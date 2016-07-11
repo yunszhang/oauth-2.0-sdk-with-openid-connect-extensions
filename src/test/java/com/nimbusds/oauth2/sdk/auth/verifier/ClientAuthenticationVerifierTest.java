@@ -9,21 +9,19 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 
-import junit.framework.TestCase;
-
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.SignedJWT;
-
 import com.nimbusds.oauth2.sdk.auth.*;
-import com.nimbusds.oauth2.sdk.auth.JWTAuthenticationClaimsSet;
 import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.JWTID;
+import junit.framework.TestCase;
 
 
 /**
@@ -43,25 +41,37 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		new Audience("https://c2id.com")));
 
 
-	private static final RSAPrivateKey VALID_RSA_PRIVATE_KEY;
+
+	private static final RSAKey VALID_RSA_KEY_PAIR_1;
 
 
-	private static final RSAPrivateKey INVALID_RSA_PRIVATE_KEY;
+	private static final RSAKey VALID_RSA_KEY_PAIR_2;
 
 
-	private static final RSAPublicKey VALID_RSA_PUBLIC_KEY;
+	private static final RSAKey INVALID_RSA_KEY_PAIR;
 
 
 	static {
 		try {
 			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-			KeyPair keyPair = gen.generateKeyPair();
-			VALID_RSA_PRIVATE_KEY = (RSAPrivateKey)keyPair.getPrivate();
-			VALID_RSA_PUBLIC_KEY = (RSAPublicKey)keyPair.getPublic();
 
-			// Generate non-matching key to simulate invalid signature
+			KeyPair keyPair = gen.generateKeyPair();
+			VALID_RSA_KEY_PAIR_1 = new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
+				.privateKey((RSAPrivateKey)keyPair.getPrivate())
+				.keyID("1")
+				.build();
+
 			keyPair = gen.generateKeyPair();
-			INVALID_RSA_PRIVATE_KEY = (RSAPrivateKey)keyPair.getPrivate();
+			VALID_RSA_KEY_PAIR_2 = new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
+				.privateKey((RSAPrivateKey)keyPair.getPrivate())
+				.keyID("2")
+				.build();
+
+			keyPair = gen.generateKeyPair();
+			INVALID_RSA_KEY_PAIR = new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
+				.privateKey((RSAPrivateKey)keyPair.getPrivate())
+				.build();
+
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
@@ -72,24 +82,47 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 
 
 		@Override
-		public List<Secret> selectClientSecrets(ClientID claimedClientID, ClientAuthenticationMethod authMethod, Context<ClientMetadata> context) {
+		public List<Secret> selectClientSecrets(ClientID claimedClientID, ClientAuthenticationMethod authMethod, Context<ClientMetadata> context)
+			throws InvalidClientException {
+
 			assert authMethod.equals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC) ||
 				authMethod.equals(ClientAuthenticationMethod.CLIENT_SECRET_POST) ||
 				authMethod.equals(ClientAuthenticationMethod.CLIENT_SECRET_JWT);
-			if (claimedClientID.equals(VALID_CLIENT_ID)) {
-				return Arrays.asList(VALID_CLIENT_SECRET);
+
+			if (! claimedClientID.equals(VALID_CLIENT_ID)) {
+				throw InvalidClientException.BAD_ID;
 			}
-			return null;
+
+			return Collections.singletonList(VALID_CLIENT_SECRET);
 		}
 
 
 		@Override
-		public List<? extends PublicKey> selectPublicKeys(ClientID claimedClientID, ClientAuthenticationMethod authMethod, JWSHeader jwsHeader, Context<ClientMetadata> context) {
+		public List<? extends PublicKey> selectPublicKeys(ClientID claimedClientID,
+								  ClientAuthenticationMethod authMethod,
+								  JWSHeader jwsHeader,
+								  boolean forceReload,
+								  Context<ClientMetadata> context)
+			throws InvalidClientException {
+
 			assert authMethod.equals(ClientAuthenticationMethod.PRIVATE_KEY_JWT);
-			if (claimedClientID.equals(VALID_CLIENT_ID)) {
-				return Arrays.asList(VALID_RSA_PUBLIC_KEY);
+
+			if (! claimedClientID.equals(VALID_CLIENT_ID)) {
+				throw InvalidClientException.BAD_ID;
 			}
-			return null;
+
+			try {
+				if (! forceReload) {
+					return Collections.singletonList(VALID_RSA_KEY_PAIR_1.toRSAPublicKey());
+				} else {
+					// Simulate reload
+					return Arrays.asList(VALID_RSA_KEY_PAIR_1.toRSAPublicKey(), VALID_RSA_KEY_PAIR_2.toRSAPublicKey());
+				}
+
+			} catch (JOSEException e) {
+				fail(e.getMessage());
+				throw InvalidClientException.NO_MATCHING_JWK;
+			}
 		}
 	};
 
@@ -98,13 +131,13 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 
 		ClientCredentialsSelector selector = new ClientCredentialsSelector() {
 			@Override
-			public List<Secret> selectClientSecrets(ClientID claimedClientID, ClientAuthenticationMethod authMethod, Context context) {
+			public List<Secret> selectClientSecrets(ClientID claimedClientID, ClientAuthenticationMethod authMethod, Context context) throws InvalidClientException {
 				return null;
 			}
 
 
 			@Override
-			public List<? extends PublicKey> selectPublicKeys(ClientID claimedClientID, ClientAuthenticationMethod authMethod, JWSHeader jwsHeader, Context context) {
+			public List<? extends PublicKey> selectPublicKeys(ClientID claimedClientID, ClientAuthenticationMethod authMethod, JWSHeader jwsHeader, boolean forceReload, Context context) throws InvalidClientException {
 				return null;
 			}
 		};
@@ -126,25 +159,25 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 
 
 	public void testHappyClientSecretBasic()
-		throws JOSEException{
+		throws Exception {
 
 		ClientAuthentication clientAuthentication = new ClientSecretBasic(VALID_CLIENT_ID, VALID_CLIENT_SECRET);
 
-		assertTrue(createVerifier().verify(clientAuthentication, null));
+		createVerifier().verify(clientAuthentication, null, null);
 	}
 
 
 	public void testHappyClientSecretPost()
-		throws JOSEException{
+		throws Exception{
 
 		ClientAuthentication clientAuthentication = new ClientSecretBasic(VALID_CLIENT_ID, VALID_CLIENT_SECRET);
 
-		assertTrue(createVerifier().verify(clientAuthentication, null));
+		createVerifier().verify(clientAuthentication, null, null);
 	}
 
 
 	public void testHappyClientSecretJWT()
-		throws JOSEException {
+		throws Exception {
 
 		ClientAuthentication clientAuthentication = new ClientSecretJWT(
 			VALID_CLIENT_ID,
@@ -152,34 +185,51 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			JWSAlgorithm.HS256,
 			VALID_CLIENT_SECRET);
 
-		assertTrue(createVerifier().verify(clientAuthentication, null));
+		createVerifier().verify(clientAuthentication, null, null);
 	}
 
 
 	public void testHappyPrivateKeyJWT()
-		throws JOSEException {
+		throws Exception {
 
 		ClientAuthentication clientAuthentication = new PrivateKeyJWT(
 			VALID_CLIENT_ID, URI.create("https://c2id.com/token"),
 			JWSAlgorithm.RS256,
-			VALID_RSA_PRIVATE_KEY,
+			VALID_RSA_KEY_PAIR_1.toRSAPrivateKey(),
 			null,
 			null);
 
-		assertTrue(createVerifier().verify(clientAuthentication, null));
+		createVerifier().verify(clientAuthentication, null, null);
 	}
 
 
-	public void testInvalidClientSecretPost()
+	public void testInvalidClientSecretPost_badID()
 		throws JOSEException{
 
-		ClientAuthentication clientAuthentication = new ClientSecretBasic(VALID_CLIENT_ID, new Secret());
+		ClientAuthentication clientAuthentication = new ClientSecretBasic(new ClientID("invalid-id"), VALID_CLIENT_SECRET);
 
-		assertFalse(createVerifier().verify(clientAuthentication, null));
+		try {
+			createVerifier().verify(clientAuthentication, null, null);
+		} catch (InvalidClientException e) {
+			assertEquals(InvalidClientException.BAD_ID, e);
+		}
 	}
 
 
-	public void testInvalidClientSecretJWTSignature()
+	public void testInvalidClientSecretPost_badSecret()
+		throws JOSEException{
+
+		ClientAuthentication clientAuthentication = new ClientSecretBasic(VALID_CLIENT_ID, new Secret("invalid-secret"));
+
+		try {
+			createVerifier().verify(clientAuthentication, null, null);
+		} catch (InvalidClientException e) {
+			assertEquals(InvalidClientException.BAD_SECRET, e);
+		}
+	}
+
+
+	public void testInvalidClientSecretJWT_badHMAC()
 		throws JOSEException {
 
 		ClientAuthentication clientAuthentication = new ClientSecretJWT(
@@ -188,21 +238,29 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			JWSAlgorithm.HS256,
 			new Secret());
 
-		assertFalse(createVerifier().verify(clientAuthentication, null));
+		try {
+			createVerifier().verify(clientAuthentication, null, null);
+		} catch (InvalidClientException e) {
+			assertEquals(InvalidClientException.BAD_JWT_HMAC, e);
+		}
 	}
 
 
-	public void testInvalidPrivateKeyJWTSignature()
+	public void testInvalidPrivateKeyJWT_badSignature()
 		throws JOSEException {
 
 		ClientAuthentication clientAuthentication = new PrivateKeyJWT(
 			VALID_CLIENT_ID, URI.create("https://c2id.com/token"),
 			JWSAlgorithm.RS256,
-			INVALID_RSA_PRIVATE_KEY,
+			INVALID_RSA_KEY_PAIR.toRSAPrivateKey(),
 			null,
 			null);
 
-		assertFalse(createVerifier().verify(clientAuthentication, null));
+		try {
+			createVerifier().verify(clientAuthentication, null, null);
+		} catch (InvalidClientException e) {
+			assertEquals(InvalidClientException.BAD_JWT_SIGNATURE, e);
+		}
 	}
 
 
@@ -215,7 +273,11 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			JWSAlgorithm.HS256,
 			new Secret());
 
-		assertFalse(createVerifier().verify(clientAuthentication, null));
+		try {
+			createVerifier().verify(clientAuthentication, null, null);
+		} catch (InvalidClientException e) {
+			assertEquals(InvalidClientException.BAD_JWT_CLAIMS, e);
+		}
 	}
 
 
@@ -225,11 +287,15 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		ClientAuthentication clientAuthentication = new PrivateKeyJWT(
 			VALID_CLIENT_ID, URI.create("https://other.com/token"),
 			JWSAlgorithm.RS256,
-			INVALID_RSA_PRIVATE_KEY,
+			INVALID_RSA_KEY_PAIR.toRSAPrivateKey(),
 			null,
 			null);
 
-		assertFalse(createVerifier().verify(clientAuthentication, null));
+		try {
+			createVerifier().verify(clientAuthentication, null, null);
+		} catch (InvalidClientException e) {
+			assertEquals(InvalidClientException.BAD_JWT_CLAIMS, e);
+		}
 	}
 
 
@@ -252,7 +318,11 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 
 		ClientAuthentication clientAuthentication = new ClientSecretJWT(jwt);
 
-		assertFalse(createVerifier().verify(clientAuthentication, null));
+		try {
+			createVerifier().verify(clientAuthentication, null, null);
+		} catch (InvalidClientException e) {
+			assertEquals(InvalidClientException.BAD_JWT_CLAIMS, e);
+		}
 	}
 
 
@@ -271,10 +341,46 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			new JWTID());
 
 		SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claimsSet.toJWTClaimsSet());
-		jwt.sign(new RSASSASigner(VALID_RSA_PRIVATE_KEY));
+		jwt.sign(new RSASSASigner(VALID_RSA_KEY_PAIR_1));
 
 		ClientAuthentication clientAuthentication = new PrivateKeyJWT(jwt);
 
-		assertFalse(createVerifier().verify(clientAuthentication, null));
+		try {
+			createVerifier().verify(clientAuthentication, null, null);
+		} catch (InvalidClientException e) {
+			assertEquals(InvalidClientException.BAD_JWT_CLAIMS, e);
+		}
+	}
+
+
+	public void testReloadRemoteJWKSet()
+		throws Exception {
+
+		ClientAuthentication clientAuthentication = new PrivateKeyJWT(
+			VALID_CLIENT_ID, URI.create("https://c2id.com/token"),
+			JWSAlgorithm.RS256,
+			VALID_RSA_KEY_PAIR_2.toRSAPrivateKey(),
+			null,
+			null);
+
+		createVerifier().verify(clientAuthentication, Collections.singleton(Hint.CLIENT_HAS_REMOTE_JWK_SET), null);
+	}
+
+
+	public void testReloadRemoteJWKSet_badSignature()
+		throws Exception {
+
+		ClientAuthentication clientAuthentication = new PrivateKeyJWT(
+			VALID_CLIENT_ID, URI.create("https://c2id.com/token"),
+			JWSAlgorithm.RS256,
+			INVALID_RSA_KEY_PAIR.toRSAPrivateKey(),
+			null,
+			null);
+
+		try {
+			createVerifier().verify(clientAuthentication, Collections.singleton(Hint.CLIENT_HAS_REMOTE_JWK_SET), null);
+		} catch (InvalidClientException e) {
+			assertEquals(InvalidClientException.BAD_JWT_SIGNATURE, e);
+		}
 	}
 }

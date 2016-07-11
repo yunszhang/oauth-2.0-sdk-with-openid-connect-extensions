@@ -36,13 +36,9 @@ public final class CodeHash extends HashClaim {
 
 		// Only required in hybrid flow for 'code id_token' and 'code id_token token'
 		// Disregard authz / token endpoint!
-		if (    new ResponseType("code", "id_token").equals(responseType) ||
-			new ResponseType("code", "id_token", "token").equals(responseType)) {
+		return new ResponseType("code", "id_token").equals(responseType) ||
+			new ResponseType("code", "id_token", "token").equals(responseType);
 
-			return true;
-		}
-
-		return false;
 	}
 
 

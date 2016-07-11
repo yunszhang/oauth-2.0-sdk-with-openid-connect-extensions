@@ -275,12 +275,8 @@ public class IDTokenClaimsSet extends ClaimsSet {
 		// See http://openid.net/specs/openid-connect-core-1_0.html#ImplicitIDToken
 		if (new ResponseType("id_token").equals(responseType)) {
 
-			if (getNonce() == null) {
-				// nonce required
-				return false;
-			}
+			return getNonce() != null;
 
-			return true; // ok
 		}
 
 		if (new ResponseType("id_token", "token").equals(responseType)) {
@@ -290,12 +286,8 @@ public class IDTokenClaimsSet extends ClaimsSet {
 				return false;
 			}
 
-			if (getAccessTokenHash() == null) {
-				// at_hash required
-				return false;
-			}
+			return getAccessTokenHash() != null;
 
-			return true; // ok
 		}
 
 		// Hybrid flow
@@ -313,12 +305,8 @@ public class IDTokenClaimsSet extends ClaimsSet {
 				return true;
 			}
 
-			if (getCodeHash() == null) {
-				// c_hash required when issued at authz endpoint
-				return false;
-			}
+			return getCodeHash() != null;
 
-			return true; // ok
 		}
 
 		if (new ResponseType("code", "token").equals(responseType)) {
@@ -355,12 +343,8 @@ public class IDTokenClaimsSet extends ClaimsSet {
 				return false;
 			}
 
-			if (getCodeHash() == null) {
-				// c_hash required when issued at authz endpoint
-				return false;
-			}
+			return getCodeHash() != null;
 
-			return true; // ok
 		}
 
 		throw new IllegalArgumentException("Unsupported response_type: " + responseType);

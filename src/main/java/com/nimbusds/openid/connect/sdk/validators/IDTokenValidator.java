@@ -96,7 +96,7 @@ public class IDTokenValidator implements ClockSkewAware {
 	public IDTokenValidator(final Issuer expectedIssuer,
 				final ClientID clientID) {
 
-		this(expectedIssuer, clientID, (JWSKeySelector) null, (JWEKeySelector) null);
+		this(expectedIssuer, clientID, (JWSKeySelector)null, (JWEKeySelector)null);
 	}
 
 

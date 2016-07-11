@@ -5,7 +5,6 @@ import java.security.PublicKey;
 import java.util.List;
 
 import com.nimbusds.jose.JWSHeader;
-
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -46,12 +45,14 @@ public interface ClientCredentialsSelector<T> {
 	 *                        {@code null}.
 	 * @param context         Additional context. May be {@code null}.
 	 *
-	 * @return The selected client secret candidates. If empty or
-	 *         {@code null} implies an invalid client.
+	 * @return The selected client secret candidates, empty list if none.
+	 *
+	 * @throws InvalidClientException If the client is invalid.
 	 */
 	List<Secret> selectClientSecrets(final ClientID claimedClientID,
 					 final ClientAuthenticationMethod authMethod,
-					 final Context<T> context);
+					 final Context<T> context)
+		throws InvalidClientException;
 
 
 	/**
@@ -66,13 +67,18 @@ public interface ClientCredentialsSelector<T> {
 	 * @param jwsHeader       The JWS header, which may contain parameters
 	 *                        such as key ID to facilitate the key
 	 *                        selection. Not {@code null}.
+	 * @param forceReload     {@code true} to force reload of the JWK set
+	 *                        (for a remote JWK set referenced by URL).
 	 * @param context         Additional context. Not {@code null}.
 	 *
-	 * @return The selected public key candidates. If empty or {@code null}
-	 *         implies an invalid client.
+	 * @return The selected public key candidates, empty list if none.
+	 *
+	 * @throws InvalidClientException If the client is invalid.
 	 */
 	List<? extends PublicKey> selectPublicKeys(final ClientID claimedClientID,
 						   final ClientAuthenticationMethod authMethod,
 						   final JWSHeader jwsHeader,
-						   final Context<T> context);
+						   final boolean forceReload,
+						   final Context<T> context)
+		throws InvalidClientException;
 }

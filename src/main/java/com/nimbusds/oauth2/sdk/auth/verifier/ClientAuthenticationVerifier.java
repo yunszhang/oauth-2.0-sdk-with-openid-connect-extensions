@@ -5,8 +5,6 @@ import java.security.PublicKey;
 import java.util.List;
 import java.util.Set;
 
-import net.jcip.annotations.ThreadSafe;
-
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -14,9 +12,10 @@ import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory;
 import com.nimbusds.jose.proc.JWSVerifierFactory;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
-
 import com.nimbusds.oauth2.sdk.auth.*;
 import com.nimbusds.oauth2.sdk.id.Audience;
+import net.jcip.annotations.ThreadSafe;
+import org.apache.commons.collections4.CollectionUtils;
 
 
 /**
@@ -107,18 +106,20 @@ public class ClientAuthenticationVerifier<T> {
 	 *
 	 * @param clientAuth The client authentication. Must not be
 	 *                   {@code null}.
+	 * @param hints      Optional hints to the verifier, empty set of
+	 *                   {@code null} if none.
 	 * @param context    Additional context to be passed to the client
 	 *                   credentials selector. May be {@code null}.
 	 *
-	 * @return {@code true} if the client was successfully authenticated,
-	 *         {@code false} if the authentication failed due to an unknown
-	 *         client, invalid credential or unsupported authentication
-	 *         method.
-	 *
-	 * @throws JOSEException
+	 * @throws InvalidClientException If the client authentication is
+	 *                                invalid, typically due to bad
+	 *                                credentials.
+	 * @throws JOSEException          If authentication failed due to an
+	 *                                internal JOSE / JWT processing
+	 *                                exception.
 	 */
-	public boolean verify(final ClientAuthentication clientAuth, final Context<T> context)
-		throws JOSEException {
+	public void verify(final ClientAuthentication clientAuth, final Set<Hint> hints, final Context<T> context)
+		throws InvalidClientException, JOSEException {
 
 		if (clientAuth instanceof PlainClientSecret) {
 
@@ -127,29 +128,29 @@ public class ClientAuthenticationVerifier<T> {
 				clientAuth.getMethod(),
 				context);
 
-			if (secretCandidates == null) {
-				return false; // invalid client
+			if (CollectionUtils.isEmpty(secretCandidates)) {
+				throw InvalidClientException.NO_REGISTERED_SECRET;
 			}
 
 			PlainClientSecret plainAuth = (PlainClientSecret)clientAuth;
 
 			for (Secret candidate: secretCandidates) {
 				if (plainAuth.getClientSecret().equals(candidate)) {
-					return true; // success
+					return; // success
 				}
 			}
 
-			return false; // invalid client
+			throw InvalidClientException.BAD_SECRET;
 
 		} else if (clientAuth instanceof ClientSecretJWT) {
 
 			ClientSecretJWT jwtAuth = (ClientSecretJWT) clientAuth;
 
-			// Check claims first before calling backend
+			// Check claims first before requesting secret from backend
 			try {
 				claimsSetVerifier.verify(jwtAuth.getJWTAuthenticationClaimsSet().toJWTClaimsSet());
 			} catch (BadJWTException e) {
-				return false; // invalid client
+				throw InvalidClientException.BAD_JWT_CLAIMS;
 			}
 
 			List<Secret> secretCandidates = clientCredentialsSelector.selectClientSecrets(
@@ -157,8 +158,8 @@ public class ClientAuthenticationVerifier<T> {
 				clientAuth.getMethod(),
 				context);
 
-			if (secretCandidates == null) {
-				return false; // invalid client
+			if (CollectionUtils.isEmpty(secretCandidates)) {
+				throw InvalidClientException.NO_REGISTERED_SECRET;
 			}
 
 			SignedJWT assertion = jwtAuth.getClientAssertion();
@@ -168,31 +169,33 @@ public class ClientAuthenticationVerifier<T> {
 				boolean valid = assertion.verify(new MACVerifier(candidate.getValueBytes()));
 
 				if (valid) {
-					return true; // success
+					return; // success
 				}
 			}
 
-			return false; // invalid client
+			throw InvalidClientException.BAD_JWT_HMAC;
 
 		} else if (clientAuth instanceof PrivateKeyJWT) {
 
 			PrivateKeyJWT jwtAuth = (PrivateKeyJWT)clientAuth;
 
-			// Check claims first before calling backend
+			// Check claims first before requesting / retrieving public keys
 			try {
 				claimsSetVerifier.verify(jwtAuth.getJWTAuthenticationClaimsSet().toJWTClaimsSet());
 			} catch (BadJWTException e) {
-				return false; // invalid client
+				throw InvalidClientException.BAD_JWT_CLAIMS;
 			}
 
 			List<? extends PublicKey> keyCandidates = clientCredentialsSelector.selectPublicKeys(
 				jwtAuth.getClientID(),
 				jwtAuth.getMethod(),
 				jwtAuth.getClientAssertion().getHeader(),
+				false, 	// don't force refresh if we have a remote JWK set;
+					// selector may however do so if it encounters an unknown key ID
 				context);
 
-			if  (keyCandidates == null) {
-				return false; // invalid client
+			if (CollectionUtils.isEmpty(keyCandidates)) {
+				throw InvalidClientException.NO_MATCHING_JWK;
 			}
 
 			SignedJWT assertion = jwtAuth.getClientAssertion();
@@ -210,11 +213,46 @@ public class ClientAuthenticationVerifier<T> {
 				boolean valid = assertion.verify(jwsVerifier);
 
 				if (valid) {
-					return true; // success
+					return; // success
 				}
 			}
 
-			return false; // invalid client
+			// Second pass
+			if (hints != null && hints.contains(Hint.CLIENT_HAS_REMOTE_JWK_SET)) {
+				// Client possibly registered JWK set URL with keys that have no IDs
+				// force JWK set reload from URL and retry
+				keyCandidates = clientCredentialsSelector.selectPublicKeys(
+					jwtAuth.getClientID(),
+					jwtAuth.getMethod(),
+					jwtAuth.getClientAssertion().getHeader(),
+					true, // force reload of remote JWK set
+					context);
+
+				if (CollectionUtils.isEmpty(keyCandidates)) {
+					throw InvalidClientException.NO_MATCHING_JWK;
+				}
+
+				assertion = jwtAuth.getClientAssertion();
+
+				for (PublicKey candidate: keyCandidates) {
+
+					if (candidate == null) {
+						continue; // skip
+					}
+
+					JWSVerifier jwsVerifier = jwsVerifierFactory.createJWSVerifier(
+						jwtAuth.getClientAssertion().getHeader(),
+						candidate);
+
+					boolean valid = assertion.verify(jwsVerifier);
+
+					if (valid) {
+						return; // success
+					}
+				}
+			}
+
+			throw InvalidClientException.BAD_JWT_SIGNATURE;
 
 		} else {
 			throw new RuntimeException("Unexpected client authentication: " + clientAuth.getMethod());

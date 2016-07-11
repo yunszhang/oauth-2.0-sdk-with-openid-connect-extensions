@@ -37,13 +37,9 @@ public final class AccessTokenHash extends HashClaim {
 		// Only required in implicit flow for 'token id_token' and
 		// hybrid flow for 'code id_token token'
 		// Disregard authz / token endpoint!
-		if (    new ResponseType("token", "id_token").equals(responseType) ||
-			new ResponseType("code", "id_token", "token").equals(responseType)) {
+		return new ResponseType("token", "id_token").equals(responseType) ||
+			new ResponseType("code", "id_token", "token").equals(responseType);
 
-			return true;
-		}
-
-		return false;
 	}
 
 
