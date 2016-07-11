@@ -105,7 +105,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertNull(request.getResponseMode());
 		assertNull(request.getDisplay());
 		assertNull(request.getPrompt());
-		assertEquals(0, request.getMaxAge());
+		assertEquals(-1, request.getMaxAge());
 		assertNull(request.getUILocales());
 		assertNull(request.getIDTokenHint());
 		assertNull(request.getLoginHint());
@@ -148,7 +148,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertNull(request.getResponseMode());
 		assertNull(request.getDisplay());
 		assertNull(request.getPrompt());
-		assertEquals(0, request.getMaxAge());
+		assertEquals(-1, request.getMaxAge());
 		assertNull(request.getUILocales());
 		assertNull(request.getIDTokenHint());
 		assertNull(request.getLoginHint());
@@ -212,6 +212,8 @@ public class AuthenticationRequestTest extends TestCase {
 
 		assertTrue(new State("abc").equals(request.getState()));
 		assertTrue(new Nonce("xyz").equals(request.getNonce()));
+
+		assertEquals(-1, request.getMaxAge());
 
 		assertNull(request.getCodeChallenge());
 		assertNull(request.getCodeChallengeMethod());
@@ -1012,7 +1014,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(ResponseMode.QUERY, request.impliedResponseMode());
 		assertNull(request.getDisplay());
 		assertNull(request.getPrompt());
-		assertEquals(0, request.getMaxAge());
+		assertEquals(-1, request.getMaxAge());
 		assertNull(request.getUILocales());
 		assertNull(request.getClaimsLocales());
 		assertNull(request.getIDTokenHint());
@@ -1111,6 +1113,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(new URI("https://client.com/cb").equals(request.getRedirectionURI()));
 		assertTrue(new Nonce("xyz").equals(request.getNonce()));
 		assertEquals(EXAMPLE_JWT_STRING, request.getRequestObject().getParsedString());
+		assertEquals(-1, request.getMaxAge());
 	}
 
 
@@ -1133,6 +1136,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(new URI("https://client.com/cb").equals(request.getRedirectionURI()));
 		assertTrue(new Nonce("xyz").equals(request.getNonce()));
 		assertTrue(new URI("https://client.com/request#123").equals(request.getRequestURI()));
+		assertEquals(-1, request.getMaxAge());
 	}
 
 
@@ -1314,6 +1318,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(new Scope("openid", "profile"), request.getScope());
 		assertEquals(new State("af0ifjsldkj"), request.getState());
 		assertEquals(new Nonce("n-0S6_WzA2Mj"), request.getNonce());
+		assertEquals(-1, request.getMaxAge());
 	}
 
 
@@ -1340,6 +1345,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(request.getState().equals(new State("af0ifjsldkj")));
 		assertTrue(request.getNonce().equals(new Nonce("n-0S6_WzA2Mj")));
 		assertTrue(request.getScope().equals(Scope.parse("openid")));
+		assertEquals(-1, request.getMaxAge());
 	}
 
 
@@ -1443,6 +1449,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(new ClientID("s6BhdRkqt3"), request.getClientID());
 		assertEquals(new State("af0ifjsldkj"), request.getState());
 		assertEquals(new Nonce("n-0S6_WzA2Mj"), request.getNonce());
+		assertEquals(-1, request.getMaxAge());
 		assertEquals(redirectURI, request.getRedirectionURI());
 	}
 
@@ -1470,6 +1477,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(new ClientID("s6BhdRkqt3"), request.getClientID());
 		assertEquals(new State("af0ifjsldkj"), request.getState());
 		assertEquals(new Nonce("n-0S6_WzA2Mj"), request.getNonce());
+		assertEquals(-1, request.getMaxAge());
 		assertEquals(redirectURI, request.getRedirectionURI());
 		assertEquals("E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM", request.getCodeChallenge().getValue());
 		assertEquals(CodeChallengeMethod.S256, request.getCodeChallengeMethod());
@@ -1488,6 +1496,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(new ResponseMode("json"), r.getResponseMode());
 		assertEquals(new Scope("openid"), r.getScope());
 		assertEquals(new Nonce("CvJam5c9fpY"), r.getNonce());
+		assertEquals(-1, r.getMaxAge());
 		assertTrue(r.getClaims().getIDTokenClaimNames(false).contains("family_name"));
 		assertTrue(r.getClaims().getIDTokenClaimNames(false).contains("given_name"));
 		assertEquals(2, r.getClaims().getIDTokenClaimNames(false).size());

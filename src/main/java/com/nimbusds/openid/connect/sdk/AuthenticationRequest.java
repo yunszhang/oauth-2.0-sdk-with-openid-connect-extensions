@@ -102,8 +102,8 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 
 	/**
-	 * The required maximum authentication age, in seconds, 0 if not 
-	 * specified (optional).
+	 * The required maximum authentication age, in seconds, -1 if not
+	 * specified, zero implies prompt=login (optional).
 	 */
 	private final int maxAge;
 
@@ -226,10 +226,10 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 
 		/**
-		 * The required maximum authentication age, in seconds, 0 if
-		 * not specified (optional).
+		 * The required maximum authentication age, in seconds, -1 if
+		 * not specified, zero implies prompt=login (optional).
 		 */
-		private int maxAge;
+		private int maxAge = -1;
 
 
 		/**
@@ -675,7 +675,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		// idTokenHint, loginHint, acrValues, claims
 		// codeChallenge, codeChallengeMethod
 		this(uri, rt, null, scope, clientID, redirectURI, state, nonce,
-		     null, null, 0, null, null, 
+		     null, null, -1, null, null,
 		     null, null, null, null, null, null,
 			null, null);
 	}
@@ -837,8 +837,9 @@ public class AuthenticationRequest extends AuthorizationRequest {
 	 *                            {@code null} if not specified.
 	 * @param maxAge              The required maximum authentication age,
 	 *                            in seconds. Corresponds to the optional
-	 *                            {@code max_age} parameter. Zero if not
-	 *                            specified.
+	 *                            {@code max_age} parameter. -1 if not
+	 *                            specified, zero implies
+	 *                            {@code prompt=login}.
 	 * @param uiLocales           The preferred languages and scripts for
 	 *                            the user interface. Corresponds to the
 	 *                            optional {@code ui_locales} parameter.
@@ -1008,8 +1009,8 @@ public class AuthenticationRequest extends AuthorizationRequest {
 	 * Gets the required maximum authentication age. Corresponds to the
 	 * optional {@code max_age} parameter.
 	 *
-	 * @return The maximum authentication age, in seconds; 0 if not 
-	 *         specified.
+	 * @return The maximum authentication age, in seconds; -1 if not
+	 *         specified, zero implies {@code prompt=login}.
 	 */
 	public int getMaxAge() {
 	
@@ -1144,7 +1145,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		if (prompt != null)
 			params.put("prompt", prompt.toString());
 
-		if (maxAge > 0)
+		if (maxAge >= 0)
 			params.put("max_age", "" + maxAge);
 
 		if (uiLocales != null) {
@@ -1361,7 +1362,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 		String v = params.get("max_age");
 
-		int maxAge = 0;
+		int maxAge = -1;
 
 		if (StringUtils.isNotBlank(v)) {
 
