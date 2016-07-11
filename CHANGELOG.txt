@@ -528,5 +528,5 @@ version 5.10.1 (2016-06-16)
 version 5.11 (2016-07-11)
     * Refactors the com.nimbusds.oauth2.sdk.auth.verifier package to support
       private_key_jwt authentication where the OAuth 2.0 client has registered
-      a remote JWK set (jwks_uri).
+      a remote JWK set (jwks_uri) (issue #191).
 
