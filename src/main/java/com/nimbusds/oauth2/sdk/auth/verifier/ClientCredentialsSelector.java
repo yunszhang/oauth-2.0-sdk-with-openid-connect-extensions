@@ -67,7 +67,7 @@ public interface ClientCredentialsSelector<T> {
 	 * @param jwsHeader       The JWS header, which may contain parameters
 	 *                        such as key ID to facilitate the key
 	 *                        selection. Not {@code null}.
-	 * @param forceReload     {@code true} to force reload of the JWK set
+	 * @param forceRefresh    {@code true} to force refresh of the JWK set
 	 *                        (for a remote JWK set referenced by URL).
 	 * @param context         Additional context. Not {@code null}.
 	 *
@@ -78,7 +78,7 @@ public interface ClientCredentialsSelector<T> {
 	List<? extends PublicKey> selectPublicKeys(final ClientID claimedClientID,
 						   final ClientAuthenticationMethod authMethod,
 						   final JWSHeader jwsHeader,
-						   final boolean forceReload,
+						   final boolean forceRefresh,
 						   final Context<T> context)
 		throws InvalidClientException;
 }

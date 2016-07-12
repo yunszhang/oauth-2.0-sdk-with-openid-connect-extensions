@@ -101,7 +101,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		public List<? extends PublicKey> selectPublicKeys(ClientID claimedClientID,
 								  ClientAuthenticationMethod authMethod,
 								  JWSHeader jwsHeader,
-								  boolean forceReload,
+								  boolean forceRefresh,
 								  Context<ClientMetadata> context)
 			throws InvalidClientException {
 
@@ -112,7 +112,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			}
 
 			try {
-				if (! forceReload) {
+				if (!forceRefresh) {
 					return Collections.singletonList(VALID_RSA_KEY_PAIR_1.toRSAPublicKey());
 				} else {
 					// Simulate reload
@@ -137,7 +137,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 
 
 			@Override
-			public List<? extends PublicKey> selectPublicKeys(ClientID claimedClientID, ClientAuthenticationMethod authMethod, JWSHeader jwsHeader, boolean forceReload, Context context) throws InvalidClientException {
+			public List<? extends PublicKey> selectPublicKeys(ClientID claimedClientID, ClientAuthenticationMethod authMethod, JWSHeader jwsHeader, boolean forceRefresh, Context context) throws InvalidClientException {
 				return null;
 			}
 		};
