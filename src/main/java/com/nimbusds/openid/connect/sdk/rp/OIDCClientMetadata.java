@@ -164,7 +164,7 @@ public class OIDCClientMetadata extends ClientMetadata {
 	/**
 	 * The default max authentication age, in seconds. If not specified 0.
 	 */
-	private int defaultMaxAge;
+	private int defaultMaxAge = -1;
 
 
 	/**
@@ -613,7 +613,7 @@ public class OIDCClientMetadata extends ClientMetadata {
 	 * {@code default_max_age} client metadata field.
 	 *
 	 * @return The default max authentication age, in seconds. If not
-	 *         specified 0.
+	 *         specified -1.
 	 */
 	public int getDefaultMaxAge() {
 
@@ -626,7 +626,7 @@ public class OIDCClientMetadata extends ClientMetadata {
 	 * {@code default_max_age} client metadata field.
 	 *
 	 * @param defaultMaxAge The default max authentication age, in seconds.
-	 *                      If not specified 0.
+	 *                      If not specified -1.
 	 */
 	public void setDefaultMaxAge(final int defaultMaxAge) {
 

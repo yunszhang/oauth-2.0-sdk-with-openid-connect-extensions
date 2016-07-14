@@ -538,3 +538,10 @@ version 5.11 (2016-07-11)
 version 5.12 (2016-07-14)
     * Lets InvalidClientException extend GeneralException.
 
+version 5.13 (2016-07-14)
+    * Fixes OIDCClientMetadata default_max_age to use -1 to signify an
+      unspecified value (in line with the max_age OpenID authentication request
+      parameter) (issue #180).
+
+
+

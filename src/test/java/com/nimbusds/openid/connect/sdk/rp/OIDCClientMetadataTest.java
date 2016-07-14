@@ -203,7 +203,7 @@ public class OIDCClientMetadataTest extends TestCase {
 		meta.setUserInfoJWEEnc(EncryptionMethod.A128CBC_HS256);
 		assertEquals(EncryptionMethod.A128CBC_HS256, meta.getUserInfoJWEEnc());
 
-		assertEquals(0, meta.getDefaultMaxAge());
+		assertEquals(-1, meta.getDefaultMaxAge());
 		meta.setDefaultMaxAge(3600);
 		assertEquals(3600, meta.getDefaultMaxAge());
 
