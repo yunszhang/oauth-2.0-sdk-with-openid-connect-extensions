@@ -69,7 +69,7 @@ public interface ClientCredentialsSelector<T> {
 	 *                        selection. Not {@code null}.
 	 * @param forceRefresh    {@code true} to force refresh of the JWK set
 	 *                        (for a remote JWK set referenced by URL).
-	 * @param context         Additional context. Not {@code null}.
+	 * @param context         Additional context. May be {@code null}.
 	 *
 	 * @return The selected public key candidates, empty list if none.
 	 *
