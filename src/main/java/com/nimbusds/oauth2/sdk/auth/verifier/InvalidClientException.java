@@ -2,6 +2,7 @@ package com.nimbusds.oauth2.sdk.auth.verifier;
 
 
 import com.nimbusds.oauth2.sdk.ErrorObject;
+import com.nimbusds.oauth2.sdk.GeneralException;
 import com.nimbusds.oauth2.sdk.OAuth2Error;
 
 
@@ -9,7 +10,7 @@ import com.nimbusds.oauth2.sdk.OAuth2Error;
  * Invalid client exception. Selected static instances are provided to speed up
  * exception processing.
  */
-public class InvalidClientException extends Exception {
+public class InvalidClientException extends GeneralException {
 	
 
 	/**
@@ -76,7 +77,10 @@ public class InvalidClientException extends Exception {
 	/**
 	 * Creates a new invalid client exception.
 	 *
-	 * @param message The message.
+	 * @param message The message. Will not be appended to the OAuth 2.0
+	 *                error description to be prevent exposing details
+	 *                about why authentication didn't succeed to the
+	 *                client.
 	 */
 	public InvalidClientException(final String message) {
 		super(message);
@@ -88,7 +92,11 @@ public class InvalidClientException extends Exception {
 	 *
 	 * @return {@link OAuth2Error#INVALID_CLIENT}.
 	 */
-	public ErrorObject toErrorObject() {
+	@Override
+	public ErrorObject getErrorObject() {
 		return OAuth2Error.INVALID_CLIENT;
 	}
+
+
+
 }

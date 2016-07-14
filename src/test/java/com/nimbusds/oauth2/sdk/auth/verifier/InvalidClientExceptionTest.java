@@ -2,12 +2,20 @@ package com.nimbusds.oauth2.sdk.auth.verifier;
 
 
 import com.nimbusds.oauth2.sdk.ErrorObject;
+import com.nimbusds.oauth2.sdk.GeneralException;
 import com.nimbusds.oauth2.sdk.OAuth2Error;
 import junit.framework.TestCase;
 
 
 public class InvalidClientExceptionTest extends TestCase {
-	
+
+
+	public void testInheritance() {
+
+		assertTrue(InvalidClientException.BAD_ID instanceof GeneralException);
+	}
+
+
 	public void testStatic() {
 
 		assertEquals("Bad client ID", InvalidClientException.BAD_ID.getMessage());
@@ -31,7 +39,7 @@ public class InvalidClientExceptionTest extends TestCase {
 
 	public void testToInvalidClientErrorObject() {
 
-		ErrorObject error = new InvalidClientException("message").toErrorObject();
+		ErrorObject error = new InvalidClientException("message").getErrorObject();
 		assertEquals(OAuth2Error.INVALID_CLIENT.getCode(), error.getCode());
 		assertEquals(OAuth2Error.INVALID_CLIENT.getDescription(), error.getDescription());
 		assertNull(error.getURI());

@@ -534,3 +534,7 @@ version 5.11 (2016-07-11)
       private_key_jwt authentication where the OAuth 2.0 client has registered
       a remote JWK set (jwks_uri) (issue #191).
     * Nimbus JOSE+JWT v4.22 becomes the minimum dependency.
+
+version 5.12 (2016-07-14)
+    * Lets InvalidClientException extend GeneralException.
+
