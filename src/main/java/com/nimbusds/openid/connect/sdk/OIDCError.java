@@ -77,7 +77,7 @@ public final class OIDCError {
 	 * returns an error or invalid data.
 	 */
 	public static final ErrorObject INVALID_REQUEST_URI =
-		new ErrorObject("invalid_request_uri", "Invalid request URI", HTTPResponse.SC_FOUND);
+		new ErrorObject("invalid_request_uri", "Invalid OpenID request URI", HTTPResponse.SC_FOUND);
 
 	
 	/**
@@ -85,7 +85,7 @@ public final class OIDCError {
 	 * contains an invalid OpenID Connect request object.
 	 */
 	public static final ErrorObject	INVALID_REQUEST_OBJECT =
-		new ErrorObject("invalid_request_object", "Invalid OpenID Connect request object", HTTPResponse.SC_FOUND);
+		new ErrorObject("invalid_request_object", "Invalid OpenID request JWT", HTTPResponse.SC_FOUND);
 
 	
 	/**
