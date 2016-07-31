@@ -3,10 +3,20 @@ package com.nimbusds.openid.connect.sdk;
 
 import java.net.URI;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.util.*;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
+import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -1503,5 +1513,64 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(URI.create("https://example.com:9090/example/implicitFlow"), r.getRedirectionURI());
 		assertEquals("MS-GLOBAL01", r.getCustomParameter("context")); // custom
 		assertEquals("zh", r.getCustomParameter("language")); // custom
+	}
+	
+	
+	public void testSignedAuthRequest()
+		throws Exception {
+		
+		JWTClaimsSet jwtClaims = new JWTClaimsSet.Builder()
+			.claim("response_type", "code")
+			.claim("scope", "openid email")
+			.claim("code_challenge_method", "S256")
+			.build();
+		
+		SignedJWT jwt = new SignedJWT(
+			new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("1").build(),
+			jwtClaims);
+		
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+		keyPairGenerator.initialize(1024);
+		KeyPair rsaKeyPair = keyPairGenerator.generateKeyPair();
+		
+		jwt.sign(new RSASSASigner(rsaKeyPair.getPrivate()));
+		
+		String jwtString = jwt.serialize();
+		System.out.println(jwtString);
+		
+		CodeVerifier pkceVerifier = new CodeVerifier();
+		CodeChallenge pkceChallenge = CodeChallenge.compute(CodeChallengeMethod.S256, pkceVerifier);
+		
+		URI authRequest = new AuthenticationRequest.Builder(
+			new ResponseType("code"),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("myapp://openid-connect-callback"))
+			.state(new State())
+			.codeChallenge(pkceChallenge, CodeChallengeMethod.S256)
+			.requestObject(jwt)
+			.endpointURI(URI.create("https://openid.c2id.com"))
+			.build()
+			.toURI();
+		
+		System.out.println(authRequest);
+		
+		Base64URL fragment = Base64URL.encode(MessageDigest.getInstance("SHA-256").digest(jwtString.getBytes(Charset.forName("UTF-8"))));
+		
+		URI requestURI = URI.create("https://myapp.io/request.jwt+" + fragment);
+		
+		authRequest = new AuthenticationRequest.Builder(
+			new ResponseType("code"),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("myapp://openid-connect-callback"))
+			.state(new State())
+			.codeChallenge(pkceChallenge, CodeChallengeMethod.S256)
+			.requestURI(requestURI)
+			.endpointURI(URI.create("https://openid.c2id.com"))
+			.build()
+			.toURI();
+		
+		System.out.println(authRequest);
 	}
 }
