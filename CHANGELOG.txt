@@ -543,5 +543,8 @@ version 5.13 (2016-07-14)
       unspecified value (in line with the max_age OpenID authentication request
       parameter) (issue #180).
 
+version 5.14 (2016-08-17)
+    * Rewrites the invalid_request_uri and invalid_request_object error
+      descriptions.
 
 
