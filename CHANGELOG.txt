@@ -544,6 +544,9 @@ version 5.13 (2016-07-14)
       parameter) (issue #180).
 
 version 5.14 (2016-08-17)
+    * Adds new SecretKeyDerivation utility for deriving symmetric AES keys from
+      client secrets. Required for encrypting ID tokens and UserInfo JWTs with
+      a symmetric JWE algorithm. See OpenID Connect Core 1.0, section 10.2.
     * Rewrites the invalid_request_uri and invalid_request_object error
       descriptions.
 
