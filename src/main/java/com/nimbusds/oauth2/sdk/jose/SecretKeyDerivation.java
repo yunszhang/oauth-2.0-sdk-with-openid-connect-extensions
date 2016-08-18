@@ -23,8 +23,7 @@ public class SecretKeyDerivation {
 	
 	
 	/**
-	 * Derives a secret key for the specified JWE algorithm and method
-	 * (implying symmetric encryption).
+	 * Derives a secret encryption key from the specified client secret.
 	 *
 	 * @param clientSecret The client secret. Must not be {@code null}.
 	 * @param alg          The JWE algorithm. Must not be {@code null}.
@@ -76,8 +75,7 @@ public class SecretKeyDerivation {
 	
 	
 	/**
-	 * Derives a secret key for the specified JWE algorithm and method
-	 * (implying symmetric encryption).
+	 * Derives a secret encryption key from the specified client secret.
 	 *
 	 * @param clientSecret The client secret. Must not be {@code null}.
 	 * @param bits         The secret key bits (128, 192, 256, 384 or 512).
