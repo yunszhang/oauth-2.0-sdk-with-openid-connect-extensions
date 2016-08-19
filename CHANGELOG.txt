@@ -550,4 +550,8 @@ version 5.14 (2016-08-17)
     * Rewrites the invalid_request_uri and invalid_request_object error
       descriptions.
 
+version 5.15 (2016-08-19)
+    * Introduces new SIVAESBasedPairwiseSubjectCodec based on SIV AES (RFC
+      5297).
+    * Deprecates AESBasedPairwiseSubjectCodec.
 

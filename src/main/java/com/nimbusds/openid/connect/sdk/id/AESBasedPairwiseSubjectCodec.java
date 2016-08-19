@@ -16,7 +16,10 @@ import org.apache.commons.lang3.tuple.Pair;
  * AES/CBC/PKCS5Padding based encoder / decoder of pairwise subject
  * identifiers. The salt is used as the IV. Reversal is supported.
  *
- * <p>The plain text is formatted as follows ('\' as delimiter):
+ * <p><strong>Warning: </strong> This codec is deprecated. Use
+ * {@link SIVAESBasedPairwiseSubjectCodec} instead.
+ *
+ * <p>The plain text is formatted as follows ('|' as delimiter):
  *
  * <pre>
  * sector_id|local_sub
@@ -29,6 +32,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * </ul>
  */
 @ThreadSafe
+@Deprecated
 public class AESBasedPairwiseSubjectCodec extends PairwiseSubjectCodec {
 
 

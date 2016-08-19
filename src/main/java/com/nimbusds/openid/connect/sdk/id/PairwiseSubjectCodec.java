@@ -54,7 +54,7 @@ public abstract class PairwiseSubjectCodec {
 	 *
 	 * @param salt The salt, {@code null} if not required.
 	 */
-	public PairwiseSubjectCodec(byte[] salt) {
+	public PairwiseSubjectCodec(final byte[] salt) {
 
 		this.salt = salt;
 	}
@@ -87,7 +87,7 @@ public abstract class PairwiseSubjectCodec {
 	 * @param provider The security provider, {@code null} if not specified
 	 *                 (implies the default one).
 	 */
-	public void setProvider(Provider provider) {
+	public void setProvider(final Provider provider) {
 		this.provider = provider;
 	}
 
