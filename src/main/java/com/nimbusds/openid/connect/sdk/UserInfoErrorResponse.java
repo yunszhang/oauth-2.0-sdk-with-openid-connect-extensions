@@ -5,15 +5,14 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.jcip.annotations.Immutable;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ErrorResponse;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.token.BearerTokenError;
+import net.jcip.annotations.Immutable;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -68,14 +67,14 @@ public class UserInfoErrorResponse
 
 
 	/**
-	 * The underlying bearer token error.
+	 * The underlying error.
 	 */
-	private final BearerTokenError error;
+	private final ErrorObject error;
 
 
 	/**
 	 * Creates a new UserInfo error response. No OAuth 2.0 bearer token
-	 * error is specified.
+	 * error / general error object is specified.
 	 */
 	private UserInfoErrorResponse() {
 
@@ -84,7 +83,8 @@ public class UserInfoErrorResponse
 	
 
 	/**
-	 * Creates a new UserInfo error response.
+	 * Creates a new UserInfo error response indicating a bearer token
+	 * error.
 	 *
 	 * @param error The OAuth 2.0 bearer token error. Should match one of 
 	 *              the {@link #getStandardErrors standard errors} for a 
@@ -92,9 +92,20 @@ public class UserInfoErrorResponse
 	 */
 	public UserInfoErrorResponse(final BearerTokenError error) {
 
+		this((ErrorObject) error);
+	}
+	
+	
+	/**
+	 * Creates a new UserInfo error response indicating a general error.
+	 *
+	 * @param error The error. Must not be {@code null}.
+	 */
+	public UserInfoErrorResponse(final ErrorObject error) {
+		
 		if (error == null)
 			throw new IllegalArgumentException("The error must not be null");
-
+		
 		this.error = error;
 	}
 
@@ -132,14 +143,19 @@ public class UserInfoErrorResponse
 
 		HTTPResponse httpResponse;
 
-		if (error != null && error.getHTTPStatusCode() > 0)
+		if (error != null && error.getHTTPStatusCode() > 0) {
 			httpResponse = new HTTPResponse(error.getHTTPStatusCode());
-		else
+		} else {
 			httpResponse = new HTTPResponse(HTTPResponse.SC_BAD_REQUEST);
+		}
 
 		// Add the WWW-Authenticate header
-		if (error != null)
-			httpResponse.setWWWAuthenticate(error.toWWWAuthenticateHeader());
+		if (error instanceof BearerTokenError) {
+			httpResponse.setWWWAuthenticate(((BearerTokenError) error).toWWWAuthenticateHeader());
+		} else if (error != null){
+			httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+			httpResponse.setContent(error.toJSONObject().toJSONString());
+		}
 
 		return httpResponse;
 	}
@@ -184,9 +200,12 @@ public class UserInfoErrorResponse
 
 		String wwwAuth = httpResponse.getWWWAuthenticate();
 		
-		if (StringUtils.isNotBlank(wwwAuth))
+		if (StringUtils.isNotBlank(wwwAuth)) {
+			// Bearer token error?
 			return parse(wwwAuth);
-
-		return new UserInfoErrorResponse();
+		}
+		
+		// Other error?
+		return new UserInfoErrorResponse(ErrorObject.parse(httpResponse));
 	}
 }

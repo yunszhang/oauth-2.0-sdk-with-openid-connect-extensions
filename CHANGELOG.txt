@@ -555,3 +555,7 @@ version 5.15 (2016-08-19)
       5297).
     * Deprecates AESBasedPairwiseSubjectCodec.
 
+version 5.16 (2016-08-25)
+    * Adds UserInfoErrorResponse support for representing general errors.
+    * Upgrades minimal dependency to Nimbus JOSE+JWT 4.25.
+
