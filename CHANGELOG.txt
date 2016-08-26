@@ -559,3 +559,5 @@ version 5.16 (2016-08-25)
     * Adds UserInfoErrorResponse support for representing general errors.
     * Upgrades minimal dependency to Nimbus JOSE+JWT 4.25.
 
+version 5.16.1 (2016-08-26)
+    * Upgrades to LangTag 1.4.1.
