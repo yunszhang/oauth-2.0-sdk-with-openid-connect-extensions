@@ -477,12 +477,15 @@ public class OIDCProviderMetadataTest extends TestCase {
 
 		meta.setRequiresRequestURIRegistration(true);
 		assertTrue(meta.requiresRequestURIRegistration());
+		
+		meta.setCustomParameter("x-custom", "xyz");
 
-		assertTrue(meta.getCustomParameters().isEmpty());
+		assertEquals(1, meta.getCustomParameters().size());
+		assertEquals("xyz", meta.getCustomParameter("x-custom"));
 
 		String json = meta.toJSONObject().toJSONString();
 
-		meta = OIDCProviderMetadata.parse(JSONObjectUtils.parseJSONObject(json));
+		meta = OIDCProviderMetadata.parse(JSONObjectUtils.parse(json));
 
 		assertEquals(issuer.getValue(), meta.getIssuer().getValue());
 		assertEquals(SubjectType.PAIRWISE, meta.getSubjectTypes().get(0));
@@ -562,8 +565,9 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(meta.supportsRequestURIParam());
 
 		assertTrue(meta.requiresRequestURIRegistration());
-
-		assertTrue(meta.getCustomParameters().isEmpty());
+		
+		assertEquals(1, meta.getCustomParameters().size());
+		assertEquals("xyz", meta.getCustomParameter("x-custom"));
 	}
 
 
