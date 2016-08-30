@@ -290,6 +290,8 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertEquals(5, uiLocales.size());
 
 		assertTrue(op.getCustomParameters().isEmpty());
+		
+		System.out.println(op.toJSONObject().toJSONString());
 	}
 
 

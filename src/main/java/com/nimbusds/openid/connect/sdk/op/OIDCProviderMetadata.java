@@ -16,6 +16,7 @@ import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.oauth2.sdk.util.OrderedJSONObject;
 import com.nimbusds.openid.connect.sdk.Display;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
@@ -1444,7 +1445,7 @@ public class OIDCProviderMetadata {
 	 */
 	public JSONObject toJSONObject() {
 
-		JSONObject o = new JSONObject();
+		JSONObject o = new OrderedJSONObject();
 
 		// Mandatory fields
 
