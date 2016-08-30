@@ -86,7 +86,8 @@ public class OIDCProviderMetadata {
 		p.add("request_parameter_supported");
 		p.add("request_uri_parameter_supported");
 		p.add("require_request_uri_registration");
-
+		p.add("introspection_endpoint");
+		p.add("revocation_endpoint");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 
@@ -119,6 +120,18 @@ public class OIDCProviderMetadata {
 	 * The registration endpoint.
 	 */
 	private URI regEndpoint;
+	
+	
+	/**
+	 * The token introspection endpoint.
+	 */
+	private URI introspectionEndpoint;
+	
+	
+	/**
+	 * The token revocation endpoint.
+	 */
+	private URI revocationEndpoint;
 	
 	
 	/**
@@ -497,6 +510,58 @@ public class OIDCProviderMetadata {
 	public void setRegistrationEndpointURI(final URI regEndpoint) {
 
 		this.regEndpoint = regEndpoint;
+	}
+	
+	
+	/**
+	 * Gets the token introspection endpoint URI. Corresponds to the
+	 * {@code introspection_endpoint} metadata field.
+	 *
+	 * @return The token introspection endpoint URI, {@code null} if not
+	 *         specified.
+	 */
+	public URI getIntrospectionEndpointURI() {
+		
+		return introspectionEndpoint;
+	}
+	
+	
+	/**
+	 * Sets the token introspection endpoint URI. Corresponds to the
+	 * {@code introspection_endpoint} metadata field.
+	 *
+	 * @param introspectionEndpoint  The token introspection endpoint URI,
+	 *                               {@code null} if not specified.
+	 */
+	public void setIntrospectionEndpointURI(final URI introspectionEndpoint) {
+		
+		this.introspectionEndpoint = introspectionEndpoint;
+	}
+	
+	
+	/**
+	 * Gets the token revocation endpoint URI. Corresponds to the
+	 * {@code revocation_endpoint} metadata field.
+	 *
+	 * @return The token revocation endpoint URI, {@code null} if not
+	 *         specified.
+	 */
+	public URI getRevocationEndpointURI() {
+		
+		return revocationEndpoint;
+	}
+	
+	
+	/**
+	 * Sets the token revocation endpoint URI. Corresponds to the
+	 * {@code revocation_endpoint} metadata field.
+	 *
+	 * @param revocationEndpoint The token revocation endpoint URI,
+	 *                           {@code null} if not specified.
+	 */
+	public void setRevocationEndpointURI(final URI revocationEndpoint) {
+		
+		this.revocationEndpoint = revocationEndpoint;
 	}
 	
 	
@@ -1473,6 +1538,12 @@ public class OIDCProviderMetadata {
 
 		if (regEndpoint != null)
 			o.put("registration_endpoint", regEndpoint.toString());
+		
+		if (introspectionEndpoint != null)
+			o.put("introspection_endpoint", introspectionEndpoint.toString());
+		
+		if (revocationEndpoint != null)
+			o.put("revocation_endpoint", revocationEndpoint.toString());
 
 		if (checkSessionIframe != null)
 			o.put("check_session_iframe", checkSessionIframe.toString());
@@ -1754,6 +1825,12 @@ public class OIDCProviderMetadata {
 		
 		if (jsonObject.containsKey("registration_endpoint"))
 			op.regEndpoint = JSONObjectUtils.getURI(jsonObject, "registration_endpoint");
+		
+		if (jsonObject.containsKey("introspection_endpoint"))
+			op.introspectionEndpoint = JSONObjectUtils.getURI(jsonObject, "introspection_endpoint");
+		
+		if (jsonObject.containsKey("revocation_endpoint"))
+			op.revocationEndpoint = JSONObjectUtils.getURI(jsonObject, "revocation_endpoint");
 		
 		if (jsonObject.containsKey("check_session_iframe"))
 			op.checkSessionIframe = JSONObjectUtils.getURI(jsonObject, "check_session_iframe");

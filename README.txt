@@ -94,6 +94,8 @@ This SDK version implements the following standards and drafts:
 
 	* OAuth 2.0 Token Revocation (RFC 7009)
 
+	* OAuth 2.0 Authorization Server Metadata (draft-ietf-oauth-discovery-04)
+
 	* OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591)
 
 	* OAuth 2.0 Dynamic Client Registration Management Protocol (RFC 7592)
@@ -109,7 +111,7 @@ This SDK version implements the following standards and drafts:
 
     * Proof Key for Code Exchange by OAuth Public Clients (RFC 7636)
 
-    * Authentication Method Reference Values (draft-jones-oauth-amr-values-02)
+    * Authentication Method Reference Values (draft-ietf-oauth-amr-values-01)
 
 	* OpenID Connect Core 1.0 (2014-02-25).
 

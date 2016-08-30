@@ -71,8 +71,10 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("op_tos_uri"));
 		assertTrue(paramNames.contains("check_session_iframe"));
 		assertTrue(paramNames.contains("end_session_endpoint"));
+		assertTrue(paramNames.contains("introspection_endpoint"));
+		assertTrue(paramNames.contains("revocation_endpoint"));
 
-		assertEquals(38, paramNames.size());
+		assertEquals(40, paramNames.size());
 	}
 
 
@@ -324,6 +326,12 @@ public class OIDCProviderMetadataTest extends TestCase {
 
 		meta.setRegistrationEndpointURI(new URI("https://c2id.com/reg"));
 		assertEquals("https://c2id.com/reg", meta.getRegistrationEndpointURI().toString());
+		
+		meta.setIntrospectionEndpointURI(new URI("https://c2id.com/inspect"));
+		assertEquals("https://c2id.com/inspect", meta.getIntrospectionEndpointURI().toString());
+		
+		meta.setRevocationEndpointURI(new URI("https://c2id.com/revoke"));
+		assertEquals("https://c2id.com/revoke", meta.getRevocationEndpointURI().toString());
 
 		meta.setCheckSessionIframeURI(new URI("https://c2id.com/session"));
 		assertEquals("https://c2id.com/session", meta.getCheckSessionIframeURI().toString());
@@ -496,6 +504,8 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertEquals("https://c2id.com/token", meta.getTokenEndpointURI().toString());
 		assertEquals("https://c2id.com/userinfo", meta.getUserInfoEndpointURI().toString());
 		assertEquals("https://c2id.com/reg", meta.getRegistrationEndpointURI().toString());
+		assertEquals("https://c2id.com/inspect", meta.getIntrospectionEndpointURI().toString());
+		assertEquals("https://c2id.com/revoke", meta.getRevocationEndpointURI().toString());
 		assertEquals("https://c2id.com/session", meta.getCheckSessionIframeURI().toString());
 		assertEquals("https://c2id.com/logout", meta.getEndSessionEndpointURI().toString());
 

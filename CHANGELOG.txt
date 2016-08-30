@@ -563,6 +563,7 @@ version 5.16.1 (2016-08-26)
     * Upgrades to LangTag 1.4.1.
 
 version 5.17 (2016-08-30)
+    * OIDCProviderMetadata adds support for draft-ietf-oauth-discovery-04.
     * OIDCProviderMetadata.toJSONObject outputs members in order.
     * Adds new OrderedJSONObject utility class.
 
