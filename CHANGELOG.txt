@@ -567,3 +567,7 @@ version 5.17 (2016-08-30)
     * OIDCProviderMetadata.toJSONObject outputs members in order.
     * Adds new OrderedJSONObject utility class.
 
+version 5.17.1 (2016-09-12)
+    * Adds copyright and licence notice to source files.
+    * Upgrades to Nimbus JOSE+JWT 4.26.2+
+    * Upgrades to LangTag 1.4.2+
