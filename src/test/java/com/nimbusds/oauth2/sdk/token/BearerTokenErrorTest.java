@@ -136,4 +136,34 @@ public class BearerTokenErrorTest extends TestCase {
 		assertNull(error.getURI());
 		assertNull(error.getRealm());
 	}
+	
+	
+	// see https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/197/userinfo-error-response-by-google-not
+	public void testParseGoogleBearerTokenError()
+		throws Exception {
+		
+		String header = "Bearer realm=\"https://acounts.google.com/\", error=invalid_token";
+		
+		BearerTokenError error = BearerTokenError.parse(header);
+		assertEquals(BearerTokenError.INVALID_TOKEN, error);
+		assertEquals("invalid_token", error.getCode());
+		assertNull(error.getDescription());
+		assertNull(error.getURI());
+		assertEquals("https://acounts.google.com/", error.getRealm());
+	}
+	
+	
+	// see https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/197/userinfo-error-response-by-google-not
+	public void testParseGoogleBearerTokenError_extended()
+		throws Exception {
+		
+		String header = "Bearer realm=\"https://acounts.google.com/\", error=invalid_token, error_description=\"Invalid access token\"";
+		
+		BearerTokenError error = BearerTokenError.parse(header);
+		assertEquals(BearerTokenError.INVALID_TOKEN, error);
+		assertEquals("invalid_token", error.getCode());
+		assertEquals("Invalid access token", error.getDescription());
+		assertNull(error.getURI());
+		assertEquals("https://acounts.google.com/", error.getRealm());
+	}
 }

@@ -120,9 +120,9 @@ public class BearerTokenError extends ErrorObject {
 	
 	/**
 	 * Regex pattern for matching the error parameter of a WWW-Authenticate 
-	 * header.
+	 * header. Double quoting is optional.
 	 */
-	private static final Pattern errorPattern = Pattern.compile("error=\"([^\"]+)");
+	private static final Pattern errorPattern = Pattern.compile("error=[\"]?([\\w\\_-]+)[\"]?");
 
 
 	/**
