@@ -788,9 +788,9 @@ public class OIDCClientMetadata extends ClientMetadata {
 
 
 	@Override
-	public JSONObject toJSONObject() {
+	public JSONObject toJSONObject(boolean includeCustomFields) {
 
-		JSONObject o = super.toJSONObject(false);
+		JSONObject o = super.toJSONObject(includeCustomFields);
 
 		o.putAll(getCustomFields());
 

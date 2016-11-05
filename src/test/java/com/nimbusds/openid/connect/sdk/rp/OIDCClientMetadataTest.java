@@ -525,4 +525,26 @@ public class OIDCClientMetadataTest extends TestCase {
 		clientMetadata.setSubjectType(null);
 		assertNull(clientMetadata.resolveSectorID());
 	}
+	
+	
+	public void testOverrideToJSONObjectWithCustomFields() {
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setRedirectionURI(URI.create("https://example.com/cb"));
+		clientMetadata.setSubjectType(SubjectType.PAIRWISE);
+		clientMetadata.setSectorIDURI(URI.create("https://example.com/sector.json"));
+		clientMetadata.applyDefaults();
+		
+		JSONObject jsonObject = clientMetadata.toJSONObject(true);
+		assertNotNull(jsonObject.get("grant_types"));
+		assertNotNull(jsonObject.get("response_types"));
+		assertNotNull(jsonObject.get("redirect_uris"));
+		assertNotNull(jsonObject.get("token_endpoint_auth_method"));
+		assertNotNull(jsonObject.get("application_type"));
+		assertNotNull(jsonObject.get("subject_type"));
+		assertNotNull(jsonObject.get("sector_identifier_uri"));
+		assertNotNull(jsonObject.get("id_token_signed_response_alg"));
+		
+		assertEquals(8, jsonObject.size());
+	}
 }
