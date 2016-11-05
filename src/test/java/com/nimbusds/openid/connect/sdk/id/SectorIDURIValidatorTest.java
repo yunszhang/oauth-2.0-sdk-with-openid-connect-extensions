@@ -23,6 +23,7 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -194,6 +195,31 @@ public class SectorIDURIValidatorTest extends TestCase {
 			fail();
 		} catch (GeneralException e) {
 			assertEquals("Sector ID URI validation failed: Redirect URI https://yourapp.com/callback is missing from published JSON array at sector ID URI https://example.com/apps.json", e.getMessage());
+		}
+	}
+
+
+	public void testNoneRedirectURIsInInSectorIDURI()
+		throws Exception {
+
+		ResourceRetriever resourceRetriever = new ResourceRetriever() {
+			@Override
+			public Resource retrieveResource(URL url) throws IOException {
+				return new Resource("[]", "application/json");
+			}
+		};
+
+		SectorIDURIValidator v = new SectorIDURIValidator(resourceRetriever);
+
+		assertEquals(resourceRetriever, v.getResourceRetriever());
+
+		Set<URI> redirectURIs = Collections.singleton(URI.create("https://myapp.com/callback"));
+
+		try {
+			v.validate(URI.create("https://example.com/apps.json"), redirectURIs);
+			fail();
+		} catch (GeneralException e) {
+			assertEquals("Sector ID URI validation failed: Redirect URI https://myapp.com/callback is missing from published JSON array at sector ID URI https://example.com/apps.json", e.getMessage());
 		}
 	}
 }
