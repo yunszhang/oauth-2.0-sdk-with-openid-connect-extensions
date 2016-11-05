@@ -196,7 +196,6 @@ public class DefaultResourceRetrieverTest extends TestCase {
 
 		ServerSocket serverSocket = new ServerSocket(0);
 		int port = serverSocket.getLocalPort();
-		System.out.println("Found unused port " + port);
 		serverSocket.close();
 
 		RestrictedResourceRetriever resourceRetriever = new DefaultResourceRetriever(50, 0);
@@ -205,7 +204,7 @@ public class DefaultResourceRetrieverTest extends TestCase {
 			resourceRetriever.retrieveResource(new URL("http://localhost:" + port + "/c2id/jwks.json"));
 			fail();
 		} catch (IOException e) {
-			assertEquals("Connection refused", e.getMessage());
+			assertTrue(e.getMessage().startsWith("Connection refused"));
 		}
 	}
 
