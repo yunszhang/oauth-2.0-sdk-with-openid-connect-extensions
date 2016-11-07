@@ -586,3 +586,7 @@ version 5.17.4 (2016-11-04)
 
 version 5.17.5 (2016-11-06)
     * Permits parsing of null JSON object member values in client metadata.
+
+version 5.17.6 (2016-11-06)
+    * Permits parsing of null JSON object member values in OpenID provider
+      metadata.

@@ -36,6 +36,7 @@ import com.nimbusds.openid.connect.sdk.OIDCScopeValue;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimType;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
@@ -713,5 +714,23 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertEquals("https://c2id.com/token/introspect", meta.getCustomParameters().get("token_introspection_endpoint"));
 		assertEquals("https://c2id.com/token/revoke", meta.getCustomParameters().get("token_revocation_endpoint"));
 		assertEquals(2, meta.getCustomParameters().size());
+	}
+	
+	
+	public void testParseNullValues()
+		throws Exception {
+		
+		JSONObject jsonObject = new JSONObject();
+		
+		for (String paramName: OIDCClientMetadata.getRegisteredParameterNames()) {
+			jsonObject.put(paramName, null);
+		}
+		
+		// Mandatory
+		jsonObject.put("issuer", "https://c2id.com");
+		jsonObject.put("subject_types_supported", Arrays.asList("public", "pairwise"));
+		jsonObject.put("jwks_uri", "https://c2id.com/jwks.json");
+		
+		OIDCProviderMetadata.parse(jsonObject);
 	}
 }

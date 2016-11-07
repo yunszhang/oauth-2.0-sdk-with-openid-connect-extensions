@@ -1831,32 +1831,32 @@ public class OIDCProviderMetadata {
 		OIDCProviderMetadata op = new OIDCProviderMetadata(issuer, Collections.unmodifiableList(subjectTypes), jwkSetURI);
 
 		// Endpoints
-		if (jsonObject.containsKey("authorization_endpoint"))
+		if (jsonObject.get("authorization_endpoint") != null)
 			op.authzEndpoint = JSONObjectUtils.getURI(jsonObject, "authorization_endpoint");
 
-		if (jsonObject.containsKey("token_endpoint"))
+		if (jsonObject.get("token_endpoint") != null)
 			op.tokenEndpoint = JSONObjectUtils.getURI(jsonObject, "token_endpoint");
 
-		if (jsonObject.containsKey("userinfo_endpoint"))
+		if (jsonObject.get("userinfo_endpoint") != null)
 			op.userInfoEndpoint = JSONObjectUtils.getURI(jsonObject, "userinfo_endpoint");
 		
-		if (jsonObject.containsKey("registration_endpoint"))
+		if (jsonObject.get("registration_endpoint") != null)
 			op.regEndpoint = JSONObjectUtils.getURI(jsonObject, "registration_endpoint");
 		
-		if (jsonObject.containsKey("introspection_endpoint"))
+		if (jsonObject.get("introspection_endpoint") != null)
 			op.introspectionEndpoint = JSONObjectUtils.getURI(jsonObject, "introspection_endpoint");
 		
-		if (jsonObject.containsKey("revocation_endpoint"))
+		if (jsonObject.get("revocation_endpoint") != null)
 			op.revocationEndpoint = JSONObjectUtils.getURI(jsonObject, "revocation_endpoint");
 		
-		if (jsonObject.containsKey("check_session_iframe"))
+		if (jsonObject.get("check_session_iframe") != null)
 			op.checkSessionIframe = JSONObjectUtils.getURI(jsonObject, "check_session_iframe");
 		
-		if (jsonObject.containsKey("end_session_endpoint"))
+		if (jsonObject.get("end_session_endpoint") != null)
 			op.endSessionEndpoint = JSONObjectUtils.getURI(jsonObject, "end_session_endpoint");
 
 		// OIDC capabilities
-		if (jsonObject.containsKey("scopes_supported")) {
+		if (jsonObject.get("scopes_supported") != null) {
 
 			op.scope = new Scope();
 
@@ -1867,7 +1867,7 @@ public class OIDCProviderMetadata {
 			}
 		}
 
-		if (jsonObject.containsKey("response_types_supported")) {
+		if (jsonObject.get("response_types_supported") != null) {
 
 			op.rts = new ArrayList<>();
 
@@ -1878,7 +1878,7 @@ public class OIDCProviderMetadata {
 			}
 		}
 
-		if (jsonObject.containsKey("response_modes_supported")) {
+		if (jsonObject.get("response_modes_supported") != null) {
 
 			op.rms = new ArrayList<>();
 
@@ -1889,7 +1889,7 @@ public class OIDCProviderMetadata {
 			}
 		}
 		
-		if (jsonObject.containsKey("grant_types_supported")) {
+		if (jsonObject.get("grant_types_supported") != null) {
 			
 			op.gts = new ArrayList<>();
 			
@@ -1900,7 +1900,7 @@ public class OIDCProviderMetadata {
 			}
 		}
 
-		if (jsonObject.containsKey("code_challenge_methods_supported")) {
+		if (jsonObject.get("code_challenge_methods_supported") != null) {
 
 			op.codeChallengeMethods = new ArrayList<>();
 
@@ -1911,7 +1911,7 @@ public class OIDCProviderMetadata {
 			}
 		}
 
-		if (jsonObject.containsKey("acr_values_supported")) {
+		if (jsonObject.get("acr_values_supported") != null) {
 
 			op.acrValues = new ArrayList<>();
 
@@ -1922,7 +1922,7 @@ public class OIDCProviderMetadata {
 			}
 		}
 
-		if (jsonObject.containsKey("token_endpoint_auth_methods_supported")) {
+		if (jsonObject.get("token_endpoint_auth_methods_supported") != null) {
 			
 			op.tokenEndpointAuthMethods = new ArrayList<>();
 			
@@ -1933,7 +1933,7 @@ public class OIDCProviderMetadata {
 			}
 		}
 		
-		if (jsonObject.containsKey("token_endpoint_auth_signing_alg_values_supported")) {
+		if (jsonObject.get("token_endpoint_auth_signing_alg_values_supported") != null) {
 			
 			op.tokenEndpointJWSAlgs = new ArrayList<>();
 			
@@ -1950,7 +1950,7 @@ public class OIDCProviderMetadata {
 		
 		// OpenID Connect request object
 
-		if (jsonObject.containsKey("request_object_signing_alg_values_supported")) {
+		if (jsonObject.get("request_object_signing_alg_values_supported") != null) {
 
 			op.requestObjectJWSAlgs = new ArrayList<>();
 
@@ -1962,7 +1962,7 @@ public class OIDCProviderMetadata {
 		}
 
 
-		if (jsonObject.containsKey("request_object_encryption_alg_values_supported")) {
+		if (jsonObject.get("request_object_encryption_alg_values_supported") != null) {
 
 			op.requestObjectJWEAlgs = new ArrayList<>();
 
@@ -1974,7 +1974,7 @@ public class OIDCProviderMetadata {
 		}
 
 
-		if (jsonObject.containsKey("request_object_encryption_enc_values_supported")) {
+		if (jsonObject.get("request_object_encryption_enc_values_supported") != null) {
 
 			op.requestObjectJWEEncs = new ArrayList<>();
 
@@ -1988,7 +1988,7 @@ public class OIDCProviderMetadata {
 		
 		// ID token
 
-		if (jsonObject.containsKey("id_token_signing_alg_values_supported")) {
+		if (jsonObject.get("id_token_signing_alg_values_supported") != null) {
 
 			op.idTokenJWSAlgs = new ArrayList<>();
 
@@ -2000,7 +2000,7 @@ public class OIDCProviderMetadata {
 		}
 
 
-		if (jsonObject.containsKey("id_token_encryption_alg_values_supported")) {
+		if (jsonObject.get("id_token_encryption_alg_values_supported") != null) {
 
 			op.idTokenJWEAlgs = new ArrayList<>();
 
@@ -2012,7 +2012,7 @@ public class OIDCProviderMetadata {
 		}
 
 
-		if (jsonObject.containsKey("id_token_encryption_enc_values_supported")) {
+		if (jsonObject.get("id_token_encryption_enc_values_supported") != null) {
 
 			op.idTokenJWEEncs = new ArrayList<>();
 
@@ -2025,7 +2025,7 @@ public class OIDCProviderMetadata {
 
 		// UserInfo
 
-		if (jsonObject.containsKey("userinfo_signing_alg_values_supported")) {
+		if (jsonObject.get("userinfo_signing_alg_values_supported") != null) {
 
 			op.userInfoJWSAlgs = new ArrayList<>();
 
@@ -2037,7 +2037,7 @@ public class OIDCProviderMetadata {
 		}
 
 
-		if (jsonObject.containsKey("userinfo_encryption_alg_values_supported")) {
+		if (jsonObject.get("userinfo_encryption_alg_values_supported") != null) {
 
 			op.userInfoJWEAlgs = new ArrayList<>();
 
@@ -2049,7 +2049,7 @@ public class OIDCProviderMetadata {
 		}
 
 
-		if (jsonObject.containsKey("userinfo_encryption_enc_values_supported")) {
+		if (jsonObject.get("userinfo_encryption_enc_values_supported") != null) {
 
 			op.userInfoJWEEncs = new ArrayList<>();
 
@@ -2063,7 +2063,7 @@ public class OIDCProviderMetadata {
 		
 		// Misc
 
-		if (jsonObject.containsKey("display_values_supported")) {
+		if (jsonObject.get("display_values_supported") != null) {
 
 			op.displays = new ArrayList<>();
 
@@ -2074,7 +2074,7 @@ public class OIDCProviderMetadata {
 			}
 		}
 		
-		if (jsonObject.containsKey("claim_types_supported")) {
+		if (jsonObject.get("claim_types_supported") != null) {
 			
 			op.claimTypes = new ArrayList<>();
 			
@@ -2086,7 +2086,7 @@ public class OIDCProviderMetadata {
 		}
 
 
-		if (jsonObject.containsKey("claims_supported")) {
+		if (jsonObject.get("claims_supported") != null) {
 
 			op.claims = new ArrayList<>();
 
@@ -2097,7 +2097,7 @@ public class OIDCProviderMetadata {
 			}
 		}
 		
-		if (jsonObject.containsKey("claims_locales_supported")) {
+		if (jsonObject.get("claims_locales_supported") != null) {
 			
 			op.claimsLocales = new ArrayList<>();
 			
@@ -2116,7 +2116,7 @@ public class OIDCProviderMetadata {
 			}
 		}
 		
-		if (jsonObject.containsKey("ui_locales_supported")) {
+		if (jsonObject.get("ui_locales_supported") != null) {
 			
 			op.uiLocales = new ArrayList<>();
 			
@@ -2136,25 +2136,25 @@ public class OIDCProviderMetadata {
 		}
 
 
-		if (jsonObject.containsKey("service_documentation"))
+		if (jsonObject.get("service_documentation") != null)
 			op.serviceDocsURI = JSONObjectUtils.getURI(jsonObject, "service_documentation");
 		
-		if (jsonObject.containsKey("op_policy_uri"))
+		if (jsonObject.get("op_policy_uri") != null)
 			op.policyURI = JSONObjectUtils.getURI(jsonObject, "op_policy_uri");
 		
-		if (jsonObject.containsKey("op_tos_uri"))
+		if (jsonObject.get("op_tos_uri") != null)
 			op.tosURI = JSONObjectUtils.getURI(jsonObject, "op_tos_uri");
 		
-		if (jsonObject.containsKey("claims_parameter_supported"))
+		if (jsonObject.get("claims_parameter_supported") != null)
 			op.claimsParamSupported = JSONObjectUtils.getBoolean(jsonObject, "claims_parameter_supported");
 		
-		if (jsonObject.containsKey("request_parameter_supported"))
+		if (jsonObject.get("request_parameter_supported") != null)
 			op.requestParamSupported = JSONObjectUtils.getBoolean(jsonObject, "request_parameter_supported");
 		
-		if (jsonObject.containsKey("request_uri_parameter_supported"))
+		if (jsonObject.get("request_uri_parameter_supported") != null)
 			op.requestURIParamSupported = JSONObjectUtils.getBoolean(jsonObject, "request_uri_parameter_supported");
 		
-		if (jsonObject.containsKey("require_request_uri_registration"))
+		if (jsonObject.get("require_request_uri_registration") != null)
 			op.requireRequestURIReg = JSONObjectUtils.getBoolean(jsonObject, "require_request_uri_registration");
 
 		// Parse custom (not registered) parameters
