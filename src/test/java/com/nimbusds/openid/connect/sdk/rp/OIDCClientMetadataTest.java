@@ -547,4 +547,18 @@ public class OIDCClientMetadataTest extends TestCase {
 		
 		assertEquals(8, jsonObject.size());
 	}
+	
+	
+	public void testPermitParseNullValues()
+		throws Exception {
+		
+		JSONObject jsonObject = new JSONObject();
+		
+		for (String paramName: OIDCClientMetadata.getRegisteredParameterNames()) {
+			
+			jsonObject.put(paramName, null);
+		}
+		
+		OIDCClientMetadata.parse(jsonObject);
+	}
 }

@@ -583,3 +583,6 @@ version 5.17.3 (2016-11-03)
 version 5.17.4 (2016-11-04)
     * Fixes missing OIDCClientMetadata override of
       ClientMetadata.toJSONObject(boolean) (issue #198).
+
+version 5.17.5 (2016-11-06)
+    * Permits parsing of null JSON object member values in client metadata.

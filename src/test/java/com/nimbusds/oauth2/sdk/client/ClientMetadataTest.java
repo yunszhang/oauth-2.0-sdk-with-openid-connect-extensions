@@ -680,4 +680,18 @@ public class ClientMetadataTest extends TestCase {
 			assertEquals("Invalid client metadata field: Unexpected type of JSON object member with key \"response_types\"", e.getErrorObject().getDescription());
 		}
 	}
+	
+	
+	public void testPermitParseNullValues()
+		throws Exception {
+		
+		JSONObject jsonObject = new JSONObject();
+		
+		for (String paramName: ClientMetadata.getRegisteredParameterNames()) {
+			
+			jsonObject.put(paramName, null);
+		}
+		
+		ClientMetadata.parse(jsonObject);
+	}
 }

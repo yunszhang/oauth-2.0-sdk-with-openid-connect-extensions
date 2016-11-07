@@ -1256,7 +1256,7 @@ public class ClientMetadata {
 
 		ClientMetadata metadata = new ClientMetadata();
 
-		if (jsonObject.containsKey("redirect_uris")) {
+		if (jsonObject.get("redirect_uris") != null) {
 
 			Set<URI> redirectURIs = new LinkedHashSet<>();
 
@@ -1282,13 +1282,13 @@ public class ClientMetadata {
 
 		try {
 
-			if (jsonObject.containsKey("scope")) {
+			if (jsonObject.get("scope") != null) {
 				metadata.setScope(Scope.parse(JSONObjectUtils.getString(jsonObject, "scope")));
 				jsonObject.remove("scope");
 			}
 
 
-			if (jsonObject.containsKey("response_types")) {
+			if (jsonObject.get("response_types") != null) {
 
 				Set<ResponseType> responseTypes = new LinkedHashSet<>();
 
@@ -1302,7 +1302,7 @@ public class ClientMetadata {
 			}
 
 
-			if (jsonObject.containsKey("grant_types")) {
+			if (jsonObject.get("grant_types") != null) {
 
 				Set<GrantType> grantTypes = new LinkedHashSet<>();
 
@@ -1316,7 +1316,7 @@ public class ClientMetadata {
 			}
 
 
-			if (jsonObject.containsKey("contacts")) {
+			if (jsonObject.get("contacts") != null) {
 
 				List<InternetAddress> emailList = new LinkedList<>();
 
@@ -1358,6 +1358,8 @@ public class ClientMetadata {
 
 			for (Map.Entry<LangTag, Object> entry : matches.entrySet()) {
 
+				if (entry.getValue() == null) continue;
+				
 				try {
 					metadata.setLogoURI(new URI((String) entry.getValue()), entry.getKey());
 
@@ -1373,6 +1375,8 @@ public class ClientMetadata {
 			matches = LangTagUtils.find("client_uri", jsonObject);
 
 			for (Map.Entry<LangTag, Object> entry : matches.entrySet()) {
+				
+				if (entry.getValue() == null) continue;
 
 				try {
 					metadata.setURI(new URI((String) entry.getValue()), entry.getKey());
@@ -1390,6 +1394,8 @@ public class ClientMetadata {
 			matches = LangTagUtils.find("policy_uri", jsonObject);
 
 			for (Map.Entry<LangTag, Object> entry : matches.entrySet()) {
+				
+				if (entry.getValue() == null) continue;
 
 				try {
 					metadata.setPolicyURI(new URI((String) entry.getValue()), entry.getKey());
@@ -1406,6 +1412,8 @@ public class ClientMetadata {
 			matches = LangTagUtils.find("tos_uri", jsonObject);
 
 			for (Map.Entry<LangTag, Object> entry : matches.entrySet()) {
+				
+				if (entry.getValue() == null) continue;
 
 				try {
 					metadata.setTermsOfServiceURI(new URI((String) entry.getValue()), entry.getKey());
@@ -1419,7 +1427,7 @@ public class ClientMetadata {
 			}
 
 
-			if (jsonObject.containsKey("token_endpoint_auth_method")) {
+			if (jsonObject.get("token_endpoint_auth_method") != null) {
 				metadata.setTokenEndpointAuthMethod(new ClientAuthenticationMethod(
 					JSONObjectUtils.getString(jsonObject, "token_endpoint_auth_method")));
 
@@ -1427,7 +1435,7 @@ public class ClientMetadata {
 			}
 
 
-			if (jsonObject.containsKey("token_endpoint_auth_signing_alg")) {
+			if (jsonObject.get("token_endpoint_auth_signing_alg") != null) {
 				metadata.setTokenEndpointAuthJWSAlg(new JWSAlgorithm(
 					JSONObjectUtils.getString(jsonObject, "token_endpoint_auth_signing_alg")));
 
@@ -1435,12 +1443,12 @@ public class ClientMetadata {
 			}
 
 
-			if (jsonObject.containsKey("jwks_uri")) {
+			if (jsonObject.get("jwks_uri") != null) {
 				metadata.setJWKSetURI(JSONObjectUtils.getURI(jsonObject, "jwks_uri"));
 				jsonObject.remove("jwks_uri");
 			}
 
-			if (jsonObject.containsKey("jwks")) {
+			if (jsonObject.get("jwks") != null) {
 
 				try {
 					metadata.setJWKSet(JWKSet.parse(JSONObjectUtils.getJSONObject(jsonObject, "jwks")));
@@ -1452,12 +1460,12 @@ public class ClientMetadata {
 				jsonObject.remove("jwks");
 			}
 
-			if (jsonObject.containsKey("software_id")) {
+			if (jsonObject.get("software_id") != null) {
 				metadata.setSoftwareID(new SoftwareID(JSONObjectUtils.getString(jsonObject, "software_id")));
 				jsonObject.remove("software_id");
 			}
 
-			if (jsonObject.containsKey("software_version")) {
+			if (jsonObject.get("software_version") != null) {
 				metadata.setSoftwareVersion(new SoftwareVersion(JSONObjectUtils.getString(jsonObject, "software_version")));
 				jsonObject.remove("software_version");
 			}
