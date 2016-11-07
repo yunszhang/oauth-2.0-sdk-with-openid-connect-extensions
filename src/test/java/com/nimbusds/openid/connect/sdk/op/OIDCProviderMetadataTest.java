@@ -733,4 +733,23 @@ public class OIDCProviderMetadataTest extends TestCase {
 		
 		OIDCProviderMetadata.parse(jsonObject);
 	}
+	
+	
+	public void testPreserveTokenEndpointJWSAlgsParseOrder()
+		throws Exception {
+		
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("issuer", "https://c2id.com");
+		jsonObject.put("subject_types_supported", Arrays.asList("public", "pairwise"));
+		jsonObject.put("jwks_uri", "https://c2id.com/jwks.json");
+		jsonObject.put("token_endpoint_auth_signing_alg_values_supported", Arrays.asList("RS256", "PS256", "HS256", "ES256"));
+		
+		OIDCProviderMetadata opMetadata = OIDCProviderMetadata.parse(jsonObject.toJSONString());
+		
+		assertEquals(JWSAlgorithm.RS256, opMetadata.getTokenEndpointJWSAlgs().get(0));
+		assertEquals(JWSAlgorithm.PS256, opMetadata.getTokenEndpointJWSAlgs().get(1));
+		assertEquals(JWSAlgorithm.HS256, opMetadata.getTokenEndpointJWSAlgs().get(2));
+		assertEquals(JWSAlgorithm.ES256, opMetadata.getTokenEndpointJWSAlgs().get(3));
+		assertEquals(4, opMetadata.getTokenEndpointJWSAlgs().size());
+	}
 }
