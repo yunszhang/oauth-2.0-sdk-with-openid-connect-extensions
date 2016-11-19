@@ -347,6 +347,7 @@ public class JSONObjectUtils {
 	 * @throws ParseException If the value is missing, {@code null} or not
 	 *                        of the expected type.
 	 */
+	@Deprecated
 	public static InternetAddress getEmail(final JSONObject o, final String key)
 		throws ParseException {
 		

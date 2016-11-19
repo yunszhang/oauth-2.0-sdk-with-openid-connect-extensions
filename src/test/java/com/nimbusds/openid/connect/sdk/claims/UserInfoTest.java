@@ -25,8 +25,10 @@ import javax.mail.internet.InternetAddress;
 
 import com.nimbusds.jose.util.DateUtils;
 import com.nimbusds.langtag.LangTag;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -141,6 +143,7 @@ public class UserInfoTest extends TestCase {
 		assertNull(userInfo.getPicture());
 		assertNull(userInfo.getWebsite());
 		assertNull(userInfo.getEmail());
+		assertNull(userInfo.getEmailAddress());
 		assertNull(userInfo.getEmailVerified());
 		assertNull(userInfo.getGender());
 		assertNull(userInfo.getBirthdate());
@@ -154,6 +157,101 @@ public class UserInfoTest extends TestCase {
 
 
 	public void testGettersAndSetters()
+		throws Exception {
+
+		UserInfo userInfo = new UserInfo(new Subject("sub"));
+
+		userInfo.setName("name");
+		userInfo.setGivenName("given_name");
+		userInfo.setFamilyName("family_name");
+		userInfo.setMiddleName("middle_name");
+		userInfo.setNickname("nickname");
+		userInfo.setPreferredUsername("preferred_username");
+		userInfo.setProfile(new URI("https://profile.com"));
+		userInfo.setPicture(new URI("https://picture.com"));
+		userInfo.setWebsite(new URI("https://website.com"));
+		userInfo.setEmailAddress("name@domain.com");
+		userInfo.setEmailVerified(true);
+		userInfo.setGender(Gender.FEMALE);
+		userInfo.setBirthdate("1992-01-31");
+		userInfo.setZoneinfo("Europe/Paris");
+		userInfo.setLocale("en-GB");
+		userInfo.setPhoneNumber("phone_number");
+		userInfo.setPhoneNumberVerified(true);
+
+		Address address = new Address();
+		address.setFormatted("formatted");
+		address.setStreetAddress("street_address");
+		address.setLocality("locality");
+		address.setRegion("region");
+		address.setPostalCode("postal_code");
+		address.setCountry("country");
+
+		userInfo.setAddress(address);
+
+		userInfo.setUpdatedTime(DateUtils.fromSecondsSinceEpoch(100000l));
+
+		assertEquals("sub", userInfo.getSubject().getValue());
+		assertEquals("given_name", userInfo.getGivenName());
+		assertEquals("family_name", userInfo.getFamilyName());
+		assertEquals("middle_name", userInfo.getMiddleName());
+		assertEquals("nickname", userInfo.getNickname());
+		assertEquals("preferred_username", userInfo.getPreferredUsername());
+		assertEquals("https://profile.com", userInfo.getProfile().toString());
+		assertEquals("https://picture.com", userInfo.getPicture().toString());
+		assertEquals("https://website.com", userInfo.getWebsite().toString());
+		assertEquals("name@domain.com", userInfo.getEmailAddress());
+		assertTrue(userInfo.getEmailVerified());
+		assertEquals(Gender.FEMALE, userInfo.getGender());
+		assertEquals("1992-01-31", userInfo.getBirthdate());
+		assertEquals("Europe/Paris", userInfo.getZoneinfo());
+		assertEquals("en-GB", userInfo.getLocale());
+		assertEquals("phone_number", userInfo.getPhoneNumber());
+		assertTrue(userInfo.getPhoneNumberVerified());
+
+		address = userInfo.getAddress();
+		assertEquals("formatted", address.getFormatted());
+		assertEquals("street_address", address.getStreetAddress());
+		assertEquals("locality", address.getLocality());
+		assertEquals("region", address.getRegion());
+		assertEquals("postal_code", address.getPostalCode());
+		assertEquals("country", address.getCountry());
+
+		String json = userInfo.toJSONObject().toString();
+
+		System.out.println("Full UserInfo: " + json);
+
+		userInfo = UserInfo.parse(json);
+
+		assertEquals("sub", userInfo.getSubject().getValue());
+		assertEquals("given_name", userInfo.getGivenName());
+		assertEquals("family_name", userInfo.getFamilyName());
+		assertEquals("middle_name", userInfo.getMiddleName());
+		assertEquals("nickname", userInfo.getNickname());
+		assertEquals("preferred_username", userInfo.getPreferredUsername());
+		assertEquals("https://profile.com", userInfo.getProfile().toString());
+		assertEquals("https://picture.com", userInfo.getPicture().toString());
+		assertEquals("https://website.com", userInfo.getWebsite().toString());
+		assertEquals("name@domain.com", userInfo.getEmailAddress());
+		assertTrue(userInfo.getEmailVerified());
+		assertEquals(Gender.FEMALE, userInfo.getGender());
+		assertEquals("1992-01-31", userInfo.getBirthdate());
+		assertEquals("Europe/Paris", userInfo.getZoneinfo());
+		assertEquals("en-GB", userInfo.getLocale());
+		assertEquals("phone_number", userInfo.getPhoneNumber());
+		assertTrue(userInfo.getPhoneNumberVerified());
+
+		address = userInfo.getAddress();
+		assertEquals("formatted", address.getFormatted());
+		assertEquals("street_address", address.getStreetAddress());
+		assertEquals("locality", address.getLocality());
+		assertEquals("region", address.getRegion());
+		assertEquals("postal_code", address.getPostalCode());
+		assertEquals("country", address.getCountry());
+	}
+
+	
+	public void testGettersAndSetters_withDeprecatedEmail()
 		throws Exception {
 
 		UserInfo userInfo = new UserInfo(new Subject("sub"));
@@ -387,5 +485,20 @@ public class UserInfoTest extends TestCase {
 		userInfo.putAll(claims);
 		assertEquals("Alice Wonderland", userInfo.getName());
 		assertEquals("Alice", userInfo.getGivenName());
+	}
+	
+	
+	public void testParseInvalidEmailAddress_ignore()
+		throws ParseException {
+		
+		JSONObject o = new JSONObject();
+		o.put("sub", "alice");
+		o.put("email", "invalid-email");
+		
+		UserInfo userInfo = UserInfo.parse(o.toJSONString());
+		
+		assertEquals("invalid-email", userInfo.getEmailAddress());
+		
+		assertNull(userInfo.getEmail()); // exception swallowed
 	}
 }

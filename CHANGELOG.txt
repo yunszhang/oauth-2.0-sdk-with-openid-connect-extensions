@@ -430,7 +430,7 @@ version 5.2 (2016-01-28)
     * Adds support for Proof Key for Code Exchange by OAuth Public Clients (RFC
       7636).
     * Adds code_challenge_methods_supported to OIDCProviderMetadata.
-    * Adds public client support to TokenRevocationRequest (issue #164).
+    * Adds public client support to TokenRevocationRequest (iss #164).
     * ClientMetadata.applyDefaults set token_endpoint_auth_method to 'none' for
       implicit authorisation grant (iss #163).
     * Overrides equals and hashCode for AuthorizationCodeGrant.
@@ -438,7 +438,7 @@ version 5.2 (2016-01-28)
     * Overrides equals and hashCode for RefreshTokenGrant.
     * Overrides equals and hashCode for SAML2BearerGrant.
     * Fixes authorisation response JavaDocs concerning use of relative callback
-      URIs (issue #162).
+      URIs (iss #162).
 
 version 5.3 (2016-01-29)
     * Adds ClientInformation.inferType method to deduce whether a client is
@@ -455,13 +455,13 @@ version 5.5 (2016-02-04)
 
 version 5.5.1 (2016-02-14)
     * Permits unencoded equals '=' characters in parameter values passed to
-      URLUtils.parseParameters (issue #169).
+      URLUtils.parseParameters (iss #169).
 
 version 5.5.2 (2016-02-18)
     * Allows socket caching in HTTPRequest.send method.
 
 version 5.6 (2016-04-07)
-    * Adds support for custom TokenRequest parameters (issue #171).
+    * Adds support for custom TokenRequest parameters (iss #171).
     * Fixes key selection bug in static factory method IDTokenValidator.create
       (iss #173).
     * Adds support for OSGi bundling in pom.xml.
@@ -481,18 +481,17 @@ version 5.8 (2016-04-21)
     * Adds support for custom OpenID Connect authentication request parameters.
 
 version 5.8.1 (2016-04-28)
-    * Removes direct dependencies on commons-lang:commons-lang:2.6 (issue
-      #179).
+    * Removes direct dependencies on commons-lang:commons-lang:2.6 (iss #179).
 
 version 5.8.2 (2016-05-24)
     * ServletUtils.createHTTPRequest recreates HTTP request body on
       Content-Type application/x-www-form-urlencoded if stripped by the servlet
-      container (issue #184).
+      container (iss #184).
 
 version 5.9 (2016-05-26)
     * Modifies the Secret class to permit empty values (empty passwords allowed
       by the HTTP basic authentication specification, see RFC 2617, section 2)
-      (issue #182).
+      (iss #182).
     * Switches to an alternative JCIP annotation dependency under the Apache
       License, version 2.0. The original JCIP annotation package has a Creative
       Commons which is not recommended for licensing software, see
@@ -529,10 +528,10 @@ version 5.11 (2016-07-11)
     * Updates the OpenID AuthenticationRequest class to treat max_age=0 as
       indicating prompt to (re)authenticate the end-user (equivalent to
       prompt=login. An unspecified max_age is now denoted by -1 (previously 0).
-      See OpenID Connect WG issue #993 (issue #180).
+      See OpenID Connect WG issue #993 (iss #180).
     * Refactors the com.nimbusds.oauth2.sdk.auth.verifier package to support
       private_key_jwt authentication where the OAuth 2.0 client has registered
-      a remote JWK set (jwks_uri) (issue #191).
+      a remote JWK set (jwks_uri) (iss #191).
     * Nimbus JOSE+JWT v4.22 becomes the minimum dependency.
 
 version 5.12 (2016-07-14)
@@ -541,7 +540,7 @@ version 5.12 (2016-07-14)
 version 5.13 (2016-07-14)
     * Fixes OIDCClientMetadata default_max_age to use -1 to signify an
       unspecified value (in line with the max_age OpenID authentication request
-      parameter) (issue #180).
+      parameter) (iss #180).
 
 version 5.14 (2016-08-17)
     * Adds new SecretKeyDerivation utility for deriving symmetric AES keys from
@@ -582,7 +581,7 @@ version 5.17.3 (2016-11-03)
 
 version 5.17.4 (2016-11-04)
     * Fixes missing OIDCClientMetadata override of
-      ClientMetadata.toJSONObject(boolean) (issue #198).
+      ClientMetadata.toJSONObject(boolean) (iss #198).
 
 version 5.17.5 (2016-11-06)
     * Permits parsing of null JSON object member values in client metadata.
@@ -590,3 +589,8 @@ version 5.17.5 (2016-11-06)
 version 5.17.6 (2016-11-06)
     * Permits parsing of null JSON object member values in OpenID provider
       metadata.
+
+version 5.18 (2016-11-19)
+    * Deprecates use of javax.mail.internet.InternetAddress (iss #195).
+
+

@@ -95,6 +95,156 @@ public class ClientMetadataTest extends TestCase {
 		grantTypes.add(GrantType.REFRESH_TOKEN);
 		meta.setGrantTypes(grantTypes);
 		
+		List<String> contacts = new LinkedList<>();
+		contacts.add("alice@wonderland.net");
+		contacts.add("admin@wonderland.net");
+		meta.setEmailContacts(contacts);
+		
+		String name = "My Example App";
+		meta.setName(name);
+		
+		String nameDE = "Mein Beispiel App";
+		meta.setName(nameDE, LangTag.parse("de"));
+		
+		URI logo = new URI("http://example.com/logo.png");
+		meta.setLogoURI(logo);
+		
+		URI logoDE = new URI("http://example.com/de/logo.png");
+		meta.setLogoURI(logoDE, LangTag.parse("de"));
+		
+		URI uri = new URI("http://example.com");
+		meta.setURI(uri);
+		
+		URI uriDE = new URI("http://example.com/de");
+		meta.setURI(uriDE, LangTag.parse("de"));
+		
+		URI policy = new URI("http://example.com/policy");
+		meta.setPolicyURI(policy);
+		
+		URI policyDE = new URI("http://example.com/de/policy");
+		meta.setPolicyURI(policyDE, LangTag.parse("de"));
+		
+		URI tos = new URI("http://example.com/tos");
+		meta.setTermsOfServiceURI(tos);
+		
+		URI tosDE = new URI("http://example.com/de/tos");
+		meta.setTermsOfServiceURI(tosDE, LangTag.parse("de"));
+		
+		ClientAuthenticationMethod authMethod = ClientAuthenticationMethod.CLIENT_SECRET_JWT;
+		meta.setTokenEndpointAuthMethod(authMethod);
+
+		JWSAlgorithm authJWSAlg = JWSAlgorithm.HS256;
+		meta.setTokenEndpointAuthJWSAlg(authJWSAlg);
+		
+		URI jwksURI = new URI("http://example.com/jwks.json");
+		meta.setJWKSetURI(jwksURI);
+
+		RSAKey rsaKey = new RSAKey.Builder(new Base64URL("nabc"), new Base64URL("eabc")).build();
+		JWKSet jwkSet = new JWKSet(rsaKey);
+		meta.setJWKSet(jwkSet);
+
+		SoftwareID softwareID = new SoftwareID();
+		meta.setSoftwareID(softwareID);
+
+		SoftwareVersion softwareVersion = new SoftwareVersion("1.0");
+		meta.setSoftwareVersion(softwareVersion);
+		
+		// Test getters
+		assertEquals(redirectURIs, meta.getRedirectionURIs());
+		assertEquals(scope, meta.getScope());
+		assertEquals(grantTypes, meta.getGrantTypes());
+		assertEquals(contacts, meta.getEmailContacts());
+		assertEquals(name, meta.getName());
+		assertEquals(nameDE, meta.getName(LangTag.parse("de")));
+		assertEquals(2, meta.getNameEntries().size());
+		assertEquals(logo, meta.getLogoURI());
+		assertEquals(logoDE, meta.getLogoURI(LangTag.parse("de")));
+		assertEquals(2, meta.getLogoURIEntries().size());
+		assertEquals(uri, meta.getURI());
+		assertEquals(uriDE, meta.getURI(LangTag.parse("de")));
+		assertEquals(2, meta.getURIEntries().size());
+		assertEquals(policy, meta.getPolicyURI());
+		assertEquals(policyDE, meta.getPolicyURI(LangTag.parse("de")));
+		assertEquals(2, meta.getPolicyURIEntries().size());
+		assertEquals(tos, meta.getTermsOfServiceURI());
+		assertEquals(tosDE, meta.getTermsOfServiceURI(LangTag.parse("de")));
+		assertEquals(2, meta.getTermsOfServiceURIEntries().size());
+		assertEquals(authMethod, meta.getTokenEndpointAuthMethod());
+		assertEquals(authJWSAlg, meta.getTokenEndpointAuthJWSAlg());
+		assertEquals(jwksURI, meta.getJWKSetURI());
+		assertEquals("nabc", ((RSAKey)meta.getJWKSet().getKeys().get(0)).getModulus().toString());
+		assertEquals("eabc", ((RSAKey)meta.getJWKSet().getKeys().get(0)).getPublicExponent().toString());
+		assertEquals(1, meta.getJWKSet().getKeys().size());
+		assertEquals(softwareID, meta.getSoftwareID());
+		assertEquals(softwareVersion, meta.getSoftwareVersion());
+		assertTrue(meta.getCustomFields().isEmpty());
+		
+		String json = meta.toJSONObject().toJSONString();
+		
+		JSONObject jsonObject = JSONObjectUtils.parse(json);
+		
+		meta = ClientMetadata.parse(jsonObject);
+		
+		// Test getters
+		assertEquals(redirectURIs, meta.getRedirectionURIs());
+		assertEquals(scope, meta.getScope());
+		assertTrue(meta.hasScopeValue(new Scope.Value("read")));
+		assertTrue(meta.hasScopeValue(new Scope.Value("write")));
+		assertEquals(grantTypes, meta.getGrantTypes());
+		assertEquals(contacts, meta.getEmailContacts());
+		assertEquals(name, meta.getName());
+		assertEquals(nameDE, meta.getName(LangTag.parse("de")));
+		assertEquals(2, meta.getNameEntries().size());
+		assertEquals(logo, meta.getLogoURI());
+		assertEquals(logoDE, meta.getLogoURI(LangTag.parse("de")));
+		assertEquals(2, meta.getLogoURIEntries().size());
+		assertEquals(uri, meta.getURI());
+		assertEquals(uriDE, meta.getURI(LangTag.parse("de")));
+		assertEquals(2, meta.getURIEntries().size());
+		assertEquals(policy, meta.getPolicyURI());
+		assertEquals(policyDE, meta.getPolicyURI(LangTag.parse("de")));
+		assertEquals(2, meta.getPolicyURIEntries().size());
+		assertEquals(tos, meta.getTermsOfServiceURI());
+		assertEquals(tosDE, meta.getTermsOfServiceURI(LangTag.parse("de")));
+		assertEquals(2, meta.getTermsOfServiceURIEntries().size());
+		assertEquals(authMethod, meta.getTokenEndpointAuthMethod());
+		assertEquals(authJWSAlg, meta.getTokenEndpointAuthJWSAlg());
+		assertEquals(jwksURI, meta.getJWKSetURI());
+		assertEquals("nabc", ((RSAKey)meta.getJWKSet().getKeys().get(0)).getModulus().toString());
+		assertEquals("eabc", ((RSAKey)meta.getJWKSet().getKeys().get(0)).getPublicExponent().toString());
+		assertEquals(1, meta.getJWKSet().getKeys().size());
+		assertEquals(softwareID, meta.getSoftwareID());
+		assertEquals(softwareVersion, meta.getSoftwareVersion());
+
+		assertTrue(meta.getCustomFields().isEmpty());
+	}
+
+
+	public void testSerializeAndParse_deprecatedInternetAddressContacts()
+		throws Exception {
+		
+		ClientMetadata meta = new ClientMetadata();
+		
+		Set<URI> redirectURIs = new HashSet<>();
+		redirectURIs.add(new URI("http://example.com/1"));
+		redirectURIs.add(new URI("http://example.com/2"));
+		meta.setRedirectionURIs(redirectURIs);
+		
+		Scope scope = Scope.parse("read write");
+		assertFalse(meta.hasScopeValue(new Scope.Value("read")));
+		meta.setScope(scope);
+		assertTrue(meta.hasScopeValue(new Scope.Value("read")));
+		assertTrue(meta.hasScopeValue(new Scope.Value("write")));
+
+		Set<ResponseType> rts = new HashSet<>();
+		rts.add(ResponseType.parse("code id_token"));
+		meta.setResponseTypes(rts);
+		
+		Set<GrantType> grantTypes = new HashSet<>();
+		grantTypes.add(GrantType.AUTHORIZATION_CODE);
+		grantTypes.add(GrantType.REFRESH_TOKEN);
+		meta.setGrantTypes(grantTypes);
+		
 		List<InternetAddress> contacts = new LinkedList<>();
 		contacts.add(new InternetAddress("alice@wonderland.net"));
 		contacts.add(new InternetAddress("admin@wonderland.net"));
@@ -242,10 +392,10 @@ public class ClientMetadataTest extends TestCase {
 		grantTypes.add(GrantType.REFRESH_TOKEN);
 		meta.setGrantTypes(grantTypes);
 
-		List<InternetAddress> contacts = new LinkedList<>();
-		contacts.add(new InternetAddress("alice@wonderland.net"));
-		contacts.add(new InternetAddress("admin@wonderland.net"));
-		meta.setContacts(contacts);
+		List<String> contacts = new LinkedList<>();
+		contacts.add("alice@wonderland.net");
+		contacts.add("admin@wonderland.net");
+		meta.setEmailContacts(contacts);
 
 		String name = "My Example App";
 		meta.setName(name);
@@ -303,7 +453,7 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(redirectURIs, copy.getRedirectionURIs());
 		assertEquals(scope, copy.getScope());
 		assertEquals(grantTypes, copy.getGrantTypes());
-		assertEquals(contacts, copy.getContacts());
+		assertEquals(contacts, copy.getEmailContacts());
 		assertEquals(name, copy.getName());
 		assertEquals(nameDE, copy.getName(LangTag.parse("de")));
 		assertEquals(2, copy.getNameEntries().size());
@@ -339,7 +489,7 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(redirectURIs, copy.getRedirectionURIs());
 		assertEquals(scope, copy.getScope());
 		assertEquals(grantTypes, copy.getGrantTypes());
-		assertEquals(contacts, copy.getContacts());
+		assertEquals(contacts, copy.getEmailContacts());
 		assertEquals(name, copy.getName());
 		assertEquals(nameDE, copy.getName(LangTag.parse("de")));
 		assertEquals(2, copy.getNameEntries().size());
@@ -693,5 +843,16 @@ public class ClientMetadataTest extends TestCase {
 		}
 		
 		ClientMetadata.parse(jsonObject);
+	}
+	
+	
+	public void testIgnoreInvalidEmailOnGetContacts()
+		throws Exception {
+		
+		ClientMetadata clientMetadata = new ClientMetadata();
+		List<String> invalidEmail = Collections.singletonList("invalid-email-address");
+		clientMetadata.setEmailContacts(invalidEmail);
+		assertEquals(invalidEmail.get(0), clientMetadata.getContacts().get(0).toString());
+		assertEquals(invalidEmail.size(), clientMetadata.getContacts().size());
 	}
 }

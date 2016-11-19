@@ -729,11 +729,14 @@ public class UserInfo extends ClaimsSet {
 	
 	
 	/**
-	 * Gets the preferred email address. Corresponds to the {@code email} 
+	 * Gets the preferred email address. Corresponds to the {@code email}
 	 * claim.
+	 *
+	 * <p>Use {@link #getEmailAddress()} instead.
 	 *
 	 * @return The preferred email address, {@code null} if not specified.
 	 */
+	@Deprecated
 	public InternetAddress getEmail() {
 	
 		return getEmailClaim(EMAIL_CLAIM_NAME);
@@ -744,12 +747,40 @@ public class UserInfo extends ClaimsSet {
 	 * Sets the preferred email address. Corresponds to the {@code email}
 	 * claim.
 	 *
+	 * <p>Use {@link #setEmailAddress(String)} instead.
+	 *
 	 * @param email The preferred email address. If {@code null} the claim
 	 *              will be removed.
 	 */
+	@Deprecated
 	public void setEmail(final InternetAddress email) {
 	
 		setEmailClaim(EMAIL_CLAIM_NAME, email);
+	}
+	
+	
+	/**
+	 * Gets the preferred email address. Corresponds to the {@code email}
+	 * claim.
+	 *
+	 * @return The preferred email address, {@code null} if not specified.
+	 */
+	public String getEmailAddress() {
+	
+		return getStringClaim(EMAIL_CLAIM_NAME);
+	}
+	
+	
+	/**
+	 * Sets the preferred email address. Corresponds to the {@code email}
+	 * claim.
+	 *
+	 * @param email The preferred email address. If {@code null} the claim
+	 *              will be removed.
+	 */
+	public void setEmailAddress(final String email) {
+	
+		setClaim(EMAIL_CLAIM_NAME, email);
 	}
 	
 	

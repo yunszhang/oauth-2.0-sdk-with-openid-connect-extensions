@@ -356,6 +356,7 @@ public abstract class ClaimsSet {
 	 * @return The claim value, {@code null} if not specified or parsing
 	 *         failed.
 	 */
+	@Deprecated
 	public InternetAddress getEmailClaim(final String name) {
 
 		try {
@@ -373,6 +374,7 @@ public abstract class ClaimsSet {
 	 * @param value The claim value. If {@code null} any existing claim
 	 *              with the same name will be removed.
 	 */
+	@Deprecated
 	public void setEmailClaim(final String name, final InternetAddress value) {
 
 		if (value != null)

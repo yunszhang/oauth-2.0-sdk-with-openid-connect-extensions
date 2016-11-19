@@ -126,9 +126,9 @@ public class ClientMetadata {
 
 
 	/**
-	 * Administrator contacts for the client.
+	 * Administrator email contacts for the client.
 	 */
-	private List<InternetAddress> contacts;
+	private List<String> contacts;
 
 
 	/**
@@ -431,25 +431,78 @@ public class ClientMetadata {
 
 
 	/**
-	 * Gets the administrator contacts for the client. Corresponds to the
-	 * {@code contacts} client metadata field.
+	 * Gets the administrator email contacts for the client. Corresponds to
+	 * the {@code contacts} client metadata field.
 	 *
-	 * @return The administrator contacts, {@code null} if not specified.
+	 * <p>Use {@link #getEmailContacts()} instead.
+	 *
+	 * @return The administrator email contacts, {@code null} if not
+	 *         specified.
 	 */
+	@Deprecated
 	public List<InternetAddress> getContacts() {
+
+		if (contacts == null)
+			return null;
+		
+		List<InternetAddress> addresses = new LinkedList<>();
+		for (String s: contacts) {
+			try {
+				addresses.add(new InternetAddress(s, false));
+			} catch (AddressException e) {
+				// ignore
+			}
+		}
+		return addresses;
+	}
+
+
+	/**
+	 * Sets the administrator email contacts for the client. Corresponds to
+	 * the {@code contacts} client metadata field.
+	 *
+	 * <p>Use {@link #setEmailContacts(List)} instead.
+	 *
+	 * @param contacts The administrator email contacts, {@code null} if
+	 *                 not specified.
+	 */
+	@Deprecated
+	public void setContacts(final List<InternetAddress> contacts) {
+
+		if (contacts == null)
+			this.contacts = null;
+		
+		List<String> addresses = new LinkedList<>();
+		for (InternetAddress a: contacts) {
+			if (a != null) {
+				addresses.add(a.toString());
+			}
+		}
+		this.contacts = addresses;
+	}
+
+
+	/**
+	 * Gets the administrator email contacts for the client. Corresponds to
+	 * the {@code contacts} client metadata field.
+	 *
+	 * @return The administrator email contacts, {@code null} if not
+	 *         specified.
+	 */
+	public List<String> getEmailContacts() {
 
 		return contacts;
 	}
 
 
 	/**
-	 * Sets the administrator contacts for the client. Corresponds to the
-	 * {@code contacts} client metadata field.
+	 * Sets the administrator email contacts for the client. Corresponds to
+	 * the {@code contacts} client metadata field.
 	 *
-	 * @param contacts The administrator contacts, {@code null} if not
-	 *                 specified.
+	 * @param contacts The administrator email contacts, {@code null} if
+	 *                 not specified.
 	 */
-	public void setContacts(final List<InternetAddress> contacts) {
+	public void setEmailContacts(final List<String> contacts) {
 
 		this.contacts = contacts;
 	}
@@ -1095,13 +1148,7 @@ public class ClientMetadata {
 
 
 		if (contacts != null) {
-
-			JSONArray contactList = new JSONArray();
-
-			for (InternetAddress email: contacts)
-				contactList.add(email.toString());
-
-			o.put("contacts", contactList);
+			o.put("contacts", contacts);
 		}
 
 
@@ -1317,22 +1364,7 @@ public class ClientMetadata {
 
 
 			if (jsonObject.get("contacts") != null) {
-
-				List<InternetAddress> emailList = new LinkedList<>();
-
-				for (String emailString : JSONObjectUtils.getStringArray(jsonObject, "contacts")) {
-
-					try {
-						emailList.add(new InternetAddress(emailString));
-
-					} catch (AddressException e) {
-
-						throw new ParseException("Invalid \"contacts\" parameter: " +
-							e.getMessage());
-					}
-				}
-
-				metadata.setContacts(emailList);
+				metadata.setEmailContacts(JSONObjectUtils.getStringList(jsonObject, "contacts"));
 				jsonObject.remove("contacts");
 			}
 
