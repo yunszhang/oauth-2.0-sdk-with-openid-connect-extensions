@@ -27,8 +27,8 @@ import java.net.URL;
 import javax.mail.internet.ContentType;
 import javax.mail.internet.ParseException;
 
+import com.nimbusds.jose.util.BoundedInputStream;
 import net.jcip.annotations.ThreadSafe;
-import org.apache.commons.io.input.BoundedInputStream;
 
 
 /**

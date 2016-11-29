@@ -593,4 +593,9 @@ version 5.17.6 (2016-11-06)
 version 5.18 (2016-11-19)
     * Deprecates use of javax.mail.internet.InternetAddress (iss #195).
 
+version 5.18.1 (2016-11-29)
+    * Fixes NPE in ClientMetadata.setContacts when the argument is null.
+    * Fixes NPE in ClientMetadata.getContacts when a contacts String list item
+      is null.
+    * Upgrades to Nimbus JOSE+JWT 4.29.
 

@@ -447,6 +447,7 @@ public class ClientMetadata {
 		
 		List<InternetAddress> addresses = new LinkedList<>();
 		for (String s: contacts) {
+			if (s == null) continue;
 			try {
 				addresses.add(new InternetAddress(s, false));
 			} catch (AddressException e) {
@@ -469,8 +470,10 @@ public class ClientMetadata {
 	@Deprecated
 	public void setContacts(final List<InternetAddress> contacts) {
 
-		if (contacts == null)
+		if (contacts == null) {
 			this.contacts = null;
+			return;
+		}
 		
 		List<String> addresses = new LinkedList<>();
 		for (InternetAddress a: contacts) {

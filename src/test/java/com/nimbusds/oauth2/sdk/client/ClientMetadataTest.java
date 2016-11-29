@@ -855,4 +855,25 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(invalidEmail.get(0), clientMetadata.getContacts().get(0).toString());
 		assertEquals(invalidEmail.size(), clientMetadata.getContacts().size());
 	}
+	
+	
+	public void testSetContactsNull_deprecated() {
+		
+		ClientMetadata clientMetadata = new ClientMetadata();
+		clientMetadata.setContacts(null);
+		assertNull(clientMetadata.getContacts());
+		assertNull(clientMetadata.getEmailContacts());
+	}
+	
+	
+	public void testGetContactsNullItem_deprecated() {
+		
+		ClientMetadata clientMetadata = new ClientMetadata();
+		clientMetadata.setEmailContacts(Arrays.asList("alice@wonderland.net", "bob@wonderland.net", null));
+		
+		List<InternetAddress> emails = clientMetadata.getContacts();
+		assertEquals("alice@wonderland.net", emails.get(0).getAddress());
+		assertEquals("bob@wonderland.net", emails.get(1).getAddress());
+		assertEquals(2, emails.size());
+	}
 }
