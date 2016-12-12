@@ -128,12 +128,12 @@ public final class ClientSecretPost extends PlainClientSecret {
 		String clientIDString = params.get("client_id");
 		
 		if (clientIDString == null)
-			throw new ParseException("Missing \"client_id\" parameter");
+			throw new ParseException("Malformed client secret post authentication: Missing \"client_id\" parameter");
 		
 		String secretValue = params.get("client_secret");
 		
 		if (secretValue == null)
-			throw new ParseException("Missing \"client_secret\" parameter");
+			throw new ParseException("Malformed client secret post authentication: Missing \"client_secret\" parameter");
 		
 		return new ClientSecretPost(new ClientID(clientIDString), new Secret(secretValue));
 	}

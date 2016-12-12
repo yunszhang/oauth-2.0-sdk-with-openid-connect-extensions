@@ -18,6 +18,7 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
+import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.TestCase;
@@ -62,5 +63,31 @@ public class ClientSecretPostTest extends TestCase {
 
 		assertEquals(id, csp.getClientID().toString());
 		assertEquals(pw, csp.getClientSecret().getValue());
+	}
+	
+	
+	public void testParse_missingClientID() {
+		
+		Map<String,String> params = new HashMap<>();
+		params.put("client_secret", "secret");
+		try {
+			ClientSecretPost.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Malformed client secret post authentication: Missing \"client_id\" parameter", e.getMessage());
+		}
+	}
+	
+	
+	public void testParse_missingClientSecret() {
+		
+		Map<String,String> params = new HashMap<>();
+		params.put("client_id", "alice");
+		try {
+			ClientSecretPost.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Malformed client secret post authentication: Missing \"client_secret\" parameter", e.getMessage());
+		}
 	}
 }
