@@ -166,7 +166,7 @@ public final class ClientSecretJWT extends JWTAuthentication {
 		if (clientID != null) {
 
 			if (! clientID.equals(clientSecretJWT.getClientID()))
-				throw new ParseException("The client identifier doesn't match the client assertion subject / issuer");
+				throw new ParseException("Invalid client secret JWT authentication: The client identifier doesn't match the client assertion subject / issuer");
 		}
 
 		return clientSecretJWT;

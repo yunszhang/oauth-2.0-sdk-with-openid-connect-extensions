@@ -30,6 +30,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.util.DateUtils;
 import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.JWTID;
@@ -139,5 +140,30 @@ public class ClientSecretJWTTest extends TestCase {
 		assertNotNull(clientSecretJWT.getJWTAuthenticationClaimsSet().getJWTID());
 		assertNull(clientSecretJWT.getJWTAuthenticationClaimsSet().getIssueTime());
 		assertNull(clientSecretJWT.getJWTAuthenticationClaimsSet().getNotBeforeTime());
+	}
+	
+	
+	public void testParse_clientIDMismatch()
+		throws Exception {
+		
+		ClientID clientID = new ClientID("123");
+		URI tokenEndpoint = new URI("https://c2id.com/token");
+		Secret secret = new Secret(256 / 8); // generate 256 bit secret
+		
+		ClientSecretJWT clientSecretJWT = new ClientSecretJWT(clientID, tokenEndpoint, JWSAlgorithm.HS256, secret);
+		
+		Map<String,String> params = clientSecretJWT.toParameters();
+		
+		assertNull(params.get("client_id"));
+		
+		params.put("client_id", "456"); // different client_id
+		
+		try {
+			ClientSecretJWT.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid client secret JWT authentication: The client identifier doesn't match the client assertion subject / issuer", e.getMessage());
+		}
+			
 	}
 }
