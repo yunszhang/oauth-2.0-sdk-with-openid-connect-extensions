@@ -20,12 +20,10 @@ package com.nimbusds.oauth2.sdk.auth;
 
 import java.nio.charset.Charset;
 
-import junit.framework.TestCase;
-
 import com.nimbusds.jose.util.Base64;
-
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import junit.framework.TestCase;
 
 
 /**
@@ -125,5 +123,32 @@ public class ClientSecretBasicTest extends TestCase {
 
 		// Must not match legacy example
 		assertNotSame("QWxhZGRpbjpvcGVuIHNlc2FtZQ==", cb.toHTTPAuthorizationHeader());
+	}
+	
+	
+	public void testParse_missingCredentialsDelimiter() {
+		
+		String id = "alice";
+		String pw = "secret";
+		String concat = id + "" + pw; // ':' delimiter
+		String b64 = Base64.encode(concat).toString();
+		
+		try {
+			ClientSecretBasic.parse("Basic " + b64);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Malformed client secret basic authentication: Missing credentials delimiter \":\"", e.getMessage());
+		}
+	}
+	
+	
+	public void testParse_tooManyAuthzHeaderTokens() {
+		
+		try {
+			ClientSecretBasic.parse("Basic abc def");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Malformed client secret basic authentication: Unexpected number of HTTP Authorization header value parts: 3", e.getMessage());
+		}
 	}
 }
