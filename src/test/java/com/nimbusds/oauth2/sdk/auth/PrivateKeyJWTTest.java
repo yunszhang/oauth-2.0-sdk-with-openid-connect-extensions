@@ -26,8 +26,10 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 
+import com.nimbusds.oauth2.sdk.ParseException;
 import junit.framework.TestCase;
 
 import com.nimbusds.jose.JWSAlgorithm;
@@ -199,5 +201,34 @@ public class PrivateKeyJWTTest extends TestCase {
 		assertNotNull(privateKeyJWT.getJWTAuthenticationClaimsSet().getJWTID());
 		assertNull(privateKeyJWT.getJWTAuthenticationClaimsSet().getIssueTime());
 		assertNull(privateKeyJWT.getJWTAuthenticationClaimsSet().getNotBeforeTime());
+	}
+	
+	
+	public void testParse_clientIDMismatch()
+		throws Exception {
+		
+		ClientID clientID = new ClientID("123");
+		URI tokenEndpoint = new URI("https://c2id.com/token");
+		
+		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+		KeyPair pair = keyGen.generateKeyPair();
+		RSAPrivateKey priv = (RSAPrivateKey)pair.getPrivate();
+		RSAPublicKey pub = (RSAPublicKey)pair.getPublic();
+		
+		PrivateKeyJWT privateKeyJWT = new PrivateKeyJWT(clientID, tokenEndpoint, JWSAlgorithm.RS256, priv, null, null);
+		
+		Map<String,String> params = privateKeyJWT.toParameters();
+		
+		assertNull(params.get("client_id"));
+		
+		params.put("client_id", "456"); // different client_id
+		
+		try {
+			PrivateKeyJWT.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid private key JWT authentication: The client identifier doesn't match the client assertion subject / issuer", e.getMessage());
+		}
+		
 	}
 }

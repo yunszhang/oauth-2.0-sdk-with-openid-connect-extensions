@@ -299,7 +299,7 @@ public final class PrivateKeyJWT extends JWTAuthentication {
 		if (clientID != null) {
 
 			if (! clientID.equals(privateKeyJWT.getClientID()))
-				throw new ParseException("The client identifier doesn't match the client assertion subject / issuer");
+				throw new ParseException("Invalid private key JWT authentication: The client identifier doesn't match the client assertion subject / issuer");
 		}
 
 		return privateKeyJWT;
