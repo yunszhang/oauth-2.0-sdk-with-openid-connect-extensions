@@ -363,6 +363,75 @@ public class IDTokenValidatorTest extends TestCase {
 	}
 
 
+	public void testVerify_secretTooShort()
+		throws Exception {
+
+		Secret clientSecret = new Secret(ByteUtils.byteLength(256));
+
+		Issuer iss = new Issuer("https://c2id.com");
+		ClientID clientID = new ClientID("123");
+		Date now = new Date();
+
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+				.issuer(iss.getValue())
+				.subject("alice")
+				.audience(clientID.getValue())
+				.expirationTime(new Date(now.getTime() + 10*60*1000L))
+				.issueTime(now)
+				.build();
+
+		SignedJWT idToken = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claimsSet);
+		idToken.sign(new MACSigner(clientSecret.getValueBytes()));
+
+		// Too short secret
+		IDTokenValidator idTokenValidator = new IDTokenValidator(iss, clientID, JWSAlgorithm.HS256, new Secret(16));
+
+		try {
+			idTokenValidator.validate(idToken, null);
+			fail();
+		} catch (KeyLengthException e) {
+			assertEquals("The secret length must be at least 256 bits", e.getMessage());
+		}
+	}
+	
+	
+	public void testVerifyRS256WhenHmacIsExpected()
+		throws Exception {
+		
+		Secret clientSecret = new Secret(ByteUtils.byteLength(256));
+		
+		Issuer iss = new Issuer("https://c2id.com");
+		ClientID clientID = new ClientID("123");
+		Date now = new Date();
+		
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+			.issuer(iss.getValue())
+			.subject("alice")
+			.audience(clientID.getValue())
+			.expirationTime(new Date(now.getTime() + 10*60*1000L))
+			.issueTime(now)
+			.claim("nonce", "xyz")
+			.build();
+		
+		SignedJWT idToken = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claimsSet);
+		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
+		gen.initialize(1024);
+		RSAPrivateKey rsaPrivateKey = (RSAPrivateKey)gen.generateKeyPair().getPrivate();
+		idToken.sign(new RSASSASigner(rsaPrivateKey));
+		
+		IDTokenValidator idTokenValidator = new IDTokenValidator(iss, clientID, JWSAlgorithm.HS256, clientSecret);
+		assertNotNull(idTokenValidator.getJWSKeySelector());
+		assertNull(idTokenValidator.getJWEKeySelector());
+		
+		try {
+			idTokenValidator.validate(idToken, new Nonce("xyz"));
+			fail();
+		} catch (BadJOSEException e) {
+			assertEquals("Signed JWT rejected: No matching key(s) found", e.getMessage());
+		}
+	}
+
+
 	public void testVerifyNested()
 		throws Exception {
 
