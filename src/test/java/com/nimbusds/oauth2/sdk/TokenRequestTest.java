@@ -27,6 +27,7 @@ import java.util.Map;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.assertions.jwt.JWTAssertionDetails;
@@ -1291,6 +1292,30 @@ public class TokenRequestTest extends TestCase {
 		assertEquals("http://xxxxxx/PartyOData", request.getCustomParameter("resource"));
 		System.out.println(request.getCustomParameters());
 		assertEquals(1, request.getCustomParameters().size());
+	}
+	
+	
+	public void testCodeGrantWithBasicSecret_parseMalformedBasicAuth_missingDelimiter()
+		throws Exception {
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://connect2id.com/token/"));
+		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		
+		httpRequest.setAuthorization("Basic " + Base64.encode("alice"));
+		
+		String postBody =
+			"grant_type=authorization_code" +
+				"&code=SplxlOBeZQQYbYS6WxSbIA" +
+				"&redirect_uri=https%3A%2F%2Fclient.example.com%2Fcb";
+		
+		httpRequest.setQuery(postBody);
+		
+		try {
+			TokenRequest.parse(httpRequest);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Malformed client secret basic authentication: Missing credentials delimiter \":\"", e.getMessage());
+		}
 	}
 }
 
