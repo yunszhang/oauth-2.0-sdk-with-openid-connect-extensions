@@ -361,6 +361,43 @@ public class IDTokenValidatorTest extends TestCase {
 			assertEquals("Signed JWT rejected: Invalid signature", e.getMessage());
 		}
 	}
+	
+	
+	public void testVerifyRS256WhenHmacIsExpected()
+		throws Exception {
+		
+		Secret clientSecret = new Secret(ByteUtils.byteLength(256));
+		
+		Issuer iss = new Issuer("https://c2id.com");
+		ClientID clientID = new ClientID("123");
+		Date now = new Date();
+		
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+			.issuer(iss.getValue())
+			.subject("alice")
+			.audience(clientID.getValue())
+			.expirationTime(new Date(now.getTime() + 10*60*1000L))
+			.issueTime(now)
+			.claim("nonce", "xyz")
+			.build();
+		
+		SignedJWT idToken = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claimsSet);
+		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
+		gen.initialize(1024);
+		RSAPrivateKey rsaPrivateKey = (RSAPrivateKey)gen.generateKeyPair().getPrivate();
+		idToken.sign(new RSASSASigner(rsaPrivateKey));
+		
+		IDTokenValidator idTokenValidator = new IDTokenValidator(iss, clientID, JWSAlgorithm.HS256, clientSecret);
+		assertNotNull(idTokenValidator.getJWSKeySelector());
+		assertNull(idTokenValidator.getJWEKeySelector());
+		
+		try {
+			idTokenValidator.validate(idToken, new Nonce("xyz"));
+			fail();
+		} catch (BadJOSEException e) {
+			assertEquals("Signed JWT rejected: No matching key(s) found", e.getMessage());
+		}
+	}
 
 
 	public void testVerifyNested()
