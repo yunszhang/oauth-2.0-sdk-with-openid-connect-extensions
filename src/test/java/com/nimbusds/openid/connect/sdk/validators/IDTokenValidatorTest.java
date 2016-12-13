@@ -332,6 +332,39 @@ public class IDTokenValidatorTest extends TestCase {
 	}
 
 
+	public void testVerifyHmac_withKeyID()
+		throws Exception {
+
+		Secret clientSecret = new Secret(ByteUtils.byteLength(256));
+
+		Issuer iss = new Issuer("https://c2id.com");
+		ClientID clientID = new ClientID("123");
+		Date now = new Date();
+
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+				.issuer(iss.getValue())
+				.subject("alice")
+				.audience(clientID.getValue())
+				.expirationTime(new Date(now.getTime() + 10*60*1000L))
+				.issueTime(now)
+				.build();
+
+		SignedJWT idToken = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.HS256).keyID("key456").build(), claimsSet);
+		idToken.sign(new MACSigner(clientSecret.getValueBytes()));
+
+		IDTokenValidator idTokenValidator = new IDTokenValidator(iss, clientID, JWSAlgorithm.HS256, clientSecret);
+		assertNotNull(idTokenValidator.getJWSKeySelector());
+		assertNull(idTokenValidator.getJWEKeySelector());
+
+		try {
+			idTokenValidator.validate(idToken, null);
+			fail();
+		} catch (BadJOSEException e) {
+			assertEquals("Signed JWT rejected: No matching key(s) found", e.getMessage());
+		}
+	}
+
+
 	public void testVerifyBadHmac()
 		throws Exception {
 
