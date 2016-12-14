@@ -33,9 +33,7 @@ import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.crypto.RSASSASigner;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.KeyUse;
-import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.*;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jose.proc.BadJWEException;
 import com.nimbusds.jose.proc.BadJWSException;
@@ -362,6 +360,43 @@ public class IDTokenValidatorTest extends TestCase {
 		} catch (BadJOSEException e) {
 			assertEquals("Signed JWT rejected: No matching key(s) found", e.getMessage());
 		}
+	}
+
+
+	public void testVerifyHmac_withKeyID_workAround()
+		throws Exception {
+
+		Secret clientSecret = new Secret(ByteUtils.byteLength(256));
+
+		Issuer iss = new Issuer("https://c2id.com");
+		ClientID clientID = new ClientID("123");
+		Date now = new Date();
+
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+				.issuer(iss.getValue())
+				.subject("alice")
+				.audience(clientID.getValue())
+				.expirationTime(new Date(now.getTime() + 10*60*1000L))
+				.issueTime(now)
+				.build();
+
+		SignedJWT idToken = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.HS256).keyID("key456").build(), claimsSet);
+		idToken.sign(new MACSigner(clientSecret.getValueBytes()));
+
+		// Convert client_secret to JSON Web Key (JWK)
+		JWK jwk = new OctetSequenceKey.Builder(clientSecret.getValueBytes()).keyID("key456").build();
+		JWKSet jwkSet = new JWKSet(jwk);
+		IDTokenValidator idTokenValidator = new IDTokenValidator(iss, clientID, JWSAlgorithm.HS256, jwkSet);
+		assertNotNull(idTokenValidator.getJWSKeySelector());
+		assertNull(idTokenValidator.getJWEKeySelector());
+		
+		IDTokenClaimsSet idTokenClaimsSet = idTokenValidator.validate(idToken, null);
+		assertEquals(iss, idTokenClaimsSet.getIssuer());
+		assertEquals(new Subject("alice"), idTokenClaimsSet.getSubject());
+		assertTrue(idTokenClaimsSet.getAudience().contains(new Audience("123")));
+		assertNotNull(idTokenClaimsSet.getExpirationTime());
+		assertNotNull(idTokenClaimsSet.getIssueTime());
+		assertNull(idTokenClaimsSet.getNonce());
 	}
 
 
