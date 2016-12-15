@@ -141,7 +141,7 @@ public final class ClientSecretBasic extends PlainClientSecret {
 		String[] parts = header.split("\\s");
 		
 		if (parts.length != 2)
-			throw new ParseException("Malformed client secret basic authentication: Unexpected number of HTTP Authorization header value parts: " + parts.length);
+			throw new ParseException("Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Unexpected number of HTTP Authorization header value parts: " + parts.length);
 		
 		if (! parts[0].equalsIgnoreCase("Basic"))
 			throw new ParseException("HTTP authentication must be \"Basic\"");
@@ -151,7 +151,7 @@ public final class ClientSecretBasic extends PlainClientSecret {
 		String[] credentials = credentialsString.split(":", 2);
 		
 		if (credentials.length != 2)
-			throw new ParseException("Malformed client secret basic authentication: Missing credentials delimiter \":\"");
+			throw new ParseException("Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Missing credentials delimiter \":\"");
 
 		try {
 			String decodedClientID = URLDecoder.decode(credentials[0], UTF8_CHARSET.name());

@@ -137,7 +137,7 @@ public class ClientSecretBasicTest extends TestCase {
 			ClientSecretBasic.parse("Basic " + b64);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Malformed client secret basic authentication: Missing credentials delimiter \":\"", e.getMessage());
+			assertEquals("Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Missing credentials delimiter \":\"", e.getMessage());
 		}
 	}
 	
@@ -148,7 +148,7 @@ public class ClientSecretBasicTest extends TestCase {
 			ClientSecretBasic.parse("Basic abc def");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Malformed client secret basic authentication: Unexpected number of HTTP Authorization header value parts: 3", e.getMessage());
+			assertEquals("Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Unexpected number of HTTP Authorization header value parts: 3", e.getMessage());
 		}
 	}
 }
