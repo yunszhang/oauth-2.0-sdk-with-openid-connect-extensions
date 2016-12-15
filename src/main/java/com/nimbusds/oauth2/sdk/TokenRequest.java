@@ -413,7 +413,13 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 		httpRequest.ensureContentType(CommonContentTypes.APPLICATION_URLENCODED);
 
 		// Parse client authentication, if any
-		ClientAuthentication clientAuth = ClientAuthentication.parse(httpRequest);
+		ClientAuthentication clientAuth;
+		
+		try {
+			clientAuth = ClientAuthentication.parse(httpRequest);
+		} catch (ParseException e) {
+			throw new ParseException(e.getMessage(), OAuth2Error.INVALID_REQUEST.appendDescription(": " + e.getMessage()));
+		}
 
 		// No fragment! May use query component!
 		Map<String,String> params = httpRequest.getQueryParameters();

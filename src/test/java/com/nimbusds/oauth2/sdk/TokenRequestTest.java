@@ -1315,6 +1315,9 @@ public class TokenRequestTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Missing credentials delimiter \":\"", e.getMessage());
+			
+			assertEquals(OAuth2Error.INVALID_REQUEST.toString(), e.getErrorObject().getCode());
+			assertEquals("Invalid request: Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Missing credentials delimiter \":\"", e.getErrorObject().getDescription());
 		}
 	}
 }
