@@ -22,6 +22,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import com.nimbusds.jose.util.Base64URL;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Identifier;
 
 
@@ -43,7 +44,7 @@ public class CodeChallenge extends Identifier {
 	 * @param value The code challenge value. Must not be {@code null} or
 	 *              empty string.
 	 */
-	public CodeChallenge(final String value) {
+	private CodeChallenge(final String value) {
 		super(value);
 	}
 
@@ -79,5 +80,23 @@ public class CodeChallenge extends Identifier {
 		}
 
 		throw new IllegalArgumentException("Unsupported code challenge method: " + method);
+	}
+	
+	
+	/**
+	 * Parses a code challenge from the specified string.
+	 *
+	 * @param value The code challenge value.
+	 *
+	 * @return The code challenge.
+	 */
+	public static CodeChallenge parse(final String value)
+		throws ParseException {
+		
+		try {
+			return new CodeChallenge(value);
+		} catch (IllegalArgumentException e) {
+			throw new ParseException("Invalid code challenge: " + e.getMessage(), e);
+		}
 	}
 }

@@ -18,6 +18,9 @@
 package com.nimbusds.oauth2.sdk.pkce;
 
 
+import java.lang.reflect.Constructor;
+
+import com.nimbusds.oauth2.sdk.ParseException;
 import junit.framework.TestCase;
 
 
@@ -27,13 +30,16 @@ import junit.framework.TestCase;
 public class CodeChallengeTest extends TestCase {
 	
 
-	public void testComputePlain() {
+	public void testComputePlain()
+		throws ParseException {
 
 		CodeVerifier verifier = new CodeVerifier();
 
 		CodeChallenge challenge = CodeChallenge.compute(CodeChallengeMethod.PLAIN, verifier);
 
 		assertEquals(verifier.getValue(), challenge.getValue());
+		
+		assertEquals(challenge.getValue(), CodeChallenge.parse(challenge.getValue()).getValue());
 	}
 
 
@@ -56,5 +62,35 @@ public class CodeChallengeTest extends TestCase {
 		} catch (IllegalArgumentException e) {
 			assertEquals("Unsupported code challenge method: S512", e.getMessage());
 		}
+	}
+	
+	
+	public void testParseNull() {
+		
+		try {
+			CodeChallenge.parse(null);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid code challenge: The value must not be null or empty string", e.getMessage());
+		}
+	}
+	
+	
+	public void testParseEmpty() {
+		
+		try {
+			CodeChallenge.parse("");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid code challenge: The value must not be null or empty string", e.getMessage());
+		}
+	}
+	
+	
+	public void testEnsurePrivateConstructor() {
+		
+		Constructor[] constructors = CodeChallenge.class.getDeclaredConstructors();
+		assertFalse(constructors[0].isAccessible());
+		assertEquals(1, constructors.length);
 	}
 }

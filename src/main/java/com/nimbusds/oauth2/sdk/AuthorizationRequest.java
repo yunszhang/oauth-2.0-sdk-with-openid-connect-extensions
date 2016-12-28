@@ -981,7 +981,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		v = params.get("code_challenge");
 
 		if (StringUtils.isNotBlank(v))
-			codeChallenge = new CodeChallenge(v);
+			codeChallenge = CodeChallenge.parse(v);
 
 		if (codeChallenge != null) {
 
