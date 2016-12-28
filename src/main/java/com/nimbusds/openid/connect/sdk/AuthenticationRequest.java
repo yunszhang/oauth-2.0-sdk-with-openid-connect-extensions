@@ -32,6 +32,7 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
+import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
@@ -594,8 +595,8 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			this.rm = rm;
 			return this;
 		}
-
-
+		
+		
 		/**
 		 * Sets the code challenge for Proof Key for Code Exchange
 		 * (PKCE) by public OAuth clients.
@@ -607,10 +608,41 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		 *
 		 * @return This builder.
 		 */
+		@Deprecated
 		public Builder codeChallenge(final CodeChallenge codeChallenge, final CodeChallengeMethod codeChallengeMethod) {
-
+			
 			this.codeChallenge = codeChallenge;
 			this.codeChallengeMethod = codeChallengeMethod;
+			return this;
+		}
+		
+		
+		/**
+		 * Sets the code challenge for Proof Key for Code Exchange
+		 * (PKCE) by public OAuth clients.
+		 *
+		 * @param codeVerifier        The code verifier to use to
+		 *                            compute the code challenge,
+		 *                            {@code null} if PKCE is not
+		 *                            specified.
+		 * @param codeChallengeMethod The code challenge method,
+		 *                            {@code null} if not specified.
+		 *                            Defaults to
+		 *                            {@link CodeChallengeMethod#PLAIN}
+		 *                            if a code verifier is specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder codeChallenge(final CodeVerifier codeVerifier, final CodeChallengeMethod codeChallengeMethod) {
+			
+			if (codeVerifier != null) {
+				CodeChallengeMethod method = codeChallengeMethod != null ? codeChallengeMethod : CodeChallengeMethod.getDefault();
+				this.codeChallenge = CodeChallenge.compute(method, codeVerifier);
+				this.codeChallengeMethod = method;
+			} else {
+				this.codeChallenge = null;
+				this.codeChallengeMethod = null;
+			}
 			return this;
 		}
 

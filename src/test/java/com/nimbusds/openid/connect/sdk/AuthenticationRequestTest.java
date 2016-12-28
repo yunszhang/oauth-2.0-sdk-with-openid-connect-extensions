@@ -1068,8 +1068,7 @@ public class AuthenticationRequestTest extends TestCase {
 		claims.addUserInfoClaim("family_name");
 
 		CodeVerifier codeVerifier = new CodeVerifier();
-		CodeChallenge codeChallenge = CodeChallenge.compute(CodeChallengeMethod.S256, codeVerifier);
-
+		
 		AuthenticationRequest request = new AuthenticationRequest.Builder(
 			new ResponseType("code", "id_token"),
 			new Scope("openid", "email"),
@@ -1087,7 +1086,7 @@ public class AuthenticationRequestTest extends TestCase {
 			.acrValues(acrValues)
 			.claims(claims)
 			.responseMode(ResponseMode.FORM_POST)
-			.codeChallenge(codeChallenge, CodeChallengeMethod.S256)
+			.codeChallenge(codeVerifier, CodeChallengeMethod.S256)
 			.customParameter("x", "100")
 			.customParameter("y", "200")
 			.customParameter("z", "300")
@@ -1111,7 +1110,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals("alice@wonderland.net", request.getLoginHint());
 		assertEquals(acrValues, request.getACRValues());
 		assertEquals(claims, request.getClaims());
-		assertEquals(codeChallenge, request.getCodeChallenge());
+		assertEquals(CodeChallenge.compute(CodeChallengeMethod.S256, codeVerifier), request.getCodeChallenge());
 		assertEquals(CodeChallengeMethod.S256, request.getCodeChallengeMethod());
 		assertEquals("100", request.getCustomParameter("x"));
 		assertEquals("200", request.getCustomParameter("y"));
@@ -1556,7 +1555,6 @@ public class AuthenticationRequestTest extends TestCase {
 		System.out.println(jwtString);
 		
 		CodeVerifier pkceVerifier = new CodeVerifier();
-		CodeChallenge pkceChallenge = CodeChallenge.compute(CodeChallengeMethod.S256, pkceVerifier);
 		
 		URI authRequest = new AuthenticationRequest.Builder(
 			new ResponseType("code"),
@@ -1564,7 +1562,7 @@ public class AuthenticationRequestTest extends TestCase {
 			new ClientID("123"),
 			URI.create("myapp://openid-connect-callback"))
 			.state(new State())
-			.codeChallenge(pkceChallenge, CodeChallengeMethod.S256)
+			.codeChallenge(pkceVerifier, CodeChallengeMethod.S256)
 			.requestObject(jwt)
 			.endpointURI(URI.create("https://openid.c2id.com"))
 			.build()
@@ -1582,12 +1580,138 @@ public class AuthenticationRequestTest extends TestCase {
 			new ClientID("123"),
 			URI.create("myapp://openid-connect-callback"))
 			.state(new State())
-			.codeChallenge(pkceChallenge, CodeChallengeMethod.S256)
+			.codeChallenge(pkceVerifier, CodeChallengeMethod.S256)
 			.requestURI(requestURI)
 			.endpointURI(URI.create("https://openid.c2id.com"))
 			.build()
 			.toURI();
 		
 		System.out.println(authRequest);
+	}
+	
+	
+	public void testBuilder_PKCE_null() {
+		
+		AuthenticationRequest request = new AuthenticationRequest.Builder(
+			new ResponseType("code"),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.codeChallenge((CodeVerifier) null, null)
+			.build();
+		
+		assertTrue(new ResponseType("code").equals(request.getResponseType()));
+		assertTrue(new ClientID("123").equals(request.getClientID()));
+		assertNull(request.getEndpointURI());
+		assertEquals(URI.create("https://example.com/cb"), request.getRedirectionURI());
+		assertNull(request.getResponseMode());
+		assertEquals(ResponseMode.QUERY, request.impliedResponseMode());
+		assertEquals(new Scope("openid"), request.getScope());
+		assertNull(request.getState());
+		assertNull(request.getCodeChallenge());
+		assertNull(request.getCodeChallengeMethod());
+		assertTrue(request.getCustomParameters().isEmpty());
+	}
+	
+	
+	public void testBuilder_PKCE_null_deprecated() {
+		
+		AuthenticationRequest request = new AuthenticationRequest.Builder(
+			new ResponseType("code"),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.codeChallenge((CodeChallenge) null, null)
+			.build();
+		
+		assertTrue(new ResponseType("code").equals(request.getResponseType()));
+		assertTrue(new ClientID("123").equals(request.getClientID()));
+		assertNull(request.getEndpointURI());
+		assertEquals(URI.create("https://example.com/cb"), request.getRedirectionURI());
+		assertNull(request.getResponseMode());
+		assertEquals(ResponseMode.QUERY, request.impliedResponseMode());
+		assertEquals(new Scope("openid"), request.getScope());
+		assertNull(request.getState());
+		assertNull(request.getCodeChallenge());
+		assertNull(request.getCodeChallengeMethod());
+		assertTrue(request.getCustomParameters().isEmpty());
+	}
+	
+	
+	public void testBuilder_PKCE_plain_default() {
+		
+		CodeVerifier pkceVerifier = new CodeVerifier();
+		
+		AuthenticationRequest request = new AuthenticationRequest.Builder(
+			new ResponseType("code"),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.codeChallenge(pkceVerifier, null)
+			.build();
+		
+		assertTrue(new ResponseType("code").equals(request.getResponseType()));
+		assertTrue(new ClientID("123").equals(request.getClientID()));
+		assertNull(request.getEndpointURI());
+		assertEquals(URI.create("https://example.com/cb"), request.getRedirectionURI());
+		assertNull(request.getResponseMode());
+		assertEquals(ResponseMode.QUERY, request.impliedResponseMode());
+		assertEquals(new Scope("openid"), request.getScope());
+		assertNull(request.getState());
+		assertEquals(CodeChallenge.compute(CodeChallengeMethod.PLAIN, pkceVerifier), request.getCodeChallenge());
+		assertEquals(CodeChallengeMethod.PLAIN, request.getCodeChallengeMethod());
+		assertTrue(request.getCustomParameters().isEmpty());
+	}
+	
+	
+	public void testBuilder_PKCE_plain() {
+		
+		CodeVerifier pkceVerifier = new CodeVerifier();
+		
+		AuthenticationRequest request = new AuthenticationRequest.Builder(
+			new ResponseType("code"),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.codeChallenge(pkceVerifier, CodeChallengeMethod.PLAIN)
+			.build();
+		
+		assertTrue(new ResponseType("code").equals(request.getResponseType()));
+		assertTrue(new ClientID("123").equals(request.getClientID()));
+		assertNull(request.getEndpointURI());
+		assertEquals(URI.create("https://example.com/cb"), request.getRedirectionURI());
+		assertNull(request.getResponseMode());
+		assertEquals(ResponseMode.QUERY, request.impliedResponseMode());
+		assertEquals(new Scope("openid"), request.getScope());
+		assertNull(request.getState());
+		assertEquals(CodeChallenge.compute(CodeChallengeMethod.PLAIN, pkceVerifier), request.getCodeChallenge());
+		assertEquals(CodeChallengeMethod.PLAIN, request.getCodeChallengeMethod());
+		assertTrue(request.getCustomParameters().isEmpty());
+	}
+	
+	
+	public void testBuilder_PKCE_S256() {
+		
+		CodeVerifier pkceVerifier = new CodeVerifier();
+		
+		AuthenticationRequest request = new AuthenticationRequest.Builder(
+			new ResponseType("code"),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.codeChallenge(pkceVerifier, CodeChallengeMethod.S256)
+			.build();
+		
+		assertTrue(new ResponseType("code").equals(request.getResponseType()));
+		assertTrue(new ClientID("123").equals(request.getClientID()));
+		assertNull(request.getEndpointURI());
+		assertEquals(URI.create("https://example.com/cb"), request.getRedirectionURI());
+		assertNull(request.getResponseMode());
+		assertEquals(ResponseMode.QUERY, request.impliedResponseMode());
+		assertEquals(new Scope("openid"), request.getScope());
+		assertNull(request.getState());
+		assertEquals(CodeChallenge.compute(CodeChallengeMethod.S256, pkceVerifier), request.getCodeChallenge());
+		assertEquals(CodeChallengeMethod.S256, request.getCodeChallengeMethod());
+		assertTrue(request.getCustomParameters().isEmpty());
 	}
 }
