@@ -25,12 +25,11 @@ import java.util.Date;
 
 import com.nimbusds.jose.util.Base64URL;
 import net.jcip.annotations.Immutable;
-import org.apache.commons.lang3.ArrayUtils;
 
 
 /**
- * Secret or password. The secret should be {@link #erase erased} when no 
- * longer in use.
+ * Secret. The secret value should be {@link #erase erased} when no longer in
+ * use.
  */
 @Immutable
 public class Secret {
@@ -87,7 +86,7 @@ public class Secret {
 	
 	
 	/**
-	 * Creates a new secret with a randomly generated value of the 
+	 * Generates a new secret with a cryptographic random value of the
 	 * specified byte length, Base64URL-encoded.
 	 *
 	 * @param byteLength The byte length of the secret value to generate. 
@@ -100,7 +99,7 @@ public class Secret {
 
 
 	/**
-	 * Creates a new secret with a randomly generated value of the 
+	 * Generates a new secret with a cryptographic random value of the
 	 * specified byte length, Base64URL-encoded, and the specified 
 	 * expiration date.
 	 *
@@ -125,7 +124,7 @@ public class Secret {
 	
 	
 	/**
-	 * Creates a new secret with a randomly generated 256-bit (32-byte) 
+	 * Generates a new secret with a cryptographic 256-bit (32-byte) random
 	 * value, Base64URL-encoded.
 	 */
 	public Secret() {
