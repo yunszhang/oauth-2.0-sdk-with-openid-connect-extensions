@@ -340,7 +340,28 @@ public class AuthorizationRequestTest extends TestCase {
 		throws Exception {
 
 		AuthorizationRequest request = new AuthorizationRequest.Builder(new ResponseType("token"), new ClientID("123"))
-			.codeChallenge(null, null)
+			.codeChallenge((CodeVerifier) null, null)
+			.build();
+
+		assertTrue(new ResponseType("token").equals(request.getResponseType()));
+		assertTrue(new ClientID("123").equals(request.getClientID()));
+		assertNull(request.getEndpointURI());
+		assertNull(request.getRedirectionURI());
+		assertNull(request.getResponseMode());
+		assertEquals(ResponseMode.FRAGMENT, request.impliedResponseMode());
+		assertNull(request.getScope());
+		assertNull(request.getState());
+		assertNull(request.getCodeChallenge());
+		assertNull(request.getCodeChallengeMethod());
+		assertTrue(request.getCustomParameters().isEmpty());
+	}
+
+
+	public void testBuilderMinimalNullCodeChallenge_deprecated()
+		throws Exception {
+
+		AuthorizationRequest request = new AuthorizationRequest.Builder(new ResponseType("token"), new ClientID("123"))
+			.codeChallenge((CodeChallenge) null, null)
 			.build();
 
 		assertTrue(new ResponseType("token").equals(request.getResponseType()));
@@ -358,6 +379,70 @@ public class AuthorizationRequestTest extends TestCase {
 
 
 	public void testBuilderFull()
+		throws Exception {
+
+		CodeVerifier codeVerifier = new CodeVerifier();
+
+		AuthorizationRequest request = new AuthorizationRequest.Builder(new ResponseType("code"), new ClientID("123")).
+			endpointURI(new URI("https://c2id.com/login")).
+			redirectionURI(new URI("https://client.com/cb")).
+			scope(new Scope("openid", "email")).
+			state(new State("123")).
+			responseMode(ResponseMode.FORM_POST).
+			codeChallenge(codeVerifier, CodeChallengeMethod.S256).
+			build();
+
+		assertTrue(new ResponseType("code").equals(request.getResponseType()));
+		assertEquals(ResponseMode.FORM_POST, request.getResponseMode());
+		assertEquals(ResponseMode.FORM_POST, request.impliedResponseMode());
+		assertTrue(new ClientID("123").equals(request.getClientID()));
+		assertEquals("https://c2id.com/login", request.getEndpointURI().toString());
+		assertEquals("https://client.com/cb", request.getRedirectionURI().toString());
+		assertTrue(new Scope("openid", "email").equals(request.getScope()));
+		assertTrue(new State("123").equals(request.getState()));
+		assertEquals(CodeChallenge.compute(CodeChallengeMethod.S256, codeVerifier), request.getCodeChallenge());
+		assertEquals(CodeChallengeMethod.S256, request.getCodeChallengeMethod());
+	}
+
+
+	public void testBuilderFullAlt()
+		throws Exception {
+
+		CodeVerifier codeVerifier = new CodeVerifier();
+
+		AuthorizationRequest request = new AuthorizationRequest.Builder(new ResponseType("code"), new ClientID("123"))
+			.endpointURI(new URI("https://c2id.com/login"))
+			.redirectionURI(new URI("https://client.com/cb"))
+			.scope(new Scope("openid", "email"))
+			.state(new State("123"))
+			.responseMode(ResponseMode.FORM_POST)
+			.codeChallenge(codeVerifier, null)
+			.customParameter("x", "100")
+			.customParameter("y", "200")
+			.customParameter("z", "300")
+			.build();
+
+		assertTrue(new ResponseType("code").equals(request.getResponseType()));
+		assertEquals(ResponseMode.FORM_POST, request.getResponseMode());
+		assertEquals(ResponseMode.FORM_POST, request.impliedResponseMode());
+		assertTrue(new ClientID("123").equals(request.getClientID()));
+		assertEquals("https://c2id.com/login", request.getEndpointURI().toString());
+		assertEquals("https://client.com/cb", request.getRedirectionURI().toString());
+		assertTrue(new Scope("openid", "email").equals(request.getScope()));
+		assertTrue(new State("123").equals(request.getState()));
+		assertEquals(CodeChallenge.compute(CodeChallengeMethod.PLAIN, codeVerifier), request.getCodeChallenge());
+		assertEquals(CodeChallengeMethod.PLAIN, request.getCodeChallengeMethod());
+		assertEquals("100", request.getCustomParameter("x"));
+		assertEquals("200", request.getCustomParameter("y"));
+		assertEquals("300", request.getCustomParameter("z"));
+		assertEquals("100", request.getCustomParameters().get("x"));
+		assertEquals("200", request.getCustomParameters().get("y"));
+		assertEquals("300", request.getCustomParameters().get("z"));
+		assertEquals(3, request.getCustomParameters().size());
+	}
+
+
+	public void testBuilderFull_codeChallengeDeprecated()
 		throws Exception {
 
 		CodeVerifier codeVerifier = new CodeVerifier();
@@ -385,7 +470,7 @@ public class AuthorizationRequestTest extends TestCase {
 	}
 
 
-	public void testBuilderFullAlt()
+	public void testBuilderFullAlt_codeChallengeDeprecated()
 		throws Exception {
 
 		CodeVerifier codeVerifier = new CodeVerifier();
