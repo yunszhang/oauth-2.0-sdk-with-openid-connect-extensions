@@ -613,7 +613,7 @@ version 5.19.2 (2016-12-15)
 
 version 5.20 (2016-12-28)
     * Refactors the AuthorizationRequest and the AuthenticationRequest builder
-      API to prevent incorrect use of PKCE (iss #202).
+      API to prevent incorrect use of the PKCE code challenge (iss #202).
     * Makes the CodeChallenge constructor private, adds static parse method to
       recreate the code challenge from a string value on the server side (iss
       #202).
