@@ -34,7 +34,7 @@ public class CodeVerifier extends Secret {
 
 
 	/**
-	 * The minimal character length of a code verifier.
+	 * The minimum character length of a code verifier.
 	 */
 	public static final int MIN_LENGTH = 43;
 
@@ -68,7 +68,10 @@ public class CodeVerifier extends Secret {
 
 
 	/**
-	 * Creates a new code verifier with the minimum (43 character) length.
+	 * Generates a new code verifier represented by a secure random 256-bit
+	 * number that is Base64URL-encoded (as a 43 character string, which is
+	 * the {@link #MIN_LENGTH minimum character length} of a code
+	 * verifier).
 	 */
 	public CodeVerifier() {
 		super(32);
