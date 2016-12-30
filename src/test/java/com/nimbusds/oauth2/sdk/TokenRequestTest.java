@@ -45,6 +45,7 @@ import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import junit.framework.TestCase;
+import net.minidev.json.JSONAware;
 import org.opensaml.xml.security.credential.BasicCredential;
 import org.opensaml.xml.signature.SignatureConstants;
 
@@ -307,9 +308,37 @@ public class TokenRequestTest extends TestCase {
 		assertEquals("https://client.example.com/cb", httpRequest.getQueryParameters().get("redirect_uri"));
 		assertEquals(3, httpRequest.getQueryParameters().size());
 	}
-
-
+	
+	
 	public void testCodeGrantWithPKCE()
+		throws Exception {
+		
+		AuthorizationCode code = new AuthorizationCode();
+		URI redirectURI = URI.create("app://oauth-callback");
+		CodeVerifier pkceVerifier = new CodeVerifier();
+		
+		TokenRequest tokenRequest = new TokenRequest(
+			URI.create("https://c2id.com/token"),
+			new ClientID("123"),
+			new AuthorizationCodeGrant(code, redirectURI, pkceVerifier));
+		
+		HTTPRequest httpRequest = tokenRequest.toHTTPRequest();
+		
+		assertNull(httpRequest.getAuthorization()); // no client auth here
+		
+		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		
+		Map<String,String> params = httpRequest.getQueryParameters();
+		assertEquals(GrantType.AUTHORIZATION_CODE.getValue(), params.get("grant_type"));
+		assertEquals(code.getValue(), params.get("code"));
+		assertEquals(redirectURI.toString(), params.get("redirect_uri"));
+		assertEquals("123", params.get("client_id"));
+		assertEquals(pkceVerifier.getValue(), params.get("code_verifier"));
+		assertEquals(5, params.size());
+	}
+
+
+	public void testParseCodeGrantWithPKCE()
 		throws Exception {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://connect2id.com/token/"));
