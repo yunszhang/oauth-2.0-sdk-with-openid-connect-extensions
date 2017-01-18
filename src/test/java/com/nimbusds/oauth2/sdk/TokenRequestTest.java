@@ -1349,5 +1349,37 @@ public class TokenRequestTest extends TestCase {
 			assertEquals("Invalid request: Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Missing credentials delimiter \":\"", e.getErrorObject().getDescription());
 		}
 	}
+	
+	
+	// Reject basic + client_secret_jwt auth present in the same token request
+	public void testRejectMultipleClientAuthMethods()
+		throws Exception {
+		
+		ClientID clientID = new ClientID("123");
+		Secret clientSecret = new Secret();
+		
+		URL tokenEndpoint = new URL("https://c2id.com/token");
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, tokenEndpoint);
+		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setAuthorization(new ClientSecretBasic(clientID, clientSecret).toHTTPAuthorizationHeader());
+		
+		AuthorizationCodeGrant grant = new AuthorizationCodeGrant(new AuthorizationCode(), URI.create("https://example.com/cb"));
+		
+		ClientSecretJWT clientSecretJWT = new ClientSecretJWT(clientID, tokenEndpoint.toURI(), JWSAlgorithm.HS256, clientSecret);
+		
+		Map<String,String> bodyParams = new HashMap<>();
+		bodyParams.putAll(grant.toParameters());
+		bodyParams.putAll(clientSecretJWT.toParameters());
+		
+		httpRequest.setQuery(URLUtils.serializeParameters(bodyParams));
+		
+		TokenRequest tokenRequest = TokenRequest.parse(httpRequest);
+		
+		ClientAuthentication clientAuth = tokenRequest.getClientAuthentication();
+		
+		System.out.println(clientAuth.getMethod());
+		
+	}
 }
 
