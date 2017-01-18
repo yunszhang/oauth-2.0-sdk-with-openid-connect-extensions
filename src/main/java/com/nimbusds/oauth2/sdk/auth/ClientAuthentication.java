@@ -20,13 +20,11 @@ package com.nimbusds.oauth2.sdk.auth;
 
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -117,32 +115,30 @@ public abstract class ClientAuthentication {
 	
 		// Check for client secret basic
 		if (httpRequest.getAuthorization() != null && 
-		    httpRequest.getAuthorization().startsWith("Basic"))
-
+		    httpRequest.getAuthorization().startsWith("Basic")) {
+			
 			return ClientSecretBasic.parse(httpRequest);
+		}
 		
 		// The other methods require HTTP POST with URL-encoded params
 		if (httpRequest.getMethod() != HTTPRequest.Method.POST &&
-		    ! httpRequest.getContentType().match(CommonContentTypes.APPLICATION_URLENCODED))
-			return null;
+		    ! httpRequest.getContentType().match(CommonContentTypes.APPLICATION_URLENCODED)) {
+			return null; // no auth
+		}
 		
-		
-		String query = httpRequest.getQuery();
-		
-		if (query == null)
-			return null;
-		
-		Map<String,String> params = URLUtils.parseParameters(query);
+		Map<String,String> params = httpRequest.getQueryParameters();
 		
 		// We have client secret post
-		if (StringUtils.isNotBlank(params.get("client_id")) && StringUtils.isNotBlank(params.get("client_secret")))
+		if (StringUtils.isNotBlank(params.get("client_id")) && StringUtils.isNotBlank(params.get("client_secret"))) {
 			return ClientSecretPost.parse(httpRequest);
+		}
 		
 		// Do we have a signed JWT assertion?
-		if (StringUtils.isNotBlank(params.get("client_assertion")) && StringUtils.isNotBlank(params.get("client_assertion_type")))
+		if (StringUtils.isNotBlank(params.get("client_assertion")) && StringUtils.isNotBlank(params.get("client_assertion_type"))) {
 			return JWTAuthentication.parse(httpRequest);
-		else
-			return null;
+		} else {
+			return null; // no auth
+		}
 	}
 	
 	

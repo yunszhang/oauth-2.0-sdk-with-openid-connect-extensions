@@ -27,12 +27,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
+import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -423,6 +425,14 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 
 		// No fragment! May use query component!
 		Map<String,String> params = httpRequest.getQueryParameters();
+		
+		// Multiple conflicting client auth methods (issue #203)?
+		if (clientAuth instanceof ClientSecretBasic) {
+			if (StringUtils.isNotBlank(params.get("client_assertion")) || StringUtils.isNotBlank(params.get("client_assertion_type"))) {
+				String msg = "Multiple conflicting client authentication methods found: Basic and JWT assertion";
+				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
+			}
+		}
 
 		// Parse grant
 		AuthorizationGrant grant = AuthorizationGrant.parse(params);

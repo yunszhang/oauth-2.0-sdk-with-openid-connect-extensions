@@ -1374,12 +1374,14 @@ public class TokenRequestTest extends TestCase {
 		
 		httpRequest.setQuery(URLUtils.serializeParameters(bodyParams));
 		
-		TokenRequest tokenRequest = TokenRequest.parse(httpRequest);
-		
-		ClientAuthentication clientAuth = tokenRequest.getClientAuthentication();
-		
-		System.out.println(clientAuth.getMethod());
-		
+		try {
+			TokenRequest.parse(httpRequest);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Multiple conflicting client authentication methods found: Basic and JWT assertion", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals("Invalid request: Multiple conflicting client authentication methods found: Basic and JWT assertion", e.getErrorObject().getDescription());
+		}
 	}
 }
 
