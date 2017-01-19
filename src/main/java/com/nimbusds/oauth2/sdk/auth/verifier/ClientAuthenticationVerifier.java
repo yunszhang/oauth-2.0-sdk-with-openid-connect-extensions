@@ -167,7 +167,7 @@ public class ClientAuthenticationVerifier<T> {
 			try {
 				claimsSetVerifier.verify(jwtAuth.getJWTAuthenticationClaimsSet().toJWTClaimsSet());
 			} catch (BadJWTException e) {
-				throw InvalidClientException.BAD_JWT_CLAIMS;
+				throw new InvalidClientException("Bad / expired JWT claims: " + e.getMessage());
 			}
 
 			List<Secret> secretCandidates = clientCredentialsSelector.selectClientSecrets(
@@ -200,7 +200,7 @@ public class ClientAuthenticationVerifier<T> {
 			try {
 				claimsSetVerifier.verify(jwtAuth.getJWTAuthenticationClaimsSet().toJWTClaimsSet());
 			} catch (BadJWTException e) {
-				throw InvalidClientException.BAD_JWT_CLAIMS;
+				throw new InvalidClientException("Bad / expired JWT claims: " + e.getMessage());
 			}
 
 			List<? extends PublicKey> keyCandidates = clientCredentialsSelector.selectPublicKeys(

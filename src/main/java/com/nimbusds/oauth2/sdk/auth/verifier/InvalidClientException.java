@@ -68,12 +68,6 @@ public class InvalidClientException extends GeneralException {
 
 
 	/**
-	 * Bad JWT claims (e.g. expired JWT).
-	 */
-	public static final InvalidClientException BAD_JWT_CLAIMS = new InvalidClientException("Bad / expired JWT claims");
-
-
-	/**
 	 * Bad JWT HMAC.
 	 */
 	public static final InvalidClientException BAD_JWT_HMAC = new InvalidClientException("Bad JWT HMAC");
@@ -113,7 +107,4 @@ public class InvalidClientException extends GeneralException {
 	public ErrorObject getErrorObject() {
 		return OAuth2Error.INVALID_CLIENT;
 	}
-
-
-
 }

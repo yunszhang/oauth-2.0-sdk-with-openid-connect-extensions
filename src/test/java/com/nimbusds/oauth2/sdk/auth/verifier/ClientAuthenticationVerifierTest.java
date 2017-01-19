@@ -293,7 +293,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		try {
 			createVerifier().verify(clientAuthentication, null, null);
 		} catch (InvalidClientException e) {
-			assertEquals(InvalidClientException.BAD_JWT_CLAIMS, e);
+			assertEquals("Bad / expired JWT claims: Invalid JWT audience claim, expected [https://c2id.com/token, https://c2id.com]", e.getMessage());
 		}
 	}
 
@@ -311,7 +311,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		try {
 			createVerifier().verify(clientAuthentication, null, null);
 		} catch (InvalidClientException e) {
-			assertEquals(InvalidClientException.BAD_JWT_CLAIMS, e);
+			assertEquals("Bad / expired JWT claims: Invalid JWT audience claim, expected [https://c2id.com/token, https://c2id.com]", e.getMessage());
 		}
 	}
 
@@ -338,7 +338,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		try {
 			createVerifier().verify(clientAuthentication, null, null);
 		} catch (InvalidClientException e) {
-			assertEquals(InvalidClientException.BAD_JWT_CLAIMS, e);
+			assertEquals("Bad / expired JWT claims: Expired JWT", e.getMessage());
 		}
 	}
 
@@ -365,7 +365,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		try {
 			createVerifier().verify(clientAuthentication, null, null);
 		} catch (InvalidClientException e) {
-			assertEquals(InvalidClientException.BAD_JWT_CLAIMS, e);
+			assertEquals("Bad / expired JWT claims: Expired JWT", e.getMessage());
 		}
 	}
 
