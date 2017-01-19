@@ -618,3 +618,8 @@ version 5.20 (2016-12-28)
       recreate the code challenge from a string value on the server side (iss
       #202).
 
+version 5.21 (2017-01-18)
+    * Updates TokenRequest.parse(HTTP request) to produce an invalid request
+      error if multiple client authentication methods are found in the request
+      (iss #203).
+
