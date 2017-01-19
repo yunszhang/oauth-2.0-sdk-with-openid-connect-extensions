@@ -258,7 +258,8 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-SymbolicName>oauth2-oidc-sdk</Bundle-SymbolicName>
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<Bundle-Version>${project.version}</Bundle-Version>
 						<Export-Package>com.nimbusds.oauth2.*;version=${project.version},com.nimbusds.openid.*;version=${project.version}</Export-Package>
 						<Import-Package>*</Import-Package>
 					</instructions>
