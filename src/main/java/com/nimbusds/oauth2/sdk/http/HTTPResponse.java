@@ -22,17 +22,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
-import net.jcip.annotations.ThreadSafe;
-
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
-
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONArrayUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import net.jcip.annotations.ThreadSafe;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -124,6 +121,12 @@ public class HTTPResponse extends HTTPMessage {
 	
 	
 	/**
+	 * The HTTP status message, {@code null} if not specified.
+	 */
+	private String statusMessage;
+	
+	
+	/**
 	 * The raw response content.
 	 */
 	private String content = null;
@@ -200,6 +203,29 @@ public class HTTPResponse extends HTTPMessage {
 
 		if (statusCode == SC_OK)
 			throw new ParseException("Unexpected HTTP status code, must not be 200 (OK)");
+	}
+	
+	
+	/**
+	 * Gets the HTTP status message.
+	 *
+	 * @return The HTTP status message, {@code null} if not specified.
+	 */
+	public String getStatusMessage() {
+		
+		return statusMessage;
+	}
+	
+	
+	/**
+	 * Sets the HTTP status message.
+	 *
+	 * @param message The HTTP status message, {@code null} if not
+	 *                specified.
+	 */
+	public void setStatusMessage(final String message) {
+		
+		this.statusMessage = message;
 	}
 	
 	

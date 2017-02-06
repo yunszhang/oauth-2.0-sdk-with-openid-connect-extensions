@@ -22,41 +22,41 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Map;
-
 import javax.net.ssl.HttpsURLConnection;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import junit.framework.TestCase;
-
 import static net.jadler.Jadler.*;
-
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
+import static org.junit.Assert.*;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 
 /**
  * Tests the HTTP request class.
  */
-public class HTTPRequestTest extends TestCase {
+public class HTTPRequestTest {
 
 
+	@Test
 	public void testDefaultHostnameVerifier() {
 
 		assertEquals(HttpsURLConnection.getDefaultHostnameVerifier(), HTTPRequest.getDefaultHostnameVerifier());
 	}
 
 
+	@Test
 	public void testDefaultSSLSocketFactory() {
 
 		assertNotNull(HTTPRequest.getDefaultSSLSocketFactory());
 	}
 
-
+	
+	@Test
 	public void testConstructorAndAccessors()
 		throws Exception {
 
@@ -117,6 +117,7 @@ public class HTTPRequestTest extends TestCase {
 	}
 
 
+	@Test
 	public void testParseJSONObject()
 		throws Exception {
 
@@ -134,6 +135,7 @@ public class HTTPRequestTest extends TestCase {
 	}
 
 
+	@Test
 	public void testParseJSONObjectException()
 		throws Exception {
 
@@ -189,8 +191,8 @@ public class HTTPRequestTest extends TestCase {
 
 		HTTPResponse httpResponse = httpRequest.send();
 		assertEquals(401, httpResponse.getStatusCode());
+		assertEquals("Unauthorized", httpResponse.getStatusMessage());
 		assertEquals("Bearer", httpResponse.getWWWAuthenticate());
-
 	}
 
 
@@ -207,6 +209,7 @@ public class HTTPRequestTest extends TestCase {
 
 		HTTPResponse httpResponse = httpRequest.send();
 		assertEquals(404, httpResponse.getStatusCode());
+		assertEquals("Not Found", httpResponse.getStatusMessage());
 	}
 
 
@@ -223,6 +226,7 @@ public class HTTPRequestTest extends TestCase {
 
 		HTTPResponse httpResponse = httpRequest.send();
 		assertEquals(405, httpResponse.getStatusCode());
+		assertEquals("Method Not Allowed", httpResponse.getStatusMessage());
 	}
 
 
@@ -293,14 +297,13 @@ public class HTTPRequestTest extends TestCase {
 
 		HTTPResponse httpResponse = httpRequest.send();
 
-		System.out.println(httpResponse.getContent());
-
 		assertEquals(200, httpResponse.getStatusCode());
+		assertEquals("OK", httpResponse.getStatusMessage());
 		httpResponse.ensureContentType(CommonContentTypes.APPLICATION_JSON);
 
 		JSONArray jsonArray = httpResponse.getContentAsJSONArray();
-		assertEquals(10l, jsonArray.get(0));
-		assertEquals(20l, jsonArray.get(1));
+		assertEquals(10L, jsonArray.get(0));
+		assertEquals(20L, jsonArray.get(1));
 		assertEquals(2, jsonArray.size());
 	}
 
@@ -331,16 +334,15 @@ public class HTTPRequestTest extends TestCase {
 
 		HTTPResponse httpResponse = httpRequest.send();
 
-		System.out.println(httpResponse.getContent());
-
 		assertEquals(200, httpResponse.getStatusCode());
+		assertEquals("OK", httpResponse.getStatusMessage());
 		httpResponse.ensureContentType(CommonContentTypes.APPLICATION_JSON);
 		assertEquals("abc", httpResponse.getHeader("SID"));
 		assertEquals("123", httpResponse.getHeader("X-App"));
 
 		JSONArray jsonArray = httpResponse.getContentAsJSONArray();
-		assertEquals(10l, jsonArray.get(0));
-		assertEquals(20l, jsonArray.get(1));
+		assertEquals(10L, jsonArray.get(0));
+		assertEquals(20L, jsonArray.get(1));
 		assertEquals(2, jsonArray.size());
 	}
 }

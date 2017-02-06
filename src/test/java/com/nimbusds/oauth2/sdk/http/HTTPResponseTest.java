@@ -56,6 +56,10 @@ public class HTTPResponseTest extends TestCase {
 			// ok
 			assertEquals("Unexpected HTTP status code 200, must be [302]", e.getMessage());
 		}
+		
+		assertNull(response.getStatusMessage());
+		response.setStatusMessage("OK");
+		assertEquals("OK", response.getStatusMessage());
 
 		assertNull(response.getContentType());
 		response.setContentType(CommonContentTypes.APPLICATION_URLENCODED);

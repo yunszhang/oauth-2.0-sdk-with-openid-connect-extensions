@@ -722,6 +722,8 @@ public class HTTPRequest extends HTTPMessage {
 
 
 		HTTPResponse response = new HTTPResponse(statusCode);
+		
+		response.setStatusMessage(conn.getResponseMessage());
 
 		// Set headers
 		for (Map.Entry<String,List<String>> responseHeader: conn.getHeaderFields().entrySet()) {

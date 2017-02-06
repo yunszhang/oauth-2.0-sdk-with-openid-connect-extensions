@@ -625,3 +625,5 @@ version 5.21 (2017-01-18)
     * Details InvalidClientException message on bad / expired JWT claims when
       JWT authentication is verified (iss #204).
 
+version 5.22 (2017-02-06)
+    * Adds HTTPResponse.getStatusMessage and setStatusMessage methods.
