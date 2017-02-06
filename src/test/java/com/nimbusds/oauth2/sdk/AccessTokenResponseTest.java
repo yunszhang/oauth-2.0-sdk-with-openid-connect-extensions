@@ -19,11 +19,9 @@ package com.nimbusds.oauth2.sdk;
 
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-
-import junit.framework.TestCase;
-
-import net.minidev.json.JSONObject;
+import java.util.Set;
 
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
@@ -31,6 +29,8 @@ import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.token.Tokens;
+import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -185,7 +185,7 @@ public class AccessTokenResponseTest extends TestCase {
 		assertEquals(accessTokenString, o.get("access_token"));
 		assertEquals("Bearer", o.get("token_type"));
 		assertEquals(refreshTokenString, o.get("refresh_token"));
-		assertEquals(3600l, o.get("expires_in"));
+		assertEquals(3600L, o.get("expires_in"));
 
 		// Custom param
 		assertEquals("abc", (String)o.get("sub_sid"));
@@ -232,5 +232,37 @@ public class AccessTokenResponseTest extends TestCase {
 
 		assertEquals(accessTokenString, o.get("access_token"));
 		assertEquals("Bearer", o.get("token_type"));
+	}
+	
+	
+	public void testParseJSONObjectNoSideEffects()
+		throws Exception {
+		
+		// {
+		//   "access_token":"2YotnFZFEjr1zCsicMWpAA",
+		//   "token_type":"Bearer",
+		//   "expires_in":3600,
+		//   "refresh_token":"tGzv3JOkF0XG5Qx2TlKWIA",
+		//   "example_parameter":"example_value"
+		// }
+		
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("access_token", "2YotnFZFEjr1zCsicMWpAA");
+		jsonObject.put("token_type", "Bearer");
+		jsonObject.put("expires_in", 3600);
+		jsonObject.put("refresh_token", "tGzv3JOkF0XG5Qx2TlKWIA");
+		jsonObject.put("example_parameter", "example_value");
+		
+		Set<String> keys = new HashSet<>();
+		keys.addAll(jsonObject.keySet());
+		
+		AccessTokenResponse response = AccessTokenResponse.parse(jsonObject);
+		assertEquals("2YotnFZFEjr1zCsicMWpAA", response.getTokens().getBearerAccessToken().getValue());
+		assertEquals(3600L, response.getTokens().getBearerAccessToken().getLifetime());
+		assertEquals("tGzv3JOkF0XG5Qx2TlKWIA", response.getTokens().getRefreshToken().getValue());
+		assertEquals("example_value", response.getCustomParameters().get(("example_parameter")));
+		assertEquals(1, response.getCustomParameters().size());
+		
+		assertEquals(keys, jsonObject.keySet());
 	}
 }

@@ -47,7 +47,7 @@ public abstract class TokenResponse implements Response {
 	 * @throws ParseException If the JSON object couldn't be parsed to a
 	 *                        token response.
 	 */
-	public static TokenResponse parse(JSONObject jsonObject)
+	public static TokenResponse parse(final JSONObject jsonObject)
 		throws ParseException{
 
 		if (jsonObject.containsKey("access_token"))

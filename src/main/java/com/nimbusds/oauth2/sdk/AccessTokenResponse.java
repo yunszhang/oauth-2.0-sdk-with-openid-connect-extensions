@@ -18,10 +18,7 @@
 package com.nimbusds.oauth2.sdk;
 
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import net.jcip.annotations.Immutable;
 
@@ -202,9 +199,9 @@ public class AccessTokenResponse extends TokenResponse implements SuccessRespons
 		Tokens tokens = Tokens.parse(jsonObject);
 
 		// Determine the custom param names
-		Set<String> paramNames = tokens.getParameterNames();
-		Set<String> customParamNames = jsonObject.keySet();
-		customParamNames.removeAll(paramNames);
+		Set<String> customParamNames = new HashSet<>();
+		customParamNames.addAll(jsonObject.keySet());
+		customParamNames.removeAll(tokens.getParameterNames());
 
 		Map<String,Object> customParams = null;
 

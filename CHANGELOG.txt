@@ -627,3 +627,5 @@ version 5.21 (2017-01-18)
 
 version 5.22 (2017-02-06)
     * Adds HTTPResponse.getStatusMessage and setStatusMessage methods.
+    * Fixes side effect in TokenResponse.parse(JSONObject) which caused removal
+      of the standard token parameters from the JSON object (iss #206).
