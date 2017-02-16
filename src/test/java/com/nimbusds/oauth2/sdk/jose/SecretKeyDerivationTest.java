@@ -18,6 +18,7 @@
 package com.nimbusds.oauth2.sdk.jose;
 
 
+import java.math.BigInteger;
 import javax.crypto.SecretKey;
 
 import com.nimbusds.jose.*;
@@ -217,5 +218,12 @@ public class SecretKeyDerivationTest extends TestCase {
 		} catch (JOSEException e) {
 			assertEquals("Unsupported secret key length: 1024 bits", e.getMessage());
 		}
+	}
+	
+	
+	public void testLeft() {
+		
+		assertEquals(1, new BigInteger(new byte[]{0, 0, 0, 1}).intValue());
+		assertEquals(1, new BigInteger(new byte[]{1}).intValue());
 	}
 }
