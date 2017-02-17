@@ -25,13 +25,8 @@ import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import net.jcip.annotations.Immutable;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
-
 import com.nimbusds.oauth2.sdk.AbstractRequest;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
@@ -39,6 +34,8 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
+import net.jcip.annotations.Immutable;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -64,7 +61,7 @@ public class LogoutRequest extends AbstractRequest {
 
 
 	/**
-	 * The required ID token hint.
+	 * The ID token hint (recommended).
 	 */
 	private final JWT idTokenHint;
 
@@ -88,11 +85,11 @@ public class LogoutRequest extends AbstractRequest {
 	 *                              May be {@code null} if the
 	 *                              {@link #toHTTPRequest} method will not
 	 *                              be used.
-	 * @param idTokenHint           The ID token hint. Must not be
-	 *                              {@code null}.
+	 * @param idTokenHint           The ID token hint (recommended),
+	 *                              {@code null} if not specified.
 	 * @param postLogoutRedirectURI The optional post-logout redirection
 	 *                              URI, {@code null} if not specified.
-	 * @param state                 The optional state parameter for a
+	 * @param state                 The optional state parameter for the
 	 *                              post-logout redirection URI,
 	 *                              {@code null} if not specified.
 	 */
@@ -102,10 +99,6 @@ public class LogoutRequest extends AbstractRequest {
 			     final State state) {
 
 		super(uri);
-
-		if (idTokenHint == null) {
-			throw new IllegalArgumentException("The ID token hint must not be null");
-		}
 
 		this.idTokenHint = idTokenHint;
 
@@ -120,25 +113,39 @@ public class LogoutRequest extends AbstractRequest {
 
 
 	/**
-	 * Creates a new OpenID Connect logout request with a post-logout
+	 * Creates a new OpenID Connect logout request without a post-logout
 	 * redirection.
 	 *
 	 * @param uri         The URI of the end-session endpoint. May be
 	 *                    {@code null} if the {@link #toHTTPRequest} method
 	 *                    will not be used.
-	 * @param idTokenHint  The ID token hint. Must not be {@code null}.
+	 * @param idTokenHint The ID token hint (recommended), {@code null} if
+	 *                    not specified.
 	 */
 	public LogoutRequest(final URI uri,
 			     final JWT idTokenHint) {
 
 		this(uri, idTokenHint, null, null);
 	}
+	
+	
+	/**
+	 * Creates a new OpenID Connect logout request without a post-logout
+	 * redirection.
+	 *
+	 * @param uri The URI of the end-session endpoint. May be {@code null}
+	 *            if the {@link #toHTTPRequest} method will not be used.
+	 */
+	public LogoutRequest(final URI uri) {
+		
+		this(uri, null, null, null);
+	}
 
 
 	/**
 	 * Returns the ID token hint.
 	 *
-	 * @return The ID token hint.
+	 * @return The ID token hint, {@code null} if not specified.
 	 */
 	public JWT getIDTokenHint() {
 
@@ -184,11 +191,13 @@ public class LogoutRequest extends AbstractRequest {
 	public Map<String,String> toParameters() {
 
 		Map <String,String> params = new LinkedHashMap<>();
-
-		try {
-			params.put("id_token_hint", idTokenHint.serialize());
-		} catch (IllegalStateException e) {
-			throw new SerializeException("Couldn't serialize ID token: " + e.getMessage(), e);
+		
+		if (idTokenHint != null) {
+			try {
+				params.put("id_token_hint", idTokenHint.serialize());
+			} catch (IllegalStateException e) {
+				throw new SerializeException("Couldn't serialize ID token: " + e.getMessage(), e);
+			}
 		}
 
 		if (postLogoutRedirectURI != null) {
@@ -245,12 +254,15 @@ public class LogoutRequest extends AbstractRequest {
 
 		if (getEndpointURI() == null)
 			throw new SerializeException("The end-session endpoint URI is not specified");
-
-		StringBuilder sb = new StringBuilder(getEndpointURI().toString());
-		sb.append('?');
-		sb.append(toQueryString());
+		
+		String query = toQueryString();
+		
+		if (StringUtils.isNotBlank(query)) {
+			query = '?' + query;
+		}
+		
 		try {
-			return new URI(sb.toString());
+			return new URI(getEndpointURI() + query);
 		} catch (URISyntaxException e) {
 			throw new SerializeException("Couldn't append query string: " + e.getMessage(), e);
 		}
@@ -334,15 +346,15 @@ public class LogoutRequest extends AbstractRequest {
 
 		String v = params.get("id_token_hint");
 
-		if (StringUtils.isBlank(v))
-			throw new ParseException("Missing \"id_token_hint\" parameter");
-
-		JWT idTokenHint;
-
-		try {
-			idTokenHint = JWTParser.parse(v);
-		} catch (java.text.ParseException e) {
-			throw new ParseException("Invalid ID token hint: " + e.getMessage(), e);
+		JWT idTokenHint = null;
+		
+		if (StringUtils.isNotBlank(v)) {
+			
+			try {
+				idTokenHint = JWTParser.parse(v);
+			} catch (java.text.ParseException e) {
+				throw new ParseException("Invalid ID token hint: " + e.getMessage(), e);
+			}
 		}
 
 		v = params.get("post_logout_redirect_uri");

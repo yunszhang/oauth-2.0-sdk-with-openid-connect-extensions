@@ -629,3 +629,9 @@ version 5.22 (2017-02-06)
     * Adds HTTPResponse.getStatusMessage and setStatusMessage methods.
     * Fixes side effect in TokenResponse.parse(JSONObject) which caused removal
       of the standard token parameters from the JSON object (iss #206).
+
+version 5.22.1 (2017-02-17)
+    * Relaxes id_token_hint requirement in RP-initiated OpenID Connect
+      LogoutRequest (iss #207).
+
+

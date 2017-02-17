@@ -20,12 +20,9 @@ package com.nimbusds.openid.connect.sdk;
 
 import java.net.URI;
 import java.net.URLEncoder;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-import junit.framework.TestCase;
 
 import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -33,7 +30,6 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.jwt.SignedJWT;
-
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
@@ -43,6 +39,7 @@ import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
+import junit.framework.TestCase;
 
 
 /**
@@ -56,17 +53,35 @@ public class LogoutRequestTest extends TestCase {
 
 		Issuer iss = new Issuer("https://c2id.com");
 		Subject sub = new Subject("alice");
-		List<Audience> audList = Arrays.asList(new Audience("123"));
-		Date exp = new Date(2000l);
-		Date iat = new Date(1000l);
+		List<Audience> audList = new Audience("123").toSingleAudienceList();
+		Date exp = new Date(2000L);
+		Date iat = new Date(1000L);
 
 		IDTokenClaimsSet claimsSet = new IDTokenClaimsSet(iss, sub, audList, exp, iat);
 
 		return new PlainJWT(claimsSet.toJWTClaimsSet());
 	}
+	
+	
+	public void testMinimal()
+		throws Exception {
+		
+		URI endpoint = URI.create("https://c2id.com/logout");
+		LogoutRequest logoutRequest = new LogoutRequest(endpoint);
+		assertNull(logoutRequest.getIDTokenHint());
+		assertNull(logoutRequest.getPostLogoutRedirectionURI());
+		assertNull(logoutRequest.getState());
+		assertEquals(endpoint, logoutRequest.getEndpointURI());
+		
+		String query = logoutRequest.toQueryString();
+		assertEquals("", query);
+		
+		URI request = logoutRequest.toURI();
+		assertEquals("https://c2id.com/logout", request.toString());
+	}
 
 
-	public void testMinimalConstructor()
+	public void testWithIDTokenHint()
 		throws Exception {
 
 		JWT idToken = createIDTokenHint();
@@ -79,6 +94,8 @@ public class LogoutRequestTest extends TestCase {
 		assertEquals(idToken, request.getIDTokenHint());
 		assertNull(request.getPostLogoutRedirectionURI());
 		assertNull(request.getState());
+		
+		assertEquals(endpoint + "?id_token_hint=" + idToken.serialize(), request.toURI().toString());
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
@@ -142,9 +159,9 @@ public class LogoutRequestTest extends TestCase {
 
 		Issuer iss = new Issuer("https://c2id.com");
 		Subject sub = new Subject("alice");
-		List<Audience> audList = Arrays.asList(new Audience("123"));
-		Date exp = new Date(2000l);
-		Date iat = new Date(1000l);
+		List<Audience> audList = new Audience("123").toSingleAudienceList();
+		Date exp = new Date(2000L);
+		Date iat = new Date(1000L);
 
 		IDTokenClaimsSet claimsSet = new IDTokenClaimsSet(iss, sub, audList, exp, iat);
 
@@ -175,18 +192,6 @@ public class LogoutRequestTest extends TestCase {
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("The state parameter required a post-logout redirection URI", e.getMessage());
-		}
-	}
-
-
-	public void testMissingIDTokenHint()
-		throws Exception {
-
-		try {
-			new LogoutRequest(new URI("https://c2id.com/logout"), null);
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The ID token hint must not be null", e.getMessage());
 		}
 	}
 
