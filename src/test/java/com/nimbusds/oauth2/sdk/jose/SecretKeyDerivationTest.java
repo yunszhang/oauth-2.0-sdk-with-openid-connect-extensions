@@ -221,7 +221,7 @@ public class SecretKeyDerivationTest extends TestCase {
 	}
 	
 	
-	public void testLeft() {
+	public void testMsbTruncate() {
 		
 		assertEquals(1, new BigInteger(new byte[]{0, 0, 0, 1}).intValue());
 		assertEquals(1, new BigInteger(new byte[]{1}).intValue());
