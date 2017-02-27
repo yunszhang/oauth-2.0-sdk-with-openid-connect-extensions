@@ -151,4 +151,16 @@ public class ClientSecretBasicTest extends TestCase {
 			assertEquals("Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Unexpected number of HTTP Authorization header value parts: 3", e.getMessage());
 		}
 	}
+	
+	
+	// iss 208
+	public void testIllegalHexCharsInAuthzHeader() {
+		
+		try {
+			ClientSecretBasic.parse("Basic KVQdqB25zeFg4duoJf7ZYo4wDMXtQjqlpxWdgFm06vc");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Invalid URL encoding", e.getMessage());
+		}
+	}
 }

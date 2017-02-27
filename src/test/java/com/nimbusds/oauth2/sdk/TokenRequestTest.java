@@ -1383,5 +1383,28 @@ public class TokenRequestTest extends TestCase {
 			assertEquals("Invalid request: Multiple conflicting client authentication methods found: Basic and JWT assertion", e.getErrorObject().getDescription());
 		}
 	}
+	
+	
+	// iss208
+	public void testClientSecretBasicDecodingException()
+		throws Exception {
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
+		httpRequest.setAuthorization("Basic KVQdqB25zeFg4duoJf7ZYo4wDMXtQjqlpxWdgFm06vc");
+		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setHeader("Cache-Control", "no-cache");
+		httpRequest.setQuery("grant_type=authorization_code" +
+			"&code=a0x3DwU3vE9Ad1CbWdy1LQ.KaPahOgJJjODKWE47-DXzg" +
+			"&redirect_uri=dufryred%3A%2F%2Foauth.callback" +
+			"&code_verifier=VjdnvRw3_nTdhoWLcwYBjVt2wQnklP-gcXRmFXvQcM6OhMqDQOXWhXQvqHeCbgOlJHsu8xDVyRU0vRaMzuEKbQ" +
+			"&client_id=47ub27skbkcf2");
+		
+		try {
+			TokenRequest.parse(httpRequest);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Invalid URL encoding", e.getMessage());
+		}
+	}
 }
 

@@ -156,12 +156,12 @@ public final class ClientSecretBasic extends PlainClientSecret {
 		try {
 			String decodedClientID = URLDecoder.decode(credentials[0], UTF8_CHARSET.name());
 			String decodedSecret = URLDecoder.decode(credentials[1], UTF8_CHARSET.name());
-
+			
 			return new ClientSecretBasic(new ClientID(decodedClientID), new Secret(decodedSecret));
 			
-		} catch (UnsupportedEncodingException e) {
+		} catch (IllegalArgumentException | UnsupportedEncodingException e) {
 		
-			throw new ParseException(e.getMessage(), e);
+			throw new ParseException("Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Invalid URL encoding", e);
 		}
 	}
 	
