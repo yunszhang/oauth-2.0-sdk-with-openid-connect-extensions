@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.nimbusds.oauth2.sdk.GeneralException;
+import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import net.jcip.annotations.Immutable;
 
@@ -125,6 +127,47 @@ public final class ACRRequest {
 		}
 		
 		return this;
+	}
+	
+	
+	/**
+	 * Ensures all requested essential ACR values are supported by the
+	 * OpenID provider.
+	 *
+	 * @param authRequest The OpenID authentication request. Must not be
+	 *                    {@code null}.
+	 * @param opMetadata  The OpenID provider metadata. Must not be
+	 *                    {@code null}.
+	 *
+	 * @throws GeneralException If a requested essential ACR value is not
+	 *                          supported by the OpenID provider.
+	 */
+	public void ensureACRSupport(final AuthenticationRequest authRequest, final OIDCProviderMetadata opMetadata)
+		throws GeneralException {
+		
+		// Ensure any requested essential ACR is supported
+		if (getEssentialACRs() != null) {
+			
+			boolean foundSupportedEssentialACR = false;
+			
+			for (ACR acr: getEssentialACRs()) {
+				
+				if (opMetadata.getACRs() != null && opMetadata.getACRs().contains(acr)) {
+					foundSupportedEssentialACR = true;
+					break;
+				}
+			}
+			
+			if (! foundSupportedEssentialACR) {
+				String msg = "Requested essential ACR(s) not supported";
+				throw new GeneralException(msg,
+					OAuth2Error.ACCESS_DENIED.appendDescription(": " + msg),
+					authRequest.getClientID(),
+					authRequest.getRedirectionURI(),
+					authRequest.impliedResponseMode(),
+					authRequest.getState());
+			}
+		}
 	}
 	
 	

@@ -21,15 +21,15 @@ package com.nimbusds.openid.connect.sdk.op;
 import java.net.URI;
 import java.util.*;
 
-import com.nimbusds.oauth2.sdk.GrantType;
-import com.nimbusds.oauth2.sdk.ResponseType;
-import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
+import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
@@ -323,5 +323,92 @@ public class ACRRequestTest extends TestCase {
 		assertEquals(2, acrRequest.getVoluntaryACRs().size());
 		
 		assertFalse(acrRequest.isEmpty());
+	}
+	
+	
+	public void testEnsureACRSupport_noEssenialACRsRequested()
+		throws GeneralException {
+		
+		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
+			new ResponseType("code"),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.build();
+		
+		ACRRequest acrRequest = ACRRequest.resolve(authRequest);
+		
+		OIDCProviderMetadata opMetadata = new OIDCProviderMetadata(
+			new Issuer("https://c2id.com"),
+			Arrays.asList(SubjectType.PUBLIC, SubjectType.PAIRWISE),
+			URI.create("https://c2id.com/jwks.json"));
+		opMetadata.applyDefaults();
+		
+		acrRequest.ensureACRSupport(authRequest, opMetadata);
+	}
+	
+	
+	public void testEnsureACRSupport_noEssenialACRsSupported()
+		throws GeneralException {
+		
+		ClaimsRequest claimsRequest = new ClaimsRequest();
+		claimsRequest.addIDTokenClaim("acr", ClaimRequirement.ESSENTIAL, null, "1");
+		
+		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
+			new ResponseType("code"),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.claims(claimsRequest)
+			.build();
+		
+		ACRRequest acrRequest = ACRRequest.resolve(authRequest);
+		
+		OIDCProviderMetadata opMetadata = new OIDCProviderMetadata(
+			new Issuer("https://c2id.com"),
+			Arrays.asList(SubjectType.PUBLIC, SubjectType.PAIRWISE),
+			URI.create("https://c2id.com/jwks.json"));
+		opMetadata.applyDefaults();
+		
+		try {
+			acrRequest.ensureACRSupport(authRequest, opMetadata);
+		} catch (GeneralException e) {
+			assertEquals(OAuth2Error.ACCESS_DENIED, e.getErrorObject());
+			assertEquals("Access denied by resource owner or authorization server: Requested essential ACR(s) not supported", e.getErrorObject().getDescription());
+			assertEquals("Requested essential ACR(s) not supported", e.getMessage());
+		}
+	}
+	
+	
+	public void testEnsureACRSupport_essenialACRsSupported()
+		throws GeneralException {
+		
+		ClaimsRequest claimsRequest = new ClaimsRequest();
+		claimsRequest.addIDTokenClaim("acr", ClaimRequirement.ESSENTIAL, null, "1");
+		
+		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
+			new ResponseType("code"),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.claims(claimsRequest)
+			.build();
+		
+		ACRRequest acrRequest = ACRRequest.resolve(authRequest);
+		
+		OIDCProviderMetadata opMetadata = new OIDCProviderMetadata(
+			new Issuer("https://c2id.com"),
+			Arrays.asList(SubjectType.PUBLIC, SubjectType.PAIRWISE),
+			URI.create("https://c2id.com/jwks.json"));
+		opMetadata.setACRs(Collections.singletonList(new ACR("1")));
+		opMetadata.applyDefaults();
+		
+		try {
+			acrRequest.ensureACRSupport(authRequest, opMetadata);
+		} catch (GeneralException e) {
+			assertEquals(OAuth2Error.ACCESS_DENIED, e.getErrorObject());
+			assertEquals("Access denied by resource owner or authorization server: Requested essential ACR(s) not supported", e.getErrorObject().getDescription());
+			assertEquals("Requested essential ACR(s) not supported", e.getMessage());
+		}
 	}
 }
