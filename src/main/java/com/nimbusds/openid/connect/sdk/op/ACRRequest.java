@@ -19,8 +19,10 @@ package com.nimbusds.openid.connect.sdk.op;
 
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
@@ -88,8 +90,8 @@ public final class ACRRequest {
 	
 	
 	/**
-	 * Checks if this authentication Context Class Reference (ACR) request
-	 * has not essential or voluntary values specified.
+	 * Checks if this ACR request has no essential or voluntary values
+	 * specified.
 	 * 
 	 * @return {@code true} if this ACR request doesn't specify any 
 	 *         essential or voluntary values, else {@code false}.
@@ -101,13 +103,37 @@ public final class ACRRequest {
 	}
 	
 	
+	/**
+	 * Applies the registered default ACR values for the requesting client
+	 * (as a voluntary ACR value, provided no ACR values were explicitly
+	 * requested).
+	 *
+	 * @param clientInfo The registered client information. Must not be
+	 *                   {@code null}.
+	 *
+	 * @return The ACR request, updated if registered default ACR values
+	 *         were applied.
+	 */
+	public ACRRequest applyDefaultACRs(final OIDCClientInformation clientInfo) {
+		
+		// Apply default ACR from client reg store as voluntary?
+		if (isEmpty()) {
+			if (clientInfo.getOIDCMetadata().getDefaultACRs() != null) {
+				List<ACR> voluntaryACRs = new LinkedList<>(clientInfo.getOIDCMetadata().getDefaultACRs());
+				return new ACRRequest(null, voluntaryACRs);
+			}
+		}
+		
+		return this;
+	}
+	
 	
 	/**
 	 * Resolves the requested essential and voluntary ACR values from the
-	 * specified OpenID Connect authentication request.
+	 * specified OpenID authentication request.
 	 * 
-	 * @param authRequest The OpenID Connect authentication request. Should
-	 *                    be resolved. Must not be {@code null}.
+	 * @param authRequest The OpenID authentication request. Should be
+	 *                    resolved. Must not be {@code null}.
 	 * 
 	 * @return The resolved ACR request.
 	 */

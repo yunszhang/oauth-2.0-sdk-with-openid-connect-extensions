@@ -19,19 +19,22 @@ package com.nimbusds.openid.connect.sdk.op;
 
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-import junit.framework.TestCase;
-
+import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
-
-import com.nimbusds.openid.connect.sdk.*;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
+import com.nimbusds.openid.connect.sdk.ClaimsRequest;
+import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
+import junit.framework.TestCase;
 
 
 /**
@@ -209,6 +212,114 @@ public class ACRRequestTest extends TestCase {
 		
 		assertTrue(acrRequest.getVoluntaryACRs().contains(new ACR("1")));
 		assertTrue(acrRequest.getVoluntaryACRs().contains(new ACR("2")));
+		assertEquals(2, acrRequest.getVoluntaryACRs().size());
+		
+		assertFalse(acrRequest.isEmpty());
+	}
+	
+	
+	public void testApplyDefaultACR_nothingToApply()
+		throws Exception {
+		
+		ACRRequest acrRequest = new ACRRequest(null, null);
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setGrantTypes(Collections.singleton(GrantType.AUTHORIZATION_CODE));
+		clientMetadata.setRedirectionURI(URI.create("https://example.com/cb"));
+		clientMetadata.applyDefaults();
+		OIDCClientInformation clientInfo = new OIDCClientInformation(new ClientID("123"), new Date(), clientMetadata, new Secret());
+		
+		acrRequest = acrRequest.applyDefaultACRs(clientInfo);
+		
+		assertTrue(acrRequest.isEmpty());
+	}
+	
+	
+	public void testApplyDefaultACR_explicitACRs_essential()
+		throws Exception {
+		
+		ACRRequest acrRequest = new ACRRequest(Collections.singletonList(new ACR("1")), null);
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setGrantTypes(Collections.singleton(GrantType.AUTHORIZATION_CODE));
+		clientMetadata.setRedirectionURI(URI.create("https://example.com/cb"));
+		clientMetadata.applyDefaults();
+		OIDCClientInformation clientInfo = new OIDCClientInformation(new ClientID("123"), new Date(), clientMetadata, new Secret());
+		
+		acrRequest = acrRequest.applyDefaultACRs(clientInfo);
+		
+		assertEquals(new ACR("1"), acrRequest.getEssentialACRs().get(0));
+		assertEquals(1, acrRequest.getEssentialACRs().size());
+		
+		assertNull(acrRequest.getVoluntaryACRs());
+		
+		assertFalse(acrRequest.isEmpty());
+	}
+	
+	
+	public void testApplyDefaultACR_explicitACRs_voluntary()
+		throws Exception {
+		
+		ACRRequest acrRequest = new ACRRequest(null, Collections.singletonList(new ACR("1")));
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setGrantTypes(Collections.singleton(GrantType.AUTHORIZATION_CODE));
+		clientMetadata.setRedirectionURI(URI.create("https://example.com/cb"));
+		clientMetadata.applyDefaults();
+		OIDCClientInformation clientInfo = new OIDCClientInformation(new ClientID("123"), new Date(), clientMetadata, new Secret());
+		
+		acrRequest = acrRequest.applyDefaultACRs(clientInfo);
+		
+		assertNull(acrRequest.getEssentialACRs());
+		
+		assertEquals(new ACR("1"), acrRequest.getVoluntaryACRs().get(0));
+		assertEquals(1, acrRequest.getVoluntaryACRs().size());
+		
+		assertFalse(acrRequest.isEmpty());
+	}
+	
+	
+	public void testApplyDefaultACR_applyRegisteredACRValue()
+		throws Exception {
+		
+		ACRRequest acrRequest = new ACRRequest(null, null);
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setGrantTypes(Collections.singleton(GrantType.AUTHORIZATION_CODE));
+		clientMetadata.setRedirectionURI(URI.create("https://example.com/cb"));
+		clientMetadata.setDefaultACRs(Collections.singletonList(new ACR("1")));
+		clientMetadata.applyDefaults();
+		OIDCClientInformation clientInfo = new OIDCClientInformation(new ClientID("123"), new Date(), clientMetadata, new Secret());
+		
+		acrRequest = acrRequest.applyDefaultACRs(clientInfo);
+		
+		assertNull(acrRequest.getEssentialACRs());
+		
+		assertEquals(new ACR("1"), acrRequest.getVoluntaryACRs().get(0));
+		assertEquals(1, acrRequest.getVoluntaryACRs().size());
+		
+		assertFalse(acrRequest.isEmpty());
+	}
+	
+	
+	public void testApplyDefaultACR_applyRegisteredACRValuesMultiple()
+		throws Exception {
+		
+		ACRRequest acrRequest = new ACRRequest(null, null);
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setGrantTypes(Collections.singleton(GrantType.AUTHORIZATION_CODE));
+		clientMetadata.setRedirectionURI(URI.create("https://example.com/cb"));
+		clientMetadata.setDefaultACRs(Arrays.asList(new ACR("1"), new ACR("2")));
+		clientMetadata.applyDefaults();
+		OIDCClientInformation clientInfo = new OIDCClientInformation(new ClientID("123"), new Date(), clientMetadata, new Secret());
+		
+		acrRequest = acrRequest.applyDefaultACRs(clientInfo);
+		
+		assertNull(acrRequest.getEssentialACRs());
+		
+		assertEquals(new ACR("1"), acrRequest.getVoluntaryACRs().get(0));
+		assertEquals(new ACR("2"), acrRequest.getVoluntaryACRs().get(1));
 		assertEquals(2, acrRequest.getVoluntaryACRs().size());
 		
 		assertFalse(acrRequest.isEmpty());
