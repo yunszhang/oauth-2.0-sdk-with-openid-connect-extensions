@@ -18,31 +18,18 @@
 package com.nimbusds.openid.connect.sdk;
 
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import net.jcip.annotations.Immutable;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
-import net.minidev.json.JSONObject;
+import java.util.*;
 
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
-
-import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-
 import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 
 /**
@@ -890,8 +877,8 @@ public class ClaimsRequest {
 	/**
 	 * Resolves the claims request for the specified response type and
 	 * scope. The scope values that are {@link OIDCScopeValue standard
-	 * OpenID Connect scope values} are resolved to their respective
-	 * individual claims requests, any other scope values are ignored.
+	 * OpenID scope values} are resolved to their respective individual
+	 * claims requests, any other scope values are ignored.
 	 *
 	 * @param responseType The response type. Must not be {@code null}.
 	 * @param scope        The scope. Must not be {@code null}.
@@ -899,6 +886,28 @@ public class ClaimsRequest {
 	 * @return The claims request.
 	 */
 	public static ClaimsRequest resolve(final ResponseType responseType, final Scope scope) {
+	
+		return resolve(responseType, scope, Collections.<Scope.Value,Set<String>>emptyMap());
+	}
+	
+	
+	/**
+	 * Resolves the claims request for the specified response type and
+	 * scope. The scope values that are {@link OIDCScopeValue standard
+	 * OpenID scope values} are resolved to their respective individual
+	 * claims requests, any other scope values are checked in the specified
+	 * custom claims map and resolved accordingly.
+	 *
+	 * @param responseType The response type. Must not be {@code null}.
+	 * @param scope        The scope. Must not be {@code null}.
+	 * @param customClaims Custom scope to claim name map, {@code null} if
+	 *                     not specified.
+	 *
+	 * @return The claims request.
+	 */
+	public static ClaimsRequest resolve(final ResponseType responseType,
+					    final Scope scope,
+					    final Map<Scope.Value,Set<String>> customClaims) {
 
 		// Determine the claims target (ID token or UserInfo)
 		final boolean switchToIDToken =
@@ -928,6 +937,20 @@ public class ClaimsRequest {
 				
 				entries = OIDCScopeValue.ADDRESS.toClaimsRequestEntries();
 				
+			} else if (customClaims != null && customClaims.containsKey(value)) {
+				
+				Set<String> claimNames = customClaims.get(value);
+				
+				if (claimNames == null || claimNames.isEmpty()) {
+					continue; // skip
+				}
+				
+				entries = new HashSet<>();
+				
+				for (String claimName: claimNames) {
+					entries.add(new ClaimsRequest.Entry(claimName, ClaimRequirement.VOLUNTARY));
+				}
+				
 			} else {
 				
 				continue; // skip
@@ -947,11 +970,11 @@ public class ClaimsRequest {
 
 
 	/**
-	 * Resolves the merged claims request from the specified OpenID Connect
-	 * authorisation request parameters. The scope values that are
-	 * {@link OIDCScopeValue standard OpenID Connect scope values} are
-	 * resolved to their respective individual claims requests, any other
-	 * scope values are ignored.
+	 * Resolves the merged claims request from the specified OpenID
+	 * authentication request parameters. The scope values that are
+	 * {@link OIDCScopeValue standard OpenID scope values} are resolved to
+	 * their respective individual claims requests, any other scope values
+	 * are ignored.
 	 *
 	 * @param responseType  The response type. Must not be {@code null}.
 	 * @param scope         The scope. Must not be {@code null}.
@@ -965,8 +988,36 @@ public class ClaimsRequest {
 	public static ClaimsRequest resolve(final ResponseType responseType,
 					    final Scope scope,
 					    final ClaimsRequest claimsRequest) {
+		
+		return resolve(responseType, scope, claimsRequest, Collections.<Scope.Value,Set<String>>emptyMap());
+	}
 
-		ClaimsRequest mergedClaimsRequest = resolve(responseType, scope);
+
+	/**
+	 * Resolves the merged claims request from the specified OpenID
+	 * authentication request parameters. The scope values that are
+	 * {@link OIDCScopeValue standard OpenID scope values} are resolved to
+	 * their respective individual claims requests, any other scope values
+	 * are checked in the specified custom claims map and resolved
+	 * accordingly.
+	 *
+	 * @param responseType  The response type. Must not be {@code null}.
+	 * @param scope         The scope. Must not be {@code null}.
+	 * @param claimsRequest The claims request, corresponding to the
+	 *                      optional {@code claims} OpenID Connect
+	 *                      authorisation request parameter, {@code null}
+	 *                      if not specified.
+	 * @param customClaims  Custom scope to claim name map, {@code null} if
+	 *                      not specified.
+	 *
+	 * @return The merged claims request.
+	 */
+	public static ClaimsRequest resolve(final ResponseType responseType,
+					    final Scope scope,
+					    final ClaimsRequest claimsRequest,
+					    final Map<Scope.Value,Set<String>> customClaims) {
+
+		ClaimsRequest mergedClaimsRequest = resolve(responseType, scope, customClaims);
 
 		mergedClaimsRequest.add(claimsRequest);
 
@@ -975,14 +1026,14 @@ public class ClaimsRequest {
 
 
 	/**
-	 * Resolves the merged claims request for the specified OpenID Connect
+	 * Resolves the merged claims request for the specified OpenID
 	 * authentication request. The scope values that are
-	 * {@link OIDCScopeValue standard OpenID Connect scope values} are
-	 * resolved to their respective individual claims requests, any other
-	 * scope values are ignored.
+	 * {@link OIDCScopeValue standard OpenID scope values} are resolved to
+	 * their respective individual claims requests, any other scope values
+	 * are ignored.
 	 *
-	 * @param authRequest The OpenID Connect authentication request. Must
-	 *                    not be {@code null}.
+	 * @param authRequest The OpenID authentication request. Must not be
+	 *                    {@code null}.
 	 *
 	 * @return The merged claims request.
 	 */

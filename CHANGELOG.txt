@@ -641,3 +641,7 @@ version 5.22.2 (2017-02-27)
 version 5.23 (2017-03-05)
     * Adds new ACRRequest.applyDefaultACRs method.
     * Adds new ensureACRSupport method.
+
+version 5.24 (2017-03-08)
+    * Adds ClaimsRequest support for resolving custom claims.
+
