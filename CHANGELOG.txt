@@ -645,3 +645,6 @@ version 5.23 (2017-03-05)
 version 5.24 (2017-03-08)
     * Adds ClaimsRequest support for resolving custom claims.
 
+version 5.24.1 (2017-03-28)
+    * Fixes NPE in ServletUtils.createHTTPRequest (iss #211).
+

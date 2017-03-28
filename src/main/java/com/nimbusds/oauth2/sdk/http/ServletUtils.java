@@ -59,8 +59,10 @@ public class ServletUtils {
 		sb.append("://");
 
 		String localAddress = request.getLocalAddr();
-
-		if (localAddress.contains(".")) {
+		
+		if (localAddress == null || localAddress.trim().isEmpty()) {
+			// Unknown local address (hostname / IP address)
+		} else if (localAddress.contains(".")) {
 			// IPv3 address
 			sb.append(localAddress);
 		} else if (localAddress.contains(":")) {
@@ -68,8 +70,6 @@ public class ServletUtils {
 			sb.append('[');
 			sb.append(localAddress);
 			sb.append(']');
-		} else {
-			// Don't know what to do
 		}
 
 		if (! request.isSecure() && request.getLocalPort() != 80) {

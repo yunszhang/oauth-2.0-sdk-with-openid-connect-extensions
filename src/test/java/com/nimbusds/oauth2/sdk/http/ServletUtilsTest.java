@@ -191,4 +191,30 @@ public class ServletUtilsTest extends TestCase {
 		assertEquals("no-cache", servletResponse.getHeader("Pragma"));
 		assertEquals("{\"apples\":\"123\"}", servletResponse.getContent());
 	}
+	
+	
+	// iss #211
+	public void testRequestWithNullLocalAddress()
+		throws Exception {
+		
+		MockServletRequest servletRequest = new MockServletRequest();
+		servletRequest.setMethod("POST");
+		servletRequest.setHeader("Content-Type", CommonContentTypes.APPLICATION_JSON.toString());
+		servletRequest.setLocalAddr(null);
+		servletRequest.setLocalPort(8080);
+		servletRequest.setRequestURI("/clients");
+		servletRequest.setQueryString(null);
+		String entityBody = "{\"grant_types\":[\"code\"]}";
+		servletRequest.setEntityBody(entityBody);
+		
+		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(servletRequest);
+		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
+		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpRequest.getContentType().toString());
+		assertNull(httpRequest.getAccept());
+		assertNull(httpRequest.getAuthorization());
+		assertEquals(entityBody, httpRequest.getQuery());
+		JSONObject jsonObject = httpRequest.getQueryAsJSONObject();
+		assertEquals("code", JSONObjectUtils.getStringArray(jsonObject, "grant_types")[0]);
+		assertEquals(1, jsonObject.size());
+	}
 }
