@@ -121,5 +121,23 @@ public class SecretTest extends TestCase {
 
 		// Base64 < encoded byte length
 		assertEquals(32, new Base64(secret.getValue()).decode().length);
+		assertEquals(43, secret.getValueBytes().length);
+	}
+	
+	
+	public void testBase64URLAlphabet() {
+		
+		String base64URLAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+		
+		// 100 trials
+		for (int i=0; i < 100; i++) {
+			
+			Secret secret = new Secret();
+			
+			for (char c: secret.getValue().toCharArray()) {
+				
+				assertTrue(base64URLAlphabet.contains(c + ""));
+			}
+		}
 	}
 }
