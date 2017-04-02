@@ -947,14 +947,14 @@ public class OIDCClientMetadata extends ClientMetadata {
 			}
 
 			if (jsonObject.get("request_object_signing_alg") != null) {
-				metadata.setRequestObjectJWSAlg(new JWSAlgorithm(
+				metadata.setRequestObjectJWSAlg(JWSAlgorithm.parse(
 					JSONObjectUtils.getString(jsonObject, "request_object_signing_alg")));
 
 				oidcFields.remove("request_object_signing_alg");
 			}
 
 			if (jsonObject.get("request_object_encryption_alg") != null) {
-				metadata.setRequestObjectJWEAlg(new JWEAlgorithm(
+				metadata.setRequestObjectJWEAlg(JWEAlgorithm.parse(
 					JSONObjectUtils.getString(jsonObject, "request_object_encryption_alg")));
 
 				oidcFields.remove("request_object_encryption_alg");
@@ -968,14 +968,14 @@ public class OIDCClientMetadata extends ClientMetadata {
 			}
 
 			if (jsonObject.get("id_token_signed_response_alg") != null) {
-				metadata.setIDTokenJWSAlg(new JWSAlgorithm(
+				metadata.setIDTokenJWSAlg(JWSAlgorithm.parse(
 					JSONObjectUtils.getString(jsonObject, "id_token_signed_response_alg")));
 
 				oidcFields.remove("id_token_signed_response_alg");
 			}
 
 			if (jsonObject.get("id_token_encrypted_response_alg") != null) {
-				metadata.setIDTokenJWEAlg(new JWEAlgorithm(
+				metadata.setIDTokenJWEAlg(JWEAlgorithm.parse(
 					JSONObjectUtils.getString(jsonObject, "id_token_encrypted_response_alg")));
 
 				oidcFields.remove("id_token_encrypted_response_alg");
@@ -989,14 +989,14 @@ public class OIDCClientMetadata extends ClientMetadata {
 			}
 
 			if (jsonObject.get("userinfo_signed_response_alg") != null) {
-				metadata.setUserInfoJWSAlg(new JWSAlgorithm(
+				metadata.setUserInfoJWSAlg(JWSAlgorithm.parse(
 					JSONObjectUtils.getString(jsonObject, "userinfo_signed_response_alg")));
 
 				oidcFields.remove("userinfo_signed_response_alg");
 			}
 
 			if (jsonObject.get("userinfo_encrypted_response_alg") != null) {
-				metadata.setUserInfoJWEAlg(new JWEAlgorithm(
+				metadata.setUserInfoJWEAlg(JWEAlgorithm.parse(
 					JSONObjectUtils.getString(jsonObject, "userinfo_encrypted_response_alg")));
 
 				oidcFields.remove("userinfo_encrypted_response_alg");

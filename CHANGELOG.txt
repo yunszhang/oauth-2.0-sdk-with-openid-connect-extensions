@@ -648,3 +648,6 @@ version 5.24 (2017-03-08)
 version 5.24.1 (2017-03-28)
     * Fixes NPE in ServletUtils.createHTTPRequest (iss #211).
 
+version 5.24.2 (2017-04-02)
+    * Parses JOSE algorithms in OP, client and RP metadata by reference (iss
+      #212).

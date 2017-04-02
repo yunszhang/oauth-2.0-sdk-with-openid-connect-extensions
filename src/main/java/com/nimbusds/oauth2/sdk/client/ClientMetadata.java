@@ -74,9 +74,6 @@ public class ClientMetadata {
 	private static final Set<String> REGISTERED_PARAMETER_NAMES;
 
 
-	/**
-	 * Initialises the registered parameter name set.
-	 */
 	static {
 		Set<String> p = new HashSet<>();
 
@@ -1463,7 +1460,7 @@ public class ClientMetadata {
 
 
 			if (jsonObject.get("token_endpoint_auth_method") != null) {
-				metadata.setTokenEndpointAuthMethod(new ClientAuthenticationMethod(
+				metadata.setTokenEndpointAuthMethod(ClientAuthenticationMethod.parse(
 					JSONObjectUtils.getString(jsonObject, "token_endpoint_auth_method")));
 
 				jsonObject.remove("token_endpoint_auth_method");
@@ -1471,7 +1468,7 @@ public class ClientMetadata {
 
 
 			if (jsonObject.get("token_endpoint_auth_signing_alg") != null) {
-				metadata.setTokenEndpointAuthJWSAlg(new JWSAlgorithm(
+				metadata.setTokenEndpointAuthJWSAlg(JWSAlgorithm.parse(
 					JSONObjectUtils.getString(jsonObject, "token_endpoint_auth_signing_alg")));
 
 				jsonObject.remove("token_endpoint_auth_signing_alg");

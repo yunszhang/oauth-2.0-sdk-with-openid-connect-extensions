@@ -752,4 +752,48 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertEquals(JWSAlgorithm.ES256, opMetadata.getTokenEndpointJWSAlgs().get(3));
 		assertEquals(4, opMetadata.getTokenEndpointJWSAlgs().size());
 	}
+	
+	
+	// iss 212
+	public void testJOSEAlgParse_referenceEquality()
+		throws Exception {
+		
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("issuer", "https://c2id.com");
+		jsonObject.put("subject_types_supported", Arrays.asList("public", "pairwise"));
+		jsonObject.put("jwks_uri", "https://c2id.com/jwks.json");
+		
+		jsonObject.put("token_endpoint_auth_signing_alg_values_supported", Collections.singletonList("RS256"));
+		
+		jsonObject.put("request_object_signing_alg_values_supported", Collections.singletonList("RS256"));
+		jsonObject.put("request_object_encryption_alg_values_supported", Collections.singletonList("RSA-OAEP"));
+		jsonObject.put("request_object_encryption_enc_values_supported", Collections.singletonList("A128GCM"));
+		
+		jsonObject.put("id_token_signing_alg_values_supported", Collections.singletonList("RS256"));
+		jsonObject.put("id_token_encryption_alg_values_supported", Collections.singletonList("RSA-OAEP"));
+		jsonObject.put("id_token_encryption_enc_values_supported", Collections.singletonList("A128GCM"));
+		
+		jsonObject.put("userinfo_signing_alg_values_supported", Collections.singletonList("RS256"));
+		jsonObject.put("userinfo_encryption_alg_values_supported", Collections.singletonList("RSA-OAEP"));
+		jsonObject.put("userinfo_encryption_enc_values_supported", Collections.singletonList("A128GCM"));
+		
+		OIDCProviderMetadata opMetadata = OIDCProviderMetadata.parse(jsonObject.toJSONString());
+		
+		assertTrue(JWSAlgorithm.RS256 == opMetadata.getTokenEndpointJWSAlgs().get(0));
+		
+		assertTrue(JWSAlgorithm.RS256 == opMetadata.getRequestObjectJWSAlgs().get(0));
+		assertTrue(JWEAlgorithm.RSA_OAEP == opMetadata.getRequestObjectJWEAlgs().get(0));
+		assertTrue(EncryptionMethod.A128GCM == opMetadata.getRequestObjectJWEEncs().get(0));
+		
+		
+		assertTrue(JWSAlgorithm.RS256 == opMetadata.getIDTokenJWSAlgs().get(0));
+		assertTrue(JWEAlgorithm.RSA_OAEP == opMetadata.getIDTokenJWEAlgs().get(0));
+		assertTrue(EncryptionMethod.A128GCM == opMetadata.getIDTokenJWEEncs().get(0));
+		
+		assertTrue(JWSAlgorithm.RS256 == opMetadata.getUserInfoJWSAlgs().get(0));
+		assertTrue(JWEAlgorithm.RSA_OAEP == opMetadata.getUserInfoJWEAlgs().get(0));
+		assertTrue(EncryptionMethod.A128GCM == opMetadata.getUserInfoJWEEncs().get(0));
+		
+		
+	}
 }

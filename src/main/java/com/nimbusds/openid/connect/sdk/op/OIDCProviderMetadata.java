@@ -1943,7 +1943,7 @@ public class OIDCProviderMetadata {
 					throw new ParseException("The none algorithm is not accepted");
 				
 				if (v != null)
-					op.tokenEndpointJWSAlgs.add(new JWSAlgorithm(v));
+					op.tokenEndpointJWSAlgs.add(JWSAlgorithm.parse(v));
 			}
 		}
 		
@@ -1957,7 +1957,7 @@ public class OIDCProviderMetadata {
 			for (String v: JSONObjectUtils.getStringArray(jsonObject, "request_object_signing_alg_values_supported")) {
 
 				if (v != null)
-					op.requestObjectJWSAlgs.add(new JWSAlgorithm(v));
+					op.requestObjectJWSAlgs.add(JWSAlgorithm.parse(v));
 			}
 		}
 
@@ -1969,7 +1969,7 @@ public class OIDCProviderMetadata {
 			for (String v: JSONObjectUtils.getStringArray(jsonObject, "request_object_encryption_alg_values_supported")) {
 
 				if (v != null)
-					op.requestObjectJWEAlgs.add(new JWEAlgorithm(v));
+					op.requestObjectJWEAlgs.add(JWEAlgorithm.parse(v));
 			}
 		}
 
@@ -1981,7 +1981,7 @@ public class OIDCProviderMetadata {
 			for (String v: JSONObjectUtils.getStringArray(jsonObject, "request_object_encryption_enc_values_supported")) {
 
 				if (v != null)
-					op.requestObjectJWEEncs.add(new EncryptionMethod(v));
+					op.requestObjectJWEEncs.add(EncryptionMethod.parse(v));
 			}
 		}
 		
@@ -1995,7 +1995,7 @@ public class OIDCProviderMetadata {
 			for (String v: JSONObjectUtils.getStringArray(jsonObject, "id_token_signing_alg_values_supported")) {
 
 				if (v != null)
-					op.idTokenJWSAlgs.add(new JWSAlgorithm(v));
+					op.idTokenJWSAlgs.add(JWSAlgorithm.parse(v));
 			}
 		}
 
@@ -2007,7 +2007,7 @@ public class OIDCProviderMetadata {
 			for (String v: JSONObjectUtils.getStringArray(jsonObject, "id_token_encryption_alg_values_supported")) {
 
 				if (v != null)
-					op.idTokenJWEAlgs.add(new JWEAlgorithm(v));
+					op.idTokenJWEAlgs.add(JWEAlgorithm.parse(v));
 			}
 		}
 
@@ -2019,7 +2019,7 @@ public class OIDCProviderMetadata {
 			for (String v: JSONObjectUtils.getStringArray(jsonObject, "id_token_encryption_enc_values_supported")) {
 
 				if (v != null)
-					op.idTokenJWEEncs.add(new EncryptionMethod(v));
+					op.idTokenJWEEncs.add(EncryptionMethod.parse(v));
 			}
 		}
 
@@ -2032,7 +2032,7 @@ public class OIDCProviderMetadata {
 			for (String v: JSONObjectUtils.getStringArray(jsonObject, "userinfo_signing_alg_values_supported")) {
 
 				if (v != null)
-					op.userInfoJWSAlgs.add(new JWSAlgorithm(v));
+					op.userInfoJWSAlgs.add(JWSAlgorithm.parse(v));
 			}
 		}
 
@@ -2044,7 +2044,7 @@ public class OIDCProviderMetadata {
 			for (String v: JSONObjectUtils.getStringArray(jsonObject, "userinfo_encryption_alg_values_supported")) {
 
 				if (v != null)
-					op.userInfoJWEAlgs.add(new JWEAlgorithm(v));
+					op.userInfoJWEAlgs.add(JWEAlgorithm.parse(v));
 			}
 		}
 
@@ -2056,7 +2056,7 @@ public class OIDCProviderMetadata {
 			for (String v: JSONObjectUtils.getStringArray(jsonObject, "userinfo_encryption_enc_values_supported")) {
 
 					if (v != null)
-						op.userInfoJWEEncs.add(new EncryptionMethod(v));
+						op.userInfoJWEEncs.add(EncryptionMethod.parse(v));
 			}
 		}
 
