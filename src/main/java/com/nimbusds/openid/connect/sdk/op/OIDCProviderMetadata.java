@@ -1929,7 +1929,7 @@ public class OIDCProviderMetadata {
 			for (String v: JSONObjectUtils.getStringArray(jsonObject, "token_endpoint_auth_methods_supported")) {
 				
 				if (v != null)
-					op.tokenEndpointAuthMethods.add(new ClientAuthenticationMethod(v));
+					op.tokenEndpointAuthMethods.add(ClientAuthenticationMethod.parse(v));
 			}
 		}
 		
