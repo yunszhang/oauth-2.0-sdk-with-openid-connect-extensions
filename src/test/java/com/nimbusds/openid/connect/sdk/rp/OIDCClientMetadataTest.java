@@ -87,8 +87,12 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("initiate_login_uri"));
 		assertTrue(paramNames.contains("request_uris"));
 		assertTrue(paramNames.contains("post_logout_redirect_uris"));
+		assertTrue(paramNames.contains("frontchannel_logout_uri"));
+		assertTrue(paramNames.contains("frontchannel_logout_session_required"));
+		assertTrue(paramNames.contains("backchannel_logout_uri"));
+		assertTrue(paramNames.contains("backchannel_logout_session_required"));
 
-		assertEquals(34, OIDCClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(38, OIDCClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -150,6 +154,11 @@ public class OIDCClientMetadataTest extends TestCase {
 		
 		assertTrue(requestURIs.contains(new URI("https://client.example.org/rf.txt#qpXaRLh_n93TTR9F252ValdatUQvQiJi5BDub2BeznA")));
 		assertEquals(1, requestURIs.size());
+		
+		assertNull(clientMetadata.getFrontChannelLogoutURI());
+		assertFalse(clientMetadata.requiresFrontChannelLogoutSession());
+		assertNull(clientMetadata.getBackChannelLogoutURI());
+		assertFalse(clientMetadata.requiresBackChannelLogoutSession());
 
 		assertTrue(clientMetadata.getCustomFields().isEmpty());
 	}
@@ -243,6 +252,22 @@ public class OIDCClientMetadataTest extends TestCase {
 		logoutURIs.add(new URI("http://post-logout.com"));
 		meta.setPostLogoutRedirectionURIs(logoutURIs);
 		assertEquals("http://post-logout.com", meta.getPostLogoutRedirectionURIs().iterator().next().toString());
+		
+		assertNull(meta.getFrontChannelLogoutURI());
+		meta.setFrontChannelLogoutURI(URI.create("https://example.com/logout/front-channel"));
+		assertEquals(URI.create("https://example.com/logout/front-channel"), meta.getFrontChannelLogoutURI());
+		
+		assertFalse(meta.requiresFrontChannelLogoutSession());
+		meta.requiresFrontChannelLogoutSession(true);
+		assertTrue(meta.requiresFrontChannelLogoutSession());
+		
+		assertNull(meta.getBackChannelLogoutURI());
+		meta.setBackChannelLogoutURI(URI.create("https://example.com/logout/back-channel"));
+		assertEquals(URI.create("https://example.com/logout/back-channel"), meta.getBackChannelLogoutURI());
+		
+		assertFalse(meta.requiresBackChannelLogoutSession());
+		meta.requiresBackChannelLogoutSession(true);
+		assertTrue(meta.requiresBackChannelLogoutSession());
 
 		String json = meta.toJSONObject().toJSONString();
 
@@ -279,6 +304,12 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertEquals("http://do-login.com", meta.getInitiateLoginURI().toString());
 
 		assertEquals("http://post-logout.com", meta.getPostLogoutRedirectionURIs().iterator().next().toString());
+		
+		assertEquals(URI.create("https://example.com/logout/front-channel"), meta.getFrontChannelLogoutURI());
+		assertTrue(meta.requiresFrontChannelLogoutSession());
+		
+		assertEquals(URI.create("https://example.com/logout/back-channel"), meta.getBackChannelLogoutURI());
+		assertTrue(meta.requiresBackChannelLogoutSession());
 	}
 
 
@@ -560,5 +591,93 @@ public class OIDCClientMetadataTest extends TestCase {
 		}
 		
 		OIDCClientMetadata.parse(jsonObject);
+	}
+	
+	
+	public void testJSONObjectFrontChannelLogoutParams()
+		throws ParseException {
+		
+		URI logoutURI = URI.create("https://example.com/logout/front-channel");
+		
+		// default
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.applyDefaults();
+		JSONObject out = clientMetadata.toJSONObject();
+		assertNull(out.get("frontchannel_logout_uri"));
+		assertNull(out.get("frontchannel_logout_session_required"));
+		
+		// with logout URI
+		clientMetadata.setFrontChannelLogoutURI(logoutURI);
+		out = clientMetadata.toJSONObject();
+		assertEquals(logoutURI.toString(), out.get("frontchannel_logout_uri"));
+		assertFalse((Boolean)out.get("frontchannel_logout_session_required"));
+		
+		clientMetadata = OIDCClientMetadata.parse(out);
+		assertEquals(logoutURI, clientMetadata.getFrontChannelLogoutURI());
+		assertFalse(clientMetadata.requiresFrontChannelLogoutSession());
+		
+		// with logout URI and SID requirement
+		clientMetadata.requiresFrontChannelLogoutSession(true);
+		out = clientMetadata.toJSONObject();
+		assertEquals(logoutURI.toString(), out.get("frontchannel_logout_uri"));
+		assertTrue((Boolean)out.get("frontchannel_logout_session_required"));
+		
+		clientMetadata = OIDCClientMetadata.parse(out);
+		assertEquals(logoutURI, clientMetadata.getFrontChannelLogoutURI());
+		assertTrue(clientMetadata.requiresFrontChannelLogoutSession());
+		
+		// with logout URI and SID requirement defaulting to false
+		clientMetadata.requiresFrontChannelLogoutSession(false);
+		out = clientMetadata.toJSONObject();
+		assertEquals(logoutURI.toString(), out.get("frontchannel_logout_uri"));
+		assertFalse((Boolean)out.remove("frontchannel_logout_session_required"));
+		
+		clientMetadata = OIDCClientMetadata.parse(out);
+		assertEquals(logoutURI, clientMetadata.getFrontChannelLogoutURI());
+		assertFalse(clientMetadata.requiresFrontChannelLogoutSession());
+	}
+	
+	
+	public void testJSONObjectBackChannelLogoutParams()
+		throws ParseException {
+		
+		URI logoutURI = URI.create("https://example.com/logout/back-channel");
+		
+		// default
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.applyDefaults();
+		JSONObject out = clientMetadata.toJSONObject();
+		assertNull(out.get("backchannel_logout_uri"));
+		assertNull(out.get("backchannel_logout_session_required"));
+		
+		// with logout URI
+		clientMetadata.setBackChannelLogoutURI(logoutURI);
+		out = clientMetadata.toJSONObject();
+		assertEquals(logoutURI.toString(), out.get("backchannel_logout_uri"));
+		assertFalse((Boolean)out.get("backchannel_logout_session_required"));
+		
+		clientMetadata = OIDCClientMetadata.parse(out);
+		assertEquals(logoutURI, clientMetadata.getBackChannelLogoutURI());
+		assertFalse(clientMetadata.requiresBackChannelLogoutSession());
+		
+		// with logout URI and SID requirement
+		clientMetadata.requiresBackChannelLogoutSession(true);
+		out = clientMetadata.toJSONObject();
+		assertEquals(logoutURI.toString(), out.get("backchannel_logout_uri"));
+		assertTrue((Boolean)out.get("backchannel_logout_session_required"));
+		
+		clientMetadata = OIDCClientMetadata.parse(out);
+		assertEquals(logoutURI, clientMetadata.getBackChannelLogoutURI());
+		assertTrue(clientMetadata.requiresBackChannelLogoutSession());
+		
+		// with logout URI and SID requirement defaulting to false
+		clientMetadata.requiresBackChannelLogoutSession(false);
+		out = clientMetadata.toJSONObject();
+		assertEquals(logoutURI.toString(), out.get("backchannel_logout_uri"));
+		assertFalse((Boolean)out.remove("backchannel_logout_session_required"));
+		
+		clientMetadata = OIDCClientMetadata.parse(out);
+		assertEquals(logoutURI, clientMetadata.getBackChannelLogoutURI());
+		assertFalse(clientMetadata.requiresBackChannelLogoutSession());
 	}
 }

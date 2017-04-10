@@ -44,9 +44,10 @@ import org.apache.commons.collections.CollectionUtils;
  *
  * <ul>
  *     <li>OpenID Connect Dynamic Client Registration 1.0, section 2.
- *     <li>OpenID Connect Session Management 1.0, section 5.1.1.
- *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section
- *         2.
+ *     <li>OpenID Connect Session Management 1.0, section 5.1.1 (draft 28).
+ *     <li>OpenID Connect Front-Channel Logout 1.0, section 2 (draft 02).
+ *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.2 (draft 04).
+ *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section 2.
  * </ul>
  */
 public class OIDCClientMetadata extends ClientMetadata {
@@ -58,9 +59,6 @@ public class OIDCClientMetadata extends ClientMetadata {
 	private static final Set<String> REGISTERED_PARAMETER_NAMES;
 
 
-	/**
-	 * Initialises the registered parameter name set.
-	 */
 	static {
 		// Start with the base OAuth 2.0 client params
 		Set<String> p = new HashSet<>(ClientMetadata.getRegisteredParameterNames());
@@ -86,6 +84,12 @@ public class OIDCClientMetadata extends ClientMetadata {
 
 		// OIDC session
 		p.add("post_logout_redirect_uris");
+		
+		// OIDC logout
+		p.add("frontchannel_logout_uri");
+		p.add("frontchannel_logout_session_required");
+		p.add("backchannel_logout_uri");
+		p.add("backchannel_logout_session_required");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -208,6 +212,32 @@ public class OIDCClientMetadata extends ClientMetadata {
 	 * Logout redirection URIs.
 	 */
 	private Set<URI> postLogoutRedirectURIs;
+	
+	
+	/**
+	 * Front-channel logout URI.
+	 */
+	private URI frontChannelLogoutURI;
+	
+	
+	/**
+	 * Indicates requirement for a session identifier on front-channel
+	 * logout.
+	 */
+	private boolean frontChannelLogoutSessionRequired = false;
+	
+	
+	/**
+	 * Back-channel logout URI.
+	 */
+	private URI backChannelLogoutURI;
+	
+	
+	/**
+	 * Indicates requirement for a session identifier on back-channel
+	 * logout.
+	 */
+	private boolean backChannelLogoutSessionRequired = false;
 
 
 	/** 
@@ -759,6 +789,116 @@ public class OIDCClientMetadata extends ClientMetadata {
 	
 	
 	/**
+	 * Gets the front-channel logout URI. Corresponds to the
+	 * {@code frontchannel_logout_uri} client metadata field.
+	 *
+	 * @return The front-channel logout URI, {@code null} if not specified.
+	 */
+	public URI getFrontChannelLogoutURI() {
+		
+		return frontChannelLogoutURI;
+	}
+	
+	
+	/**
+	 * Sets the front-channel logout URI. Corresponds to the
+	 * {@code frontchannel_logout_uri} client metadata field.
+	 *
+	 * @param frontChannelLogoutURI The front-channel logout URI,
+	 *                              {@code null} if not specified.
+	 */
+	public void setFrontChannelLogoutURI(final URI frontChannelLogoutURI) {
+		
+		this.frontChannelLogoutURI = frontChannelLogoutURI;
+	}
+	
+	
+	/**
+	 * Gets the requirement for a session identifier on front-channel
+	 * logout. Corresponds to
+	 * the {@code frontchannel_logout_session_required} client metadata
+	 * field.
+	 *
+	 * @return {@code true} if a session identifier is required, else
+	 *         {@code false}.
+	 */
+	public boolean requiresFrontChannelLogoutSession() {
+		
+		return frontChannelLogoutSessionRequired;
+	}
+	
+	
+	/**
+	 * Sets the requirement for a session identifier on front-channel
+	 * logout. Corresponds to
+	 * the {@code frontchannel_logout_session_required} client metadata
+	 * field.
+	 *
+	 * @param requiresSession  {@code true} if a session identifier is
+	 *                         required, else {@code false}.
+	 */
+	public void requiresFrontChannelLogoutSession(boolean requiresSession) {
+		
+		frontChannelLogoutSessionRequired = requiresSession;
+	}
+	
+	
+	/**
+	 * Gets the back-channel logout URI. Corresponds to the
+	 * {@code backchannel_logout_uri} client metadata field.
+	 *
+	 * @return The back-channel logout URI, {@code null} if not specified.
+	 */
+	public URI getBackChannelLogoutURI() {
+		
+		return backChannelLogoutURI;
+	}
+	
+	
+	/**
+	 * Sets the back-channel logout URI. Corresponds to the
+	 * {@code backchannel_logout_uri} client metadata field.
+	 *
+	 * @param backChannelLogoutURI The back-channel logout URI,
+	 *                             {@code null} if not specified.
+	 */
+	public void setBackChannelLogoutURI(final URI backChannelLogoutURI) {
+		
+		this.backChannelLogoutURI = backChannelLogoutURI;
+	}
+	
+	
+	/**
+	 * Gets the requirement for a session identifier on back-channel
+	 * logout. Corresponds to
+	 * the {@code backchannel_logout_session_required} client metadata
+	 * field.
+	 *
+	 * @return {@code true} if a session identifier is required, else
+	 *         {@code false}.
+	 */
+	public boolean requiresBackChannelLogoutSession() {
+		
+		return backChannelLogoutSessionRequired;
+	}
+	
+	
+	/**
+	 * Sets the requirement for a session identifier on back-channel
+	 * logout. Corresponds to
+	 * the {@code backchannel_logout_session_required} client metadata
+	 * field.
+	 *
+	 * @param requiresSession  {@code true} if a session identifier is
+	 *                         required, else {@code false}.
+	 */
+	public void requiresBackChannelLogoutSession(final boolean requiresSession) {
+		
+		backChannelLogoutSessionRequired = requiresSession;
+	}
+	
+	
+	/**
 	 * Applies the client metadata defaults where no values have been
 	 * specified.
 	 * 
@@ -881,6 +1021,16 @@ public class OIDCClientMetadata extends ClientMetadata {
 				uriList.add(uri.toString());
 
 			o.put("post_logout_redirect_uris", uriList);
+		}
+		
+		if (frontChannelLogoutURI != null) {
+			o.put("frontchannel_logout_uri", frontChannelLogoutURI.toString());
+			o.put("frontchannel_logout_session_required", frontChannelLogoutSessionRequired);
+		}
+		
+		if (backChannelLogoutURI != null) {
+			o.put("backchannel_logout_uri", backChannelLogoutURI.toString());
+			o.put("backchannel_logout_session_required", backChannelLogoutSessionRequired);
 		}
 
 		return o;
@@ -1054,6 +1204,27 @@ public class OIDCClientMetadata extends ClientMetadata {
 				metadata.setPostLogoutRedirectionURIs(logoutURIs);
 				oidcFields.remove("post_logout_redirect_uris");
 			}
+			
+			if (jsonObject.get("frontchannel_logout_uri") != null) {
+				
+				metadata.setFrontChannelLogoutURI(JSONObjectUtils.getURI(jsonObject, "frontchannel_logout_uri"));
+			
+				if (jsonObject.get("frontchannel_logout_session_required") != null) {
+					metadata.requiresFrontChannelLogoutSession(JSONObjectUtils.getBoolean(jsonObject, "frontchannel_logout_session_required"));
+				}
+			}
+			
+			
+			if (jsonObject.get("backchannel_logout_uri") != null) {
+				
+				metadata.setBackChannelLogoutURI(JSONObjectUtils.getURI(jsonObject, "backchannel_logout_uri"));
+				
+				if (jsonObject.get("backchannel_logout_session_required") != null) {
+					metadata.requiresBackChannelLogoutSession(JSONObjectUtils.getBoolean(jsonObject, "backchannel_logout_session_required"));
+				}
+			}
+			
+			
 		} catch (ParseException e) {
 			// Insert client_client_metadata error code so that it
 			// can be reported back to the client if we have a
