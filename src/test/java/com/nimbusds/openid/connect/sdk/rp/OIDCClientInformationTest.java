@@ -81,8 +81,12 @@ public class OIDCClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("initiate_login_uri"));
 		assertTrue(paramNames.contains("request_uris"));
 		assertTrue(paramNames.contains("post_logout_redirect_uris"));
+		assertTrue(paramNames.contains("frontchannel_logout_uri"));
+		assertTrue(paramNames.contains("frontchannel_logout_session_required"));
+		assertTrue(paramNames.contains("backchannel_logout_uri"));
+		assertTrue(paramNames.contains("backchannel_logout_session_required"));
 
-		assertEquals(40, paramNames.size());
+		assertEquals(44, paramNames.size());
 	}
 
 
