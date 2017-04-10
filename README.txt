@@ -57,6 +57,8 @@ and OpenID Connect based applications:
 
 		- Parse and process requests at the OpenID Connect End-Session (Logout)
 		  Endpoint.
+
+		- Make requests to a Relying Party Back-Channel Logout Endpoint.
 	
 	* Developing OpenID Connect relying party (RP) clients:
 	
@@ -73,6 +75,8 @@ and OpenID Connect based applications:
 		  process the responses.
 
 		- Make requests to an OpenID Connect End-Session (Logout) Endpoint.
+
+		- Parse and process requests at a Back-Channel Logout Endpoint.
 
 
 Additional features:
@@ -119,7 +123,11 @@ This SDK version implements the following standards and drafts:
 
 	* OpenID Connect Dynamic Registration 1.0 (2014-02-25).
 
-	* OpenID Connect Session Management 1.0 (2014-11-08).
+	* OpenID Connect Session Management 1.0 (2017-01-25).
+
+	* OpenID Connect Front-Channel Logout 1.0 (2017-01-25).
+
+	* OpenID Connect Back-Channel Logout 1.0 (2017-01-25).
 
 	* OAuth 2.0 Multiple Response Type Encoding Practices 1.0 (2014-02-25).
 
@@ -130,5 +138,5 @@ This SDK is provided under the terms of the Apache 2.0 licence.
 Questions or comments? Email support@connect2id.com
 
 
-2016-01-07
+2016-04-10
 
