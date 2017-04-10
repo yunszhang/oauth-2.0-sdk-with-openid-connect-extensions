@@ -39,7 +39,7 @@ import org.apache.commons.lang3.StringUtils;
 
 
 /**
- * OpenID Connect logout request initiated by the relying party (RP).
+ * Logout request initiated by an OpenID relying party (RP).
  *
  * <p>Example HTTP request:
  *
@@ -176,7 +176,7 @@ public class LogoutRequest extends AbstractRequest {
 	}
 
 	/**
-	 * Returns the parameters for this authorisation request.
+	 * Returns the parameters for this logout request.
 	 *
 	 * <p>Example parameters:
 	 *
