@@ -23,7 +23,7 @@ import java.net.URL;
 import java.util.*;
 import javax.mail.internet.InternetAddress;
 
-import com.nimbusds.jose.util.DateUtils;
+import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagUtils;
@@ -455,8 +455,10 @@ public abstract class ClaimsSet {
 	 * @return The JSON object representation.
 	 */
 	public JSONObject toJSONObject() {
-
-		return claims;
+		
+		JSONObject out = new JSONObject();
+		out.putAll(claims);
+		return out;
 	}
 
 

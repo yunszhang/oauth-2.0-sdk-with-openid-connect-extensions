@@ -60,6 +60,7 @@ public class IDTokenClaimsSetTest extends TestCase {
 		assertEquals("nonce", IDTokenClaimsSet.NONCE_CLAIM_NAME);
 		assertEquals("sub", IDTokenClaimsSet.SUB_CLAIM_NAME);
 		assertEquals("sub_jwk", IDTokenClaimsSet.SUB_JWK_CLAIM_NAME);
+		assertEquals("sid", IDTokenClaimsSet.SID_CLAIM_NAME);
 	}
 
 
@@ -80,8 +81,9 @@ public class IDTokenClaimsSetTest extends TestCase {
 		assertTrue(stdClaimNames.contains("amr"));
 		assertTrue(stdClaimNames.contains("azp"));
 		assertTrue(stdClaimNames.contains("sub_jwk"));
+		assertTrue(stdClaimNames.contains("sid"));
 
-		assertEquals(13, stdClaimNames.size());
+		assertEquals(14, stdClaimNames.size());
 	}
 
 

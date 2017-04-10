@@ -20,20 +20,17 @@ package com.nimbusds.openid.connect.sdk.claims;
 
 import java.util.*;
 
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.JWTClaimsSet;
-
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-
 import com.nimbusds.openid.connect.sdk.Nonce;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -59,39 +56,16 @@ import com.nimbusds.openid.connect.sdk.Nonce;
  *
  * <ul>
  *     <li>OpenID Connect Core 1.0, section 2.
+ *     <li>OpenID Connect Front-Channel Logout 1.0, section 3 (draft 02).
  * </ul>
  */
-public class IDTokenClaimsSet extends ClaimsSet {
-
-
-	/**
-	 * The issuer claim name.
-	 */
-	public static final String ISS_CLAIM_NAME = "iss";
-
-
-	/**
-	 * The subject claim name.
-	 */
-	public static final String SUB_CLAIM_NAME = "sub";
-
-
-	/**
-	 * The audience claim name.
-	 */
-	public static final String AUD_CLAIM_NAME = "aud";
+public class IDTokenClaimsSet extends CommonClaimsSet {
 
 
 	/**
 	 * The expiration time claim name.
 	 */
 	public static final String EXP_CLAIM_NAME = "exp";
-
-
-	/**
-	 * The issue time claim name.
-	 */
-	public static final String IAT_CLAIM_NAME = "iat";
 
 
 	/**
@@ -162,6 +136,7 @@ public class IDTokenClaimsSet extends ClaimsSet {
 		stdClaimNames.add(AMR_CLAIM_NAME);
 		stdClaimNames.add(AZP_CLAIM_NAME);
 		stdClaimNames.add(SUB_JWK_CLAIM_NAME);
+		stdClaimNames.add(SID_CLAIM_NAME);
 	}
 
 
@@ -213,13 +188,10 @@ public class IDTokenClaimsSet extends ClaimsSet {
 	 * Creates a new ID token claims set from the specified JSON object.
 	 *
 	 * @param jsonObject The JSON object. Must be verified to represent a
-	 *                   valid ID token claims set and not {@code null}.
+	 *                   valid ID token claims set and not be {@code null}.
 	 *
-	 * @throws ParseException If the JSON object doesn't contain the
-	 *                        minimally required issuer {@code iss},
-	 *                        subject {@code sub}, audience list
-	 *                        {@code aud}, expiration date {@code exp} and
-	 *                        issue date {@code iat} claims.
+	 * @throws ParseException If the JSON object doesn't represent a valid
+	 *                        ID token claims set.
 	 */
 	private IDTokenClaimsSet(final JSONObject jsonObject)
 		throws ParseException {
@@ -250,11 +222,8 @@ public class IDTokenClaimsSet extends ClaimsSet {
 	 *
 	 * @param jwtClaimsSet The JWT claims set. Must not be {@code null}.
 	 *
-	 * @throws ParseException If the JSON object doesn't contain the
-	 *                        minimally required issuer {@code iss},
-	 *                        subject {@code sub}, audience list
-	 *                        {@code aud}, expiration date {@code exp} and
-	 *                        issue date {@code iat} claims.
+	 * @throws ParseException If the JWT claims set doesn't represent a
+	 *                        valid ID token claims set.
 	 */
 	public IDTokenClaimsSet(final JWTClaimsSet jwtClaimsSet)
 		throws ParseException {
@@ -385,52 +354,6 @@ public class IDTokenClaimsSet extends ClaimsSet {
 
 
 	/**
-	 * Gets the ID token issuer. Corresponds to the {@code iss} claim.
-	 *
-	 * @return The issuer.
-	 */
-	public Issuer getIssuer() {
-
-		return new Issuer(getStringClaim(ISS_CLAIM_NAME));
-	}
-
-
-	/**
-	 * Gets the ID token subject. Corresponds to the {@code sub} claim.
-	 *
-	 * @return The subject.
-	 */
-	public Subject getSubject() {
-
-		return new Subject(getStringClaim(SUB_CLAIM_NAME));
-	}
-
-
-	/**
-	 * Gets the ID token audience. Corresponds to the {@code aud} claim.
-	 *
-	 * @return The audience.
-	 */
-	public List<Audience> getAudience() {
-
-		if (getClaim(AUD_CLAIM_NAME) instanceof String) {
-			// Special case - aud is a string
-			return new Audience(getStringClaim(AUD_CLAIM_NAME)).toSingleAudienceList();
-		}
-
-		// General case - JSON string array
-		List<String> rawList = getStringListClaim(AUD_CLAIM_NAME);
-
-		List<Audience> audList = new ArrayList<>(rawList.size());
-
-		for (String s: rawList)
-			audList.add(new Audience(s));
-
-		return audList;
-	}
-
-
-	/**
 	 * Gets the ID token expiration time. Corresponds to the {@code exp}
 	 * claim.
 	 *
@@ -439,17 +362,6 @@ public class IDTokenClaimsSet extends ClaimsSet {
 	public Date getExpirationTime() {
 
 		return getDateClaim(EXP_CLAIM_NAME);
-	}
-
-
-	/**
-	 * Gets the ID token issue time. Corresponds to the {@code iss} claim.
-	 *
-	 * @return The issue time.
-	 */
-	public Date getIssueTime() {
-
-		return getDateClaim(IAT_CLAIM_NAME);
 	}
 
 
@@ -498,10 +410,7 @@ public class IDTokenClaimsSet extends ClaimsSet {
 	 */
 	public void setNonce(final Nonce nonce) {
 
-		if (nonce != null)
-			setClaim(NONCE_CLAIM_NAME, nonce.getValue());
-		else
-			setClaim(NONCE_CLAIM_NAME, null);
+		setClaim(NONCE_CLAIM_NAME, nonce != null ? nonce.getValue() : null);
 	}
 
 
@@ -527,10 +436,7 @@ public class IDTokenClaimsSet extends ClaimsSet {
 	 */
 	public void setAccessTokenHash(final AccessTokenHash atHash) {
 
-		if (atHash != null)
-			setClaim(AT_HASH_CLAIM_NAME, atHash.getValue());
-		else
-			setClaim(AT_HASH_CLAIM_NAME, null);
+		setClaim(AT_HASH_CLAIM_NAME, atHash != null ? atHash.getValue() : null);
 	}
 
 
@@ -557,10 +463,7 @@ public class IDTokenClaimsSet extends ClaimsSet {
 	 */
 	public void setCodeHash(final CodeHash cHash) {
 
-		if (cHash != null)
-			setClaim(C_HASH_CLAIM_NAME, cHash.getValue());
-		else
-			setClaim(C_HASH_CLAIM_NAME, null);
+		setClaim(C_HASH_CLAIM_NAME, cHash != null ? cHash.getValue() : null);
 	}
 
 
@@ -587,10 +490,7 @@ public class IDTokenClaimsSet extends ClaimsSet {
 	 */
 	public void setACR(final ACR acr) {
 
-		if (acr != null)
-			setClaim(ACR_CLAIM_NAME, acr.getValue());
-		else
-			setClaim(ACR_CLAIM_NAME, null);
+		setClaim(ACR_CLAIM_NAME, acr != null ? acr.getValue() : null);
 	}
 
 
@@ -663,10 +563,7 @@ public class IDTokenClaimsSet extends ClaimsSet {
 	 */
 	public void setAuthorizedParty(final AuthorizedParty azp) {
 
-		if (azp != null)
-			setClaim(AZP_CLAIM_NAME, azp.getValue());
-		else
-			setClaim(AZP_CLAIM_NAME, null);
+		setClaim(AZP_CLAIM_NAME, azp != null ? azp.getValue() : null);
 	}
 
 
