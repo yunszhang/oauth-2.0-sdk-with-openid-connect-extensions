@@ -24,12 +24,12 @@ import java.util.*;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.Display;
 import com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue;
 import com.nimbusds.openid.connect.sdk.OIDCScopeValue;
@@ -91,8 +91,12 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("end_session_endpoint"));
 		assertTrue(paramNames.contains("introspection_endpoint"));
 		assertTrue(paramNames.contains("revocation_endpoint"));
+		assertTrue(paramNames.contains("frontchannel_logout_supported"));
+		assertTrue(paramNames.contains("frontchannel_logout_session_supported"));
+		assertTrue(paramNames.contains("backchannel_logout_supported"));
+		assertTrue(paramNames.contains("backchannel_logout_session_supported"));
 
-		assertEquals(40, paramNames.size());
+		assertEquals(44, paramNames.size());
 	}
 
 
@@ -308,10 +312,14 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(uiLocales.contains(LangTag.parse("fr-FR")));
 		assertTrue(uiLocales.contains(LangTag.parse("fr-CA")));
 		assertEquals(5, uiLocales.size());
+		
+		// logout channels
+		assertFalse(op.supportsFrontChannelLogout());
+		assertFalse(op.supportsFrontChannelLogoutSession());
+		assertFalse(op.supportsBackChannelLogout());
+		assertFalse(op.supportsBackChannelLogoutSession());
 
 		assertTrue(op.getCustomParameters().isEmpty());
-		
-		System.out.println(op.toJSONObject().toJSONString());
 	}
 
 
@@ -504,6 +512,22 @@ public class OIDCProviderMetadataTest extends TestCase {
 		meta.setRequiresRequestURIRegistration(true);
 		assertTrue(meta.requiresRequestURIRegistration());
 		
+		assertFalse(meta.supportsFrontChannelLogout());
+		meta.setSupportsFrontChannelLogout(true);
+		assertTrue(meta.supportsFrontChannelLogout());
+		
+		assertFalse(meta.supportsFrontChannelLogoutSession());
+		meta.setSupportsFrontChannelLogoutSession(true);
+		assertTrue(meta.supportsFrontChannelLogoutSession());
+		
+		assertFalse(meta.supportsBackChannelLogout());
+		meta.setSupportsBackChannelLogout(true);
+		assertTrue(meta.supportsBackChannelLogout());
+		
+		assertFalse(meta.supportsBackChannelLogoutSession());
+		meta.setSupportsBackChannelLogoutSession(true);
+		assertTrue(meta.supportsBackChannelLogoutSession());
+		
 		meta.setCustomParameter("x-custom", "xyz");
 
 		assertEquals(1, meta.getCustomParameters().size());
@@ -593,6 +617,11 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(meta.supportsRequestURIParam());
 
 		assertTrue(meta.requiresRequestURIRegistration());
+		
+		assertTrue(meta.supportsFrontChannelLogout());
+		assertTrue(meta.supportsFrontChannelLogoutSession());
+		assertTrue(meta.supportsBackChannelLogout());
+		assertTrue(meta.supportsBackChannelLogoutSession());
 		
 		assertEquals(1, meta.getCustomParameters().size());
 		assertEquals("xyz", meta.getCustomParameter("x-custom"));
@@ -793,7 +822,111 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(JWSAlgorithm.RS256 == opMetadata.getUserInfoJWSAlgs().get(0));
 		assertTrue(JWEAlgorithm.RSA_OAEP == opMetadata.getUserInfoJWEAlgs().get(0));
 		assertTrue(EncryptionMethod.A128GCM == opMetadata.getUserInfoJWEEncs().get(0));
+	}
+	
+	
+	public void testOutputFrontChannelLogoutSessionSupported()
+		throws ParseException {
 		
+		OIDCProviderMetadata meta = new OIDCProviderMetadata(
+			new Issuer("https://c2id.com"),
+			Collections.singletonList(SubjectType.PUBLIC),
+			URI.create("https://c2id.com/jwks.json"));
 		
+		meta.applyDefaults();
+		
+		JSONObject out = meta.toJSONObject();
+		assertFalse(JSONObjectUtils.getBoolean(out, "frontchannel_logout_supported"));
+		assertFalse(JSONObjectUtils.containsKey(out, "frontchannel_logout_session_supported"));
+		
+		meta.setSupportsFrontChannelLogout(true);
+		out = meta.toJSONObject();
+		assertTrue(JSONObjectUtils.getBoolean(out, "frontchannel_logout_supported"));
+		assertFalse(JSONObjectUtils.getBoolean(out, "frontchannel_logout_session_supported"));
+		
+		meta.setSupportsFrontChannelLogoutSession(true);
+		out = meta.toJSONObject();
+		assertTrue(JSONObjectUtils.getBoolean(out, "frontchannel_logout_supported"));
+		assertTrue(JSONObjectUtils.getBoolean(out, "frontchannel_logout_session_supported"));
+	}
+	
+	
+	public void testOutputBackChannelLogoutSessionSupported()
+		throws ParseException {
+		
+		OIDCProviderMetadata meta = new OIDCProviderMetadata(
+			new Issuer("https://c2id.com"),
+			Collections.singletonList(SubjectType.PUBLIC),
+			URI.create("https://c2id.com/jwks.json"));
+		
+		meta.applyDefaults();
+		
+		JSONObject out = meta.toJSONObject();
+		assertFalse(JSONObjectUtils.getBoolean(out, "backchannel_logout_supported"));
+		assertFalse(JSONObjectUtils.containsKey(out, "backchannel_logout_session_supported"));
+		
+		meta.setSupportsBackChannelLogout(true);
+		out = meta.toJSONObject();
+		assertTrue(JSONObjectUtils.getBoolean(out, "backchannel_logout_supported"));
+		assertFalse(JSONObjectUtils.getBoolean(out, "backchannel_logout_session_supported"));
+		
+		meta.setSupportsBackChannelLogoutSession(true);
+		out = meta.toJSONObject();
+		assertTrue(JSONObjectUtils.getBoolean(out, "backchannel_logout_supported"));
+		assertTrue(JSONObjectUtils.getBoolean(out, "backchannel_logout_session_supported"));
+	}
+	
+	
+	public void testParseDefaultFrontAndBackChannelLogoutSupport()
+		throws ParseException {
+		
+		OIDCProviderMetadata meta = new OIDCProviderMetadata(
+			new Issuer("https://c2id.com"),
+			Collections.singletonList(SubjectType.PUBLIC),
+			URI.create("https://c2id.com/jwks.json"));
+		
+		meta.applyDefaults();
+		
+		JSONObject out = meta.toJSONObject();
+		
+		// default - not set
+		assertNotNull(out.remove("frontchannel_logout_supported"));
+		assertNull(out.remove("frontchannel_logout_session_supported"));
+		assertNotNull(out.remove("backchannel_logout_supported"));
+		assertNull(out.remove("backchannel_logout_session_supported"));
+		
+		meta = OIDCProviderMetadata.parse(out.toJSONString());
+		
+		assertFalse(meta.supportsFrontChannelLogout());
+		assertFalse(meta.supportsFrontChannelLogoutSession());
+		assertFalse(meta.supportsBackChannelLogout());
+		assertFalse(meta.supportsBackChannelLogoutSession());
+	}
+	
+	
+	public void testParseBasicFrontAndBackChannelLogoutSupport()
+		throws ParseException {
+		
+		OIDCProviderMetadata meta = new OIDCProviderMetadata(
+			new Issuer("https://c2id.com"),
+			Collections.singletonList(SubjectType.PUBLIC),
+			URI.create("https://c2id.com/jwks.json"));
+		
+		meta.applyDefaults();
+		meta.setSupportsFrontChannelLogout(true);
+		meta.setSupportsBackChannelLogout(true);
+		
+		JSONObject out = meta.toJSONObject();
+		
+		// Optional session supported flag defaults to false
+		assertNotNull(out.remove("frontchannel_logout_session_supported"));
+		assertNotNull(out.remove("backchannel_logout_session_supported"));
+		
+		meta = OIDCProviderMetadata.parse(out.toJSONString());
+		
+		assertTrue(meta.supportsFrontChannelLogout());
+		assertFalse(meta.supportsFrontChannelLogoutSession());
+		assertTrue(meta.supportsBackChannelLogout());
+		assertFalse(meta.supportsBackChannelLogoutSession());
 	}
 }

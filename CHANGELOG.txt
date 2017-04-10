@@ -651,3 +651,9 @@ version 5.24.1 (2017-03-28)
 version 5.24.2 (2017-04-02)
     * Parses JOSE algorithms in OP, client and RP metadata by reference (iss
       #212).
+
+version 5.25 (2017-04-10)
+    * Adds support for OpenID Connect Front-Channel Logout 1.0 (draft 02).
+    * Adds support for OpenID Connect Back-Channel Logout 1.0 (draft 04).
+
+

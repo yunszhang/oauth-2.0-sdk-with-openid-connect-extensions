@@ -59,9 +59,6 @@ public class OIDCProviderMetadata {
 	private static final Set<String> REGISTERED_PARAMETER_NAMES;
 
 
-	/**
-	 * Initialises the registered parameter name set.
-	 */
 	static {
 		Set<String> p = new HashSet<>();
 
@@ -105,6 +102,10 @@ public class OIDCProviderMetadata {
 		p.add("require_request_uri_registration");
 		p.add("introspection_endpoint");
 		p.add("revocation_endpoint");
+		p.add("backchannel_logout_supported");
+		p.add("backchannel_logout_session_supported");
+		p.add("frontchannel_logout_supported");
+		p.add("frontchannel_logout_session_supported");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 
@@ -351,6 +352,34 @@ public class OIDCProviderMetadata {
 	 * pre-registered with the provider, else not.
 	 */
 	private boolean requireRequestURIReg = false;
+	
+	
+	/**
+	 * If {@code true} the {@code frontchannel_logout_supported} parameter
+	 * is set, else not.
+	 */
+	private boolean frontChannelLogoutSupported = false;
+	
+	
+	/**
+	 * If {@code true} the {@code frontchannel_logout_session_supported}
+	 * parameter is set, else not.
+	 */
+	private boolean frontChannelLogoutSessionSupported = false;
+	
+	
+	/**
+	 * If {@code true} the {@code backchannel_logout_supported} parameter
+	 * is set, else not.
+	 */
+	private boolean backChannelLogoutSupported = false;
+	
+	
+	/**
+	 * If {@code true} the {@code backchannel_logout_session_supported}
+	 * parameter is set, else not.
+	 */
+	private boolean backChannelLogoutSessionSupported = false;
 
 
 	/**
@@ -1426,6 +1455,120 @@ public class OIDCProviderMetadata {
 
 		this.requireRequestURIReg = requireRequestURIReg;
 	}
+	
+	
+	/**
+	 * Gets the support for front-channel logout. Corresponds to the
+	 * {@code frontchannel_logout_supported} metadata field.
+	 *
+	 * @return {@code true} if front-channel logout is supported, else
+	 *         {@code false}.
+	 */
+	public boolean supportsFrontChannelLogout() {
+		
+		return frontChannelLogoutSupported;
+	}
+	
+	
+	/**
+	 * Sets the support for front-channel logout. Corresponds to the
+	 * {@code frontchannel_logout_supported} metadata field.
+	 *
+	 * @param frontChannelLogoutSupported {@code true} if front-channel
+	 *                                    logout is supported, else
+	 *                                    {@code false}.
+	 */
+	public void setSupportsFrontChannelLogout(final boolean frontChannelLogoutSupported) {
+	
+		this.frontChannelLogoutSupported = frontChannelLogoutSupported;
+	}
+	
+	
+	/**
+	 * Gets the support for front-channel logout with a session ID.
+	 * Corresponds to the {@code frontchannel_logout_session_supported}
+	 * metadata field.
+	 *
+	 * @return {@code true} if front-channel logout with a session ID is
+	 *         supported, else {@code false}.
+	 */
+	public boolean supportsFrontChannelLogoutSession() {
+		
+		return frontChannelLogoutSessionSupported;
+	}
+	
+	
+	/**
+	 * Sets the support for front-channel logout with a session ID.
+	 * Corresponds to the {@code frontchannel_logout_session_supported}
+	 * metadata field.
+	 *
+	 * @param frontChannelLogoutSessionSupported {@code true} if
+	 *                                           front-channel logout with
+	 *                                           a session ID is supported,
+	 *                                           else {@code false}.
+	 */
+	public void setSupportsFrontChannelLogoutSession(final boolean frontChannelLogoutSessionSupported) {
+	
+		this.frontChannelLogoutSessionSupported = frontChannelLogoutSessionSupported;
+	}
+	
+	
+	/**
+	 * Gets the support for back-channel logout. Corresponds to the
+	 * {@code backchannel_logout_supported} metadata field.
+	 *
+	 * @return {@code true} if back-channel logout is supported, else
+	 *         {@code false}.
+	 */
+	public boolean supportsBackChannelLogout() {
+		
+		return backChannelLogoutSupported;
+	}
+	
+	
+	/**
+	 * Sets the support for back-channel logout. Corresponds to the
+	 * {@code backchannel_logout_supported} metadata field.
+	 *
+	 * @param backChannelLogoutSupported {@code true} if back-channel
+	 *                                   logout is supported, else
+	 *                                   {@code false}.
+	 */
+	public void setSupportsBackChannelLogout(final boolean backChannelLogoutSupported) {
+	
+		this.backChannelLogoutSupported = backChannelLogoutSupported;
+	}
+	
+	
+	/**
+	 * Gets the support for back-channel logout with a session ID.
+	 * Corresponds to the {@code backchannel_logout_session_supported}
+	 * metadata field.
+	 *
+	 * @return {@code true} if back-channel logout with a session ID is
+	 *         supported, else {@code false}.
+	 */
+	public boolean supportsBackChannelLogoutSession() {
+		
+		return backChannelLogoutSessionSupported;
+	}
+	
+	
+	/**
+	 * Sets the support for back-channel logout with a session ID.
+	 * Corresponds to the {@code backchannel_logout_session_supported}
+	 * metadata field.
+	 *
+	 * @param backChannelLogoutSessionSupported {@code true} if
+	 *                                          back-channel logout with a
+	 *                                          session ID is supported,
+	 *                                          else {@code false}.
+	 */
+	public void setSupportsBackChannelLogoutSession(final boolean backChannelLogoutSessionSupported) {
+		
+		this.backChannelLogoutSessionSupported = backChannelLogoutSessionSupported;
+	}
 
 
 	/**
@@ -1791,6 +1934,19 @@ public class OIDCProviderMetadata {
 		o.put("request_uri_parameter_supported", requestURIParamSupported);
 
 		o.put("require_request_uri_registration", requireRequestURIReg);
+		
+		// optional front and back-channel logout
+		o.put("frontchannel_logout_supported", frontChannelLogoutSupported);
+		
+		if (frontChannelLogoutSupported) {
+			o.put("frontchannel_logout_session_supported", frontChannelLogoutSessionSupported);
+		}
+		
+		o.put("backchannel_logout_supported", backChannelLogoutSupported);
+		
+		if (backChannelLogoutSupported) {
+			o.put("backchannel_logout_session_supported", backChannelLogoutSessionSupported);
+		}
 
 		// Append any custom (not registered) parameters
 		o.putAll(customParameters);
@@ -2156,7 +2312,20 @@ public class OIDCProviderMetadata {
 		
 		if (jsonObject.get("require_request_uri_registration") != null)
 			op.requireRequestURIReg = JSONObjectUtils.getBoolean(jsonObject, "require_request_uri_registration");
-
+		
+		// optional front and back-channel logout
+		if (jsonObject.get("frontchannel_logout_supported") != null)
+			op.frontChannelLogoutSupported = JSONObjectUtils.getBoolean(jsonObject, "frontchannel_logout_supported");
+		
+		if (op.frontChannelLogoutSupported && jsonObject.get("frontchannel_logout_session_supported") != null)
+			op.frontChannelLogoutSessionSupported = JSONObjectUtils.getBoolean(jsonObject, "frontchannel_logout_session_supported");
+		
+		if (jsonObject.get("backchannel_logout_supported") != null)
+			op.backChannelLogoutSupported = JSONObjectUtils.getBoolean(jsonObject, "backchannel_logout_supported");
+		
+		if (op.frontChannelLogoutSupported && jsonObject.get("backchannel_logout_session_supported") != null)
+			op.backChannelLogoutSessionSupported = JSONObjectUtils.getBoolean(jsonObject, "backchannel_logout_session_supported");
+		
 		// Parse custom (not registered) parameters
 		JSONObject customParams = new JSONObject(jsonObject);
 		customParams.keySet().removeAll(REGISTERED_PARAMETER_NAMES);
