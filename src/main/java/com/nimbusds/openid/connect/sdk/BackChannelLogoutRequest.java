@@ -27,6 +27,7 @@ import java.util.Map;
 
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
+import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.oauth2.sdk.AbstractRequest;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
@@ -82,6 +83,10 @@ public class BackChannelLogoutRequest extends AbstractRequest {
 		
 		if (logoutToken == null) {
 			throw new IllegalArgumentException("The logout token must not be null");
+		}
+		
+		if (logoutToken instanceof PlainJWT) {
+			throw new IllegalArgumentException("The logout token must not be unsecured (plain)");
 		}
 		
 		this.logoutToken = logoutToken;
@@ -208,7 +213,11 @@ public class BackChannelLogoutRequest extends AbstractRequest {
 			throw new ParseException("Invalid logout token: " + e.getMessage(), e);
 		}
 		
-		return new BackChannelLogoutRequest(uri, logoutToken);
+		try {
+			return new BackChannelLogoutRequest(uri, logoutToken);
+		} catch (IllegalArgumentException e) {
+			throw new ParseException(e.getMessage(), e);
+		}
 	}
 	
 	
@@ -235,7 +244,11 @@ public class BackChannelLogoutRequest extends AbstractRequest {
 	public static BackChannelLogoutRequest parse(final HTTPRequest httpRequest)
 		throws ParseException {
 		
-		// Lenient, POST method and content-type not checked
+		if (! HTTPRequest.Method.POST.equals(httpRequest.getMethod())) {
+			throw new ParseException("HTTP POST required");
+		}
+		
+		// Lenient on content-type
 		
 		String query = httpRequest.getQuery();
 		
