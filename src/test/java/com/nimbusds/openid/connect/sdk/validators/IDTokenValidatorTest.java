@@ -358,7 +358,7 @@ public class IDTokenValidatorTest extends TestCase {
 			idTokenValidator.validate(idToken, null);
 			fail();
 		} catch (BadJOSEException e) {
-			assertEquals("Signed JWT rejected: No matching key(s) found", e.getMessage());
+			assertEquals("Signed JWT rejected: Another algorithm expected, or no matching key(s) found", e.getMessage());
 		}
 	}
 
@@ -495,7 +495,7 @@ public class IDTokenValidatorTest extends TestCase {
 			idTokenValidator.validate(idToken, new Nonce("xyz"));
 			fail();
 		} catch (BadJOSEException e) {
-			assertEquals("Signed JWT rejected: No matching key(s) found", e.getMessage());
+			assertEquals("Signed JWT rejected: Another algorithm expected, or no matching key(s) found", e.getMessage());
 		}
 	}
 
@@ -653,7 +653,7 @@ public class IDTokenValidatorTest extends TestCase {
 	}
 
 
-	private Pair<OIDCProviderMetadata,List<RSAKey>> createOPMetadata()
+	public static Pair<OIDCProviderMetadata,List<RSAKey>> createOPMetadata()
 		throws Exception {
 
 		// Generate 2 RSA keys for the OP
@@ -761,7 +761,7 @@ public class IDTokenValidatorTest extends TestCase {
 			v.validate(idToken, null);
 			fail();
 		} catch (BadJOSEException e) {
-			assertEquals("Signed JWT rejected: No matching key(s) found", e.getMessage());
+			assertEquals("Signed JWT rejected: Another algorithm expected, or no matching key(s) found", e.getMessage());
 		}
 
 		// Sign ID token with bad HMAC key
@@ -773,7 +773,7 @@ public class IDTokenValidatorTest extends TestCase {
 			v.validate(idToken, null);
 			fail();
 		} catch (BadJOSEException e) {
-			assertEquals("Signed JWT rejected: No matching key(s) found", e.getMessage());
+			assertEquals("Signed JWT rejected: Another algorithm expected, or no matching key(s) found", e.getMessage());
 		}
 	}
 }

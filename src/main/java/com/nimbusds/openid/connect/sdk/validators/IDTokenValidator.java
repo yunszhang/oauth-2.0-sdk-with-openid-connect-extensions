@@ -63,44 +63,7 @@ import net.jcip.annotations.ThreadSafe;
  * </ul>
  */
 @ThreadSafe
-public class IDTokenValidator implements ClockSkewAware {
-
-
-	/**
-	 * The default maximum acceptable clock skew for verifying ID token
-	 * timestamps, in seconds.
-	 */
-	public static final int DEFAULT_MAX_CLOCK_SKEW = 60;
-
-
-	/**
-	 * The expected ID token issuer.
-	 */
-	private final Issuer expectedIssuer;
-
-
-	/**
-	 * The requesting client.
-	 */
-	private final ClientID clientID;
-
-
-	/**
-	 * The JWS key selector.
-	 */
-	private final JWSKeySelector jwsKeySelector;
-
-
-	/**
-	 * The JWE key selector.
-	 */
-	private final JWEKeySelector jweKeySelector;
-
-
-	/**
-	 * The maximum acceptable clock skew, in seconds.
-	 */
-	private int maxClockSkew = DEFAULT_MAX_CLOCK_SKEW;
+public class IDTokenValidator extends AbstractJWTValidator implements ClockSkewAware {
 
 
 	/**
@@ -113,7 +76,7 @@ public class IDTokenValidator implements ClockSkewAware {
 	public IDTokenValidator(final Issuer expectedIssuer,
 				final ClientID clientID) {
 
-		this(expectedIssuer, clientID, (JWSKeySelector)null, (JWEKeySelector)null);
+		this(expectedIssuer, clientID, (JWSKeySelector) null, null);
 	}
 
 
@@ -225,86 +188,8 @@ public class IDTokenValidator implements ClockSkewAware {
 				final ClientID clientID,
 				final JWSKeySelector jwsKeySelector,
 				final JWEKeySelector jweKeySelector) {
-		if (expectedIssuer == null) {
-			throw new IllegalArgumentException("The expected ID token issuer must not be null");
-		}
-		this.expectedIssuer = expectedIssuer;
-		if (clientID == null) {
-			throw new IllegalArgumentException("The client ID must not be null");
-		}
-		this.clientID = clientID;
-		this.jwsKeySelector = jwsKeySelector;
-		this.jweKeySelector = jweKeySelector;
-	}
-
-
-	/**
-	 * Returns the expected ID token issuer.
-	 *
-	 * @return The ID token issuer.
-	 */
-	public Issuer getExpectedIssuer() {
-		return expectedIssuer;
-	}
-
-
-	/**
-	 * Returns the client ID (the expected ID token audience).
-	 *
-	 * @return The client ID.
-	 */
-	public ClientID getClientID() {
-		return clientID;
-	}
-
-
-	/**
-	 * Returns the configured JWS key selector for signed ID token
-	 * verification.
-	 *
-	 * @return The JWS key selector, {@code null} if none.
-	 */
-	public JWSKeySelector getJWSKeySelector() {
-		return jwsKeySelector;
-	}
-
-
-	/**
-	 * Returns the configured JWE key selector for encrypted ID token
-	 * decryption.
-	 *
-	 * @return The JWE key selector, {@code null}.
-	 */
-	public JWEKeySelector getJWEKeySelector() {
-		return jweKeySelector;
-	}
-
-
-	/**
-	 * Gets the maximum acceptable clock skew for verifying the ID token
-	 * timestamps.
-	 *
-	 * @return The maximum acceptable clock skew, in seconds. Zero
-	 *         indicates none.
-	 */
-	@Override
-	public int getMaxClockSkew() {
-
-		return maxClockSkew;
-	}
-
-
-	/**
-	 * Sets the maximum acceptable clock skew for verifying the ID token
-	 * timestamps.
-	 *
-	 * @param maxClockSkew The maximum acceptable clock skew, in seconds.
-	 *                     Zero indicates none. Must not be negative.
-	 */
-	@Override
-	public void setMaxClockSkew(final int maxClockSkew) {
-
-		this.maxClockSkew = maxClockSkew;
+		
+		super(expectedIssuer, clientID, jwsKeySelector, jweKeySelector);
 	}
 
 
@@ -350,7 +235,7 @@ public class IDTokenValidator implements ClockSkewAware {
 	private IDTokenClaimsSet validate(final PlainJWT idToken, final Nonce expectedNonce)
 		throws BadJOSEException, JOSEException {
 
-		if (jwsKeySelector != null) {
+		if (getJWSKeySelector() != null) {
 			throw new BadJWTException("Signed ID token expected");
 		}
 
@@ -362,8 +247,8 @@ public class IDTokenValidator implements ClockSkewAware {
 			throw new BadJWTException(e.getMessage(), e);
 		}
 
-		JWTClaimsVerifier claimsVerifier = new IDTokenClaimsVerifier(expectedIssuer, clientID, expectedNonce, maxClockSkew);
-		claimsVerifier.verify(jwtClaimsSet);
+		JWTClaimsSetVerifier<?> claimsVerifier = new IDTokenClaimsVerifier(getExpectedIssuer(), getClientID(), expectedNonce, getMaxClockSkew());
+		claimsVerifier.verify(jwtClaimsSet, null);
 		return toIDTokenClaimsSet(jwtClaimsSet);
 	}
 
@@ -383,13 +268,13 @@ public class IDTokenValidator implements ClockSkewAware {
 	private IDTokenClaimsSet validate(final SignedJWT idToken, final Nonce expectedNonce)
 		throws BadJOSEException, JOSEException {
 
-		if (jwsKeySelector == null) {
+		if (getJWSKeySelector() == null) {
 			throw new BadJWTException("Verification of signed JWTs not configured");
 		}
 
-		ConfigurableJWTProcessor jwtProcessor = new DefaultJWTProcessor();
-		jwtProcessor.setJWSKeySelector(jwsKeySelector);
-		jwtProcessor.setJWTClaimsVerifier(new IDTokenClaimsVerifier(expectedIssuer, clientID, expectedNonce, maxClockSkew));
+		ConfigurableJWTProcessor<?> jwtProcessor = new DefaultJWTProcessor();
+		jwtProcessor.setJWSKeySelector(getJWSKeySelector());
+		jwtProcessor.setJWTClaimsSetVerifier(new IDTokenClaimsVerifier(getExpectedIssuer(), getClientID(), expectedNonce, getMaxClockSkew()));
 		JWTClaimsSet jwtClaimsSet = jwtProcessor.process(idToken, null);
 		return toIDTokenClaimsSet(jwtClaimsSet);
 	}
@@ -410,17 +295,17 @@ public class IDTokenValidator implements ClockSkewAware {
 	private IDTokenClaimsSet validate(final EncryptedJWT idToken, final Nonce expectedNonce)
 		throws BadJOSEException, JOSEException {
 
-		if (jweKeySelector == null) {
+		if (getJWEKeySelector() == null) {
 			throw new BadJWTException("Decryption of JWTs not configured");
 		}
-		if (jwsKeySelector == null) {
+		if (getJWSKeySelector() == null) {
 			throw new BadJWTException("Verification of signed JWTs not configured");
 		}
 
-		ConfigurableJWTProcessor jwtProcessor = new DefaultJWTProcessor();
-		jwtProcessor.setJWSKeySelector(jwsKeySelector);
-		jwtProcessor.setJWEKeySelector(jweKeySelector);
-		jwtProcessor.setJWTClaimsVerifier(new IDTokenClaimsVerifier(expectedIssuer, clientID, expectedNonce, maxClockSkew));
+		ConfigurableJWTProcessor<?> jwtProcessor = new DefaultJWTProcessor();
+		jwtProcessor.setJWSKeySelector(getJWSKeySelector());
+		jwtProcessor.setJWEKeySelector(getJWEKeySelector());
+		jwtProcessor.setJWTClaimsSetVerifier(new IDTokenClaimsVerifier(getExpectedIssuer(), getClientID(), expectedNonce, getMaxClockSkew()));
 
 		JWTClaimsSet jwtClaimsSet = jwtProcessor.process(idToken, null);
 
@@ -429,7 +314,7 @@ public class IDTokenValidator implements ClockSkewAware {
 
 
 	/**
-	 * Converts a JWT claims set to ID token claims set.
+	 * Converts a JWT claims set to an ID token claims set.
 	 *
 	 * @param jwtClaimsSet The JWT claims set. Must not be {@code null}.
 	 *
@@ -463,8 +348,8 @@ public class IDTokenValidator implements ClockSkewAware {
 	 *                          Relying Party metadata are missing a
 	 *                          required parameter or inconsistent.
 	 */
-	private static JWSKeySelector createJWSKeySelector(final OIDCProviderMetadata opMetadata,
-							   final OIDCClientInformation clientInfo)
+	protected static JWSKeySelector createJWSKeySelector(final OIDCProviderMetadata opMetadata,
+							     final OIDCClientInformation clientInfo)
 		throws GeneralException {
 
 		final JWSAlgorithm expectedJWSAlg = clientInfo.getOIDCMetadata().getIDTokenJWSAlg();
@@ -523,9 +408,9 @@ public class IDTokenValidator implements ClockSkewAware {
 	 *                          Relying Party metadata are missing a
 	 *                          required parameter or inconsistent.
 	 */
-	private static JWEKeySelector createJWEKeySelector(final OIDCProviderMetadata opMetadata,
-							   final OIDCClientInformation clientInfo,
-							   final JWKSource clientJWKSource)
+	protected static JWEKeySelector createJWEKeySelector(final OIDCProviderMetadata opMetadata,
+							     final OIDCClientInformation clientInfo,
+							     final JWKSource clientJWKSource)
 		throws GeneralException {
 
 		final JWEAlgorithm expectedJWEAlg = clientInfo.getOIDCMetadata().getIDTokenJWEAlg();

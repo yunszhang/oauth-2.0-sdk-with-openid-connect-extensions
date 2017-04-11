@@ -215,7 +215,7 @@ public class IDTokenValidatorWithHTTPTest extends TestCase {
 			v.validate(idToken, null);
 			fail();
 		} catch (BadJOSEException e) {
-			assertEquals("Signed JWT rejected: No matching key(s) found", e.getMessage());
+			assertEquals("Signed JWT rejected: Another algorithm expected, or no matching key(s) found", e.getMessage());
 		}
 	}
 
@@ -335,7 +335,7 @@ public class IDTokenValidatorWithHTTPTest extends TestCase {
 			v.validate(idToken, null);
 			fail();
 		} catch (BadJOSEException e) {
-			assertEquals("Signed JWT rejected: No matching key(s) found", e.getMessage());
+			assertEquals("Signed JWT rejected: Another algorithm expected, or no matching key(s) found", e.getMessage());
 		}
 	}
 }

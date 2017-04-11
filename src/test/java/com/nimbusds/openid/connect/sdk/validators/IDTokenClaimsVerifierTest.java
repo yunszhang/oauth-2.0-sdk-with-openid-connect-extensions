@@ -61,7 +61,7 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 			.claim("nonce", nonce.getValue())
 			.build();
 
-		verifier.verify(claimsSet);
+		verifier.verify(claimsSet, null);
 	}
 
 
@@ -89,7 +89,7 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 			.issueTime(iat)
 			.build();
 
-		verifier.verify(claimsSet);
+		verifier.verify(claimsSet, null);
 	}
 
 
@@ -116,7 +116,7 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 			.build();
 
 		try {
-			verifier.verify(claimsSet);
+			verifier.verify(claimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Missing JWT issuer (iss) claim", e.getMessage());
@@ -147,7 +147,7 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 			.build();
 
 		try {
-			verifier.verify(claimsSet);
+			verifier.verify(claimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Missing JWT subject (sub) claim", e.getMessage());
@@ -178,7 +178,7 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 			.build();
 
 		try {
-			verifier.verify(claimsSet);
+			verifier.verify(claimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Missing JWT audience (aud) claim", e.getMessage());
@@ -208,7 +208,7 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 			.build();
 
 		try {
-			verifier.verify(claimsSet);
+			verifier.verify(claimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Missing JWT expiration (exp) claim", e.getMessage());
@@ -238,7 +238,7 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 			.build();
 
 		try {
-			verifier.verify(claimsSet);
+			verifier.verify(claimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Missing JWT issue time (iat) claim", e.getMessage());
@@ -271,7 +271,7 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 			.build();
 
 		try {
-			verifier.verify(claimsSet);
+			verifier.verify(claimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Missing JWT nonce (nonce) claim", e.getMessage());
@@ -305,7 +305,7 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 			.build();
 
 		try {
-			verifier.verify(claimsSet);
+			verifier.verify(claimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Unexpected JWT issuer: https://other-issuer.com", e.getMessage());
@@ -339,7 +339,7 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 			.build();
 
 		try {
-			verifier.verify(claimsSet);
+			verifier.verify(claimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Unexpected JWT audience: [789]", e.getMessage());
@@ -373,7 +373,7 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 			.build();
 
 		try {
-			verifier.verify(claimsSet);
+			verifier.verify(claimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Unexpected JWT audience: [456, 789]", e.getMessage());
@@ -408,7 +408,7 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 			.build();
 
 		try {
-			verifier.verify(claimsSet);
+			verifier.verify(claimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Unexpected JWT authorized party (azp) claim: 456", e.getMessage());
@@ -442,7 +442,7 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 			.build();
 
 		try {
-			verifier.verify(claimsSet);
+			verifier.verify(claimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Expired JWT", e.getMessage());
@@ -476,7 +476,7 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 			.build();
 
 		try {
-			verifier.verify(claimsSet);
+			verifier.verify(claimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("JWT issue time ahead of current time", e.getMessage());
@@ -510,7 +510,7 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 			.build();
 
 		try {
-			verifier.verify(claimsSet);
+			verifier.verify(claimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Unexpected JWT nonce (nonce) claim: xxx", e.getMessage());
@@ -544,7 +544,7 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 				.claim("nonce", nonce.getValue())
 				.build();
 
-		verifier.verify(claimsSet);
+		verifier.verify(claimsSet, null);
 	}
 
 
@@ -574,6 +574,6 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 				.claim("nonce", nonce.getValue())
 				.build();
 
-		verifier.verify(claimsSet);
+		verifier.verify(claimsSet, null);
 	}
 }
