@@ -28,8 +28,8 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jose.util.DateUtils;
 import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -133,8 +133,8 @@ public class ClientSecretJWTTest extends TestCase {
 
 		// 4 min < exp < 6 min
 		final long now = new Date().getTime();
-		final Date fourMinutesFromNow = new Date(now + 4*60*1000l);
-		final Date sixMinutesFromNow = new Date(now + 6*60*1000l);
+		final Date fourMinutesFromNow = new Date(now + 4*60*1000L);
+		final Date sixMinutesFromNow = new Date(now + 6*60*1000L);
 		assertTrue(clientSecretJWT.getJWTAuthenticationClaimsSet().getExpirationTime().after(fourMinutesFromNow));
 		assertTrue(clientSecretJWT.getJWTAuthenticationClaimsSet().getExpirationTime().before(sixMinutesFromNow));
 		assertNotNull(clientSecretJWT.getJWTAuthenticationClaimsSet().getJWTID());
