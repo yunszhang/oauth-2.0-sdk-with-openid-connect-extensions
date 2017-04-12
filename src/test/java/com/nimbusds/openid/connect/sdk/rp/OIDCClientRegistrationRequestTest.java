@@ -19,12 +19,11 @@ package com.nimbusds.openid.connect.sdk.rp;
 
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
-
-import junit.framework.TestCase;
 
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
@@ -34,14 +33,16 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-
 import com.nimbusds.langtag.LangTag;
-
+import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.client.*;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
-
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.openid.connect.sdk.SubjectType;
+import junit.framework.TestCase;
 
 
 
@@ -255,5 +256,136 @@ public class OIDCClientRegistrationRequestTest extends TestCase {
 			// ok
 			assertEquals("The software statement JWT must contain an 'iss' claim", e.getMessage());
 		}
+	}
+	
+	
+	public void _testExampleRegisterForCodeGrant()
+		throws Exception {
+		
+		// The client registration endpoint
+		URI clientsEndpoint = new URI("https://demo.c2id.com/c2id/clients");
+		
+		// Master API token for the clients endpoint
+		BearerAccessToken masterToken = new BearerAccessToken("ztucZS1ZyFKgh0tUEruUtiSTXhnexmd6");
+		
+		// We want to register a client for the code grant
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setGrantTypes(Collections.singleton(GrantType.AUTHORIZATION_CODE));
+		clientMetadata.setRedirectionURI(URI.create("https://example.com/cb"));
+		clientMetadata.setName("My Client App");
+		
+		OIDCClientRegistrationRequest regRequest = new OIDCClientRegistrationRequest(
+			clientsEndpoint,
+			clientMetadata,
+			masterToken
+		);
+		
+		HTTPResponse httpResponse = regRequest.toHTTPRequest().send();
+		
+		ClientRegistrationResponse regResponse = OIDCClientRegistrationResponseParser.parse(httpResponse);
+		
+		if (! regResponse.indicatesSuccess()) {
+			// We have an error
+			ClientRegistrationErrorResponse errorResponse = (ClientRegistrationErrorResponse)regResponse;
+			System.err.println(errorResponse.getErrorObject());
+			return;
+		}
+		
+		// Successful registration
+		OIDCClientInformationResponse successResponse = (OIDCClientInformationResponse)regResponse;
+		
+		OIDCClientInformation clientInfo = successResponse.getOIDCClientInformation();
+		
+		// The client credentials - store them:
+		
+		// The client_id
+		System.out.println("Client ID: " + clientInfo.getID());
+		
+		// The client_secret
+		System.out.println("Client secret: " + clientInfo.getSecret().getValue());
+		
+		// The client's registration resource
+		System.out.println("Client registration URI: " + clientInfo.getRegistrationURI());
+		
+		// The token for accessing the client's registration (for update, etc)
+		System.out.println("Client reg access token: " + clientInfo.getRegistrationAccessToken());
+		
+		// Print the remaining client metadata
+		System.out.println("Client metadata: " + clientInfo.getMetadata().toJSONObject());
+		
+		
+		// Query
+		ClientReadRequest readRequest = new ClientReadRequest(
+			clientInfo.getRegistrationURI(),
+			clientInfo.getRegistrationAccessToken()
+		);
+		
+		httpResponse = readRequest.toHTTPRequest().send();
+		
+		regResponse = OIDCClientRegistrationResponseParser.parse(httpResponse);
+		
+		if (! regResponse.indicatesSuccess()) {
+			// We have an error
+			ClientRegistrationErrorResponse errorResponse = (ClientRegistrationErrorResponse)regResponse;
+			System.err.println(errorResponse.getErrorObject());
+			return;
+		}
+		
+		// Success
+		successResponse = (OIDCClientInformationResponse)regResponse;
+		
+		System.out.println("Client registration data: " + successResponse.getClientInformation().toJSONObject());
+		
+		
+		// Update client name
+		clientMetadata = clientInfo.getOIDCMetadata();
+		clientMetadata.setName("My app has a new name");
+		
+		// Send request
+		ClientUpdateRequest updateRequest = new ClientUpdateRequest(
+			clientInfo.getRegistrationURI(),
+			clientInfo.getID(),
+			clientInfo.getRegistrationAccessToken(),
+			clientMetadata,
+			clientInfo.getSecret()
+		);
+		
+		httpResponse = updateRequest.toHTTPRequest().send();
+		
+		regResponse = OIDCClientRegistrationResponseParser.parse(httpResponse);
+		
+		if (! regResponse.indicatesSuccess()) {
+			// We have an error
+			ClientRegistrationErrorResponse errorResponse = (ClientRegistrationErrorResponse)regResponse;
+			System.err.println(errorResponse.getErrorObject());
+			return;
+		}
+		
+		// Success
+		successResponse = (OIDCClientInformationResponse)regResponse;
+		
+		// Ensure the client name has been updated
+		clientInfo = successResponse.getOIDCClientInformation();
+		System.out.println("Client name: " + clientInfo.getMetadata().getName());
+		
+		
+		// Request deletion
+		ClientDeleteRequest deleteRequest = new ClientDeleteRequest(
+			clientInfo.getRegistrationURI(),
+			clientInfo.getRegistrationAccessToken()
+		);
+		
+		httpResponse = deleteRequest.toHTTPRequest().send();
+		
+		regResponse = ClientRegistrationResponse.parse(httpResponse);
+		
+		if (! regResponse.indicatesSuccess()) {
+			// We have an error
+			ClientRegistrationErrorResponse errorResponse = (ClientRegistrationErrorResponse)regResponse;
+			System.err.println(errorResponse.getErrorObject());
+			return;
+		}
+		
+		// Success: nothing returned
 	}
 }

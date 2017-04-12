@@ -19,9 +19,12 @@ package com.nimbusds.oauth2.sdk.client;
 
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import com.nimbusds.oauth2.sdk.GrantType;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import junit.framework.TestCase;
 
 import net.minidev.json.JSONObject;
@@ -88,6 +91,137 @@ public class ClientRegistrationRequestTest extends TestCase {
 		assertEquals(metadata.getTokenEndpointAuthMethod(), request.getClientMetadata().getTokenEndpointAuthMethod());
 		assertEquals("code", request.getClientMetadata().getResponseTypes().iterator().next().toString());
 		assertEquals("authorization_code", request.getClientMetadata().getGrantTypes().iterator().next().toString());
+	}
+	
+	
+	public void _testExampleRegisterForCodeGrant()
+		throws Exception {
+		
+		// The client registration endpoint
+		URI clientsEndpoint = new URI("https://demo.c2id.com/c2id/clients");
+		
+		// Master API token for the clients endpoint
+		BearerAccessToken masterToken = new BearerAccessToken("ztucZS1ZyFKgh0tUEruUtiSTXhnexmd6");
+		
+		// We want to register a client for the code grant
+		ClientMetadata clientMetadata = new ClientMetadata();
+		clientMetadata.setGrantTypes(Collections.singleton(GrantType.AUTHORIZATION_CODE));
+		clientMetadata.setRedirectionURI(URI.create("https://example.com/cb"));
+		clientMetadata.setName("My Client App");
+		
+		ClientRegistrationRequest regRequest = new ClientRegistrationRequest(
+			clientsEndpoint,
+			clientMetadata,
+			masterToken
+		);
+		
+		HTTPResponse httpResponse = regRequest.toHTTPRequest().send();
+		
+		ClientRegistrationResponse regResponse = ClientRegistrationResponse.parse(httpResponse);
+		
+		if (! regResponse.indicatesSuccess()) {
+			// We have an error
+			ClientRegistrationErrorResponse errorResponse = (ClientRegistrationErrorResponse)regResponse;
+			System.err.println(errorResponse.getErrorObject());
+			return;
+		}
+		
+		// Successful registration
+		ClientInformationResponse successResponse = (ClientInformationResponse)regResponse;
+		
+		ClientInformation clientInfo = successResponse.getClientInformation();
+		
+		// The client credentials - store them:
+		
+		// The client_id
+		System.out.println("Client ID: " + clientInfo.getID());
+		
+		// The client_secret
+		System.out.println("Client secret: " + clientInfo.getSecret().getValue());
+		
+		// The client's registration resource
+		System.out.println("Client registration URI: " + clientInfo.getRegistrationURI());
+		
+		// The token for accessing the client's registration (for update, etc)
+		System.out.println("Client reg access token: " + clientInfo.getRegistrationAccessToken());
+		
+		// Print the remaining client metadata
+		System.out.println("Client metadata: " + clientInfo.getMetadata().toJSONObject());
+		
+		
+		// Query
+		ClientReadRequest readRequest = new ClientReadRequest(
+			clientInfo.getRegistrationURI(),
+			clientInfo.getRegistrationAccessToken()
+		);
+		
+		httpResponse = readRequest.toHTTPRequest().send();
+		
+		regResponse = ClientRegistrationResponse.parse(httpResponse);
+		
+		if (! regResponse.indicatesSuccess()) {
+			// We have an error
+			ClientRegistrationErrorResponse errorResponse = (ClientRegistrationErrorResponse)regResponse;
+			System.err.println(errorResponse.getErrorObject());
+			return;
+		}
+		
+		// Success
+		successResponse = (ClientInformationResponse)regResponse;
+		
+		System.out.println("Client registration data: " + successResponse.getClientInformation().toJSONObject());
+		
+		
+		// Update client name
+		clientMetadata = clientInfo.getMetadata();
+		clientMetadata.setName("My app has a new name");
+		
+		// Send request
+		ClientUpdateRequest updateRequest = new ClientUpdateRequest(
+			clientInfo.getRegistrationURI(),
+			clientInfo.getID(),
+			clientInfo.getRegistrationAccessToken(),
+			clientMetadata,
+			clientInfo.getSecret()
+		);
+	
+		httpResponse = updateRequest.toHTTPRequest().send();
+		
+		regResponse = ClientRegistrationResponse.parse(httpResponse);
+		
+		if (! regResponse.indicatesSuccess()) {
+			// We have an error
+			ClientRegistrationErrorResponse errorResponse = (ClientRegistrationErrorResponse)regResponse;
+			System.err.println(errorResponse.getErrorObject());
+			return;
+		}
+		
+		// Success
+		successResponse = (ClientInformationResponse)regResponse;
+		
+		// Ensure the client name has been updated
+		clientInfo = successResponse.getClientInformation();
+		System.out.println("Client name: " + clientInfo.getMetadata().getName());
+		
+		
+		// Request deletion
+		ClientDeleteRequest deleteRequest = new ClientDeleteRequest(
+			clientInfo.getRegistrationURI(),
+			clientInfo.getRegistrationAccessToken()
+		);
+		
+		httpResponse = deleteRequest.toHTTPRequest().send();
+		
+		regResponse = ClientRegistrationResponse.parse(httpResponse);
+		
+		if (! regResponse.indicatesSuccess()) {
+			// We have an error
+			ClientRegistrationErrorResponse errorResponse = (ClientRegistrationErrorResponse)regResponse;
+			System.err.println(errorResponse.getErrorObject());
+			return;
+		}
+		
+		// Success: nothing returned
 	}
 	
 
