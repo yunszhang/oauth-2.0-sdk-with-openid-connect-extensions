@@ -138,5 +138,5 @@ This SDK is provided under the terms of the Apache 2.0 licence.
 Questions or comments? Email support@connect2id.com
 
 
-2016-04-10
+2017-04-10
 
