@@ -19,10 +19,13 @@ package com.nimbusds.oauth2.sdk.auth;
 
 
 import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Date;
 
+import com.nimbusds.jose.crypto.utils.ConstantTimeUtils;
 import com.nimbusds.jose.util.Base64URL;
 import net.jcip.annotations.Immutable;
 
@@ -159,6 +162,27 @@ public class Secret {
 
 		return value;
 	}
+	
+	
+	/**
+	 * Gets the SHA-256 hash of this secret.
+	 *
+	 * @return The SHA-256 hash, {@code null} if the secret value has been
+	 *         erased.
+	 */
+	public byte[] getSHA256() {
+		
+		if (value == null) {
+			return null;
+		}
+		
+		try {
+			MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+			return sha256.digest(value);
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 
 	/**
@@ -206,17 +230,48 @@ public class Secret {
 
 		return expDate.before(now);
 	}
-
 	
+	
+	/**
+	 * Constant time comparison of the SHA-256 hashes of this and another
+	 * secret.
+	 *
+	 * @param other The other secret. May be {@code null}.
+	 *
+	 * @return {@code true} if the SHA-256 hashes of the two secrets are
+	 *         equal, else {@code false}.
+	 */
+	public boolean equalsSHA256Based(final Secret other) {
+		
+		if (other == null) {
+			return false;
+		}
+		
+		byte[] thisHash = getSHA256();
+		byte[] otherHash = other.getSHA256();
+		
+		if (thisHash == null || otherHash == null) {
+			return false;
+		}
+		
+		return ConstantTimeUtils.areEqual(thisHash, otherHash);
+	}
+	
+	
+	/**
+	 * Comparison with another secret is constant time.
+	 *
+	 * @param o The other object. May be {@code null}.
+	 *
+	 * @return {@code true} if both objects are equal, else {@code false}.
+	 */
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) return true;
+		if (value == null) return false;
 		if (!(o instanceof Secret)) return false;
-
 		Secret secret = (Secret) o;
-
-		return Arrays.equals(value, secret.value);
-
+		return ConstantTimeUtils.areEqual(value, secret.value);
 	}
 
 

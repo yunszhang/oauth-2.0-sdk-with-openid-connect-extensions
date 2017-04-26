@@ -18,6 +18,9 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Date;
 
 import com.nimbusds.jose.util.Base64;
@@ -85,7 +88,7 @@ public class SecretTest extends TestCase {
 		Secret s2 = new Secret("password");
 		s2.erase();
 
-		assertTrue(s1.equals(s2));
+		assertFalse(s1.equals(s2));
 
 		// Ensure expiration date is ignored in comparison
 		final Date now = new Date();
@@ -139,5 +142,39 @@ public class SecretTest extends TestCase {
 				assertTrue(base64URLAlphabet.contains(c + ""));
 			}
 		}
+	}
+	
+	
+	public void testSHA256()
+		throws NoSuchAlgorithmException {
+		
+		Secret secret = new Secret();
+		byte[] value = secret.getValueBytes();
+		
+		MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+		assertTrue(Arrays.equals(sha256.digest(value), secret.getSHA256()));
+		
+		// Erase value
+		secret.erase();
+		assertNull(secret.getSHA256());
+	}
+	
+	
+	public void testEqualsSHA256() {
+		
+		Secret secret = new Secret();
+		Secret anotherSecret = new Secret(secret.getValue());
+		
+		assertTrue(secret.equals(anotherSecret));
+		
+		assertTrue(secret.equalsSHA256Based(anotherSecret));
+		
+		secret.erase();
+		assertFalse(secret.equalsSHA256Based(anotherSecret));
+		
+		anotherSecret.erase();
+		assertFalse(secret.equalsSHA256Based(anotherSecret));
+		
+		assertFalse(secret.equalsSHA256Based(null));
 	}
 }
