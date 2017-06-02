@@ -217,4 +217,19 @@ public class LogoutRequestTest extends TestCase {
 		assertNotNull(request.getIDTokenHint());
 		assertEquals("https://server.example.com/logout", request.getEndpointURI().toString());
 	}
+	
+	
+	public void testNullParseNullQueryString()
+		throws Exception {
+		
+		LogoutRequest request = LogoutRequest.parse((String)null);
+		assertNull(request.getIDTokenHint());
+		assertNull(request.getPostLogoutRedirectionURI());
+		assertNull(request.getState());
+		
+		request = LogoutRequest.parse((URI)null, (String)null);
+		assertNull(request.getIDTokenHint());
+		assertNull(request.getPostLogoutRedirectionURI());
+		assertNull(request.getState());
+	}
 }

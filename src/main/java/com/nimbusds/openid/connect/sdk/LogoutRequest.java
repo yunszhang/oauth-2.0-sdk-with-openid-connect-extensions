@@ -306,7 +306,8 @@ public class LogoutRequest extends AbstractRequest {
 	 * state = af0ifjsldkj
 	 * </pre>
 	 *
-	 * @param params The parameters. Must not be {@code null}.
+	 * @param params The parameters, empty map if none. Must not be
+	 *               {@code null}.
 	 *
 	 * @return The logout request.
 	 *
@@ -334,7 +335,8 @@ public class LogoutRequest extends AbstractRequest {
 	 * @param uri    The URI of the end-session endpoint. May be
 	 *               {@code null} if the {@link #toHTTPRequest()} method
 	 *               will not be used.
-	 * @param params The parameters. Must not be {@code null}.
+	 * @param params The parameters, empty map if none. Must not be
+	 *               {@code null}.
 	 *
 	 * @return The logout request.
 	 *
@@ -393,7 +395,7 @@ public class LogoutRequest extends AbstractRequest {
 	 * &amp;state=af0ifjsldkj
 	 * </pre>
 	 *
-	 * @param query The URI query string. Must not be {@code null}.
+	 * @param query The URI query string, {@code null} if none.
 	 *
 	 * @return The logout request.
 	 *
@@ -421,7 +423,7 @@ public class LogoutRequest extends AbstractRequest {
 	 * @param uri   The URI of the end-session endpoint. May be
 	 *              {@code null} if the {@link #toHTTPRequest()} method
 	 *              will not be used.
-	 * @param query The URI query string. Must not be {@code null}.
+	 * @param query The URI query string, {@code null} if none.
 	 *
 	 * @return The logout request.
 	 *
