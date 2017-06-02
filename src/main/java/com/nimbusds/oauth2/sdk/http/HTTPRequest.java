@@ -386,8 +386,8 @@ public class HTTPRequest extends HTTPMessage {
 	/**
 	 * Gets the HTTP connect timeout.
 	 *
-	 * @return The HTTP connect read timeout, in milliseconds. Zero implies
-	 *         no timeout.
+	 * @return The HTTP connect timeout, in milliseconds. Zero implies no
+	 *         timeout.
 	 */
 	public int getConnectTimeout() {
 

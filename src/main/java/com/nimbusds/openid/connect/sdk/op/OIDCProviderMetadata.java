@@ -18,8 +18,11 @@
 package com.nimbusds.openid.connect.sdk.op;
 
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.*;
 
 import com.nimbusds.jose.Algorithm;
@@ -30,6 +33,8 @@ import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
@@ -2355,5 +2360,90 @@ public class OIDCProviderMetadata {
 		throws ParseException {
 
 		return parse(JSONObjectUtils.parse(s));
+	}
+	
+	
+	/**
+	 * Resolves OpenID Provider metadata from the specified issuer
+	 * identifier. The metadata is downloaded by HTTP GET from
+	 * {@code [issuer-url]/.well-known/openid-configuration}.
+	 *
+	 * @param issuer The OpenID Provider issuer identifier. Must represent
+	 *               a valid HTTPS or HTTP URL. Must not be {@code null}.
+	 *
+	 * @return The OpenID Provider metadata.
+	 *
+	 * @throws GeneralException If the issuer identifier or the downloaded
+	 *                          metadata are invalid.
+	 * @throws IOException      On a HTTP exception.
+	 */
+	public static OIDCProviderMetadata resolve(final Issuer issuer)
+		throws GeneralException, IOException {
+		
+		return resolve(issuer, 0, 0);
+	}
+	
+	
+	/**
+	 * Resolves OpenID Provider metadata from the specified issuer
+	 * identifier. The metadata is downloaded by HTTP GET from
+	 * {@code [issuer-url]/.well-known/openid-configuration}, using the
+	 * specified HTTP timeouts.
+	 *
+	 * @param issuer         The OpenID Provider issuer identifier. Must
+	 *                       represent a valid HTTPS or HTTP URL. Must not
+	 *                       be {@code null}.
+	 * @param connectTimeout The HTTP connect timeout, in milliseconds.
+	 *                       Zero implies no timeout. Must not be negative.
+	 * @param readTimeout    The HTTP response read timeout, in
+	 *                       milliseconds. Zero implies no timeout. Must
+	 *                       not be negative.
+	 *
+	 * @return The OpenID Provider metadata.
+	 *
+	 * @throws GeneralException If the issuer identifier or the downloaded
+	 *                          metadata are invalid.
+	 * @throws IOException      On a HTTP exception.
+	 */
+	public static OIDCProviderMetadata resolve(final Issuer issuer,
+						   final int connectTimeout,
+						   final int readTimeout)
+		throws GeneralException, IOException {
+		
+		URL configURL;
+		
+		try {
+			URL issuerURL = new URL(issuer.getValue());
+			
+			// Validate but don't insist on HTTPS, see
+			// http://openid.net/specs/openid-connect-core-1_0.html#Terminology
+			if (issuerURL.getQuery() != null && ! issuerURL.getQuery().trim().isEmpty()) {
+				throw new GeneralException("The issuer identifier must not contain a query component");
+			}
+			
+			if (issuerURL.getPath() != null && issuerURL.getPath().endsWith("/")) {
+				configURL = new URL(issuerURL + ".well-known/openid-configuration");
+			} else {
+				configURL = new URL(issuerURL + "/.well-known/openid-configuration");
+			}
+			
+		} catch (MalformedURLException e) {
+			throw new GeneralException("The issuer identifier doesn't represent a valid URL: " + e.getMessage(), e);
+		}
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, configURL);
+		httpRequest.setConnectTimeout(connectTimeout);
+		httpRequest.setReadTimeout(readTimeout);
+		
+		HTTPResponse httpResponse = httpRequest.send();
+		
+		if (httpResponse.getStatusCode() != 200) {
+			throw new IOException("Couldn't download OpenID Provider metadata from " + configURL +
+				": Status code " + httpResponse.getStatusCode());
+		}
+		
+		JSONObject jsonObject = httpResponse.getContentAsJSONObject();
+		
+		return OIDCProviderMetadata.parse(jsonObject);
 	}
 }

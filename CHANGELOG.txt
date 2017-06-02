@@ -666,3 +666,9 @@ version 5.26 (2017-04-26)
       com.nimbusds.oauth2.sdk.auth.verifier.ClientAuthenticationVerifier (iss
       #215).
     * Upgrades minimal Nimbus JOSE+JWT dependency to 4.37.
+
+version 5.27 (2017-06-02)
+    * Adds new OIDCProviderMetadata.resolve(Issuer) methods for downloading an
+      OpenID Connect provider's metadata by using the issuer identifier as a
+      starting point to resolve the configuration endpoint URL.
+
