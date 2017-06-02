@@ -639,7 +639,7 @@ public class IDTokenValidatorTest extends TestCase {
 			verifier.validate(JWTParser.parse(idTokenString), null);
 			fail();
 		} catch (BadJWEException e) {
-			assertEquals("Encrypted JWT rejected: Given final block not properly padded", e.getMessage());
+			assertEquals("Encrypted JWT rejected: MAC check failed", e.getMessage());
 		}
 	}
 
