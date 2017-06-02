@@ -18,6 +18,7 @@
 package com.nimbusds.openid.connect.sdk.validators;
 
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -54,6 +55,15 @@ import net.jcip.annotations.ThreadSafe;
  *     <li>ID tokens authenticated with a JWS HMAC, require the client's secret
  *         to verify them.
  *     <li>Unsecured (plain) ID tokens received at the token endpoint.
+ * </ul>
+ *
+ * <p>Convenience static methods for creating an ID token validator from OpenID
+ * Provider metadata or issuer URL, and the registered Relying Party
+ * information:
+ *
+ * <ul>
+ *     <li>{@link #create(OIDCProviderMetadata, OIDCClientInformation)}
+ *     <li>{@link #create(Issuer, OIDCClientInformation)}
  * </ul>
  *
  * <p>Related specifications:
@@ -466,5 +476,89 @@ public class IDTokenValidator extends AbstractJWTValidator implements ClockSkewA
 		final JWEKeySelector jweKeySelector = createJWEKeySelector(opMetadata, clientInfo, clientJWKSource);
 
 		return new IDTokenValidator(opMetadata.getIssuer(), clientInfo.getID(), jwsKeySelector, jweKeySelector);
+	}
+
+
+	/**
+	 * Creates a new ID token validator for the specified OpenID Provider
+	 * metadata and OpenID Relying Party registration.
+	 *
+	 * @param opMetadata The OpenID Provider metadata. Must not be
+	 *                   {@code null}.
+	 * @param clientInfo The OpenID Relying Party registration. Must not be
+	 *                   {@code null}.
+	 *
+	 * @return The ID token validator.
+	 *
+	 * @throws GeneralException If the supplied OpenID Provider metadata or
+	 *                          Relying Party metadata are missing a
+	 *                          required parameter or inconsistent.
+	 */
+	public static IDTokenValidator create(final OIDCProviderMetadata opMetadata,
+					      final OIDCClientInformation clientInfo)
+		throws GeneralException {
+
+		return create(opMetadata, clientInfo, null);
+	}
+	
+	
+	/**
+	 * Creates a new ID token validator for the specified OpenID Provider,
+	 * which must publish its metadata at
+	 * {@code [issuer-url]/.well-known/openid-configuration}.
+	 *
+	 * @param opIssuer   The OpenID Provider issuer identifier. Must not be
+	 *                   {@code null}.
+	 * @param clientInfo The OpenID Relying Party registration. Must not be
+	 *                   {@code null}.
+	 *
+	 * @return The ID token validator.
+	 *
+	 * @throws GeneralException If the resolved OpenID Provider metadata is
+	 *                          invalid.
+	 * @throws IOException      On a HTTP exception.
+	 */
+	public static IDTokenValidator create(final Issuer opIssuer,
+					      final OIDCClientInformation clientInfo)
+		throws GeneralException, IOException {
+		
+		return create(opIssuer, clientInfo, null, 0, 0);
+	}
+	
+	
+	/**
+	 * Creates a new ID token validator for the specified OpenID Provider,
+	 * which must publish its metadata at
+	 * {@code [issuer-url]/.well-known/openid-configuration}.
+	 *
+	 * @param opIssuer        The OpenID Provider issuer identifier. Must
+	 *                        not be {@code null}.
+	 * @param clientInfo      The OpenID Relying Party registration. Must
+	 *                        not be {@code null}.
+	 * @param clientJWKSource The client private JWK source, {@code null}
+	 *                        if encrypted ID tokens are not expected.
+	 * @param connectTimeout  The HTTP connect timeout, in milliseconds.
+	 *                        Zero implies no timeout. Must not be
+	 *                        negative.
+	 * @param readTimeout     The HTTP response read timeout, in
+	 *                        milliseconds. Zero implies no timeout. Must
+	 *                        not be negative.
+	 *
+	 * @return The ID token validator.
+	 *
+	 * @throws GeneralException If the resolved OpenID Provider metadata is
+	 *                          invalid.
+	 * @throws IOException      On a HTTP exception.
+	 */
+	public static IDTokenValidator create(final Issuer opIssuer,
+					      final OIDCClientInformation clientInfo,
+					      final JWKSource clientJWKSource,
+					      final int connectTimeout,
+					      final int readTimeout)
+		throws GeneralException, IOException {
+		
+		OIDCProviderMetadata opMetadata = OIDCProviderMetadata.resolve(opIssuer, connectTimeout, readTimeout);
+		
+		return create(opMetadata, clientInfo, clientJWKSource);
 	}
 }

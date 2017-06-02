@@ -338,4 +338,116 @@ public class IDTokenValidatorWithHTTPTest extends TestCase {
 			assertEquals("Signed JWT rejected: Another algorithm expected, or no matching key(s) found", e.getMessage());
 		}
 	}
+	
+	
+	public void testStaticFactoryMethod_RS256_resolveFromIssuer()
+		throws Exception {
+		
+		// Create OP metadata
+		Pair<OIDCProviderMetadata,List<RSAKey>> opInfo = createOPMetadata();
+		OIDCProviderMetadata opMetadata = opInfo.getLeft();
+		RSAKey rsaKey1 = opInfo.getRight().get(0);
+		RSAKey rsaKey2 = opInfo.getRight().get(1);
+		
+		// Create client registration
+		OIDCClientMetadata metadata = new OIDCClientMetadata();
+		metadata.setRedirectionURI(URI.create("https://example.com/cb"));
+		metadata.applyDefaults();
+		
+		OIDCClientInformation clientInfo = new OIDCClientInformation(new ClientID("123"), new Date(), metadata, new Secret());
+		
+		// OP Configuration endpoint
+		onRequest()
+			.havingMethodEqualTo("GET")
+			.havingPathEqualTo("/.well-known/openid-configuration")
+			.respond()
+			.withStatus(200)
+			.withContentType("application/json")
+			.withBody(opMetadata.toJSONObject().toJSONString());
+		
+		// Create validator
+		IDTokenValidator v = IDTokenValidator.create(new Issuer("http://localhost:" + port()), clientInfo);
+		assertEquals(opMetadata.getIssuer(), v.getExpectedIssuer());
+		assertEquals(clientInfo.getID(), v.getClientID());
+		assertNotNull(v.getJWSKeySelector());
+		assertNull(v.getJWEKeySelector());
+		
+		// Check JWS key selector
+		List<Key> matches = v.getJWSKeySelector().selectJWSKeys(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaKey1.getKeyID()).build(), null);
+		assertEquals(1, matches.size());
+		matches = v.getJWSKeySelector().selectJWSKeys(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaKey2.getKeyID()).build(), null);
+		assertEquals(1, matches.size());
+		matches = v.getJWSKeySelector().selectJWSKeys(new JWSHeader.Builder(JWSAlgorithm.RS256).build(), null);
+		assertEquals(2, matches.size());
+		
+		
+		// Create ID token
+		final Date now = new Date();
+		final Date inOneHour = new Date(now.getTime() + 3600*1000L);
+		IDTokenClaimsSet claimsSet = new IDTokenClaimsSet(
+			opMetadata.getIssuer(),
+			new Subject("alice"),
+			new Audience(clientInfo.getID()).toSingleAudienceList(),
+			inOneHour, // exp
+			now); // iat
+		
+		SignedJWT idToken = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaKey1.getKeyID()).build(), claimsSet.toJWTClaimsSet());
+		idToken.sign(new RSASSASigner(rsaKey1));
+		
+		// Validate
+		IDTokenClaimsSet validated = v.validate(idToken, null);
+		assertEquals(claimsSet.getIssuer(), validated.getIssuer());
+		assertEquals(claimsSet.getSubject(), validated.getSubject());
+		assertEquals(claimsSet.getAudience().get(0), validated.getAudience().get(0));
+		assertEquals(1, validated.getAudience().size());
+		assertEquals(claimsSet.getExpirationTime(), validated.getExpirationTime());
+		assertEquals(claimsSet.getIssueTime(), validated.getIssueTime());
+		
+		// Create an ID token with unspecified key ID
+		idToken = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).build(), claimsSet.toJWTClaimsSet());
+		idToken.sign(new RSASSASigner(rsaKey1));
+		
+		// Validate again
+		validated = v.validate(idToken, null);
+		assertEquals(claimsSet.getIssuer(), validated.getIssuer());
+		assertEquals(claimsSet.getSubject(), validated.getSubject());
+		assertEquals(claimsSet.getAudience().get(0), validated.getAudience().get(0));
+		assertEquals(1, validated.getAudience().size());
+		assertEquals(claimsSet.getExpirationTime(), validated.getExpirationTime());
+		assertEquals(claimsSet.getIssueTime(), validated.getIssueTime());
+		
+		// Sign ID token with invalid RSA key
+		KeyPairGenerator pairGen = KeyPairGenerator.getInstance("RSA");
+		pairGen.initialize(1024);
+		KeyPair keyPair = pairGen.generateKeyPair();
+		
+		final RSAKey badKey = new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
+			.privateKey((RSAPrivateKey) keyPair.getPrivate())
+			.keyID("1")
+			.build();
+		
+		idToken = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaKey1.getKeyID()).build(), claimsSet.toJWTClaimsSet());
+		idToken.sign(new RSASSASigner(badKey));
+		
+		try {
+			v.validate(idToken, null);
+			fail();
+		} catch (BadJWSException e) {
+			assertEquals("Signed JWT rejected: Invalid signature", e.getMessage());
+		}
+		
+		// Sign ID token with RSA key with unexpected key ID
+		idToken = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("XXXXXXX").build(), claimsSet.toJWTClaimsSet());
+		idToken.sign(new RSASSASigner(rsaKey1));
+		
+		try {
+			v.validate(idToken, null);
+			fail();
+		} catch (BadJOSEException e) {
+			assertEquals("Signed JWT rejected: Another algorithm expected, or no matching key(s) found", e.getMessage());
+		}
+	}
+	
+	
+	
 }

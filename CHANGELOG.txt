@@ -669,6 +669,9 @@ version 5.26 (2017-04-26)
 
 version 5.27 (2017-06-02)
     * Adds new OIDCProviderMetadata.resolve(Issuer) methods for downloading an
-      OpenID Connect provider's metadata by using the issuer identifier as a
-      starting point to resolve the configuration endpoint URL.
+      OpenID provider's metadata by using the issuer identifier as a starting
+      point to resolve the configuration endpoint URL.
+    * Adds new static IDTokenValidator.create(Issuer, OIDCClientInformation)
+      methods for creating an ID token validator from an OpenID provider's
+      issuer identifier and a Relying Party's client registration.
 
