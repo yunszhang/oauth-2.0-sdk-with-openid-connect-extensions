@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
 import javax.mail.internet.ContentType;
 import javax.mail.internet.ParseException;
 
@@ -111,7 +112,7 @@ public class DefaultResourceRetriever extends AbstractRestrictedResourceRetrieve
 			inputStream = new BoundedInputStream(inputStream, getSizeLimit());
 		}
 
-		BufferedReader input = new BufferedReader(new InputStreamReader(inputStream));
+		BufferedReader input = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
 
 		String line;
 

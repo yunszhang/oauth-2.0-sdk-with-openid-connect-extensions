@@ -675,3 +675,7 @@ version 5.27 (2017-06-02)
       methods for creating an ID token validator from an OpenID provider's
       issuer identifier and a Relying Party's client registration.
 
+version 5.27.1 (2017-06-16)
+    * Ensures the InputStreamReader in HTTPRequest and the deprecated
+      DefaultResourceRetriever use UTF-8 as the charset at all times (iss
+      #216).
