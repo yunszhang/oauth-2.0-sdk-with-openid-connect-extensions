@@ -679,3 +679,7 @@ version 5.27.1 (2017-06-16)
     * Ensures the InputStreamReader in HTTPRequest and the deprecated
       DefaultResourceRetriever use UTF-8 as the charset at all times (iss
       #216).
+
+version 5.28 (2017-06-20)
+    * Supports all Authentication Method References (AMR) defined in RFC 8176.
+

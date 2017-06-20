@@ -29,19 +29,27 @@ public class AMRTest extends TestCase {
 
 	public void testConstants() {
 
-		assertEquals("eye", AMR.EYE.getValue());
+		assertEquals("face", AMR.FACE.getValue());
 		assertEquals("fpt", AMR.FPT.getValue());
+		assertEquals("geo", AMR.GEO.getValue());
+		assertEquals("hwk", AMR.HWK.getValue());
+		assertEquals("iris", AMR.IRIS.getValue());
 		assertEquals("kba", AMR.KBA.getValue());
 		assertEquals("mca", AMR.MCA.getValue());
 		assertEquals("mfa", AMR.MFA.getValue());
 		assertEquals("otp", AMR.OTP.getValue());
-		assertEquals("pop", AMR.POP.getValue());
+		assertEquals("pin", AMR.PIN.getValue());
 		assertEquals("pwd", AMR.PWD.getValue());
 		assertEquals("rba", AMR.RBA.getValue());
 		assertEquals("sc", AMR.SC.getValue());
 		assertEquals("sms", AMR.SMS.getValue());
 		assertEquals("tel", AMR.TEL.getValue());
 		assertEquals("user", AMR.USER.getValue());
+		assertEquals("vbm", AMR.VBM.getValue());
 		assertEquals("wia", AMR.WIA.getValue());
+		
+		// deprecated
+		assertEquals("pop", AMR.POP.getValue());
+		assertEquals("eye", AMR.EYE.getValue());
 	}
 }

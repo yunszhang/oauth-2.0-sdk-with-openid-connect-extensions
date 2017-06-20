@@ -32,107 +32,160 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  * <p>Related specifications:
  *
  * <ul>
+ *     <li>RFC 8176.
  *     <li>OpenID Connect Core 1.0, section 2.
  * </ul>
  */
 @Immutable
 public final class AMR extends Identifier {
-
-
+	
+	
+	/**
+	 * Biometric authentication (RFC 4949) using facial recognition.
+	 */
+	public static final AMR FACE = new AMR("face");
+	
+	
+	/**
+	 * Biometric authentication (RFC 4949) using a fingerprint.
+	 */
+	public static final AMR FPT = new AMR("fpt");
+	
+	
+	/**
+	 * Use of geolocation information for authentication, such as that
+	 * provided by W3C REC-geolocation-API-20161108.
+	 */
+	public static final AMR GEO = new AMR("geo");
+	
+	
+	/**
+	 * Proof-of-Possession (PoP) of a hardware-secured key. See Appendix C
+	 * of RFC 4211 for a discussion on PoP.
+	 */
+	public static final AMR HWK = new AMR("hwk");
+	
+	
+	/**
+	 * Biometric authentication (RFC 4949) using an iris scan.
+	 */
+	public static final AMR IRIS = new AMR("iris");
+	
+	
 	/**
 	 * Retina scan biometric.
 	 */
+	@Deprecated
 	public static final AMR EYE = new AMR("eye");
 
-
+	
 	/**
-	 * Fingerprint biometric.
-	 */
-	public static final AMR FPT = new AMR("fpt");
-
-
-	/**
-	 * Knowledge-based authentication (see NIST.800-63-2).
+	 * Knowledge-based authentication (NIST.800-63-2, ISO29115).
 	 */
 	public static final AMR KBA = new AMR("kba");
-
-
+	
+	
 	/**
-	 * Multiple-channel authentication. The authentication involves
-	 * communication over more than one distinct channel.
+	 * Multiple-channel authentication (MCA). The authentication involves
+	 * communication over more than one distinct communication channel. For
+	 * instance, a multiple-channel authentication might involve both
+	 * entering information into a workstation's browser and providing
+	 * information on a telephone call to a pre-registered number.
 	 */
 	public static final AMR MCA = new AMR("mca");
 
 
 	/**
-	 * Multiple-factor authentication (see NIST.800-63-2). When this is
-	 * present, specific authentication methods used may also be included.
+	 * Multiple-factor authentication (NIST.800-63-2, ISO29115). When this
+	 * is present, specific authentication methods used may also be
+	 * included.
 	 */
 	public static final AMR MFA = new AMR("mfa");
 
 
 	/**
-	 * One-time password. One-time password specifications that this
-	 * authentication method applies to include RFC 4226 and RFC 6238.
+	 * One-time password (RFC 4949). One-time password specifications that
+	 * this authentication method applies to include RFC 4226 and RFC 6238.
 	 */
 	public static final AMR OTP = new AMR("otp");
+	
+	
+	/**
+	 * Personal Identification Number (PIN) (RFC 4949) or pattern (not
+	 * restricted to containing only numbers) that a user enters to unlock
+	 * a key on the device. This mechanism should have a way to deter an
+	 * attacker from obtaining the PIN by trying repeated guesses.
+	 */
+	public static final AMR PIN = new AMR("pin");
 
 
 	/**
 	 * Proof-of-possession (PoP) of a key. See Appendix C of RFC 4211 for a
 	 * discussion on PoP.
 	 */
+	@Deprecated
 	public static final AMR POP = new AMR("pop");
 
 
 	/**
-	 * Password-based authentication.
+	 * Password-based authentication (RFC 4949).
 	 */
 	public static final AMR PWD = new AMR("pwd");
 
 
 	/**
-	 * Risk-based authentication. See <a href="http://utica.edu/academic/institutes/ecii/publications/articles/51D6D996-90F2-F468-AC09C4E8071575AE.pdf">Enhanced
-	 * Authentication In Online Banking</a>, Journal of Economic Crime
-	 * Management 4.2: 18-19, 2006.
+	 * Risk-based authentication (Williamson, G., "Enhanced Authentication
+	 * In Online Banking", Journal of Economic Crime Management 4.2: 18-19,
+	 * 2006).
 	 */
 	public static final AMR RBA = new AMR("rba");
 
 
 	/**
-	 * Smart card.
+	 * Smart card (RFC 4949).
 	 */
 	public static final AMR SC = new AMR("sc");
 
 
 	/**
-	 * Confirmation by SMS reply.
+	 * Confirmation using SMS text message to the user at a registered
+	 * number.
 	 */
 	public static final AMR SMS = new AMR("sms");
+	
+	
+	/**
+	 * Proof-of-Possession (PoP) of a software-secured key. See Appendix C
+	 * of RFC 4211 for a discussion on PoP.
+	 */
+	public static final AMR SWK = new AMR("swk");
 
 
 	/**
-	 * Confirmation by telephone call.
+	 * Confirmation by telephone call to the user at a registered number.
+	 * This authentication technique is sometimes also referred to as
+	 * "call back" (RFC 4949).
 	 */
 	public static final AMR TEL = new AMR("tel");
 
 
 	/**
-	 * User presence test.
+	 * User presence test. Evidence that the end user is present and
+	 * interacting with the device.  This is sometimes also referred to as
+	 * "test of user presence" (W3C WD-webauthn-20170216).
 	 */
 	public static final AMR USER = new AMR("user");
 
 
 	/**
-	 * Voice biometric.
+	 * Biometric authentication (RFC 4949) using a voiceprint.
 	 */
 	public static final AMR VBM = new AMR("vbm");
 
 
 	/**
-	 * Windows integrated authentication. See
-	 * <a href="http://blogs.msdn.com/b/benjaminperkins/archive/2011/09/14/iis-integrated-windows-authentication-with-negotiate.aspx">Integrated
-	 * Windows Authentication with Negotiate</a>, September 2011.
+	 * Windows integrated authentication (Microsoft, "Integrated Windows
+	 * Authentication with Negotiate", September 2011).
 	 */
 	public static final AMR WIA = new AMR("wia");
 

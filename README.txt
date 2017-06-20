@@ -115,7 +115,7 @@ This SDK version implements the following standards and drafts:
 
     * Proof Key for Code Exchange by OAuth Public Clients (RFC 7636)
 
-    * Authentication Method Reference Values (draft-ietf-oauth-amr-values-01)
+    * Authentication Method Reference Values (RFC 8176)
 
 	* OpenID Connect Core 1.0 (2014-02-25).
 
@@ -138,5 +138,5 @@ This SDK is provided under the terms of the Apache 2.0 licence.
 Questions or comments? Email support@connect2id.com
 
 
-2017-04-10
+2017-06-20
 
