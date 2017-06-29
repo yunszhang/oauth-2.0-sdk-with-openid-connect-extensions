@@ -239,6 +239,28 @@ public class AuthorizationRequest extends AbstractRequest {
 
 			this.clientID = clientID;
 		}
+		
+		
+		/**
+		 * Creates a new authorisation request builder from the
+		 * specified request.
+		 *
+		 * @param request The authorisation request. Must not be
+		 *                {@code null}.
+		 */
+		public Builder(final AuthorizationRequest request) {
+			
+			uri = request.getEndpointURI();
+			scope = request.scope;
+			rt = request.getResponseType();
+			clientID = request.getClientID();
+			redirectURI = request.getRedirectionURI();
+			state = request.getState();
+			rm = request.getResponseMode();
+			codeChallenge = request.getCodeChallenge();
+			codeChallengeMethod = request.getCodeChallengeMethod();
+			customParams.putAll(request.getCustomParameters());
+		}
 
 
 		/**

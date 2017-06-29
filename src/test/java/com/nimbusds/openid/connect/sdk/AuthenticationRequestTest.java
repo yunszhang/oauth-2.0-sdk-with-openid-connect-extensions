@@ -1743,6 +1743,7 @@ public class AuthenticationRequestTest extends TestCase {
 			.responseMode(ResponseMode.FORM_POST)
 			.codeChallenge(new CodeVerifier(), CodeChallengeMethod.S256)
 			.customParameter("apples", "10")
+			.endpointURI(new URI("https://c2id.com/login"))
 			.build();
 		
 		AuthenticationRequest out = new AuthenticationRequest.Builder(in).build();
@@ -1768,6 +1769,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(in.getCodeChallenge(), out.getCodeChallenge());
 		assertEquals(in.getCodeChallengeMethod(), out.getCodeChallengeMethod());
 		assertEquals(in.getCustomParameters(), out.getCustomParameters());
+		assertEquals(in.getEndpointURI(), out.getEndpointURI());
 	}
 	
 	
@@ -1797,6 +1799,7 @@ public class AuthenticationRequestTest extends TestCase {
 			.responseMode(ResponseMode.FORM_POST)
 			.codeChallenge(new CodeVerifier(), CodeChallengeMethod.S256)
 			.customParameter("apples", "10")
+			.endpointURI(new URI("https://c2id.com/login"))
 			.build();
 		
 		AuthenticationRequest out = new AuthenticationRequest.Builder(in).build();
@@ -1822,5 +1825,6 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(in.getCodeChallenge(), out.getCodeChallenge());
 		assertEquals(in.getCodeChallengeMethod(), out.getCodeChallengeMethod());
 		assertEquals(in.getCustomParameters(), out.getCustomParameters());
+		assertEquals(in.getEndpointURI(), out.getEndpointURI());
 	}
 }

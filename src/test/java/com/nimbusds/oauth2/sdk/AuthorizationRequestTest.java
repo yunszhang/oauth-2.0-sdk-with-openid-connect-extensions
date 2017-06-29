@@ -589,4 +589,37 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(new State("xyz"), request.getState());
 		assertEquals(redirectURI, request.getRedirectionURI());
 	}
+	
+	
+	public void testCopyConstructorBuilder()
+		throws Exception {
+		
+		Map<String,String> customParams = new HashMap<>();
+		customParams.put("apples", "10");
+		
+		AuthorizationRequest in = new AuthorizationRequest(
+			new URI("https://example.com/cb"),
+			new ResponseType("code"),
+			ResponseMode.FORM_POST,
+			new ClientID("123"),
+			new URI("https://example.com/cb"),
+			new Scope("openid"),
+			new State(),
+			CodeChallenge.compute(CodeChallengeMethod.S256, new CodeVerifier()),
+			CodeChallengeMethod.S256,
+			customParams);
+		
+		AuthorizationRequest out = new AuthorizationRequest.Builder(in).build();
+		
+		assertEquals(in.getResponseType(), out.getResponseType());
+		assertEquals(in.getScope(), out.getScope());
+		assertEquals(in.getClientID(), out.getClientID());
+		assertEquals(in.getRedirectionURI(), out.getRedirectionURI());
+		assertEquals(in.getState(), out.getState());
+		assertEquals(in.getResponseMode(), out.getResponseMode());
+		assertEquals(in.getCodeChallenge(), out.getCodeChallenge());
+		assertEquals(in.getCodeChallengeMethod(), out.getCodeChallengeMethod());
+		assertEquals(in.getCustomParameters(), out.getCustomParameters());
+		assertEquals(in.getEndpointURI(), out.getEndpointURI());
+	}
 }
