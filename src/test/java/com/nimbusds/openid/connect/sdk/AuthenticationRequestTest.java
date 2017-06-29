@@ -35,6 +35,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.langtag.LangTag;
+import com.nimbusds.langtag.LangTagUtils;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
@@ -1713,5 +1714,113 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(CodeChallenge.compute(CodeChallengeMethod.S256, pkceVerifier), request.getCodeChallenge());
 		assertEquals(CodeChallengeMethod.S256, request.getCodeChallengeMethod());
 		assertTrue(request.getCustomParameters().isEmpty());
+	}
+	
+	
+	public void testCopyConstructorBuilder_requestObject()
+		throws Exception {
+		
+		ClaimsRequest claims = new ClaimsRequest();
+		claims.addIDTokenClaim("name");
+		
+		AuthenticationRequest in = new AuthenticationRequest.Builder(
+			new ResponseType("code"),
+			new Scope("openid"),
+			new ClientID("123"),
+			new URI("https://example.com/cb"))
+			.state(new State())
+			.nonce(new Nonce())
+			.display(Display.POPUP)
+			.prompt(new Prompt(Prompt.Type.NONE))
+			.maxAge(900)
+			.uiLocales(LangTagUtils.parseLangTagList("en", "de"))
+			.claimsLocales(LangTagUtils.parseLangTagList("fr", "bg"))
+			.idTokenHint(JWTParser.parse(EXAMPLE_JWT_STRING))
+			.loginHint("alice@wonderland.net")
+			.acrValues(Arrays.asList(new ACR("0"), new ACR("1")))
+			.claims(claims)
+			.requestObject(JWTParser.parse(EXAMPLE_JWT_STRING))
+			.responseMode(ResponseMode.FORM_POST)
+			.codeChallenge(new CodeVerifier(), CodeChallengeMethod.S256)
+			.customParameter("apples", "10")
+			.build();
+		
+		AuthenticationRequest out = new AuthenticationRequest.Builder(in).build();
+		
+		assertEquals(in.getResponseType(), out.getResponseType());
+		assertEquals(in.getScope(), out.getScope());
+		assertEquals(in.getClientID(), out.getClientID());
+		assertEquals(in.getRedirectionURI(), out.getRedirectionURI());
+		assertEquals(in.getState(), out.getState());
+		assertEquals(in.getNonce(), out.getNonce());
+		assertEquals(in.getDisplay(), out.getDisplay());
+		assertEquals(in.getPrompt(), out.getPrompt());
+		assertEquals(in.getMaxAge(), out.getMaxAge());
+		assertEquals(in.getUILocales(), out.getUILocales());
+		assertEquals(in.getClaimsLocales(), out.getClaimsLocales());
+		assertEquals(in.getIDTokenHint(), out.getIDTokenHint());
+		assertEquals(in.getLoginHint(), out.getLoginHint());
+		assertEquals(in.getACRValues(), out.getACRValues());
+		assertEquals(in.getClaims(), out.getClaims());
+		assertEquals(in.getRequestObject(), out.getRequestObject());
+		assertEquals(in.getRequestURI(), out.getRequestURI());
+		assertEquals(in.getResponseMode(), out.getResponseMode());
+		assertEquals(in.getCodeChallenge(), out.getCodeChallenge());
+		assertEquals(in.getCodeChallengeMethod(), out.getCodeChallengeMethod());
+		assertEquals(in.getCustomParameters(), out.getCustomParameters());
+	}
+	
+	
+	public void testCopyConstructorBuilder_requesURI()
+		throws Exception {
+		
+		ClaimsRequest claims = new ClaimsRequest();
+		claims.addIDTokenClaim("name");
+		
+		AuthenticationRequest in = new AuthenticationRequest.Builder(
+			new ResponseType("code"),
+			new Scope("openid"),
+			new ClientID("123"),
+			new URI("https://example.com/cb"))
+			.state(new State())
+			.nonce(new Nonce())
+			.display(Display.POPUP)
+			.prompt(new Prompt(Prompt.Type.NONE))
+			.maxAge(900)
+			.uiLocales(LangTagUtils.parseLangTagList("en", "de"))
+			.claimsLocales(LangTagUtils.parseLangTagList("fr", "bg"))
+			.idTokenHint(JWTParser.parse(EXAMPLE_JWT_STRING))
+			.loginHint("alice@wonderland.net")
+			.acrValues(Arrays.asList(new ACR("0"), new ACR("1")))
+			.claims(claims)
+			.requestURI(new URI("https://example.com/request.jwt"))
+			.responseMode(ResponseMode.FORM_POST)
+			.codeChallenge(new CodeVerifier(), CodeChallengeMethod.S256)
+			.customParameter("apples", "10")
+			.build();
+		
+		AuthenticationRequest out = new AuthenticationRequest.Builder(in).build();
+		
+		assertEquals(in.getResponseType(), out.getResponseType());
+		assertEquals(in.getScope(), out.getScope());
+		assertEquals(in.getClientID(), out.getClientID());
+		assertEquals(in.getRedirectionURI(), out.getRedirectionURI());
+		assertEquals(in.getState(), out.getState());
+		assertEquals(in.getNonce(), out.getNonce());
+		assertEquals(in.getDisplay(), out.getDisplay());
+		assertEquals(in.getPrompt(), out.getPrompt());
+		assertEquals(in.getMaxAge(), out.getMaxAge());
+		assertEquals(in.getUILocales(), out.getUILocales());
+		assertEquals(in.getClaimsLocales(), out.getClaimsLocales());
+		assertEquals(in.getIDTokenHint(), out.getIDTokenHint());
+		assertEquals(in.getLoginHint(), out.getLoginHint());
+		assertEquals(in.getACRValues(), out.getACRValues());
+		assertEquals(in.getClaims(), out.getClaims());
+		assertEquals(in.getRequestObject(), out.getRequestObject());
+		assertEquals(in.getRequestURI(), out.getRequestURI());
+		assertEquals(in.getResponseMode(), out.getResponseMode());
+		assertEquals(in.getCodeChallenge(), out.getCodeChallenge());
+		assertEquals(in.getCodeChallengeMethod(), out.getCodeChallengeMethod());
+		assertEquals(in.getCustomParameters(), out.getCustomParameters());
 	}
 }

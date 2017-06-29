@@ -377,6 +377,40 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			// Check presence at build time
 			this.redirectURI = redirectURI;
 		}
+		
+		
+		/**
+		 * Creates a new OpenID Connect authentication request builder
+		 * from the specified request.
+		 *
+		 * @param request The OpenID Connect authentication request.
+		 *                Must not be {@code null}.
+		 */
+		public Builder(final AuthenticationRequest request) {
+			
+			uri = request.getEndpointURI();
+			rt = request.getResponseType();
+			clientID = request.getClientID();
+			redirectURI = request.getRedirectionURI();
+			scope = request.getScope();
+			state = request.getState();
+			nonce = request.getNonce();
+			display = request.getDisplay();
+			prompt = request.getPrompt();
+			maxAge = request.getMaxAge();
+			uiLocales = request.getUILocales();
+			claimsLocales = request.getClaimsLocales();
+			idTokenHint = request.getIDTokenHint();
+			loginHint = request.getLoginHint();
+			acrValues = request.getACRValues();
+			claims = request.getClaims();
+			requestObject = request.getRequestObject();
+			requestURI = request.getRequestURI();
+			rm = request.getResponseMode();
+			codeChallenge = request.getCodeChallenge();
+			codeChallengeMethod = request.getCodeChallengeMethod();
+			customParams.putAll(request.getCustomParameters());
+		}
 
 
 		/**
