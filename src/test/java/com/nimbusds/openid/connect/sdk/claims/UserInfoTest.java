@@ -19,14 +19,16 @@ package com.nimbusds.openid.connect.sdk.claims;
 
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import javax.mail.internet.InternetAddress;
 
 import com.nimbusds.jose.util.DateUtils;
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Subject;
+import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+import com.nimbusds.oauth2.sdk.token.TypelessAccessToken;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
@@ -72,6 +74,10 @@ public class UserInfoTest extends TestCase {
 		assertEquals("j.doe", userInfo.getPreferredUsername());
 		assertEquals("janedoe@example.com", userInfo.getEmail().getAddress());
 		assertEquals("http://example.com/janedoe/me.jpg", userInfo.getPicture().toString());
+		
+		// No external claims
+		assertNull(userInfo.getAggregatedClaims());
+		assertNull(userInfo.getDistributedClaims());
 	}
 
 
@@ -153,6 +159,10 @@ public class UserInfoTest extends TestCase {
 		assertNull(userInfo.getPhoneNumberVerified());
 		assertNull(userInfo.getAddress());
 		assertNull(userInfo.getUpdatedTime());
+		
+		// No external claims
+		assertNull(userInfo.getAggregatedClaims());
+		assertNull(userInfo.getDistributedClaims());
 	}
 
 
@@ -218,8 +228,6 @@ public class UserInfoTest extends TestCase {
 		assertEquals("country", address.getCountry());
 
 		String json = userInfo.toJSONObject().toString();
-
-		System.out.println("Full UserInfo: " + json);
 
 		userInfo = UserInfo.parse(json);
 
@@ -313,8 +321,6 @@ public class UserInfoTest extends TestCase {
 		assertEquals("country", address.getCountry());
 
 		String json = userInfo.toJSONObject().toString();
-
-		System.out.println("Full UserInfo: " + json);
 
 		userInfo = UserInfo.parse(json);
 
@@ -500,5 +506,189 @@ public class UserInfoTest extends TestCase {
 		assertEquals("invalid-email", userInfo.getEmailAddress());
 		
 		assertNull(userInfo.getEmail()); // exception swallowed
+	}
+	
+	
+	public void testAggregatedClaims_addAndGet()
+		throws Exception {
+		
+		UserInfo userInfo = new UserInfo(new Subject("alice"));
+		
+		JSONObject c1 = new JSONObject();
+		c1.put("email", "alice@wonderland.net");
+		c1.put("email_verified", true);
+		
+		JWT jwt1 = AggregatedClaimsTest.createClaimsJWT(c1);
+		
+		AggregatedClaims a1 = new AggregatedClaims("src1", c1.keySet(), jwt1);
+		userInfo.addAggregatedClaims(a1);
+		
+		JSONObject c2 = new JSONObject();
+		c2.put("score", "100");
+		
+		JWT jwt2 = AggregatedClaimsTest.createClaimsJWT(c2);
+		
+		AggregatedClaims a2 = new AggregatedClaims("src2", c2.keySet(), jwt2);
+		userInfo.addAggregatedClaims(a2);
+		
+		JSONObject jsonObject = userInfo.toJSONObject();
+		
+		assertEquals("alice", jsonObject.get("sub"));
+		assertEquals("src1", ((JSONObject)jsonObject.get("_claim_names")).get("email"));
+		assertEquals("src1", ((JSONObject)jsonObject.get("_claim_names")).get("email_verified"));
+		assertEquals("src2", ((JSONObject)jsonObject.get("_claim_names")).get("score"));
+		assertEquals(3, ((JSONObject)jsonObject.get("_claim_names")).size());
+		assertEquals(jwt1.serialize(), ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src1")).get("JWT"));
+		assertEquals(jwt2.serialize(), ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src2")).get("JWT"));
+		assertEquals(2, ((JSONObject)jsonObject.get("_claim_sources")).size());
+		assertEquals(3, jsonObject.size());
+		
+		Set<AggregatedClaims> set = userInfo.getAggregatedClaims();
+		
+		for(AggregatedClaims c: set) {
+			
+			AggregatedClaims ref = null;
+			
+			if (a1.getSourceID().equals(c.getSourceID())) {
+				
+				ref = a1;
+				
+			} else if (a2.getSourceID().equals(c.getSourceID())) {
+				
+				ref = a2;
+				
+			} else {
+				fail();
+			}
+			
+			assertEquals(ref.getNames(), c.getNames());
+			assertEquals(ref.getClaimsJWT().serialize(), c.getClaimsJWT().serialize());
+		}
+		
+		assertEquals(2, set.size());
+	}
+	
+	
+	public void testDistributedClaims_addAndGet()
+		throws Exception {
+		
+		UserInfo userInfo = new UserInfo(new Subject("alice"));
+		
+		DistributedClaims d1 = new DistributedClaims(
+			"src1",
+			new HashSet<>(Arrays.asList("email", "email_verified")),
+			new URI("https://claims-provider.com"),
+			new BearerAccessToken()
+		);
+		userInfo.addDistributedClaims(d1);
+		
+		DistributedClaims d2 = new DistributedClaims(
+			"src2",
+			Collections.singleton("score"),
+			new URI("https://other-provider.com"),
+			null
+		);
+		userInfo.addDistributedClaims(d2);
+		
+		JSONObject jsonObject = userInfo.toJSONObject();
+		
+		assertEquals("alice", jsonObject.get("sub"));
+		assertEquals("src1", ((JSONObject)jsonObject.get("_claim_names")).get("email"));
+		assertEquals("src1", ((JSONObject)jsonObject.get("_claim_names")).get("email_verified"));
+		assertEquals("src2", ((JSONObject)jsonObject.get("_claim_names")).get("score"));
+		assertEquals(3, ((JSONObject)jsonObject.get("_claim_names")).size());
+		assertEquals(d1.getSourceEndpoint().toString(), ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src1")).get("endpoint"));
+		assertEquals(d1.getAccessToken().getValue(), ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src1")).get("access_token"));
+		assertEquals(2, ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src1")).size());
+		assertEquals(d2.getSourceEndpoint().toString(), ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src2")).get("endpoint"));
+		assertEquals(1, ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src2")).size());
+		assertEquals(2, ((JSONObject)jsonObject.get("_claim_sources")).size());
+		assertEquals(3, jsonObject.size());
+		
+		Set<DistributedClaims> set = userInfo.getDistributedClaims();
+		
+		for(DistributedClaims c: set) {
+			
+			DistributedClaims ref = null;
+			
+			if (d1.getSourceID().equals(c.getSourceID())) {
+				
+				ref = d1;
+				
+			} else if (d2.getSourceID().equals(c.getSourceID())) {
+				
+				ref = d2;
+				
+			} else {
+				fail();
+			}
+			
+			assertEquals(ref.getNames(), c.getNames());
+			assertEquals(ref.getSourceEndpoint(), c.getSourceEndpoint());
+			if (ref.getAccessToken() != null) {
+				assertEquals(ref.getAccessToken().getValue(), c.getAccessToken().getValue());
+			}
+		}
+		
+		assertEquals(2, set.size());
+	}
+	
+	
+	public void testParseDistributedClaimsExample()
+		throws Exception {
+	
+		String json = 
+			"{" +
+			"   \"sub\":\"jd\"," + // fix example, missing 'sub'
+			"   \"name\": \"Jane Doe\"," +
+			"   \"given_name\": \"Jane\"," +
+			"   \"family_name\": \"Doe\"," +
+			"   \"email\": \"janedoe@example.com\"," +
+			"   \"birthdate\": \"0000-03-22\"," +
+			"   \"eye_color\": \"blue\"," +
+			"   \"_claim_names\": {" +
+			"     \"payment_info\": \"src1\"," +
+			"     \"shipping_address\": \"src1\"," +
+			"     \"credit_score\": \"src2\"" +
+			"    }," +
+			"   \"_claim_sources\": {" +
+			"     \"src1\": {\"endpoint\":" +
+			"                \"https://bank.example.com/claim_source\"}," +
+			"     \"src2\": {\"endpoint\":" +
+			"                \"https://creditagency.example.com/claims_here\"," +
+			"              \"access_token\": \"ksj3n283dke\"}" +
+			"   }" +
+			"  }";
+		
+		UserInfo userInfo = UserInfo.parse(json);
+	
+		Set<DistributedClaims> dcSet = userInfo.getDistributedClaims();
+		
+		for (DistributedClaims dc: dcSet) {
+			
+			if ("src1".equals(dc.getSourceID())) {
+				
+				assertTrue(dc.getNames().contains("payment_info"));
+				assertTrue(dc.getNames().contains("shipping_address"));
+				assertEquals(2, dc.getNames().size());
+				
+				assertEquals("https://bank.example.com/claim_source", dc.getSourceEndpoint().toString());
+				assertNull(dc.getAccessToken());
+				
+			} else if ("src2".equals(dc.getSourceID())) {
+				
+				assertTrue(dc.getNames().contains("credit_score"));
+				assertEquals(1, dc.getNames().size());
+				
+				assertEquals("https://creditagency.example.com/claims_here", dc.getSourceEndpoint().toString());
+				assertEquals("ksj3n283dke", dc.getAccessToken().getValue());
+				assertTrue(dc.getAccessToken() instanceof TypelessAccessToken);
+				
+			} else {
+				fail();
+			}
+		}
+		
+		assertEquals(2, dcSet.size());
 	}
 }

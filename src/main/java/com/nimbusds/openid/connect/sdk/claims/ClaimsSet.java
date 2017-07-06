@@ -23,8 +23,8 @@ import java.net.URL;
 import java.util.*;
 import javax.mail.internet.InternetAddress;
 
-import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagUtils;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -41,7 +41,7 @@ public abstract class ClaimsSet {
 	/**
 	 * The JSON object representation of the claims set.
 	 */
-	private final JSONObject claims;
+	protected final JSONObject claims;
 
 
 	/**
