@@ -691,4 +691,171 @@ public class UserInfoTest extends TestCase {
 		
 		assertEquals(2, dcSet.size());
 	}
+	
+	
+	public void testPutAll_mergeAggregatedAndDistributedClaims()
+		throws Exception {
+		
+		UserInfo userInfo = new UserInfo(new Subject("alice"));
+		
+		AggregatedClaims ac = new AggregatedClaims(
+			"src1",
+			new HashSet<>(Arrays.asList("email", "email_verified")),
+			AggregatedClaimsTest.createClaimsJWT()
+			);
+		
+		userInfo.addAggregatedClaims(ac);
+		
+		assertEquals(1, userInfo.getAggregatedClaims().size());
+		
+		UserInfo other = new UserInfo(new Subject("alice"));
+		
+		DistributedClaims dc = new DistributedClaims(
+			"src2",
+			Collections.singleton("score"),
+			new URI("https://claims-source.com"),
+			new BearerAccessToken());
+		
+		other.addDistributedClaims(dc);
+		
+		assertEquals(1, other.getDistributedClaims().size());
+		
+		userInfo.putAll(other);
+		
+		JSONObject jsonObject = userInfo.toJSONObject();
+		
+		// Check merge
+		assertEquals(new Subject("alice"), userInfo.getSubject());
+		
+		assertEquals(ac.getSourceID(), userInfo.getAggregatedClaims().iterator().next().getSourceID());
+		assertEquals(ac.getNames(), userInfo.getAggregatedClaims().iterator().next().getNames());
+		assertEquals(ac.getClaimsJWT().serialize(), userInfo.getAggregatedClaims().iterator().next().getClaimsJWT().serialize());
+		
+		assertEquals(dc.getSourceID(), userInfo.getDistributedClaims().iterator().next().getSourceID());
+		assertEquals(dc.getNames(), userInfo.getDistributedClaims().iterator().next().getNames());
+		assertEquals(dc.getSourceEndpoint(), userInfo.getDistributedClaims().iterator().next().getSourceEndpoint());
+		assertEquals(dc.getAccessToken().getValue(), userInfo.getDistributedClaims().iterator().next().getAccessToken().getValue());
+		
+		assertEquals("alice", jsonObject.get("sub"));
+		
+		assertEquals("src1", ((JSONObject)jsonObject.get("_claim_names")).get("email"));
+		assertEquals("src1", ((JSONObject)jsonObject.get("_claim_names")).get("email_verified"));
+		assertEquals("src2", ((JSONObject)jsonObject.get("_claim_names")).get("score"));
+		assertEquals(3, ((JSONObject)jsonObject.get("_claim_names")).size());
+		
+		assertEquals(ac.getClaimsJWT().serialize(), ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src1")).get("JWT"));
+		assertEquals(1, ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src1")).size());
+		
+		assertEquals(dc.getSourceEndpoint().toString(), ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src2")).get("endpoint"));
+		assertEquals(dc.getAccessToken().getValue(), ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src2")).get("access_token"));
+		assertEquals(2, ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src2")).size());
+		
+		assertEquals(3, jsonObject.size());
+	}
+	
+	
+	public void testPutAll_mergeDistributedClaims()
+		throws Exception {
+		
+		UserInfo userInfo = new UserInfo(new Subject("alice"));
+		
+		DistributedClaims dc1 = new DistributedClaims(
+			"src1",
+			new HashSet<>(Arrays.asList("email", "email_verified")),
+			new URI("https://claims-source.com"),
+			new BearerAccessToken()
+			);
+		
+		userInfo.addDistributedClaims(dc1);
+		
+		assertEquals(1, userInfo.getDistributedClaims().size());
+		
+		UserInfo other = new UserInfo(new Subject("alice"));
+		
+		DistributedClaims dc2 = new DistributedClaims(
+			"src2",
+			Collections.singleton("score"),
+			new URI("https://other-claims-source.com"),
+			new BearerAccessToken());
+		
+		other.addDistributedClaims(dc2);
+		
+		assertEquals(1, other.getDistributedClaims().size());
+		
+		userInfo.putAll(other);
+		
+		JSONObject jsonObject = userInfo.toJSONObject();
+		
+		// Check merge
+		assertEquals(new Subject("alice"), userInfo.getSubject());
+		
+		for (DistributedClaims dc: userInfo.getDistributedClaims()) {
+			
+			DistributedClaims ref = null;
+			
+			if (dc.getSourceID().equals(dc1.getSourceID())) {
+				ref = dc1;
+			} else if (dc.getSourceID().equals(dc2.getSourceID())) {
+				ref = dc2;
+			} else {
+				fail();
+			}
+			
+			assertEquals(ref.getSourceID(), dc.getSourceID());
+			assertEquals(ref.getSourceEndpoint(), dc.getSourceEndpoint());
+			assertEquals(ref.getAccessToken().getValue(), dc.getAccessToken().getValue());
+		}
+		
+		assertEquals("alice", jsonObject.get("sub"));
+		
+		assertEquals("src1", ((JSONObject)jsonObject.get("_claim_names")).get("email"));
+		assertEquals("src1", ((JSONObject)jsonObject.get("_claim_names")).get("email_verified"));
+		assertEquals("src2", ((JSONObject)jsonObject.get("_claim_names")).get("score"));
+		assertEquals(3, ((JSONObject)jsonObject.get("_claim_names")).size());
+		
+		assertEquals(dc1.getSourceEndpoint().toString(), ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src1")).get("endpoint"));
+		assertEquals(dc1.getAccessToken().getValue(), ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src1")).get("access_token"));
+		assertEquals(2, ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src1")).size());
+		
+		assertEquals(dc2.getSourceEndpoint().toString(), ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src2")).get("endpoint"));
+		assertEquals(dc2.getAccessToken().getValue(), ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src2")).get("access_token"));
+		assertEquals(2, ((JSONObject)((JSONObject)jsonObject.get("_claim_sources")).get("src2")).size());
+		
+		assertEquals(3, jsonObject.size());
+	}
+	
+	
+	public void testPutAll_withExternalClaims_preventSourceIDConflict()
+		throws Exception {
+		
+		UserInfo userInfo = new UserInfo(new Subject("alice"));
+		
+		AggregatedClaims ac = new AggregatedClaims(
+			"src1",
+			new HashSet<>(Arrays.asList("email", "email_verified")),
+			AggregatedClaimsTest.createClaimsJWT()
+			);
+		
+		userInfo.addAggregatedClaims(ac);
+		
+		assertEquals(1, userInfo.getAggregatedClaims().size());
+		
+		UserInfo other = new UserInfo(new Subject("alice"));
+		
+		DistributedClaims dc = new DistributedClaims(
+			"src1", // same!!!
+			Collections.singleton("score"),
+			new URI("https://claims-source.com"),
+			new BearerAccessToken());
+		
+		other.addDistributedClaims(dc);
+		
+		assertEquals(1, other.getDistributedClaims().size());
+		
+		try {
+			userInfo.putAll(other);
+		} catch (IllegalArgumentException e) {
+			assertEquals("Distributed claims source ID conflict: src1", e.getMessage());
+		}
+	}
 }

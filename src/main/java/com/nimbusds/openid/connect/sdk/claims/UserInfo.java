@@ -271,12 +271,16 @@ public class UserInfo extends ClaimsSet {
 
 	/**
 	 * Puts all claims from the specified other UserInfo claims set.
+	 * Aggregated and distributed claims are properly merged.
 	 *
 	 * @param other The other UserInfo. Must have the same
 	 *              {@link #getSubject subject}. Must not be {@code null}.
 	 *
 	 * @throws IllegalArgumentException If the other UserInfo claims set
-	 *                                  doesn't have an identical subject.
+	 *                                  doesn't have an identical subject,
+	 *                                  or if the external claims source ID
+	 *                                  of the other UserInfo matches an
+	 *                                  existing source ID.
 	 */
 	public void putAll(final UserInfo other) {
 
@@ -287,8 +291,61 @@ public class UserInfo extends ClaimsSet {
 
 		if (! otherSubject.equals(getSubject()))
 			throw new IllegalArgumentException("The subject of the other UserInfo must be identical");
-
+		
+		// Save present aggregated and distributed claims, to prevent
+		// overwrite by put to claims JSON object
+		Set<AggregatedClaims> savedAggregatedClaims = getAggregatedClaims();
+		Set<DistributedClaims> savedDistributedClaims = getDistributedClaims();
+		
+		// Save other present aggregated and distributed claims
+		Set<AggregatedClaims> otherAggregatedClaims = other.getAggregatedClaims();
+		Set<DistributedClaims> otherDistributedClaims = other.getDistributedClaims();
+		
+		// Ensure external source IDs don't conflict during merge
+		Set<String> externalSourceIDs = new HashSet<>();
+		
+		if (savedAggregatedClaims != null) {
+			for (AggregatedClaims ac: savedAggregatedClaims) {
+				externalSourceIDs.add(ac.getSourceID());
+			}
+		}
+		
+		if (savedDistributedClaims != null) {
+			for (DistributedClaims dc: savedDistributedClaims) {
+				externalSourceIDs.add(dc.getSourceID());
+			}
+		}
+		
+		if (otherAggregatedClaims != null) {
+			for (AggregatedClaims ac: otherAggregatedClaims) {
+				if (externalSourceIDs.contains(ac.getSourceID())) {
+					throw new IllegalArgumentException("Aggregated claims source ID conflict: " + ac.getSourceID());
+				}
+			}
+		}
+		
+		if (otherDistributedClaims != null) {
+			for (DistributedClaims dc: otherDistributedClaims) {
+				if (externalSourceIDs.contains(dc.getSourceID())) {
+					throw new IllegalArgumentException("Distributed claims source ID conflict: " + dc.getSourceID());
+				}
+			}
+		}
+		
 		putAll((ClaimsSet)other);
+		
+		// Merge saved external claims, if any
+		if (savedAggregatedClaims != null) {
+			for (AggregatedClaims ac: savedAggregatedClaims) {
+				addAggregatedClaims(ac);
+			}
+		}
+		
+		if (savedDistributedClaims != null) {
+			for (DistributedClaims dc: savedDistributedClaims) {
+				addDistributedClaims(dc);
+			}
+		}
 	}
 	
 	
