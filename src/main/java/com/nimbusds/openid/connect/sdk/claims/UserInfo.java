@@ -19,28 +19,26 @@ package com.nimbusds.openid.connect.sdk.claims;
 
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
+import java.net.URISyntaxException;
+import java.util.*;
 import javax.mail.internet.InternetAddress;
 
-import net.minidev.json.JSONObject;
-
-import com.nimbusds.langtag.LangTag;
-
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
-
+import com.nimbusds.jwt.JWTParser;
+import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Subject;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.oauth2.sdk.token.TypelessAccessToken;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import net.minidev.json.JSONObject;
 
 
 /**
  * UserInfo claims set, serialisable to a JSON object.
+ *
+ * <p>Supports normal, aggregated and distributed claims.
  *
  * <p>Example UserInfo claims set:
  *
@@ -59,7 +57,7 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OpenID Connect Core 1.0, section 5.1.
+ *     <li>OpenID Connect Core 1.0, sections 5.1 and 5.6.
  * </ul>
  */
 public class UserInfo extends ClaimsSet {
@@ -273,12 +271,16 @@ public class UserInfo extends ClaimsSet {
 
 	/**
 	 * Puts all claims from the specified other UserInfo claims set.
+	 * Aggregated and distributed claims are properly merged.
 	 *
 	 * @param other The other UserInfo. Must have the same
 	 *              {@link #getSubject subject}. Must not be {@code null}.
 	 *
 	 * @throws IllegalArgumentException If the other UserInfo claims set
-	 *                                  doesn't have an identical subject.
+	 *                                  doesn't have an identical subject,
+	 *                                  or if the external claims source ID
+	 *                                  of the other UserInfo matches an
+	 *                                  existing source ID.
 	 */
 	public void putAll(final UserInfo other) {
 
@@ -289,8 +291,61 @@ public class UserInfo extends ClaimsSet {
 
 		if (! otherSubject.equals(getSubject()))
 			throw new IllegalArgumentException("The subject of the other UserInfo must be identical");
-
+		
+		// Save present aggregated and distributed claims, to prevent
+		// overwrite by put to claims JSON object
+		Set<AggregatedClaims> savedAggregatedClaims = getAggregatedClaims();
+		Set<DistributedClaims> savedDistributedClaims = getDistributedClaims();
+		
+		// Save other present aggregated and distributed claims
+		Set<AggregatedClaims> otherAggregatedClaims = other.getAggregatedClaims();
+		Set<DistributedClaims> otherDistributedClaims = other.getDistributedClaims();
+		
+		// Ensure external source IDs don't conflict during merge
+		Set<String> externalSourceIDs = new HashSet<>();
+		
+		if (savedAggregatedClaims != null) {
+			for (AggregatedClaims ac: savedAggregatedClaims) {
+				externalSourceIDs.add(ac.getSourceID());
+			}
+		}
+		
+		if (savedDistributedClaims != null) {
+			for (DistributedClaims dc: savedDistributedClaims) {
+				externalSourceIDs.add(dc.getSourceID());
+			}
+		}
+		
+		if (otherAggregatedClaims != null) {
+			for (AggregatedClaims ac: otherAggregatedClaims) {
+				if (externalSourceIDs.contains(ac.getSourceID())) {
+					throw new IllegalArgumentException("Aggregated claims source ID conflict: " + ac.getSourceID());
+				}
+			}
+		}
+		
+		if (otherDistributedClaims != null) {
+			for (DistributedClaims dc: otherDistributedClaims) {
+				if (externalSourceIDs.contains(dc.getSourceID())) {
+					throw new IllegalArgumentException("Distributed claims source ID conflict: " + dc.getSourceID());
+				}
+			}
+		}
+		
 		putAll((ClaimsSet)other);
+		
+		// Merge saved external claims, if any
+		if (savedAggregatedClaims != null) {
+			for (AggregatedClaims ac: savedAggregatedClaims) {
+				addAggregatedClaims(ac);
+			}
+		}
+		
+		if (savedDistributedClaims != null) {
+			for (DistributedClaims dc: savedDistributedClaims) {
+				addDistributedClaims(dc);
+			}
+		}
 	}
 	
 	
@@ -1079,8 +1134,147 @@ public class UserInfo extends ClaimsSet {
 	
 		setDateClaim(UPDATED_AT_CLAIM_NAME, updatedTime);
 	}
-
-
+	
+	
+	/**
+	 * Adds the specified aggregated claims provided by an external claims
+	 * source.
+	 *
+	 * @param aggregatedClaims The aggregated claims instance, if
+	 *                         {@code null} nothing will be added.
+	 */
+	public void addAggregatedClaims(final AggregatedClaims aggregatedClaims) {
+		
+		if (aggregatedClaims == null) {
+			return;
+		}
+		
+		aggregatedClaims.mergeInto(claims);
+	}
+	
+	
+	/**
+	 * Gets the included aggregated claims provided by each external claims
+	 * source.
+	 *
+	 * @return The aggregated claims, {@code null} if none are found.
+	 */
+	public Set<AggregatedClaims> getAggregatedClaims() {
+	
+		Map<String,JSONObject> claimSources = ExternalClaimsUtils.getExternalClaimSources(claims);
+		
+		if (claimSources == null) {
+			return null; // No external _claims_sources
+		}
+		
+		Set<AggregatedClaims> aggregatedClaimsSet = new HashSet<>();
+		
+		for (Map.Entry<String,JSONObject> en: claimSources.entrySet()) {
+			
+			String sourceID = en.getKey();
+			JSONObject sourceSpec = en.getValue();
+			
+			Object jwtValue = sourceSpec.get("JWT");
+			if (! (jwtValue instanceof String)) {
+				continue; // skip
+			}
+			
+			JWT claimsJWT;
+			try {
+				claimsJWT = JWTParser.parse((String)jwtValue);
+			} catch (java.text.ParseException e) {
+				continue; // invalid JWT, skip
+			}
+			
+			Set<String> claimNames = ExternalClaimsUtils.getExternalClaimNamesForSource(claims, sourceID);
+			
+			if (claimNames.isEmpty()) {
+				continue; // skip
+			}
+			
+			aggregatedClaimsSet.add(new AggregatedClaims(sourceID, claimNames, claimsJWT));
+		}
+		
+		if (aggregatedClaimsSet.isEmpty()) {
+			return null;
+		}
+		
+		return aggregatedClaimsSet;
+	}
+	
+	
+	/**
+	 * Adds the specified distributed claims from an external claims source.
+	 *
+	 * @param distributedClaims The distributed claims instance, if
+	 *                          {@code null} nothing will be added.
+	 */
+	public void addDistributedClaims(final DistributedClaims distributedClaims) {
+		
+		if (distributedClaims == null) {
+			return;
+		}
+		
+		distributedClaims.mergeInto(claims);
+	}
+	
+	
+	/**
+	 * Gets the included distributed claims provided by each external
+	 * claims source.
+	 *
+	 * @return The distributed claims, {@code null} if none are found.
+	 */
+	public Set<DistributedClaims> getDistributedClaims() {
+		
+		Map<String,JSONObject> claimSources = ExternalClaimsUtils.getExternalClaimSources(claims);
+		
+		if (claimSources == null) {
+			return null; // No external _claims_sources
+		}
+		
+		Set<DistributedClaims> distributedClaimsSet = new HashSet<>();
+		
+		for (Map.Entry<String,JSONObject> en: claimSources.entrySet()) {
+			
+			String sourceID = en.getKey();
+			JSONObject sourceSpec = en.getValue();
+	
+			Object endpointValue = sourceSpec.get("endpoint");
+			if (! (endpointValue instanceof String)) {
+				continue; // skip
+			}
+			
+			URI endpoint;
+			try {
+				endpoint = new URI((String)endpointValue);
+			} catch (URISyntaxException e) {
+				continue; // invalid URI, skip
+			}
+			
+			AccessToken accessToken = null;
+			Object accessTokenValue = sourceSpec.get("access_token");
+			if (accessTokenValue instanceof String) {
+				accessToken = new TypelessAccessToken((String)accessTokenValue);
+			}
+			
+			Set<String> claimNames = ExternalClaimsUtils.getExternalClaimNamesForSource(claims, sourceID);
+			
+			if (claimNames.isEmpty()) {
+				continue; // skip
+			}
+			
+			distributedClaimsSet.add(new DistributedClaims(sourceID, claimNames, endpoint, accessToken));
+		}
+		
+		if (distributedClaimsSet.isEmpty()) {
+			return null;
+		}
+		
+		return distributedClaimsSet;
+	}
+	
+	
 	/**
 	 * Parses a UserInfo claims set from the specified JSON object string.
 	 *
