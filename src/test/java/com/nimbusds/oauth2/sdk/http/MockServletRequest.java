@@ -18,7 +18,10 @@
 package com.nimbusds.oauth2.sdk.http;
 
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.*;
 import javax.servlet.*;
@@ -34,10 +37,15 @@ public class MockServletRequest implements HttpServletRequest {
 	private String method;
 
 
-	private Map<String,String> headers = new HashMap<>();
+	private Map<String,String> headers = new LinkedHashMap<>();
 
-	private Map<String, String[]> parameters = new LinkedHashMap<>();
+	
+	private Map<String,String[]> parameters = new LinkedHashMap<>();
+	
+	
+	private Map<String,Object> attributes = new LinkedHashMap<>();
 
+	
 	private String addr;
 
 
@@ -270,7 +278,8 @@ public class MockServletRequest implements HttpServletRequest {
 
 	@Override
 	public Object getAttribute(String s) {
-		return null;
+		
+		return attributes.get(s);
 	}
 
 
@@ -386,6 +395,7 @@ public class MockServletRequest implements HttpServletRequest {
 	@Override
 	public void setAttribute(String s, Object o) {
 
+		attributes.put(s, o);
 	}
 
 

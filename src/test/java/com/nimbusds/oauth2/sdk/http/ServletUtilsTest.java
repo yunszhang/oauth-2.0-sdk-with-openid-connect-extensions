@@ -20,8 +20,14 @@ package com.nimbusds.oauth2.sdk.http;
 
 import java.io.IOException;
 import java.net.URI;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
 
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
@@ -31,6 +37,23 @@ import net.minidev.json.JSONObject;
  * Tests the HTTP to / from servet request / response.
  */
 public class ServletUtilsTest extends TestCase {
+	
+	
+	private static X509Certificate generateSampleClientCertificate()
+		throws Exception {
+		
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+		keyPairGenerator.initialize(2048);
+		KeyPair keyPair = keyPairGenerator.generateKeyPair();
+		
+		RSAPublicKey rsaPublicKey = (RSAPublicKey)keyPair.getPublic();
+		RSAPrivateKey rsaPrivateKey = (RSAPrivateKey)keyPair.getPrivate();
+		
+		return X509CertificateGenerator.generateSelfSignedCertificate(
+			new Issuer("123"),
+			rsaPublicKey,
+			rsaPrivateKey);
+	}
 
 
 	public void testConstructFromServletRequestWithJSONEntityBody()
@@ -57,6 +80,35 @@ public class ServletUtilsTest extends TestCase {
 		assertEquals(1, jsonObject.size());
 	}
 
+
+	public void testConstructWithClientCertificate()
+		throws Exception {
+
+		X509Certificate cert = generateSampleClientCertificate();
+		
+		MockServletRequest servletRequest = new MockServletRequest();
+		servletRequest.setMethod("POST");
+		servletRequest.setHeader("Content-Type", CommonContentTypes.APPLICATION_JSON.toString());
+		servletRequest.setLocalAddr("c2id.com");
+		servletRequest.setLocalPort(8080);
+		servletRequest.setRequestURI("/clients");
+		servletRequest.setQueryString(null);
+		String entityBody = "{\"grant_types\":[\"code\"]}";
+		servletRequest.setEntityBody(entityBody);
+		servletRequest.setAttribute("javax.servlet.request.X509Certificate", new X509Certificate[]{cert});
+		
+
+		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(servletRequest);
+		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
+		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpRequest.getContentType().toString());
+		assertNull(httpRequest.getAccept());
+		assertNull(httpRequest.getAuthorization());
+		assertEquals(entityBody, httpRequest.getQuery());
+		JSONObject jsonObject = httpRequest.getQueryAsJSONObject();
+		assertEquals("code", JSONObjectUtils.getStringArray(jsonObject, "grant_types")[0]);
+		assertEquals(1, jsonObject.size());
+		assertEquals(cert, httpRequest.getClientX509Certificate());
+	}
 
 
 	public void testConstructFromServletRequestURLEncoded()
@@ -216,5 +268,34 @@ public class ServletUtilsTest extends TestCase {
 		JSONObject jsonObject = httpRequest.getQueryAsJSONObject();
 		assertEquals("code", JSONObjectUtils.getStringArray(jsonObject, "grant_types")[0]);
 		assertEquals(1, jsonObject.size());
+	}
+	
+	
+	public void testExtractClientCertificate_none() {
+		
+		assertNull(ServletUtils.extractClientX509Certificate(new MockServletRequest()));
+	}
+	
+	
+	public void testExtractClientCertificate_emptyArray() {
+		
+		MockServletRequest servletRequest = new MockServletRequest();
+		servletRequest.setAttribute("javax.servlet.request.X509Certificate", new X509Certificate[]{});
+		
+		assertNull(ServletUtils.extractClientX509Certificate(servletRequest));
+	}
+	
+	
+	public void testExtractClientCertificate_onePresent()
+		throws Exception {
+		
+		X509Certificate cert = generateSampleClientCertificate();
+		
+		X509Certificate[] certArray = new X509Certificate[]{cert};
+		
+		MockServletRequest servletRequest = new MockServletRequest();
+		servletRequest.setAttribute("javax.servlet.request.X509Certificate", certArray);
+		
+		assertEquals(cert, ServletUtils.extractClientX509Certificate(servletRequest));
 	}
 }

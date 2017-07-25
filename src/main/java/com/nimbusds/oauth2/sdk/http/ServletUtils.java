@@ -23,8 +23,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 import java.util.Map;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -219,6 +221,9 @@ public class ServletUtils {
 				request.setQuery(body.toString());
 			}
 		}
+		
+		// Extract validated client X.509 if we have mutual TLS
+		request.setClientX509Certificate(extractClientX509Certificate(sr));
 
 		return request;
 	}
@@ -260,12 +265,32 @@ public class ServletUtils {
 			writer.close();
 		}
 	}
+	
+	
+	/**
+	 * Extracts the client's X.509 certificate from the specified servlet
+	 * request. The first found certificate is returned, if any.
+	 *
+	 * @param servletRequest The HTTP servlet request. Must not be
+	 *                       {@code null}.
+	 *
+	 * @return The first client X.509 certificate, {@code null} if none is
+	 *         found.
+	 */
+	public static X509Certificate extractClientX509Certificate(final ServletRequest servletRequest) {
+		
+		X509Certificate[] certs = (X509Certificate[]) servletRequest.getAttribute("javax.servlet.request.X509Certificate");
+		
+		if (certs == null || certs.length == 0) {
+			return null;
+		}
+		
+		return certs[0];
+	}
 
 
 	/**
 	 * Prevents public instantiation.
 	 */
-	private ServletUtils() {
-
-	}
+	private ServletUtils() { }
 }
