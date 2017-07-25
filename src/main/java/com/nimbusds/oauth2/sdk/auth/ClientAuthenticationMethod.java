@@ -28,12 +28,12 @@ import net.jcip.annotations.Immutable;
  * <p>Constants are provided for four client authentication methods:
  *
  * <ul>
- *     <li>{@link #CLIENT_SECRET_BASIC} (default)
- *     <li>{@link #CLIENT_SECRET_POST}
- *     <li>{@link #CLIENT_SECRET_JWT}
- *     <li>{@link #PRIVATE_KEY_JWT}
- *     <li>{@link #TLS_CLIENT_AUTH}
- *     <li>{@link #NONE}
+ *     <li>{@link #CLIENT_SECRET_BASIC client_secret_basic} (default)
+ *     <li>{@link #CLIENT_SECRET_POST client_secret_post}
+ *     <li>{@link #CLIENT_SECRET_JWT client_secret_jwt}
+ *     <li>{@link #PRIVATE_KEY_JWT private_key_jwt}
+ *     <li>{@link #TLS_CLIENT_AUTH tls_client_auth}
+ *     <li>{@link #NONE none}
  * </ul>
  *
  * <p>Use the constructor to define a custom client authentication method.
@@ -96,7 +96,7 @@ public final class ClientAuthenticationMethod extends Identifier {
 	
 	
 	/**
-	 * TLS / X.509 client certificate authentication. See Mutual TLS
+	 * Client TLS / X.509 certificate authentication. See Mutual TLS
 	 * Profile for OAuth 2.0, section 2.
 	 */
 	public static final ClientAuthenticationMethod TLS_CLIENT_AUTH =
