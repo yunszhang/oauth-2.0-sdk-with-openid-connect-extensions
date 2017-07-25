@@ -57,6 +57,8 @@ import net.minidev.json.JSONObject;
  * <ul>
  *     <li>OpenID Connect Core 1.0, section 2.
  *     <li>OpenID Connect Front-Channel Logout 1.0, section 3 (draft 02).
+ *     <li>Financial Services – Financial API - Part 2: Read and Write API
+ *         Security Profile, section 5.1.
  * </ul>
  */
 public class IDTokenClaimsSet extends CommonClaimsSet {
@@ -90,6 +92,12 @@ public class IDTokenClaimsSet extends CommonClaimsSet {
 	 * The authorisation code hash claim name.
 	 */
 	public static final String C_HASH_CLAIM_NAME = "c_hash";
+	
+	
+	/**
+	 * The state hash claim name.
+	 */
+	public static final String S_HASH_CLAIM_NAME = "s_hash";
 
 
 	/**
@@ -132,6 +140,7 @@ public class IDTokenClaimsSet extends CommonClaimsSet {
 		stdClaimNames.add(NONCE_CLAIM_NAME);
 		stdClaimNames.add(AT_HASH_CLAIM_NAME);
 		stdClaimNames.add(C_HASH_CLAIM_NAME);
+		stdClaimNames.add(S_HASH_CLAIM_NAME);
 		stdClaimNames.add(ACR_CLAIM_NAME);
 		stdClaimNames.add(AMR_CLAIM_NAME);
 		stdClaimNames.add(AZP_CLAIM_NAME);
@@ -273,7 +282,6 @@ public class IDTokenClaimsSet extends CommonClaimsSet {
 			}
 
 			return getAccessTokenHash() != null;
-
 		}
 
 		// Hybrid flow
@@ -464,6 +472,30 @@ public class IDTokenClaimsSet extends CommonClaimsSet {
 	public void setCodeHash(final CodeHash cHash) {
 
 		setClaim(C_HASH_CLAIM_NAME, cHash != null ? cHash.getValue() : null);
+	}
+	
+	
+	/**
+	 * Gets the state hash. Corresponds to the {@code s_hash} claim.
+	 *
+	 * @return The state hash, {@code null} if not specified or parsing
+	 *         failed.
+	 */
+	public StateHash getStateHash() {
+		
+		String value = getStringClaim(S_HASH_CLAIM_NAME);
+		return value != null ? new StateHash(value) : null;
+	}
+	
+	
+	/**
+	 * Sets the state hash. Corresponds to the {@code s_hash} claim.
+	 *
+	 * @param sHash The state hash, {@code null} if not specified.
+	 */
+	public void setStateHash(final StateHash sHash) {
+		
+		setClaim(S_HASH_CLAIM_NAME, sHash != null ? sHash.getValue() : null);
 	}
 
 

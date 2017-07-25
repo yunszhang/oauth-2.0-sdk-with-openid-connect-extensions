@@ -28,15 +28,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.util.DateUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -54,8 +57,10 @@ public class IDTokenClaimsSetTest extends TestCase {
 		assertEquals("auth_time", IDTokenClaimsSet.AUTH_TIME_CLAIM_NAME);
 		assertEquals("azp", IDTokenClaimsSet.AZP_CLAIM_NAME);
 		assertEquals("c_hash", IDTokenClaimsSet.C_HASH_CLAIM_NAME);
+		assertEquals("s_hash", IDTokenClaimsSet.S_HASH_CLAIM_NAME);
 		assertEquals("exp", IDTokenClaimsSet.EXP_CLAIM_NAME);
 		assertEquals("iat", IDTokenClaimsSet.IAT_CLAIM_NAME);
+		assertEquals("iss", IDTokenClaimsSet.ISS_CLAIM_NAME);
 		assertEquals("iss", IDTokenClaimsSet.ISS_CLAIM_NAME);
 		assertEquals("nonce", IDTokenClaimsSet.NONCE_CLAIM_NAME);
 		assertEquals("sub", IDTokenClaimsSet.SUB_CLAIM_NAME);
@@ -77,13 +82,14 @@ public class IDTokenClaimsSetTest extends TestCase {
 		assertTrue(stdClaimNames.contains("nonce"));
 		assertTrue(stdClaimNames.contains("at_hash"));
 		assertTrue(stdClaimNames.contains("c_hash"));
+		assertTrue(stdClaimNames.contains("s_hash"));
 		assertTrue(stdClaimNames.contains("acr"));
 		assertTrue(stdClaimNames.contains("amr"));
 		assertTrue(stdClaimNames.contains("azp"));
 		assertTrue(stdClaimNames.contains("sub_jwk"));
 		assertTrue(stdClaimNames.contains("sid"));
 
-		assertEquals(14, stdClaimNames.size());
+		assertEquals(15, stdClaimNames.size());
 	}
 
 
@@ -94,16 +100,16 @@ public class IDTokenClaimsSetTest extends TestCase {
 			.issuer("https://c2id.com")
 			.subject("alice")
 			.audience("client-123")
-			.expirationTime(new Date(3600000l))
-			.issueTime(new Date(1000l))
+			.expirationTime(new Date(3_600_000L))
+			.issueTime(new Date(1_000L))
 			.build();
 
 		IDTokenClaimsSet idTokenClaimsSet = new IDTokenClaimsSet(claimsSet);
 		assertEquals("https://c2id.com", idTokenClaimsSet.getIssuer().getValue());
 		assertEquals("alice", idTokenClaimsSet.getSubject().getValue());
 		assertEquals("client-123", idTokenClaimsSet.getAudience().get(0).getValue());
-		assertEquals(3600000l, idTokenClaimsSet.getExpirationTime().getTime());
-		assertEquals(1000l, idTokenClaimsSet.getIssueTime().getTime());
+		assertEquals(3_600_000L, idTokenClaimsSet.getExpirationTime().getTime());
+		assertEquals(1_000L, idTokenClaimsSet.getIssueTime().getTime());
 	}
 
 
@@ -134,9 +140,9 @@ public class IDTokenClaimsSetTest extends TestCase {
 		assertEquals("24400320", idTokenClaimsSet.getSubject().getValue());
 		assertEquals("s6BhdRkqt3", idTokenClaimsSet.getAudience().get(0).getValue());
 		assertEquals("n-0S6_WzA2Mj", idTokenClaimsSet.getNonce().getValue());
-		assertEquals(1311281970l, DateUtils.toSecondsSinceEpoch(idTokenClaimsSet.getExpirationTime()));
-		assertEquals(1311280970l, DateUtils.toSecondsSinceEpoch(idTokenClaimsSet.getIssueTime()));
-		assertEquals(1311280969l, DateUtils.toSecondsSinceEpoch(idTokenClaimsSet.getAuthenticationTime()));
+		assertEquals(1311281970L, DateUtils.toSecondsSinceEpoch(idTokenClaimsSet.getExpirationTime()));
+		assertEquals(1311280970L, DateUtils.toSecondsSinceEpoch(idTokenClaimsSet.getIssueTime()));
+		assertEquals(1311280969L, DateUtils.toSecondsSinceEpoch(idTokenClaimsSet.getAuthenticationTime()));
 		assertEquals("urn:mace:incommon:iap:silver", idTokenClaimsSet.getACR().getValue());
 		assertEquals("MTIzNDU2Nzg5MDEyMzQ1Ng", idTokenClaimsSet.getAccessTokenHash().getValue());
 
@@ -152,9 +158,9 @@ public class IDTokenClaimsSetTest extends TestCase {
 		assertEquals("24400320", idTokenClaimsSet.getSubject().getValue());
 		assertEquals("s6BhdRkqt3", idTokenClaimsSet.getAudience().get(0).getValue());
 		assertEquals("n-0S6_WzA2Mj", idTokenClaimsSet.getNonce().getValue());
-		assertEquals(1311281970l, DateUtils.toSecondsSinceEpoch(idTokenClaimsSet.getExpirationTime()));
-		assertEquals(1311280970l, DateUtils.toSecondsSinceEpoch(idTokenClaimsSet.getIssueTime()));
-		assertEquals(1311280969l, DateUtils.toSecondsSinceEpoch(idTokenClaimsSet.getAuthenticationTime()));
+		assertEquals(1311281970L, DateUtils.toSecondsSinceEpoch(idTokenClaimsSet.getExpirationTime()));
+		assertEquals(1311280970L, DateUtils.toSecondsSinceEpoch(idTokenClaimsSet.getIssueTime()));
+		assertEquals(1311280969L, DateUtils.toSecondsSinceEpoch(idTokenClaimsSet.getAuthenticationTime()));
 		assertEquals("urn:mace:incommon:iap:silver", idTokenClaimsSet.getACR().getValue());
 		assertEquals("MTIzNDU2Nzg5MDEyMzQ1Ng", idTokenClaimsSet.getAccessTokenHash().getValue());
 	}
@@ -169,12 +175,12 @@ public class IDTokenClaimsSetTest extends TestCase {
 		List<Audience> audList = new LinkedList<>();
 		audList.add(new Audience("aud"));
 
-		Date expirationTime = DateUtils.fromSecondsSinceEpoch(100000l);
-		Date issueTime = DateUtils.fromSecondsSinceEpoch(200000l);
+		Date expirationTime = DateUtils.fromSecondsSinceEpoch(100000L);
+		Date issueTime = DateUtils.fromSecondsSinceEpoch(200000L);
 
 		IDTokenClaimsSet idTokenClaimsSet = new IDTokenClaimsSet(issuer, subject, audList, expirationTime, issueTime);
 
-		Date authenticationTime = DateUtils.fromSecondsSinceEpoch(300000l);
+		Date authenticationTime = DateUtils.fromSecondsSinceEpoch(300000L);
 		idTokenClaimsSet.setAuthenticationTime(authenticationTime);
 
 		Nonce nonce = new Nonce();
@@ -185,6 +191,9 @@ public class IDTokenClaimsSetTest extends TestCase {
 
 		CodeHash codeHash = new CodeHash("456");
 		idTokenClaimsSet.setCodeHash(codeHash);
+		
+		StateHash stateHash = new StateHash("789");
+		idTokenClaimsSet.setStateHash(stateHash);
 
 		ACR acr = new ACR("1");
 		idTokenClaimsSet.setACR(acr);
@@ -200,14 +209,15 @@ public class IDTokenClaimsSetTest extends TestCase {
 		assertEquals("iss", idTokenClaimsSet.getIssuer().getValue());
 		assertEquals("sub", idTokenClaimsSet.getSubject().getValue());
 		assertEquals("aud", idTokenClaimsSet.getAudience().get(0).getValue());
-		assertEquals(100000l, idTokenClaimsSet.getExpirationTime().getTime() / 1000);
-		assertEquals(200000l, idTokenClaimsSet.getIssueTime().getTime() / 1000);
+		assertEquals(100000L, idTokenClaimsSet.getExpirationTime().getTime() / 1000);
+		assertEquals(200000L, idTokenClaimsSet.getIssueTime().getTime() / 1000);
 
 		// Optional claims
-		assertEquals(300000l, idTokenClaimsSet.getAuthenticationTime().getTime() / 1000);
+		assertEquals(300000L, idTokenClaimsSet.getAuthenticationTime().getTime() / 1000);
 		assertEquals(nonce.getValue(), idTokenClaimsSet.getNonce().getValue());
 		assertEquals(accessTokenHash.getValue(), idTokenClaimsSet.getAccessTokenHash().getValue());
 		assertEquals(codeHash.getValue(), idTokenClaimsSet.getCodeHash().getValue());
+		assertEquals(stateHash.getValue(), idTokenClaimsSet.getStateHash().getValue());
 		assertEquals(acr.getValue(), idTokenClaimsSet.getACR().getValue());
 		assertEquals("A", idTokenClaimsSet.getAMR().get(0).getValue());
 		assertEquals(authorizedParty.getValue(), idTokenClaimsSet.getAuthorizedParty().getValue());
@@ -223,17 +233,58 @@ public class IDTokenClaimsSetTest extends TestCase {
 		assertEquals("iss", idTokenClaimsSet.getIssuer().getValue());
 		assertEquals("sub", idTokenClaimsSet.getSubject().getValue());
 		assertEquals("aud", idTokenClaimsSet.getAudience().get(0).getValue());
-		assertEquals(100000l, idTokenClaimsSet.getExpirationTime().getTime() / 1000);
-		assertEquals(200000l, idTokenClaimsSet.getIssueTime().getTime() / 1000);
+		assertEquals(100000L, idTokenClaimsSet.getExpirationTime().getTime() / 1000);
+		assertEquals(200000L, idTokenClaimsSet.getIssueTime().getTime() / 1000);
 
 		// Optional claims
-		assertEquals(300000l, idTokenClaimsSet.getAuthenticationTime().getTime() / 1000);
+		assertEquals(300000L, idTokenClaimsSet.getAuthenticationTime().getTime() / 1000);
 		assertEquals(nonce.getValue(), idTokenClaimsSet.getNonce().getValue());
 		assertEquals(accessTokenHash.getValue(), idTokenClaimsSet.getAccessTokenHash().getValue());
 		assertEquals(codeHash.getValue(), idTokenClaimsSet.getCodeHash().getValue());
+		assertEquals(stateHash.getValue(), idTokenClaimsSet.getStateHash().getValue());
 		assertEquals(acr.getValue(), idTokenClaimsSet.getACR().getValue());
 		assertEquals("A", idTokenClaimsSet.getAMR().get(0).getValue());
 		assertEquals(authorizedParty.getValue(), idTokenClaimsSet.getAuthorizedParty().getValue());
+	}
+	
+	
+	public void testStateHash()
+		throws Exception {
+		
+		IDTokenClaimsSet idTokenClaimsSet = new IDTokenClaimsSet(
+			new Issuer("https://c2id.com"),
+			new Subject("alice"),
+			new Audience("123").toSingleAudienceList(),
+			new Date(60_000L),
+			new Date(0L)
+		);
+		
+		assertNull(idTokenClaimsSet.getStateHash());
+		
+		// Set / get null
+		idTokenClaimsSet.setStateHash(null);
+		assertNull(idTokenClaimsSet.getStateHash());
+		
+		State state = new State();
+		StateHash stateHash = StateHash.compute(state, JWSAlgorithm.RS256);
+		
+		idTokenClaimsSet.setStateHash(stateHash);
+		
+		assertEquals(stateHash, idTokenClaimsSet.getStateHash());
+		
+		JSONObject jsonObject = idTokenClaimsSet.toJSONObject();
+		
+		assertEquals("https://c2id.com", jsonObject.get("iss"));
+		assertEquals("alice", jsonObject.get("sub"));
+		assertEquals(stateHash.getValue(), jsonObject.get("s_hash"));
+		assertEquals(0L, jsonObject.get("iat"));
+		assertEquals(60L, jsonObject.get("exp"));
+		assertEquals("123", ((List<String>)jsonObject.get("aud")).get(0));
+		assertEquals(6, jsonObject.size());
+		
+		idTokenClaimsSet = IDTokenClaimsSet.parse(jsonObject.toJSONString());
+		
+		assertEquals(stateHash, idTokenClaimsSet.getStateHash());
 	}
 
 
@@ -246,8 +297,8 @@ public class IDTokenClaimsSetTest extends TestCase {
 		List<Audience> audList = new LinkedList<>();
 		audList.add(new Audience("aud"));
 
-		Date expirationTime = DateUtils.fromSecondsSinceEpoch(100000l);
-		Date issueTime = DateUtils.fromSecondsSinceEpoch(200000l);
+		Date expirationTime = DateUtils.fromSecondsSinceEpoch(100000L);
+		Date issueTime = DateUtils.fromSecondsSinceEpoch(200000L);
 
 		IDTokenClaimsSet idTokenClaimsSet = new IDTokenClaimsSet(issuer, subject, audList, expirationTime, issueTime);
 
@@ -263,7 +314,7 @@ public class IDTokenClaimsSetTest extends TestCase {
 		// See http://openid.net/specs/openid-connect-core-1_0.html#CodeIDToken
 
 		ResponseType rt_code = ResponseType.parse("code");
-		boolean iatAuthzEndpoint = false;
+		final boolean iatAuthzEndpoint = false;
 
 		IDTokenClaimsSet claimsSet = new IDTokenClaimsSet(
 			new Issuer("iss"),
@@ -290,7 +341,7 @@ public class IDTokenClaimsSetTest extends TestCase {
 
 		ResponseType rt_idToken = ResponseType.parse("id_token");
 		ResponseType rt_idToken_token = ResponseType.parse("id_token token");
-		boolean iatAuthzEndpoint = true;
+		final boolean iatAuthzEndpoint = true;
 
 		IDTokenClaimsSet claimsSet = new IDTokenClaimsSet(
 			new Issuer("iss"),
@@ -420,7 +471,7 @@ public class IDTokenClaimsSetTest extends TestCase {
 
 		String json = claimsSet.toJSONObject().toJSONString();
 
-		System.out.println("ID token with subject JWK: " + json);
+//		System.out.println("ID token with subject JWK: " + json);
 
 		claimsSet = IDTokenClaimsSet.parse(json);
 
