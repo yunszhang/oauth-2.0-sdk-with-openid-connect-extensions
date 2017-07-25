@@ -20,14 +20,9 @@ package com.nimbusds.oauth2.sdk.http;
 
 import java.io.IOException;
 import java.net.URI;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.cert.X509Certificate;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
 
-import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
@@ -37,23 +32,6 @@ import net.minidev.json.JSONObject;
  * Tests the HTTP to / from servet request / response.
  */
 public class ServletUtilsTest extends TestCase {
-	
-	
-	private static X509Certificate generateSampleClientCertificate()
-		throws Exception {
-		
-		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-		keyPairGenerator.initialize(2048);
-		KeyPair keyPair = keyPairGenerator.generateKeyPair();
-		
-		RSAPublicKey rsaPublicKey = (RSAPublicKey)keyPair.getPublic();
-		RSAPrivateKey rsaPrivateKey = (RSAPrivateKey)keyPair.getPrivate();
-		
-		return X509CertificateGenerator.generateSelfSignedCertificate(
-			new Issuer("123"),
-			rsaPublicKey,
-			rsaPrivateKey);
-	}
 
 
 	public void testConstructFromServletRequestWithJSONEntityBody()
@@ -84,7 +62,7 @@ public class ServletUtilsTest extends TestCase {
 	public void testConstructWithClientCertificate()
 		throws Exception {
 
-		X509Certificate cert = generateSampleClientCertificate();
+		X509Certificate cert = X509CertificateGenerator.generateSampleClientCertificate();
 		
 		MockServletRequest servletRequest = new MockServletRequest();
 		servletRequest.setMethod("POST");
@@ -289,7 +267,7 @@ public class ServletUtilsTest extends TestCase {
 	public void testExtractClientCertificate_onePresent()
 		throws Exception {
 		
-		X509Certificate cert = generateSampleClientCertificate();
+		X509Certificate cert = X509CertificateGenerator.generateSampleClientCertificate();
 		
 		X509Certificate[] certArray = new X509Certificate[]{cert};
 		

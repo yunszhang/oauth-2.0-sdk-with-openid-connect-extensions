@@ -136,9 +136,14 @@ public abstract class ClientAuthentication {
 		// Do we have a signed JWT assertion?
 		if (StringUtils.isNotBlank(params.get("client_assertion")) && StringUtils.isNotBlank(params.get("client_assertion_type"))) {
 			return JWTAuthentication.parse(httpRequest);
-		} else {
-			return null; // no auth
 		}
+		
+		// Client TLS?
+		if (StringUtils.isNotBlank(params.get("client_id")) && httpRequest.getClientX509Certificate() != null) {
+			return TLSClientAuthentication.parse(httpRequest);
+		}
+		
+		return null; // no auth
 	}
 	
 	

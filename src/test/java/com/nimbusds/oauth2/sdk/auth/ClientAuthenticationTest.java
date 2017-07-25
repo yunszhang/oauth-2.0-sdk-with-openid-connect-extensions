@@ -19,10 +19,13 @@ package com.nimbusds.oauth2.sdk.auth;
 
 
 import java.net.URL;
+import java.security.cert.X509Certificate;
 
-import junit.framework.TestCase;
-
+import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.X509CertificateGenerator;
+import com.nimbusds.oauth2.sdk.id.ClientID;
+import junit.framework.TestCase;
 
 
 /**
@@ -53,5 +56,33 @@ public class ClientAuthenticationTest extends TestCase {
 
 		ClientAuthentication auth = ClientAuthentication.parse(httpRequest);
 		assertNull(auth);
+	}
+	
+	
+	public void testTLSClientCertificateAuthentication()
+		throws Exception {
+		
+		X509Certificate clientCert = X509CertificateGenerator.generateSampleClientCertificate();
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
+		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setQuery("client_id=123");
+		httpRequest.setClientX509Certificate(clientCert);
+		
+		TLSClientAuthentication clientAuth = (TLSClientAuthentication) ClientAuthentication.parse(httpRequest);
+		assertEquals(new ClientID("123"), clientAuth.getClientID());
+		assertNull(clientAuth.getSSLSocketFactory());
+		assertEquals(clientCert, clientAuth.getClientX509Certificate());
+	}
+	
+	
+	public void testClientAuthenticationNone()
+		throws Exception {
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
+		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setQuery("client_id=123");
+		
+		assertNull(ClientAuthentication.parse(httpRequest));
 	}
 }

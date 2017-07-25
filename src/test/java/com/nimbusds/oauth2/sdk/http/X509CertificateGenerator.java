@@ -20,10 +20,7 @@ package com.nimbusds.oauth2.sdk.http;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -65,5 +62,22 @@ public class X509CertificateGenerator {
 		JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder("SHA256withRSA");
 		X509CertificateHolder certHolder = x509certBuilder.build(signerBuilder.build(rsaPrivateKey));
 		return X509CertUtils.parse(certHolder.getEncoded());
+	}
+	
+	
+	public static X509Certificate generateSampleClientCertificate()
+		throws Exception {
+		
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+		keyPairGenerator.initialize(2048);
+		KeyPair keyPair = keyPairGenerator.generateKeyPair();
+		
+		RSAPublicKey rsaPublicKey = (RSAPublicKey)keyPair.getPublic();
+		RSAPrivateKey rsaPrivateKey = (RSAPrivateKey)keyPair.getPrivate();
+		
+		return X509CertificateGenerator.generateSelfSignedCertificate(
+			new Issuer("123"),
+			rsaPublicKey,
+			rsaPrivateKey);
 	}
 }
