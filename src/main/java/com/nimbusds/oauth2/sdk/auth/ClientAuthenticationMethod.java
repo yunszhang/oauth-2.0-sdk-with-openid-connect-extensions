@@ -18,9 +18,8 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
-import net.jcip.annotations.Immutable;
-
 import com.nimbusds.oauth2.sdk.id.Identifier;
+import net.jcip.annotations.Immutable;
 
 
 /**
@@ -33,6 +32,7 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  *     <li>{@link #CLIENT_SECRET_POST}
  *     <li>{@link #CLIENT_SECRET_JWT}
  *     <li>{@link #PRIVATE_KEY_JWT}
+ *     <li>{@link #TLS_CLIENT_AUTH}
  *     <li>{@link #NONE}
  * </ul>
  *
@@ -43,6 +43,8 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  * <ul>
  *     <li>OAuth 2.0 (RFC 6749), section 2.3.
  *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section
+ *         2.
+ *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-02), section
  *         2.
  * </ul>
  */
@@ -91,6 +93,14 @@ public final class ClientAuthenticationMethod extends Identifier {
 	 */
 	public static final ClientAuthenticationMethod PRIVATE_KEY_JWT =
 		new ClientAuthenticationMethod("private_key_jwt");
+	
+	
+	/**
+	 * TLS / X.509 client certificate authentication. See Mutual TLS
+	 * Profile for OAuth 2.0, section 2.
+	 */
+	public static final ClientAuthenticationMethod TLS_CLIENT_AUTH =
+		new ClientAuthenticationMethod("tls_client_auth");
 
 
 	/**
@@ -142,6 +152,8 @@ public final class ClientAuthenticationMethod extends Identifier {
 			return CLIENT_SECRET_JWT;
 		} else if (value.equals(PRIVATE_KEY_JWT.getValue())) {
 			return PRIVATE_KEY_JWT;
+		} else if (value.equalsIgnoreCase(TLS_CLIENT_AUTH.getValue())) {
+			return TLS_CLIENT_AUTH;
 		} else if (value.equals(NONE.getValue())) {
 			return NONE;
 		} else {
