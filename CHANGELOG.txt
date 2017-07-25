@@ -690,3 +690,8 @@ version 5.29 (2017-06-29)
 version 5.30 (2017-07-07)
     * Adds UserInfo support for aggregated and distributed claims.
 
+version 5.31 (2017-07-25)
+    * Adds new StateHash class to represent state hash claims (s_hash) in ID
+      tokens, see Financial Services – Financial API - Part 2: Read and Write
+      API Security Profile.
+

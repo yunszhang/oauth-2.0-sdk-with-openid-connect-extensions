@@ -39,6 +39,8 @@ public class AccessTokenHashTest extends TestCase {
 		AccessToken token = new TypelessAccessToken("jHkWEdUXMU1BwAsC4vtUsZwnNvTIxEl0z9K3vx5KF0Y");
 
 		AccessTokenHash computedHash = AccessTokenHash.compute(token, JWSAlgorithm.RS256);
+		
+		assertNotNull(computedHash);
 
 		AccessTokenHash expectedHash = new AccessTokenHash("77QmUPtjPfzWtF2AnpK9RQ");
 
@@ -53,6 +55,10 @@ public class AccessTokenHashTest extends TestCase {
 		AccessTokenHash hash1 = AccessTokenHash.compute(token, JWSAlgorithm.HS512);
 
 		AccessTokenHash hash2 = AccessTokenHash.compute(token, JWSAlgorithm.HS512);
+		
+		assertNotNull(hash1);
+		
+		assertNotNull(hash2);
 
 		assertTrue(hash1.equals(hash2));
 	}
