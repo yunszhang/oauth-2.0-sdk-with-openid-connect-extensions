@@ -19,22 +19,22 @@ package com.nimbusds.oauth2.sdk.http;
 
 
 import java.io.*;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
-import net.jcip.annotations.ThreadSafe;
-
-import net.minidev.json.JSONObject;
-
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
+import net.jcip.annotations.ThreadSafe;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -143,16 +143,37 @@ public class HTTPRequest extends HTTPMessage {
 	 * Controls HTTP 3xx redirections.
 	 */
 	private boolean followRedirects = true;
+	
+	
+	/**
+	 * The received validated client X.509 certificate for a received HTTPS
+	 * request, {@code null} if not specified.
+	 */
+	private X509Certificate clientX509Certificate = null;
+	
+	
+	/**
+	 * The hostname verifier to use for outgoing HTTPS requests,
+	 * {@code null} implies the default one.
+	 */
+	private HostnameVerifier hostnameVerifier = null;
+	
+	
+	/**
+	 * The SSL socket factory to use for outgoing HTTPS requests,
+	 * {@code null} implies the default one.
+	 */
+	private SSLSocketFactory sslSocketFactory = null;
 
 
 	/**
-	 * The default hostname verifier for all HTTPS requests.
+	 * The default hostname verifier for all outgoing HTTPS requests.
 	 */
 	private static HostnameVerifier defaultHostnameVerifier = HttpsURLConnection.getDefaultHostnameVerifier();
 
 
 	/**
-	 * The default socket factory for all HTTPS requests.
+	 * The default socket factory for all outgoing HTTPS requests.
 	 */
 	private static SSLSocketFactory defaultSSLSocketFactory = (SSLSocketFactory)SSLSocketFactory.getDefault();
 	
@@ -463,10 +484,85 @@ public class HTTPRequest extends HTTPMessage {
 
 		followRedirects = follow;
 	}
-
-
+	
+	
 	/**
-	 * Returns the default hostname verifier for all HTTPS requests.
+	 * Gets the received validated client X.509 certificate for a received
+	 * HTTPS request.
+	 *
+	 * @return The client X.509 certificate, {@code null} if not specified.
+	 */
+	public X509Certificate getClientX509Certificate() {
+		
+		return clientX509Certificate;
+	}
+	
+	
+	/**
+	 * Sets the received validated client X.509 certificate for a received
+	 * HTTPS request.
+	 *
+	 * @param clientX509Certificate The client X.509 certificate,
+	 *                              {@code null} if not specified.
+	 */
+	public void setClientX509Certificate(final X509Certificate clientX509Certificate) {
+		
+		this.clientX509Certificate = clientX509Certificate;
+	}
+	
+	
+	/**
+	 * Gets the hostname verifier for outgoing HTTPS requests.
+	 *
+	 * @return The hostname verifier, {@code null} implies use of the
+	 *         {@link #getDefaultHostnameVerifier() default one}.
+	 */
+	public HostnameVerifier getHostnameVerifier() {
+		
+		return hostnameVerifier;
+	}
+	
+	
+	/**
+	 * Sets the hostname verifier for outgoing HTTPS requests.
+	 *
+	 * @param hostnameVerifier The hostname verifier, {@code null} implies
+	 *                         use of the
+	 *                         {@link #getDefaultHostnameVerifier() default
+	 *                         one}.
+	 */
+	public void setHostnameVerifier(final HostnameVerifier hostnameVerifier) {
+		
+		this.hostnameVerifier = hostnameVerifier;
+	}
+	
+	
+	/**
+	 * Gets the SSL factory for outgoing HTTPS requests.
+	 *
+	 * @return The SSL factory, {@code null} implies of the default one.
+	 */
+	public SSLSocketFactory getSSLSocketFactory() {
+		
+		return sslSocketFactory;
+	}
+	
+	
+	/**
+	 * Sets the SSL factory for outgoing HTTPS requests.
+	 *
+	 * @param sslSocketFactory The SSL factory, {@code null} implies use of
+	 *                         the default one.
+	 */
+	public void setSSLSocketFactory(final SSLSocketFactory sslSocketFactory) {
+		
+		this.sslSocketFactory = sslSocketFactory;
+	}
+	
+	
+	/**
+	 * Returns the default hostname verifier for all outgoing HTTPS
+	 * requests.
 	 *
 	 * @return The hostname verifier.
 	 */
@@ -477,8 +573,8 @@ public class HTTPRequest extends HTTPMessage {
 
 
 	/**
-	 * Sets the default hostname verifier for all HTTPS requests. May be
-	 * overridden on a individual request basis.
+	 * Sets the default hostname verifier for all outgoing HTTPS requests.
+	 * May be overridden on a individual request basis.
 	 *
 	 * @param defaultHostnameVerifier The hostname verifier. Must not be
 	 *                         {@code null}.
@@ -494,7 +590,8 @@ public class HTTPRequest extends HTTPMessage {
 
 
 	/**
-	 * Returns the default SSL socket factory for all HTTPS requests.
+	 * Returns the default SSL socket factory for all outgoing HTTPS
+	 * requests.
 	 *
 	 * @return The SSL socket factory.
 	 */
@@ -505,8 +602,8 @@ public class HTTPRequest extends HTTPMessage {
 
 
 	/**
-	 * Sets the default SSL socket factory for all HTTPS requests. May be
-	 * overridden on a individual request basis.
+	 * Sets the default SSL socket factory for all outgoing HTTPS requests.
+	 * May be overridden on a individual request basis.
 	 *
 	 * @param sslSocketFactory The SSL socket factory. Must not be
 	 *                         {@code null}.
@@ -523,6 +620,49 @@ public class HTTPRequest extends HTTPMessage {
 
 	/**
 	 * Returns an established HTTP URL connection for this HTTP request.
+	 * Deprecated as of v5.31, use {@link #toHttpURLConnection()} with
+	 * {@link #setHostnameVerifier} and {@link #setSSLSocketFactory}
+	 * instead.
+	 *
+	 * @param hostnameVerifier The hostname verifier for outgoing HTTPS
+	 *                         requests, {@code null} implies use of the
+	 *                         {@link #getDefaultHostnameVerifier() default
+	 *                         one}.
+	 * @param sslSocketFactory The SSL socket factory for HTTPS requests,
+	 *                         {@code null} implies use of the
+	 *                         {@link #getDefaultSSLSocketFactory() default
+	 *                         one}.
+	 *
+	 * @return The HTTP URL connection, with the request sent and ready to
+	 *         read the response.
+	 *
+	 * @throws IOException If the HTTP request couldn't be made, due to a
+	 *                     network or other error.
+	 */
+	@Deprecated
+	public HttpURLConnection toHttpURLConnection(final HostnameVerifier hostnameVerifier,
+						     final SSLSocketFactory sslSocketFactory)
+		throws IOException {
+		
+		HostnameVerifier savedHostnameVerifier = getHostnameVerifier();
+		SSLSocketFactory savedSSLFactory = getSSLSocketFactory();
+		
+		try {
+			// Set for this HTTP URL connection only
+			setHostnameVerifier(hostnameVerifier);
+			setSSLSocketFactory(sslSocketFactory);
+			
+			return toHttpURLConnection();
+			
+		} finally {
+			setHostnameVerifier(savedHostnameVerifier);
+			setSSLSocketFactory(savedSSLFactory);
+		}
+	}
+
+
+	/**
+	 * Returns an established HTTP URL connection for this HTTP request.
 	 *
 	 * @return The HTTP URL connection, with the request sent and ready to
 	 *         read the response.
@@ -531,34 +671,6 @@ public class HTTPRequest extends HTTPMessage {
 	 *                     network or other error.
 	 */
 	public HttpURLConnection toHttpURLConnection()
-		throws IOException {
-
-		return toHttpURLConnection(null, null);
-	}
-
-
-	/**
-	 * Returns an established HTTP URL connection for this HTTP request.
-	 *
-	 * @param hostnameVerifier The hostname verifier for HTTPS requests.
-	 *                         Disregarded for plain HTTP requests. If
-	 *                         {@code null} the
-	 *                         {@link #getDefaultHostnameVerifier() default
-	 *                         hostname verifier} will apply.
-	 * @param sslSocketFactory The SSL socket factory for HTTPS requests.
-	 *                         Disregarded for plain HTTP requests. If
-	 *                         {@code null} the
-	 *                         {@link #getDefaultSSLSocketFactory() default
-	 *                         SSL socket factory} will apply.
-	 *
-	 * @return The HTTP URL connection, with the request sent and ready to
-	 *         read the response.
-	 *
-	 * @throws IOException If the HTTP request couldn't be made, due to a
-	 *                     network or other error.
-	 */
-	public HttpURLConnection toHttpURLConnection(final HostnameVerifier hostnameVerifier,
-						     final SSLSocketFactory sslSocketFactory)
 		throws IOException {
 
 		URL finalURL = url;
@@ -636,18 +748,44 @@ public class HTTPRequest extends HTTPMessage {
 
 
 	/**
-	 * Sends this HTTP request to the request URL and retrieves the 
-	 * resulting HTTP response.
+	 * Sends this HTTP request to the request URL and retrieves the
+	 * resulting HTTP response. Deprecated as of v5.31, use
+	 * {@link #toHttpURLConnection()} with {@link #setHostnameVerifier} and
+	 * {@link #setSSLSocketFactory} instead.
+	 *
+	 * @param hostnameVerifier The hostname verifier for outgoing HTTPS
+	 *                         requests, {@code null} implies use of the
+	 *                         {@link #getDefaultHostnameVerifier() default
+	 *                         one}.
+	 * @param sslSocketFactory The SSL socket factory for HTTPS requests,
+	 *                         {@code null} implies use of the
+	 *                         {@link #getDefaultSSLSocketFactory() default
+	 *                         one}.
 	 *
 	 * @return The resulting HTTP response.
 	 *
-	 * @throws IOException If the HTTP request couldn't be made, due to a 
+	 * @throws IOException If the HTTP request couldn't be made, due to a
 	 *                     network or other error.
 	 */
-	public HTTPResponse send()
+	@Deprecated
+	public HTTPResponse send(final HostnameVerifier hostnameVerifier,
+				 final SSLSocketFactory sslSocketFactory)
 		throws IOException {
-
-		return send(null, null);
+		
+		HostnameVerifier savedHostnameVerifier = getHostnameVerifier();
+		SSLSocketFactory savedSSLFactory = getSSLSocketFactory();
+		
+		try {
+			// Set for this HTTP URL connection only
+			setHostnameVerifier(hostnameVerifier);
+			setSSLSocketFactory(sslSocketFactory);
+			
+			return send();
+			
+		} finally {
+			setHostnameVerifier(savedHostnameVerifier);
+			setSSLSocketFactory(savedSSLFactory);
+		}
 	}
 
 
@@ -655,27 +793,15 @@ public class HTTPRequest extends HTTPMessage {
 	 * Sends this HTTP request to the request URL and retrieves the
 	 * resulting HTTP response.
 	 *
-	 * @param hostnameVerifier The hostname verifier for HTTPS requests.
-	 *                         Disregarded for plain HTTP requests. If
-	 *                         {@code null} the
-	 *                         {@link #getDefaultHostnameVerifier() default
-	 *                         hostname verifier} will apply.
-	 * @param sslSocketFactory The SSL socket factory for HTTPS requests.
-	 *                         Disregarded for plain HTTP requests. If
-	 *                         {@code null} the
-	 *                         {@link #getDefaultSSLSocketFactory() default
-	 *                         SSL socket factory} will apply.
-	 *
 	 * @return The resulting HTTP response.
 	 *
 	 * @throws IOException If the HTTP request couldn't be made, due to a
 	 *                     network or other error.
 	 */
-	public HTTPResponse send(final HostnameVerifier hostnameVerifier,
-				 final SSLSocketFactory sslSocketFactory)
+	public HTTPResponse send()
 		throws IOException {
 
-		HttpURLConnection conn = toHttpURLConnection(hostnameVerifier, sslSocketFactory);
+		HttpURLConnection conn = toHttpURLConnection();
 
 		int statusCode;
 

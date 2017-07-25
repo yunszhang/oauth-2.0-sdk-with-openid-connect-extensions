@@ -21,13 +21,21 @@ package com.nimbusds.oauth2.sdk.http;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
 
 import static net.jadler.Jadler.*;
 import static org.junit.Assert.*;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -345,4 +353,78 @@ public class HTTPRequestTest {
 		assertEquals(20L, jsonArray.get(1));
 		assertEquals(2, jsonArray.size());
 	}
+	
+	
+	@Test
+	public void testWithClientCertificate()
+		throws Exception {
+		
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+		keyPairGenerator.initialize(2048);
+		KeyPair keyPair = keyPairGenerator.generateKeyPair();
+		
+		RSAPublicKey rsaPublicKey = (RSAPublicKey)keyPair.getPublic();
+		RSAPrivateKey rsaPrivateKey = (RSAPrivateKey)keyPair.getPrivate();
+		
+		X509Certificate cert = X509CertificateGenerator.generateSelfSignedCertificate(
+			new Issuer("123"),
+			rsaPublicKey,
+			rsaPrivateKey);
+		
+		cert.checkValidity();
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
+		
+		assertNull(httpRequest.getClientX509Certificate());
+		
+		httpRequest.setClientX509Certificate(cert);
+		
+		assertEquals(cert, httpRequest.getClientX509Certificate());
+	}
+	
+	
+	@Test
+	public void testGetAndSetDefaultHostnameVerifier()
+		throws Exception {
+		
+		HostnameVerifier mockHostnameVerifier = new HostnameVerifier() {
+			@Override
+			public boolean verify(String s, SSLSession sslSession) {
+				return false;
+			}
+		};
+		
+		HostnameVerifier defaultHostnameVerifier = HTTPRequest.getDefaultHostnameVerifier();
+		
+		assertNotNull(defaultHostnameVerifier);
+		
+		HTTPRequest.setDefaultHostnameVerifier(mockHostnameVerifier);
+		
+		assertEquals(mockHostnameVerifier, HTTPRequest.getDefaultHostnameVerifier());
+	}
+	
+	
+	@Test
+	public void testRejectNullDefaultHostnameVerifier() {
+		
+		try {
+			HTTPRequest.setDefaultHostnameVerifier(null);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The hostname verifier must not be null", e.getMessage());
+		}
+	}
+	
+	
+	@Test
+	public void testRejectNullDefaultSSLSocketFactory() {
+		
+		try {
+			HTTPRequest.setDefaultSSLSocketFactory(null);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The SSL socket factory must not be null", e.getMessage());
+		}
+	}
+	
 }
