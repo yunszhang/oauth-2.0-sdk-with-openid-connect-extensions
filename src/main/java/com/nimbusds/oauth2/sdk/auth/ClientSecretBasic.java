@@ -45,8 +45,6 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
  *
  * <p>Related specifications:
  *
- * <p>Related specifications:
- *
  * <ul>
  *     <li>OAuth 2.0 (RFC 6749), sections 2.3.1 and 3.2.1.
  *     <li>OpenID Connect Core 1.0, section 9.
