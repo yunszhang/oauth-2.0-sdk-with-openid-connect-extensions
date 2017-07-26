@@ -50,6 +50,7 @@ public class X509CertificateUtilsTest extends TestCase {
 		);
 		
 		assertTrue(X509CertificateUtils.isSelfIssued(cert));
+		assertTrue(X509CertificateUtils.isSelfSigned(cert));
 	}
 	
 	
@@ -71,5 +72,6 @@ public class X509CertificateUtilsTest extends TestCase {
 		);
 		
 		assertFalse(X509CertificateUtils.isSelfIssued(cert));
+		assertTrue(X509CertificateUtils.isSelfSigned(cert));
 	}
 }

@@ -44,6 +44,7 @@ public class InvalidClientExceptionTest extends TestCase {
 		assertEquals("Bad JWT HMAC", InvalidClientException.BAD_JWT_HMAC.getMessage());
 		assertEquals("No matching JWKs found", InvalidClientException.NO_MATCHING_JWK.getMessage());
 		assertEquals("Bad JWT signature", InvalidClientException.BAD_JWT_SIGNATURE.getMessage());
+		assertEquals("Couldn't validate client X.509 certificate signature: No matching registered client JWK found", InvalidClientException.BAD_SELF_SIGNED_CLIENT_CERTIFICATE.getMessage());
 	}
 
 

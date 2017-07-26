@@ -19,6 +19,7 @@ package com.nimbusds.oauth2.sdk.auth.verifier;
 
 
 import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Set;
 
@@ -31,6 +32,7 @@ import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.oauth2.sdk.auth.*;
 import com.nimbusds.oauth2.sdk.id.Audience;
+import com.nimbusds.oauth2.sdk.util.X509CertificateUtils;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -45,6 +47,8 @@ import org.apache.commons.collections4.CollectionUtils;
  *     <li>OpenID Connect Core 1.0, section 9.
  *     <li>JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and
  *         Authorization Grants (RFC 7523).
+ *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-02), section
+ *         2.
  * </ul>
  */
 @ThreadSafe
@@ -194,47 +198,47 @@ public class ClientAuthenticationVerifier<T> {
 			throw InvalidClientException.BAD_JWT_HMAC;
 
 		} else if (clientAuth instanceof PrivateKeyJWT) {
-
-			PrivateKeyJWT jwtAuth = (PrivateKeyJWT)clientAuth;
-
+			
+			PrivateKeyJWT jwtAuth = (PrivateKeyJWT) clientAuth;
+			
 			// Check claims first before requesting / retrieving public keys
 			try {
 				claimsSetVerifier.verify(jwtAuth.getJWTAuthenticationClaimsSet().toJWTClaimsSet());
 			} catch (BadJWTException e) {
 				throw new InvalidClientException("Bad / expired JWT claims: " + e.getMessage());
 			}
-
+			
 			List<? extends PublicKey> keyCandidates = clientCredentialsSelector.selectPublicKeys(
 				jwtAuth.getClientID(),
 				jwtAuth.getMethod(),
 				jwtAuth.getClientAssertion().getHeader(),
-				false, 	// don't force refresh if we have a remote JWK set;
-					// selector may however do so if it encounters an unknown key ID
+				false,        // don't force refresh if we have a remote JWK set;
+				// selector may however do so if it encounters an unknown key ID
 				context);
-
+			
 			if (CollectionUtils.isEmpty(keyCandidates)) {
 				throw InvalidClientException.NO_MATCHING_JWK;
 			}
-
+			
 			SignedJWT assertion = jwtAuth.getClientAssertion();
-
-			for (PublicKey candidate: keyCandidates) {
-
+			
+			for (PublicKey candidate : keyCandidates) {
+				
 				if (candidate == null) {
 					continue; // skip
 				}
-
+				
 				JWSVerifier jwsVerifier = jwsVerifierFactory.createJWSVerifier(
 					jwtAuth.getClientAssertion().getHeader(),
 					candidate);
-
+				
 				boolean valid = assertion.verify(jwsVerifier);
-
+				
 				if (valid) {
 					return; // success
 				}
 			}
-
+			
 			// Second pass
 			if (hints != null && hints.contains(Hint.CLIENT_HAS_REMOTE_JWK_SET)) {
 				// Client possibly registered JWK set URL with keys that have no IDs
@@ -245,32 +249,101 @@ public class ClientAuthenticationVerifier<T> {
 					jwtAuth.getClientAssertion().getHeader(),
 					true, // force reload of remote JWK set
 					context);
-
+				
 				if (CollectionUtils.isEmpty(keyCandidates)) {
 					throw InvalidClientException.NO_MATCHING_JWK;
 				}
-
+				
 				assertion = jwtAuth.getClientAssertion();
-
-				for (PublicKey candidate: keyCandidates) {
-
+				
+				for (PublicKey candidate : keyCandidates) {
+					
 					if (candidate == null) {
 						continue; // skip
 					}
-
+					
 					JWSVerifier jwsVerifier = jwsVerifierFactory.createJWSVerifier(
 						jwtAuth.getClientAssertion().getHeader(),
 						candidate);
-
+					
 					boolean valid = assertion.verify(jwsVerifier);
-
+					
 					if (valid) {
 						return; // success
 					}
 				}
 			}
-
+			
 			throw InvalidClientException.BAD_JWT_SIGNATURE;
+			
+		} else if (clientAuth instanceof TLSClientAuthentication) {
+			
+			TLSClientAuthentication tlsClientAuth = (TLSClientAuthentication) clientAuth;
+			
+			X509Certificate clientCert = tlsClientAuth.getClientX509Certificate();
+			
+			if (clientCert == null) {
+				// Sanity check
+				throw new InvalidClientException("Missing client X.509 certificate");
+			}
+			
+			// At present only self-signed certs are supported,
+			// validated with registered client jwks / jwks_uri
+			List<? extends PublicKey> keyCandidates = clientCredentialsSelector.selectPublicKeys(
+				tlsClientAuth.getClientID(),
+				tlsClientAuth.getMethod(),
+				null,
+				false, // don't force refresh if we have a remote JWK set;
+				// selector may however do so if it encounters an unknown key ID
+				context);
+			
+			if (CollectionUtils.isEmpty(keyCandidates)) {
+				throw InvalidClientException.NO_MATCHING_JWK;
+			}
+			
+			for (PublicKey candidate : keyCandidates) {
+				
+				if (candidate == null) {
+					continue; // skip
+				}
+				
+				boolean valid = X509CertificateUtils.hasValidSignature(clientCert, candidate);
+				
+				if (valid) {
+					return; // success
+				}
+			}
+			
+			// Second pass
+			if (hints != null && hints.contains(Hint.CLIENT_HAS_REMOTE_JWK_SET)) {
+				// Client possibly registered JWK set URL with keys that have no IDs
+				// force JWK set reload from URL and retry
+				keyCandidates = clientCredentialsSelector.selectPublicKeys(
+					tlsClientAuth.getClientID(),
+					tlsClientAuth.getMethod(),
+					null,
+					true, // force reload of remote JWK set
+					context);
+				
+				if (CollectionUtils.isEmpty(keyCandidates)) {
+					throw InvalidClientException.NO_MATCHING_JWK;
+				}
+				
+				for (PublicKey candidate : keyCandidates) {
+					
+					if (candidate == null) {
+						continue; // skip
+					}
+					
+					boolean valid = X509CertificateUtils.hasValidSignature(clientCert, candidate);
+					
+					if (valid) {
+						return; // success
+					}
+				}
+			}
+			
+			throw InvalidClientException.BAD_SELF_SIGNED_CLIENT_CERTIFICATE;
 
 		} else {
 			throw new RuntimeException("Unexpected client authentication: " + clientAuth.getMethod());

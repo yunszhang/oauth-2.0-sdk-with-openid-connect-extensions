@@ -22,9 +22,11 @@ import java.net.URI;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
+import javax.net.ssl.SSLSocketFactory;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -35,8 +37,10 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.auth.*;
 import com.nimbusds.oauth2.sdk.client.ClientMetadata;
+import com.nimbusds.oauth2.sdk.http.X509CertificateGenerator;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.JWTID;
 import junit.framework.TestCase;
 
@@ -122,7 +126,12 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 								  Context<ClientMetadata> context)
 			throws InvalidClientException {
 
-			assert authMethod.equals(ClientAuthenticationMethod.PRIVATE_KEY_JWT);
+			final Set<ClientAuthenticationMethod> permittedClientAuthMethods =
+				new HashSet<>(Arrays.asList(
+					ClientAuthenticationMethod.PRIVATE_KEY_JWT,
+					ClientAuthenticationMethod.TLS_CLIENT_AUTH));
+			
+			assert permittedClientAuthMethods.contains(authMethod);
 
 			if (! claimedClientID.equals(VALID_CLIENT_ID)) {
 				throw InvalidClientException.BAD_ID;
@@ -320,7 +329,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		throws JOSEException {
 
 		Date now = new Date();
-		Date before5min = new Date(now.getTime() - 5*60*1000l);
+		Date before5min = new Date(now.getTime() - 5*60*1000L);
 
 		JWTAuthenticationClaimsSet claimsSet = new JWTAuthenticationClaimsSet(
 			VALID_CLIENT_ID,
@@ -398,6 +407,80 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			createVerifier().verify(clientAuthentication, Collections.singleton(Hint.CLIENT_HAS_REMOTE_JWK_SET), null);
 		} catch (InvalidClientException e) {
 			assertEquals(InvalidClientException.BAD_JWT_SIGNATURE, e);
+		}
+	}
+	
+	
+	public void testTLSClientAuth_ok()
+		throws Exception {
+		
+		X509Certificate clientCert = X509CertificateGenerator.generateSelfSignedCertificate(
+			new Issuer(VALID_CLIENT_ID),
+			VALID_RSA_KEY_PAIR_1.toRSAPublicKey(),
+			VALID_RSA_KEY_PAIR_1.toRSAPrivateKey()
+		);
+		
+		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
+			VALID_CLIENT_ID,
+			clientCert
+		);
+		
+		createVerifier().verify(clientAuthentication, null, null);
+	}
+	
+	
+	public void testTLSClientAuth_okWithReload()
+		throws Exception {
+		
+		X509Certificate clientCert = X509CertificateGenerator.generateSelfSignedCertificate(
+			new Issuer(VALID_CLIENT_ID),
+			VALID_RSA_KEY_PAIR_2.toRSAPublicKey(),
+			VALID_RSA_KEY_PAIR_2.toRSAPrivateKey()
+		);
+		
+		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
+			VALID_CLIENT_ID,
+			clientCert
+		);
+		
+		createVerifier().verify(clientAuthentication, Collections.singleton(Hint.CLIENT_HAS_REMOTE_JWK_SET), null);
+	}
+	
+	public void testTLSClientAuth_badSignature()
+		throws Exception {
+		
+		X509Certificate clientCert = X509CertificateGenerator.generateSelfSignedCertificate(
+			new Issuer(VALID_CLIENT_ID),
+			INVALID_RSA_KEY_PAIR.toRSAPublicKey(),
+			INVALID_RSA_KEY_PAIR.toRSAPrivateKey()
+		);
+		
+		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
+			VALID_CLIENT_ID,
+			clientCert
+		);
+		
+		try {
+			createVerifier().verify(clientAuthentication, null, null);
+			fail();
+		} catch (InvalidClientException e) {
+			assertEquals("Couldn't validate client X.509 certificate signature: No matching registered client JWK found", e.getMessage());
+		}
+	}
+	
+	public void testTLSClientAuth_missingCertificate()
+		throws Exception {
+		
+		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
+			VALID_CLIENT_ID,
+			(SSLSocketFactory) null
+		);
+		
+		try {
+			createVerifier().verify(clientAuthentication, null, null);
+			fail();
+		} catch (InvalidClientException e) {
+			assertEquals("Missing client X.509 certificate", e.getMessage());
 		}
 	}
 }

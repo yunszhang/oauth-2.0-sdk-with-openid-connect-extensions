@@ -83,6 +83,12 @@ public class InvalidClientException extends GeneralException {
 	 * Bad JWT signature.
 	 */
 	public static final InvalidClientException BAD_JWT_SIGNATURE = new InvalidClientException("Bad JWT signature");
+	
+	
+	/**
+	 * Bad self-signed client X.509 certificate.
+	 */
+	public static final InvalidClientException BAD_SELF_SIGNED_CLIENT_CERTIFICATE = new InvalidClientException("Couldn't validate client X.509 certificate signature: No matching registered client JWK found");
 
 
 	/**

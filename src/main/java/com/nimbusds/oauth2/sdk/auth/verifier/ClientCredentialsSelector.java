@@ -30,8 +30,9 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 /**
  * Selector of client credential candidates for client authentication
  * verification. The select methods should typically return a single candidate,
- * but may also return multiple in case of client credentials key rotation.
- * Implementations should be tread-safe.
+ * but may also return multiple in case the client rotates its keys.
+ *
+ * <p>Implementations should be tread-safe.
  *
  * <p>Selection of {@link com.nimbusds.oauth2.sdk.auth.ClientSecretBasic
  * client_secret_basic}, {@link com.nimbusds.oauth2.sdk.auth.ClientSecretPost
@@ -40,7 +41,9 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
  * method.
  *
  * <p>Selection of {@link com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT
- * private_key_jwt} keys is handled by the {@link #selectPublicKeys} method.
+ * private_key_jwt} and
+ * {@link com.nimbusds.oauth2.sdk.auth.TLSClientAuthentication tls_client_auth}
+ * keys is handled by the {@link #selectPublicKeys} method.
  *
  * <p>The generic {@link Context context object} may be used to return
  * {@link com.nimbusds.oauth2.sdk.client.ClientMetadata client metadata} or
@@ -75,7 +78,8 @@ public interface ClientCredentialsSelector<T> {
 	/**
 	 * Selects one or more public key candidates (e.g. RSA or EC) for
 	 * {@link com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT private_key_jwt}
-	 * authentication.
+	 * and {@link com.nimbusds.oauth2.sdk.auth.TLSClientAuthentication
+	 * tls_client_auth} authentication.
 	 *
 	 * @param claimedClientID The client identifier (to be verified). Not
 	 *                        {@code null}.
@@ -83,7 +87,8 @@ public interface ClientCredentialsSelector<T> {
 	 *                        {@code null}.
 	 * @param jwsHeader       The JWS header, which may contain parameters
 	 *                        such as key ID to facilitate the key
-	 *                        selection. Not {@code null}.
+	 *                        selection. {@code null} for TLS client
+	 *                        authentication.
 	 * @param forceRefresh    {@code true} to force refresh of the JWK set
 	 *                        (for a remote JWK set referenced by URL).
 	 * @param context         Additional context. May be {@code null}.

@@ -18,8 +18,8 @@
 package com.nimbusds.oauth2.sdk.util;
 
 
-import java.security.*;
-import java.security.cert.CertificateException;
+import java.security.Principal;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
 
@@ -62,9 +62,27 @@ public class X509CertificateUtils {
 		
 		PublicKey publicKey = cert.getPublicKey();
 		
+		return hasValidSignature(cert, publicKey);
+	}
+	
+	
+	/**
+	 * Validates the signature of a X.509 certificate with the specified
+	 * public key. Intended for validating self-signed X.509 certificates
+	 * with a pre-registered RSA or EC public key.
+	 *
+	 * @param cert   The X.509 certificate. Must not be {@code null}.
+	 * @param pubKey The public key to use for the validation. Must not be
+	 *               {@code null}.
+	 *
+	 * @return {@code true} if the signature is valid, else {@code false}.
+	 */
+	public static boolean hasValidSignature(final X509Certificate cert,
+						final PublicKey pubKey) {
+		
 		try {
-			cert.verify(publicKey);
-		} catch (CertificateException| NoSuchAlgorithmException | InvalidKeyException | SignatureException | NoSuchProviderException e) {
+			cert.verify(pubKey);
+		} catch (Exception e) {
 			return false;
 		}
 		

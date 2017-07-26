@@ -26,9 +26,9 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 
-import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.util.X509CertUtils;
 import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.id.Subject;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
@@ -39,9 +39,10 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 public class X509CertificateGenerator {
 	
 	
-	public static X509Certificate generateSelfSignedCertificate(final Issuer issuer,
-								    final RSAPublicKey rsaPublicKey,
-								    final RSAPrivateKey rsaPrivateKey)
+	public static X509Certificate generateCertificate(final Issuer issuer,
+							  final Subject subject,
+							  final RSAPublicKey rsaPublicKey,
+							  final RSAPrivateKey rsaPrivateKey)
 		throws NoSuchAlgorithmException, IOException, OperatorCreationException, KeyStoreException {
 		
 		X500Name certIssuer = new X500Name("cn=" + issuer);
@@ -49,19 +50,28 @@ public class X509CertificateGenerator {
 		Date now = new Date();
 		Date nbf = new Date(now.getTime() - 1000L);
 		Date exp = new Date(now.getTime() + 365*24*60*60*1000L); // in 1 year
-		X500Name subject = new X500Name("cn=" + issuer);
+		X500Name certSubject = new X500Name("cn=" + subject);
 		JcaX509v3CertificateBuilder x509certBuilder = new JcaX509v3CertificateBuilder(
 			certIssuer,
 			serialNumber,
 			nbf,
 			exp,
-			subject,
+			certSubject,
 			rsaPublicKey
 		);
 		
 		JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder("SHA256withRSA");
 		X509CertificateHolder certHolder = x509certBuilder.build(signerBuilder.build(rsaPrivateKey));
 		return X509CertUtils.parse(certHolder.getEncoded());
+	}
+	
+	
+	public static X509Certificate generateSelfSignedCertificate(final Issuer issuer,
+								    final RSAPublicKey rsaPublicKey,
+								    final RSAPrivateKey rsaPrivateKey)
+		throws NoSuchAlgorithmException, IOException, OperatorCreationException, KeyStoreException {
+		
+		return generateCertificate(issuer, new Subject(issuer.getValue()), rsaPublicKey, rsaPrivateKey);
 	}
 	
 	
