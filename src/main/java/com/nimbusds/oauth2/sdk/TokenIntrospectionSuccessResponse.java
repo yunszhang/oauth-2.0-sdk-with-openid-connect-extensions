@@ -51,84 +51,12 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 	 * Builder for constructing token introspection success responses.
 	 */
 	public static class Builder {
-
-
+		
+		
 		/**
-		 * Determines whether the token is active.
+		 * The parameters.
 		 */
-		private final boolean active;
-
-
-		/**
-		 * The optional token scope.
-		 */
-		private Scope scope;
-
-
-		/**
-		 * The optional client ID for the token.
-		 */
-		private ClientID clientID;
-
-
-		/**
-		 * The optional username for the token.
-		 */
-		private String username;
-
-
-		/**
-		 * The optional token type.
-		 */
-		private AccessTokenType tokenType;
-
-
-		/**
-		 * The optional token expiration date.
-		 */
-		private Date exp;
-
-
-		/**
-		 * The optional token issue date.
-		 */
-		private Date iat;
-
-
-		/**
-		 * The optional token not-before date.
-		 */
-		private Date nbf;
-
-
-		/**
-		 * The optional token subject.
-		 */
-		private Subject sub;
-
-
-		/**
-		 * The optional token audience.
-		 */
-		private List<Audience> audList;
-
-
-		/**
-		 * The optional token issuer.
-		 */
-		private Issuer iss;
-
-
-		/**
-		 * The optional token identifier.
-		 */
-		private JWTID jti;
-
-
-		/**
-		 * Optional custom parameters.
-		 */
-		private final JSONObject customParams = new JSONObject();
+		private final JSONObject params = new JSONObject();
 
 
 		/**
@@ -138,8 +66,8 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 		 *               {@code false}.
 		 */
 		public Builder(final boolean active) {
-
-			this.active = active;
+			
+			params.put("active", active);
 		}
 
 
@@ -151,7 +79,8 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 		 * @return This builder.
 		 */
 		public Builder scope(final Scope scope) {
-			this.scope = scope;
+			if (scope != null) params.put("scope", scope.toString());
+			else params.remove("scope");
 			return this;
 		}
 
@@ -166,7 +95,8 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 		 * @return This builder.
 		 */
 		public Builder clientID(final ClientID clientID) {
-			this.clientID = clientID;
+			if (clientID != null) params.put("client_id", clientID.getValue());
+			else params.remove("client_id");
 			return this;
 		}
 
@@ -180,7 +110,8 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 		 * @return This builder.
 		 */
 		public Builder username(final String username) {
-			this.username = username;
+			if (username != null) params.put("username", username);
+			else params.remove("username");
 			return this;
 		}
 
@@ -194,7 +125,8 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 		 * @return This builder.
 		 */
 		public Builder tokenType(final AccessTokenType tokenType) {
-			this.tokenType = tokenType;
+			if (tokenType != null) params.put("token_type", tokenType.getValue());
+			else params.remove("token_type");
 			return this;
 		}
 
@@ -208,7 +140,8 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 		 * @return This builder.
 		 */
 		public Builder expirationTime(final Date exp) {
-			this.exp = exp;
+			if (exp != null) params.put("exp", DateUtils.toSecondsSinceEpoch(exp));
+			else params.remove("exp");
 			return this;
 		}
 
@@ -222,7 +155,8 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 		 * @return This builder.
 		 */
 		public Builder issueTime(final Date iat) {
-			this.iat = iat;
+			if (iat != null) params.put("iat", DateUtils.toSecondsSinceEpoch(iat));
+			else params.remove("iat");
 			return this;
 		}
 
@@ -236,7 +170,8 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 		 * @return This builder.
 		 */
 		public Builder notBeforeTime(final Date nbf) {
-			this.nbf = nbf;
+			if (nbf != null) params.put("nbf", DateUtils.toSecondsSinceEpoch(nbf));
+			else params.remove("nbf");
 			return this;
 		}
 
@@ -249,7 +184,8 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 		 * @return This builder.
 		 */
 		public Builder subject(final Subject sub) {
-			this.sub = sub;
+			if (sub != null) params.put("sub", sub.getValue());
+			else params.remove("sub");
 			return this;
 		}
 
@@ -263,7 +199,8 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 		 * @return This builder.
 		 */
 		public Builder audience(final List<Audience> audList) {
-			this.audList = audList;
+			if (audList != null) params.put("aud", Audience.toStringList(audList));
+			else params.remove("aud");
 			return this;
 		}
 
@@ -276,7 +213,8 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 		 * @return This builder.
 		 */
 		public Builder issuer(final Issuer iss) {
-			this.iss = iss;
+			if (iss != null) params.put("iss", iss.getValue());
+			else params.remove("iss");
 			return this;
 		}
 
@@ -290,7 +228,8 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 		 * @return This builder.
 		 */
 		public Builder jwtID(final JWTID jti) {
-			this.jti = jti;
+			if (jti != null) params.put("jti", jti.getValue());
+			else params.remove("jti");
 			return this;
 		}
 
@@ -305,9 +244,8 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 		 * @return This builder.
 		 */
 		public Builder parameter(final String name, final Object value) {
-			if (value != null) {
-				customParams.put(name, value);
-			}
+			if (value != null) params.put(name, value);
+			else params.remove(name);
 			return this;
 		}
 
@@ -319,21 +257,7 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 		 */
 		public TokenIntrospectionSuccessResponse build() {
 
-			JSONObject o = new JSONObject();
-			o.put("active", active);
-			if (scope != null) o.put("scope", scope.toString());
-			if (clientID != null) o.put("client_id", clientID.getValue());
-			if (username != null) o.put("username", username);
-			if (tokenType != null) o.put("token_type", tokenType.getValue());
-			if (exp != null) o.put("exp", DateUtils.toSecondsSinceEpoch(exp));
-			if (iat != null) o.put("iat", DateUtils.toSecondsSinceEpoch(iat));
-			if (nbf != null) o.put("nbf", DateUtils.toSecondsSinceEpoch(nbf));
-			if (sub != null) o.put("sub", sub.getValue());
-			if (audList != null) o.put("aud", Audience.toStringList(audList));
-			if (iss != null) o.put("iss", iss.getValue());
-			if (jti != null) o.put("jti", jti.getValue());
-			o.putAll(customParams);
-			return new TokenIntrospectionSuccessResponse(o);
+			return new TokenIntrospectionSuccessResponse(params);
 		}
 	}
 
