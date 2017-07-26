@@ -117,6 +117,8 @@ This SDK version implements the following standards and drafts:
 
     * Authentication Method Reference Values (RFC 8176)
 
+    * Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-02).
+
 	* OpenID Connect Core 1.0 (2014-02-25).
 
 	* OpenID Connect Discovery 1.0 (2014-02-25).
@@ -131,6 +133,12 @@ This SDK version implements the following standards and drafts:
 
 	* OAuth 2.0 Multiple Response Type Encoding Practices 1.0 (2014-02-25).
 
+	* Financial Services – Financial API - Part 1: Read Only API Security
+	  Profile (2017-02-02).
+
+	* Financial Services – Financial API - Part 2: Read and Write API Security
+	  Profile (2017-07-17).
+
 
 This SDK is provided under the terms of the Apache 2.0 licence.
 
@@ -138,5 +146,5 @@ This SDK is provided under the terms of the Apache 2.0 licence.
 Questions or comments? Email support@connect2id.com
 
 
-2017-06-20
+2017-07-26
 
