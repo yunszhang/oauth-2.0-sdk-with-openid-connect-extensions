@@ -18,11 +18,15 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import java.util.Date;
+
+import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.*;
 import com.nimbusds.oauth2.sdk.token.AccessTokenType;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
@@ -63,8 +67,9 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertEquals(new Audience("https://protected.example.net/resource"), response.getAudience().get(0));
 		assertEquals(1, response.getAudience().size());
 		assertEquals(new Issuer("https://server.example.com/"), response.getIssuer());
-		assertEquals(DateUtils.fromSecondsSinceEpoch(1419356238l), response.getExpirationTime());
-		assertEquals(DateUtils.fromSecondsSinceEpoch(1419350238l), response.getIssueTime());
+		assertEquals(DateUtils.fromSecondsSinceEpoch(1419356238L), response.getExpirationTime());
+		assertEquals(DateUtils.fromSecondsSinceEpoch(1419350238L), response.getIssueTime());
+		assertNull(response.getX509CertificateSHA256Thumbprint());
 		assertEquals("twenty-seven", response.toJSONObject().get("extension_field"));
 
 		httpResponse = response.toHTTPResponse();
@@ -79,8 +84,9 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertEquals(new Audience("https://protected.example.net/resource"), response.getAudience().get(0));
 		assertEquals(1, response.getAudience().size());
 		assertEquals(new Issuer("https://server.example.com/"), response.getIssuer());
-		assertEquals(DateUtils.fromSecondsSinceEpoch(1419356238l), response.getExpirationTime());
-		assertEquals(DateUtils.fromSecondsSinceEpoch(1419350238l), response.getIssueTime());
+		assertEquals(DateUtils.fromSecondsSinceEpoch(1419356238L), response.getExpirationTime());
+		assertEquals(DateUtils.fromSecondsSinceEpoch(1419350238L), response.getIssueTime());
+		assertNull(response.getX509CertificateSHA256Thumbprint());
 		assertEquals("twenty-seven", response.toJSONObject().get("extension_field"));
 	}
 
@@ -130,6 +136,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertNull(response.getAudience());
 		assertNull(response.getIssuer());
 		assertNull(response.getJWTID());
+		assertNull(response.getX509CertificateSHA256Thumbprint());
 	}
 
 
@@ -189,6 +196,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertNull(response.getAudience());
 		assertNull(response.getIssuer());
 		assertNull(response.getJWTID());
+		assertNull(response.getX509CertificateSHA256Thumbprint());
 	}
 
 
@@ -248,5 +256,31 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertEquals("10.20.30.40", response.toJSONObject().get("ip"));
 
 		assertEquals(13, response.toJSONObject().size());
+	}
+	
+	
+	public void testMutualTLSExample()
+		throws Exception {
+		
+		String json = "{" +
+			"  \"active\": true," +
+			"  \"iss\": \"https://server.example.com\"," +
+			"  \"sub\": \"ty.webb@example.com\"," +
+			"  \"exp\": 1493726400," +
+			"  \"nbf\": 1493722800," +
+			"  \"cnf\":{" +
+			"    \"x5t#S256\": \"bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2\"" +
+			"  }" +
+			"}";
+		
+		JSONObject jsonObject = JSONObjectUtils.parse(json);
+		
+		TokenIntrospectionSuccessResponse response = TokenIntrospectionSuccessResponse.parse(jsonObject);
+		assertTrue(response.isActive());
+		assertEquals(new Issuer("https://server.example.com"), response.getIssuer());
+		assertEquals(new Subject("ty.webb@example.com"), response.getSubject());
+		assertEquals(new Date(1493726400*1000L), response.getExpirationTime());
+		assertEquals(new Date(1493722800*1000L), response.getNotBeforeTime());
+		assertEquals(new Base64URL("bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2"), response.getX509CertificateSHA256Thumbprint());
 	}
 }

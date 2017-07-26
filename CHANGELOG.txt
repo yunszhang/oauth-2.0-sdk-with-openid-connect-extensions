@@ -695,4 +695,4 @@ version 5.31 (2017-07-25)
       tokens, see Financial Services – Financial API - Part 2: Read and Write
       API Security Profile.
     * Adds StateHash getter and setter to IDTokenClaimsSet.
-
+    * Upgrades minimal Nimbus JOSE+JWT dependency to 4.40.

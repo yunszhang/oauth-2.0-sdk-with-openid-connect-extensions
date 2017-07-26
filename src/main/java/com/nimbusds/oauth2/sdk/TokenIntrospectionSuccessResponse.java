@@ -21,6 +21,7 @@ package com.nimbusds.oauth2.sdk;
 import java.util.Date;
 import java.util.List;
 
+import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
@@ -38,6 +39,8 @@ import net.minidev.json.JSONObject;
  *
  * <ul>
  *     <li>OAuth 2.0 Token Introspection (RFC 7662).
+ *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-02), section
+ *         3.2.
  * </ul>
  */
 @Immutable
@@ -547,6 +550,26 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 
 		try {
 			return new JWTID(JSONObjectUtils.getString(params, "jti"));
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Returns the client X.509 certificate SHA-256 thumbprint, for a
+	 * mutual TLS sender constrained access token. Corresponds to the
+	 * {@code cnf.x5t#S256} claim.
+	 *
+	 *
+	 * @return The client X.509 certificate SHA-256 thumbprint,
+	 *         {@code null} if not specified.
+	 */
+	public Base64URL getX509CertificateSHA256Thumbprint() {
+	
+		try {
+			JSONObject cnf = JSONObjectUtils.getJSONObject(params, "cnf");
+			return new Base64URL(JSONObjectUtils.getString(cnf, "x5t#S256"));
 		} catch (ParseException e) {
 			return null;
 		}
