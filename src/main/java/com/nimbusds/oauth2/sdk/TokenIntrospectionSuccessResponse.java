@@ -232,6 +232,38 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 			else params.remove("jti");
 			return this;
 		}
+		
+		
+		/**
+		 * Sets the client X.509 certificate SHA-256 thumbprint, for a
+		 * mutual TLS sender constrained access token. Corresponds to
+		 * the {@code cnf.x5t#S256} claim.
+		 *
+		 *
+		 * @return The client X.509 certificate SHA-256 thumbprint,
+		 *         {@code null} if not specified.
+		 */
+		public Builder x509CertificateSHA256Thumbprint(final Base64URL x5t) {
+			
+			if (x5t != null) {
+				JSONObject cnf;
+				if (params.containsKey("cnf")) {
+					cnf = (JSONObject)params.get("cnf");
+				} else {
+					cnf = new JSONObject();
+					params.put("cnf", cnf);
+				}
+				cnf.put("x5t#S256", x5t.toString());
+			} else if (params.containsKey("cnf")) {
+				JSONObject cnf = (JSONObject) params.get("cnf");
+				cnf.remove("x5t#S256");
+				if (cnf.isEmpty()) {
+					params.remove("cnf");
+				}
+			}
+			
+			return this;
+		}
 
 
 		/**

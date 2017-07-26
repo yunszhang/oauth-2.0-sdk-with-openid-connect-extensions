@@ -109,6 +109,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertNull(response.getAudience());
 		assertNull(response.getIssuer());
 		assertNull(response.getJWTID());
+		assertNull(response.getX509CertificateSHA256Thumbprint());
 
 		JSONObject jsonObject = response.toJSONObject();
 		assertTrue((Boolean) jsonObject.get("active"));
@@ -158,6 +159,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertNull(response.getAudience());
 		assertNull(response.getIssuer());
 		assertNull(response.getJWTID());
+		assertNull(response.getX509CertificateSHA256Thumbprint());
 
 		JSONObject jsonObject = response.toJSONObject();
 		assertFalse((Boolean) jsonObject.get("active"));
@@ -215,6 +217,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 			.audience(Audience.create("456", "789"))
 			.issuer(new Issuer("https://c2id.com"))
 			.jwtID(new JWTID("xyz"))
+			.x509CertificateSHA256Thumbprint(new Base64URL("abc"))
 			.parameter("ip", "10.20.30.40")
 			.build();
 
@@ -230,9 +233,10 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertEquals(Audience.create("456", "789"), response.getAudience());
 		assertEquals(new Issuer("https://c2id.com"), response.getIssuer());
 		assertEquals(new JWTID("xyz"), response.getJWTID());
+		assertEquals(new Base64URL("abc"), response.getX509CertificateSHA256Thumbprint());
 		assertEquals("10.20.30.40", response.toJSONObject().get("ip"));
 
-		assertEquals(13, response.toJSONObject().size());
+		assertEquals(14, response.toJSONObject().size());
 
 		HTTPResponse httpResponse = response.toHTTPResponse();
 
@@ -253,9 +257,10 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertEquals(Audience.create("456", "789"), response.getAudience());
 		assertEquals(new Issuer("https://c2id.com"), response.getIssuer());
 		assertEquals(new JWTID("xyz"), response.getJWTID());
+		assertEquals(new Base64URL("abc"), response.getX509CertificateSHA256Thumbprint());
 		assertEquals("10.20.30.40", response.toJSONObject().get("ip"));
 
-		assertEquals(13, response.toJSONObject().size());
+		assertEquals(14, response.toJSONObject().size());
 	}
 	
 	

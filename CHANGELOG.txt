@@ -690,9 +690,17 @@ version 5.29 (2017-06-29)
 version 5.30 (2017-07-07)
     * Adds UserInfo support for aggregated and distributed claims.
 
-version 5.31 (2017-07-25)
+version 5.31 (2017-07-26)
     * Adds new StateHash class to represent state hash claims (s_hash) in ID
       tokens, see Financial Services – Financial API - Part 2: Read and Write
       API Security Profile.
     * Adds StateHash getter and setter to IDTokenClaimsSet.
+    * Adds new TLSClientAuthentication class for handling tls_client_auth
+      client authentication, see draft-ietf-oauth-mtls-02.
+    * Updates the ClientCredentialsSelector interface to support
+      tls_client_auth client authentication.
+    * Adds TokenIntrospectionSuccessResponse support for the cnf.x5t#S256 claim
+      used for mutual TLS sender constrained access tokens, see
+      draft-ietf-oauth-mtls-02.
     * Upgrades minimal Nimbus JOSE+JWT dependency to 4.40.
+
