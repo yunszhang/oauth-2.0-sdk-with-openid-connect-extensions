@@ -117,24 +117,24 @@ This SDK version implements the following standards and drafts:
 
     * Authentication Method Reference Values (RFC 8176)
 
-    * Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-02).
+    * Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-02)
 
-	* OpenID Connect Core 1.0 (2014-02-25).
+	* OpenID Connect Core 1.0 (2014-02-25)
 
-	* OpenID Connect Discovery 1.0 (2014-02-25).
+	* OpenID Connect Discovery 1.0 (2014-02-25)
 
-	* OpenID Connect Dynamic Registration 1.0 (2014-02-25).
+	* OpenID Connect Dynamic Registration 1.0 (2014-02-25)
 
-	* OpenID Connect Session Management 1.0 (2017-01-25).
+	* OpenID Connect Session Management 1.0 (2017-01-25)
 
-	* OpenID Connect Front-Channel Logout 1.0 (2017-01-25).
+	* OpenID Connect Front-Channel Logout 1.0 (2017-01-25)
 
-	* OpenID Connect Back-Channel Logout 1.0 (2017-01-25).
+	* OpenID Connect Back-Channel Logout 1.0 (2017-01-25)
 
-	* OAuth 2.0 Multiple Response Type Encoding Practices 1.0 (2014-02-25).
+	* OAuth 2.0 Multiple Response Type Encoding Practices 1.0 (2014-02-25)
 
 	* Financial Services – Financial API - Part 1: Read Only API Security
-	  Profile (2017-02-02).
+	  Profile (2017-02-02)
 
 	* Financial Services – Financial API - Part 2: Read and Write API Security
 	  Profile (2017-07-17).
