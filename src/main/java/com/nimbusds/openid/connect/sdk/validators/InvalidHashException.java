@@ -25,17 +25,24 @@ public class InvalidHashException extends Exception {
 
 
 	/**
-	 * Invalid access token hash exception.
+	 * Access token hash mismatch exception.
 	 */
 	public static final InvalidHashException INVALID_ACCESS_T0KEN_HASH_EXCEPTION
-		= new InvalidHashException("Invalid access token hash (at_hash)");
+		= new InvalidHashException("Access token hash (at_hash) mismatch");
 	
 
 	/**
-	 * Invalid authorisation code hash exception.
+	 * Authorisation code hash mismatch exception.
 	 */
 	public static final InvalidHashException INVALID_CODE_HASH_EXCEPTION
-		= new InvalidHashException("Invalid authorization code hash (c_hash)");
+		= new InvalidHashException("Authorization code hash (c_hash) mismatch");
+	
+	
+	/**
+	 * State hash mismatch exception.
+	 */
+	public static final InvalidHashException INVALID_STATE_HASH_EXCEPTION
+		= new InvalidHashException("State hash (s_hash) mismatch");
 
 
 	/**

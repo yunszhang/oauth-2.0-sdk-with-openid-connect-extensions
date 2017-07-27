@@ -19,48 +19,47 @@ package com.nimbusds.openid.connect.sdk.validators;
 
 
 import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.oauth2.sdk.token.AccessToken;
-import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
-import com.nimbusds.openid.connect.sdk.claims.AccessTokenHash;
+import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.openid.connect.sdk.claims.StateHash;
 import junit.framework.TestCase;
 
 
 /**
- * Tests the access token hash validator.
+ * Tests the state hash validator.
  */
-public class AccessTokenValidatorTest extends TestCase {
+public class StateValidatorTest extends TestCase {
 	
-
+	
 	public void testValid()
 		throws InvalidHashException {
-
-		AccessToken token = new BearerAccessToken(32);
-		AccessTokenHash atHash = AccessTokenHash.compute(token, JWSAlgorithm.HS256);
-		AccessTokenValidator.validate(token, JWSAlgorithm.HS256, atHash);
+		
+		State state = new State();
+		StateHash sHash = StateHash.compute(state, JWSAlgorithm.HS256);
+		StateValidator.validate(state, JWSAlgorithm.HS256, sHash);
 	}
-
-
+	
+	
 	public void testUnsupportedAlg() {
-
-		AccessToken token = new BearerAccessToken(32);
-		AccessTokenHash atHash = AccessTokenHash.compute(token, JWSAlgorithm.HS256);
+		
+		State state = new State();
+		StateHash sHash = StateHash.compute(state, JWSAlgorithm.HS256);
 		try {
-			AccessTokenValidator.validate(token, new JWSAlgorithm("none"), atHash);
+			StateValidator.validate(state, new JWSAlgorithm("none"), sHash);
 			fail();
 		} catch (InvalidHashException e) {
-			assertEquals("Access token hash (at_hash) mismatch", e.getMessage());
+			assertEquals("State hash (s_hash) mismatch", e.getMessage());
 		}
 	}
-
-
+	
+	
 	public void testInvalidHash() {
-
-		AccessToken token = new BearerAccessToken(32);
+	
+		State state = new State();
 		try {
-			AccessTokenValidator.validate(token, JWSAlgorithm.HS256, new AccessTokenHash("xxx"));
+			StateValidator.validate(state, JWSAlgorithm.HS256, new StateHash("xxx"));
 			fail();
 		} catch (InvalidHashException e) {
-			assertEquals("Access token hash (at_hash) mismatch", e.getMessage());
+			assertEquals("State hash (s_hash) mismatch", e.getMessage());
 		}
 	}
 }

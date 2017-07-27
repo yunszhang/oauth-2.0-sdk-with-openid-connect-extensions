@@ -704,3 +704,8 @@ version 5.31 (2017-07-26)
       draft-ietf-oauth-mtls-02.
     * Upgrades minimal Nimbus JOSE+JWT dependency to 4.40.
 
+version 5.32 (2017-07-27)
+    * Adds new StateValidator for validating the integrity of the state
+      parameter in OpenID authentication requests by means of the optional
+      s_hash ID token claim.
+

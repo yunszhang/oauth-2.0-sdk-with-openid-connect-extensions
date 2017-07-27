@@ -47,7 +47,7 @@ public class AuthorizationCodeValidatorTest extends TestCase {
 			AuthorizationCodeValidator.validate(code, new JWSAlgorithm("none"), codeHash);
 			fail();
 		} catch (InvalidHashException e) {
-			// ok
+			assertEquals("Authorization code hash (c_hash) mismatch", e.getMessage());
 		}
 	}
 
@@ -59,7 +59,7 @@ public class AuthorizationCodeValidatorTest extends TestCase {
 			AuthorizationCodeValidator.validate(code, JWSAlgorithm.RS256, new CodeHash("xxx"));
 			fail();
 		} catch (InvalidHashException e) {
-			// ok
+			assertEquals("Authorization code hash (c_hash) mismatch", e.getMessage());
 		}
 	}
 }
