@@ -1998,9 +1998,7 @@ public class OIDCProviderMetadata {
 			o.put("backchannel_logout_session_supported", backChannelLogoutSessionSupported);
 		}
 		
-		if (mutualTLSSenderConstrainedAccessTokens) {
-			o.put("mutual_tls_sender_constrained_access_tokens", mutualTLSSenderConstrainedAccessTokens);
-		}
+		o.put("mutual_tls_sender_constrained_access_tokens", mutualTLSSenderConstrainedAccessTokens);
 
 		// Append any custom (not registered) parameters
 		o.putAll(customParameters);

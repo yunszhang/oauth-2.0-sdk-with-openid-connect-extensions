@@ -952,7 +952,12 @@ public class OIDCProviderMetadataTest extends TestCase {
 		
 		JSONObject jsonObject = meta.toJSONObject();
 		
-		assertFalse(jsonObject.containsKey("mutual_tls_sender_constrained_access_tokens"));
+		assertFalse((Boolean) jsonObject.get("mutual_tls_sender_constrained_access_tokens"));
+		
+		assertFalse(OIDCProviderMetadata.parse(jsonObject).supportsMutualTLSSenderConstrainedAccessTokens());
+		
+		// default to false
+		assertNotNull(jsonObject.remove("mutual_tls_sender_constrained_access_tokens"));
 		
 		assertFalse(OIDCProviderMetadata.parse(jsonObject).supportsMutualTLSSenderConstrainedAccessTokens());
 		
