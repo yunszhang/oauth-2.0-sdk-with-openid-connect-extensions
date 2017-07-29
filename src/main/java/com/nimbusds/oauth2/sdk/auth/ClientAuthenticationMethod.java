@@ -33,6 +33,7 @@ import net.jcip.annotations.Immutable;
  *     <li>{@link #CLIENT_SECRET_JWT client_secret_jwt}
  *     <li>{@link #PRIVATE_KEY_JWT private_key_jwt}
  *     <li>{@link #TLS_CLIENT_AUTH tls_client_auth}
+ *     <li>{@link #PUB_KEY_TLS_CLIENT_AUTH pub_key_tls_client_auth}
  *     <li>{@link #NONE none}
  * </ul>
  *
@@ -45,7 +46,7 @@ import net.jcip.annotations.Immutable;
  *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section
  *         2.
  *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-02), section
- *         2.
+ *         2.1.
  * </ul>
  */
 @Immutable
@@ -96,11 +97,19 @@ public final class ClientAuthenticationMethod extends Identifier {
 	
 	
 	/**
-	 * Client TLS / X.509 certificate authentication. See Mutual TLS
-	 * Profile for OAuth 2.0, section 2.
+	 * Client TLS / X.509 certificate authentication using PKI. See Mutual
+	 * TLS Profile for OAuth 2.0, section 2.1.
 	 */
 	public static final ClientAuthenticationMethod TLS_CLIENT_AUTH =
 		new ClientAuthenticationMethod("tls_client_auth");
+	
+	
+	/**
+	 * Client TLS / X.509 certificate authentication using a public key.
+	 * See Mutual TLS Profile for OAuth 2.0, section 2.1.
+	 */
+	public static final ClientAuthenticationMethod PUB_KEY_TLS_CLIENT_AUTH =
+		new ClientAuthenticationMethod("pub_key_tls_client_auth");
 
 
 	/**
@@ -154,6 +163,8 @@ public final class ClientAuthenticationMethod extends Identifier {
 			return PRIVATE_KEY_JWT;
 		} else if (value.equalsIgnoreCase(TLS_CLIENT_AUTH.getValue())) {
 			return TLS_CLIENT_AUTH;
+		} else if (value.equalsIgnoreCase(PUB_KEY_TLS_CLIENT_AUTH.getValue())) {
+			return PUB_KEY_TLS_CLIENT_AUTH;
 		} else if (value.equals(NONE.getValue())) {
 			return NONE;
 		} else {
