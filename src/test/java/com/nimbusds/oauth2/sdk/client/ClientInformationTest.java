@@ -66,8 +66,11 @@ public class ClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("jwks"));
 		assertTrue(paramNames.contains("software_id"));
 		assertTrue(paramNames.contains("software_version"));
+		assertTrue(paramNames.contains("mutual_tls_sender_constrained_access_tokens"));
+		assertTrue(paramNames.contains("tls_client_auth_subject_dn"));
+		assertTrue(paramNames.contains("tls_client_auth_root_dn"));
 
-		assertEquals(22, paramNames.size());
+		assertEquals(25, paramNames.size());
 	}
 
 
@@ -204,8 +207,9 @@ public class ClientInformationTest extends TestCase {
 		assertEquals("123", (String)o.get("client_id"));
 		assertEquals("https://example.com/in", ((List<String>)o.get("redirect_uris")).get(0));
 		assertEquals("secret", (String)o.get("client_secret"));
-		assertEquals(0l, ((Long)o.get("client_secret_expires_at")).longValue());
-		assertEquals(4, o.size());
+		assertEquals(0L, ((Long)o.get("client_secret_expires_at")).longValue());
+		assertFalse((Boolean)o.get("mutual_tls_sender_constrained_access_tokens"));
+		assertEquals(5, o.size());
 
 		String jsonString = o.toJSONString();
 
@@ -247,8 +251,9 @@ public class ClientInformationTest extends TestCase {
 		assertEquals("123", (String)o.get("client_id"));
 		assertEquals("https://example.com/in", ((List<String>)o.get("redirect_uris")).get(0));
 		assertEquals("secret", (String)o.get("client_secret"));
-		assertEquals(0l, ((Long)o.get("client_secret_expires_at")).longValue());
-		assertEquals(4, o.size());
+		assertEquals(0L, ((Long)o.get("client_secret_expires_at")).longValue());
+		assertFalse((Boolean) o.get("mutual_tls_sender_constrained_access_tokens"));
+		assertEquals(5, o.size());
 
 		String jsonString = o.toJSONString();
 

@@ -63,6 +63,8 @@ import net.minidev.json.JSONObject;
  * <ul>
  *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section
  *         2.
+ *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-03), section
+ *         2.3.
  * </ul>
  */
 public class ClientMetadata {
@@ -93,6 +95,9 @@ public class ClientMetadata {
 		p.add("jwks");
 		p.add("software_id");
 		p.add("software_version");
+		p.add("mutual_tls_sender_constrained_access_tokens");
+		p.add("tls_client_auth_subject_dn");
+		p.add("tls_client_auth_root_dn");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -198,6 +203,26 @@ public class ClientMetadata {
 	 * Version identifier for the OAuth 2.0 client software.
 	 */
 	private SoftwareVersion softwareVersion;
+	
+	
+	/**
+	 * Preference for mutual TLS sender constrained access tokens.
+	 */
+	private boolean mutualTLSSenderConstrainedAccessTokens = false;
+	
+	
+	/**
+	 * The expected subject distinguished name (DN) of the client X.509
+	 * certificate the in mutual TLS authentication.
+	 */
+	private String tlsClientAuthSubjectDN = null;
+	
+	
+	/**
+	 * The expected distinguished name (DN) of the root issuer of the X.509
+	 * client certificate in mutual TLS authentication.
+	 */
+	private String tlsClientAuthRootDN = null;
 
 
 	/**
@@ -246,6 +271,9 @@ public class ClientMetadata {
 		jwkSet = metadata.getJWKSet();
 		softwareID = metadata.softwareID;
 		softwareVersion = metadata.softwareVersion;
+		mutualTLSSenderConstrainedAccessTokens = metadata.mutualTLSSenderConstrainedAccessTokens;
+		tlsClientAuthSubjectDN = metadata.tlsClientAuthSubjectDN;
+		tlsClientAuthRootDN = metadata.tlsClientAuthRootDN;
 		customFields = metadata.customFields;
 	}
 
@@ -989,8 +1017,93 @@ public class ClientMetadata {
 
 		this.softwareVersion = softwareVersion;
 	}
-
-
+	
+	
+	/**
+	 * Sets the preference for mutual TLS sender constrained access tokens.
+	 * Corresponds to the
+	 * {@code mutual_tls_sender_constrained_access_tokens} client metadata
+	 * field.
+	 *
+	 * @return {@code true} indicates a preference for mutual TLS sender
+	 *         constrained access tokens, {@code false} if none.
+	 */
+	public boolean getMutualTLSSenderConstrainedAccessTokens() {
+		
+		return mutualTLSSenderConstrainedAccessTokens;
+	}
+	
+	
+	/**
+	 * Gets the preference for mutual TLS sender constrained access tokens.
+	 * Corresponds to the
+	 * {@code mutual_tls_sender_constrained_access_tokens} client metadata
+	 * field.
+	 *
+	 * @param tlsSenderAccessTokens {@code true} indicates a preference for
+	 *                              mutual TLS sender constrained access
+	 *                              tokens, {@code false} if none.
+	 */
+	public void setMutualTLSSenderConstrainedAccessTokens(final boolean tlsSenderAccessTokens) {
+		
+		mutualTLSSenderConstrainedAccessTokens = tlsSenderAccessTokens;
+	}
+	
+	
+	/**
+	 * Gets the expected subject distinguished name (DN) of the client
+	 * X.509 certificate in mutual TLS authentication.
+	 *
+	 * @return The expected subject distinguished name (DN) of the client
+	 *         X.509 certificate, {@code null} if not specified.
+	 */
+	public String getTLSClientAuthSubjectDN() {
+		
+		return tlsClientAuthSubjectDN;
+	}
+	
+	
+	/**
+	 * Sets the expected subject distinguished name (DN) of the client
+	 * X.509 certificate in mutual TLS authentication.
+	 *
+	 * @param subjectDN The expected subject distinguished name (DN) of the
+	 *                  client X.509 certificate, {@code null} if not
+	 *                  specified.
+	 */
+	public void setTLSClientAuthSubjectDN(final String subjectDN) {
+		
+		this.tlsClientAuthSubjectDN = subjectDN;
+	}
+	
+	
+	/**
+	 * Gets the expected distinguished name (DN) of the root issuer of the
+	 * X.509 client certificate in mutual TLS authentication.
+	 *
+	 * @return The expected distinguished name (DN) of the root issuer of
+	 *         the X.509 client certificate, {@code null} if not specified.
+	 */
+	public String getTLSClientAuthRootDN() {
+		
+		return tlsClientAuthRootDN;
+	}
+	
+	
+	/**
+	 * Sets the expected distinguished name (DN) of the root issuer of the
+	 * X.509 client certificate in mutual TLS authentication.
+	 *
+	 * @param rootDN The expected distinguished name (DN) of the root
+	 *               issuer of the X.509 client certificate, {@code null}
+	 *               if not specified.
+	 */
+	public void setTLSClientAuthRootDN(final String rootDN) {
+		
+		this.tlsClientAuthRootDN = rootDN;
+	}
+	
+	
 	/**
 	 * Gets the specified custom metadata field.
 	 *
@@ -1263,6 +1376,16 @@ public class ClientMetadata {
 
 		if (softwareVersion != null)
 			o.put("software_version", softwareVersion.getValue());
+		
+		o.put("mutual_tls_sender_constrained_access_tokens", mutualTLSSenderConstrainedAccessTokens);
+		
+		if (tlsClientAuthSubjectDN != null) {
+			o.put("tls_client_auth_subject_dn", tlsClientAuthSubjectDN);
+		
+			if (tlsClientAuthRootDN != null) {
+				o.put("tls_client_auth_root_dn", tlsClientAuthRootDN);
+			}
+		}
 
 		return o;
 	}
@@ -1500,6 +1623,21 @@ public class ClientMetadata {
 			if (jsonObject.get("software_version") != null) {
 				metadata.setSoftwareVersion(new SoftwareVersion(JSONObjectUtils.getString(jsonObject, "software_version")));
 				jsonObject.remove("software_version");
+			}
+			
+			if (jsonObject.get("mutual_tls_sender_constrained_access_tokens") != null) {
+				metadata.setMutualTLSSenderConstrainedAccessTokens(JSONObjectUtils.getBoolean(jsonObject, "mutual_tls_sender_constrained_access_tokens"));
+				jsonObject.remove("mutual_tls_sender_constrained_access_tokens");
+			}
+			
+			if (jsonObject.get("tls_client_auth_subject_dn") != null) {
+				metadata.setTLSClientAuthSubjectDN(JSONObjectUtils.getString(jsonObject, "tls_client_auth_subject_dn"));
+				jsonObject.remove("tls_client_auth_subject_dn");
+				
+				if (jsonObject.get("tls_client_auth_root_dn") != null) {
+					metadata.setTLSClientAuthRootDN(JSONObjectUtils.getString(jsonObject, "tls_client_auth_root_dn"));
+					jsonObject.remove("tls_client_auth_root_dn");
+				}
 			}
 
 		} catch (ParseException e) {

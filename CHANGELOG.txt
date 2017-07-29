@@ -710,8 +710,15 @@ version 5.32 (2017-07-27)
       s_hash ID token claim.
 
 version 5.33 (2017-07-29)
-    * Upgrades Mutual TLS Profile for OAuth 2.0 to draft-ietf-oauth-mtls-03.
+    * Updates implementation of Mutual TLS Profile for OAuth 2.0 to
+      draft-ietf-oauth-mtls-03.
     * Adds support for mutual_tls_sender_constrained_access_tokens
       authorisation server metadata field.
+    * Adds support for mutual_tls_sender_constrained_access_tokens client
+      metadata field.
+    * Adds support for tls_client_auth_subject_dn client metadata field.
+    * Adds support for tls_client_auth_root_dn client metadata field.
+
+
 
 
