@@ -709,3 +709,9 @@ version 5.32 (2017-07-27)
       parameter in OpenID authentication requests by means of the optional
       s_hash ID token claim.
 
+version 5.33 (2017-07-29)
+    * Upgrades Mutual TLS Profile for OAuth 2.0 to draft-ietf-oauth-mtls-03.
+    * Adds support for mutual_tls_sender_constrained_access_tokens
+      authorisation server metadata field.
+
+

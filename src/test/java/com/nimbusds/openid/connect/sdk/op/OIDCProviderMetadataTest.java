@@ -95,8 +95,9 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("frontchannel_logout_session_supported"));
 		assertTrue(paramNames.contains("backchannel_logout_supported"));
 		assertTrue(paramNames.contains("backchannel_logout_session_supported"));
+		assertTrue(paramNames.contains("mutual_tls_sender_constrained_access_tokens"));
 
-		assertEquals(44, paramNames.size());
+		assertEquals(45, paramNames.size());
 	}
 
 
@@ -318,6 +319,8 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertFalse(op.supportsFrontChannelLogoutSession());
 		assertFalse(op.supportsBackChannelLogout());
 		assertFalse(op.supportsBackChannelLogoutSession());
+		
+		assertFalse(op.supportsMutualTLSSenderConstrainedAccessTokens());
 
 		assertTrue(op.getCustomParameters().isEmpty());
 	}
@@ -528,6 +531,10 @@ public class OIDCProviderMetadataTest extends TestCase {
 		meta.setSupportsBackChannelLogoutSession(true);
 		assertTrue(meta.supportsBackChannelLogoutSession());
 		
+		assertFalse(meta.supportsMutualTLSSenderConstrainedAccessTokens());
+		meta.setSupportsMutualTLSSenderConstrainedAccessTokens(true);
+		assertTrue(meta.supportsMutualTLSSenderConstrainedAccessTokens());
+		
 		meta.setCustomParameter("x-custom", "xyz");
 
 		assertEquals(1, meta.getCustomParameters().size());
@@ -622,6 +629,8 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(meta.supportsFrontChannelLogoutSession());
 		assertTrue(meta.supportsBackChannelLogout());
 		assertTrue(meta.supportsBackChannelLogoutSession());
+		
+		assertTrue(meta.supportsMutualTLSSenderConstrainedAccessTokens());
 		
 		assertEquals(1, meta.getCustomParameters().size());
 		assertEquals("xyz", meta.getCustomParameter("x-custom"));
@@ -928,5 +937,31 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertFalse(meta.supportsFrontChannelLogoutSession());
 		assertTrue(meta.supportsBackChannelLogout());
 		assertFalse(meta.supportsBackChannelLogoutSession());
+	}
+	
+	
+	public void testOutputTLSSenderConstrainedTokensSupport()
+		throws ParseException {
+		
+		OIDCProviderMetadata meta = new OIDCProviderMetadata(
+			new Issuer("https://c2id.com"),
+			Collections.singletonList(SubjectType.PUBLIC),
+			URI.create("https://c2id.com/jwks.json"));
+		
+		meta.applyDefaults();
+		
+		JSONObject jsonObject = meta.toJSONObject();
+		
+		assertFalse(jsonObject.containsKey("mutual_tls_sender_constrained_access_tokens"));
+		
+		assertFalse(OIDCProviderMetadata.parse(jsonObject).supportsMutualTLSSenderConstrainedAccessTokens());
+		
+		meta.setSupportsMutualTLSSenderConstrainedAccessTokens(true);
+		
+		jsonObject = meta.toJSONObject();
+		
+		assertTrue((Boolean)jsonObject.get("mutual_tls_sender_constrained_access_tokens"));
+		
+		assertTrue(OIDCProviderMetadata.parse(jsonObject).supportsMutualTLSSenderConstrainedAccessTokens());
 	}
 }

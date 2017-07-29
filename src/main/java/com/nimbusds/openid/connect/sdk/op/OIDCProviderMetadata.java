@@ -56,6 +56,8 @@ import net.minidev.json.JSONObject;
  *     <li>OpenID Connect Session Management 1.0, section 2.1 (draft 28).
  *     <li>OpenID Connect Front-Channel Logout 1.0, section 3 (draft 02).
  *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.1 (draft 04).
+ *     <li>Mutual TLS Profile for OAuth 2.0, section 2.2
+ *         (draft-ietf-oauth-mtls-03).
  * </ul>
  */
 public class OIDCProviderMetadata {
@@ -114,6 +116,7 @@ public class OIDCProviderMetadata {
 		p.add("backchannel_logout_session_supported");
 		p.add("frontchannel_logout_supported");
 		p.add("frontchannel_logout_session_supported");
+		p.add("mutual_tls_sender_constrained_access_tokens");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 
@@ -388,6 +391,14 @@ public class OIDCProviderMetadata {
 	 * parameter is set, else not.
 	 */
 	private boolean backChannelLogoutSessionSupported = false;
+	
+	
+	/**
+	 * If {@code true} the
+	 * {@code mutual_tls_sender_constrained_access_tokens} if set, else
+	 * not.
+	 */
+	private boolean mutualTLSSenderConstrainedAccessTokens = false;
 
 
 	/**
@@ -1577,8 +1588,39 @@ public class OIDCProviderMetadata {
 		
 		this.backChannelLogoutSessionSupported = backChannelLogoutSessionSupported;
 	}
-
-
+	
+	
+	/**
+	 * Gets the support for mutual TLS sender constrained access tokens.
+	 * Corresponds to the
+	 * {@code mutual_tls_sender_constrained_access_tokens} metadata field.
+	 *
+	 * @return {@code true} if mutual TLS sender constrained access tokens
+	 *         are supported, else {@code false}.
+	 */
+	public boolean supportsMutualTLSSenderConstrainedAccessTokens() {
+		
+		return mutualTLSSenderConstrainedAccessTokens;
+	}
+	
+	
+	/**
+	 * Sets the support for mutual TLS sender constrained access tokens.
+	 * Corresponds to the
+	 * {@code mutual_tls_sender_constrained_access_tokens} metadata field.
+	 *
+	 * @param mutualTLSSenderConstrainedAccessTokens {@code true} if mutual
+	 *                                               TLS sender constrained
+	 *                                               access tokens are
+	 *                                               supported, else
+	 *                                               {@code false}.
+	 */
+	public void setSupportsMutualTLSSenderConstrainedAccessTokens(final boolean mutualTLSSenderConstrainedAccessTokens) {
+		
+		this.mutualTLSSenderConstrainedAccessTokens = mutualTLSSenderConstrainedAccessTokens;
+	}
+	
+	
 	/**
 	 * Gets the specified custom (not registered) parameter.
 	 *
@@ -1954,6 +1996,10 @@ public class OIDCProviderMetadata {
 		
 		if (backChannelLogoutSupported) {
 			o.put("backchannel_logout_session_supported", backChannelLogoutSessionSupported);
+		}
+		
+		if (mutualTLSSenderConstrainedAccessTokens) {
+			o.put("mutual_tls_sender_constrained_access_tokens", mutualTLSSenderConstrainedAccessTokens);
 		}
 
 		// Append any custom (not registered) parameters
@@ -2333,6 +2379,9 @@ public class OIDCProviderMetadata {
 		
 		if (op.frontChannelLogoutSupported && jsonObject.get("backchannel_logout_session_supported") != null)
 			op.backChannelLogoutSessionSupported = JSONObjectUtils.getBoolean(jsonObject, "backchannel_logout_session_supported");
+		
+		if (jsonObject.get("mutual_tls_sender_constrained_access_tokens") != null)
+			op.mutualTLSSenderConstrainedAccessTokens = JSONObjectUtils.getBoolean(jsonObject, "mutual_tls_sender_constrained_access_tokens");
 		
 		// Parse custom (not registered) parameters
 		JSONObject customParams = new JSONObject(jsonObject);
