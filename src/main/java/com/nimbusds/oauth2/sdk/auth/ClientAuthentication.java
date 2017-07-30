@@ -148,7 +148,8 @@ public abstract class ClientAuthentication {
 			X509Certificate clientCert = httpRequest.getClientX509Certificate();
 			
 			if (X509CertificateUtils.hasMatchingIssuerAndSubject(clientCert)) {
-				// Assume self-signed certificate
+				// Don't do expensive public key / signature check,
+				// assume self-signed certificate if issuer and subject DNs match
 				return PublicKeyTLSClientAuthentication.parse(httpRequest);
 			} else {
 				// CA-issued certificate
