@@ -43,7 +43,7 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
  *
  * <p>Selection of {@link com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT
  * private_key_jwt} and
- * {@link PublicKeyTLSClientAuthentication tls_client_auth}
+ * {@link PublicKeyTLSClientAuthentication pub_key_tls_client_auth}
  * keys is handled by the {@link #selectPublicKeys} method.
  *
  * <p>The generic {@link Context context object} may be used to return
@@ -80,7 +80,7 @@ public interface ClientCredentialsSelector<T> {
 	 * Selects one or more public key candidates (e.g. RSA or EC) for
 	 * {@link com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT private_key_jwt}
 	 * and {@link PublicKeyTLSClientAuthentication
-	 * tls_client_auth} authentication.
+	 * pub_key_tls_client_auth} authentication.
 	 *
 	 * @param claimedClientID The client identifier (to be verified). Not
 	 *                        {@code null}.

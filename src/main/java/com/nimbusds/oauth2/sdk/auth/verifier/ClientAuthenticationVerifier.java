@@ -47,7 +47,7 @@ import org.apache.commons.collections4.CollectionUtils;
  *     <li>OpenID Connect Core 1.0, section 9.
  *     <li>JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and
  *         Authorization Grants (RFC 7523).
- *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-02), section
+ *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-03), section
  *         2.
  * </ul>
  */
@@ -287,8 +287,7 @@ public class ClientAuthenticationVerifier<T> {
 				throw new InvalidClientException("Missing client X.509 certificate");
 			}
 			
-			// At present only self-signed certs are supported,
-			// validated with registered client jwks / jwks_uri
+			// Self-signed certs bound to registered public key in client jwks / jwks_uri
 			List<? extends PublicKey> keyCandidates = clientCredentialsSelector.selectPublicKeys(
 				tlsClientAuth.getClientID(),
 				tlsClientAuth.getMethod(),
