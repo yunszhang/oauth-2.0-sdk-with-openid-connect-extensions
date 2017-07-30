@@ -25,6 +25,9 @@ import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.X509CertificateGenerator;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.id.Subject;
+import com.nimbusds.oauth2.sdk.util.X509CertificateUtilsTest;
 import junit.framework.TestCase;
 
 
@@ -59,7 +62,7 @@ public class ClientAuthenticationTest extends TestCase {
 	}
 	
 	
-	public void testTLSClientCertificateAuthentication()
+	public void testPublicKeyTLSClientCertificateAuthentication()
 		throws Exception {
 		
 		X509Certificate clientCert = X509CertificateGenerator.generateSampleClientCertificate();
@@ -70,6 +73,28 @@ public class ClientAuthenticationTest extends TestCase {
 		httpRequest.setClientX509Certificate(clientCert);
 		
 		PublicKeyTLSClientAuthentication clientAuth = (PublicKeyTLSClientAuthentication) ClientAuthentication.parse(httpRequest);
+		assertEquals(new ClientID("123"), clientAuth.getClientID());
+		assertNull(clientAuth.getSSLSocketFactory());
+		assertEquals(clientCert, clientAuth.getClientX509Certificate());
+	}
+	
+	
+	public void testTLSClientCertificateAuthentication()
+		throws Exception {
+		
+		X509Certificate clientCert = X509CertificateGenerator.generateCertificate(
+			new Issuer("123"),
+			new Subject("456"),
+			X509CertificateUtilsTest.PUBLIC_KEY,
+			X509CertificateUtilsTest.PRIVATE_KEY
+		);
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
+		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setQuery("client_id=123");
+		httpRequest.setClientX509Certificate(clientCert);
+		
+		TLSClientAuthentication clientAuth = (TLSClientAuthentication) ClientAuthentication.parse(httpRequest);
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals(clientCert, clientAuth.getClientX509Certificate());

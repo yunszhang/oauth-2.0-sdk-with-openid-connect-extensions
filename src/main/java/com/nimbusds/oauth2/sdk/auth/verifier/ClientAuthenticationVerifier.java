@@ -343,6 +343,11 @@ public class ClientAuthenticationVerifier<T> {
 			}
 			
 			throw InvalidClientException.BAD_SELF_SIGNED_CLIENT_CERTIFICATE;
+			
+		} else if (clientAuth instanceof TLSClientAuthentication) {
+			
+			// Not supported
+			
 
 		} else {
 			throw new RuntimeException("Unexpected client authentication: " + clientAuth.getMethod());
