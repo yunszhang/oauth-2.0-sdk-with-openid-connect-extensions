@@ -33,20 +33,59 @@ import junit.framework.TestCase;
 public class X509CertificateUtilsTest extends TestCase {
 	
 	
+	public static final RSAPublicKey PUBLIC_KEY;
+	
+	
+	public static final RSAPrivateKey PRIVATE_KEY;
+	
+	
+	static {
+		try {
+			KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+			keyPairGenerator.initialize(2048);
+			KeyPair keyPair = keyPairGenerator.generateKeyPair();
+			
+			PUBLIC_KEY = (RSAPublicKey)keyPair.getPublic();
+			PRIVATE_KEY = (RSAPrivateKey)keyPair.getPrivate();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	
+	public void testHasMatchingIssuerAndSubject_true()
+		throws Exception {
+		
+		X509Certificate cert = X509CertificateGenerator.generateCertificate(
+			new Issuer("123"),
+			new Subject("123"),
+			PUBLIC_KEY,
+			PRIVATE_KEY);
+		
+		assertTrue(X509CertificateUtils.hasMatchingIssuerAndSubject(cert));
+	}
+	
+	
+	public void testHasMatchingIssuerAndSubject_false()
+		throws Exception {
+		
+		X509Certificate cert = X509CertificateGenerator.generateCertificate(
+			new Issuer("123"),
+			new Subject("456"),
+			PUBLIC_KEY,
+			PRIVATE_KEY);
+		
+		assertFalse(X509CertificateUtils.hasMatchingIssuerAndSubject(cert));
+	}
+	
+	
 	public void testIsSelfIssued_positive()
 		throws Exception {
 		
-		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-		keyPairGenerator.initialize(2048);
-		KeyPair keyPair = keyPairGenerator.generateKeyPair();
-		
-		RSAPublicKey rsaPublicKey = (RSAPublicKey)keyPair.getPublic();
-		RSAPrivateKey rsaPrivateKey = (RSAPrivateKey)keyPair.getPrivate();
-		
 		X509Certificate cert = X509CertificateGenerator.generateSelfSignedCertificate(
 			new Issuer("123"),
-			rsaPublicKey,
-			rsaPrivateKey
+			PUBLIC_KEY,
+			PRIVATE_KEY
 		);
 		
 		assertTrue(X509CertificateUtils.isSelfIssued(cert));
@@ -57,18 +96,11 @@ public class X509CertificateUtilsTest extends TestCase {
 	public void testIsSelfIssued_negative()
 		throws Exception {
 		
-		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-		keyPairGenerator.initialize(2048);
-		KeyPair keyPair = keyPairGenerator.generateKeyPair();
-		
-		RSAPublicKey rsaPublicKey = (RSAPublicKey)keyPair.getPublic();
-		RSAPrivateKey rsaPrivateKey = (RSAPrivateKey)keyPair.getPrivate();
-		
 		X509Certificate cert = X509CertificateGenerator.generateCertificate(
 			new Issuer("123"),
 			new Subject("456"),
-			rsaPublicKey,
-			rsaPrivateKey
+			PUBLIC_KEY,
+			PRIVATE_KEY
 		);
 		
 		assertFalse(X509CertificateUtils.isSelfIssued(cert));

@@ -30,6 +30,24 @@ public class X509CertificateUtils {
 	
 	
 	/**
+	 * Checks if the issuer DN and the subject DN of the specified X.509
+	 * certificate match. The matched DNs are not normalised.
+	 *
+	 * @param cert The X.509 certificate. Must not be {@code null}.
+	 *
+	 * @return {@code true} if the issuer DN and and subject DN match, else
+	 *         {@code false}.
+	 */
+	public static boolean hasMatchingIssuerAndSubject(final X509Certificate cert) {
+		
+		Principal issuer = cert.getIssuerDN();
+		Principal subject = cert.getSubjectDN();
+		
+		return issuer != null && subject != null && issuer.equals(subject);
+	}
+	
+	
+	/**
 	 * Checks if the specified X.509 certificate is self-issued, i.e. it
 	 * has a matching issuer and subject, and the public key can be used to
 	 * successfully validate the certificate's digital signature.
@@ -41,10 +59,7 @@ public class X509CertificateUtils {
 	 */
 	public static boolean isSelfIssued(final X509Certificate cert) {
 		
-		Principal issuer = cert.getIssuerDN();
-		Principal subject = cert.getSubjectDN();
-		
-		return issuer != null && subject != null && issuer.equals(subject) && isSelfSigned(cert);
+		return hasMatchingIssuerAndSubject(cert) && isSelfSigned(cert);
 	}
 	
 	

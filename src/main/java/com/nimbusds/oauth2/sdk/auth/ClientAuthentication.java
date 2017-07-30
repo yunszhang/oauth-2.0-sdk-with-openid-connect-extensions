@@ -18,12 +18,14 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
+import java.security.cert.X509Certificate;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.util.X509CertificateUtils;
 import org.apache.commons.lang3.StringUtils;
 
 
@@ -34,6 +36,8 @@ import org.apache.commons.lang3.StringUtils;
  *
  * <ul>
  *     <li>OAuth 2.0 (RFC 6749), section 2.3.
+ *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-03), section
+ *         2.1.
  * </ul>
  */
 public abstract class ClientAuthentication {
@@ -140,7 +144,16 @@ public abstract class ClientAuthentication {
 		
 		// Client TLS?
 		if (StringUtils.isNotBlank(params.get("client_id")) && httpRequest.getClientX509Certificate() != null) {
-			return TLSClientAuthentication.parse(httpRequest);
+			
+			X509Certificate clientCert = httpRequest.getClientX509Certificate();
+			
+			if (X509CertificateUtils.hasMatchingIssuerAndSubject(clientCert)) {
+				// Assume self-signed certificate
+				return PublicKeyTLSClientAuthentication.parse(httpRequest);
+			} else {
+				// CA-issued certificate
+				return TLSClientAuthentication.parse(httpRequest);
+			}
 		}
 		
 		return null; // no auth

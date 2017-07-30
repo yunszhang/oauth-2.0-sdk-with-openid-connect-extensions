@@ -420,7 +420,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			VALID_RSA_KEY_PAIR_1.toRSAPrivateKey()
 		);
 		
-		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
+		ClientAuthentication clientAuthentication = new PublicKeyTLSClientAuthentication(
 			VALID_CLIENT_ID,
 			clientCert
 		);
@@ -438,7 +438,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			VALID_RSA_KEY_PAIR_2.toRSAPrivateKey()
 		);
 		
-		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
+		ClientAuthentication clientAuthentication = new PublicKeyTLSClientAuthentication(
 			VALID_CLIENT_ID,
 			clientCert
 		);
@@ -455,7 +455,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			INVALID_RSA_KEY_PAIR.toRSAPrivateKey()
 		);
 		
-		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
+		ClientAuthentication clientAuthentication = new PublicKeyTLSClientAuthentication(
 			VALID_CLIENT_ID,
 			clientCert
 		);
@@ -471,7 +471,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 	public void testTLSClientAuth_missingCertificate()
 		throws Exception {
 		
-		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
+		ClientAuthentication clientAuthentication = new PublicKeyTLSClientAuthentication(
 			VALID_CLIENT_ID,
 			(SSLSocketFactory) null
 		);

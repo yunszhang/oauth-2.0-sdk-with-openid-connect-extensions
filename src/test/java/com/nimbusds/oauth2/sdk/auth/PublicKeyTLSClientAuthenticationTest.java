@@ -27,23 +27,20 @@ import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.X509CertificateGenerator;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.oauth2.sdk.id.Issuer;
-import com.nimbusds.oauth2.sdk.id.Subject;
-import com.nimbusds.oauth2.sdk.util.X509CertificateUtilsTest;
 import junit.framework.TestCase;
 
 
-public class TLSClientAuthenticationTest extends TestCase {
+public class PublicKeyTLSClientAuthenticationTest extends TestCase {
 	
 	
 	public void testSSLSocketFactoryConstructor_defaultSSL()
 		throws Exception {
 		
-		TLSClientAuthentication clientAuth = new TLSClientAuthentication(
+		PublicKeyTLSClientAuthentication clientAuth = new PublicKeyTLSClientAuthentication(
 			new ClientID("123"),
 			(SSLSocketFactory)null);
 		
-		assertEquals(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientAuth.getMethod());
+		assertEquals(ClientAuthenticationMethod.PUB_KEY_TLS_CLIENT_AUTH, clientAuth.getMethod());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertNull(clientAuth.getClientX509Certificate());
@@ -65,12 +62,12 @@ public class TLSClientAuthenticationTest extends TestCase {
 		
 		SSLSocketFactory sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 		
-		TLSClientAuthentication clientAuth = new TLSClientAuthentication(
+		PublicKeyTLSClientAuthentication clientAuth = new PublicKeyTLSClientAuthentication(
 			new ClientID("123"),
 			sslSocketFactory
 		);
 		
-		assertEquals(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientAuth.getMethod());
+		assertEquals(ClientAuthenticationMethod.PUB_KEY_TLS_CLIENT_AUTH, clientAuth.getMethod());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertEquals(sslSocketFactory, clientAuth.getSSLSocketFactory());
 		assertNull(clientAuth.getClientX509Certificate());
@@ -90,15 +87,12 @@ public class TLSClientAuthenticationTest extends TestCase {
 	public void testCertificateConstructor()
 		throws Exception {
 		
-		X509Certificate clientCert = X509CertificateGenerator.generateCertificate(
-			new Issuer("123"),
-			new Subject("456"),
-			X509CertificateUtilsTest.PUBLIC_KEY,
-			X509CertificateUtilsTest.PRIVATE_KEY);
+		X509Certificate clientCert = X509CertificateGenerator.generateSampleClientCertificate();
 		
-		TLSClientAuthentication clientAuth = new TLSClientAuthentication(
+		PublicKeyTLSClientAuthentication clientAuth = new PublicKeyTLSClientAuthentication(
 			new ClientID("123"),
-			clientCert);
+			clientCert
+		);
 		
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
@@ -183,18 +177,14 @@ public class TLSClientAuthenticationTest extends TestCase {
 	public void testParse_ok()
 		throws Exception {
 		
-		X509Certificate clientCert = X509CertificateGenerator.generateCertificate(
-			new Issuer("123"),
-			new Subject("456"),
-			X509CertificateUtilsTest.PUBLIC_KEY,
-			X509CertificateUtilsTest.PRIVATE_KEY);
+		X509Certificate clientCert = X509CertificateGenerator.generateSampleClientCertificate();
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
 		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=123");
 		httpRequest.setClientX509Certificate(clientCert);
 		
-		TLSClientAuthentication clientAuth = TLSClientAuthentication.parse(httpRequest);
+		PublicKeyTLSClientAuthentication clientAuth = PublicKeyTLSClientAuthentication.parse(httpRequest);
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals(clientCert, clientAuth.getClientX509Certificate());
