@@ -18,7 +18,6 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
-import java.security.cert.X509Certificate;
 import java.util.Map;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -49,6 +48,18 @@ public class TLSClientAuthentication extends AbstractTLSClientAuthentication {
 	
 	
 	/**
+	 * The client X.509 certificate subject DN.
+	 */
+	private final String certSubjectDN;
+	
+	
+	/**
+	 * The client X.509 certificate root DN, {@code null} if not specified.
+	 */
+	private final String certRootDN;
+	
+	
+	/**
 	 * Creates a new TLS / X.509 certificate client authentication. This
 	 * constructor is intended for an outgoing token request.
 	 *
@@ -63,6 +74,8 @@ public class TLSClientAuthentication extends AbstractTLSClientAuthentication {
 				       final SSLSocketFactory sslSocketFactory) {
 		
 		super(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientID, sslSocketFactory);
+		certSubjectDN = null;
+		certRootDN = null;
 	}
 	
 	
@@ -70,16 +83,50 @@ public class TLSClientAuthentication extends AbstractTLSClientAuthentication {
 	 * Creates a new TLS / X.509 certificate client authentication. This
 	 * constructor is intended for a received token request.
 	 *
-	 * @param clientID        The client identifier. Must not be
-	 *                        {@code null}.
-	 * @param x509Certificate The validated client X.509 certificate from
-	 *                        the received HTTPS request. Must not be
-	 *                        {@code null}.
+	 * @param clientID      The client identifier. Must not be
+	 *                      {@code null}.
+	 * @param certSubjectDN The subject DN of the received validated client
+	 *                      X.509 certificate. Must not be {@code null}.
+	 * @param certRootDN    The root issuer DN of the received validated
+	 *                      client X.509 certificate, {@code null} if not
+	 *                      specified.
 	 */
 	public TLSClientAuthentication(final ClientID clientID,
-				       final X509Certificate x509Certificate) {
+				       final String certSubjectDN,
+				       final String certRootDN) {
 		
-		super(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientID, x509Certificate);
+		super(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientID);
+		
+		if (certSubjectDN == null) {
+			throw new IllegalArgumentException("The X.509 client certificate subject DN must not be null");
+		}
+		this.certSubjectDN = certSubjectDN;
+		
+		this.certRootDN = certRootDN;
+	}
+	
+	
+	/**
+	 * Gets the subject DN of the received validated client X.509
+	 * certificate.
+	 *
+	 * @return The subject DN.
+	 */
+	public String getClientX509CertificateSubjectDN() {
+		
+		return certSubjectDN;
+	}
+	
+	
+	/**
+	 * Gets the root issuer DN of the received validated client X.509
+	 * certificate.
+	 *
+	 * @return The root DN, {@code null} if not specified.
+	 */
+	public String getClientX509CertificateRootDN() {
+		
+		return certRootDN;
 	}
 	
 	
@@ -113,12 +160,13 @@ public class TLSClientAuthentication extends AbstractTLSClientAuthentication {
 			throw new ParseException("Missing client_id parameter");
 		}
 		
-		X509Certificate cert = httpRequest.getClientX509Certificate();
-		
-		if (cert == null) {
-			throw new ParseException("Missing client X.509 certificate");
+		if (httpRequest.getClientX509CertificateSubjectDN() == null) {
+			throw new ParseException("Missing client X.509 certificate subject DN");
 		}
 		
-		return new TLSClientAuthentication(new ClientID(clientIDString), cert);
+		return new TLSClientAuthentication(
+			new ClientID(clientIDString),
+			httpRequest.getClientX509CertificateSubjectDN(),
+			httpRequest.getClientX509CertificateRootDN());
 	}
 }

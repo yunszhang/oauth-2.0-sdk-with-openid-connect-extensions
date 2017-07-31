@@ -18,7 +18,6 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
-import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLSocketFactory;
 
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
@@ -31,18 +30,12 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
  */
 abstract class AbstractTLSClientAuthentication extends ClientAuthentication {
 	
+	
 	/**
-	 * The SSL socket factory for the outgoing HTTPS requests, {@code null}
+	 * The SSL socket factory for an outgoing HTTPS request, {@code null}
 	 * to use the default one.
 	 */
 	private final SSLSocketFactory sslSocketFactory;
-	
-	
-	/**
-	 * The validated client X.509 certificate from the received HTTPS
-	 * request, {@code null} for an outgoing HTTPS request.
-	 */
-	private final X509Certificate x509Certificate;
 	
 	
 	/**
@@ -65,7 +58,6 @@ abstract class AbstractTLSClientAuthentication extends ClientAuthentication {
 		
 		super(method, clientID);
 		this.sslSocketFactory = sslSocketFactory;
-		x509Certificate = null;
 	}
 	
 	
@@ -74,30 +66,19 @@ abstract class AbstractTLSClientAuthentication extends ClientAuthentication {
 	 * authentication. This constructor is intended for a received token
 	 * request.
 	 *
-	 * @param method          The client authentication method. Must not
-	 *                        be {@code null}.
-	 * @param clientID        The client identifier. Must not be
-	 *                        {@code null}.
-	 * @param x509Certificate The validated client X.509 certificate from
-	 *                        the received HTTPS request. Must not be
-	 *                        {@code null}.
+	 * @param method   The client authentication method. Must not be
+	 *                 {@code null}.
+	 * @param clientID The client identifier. Must not be {@code null}.
 	 */
 	protected AbstractTLSClientAuthentication(final ClientAuthenticationMethod method,
-						  final ClientID clientID,
-						  final X509Certificate x509Certificate) {
+						  final ClientID clientID) {
 		super(method, clientID);
 		sslSocketFactory = null;
-		
-		if (x509Certificate == null) {
-			throw new IllegalArgumentException("The client X.509 certificate must not be null");
-		}
-		
-		this.x509Certificate = x509Certificate;
 	}
 	
 	
 	/**
-	 * Returns the SSL socket factory to use for the outgoing HTTPS request
+	 * Returns the SSL socket factory to use for an outgoing HTTPS request
 	 * and to present the client certificate(s).
 	 *
 	 * @return The SSL socket factory, {@code null} to use the default one.
@@ -105,19 +86,6 @@ abstract class AbstractTLSClientAuthentication extends ClientAuthentication {
 	public SSLSocketFactory getSSLSocketFactory() {
 		
 		return sslSocketFactory;
-	}
-	
-	
-	/**
-	 * Returns the validated client X.509 certificate from the received
-	 * HTTPS request.
-	 *
-	 * @return The client X.509 certificate, {@code null} for an outgoing
-	 *         HTTPS request.
-	 */
-	public X509Certificate getClientX509Certificate() {
-		
-		return x509Certificate;
 	}
 	
 	

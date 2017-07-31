@@ -59,6 +59,13 @@ public class ClientAuthenticationVerifier<T> {
 	 * The client credentials selector.
 	 */
 	private final ClientCredentialsSelector<T> clientCredentialsSelector;
+	
+	
+	/**
+	 * Optional client X.509 certificate binding verifier for
+	 * {@code tls_client_auth}.
+	 */
+	private final ClientX509CertificateBindingVerifier certBindingVerifier;
 
 
 	/**
@@ -78,6 +85,10 @@ public class ClientAuthenticationVerifier<T> {
 	 *
 	 * @param clientCredentialsSelector The client credentials selector.
 	 *                                  Must not be {@code null}.
+	 * @param certBindingVerifier       Optional client X.509 certificate
+	 *                                  binding verifier for
+	 *                                  {@code tls_client_auth},
+	 *                                  {@code null} if not supported.
 	 * @param expectedAudience          The permitted audience (aud) claim
 	 *                                  values in JWT authentication
 	 *                                  assertions. Must not be empty or
@@ -87,6 +98,7 @@ public class ClientAuthenticationVerifier<T> {
 	 *                                  include the issuer URI.
 	 */
 	public ClientAuthenticationVerifier(final ClientCredentialsSelector<T> clientCredentialsSelector,
+					    final ClientX509CertificateBindingVerifier certBindingVerifier,
 					    final Set<Audience> expectedAudience) {
 
 		claimsSetVerifier = new JWTAuthenticationClaimsSetVerifier(expectedAudience);
@@ -94,6 +106,8 @@ public class ClientAuthenticationVerifier<T> {
 		if (clientCredentialsSelector == null) {
 			throw new IllegalArgumentException("The client credentials selector must not be null");
 		}
+		
+		this.certBindingVerifier = certBindingVerifier;
 
 		this.clientCredentialsSelector = clientCredentialsSelector;
 	}
@@ -108,8 +122,21 @@ public class ClientAuthenticationVerifier<T> {
 
 		return clientCredentialsSelector;
 	}
-
-
+	
+	
+	/**
+	 * Returns the client X.509 certificate binding verifier for use in
+	 * {@code tls_client_auth}.
+	 *
+	 * @return The client X.509 certificate binding verifier, {@code null}
+	 *         if not specified.
+	 */
+	public ClientX509CertificateBindingVerifier getClientX509CertificateBindingVerifier() {
+		
+		return certBindingVerifier;
+	}
+	
+	
 	/**
 	 * Returns the permitted audience values in JWT authentication
 	 * assertions.
@@ -346,8 +373,16 @@ public class ClientAuthenticationVerifier<T> {
 			
 		} else if (clientAuth instanceof TLSClientAuthentication) {
 			
-			// Not supported
+			if (certBindingVerifier == null) {
+				throw new InvalidClientException("Mutual TLS client Authentication (tls_client_auth) not supported");
+			}
 			
+			TLSClientAuthentication tlsClientAuth = (TLSClientAuthentication) clientAuth;
+			
+			certBindingVerifier.verifyCertificateBinding(
+				clientAuth.getClientID(),
+				tlsClientAuth.getClientX509CertificateSubjectDN(),
+				tlsClientAuth.getClientX509CertificateRootDN());
 
 		} else {
 			throw new RuntimeException("Unexpected client authentication: " + clientAuth.getMethod());

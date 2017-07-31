@@ -19,12 +19,15 @@ package com.nimbusds.oauth2.sdk.auth;
 
 
 import java.security.cert.X509Certificate;
+import java.util.Map;
 import javax.net.ssl.SSLSocketFactory;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -46,6 +49,13 @@ public class PublicKeyTLSClientAuthentication extends AbstractTLSClientAuthentic
 	
 	
 	/**
+	 * The validated client X.509 certificate from the received HTTPS
+	 * request, {@code null} for an outgoing HTTPS request.
+	 */
+	private final X509Certificate x509Certificate;
+	
+	
+	/**
 	 * Creates a new public key TLS / X.509 certificate client
 	 * authentication. This constructor is intended for an outgoing token
 	 * request.
@@ -61,6 +71,7 @@ public class PublicKeyTLSClientAuthentication extends AbstractTLSClientAuthentic
 						final SSLSocketFactory sslSocketFactory) {
 		
 		super(ClientAuthenticationMethod.PUB_KEY_TLS_CLIENT_AUTH, clientID, sslSocketFactory);
+		x509Certificate = null;
 	}
 	
 	
@@ -78,7 +89,26 @@ public class PublicKeyTLSClientAuthentication extends AbstractTLSClientAuthentic
 	public PublicKeyTLSClientAuthentication(final ClientID clientID,
 						final X509Certificate x509Certificate) {
 		
-		super(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientID, x509Certificate);
+		super(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientID);
+		
+		if (x509Certificate == null) {
+			throw new IllegalArgumentException("The client X.509 certificate must not be null");
+		}
+		
+		this.x509Certificate = x509Certificate;
+	}
+	
+	
+	/**
+	 * Returns the validated client X.509 certificate from the received
+	 * HTTPS request.
+	 *
+	 * @return The client X.509 certificate, {@code null} for an outgoing
+	 *         HTTPS request.
+	 */
+	public X509Certificate getClientX509Certificate() {
+		
+		return x509Certificate;
 	}
 	
 	
@@ -99,10 +129,26 @@ public class PublicKeyTLSClientAuthentication extends AbstractTLSClientAuthentic
 	public static PublicKeyTLSClientAuthentication parse(final HTTPRequest httpRequest)
 		throws ParseException {
 		
-		TLSClientAuthentication pkiClientAuth = TLSClientAuthentication.parse(httpRequest);
+		String query = httpRequest.getQuery();
 		
-		return new PublicKeyTLSClientAuthentication(
-			pkiClientAuth.getClientID(),
-			pkiClientAuth.getClientX509Certificate());
+		if (query == null) {
+			throw new ParseException("Missing HTTP POST request entity body");
+		}
+		
+		Map<String,String> params = URLUtils.parseParameters(query);
+		
+		String clientIDString = params.get("client_id");
+		
+		if (StringUtils.isBlank(clientIDString)) {
+			throw new ParseException("Missing client_id parameter");
+		}
+		
+		X509Certificate cert = httpRequest.getClientX509Certificate();
+		
+		if (cert == null) {
+			throw new ParseException("Missing client X.509 certificate");
+		}
+		
+		return new PublicKeyTLSClientAuthentication(new ClientID(clientIDString), cert);
 	}
 }

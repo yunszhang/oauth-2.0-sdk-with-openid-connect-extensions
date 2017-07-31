@@ -62,6 +62,9 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		new Audience("https://c2id.com")));
 
 
+	private static final String VALID_ROOT_DN = "cn=root";
+	
+	private static final String VALID_SUBJECT_DN = "";
 
 	private static final RSAKey VALID_RSA_KEY_PAIR_1;
 
@@ -151,6 +154,19 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			}
 		}
 	};
+	
+	
+	private static final ClientX509CertificateBindingVerifier CERT_BINDING_VERIFIER = new ClientX509CertificateBindingVerifier() {
+		
+		@Override
+		public void verifyCertificateBinding(ClientID clientID, String subjectDN, String rootDN)
+			throws InvalidClientException {
+			
+			if (! VALID_CLIENT_ID.equals(clientID)) {
+				throw InvalidClientException.BAD_ID;
+			}
+		}
+	};
 
 
 	public void testGetters() {
@@ -171,16 +187,17 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		Set<Audience> audienceSet = new HashSet<>();
 		audienceSet.add(new Audience("https://c2id.com/token"));
 
-		ClientAuthenticationVerifier verifier = new ClientAuthenticationVerifier(selector, audienceSet);
+		ClientAuthenticationVerifier verifier = new ClientAuthenticationVerifier(selector, null, audienceSet);
 
 		assertEquals(selector, verifier.getClientCredentialsSelector());
+		assertNull(verifier.getClientX509CertificateBindingVerifier());
 		assertEquals(audienceSet, verifier.getExpectedAudience());
 	}
 
 
-	private static ClientAuthenticationVerifier<ClientMetadata> createVerifier() {
+	private static ClientAuthenticationVerifier<ClientMetadata> createBasicVerifier() {
 
-		return new ClientAuthenticationVerifier<>(CLIENT_CREDENTIALS_SELECTOR, EXPECTED_JWT_AUDIENCE);
+		return new ClientAuthenticationVerifier<>(CLIENT_CREDENTIALS_SELECTOR, null, EXPECTED_JWT_AUDIENCE);
 	}
 
 
@@ -189,7 +206,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 
 		ClientAuthentication clientAuthentication = new ClientSecretBasic(VALID_CLIENT_ID, VALID_CLIENT_SECRET);
 
-		createVerifier().verify(clientAuthentication, null, null);
+		createBasicVerifier().verify(clientAuthentication, null, null);
 	}
 
 
@@ -198,7 +215,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 
 		ClientAuthentication clientAuthentication = new ClientSecretBasic(VALID_CLIENT_ID, VALID_CLIENT_SECRET);
 
-		createVerifier().verify(clientAuthentication, null, null);
+		createBasicVerifier().verify(clientAuthentication, null, null);
 	}
 
 
@@ -211,7 +228,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			JWSAlgorithm.HS256,
 			VALID_CLIENT_SECRET);
 
-		createVerifier().verify(clientAuthentication, null, null);
+		createBasicVerifier().verify(clientAuthentication, null, null);
 	}
 
 
@@ -225,7 +242,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			null,
 			null);
 
-		createVerifier().verify(clientAuthentication, null, null);
+		createBasicVerifier().verify(clientAuthentication, null, null);
 	}
 
 
@@ -235,7 +252,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		ClientAuthentication clientAuthentication = new ClientSecretBasic(new ClientID("invalid-id"), VALID_CLIENT_SECRET);
 
 		try {
-			createVerifier().verify(clientAuthentication, null, null);
+			createBasicVerifier().verify(clientAuthentication, null, null);
 		} catch (InvalidClientException e) {
 			assertEquals(InvalidClientException.BAD_ID, e);
 		}
@@ -248,7 +265,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		ClientAuthentication clientAuthentication = new ClientSecretBasic(VALID_CLIENT_ID, new Secret("invalid-secret"));
 
 		try {
-			createVerifier().verify(clientAuthentication, null, null);
+			createBasicVerifier().verify(clientAuthentication, null, null);
 		} catch (InvalidClientException e) {
 			assertEquals(InvalidClientException.BAD_SECRET, e);
 		}
@@ -265,7 +282,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			new Secret());
 
 		try {
-			createVerifier().verify(clientAuthentication, null, null);
+			createBasicVerifier().verify(clientAuthentication, null, null);
 		} catch (InvalidClientException e) {
 			assertEquals(InvalidClientException.BAD_JWT_HMAC, e);
 		}
@@ -283,7 +300,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			null);
 
 		try {
-			createVerifier().verify(clientAuthentication, null, null);
+			createBasicVerifier().verify(clientAuthentication, null, null);
 		} catch (InvalidClientException e) {
 			assertEquals(InvalidClientException.BAD_JWT_SIGNATURE, e);
 		}
@@ -300,7 +317,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			new Secret());
 
 		try {
-			createVerifier().verify(clientAuthentication, null, null);
+			createBasicVerifier().verify(clientAuthentication, null, null);
 		} catch (InvalidClientException e) {
 			assertEquals("Bad / expired JWT claims: Invalid JWT audience claim, expected [https://c2id.com/token, https://c2id.com]", e.getMessage());
 		}
@@ -318,7 +335,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			null);
 
 		try {
-			createVerifier().verify(clientAuthentication, null, null);
+			createBasicVerifier().verify(clientAuthentication, null, null);
 		} catch (InvalidClientException e) {
 			assertEquals("Bad / expired JWT claims: Invalid JWT audience claim, expected [https://c2id.com/token, https://c2id.com]", e.getMessage());
 		}
@@ -345,7 +362,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		ClientAuthentication clientAuthentication = new ClientSecretJWT(jwt);
 
 		try {
-			createVerifier().verify(clientAuthentication, null, null);
+			createBasicVerifier().verify(clientAuthentication, null, null);
 		} catch (InvalidClientException e) {
 			assertEquals("Bad / expired JWT claims: Expired JWT", e.getMessage());
 		}
@@ -356,7 +373,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		throws JOSEException {
 
 		Date now = new Date();
-		Date before5min = new Date(now.getTime() - 5*60*1000l);
+		Date before5min = new Date(now.getTime() - 5*60*1000L);
 
 		JWTAuthenticationClaimsSet claimsSet = new JWTAuthenticationClaimsSet(
 			VALID_CLIENT_ID,
@@ -372,7 +389,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		ClientAuthentication clientAuthentication = new PrivateKeyJWT(jwt);
 
 		try {
-			createVerifier().verify(clientAuthentication, null, null);
+			createBasicVerifier().verify(clientAuthentication, null, null);
 		} catch (InvalidClientException e) {
 			assertEquals("Bad / expired JWT claims: Expired JWT", e.getMessage());
 		}
@@ -389,7 +406,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			null,
 			null);
 
-		createVerifier().verify(clientAuthentication, Collections.singleton(Hint.CLIENT_HAS_REMOTE_JWK_SET), null);
+		createBasicVerifier().verify(clientAuthentication, Collections.singleton(Hint.CLIENT_HAS_REMOTE_JWK_SET), null);
 	}
 
 
@@ -404,14 +421,14 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			null);
 
 		try {
-			createVerifier().verify(clientAuthentication, Collections.singleton(Hint.CLIENT_HAS_REMOTE_JWK_SET), null);
+			createBasicVerifier().verify(clientAuthentication, Collections.singleton(Hint.CLIENT_HAS_REMOTE_JWK_SET), null);
 		} catch (InvalidClientException e) {
 			assertEquals(InvalidClientException.BAD_JWT_SIGNATURE, e);
 		}
 	}
 	
 	
-	public void testTLSClientAuth_ok()
+	public void testPubKeyTLSClientAuth_ok()
 		throws Exception {
 		
 		X509Certificate clientCert = X509CertificateGenerator.generateSelfSignedCertificate(
@@ -425,11 +442,11 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			clientCert
 		);
 		
-		createVerifier().verify(clientAuthentication, null, null);
+		createBasicVerifier().verify(clientAuthentication, null, null);
 	}
 	
 	
-	public void testTLSClientAuth_okWithReload()
+	public void testPubKeyTLSClientAuth_okWithReload()
 		throws Exception {
 		
 		X509Certificate clientCert = X509CertificateGenerator.generateSelfSignedCertificate(
@@ -443,10 +460,10 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			clientCert
 		);
 		
-		createVerifier().verify(clientAuthentication, Collections.singleton(Hint.CLIENT_HAS_REMOTE_JWK_SET), null);
+		createBasicVerifier().verify(clientAuthentication, Collections.singleton(Hint.CLIENT_HAS_REMOTE_JWK_SET), null);
 	}
 	
-	public void testTLSClientAuth_badSignature()
+	public void testPubKeyTLSClientAuth_badSignature()
 		throws Exception {
 		
 		X509Certificate clientCert = X509CertificateGenerator.generateSelfSignedCertificate(
@@ -461,14 +478,14 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		);
 		
 		try {
-			createVerifier().verify(clientAuthentication, null, null);
+			createBasicVerifier().verify(clientAuthentication, null, null);
 			fail();
 		} catch (InvalidClientException e) {
 			assertEquals("Couldn't validate client X.509 certificate signature: No matching registered client JWK found", e.getMessage());
 		}
 	}
 	
-	public void testTLSClientAuth_missingCertificate()
+	public void testPubKeyTLSClientAuth_missingCertificate()
 		throws Exception {
 		
 		ClientAuthentication clientAuthentication = new PublicKeyTLSClientAuthentication(
@@ -477,7 +494,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		);
 		
 		try {
-			createVerifier().verify(clientAuthentication, null, null);
+			createBasicVerifier().verify(clientAuthentication, null, null);
 			fail();
 		} catch (InvalidClientException e) {
 			assertEquals("Missing client X.509 certificate", e.getMessage());

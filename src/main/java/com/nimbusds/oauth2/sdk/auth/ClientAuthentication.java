@@ -18,14 +18,12 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
-import java.security.cert.X509Certificate;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.oauth2.sdk.util.X509CertificateUtils;
 import org.apache.commons.lang3.StringUtils;
 
 
@@ -142,19 +140,15 @@ public abstract class ClientAuthentication {
 			return JWTAuthentication.parse(httpRequest);
 		}
 		
-		// Client TLS?
+		// Public key bound client TLS?
 		if (StringUtils.isNotBlank(params.get("client_id")) && httpRequest.getClientX509Certificate() != null) {
-			
-			X509Certificate clientCert = httpRequest.getClientX509Certificate();
-			
-			if (X509CertificateUtils.hasMatchingIssuerAndSubject(clientCert)) {
-				// Don't do expensive public key / signature check,
-				// assume self-signed certificate if issuer and subject DNs match
-				return PublicKeyTLSClientAuthentication.parse(httpRequest);
-			} else {
-				// CA-issued certificate
-				return TLSClientAuthentication.parse(httpRequest);
-			}
+			// Don't do self-signed check, too expensive in terms of CPU time
+			return PublicKeyTLSClientAuthentication.parse(httpRequest);
+		}
+		
+		// PKI bound client TLS?
+		if (StringUtils.isNotBlank(httpRequest.getClientX509CertificateSubjectDN())) {
+			return TLSClientAuthentication.parse(httpRequest);
 		}
 		
 		return null; // no auth

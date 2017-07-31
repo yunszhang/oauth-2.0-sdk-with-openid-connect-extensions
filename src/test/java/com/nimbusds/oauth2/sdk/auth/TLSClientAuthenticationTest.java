@@ -19,17 +19,12 @@ package com.nimbusds.oauth2.sdk.auth;
 
 
 import java.net.URL;
-import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLSocketFactory;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
-import com.nimbusds.oauth2.sdk.http.X509CertificateGenerator;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.oauth2.sdk.id.Issuer;
-import com.nimbusds.oauth2.sdk.id.Subject;
-import com.nimbusds.oauth2.sdk.util.X509CertificateUtilsTest;
 import junit.framework.TestCase;
 
 
@@ -41,12 +36,13 @@ public class TLSClientAuthenticationTest extends TestCase {
 		
 		TLSClientAuthentication clientAuth = new TLSClientAuthentication(
 			new ClientID("123"),
-			(SSLSocketFactory)null);
+			null);
 		
 		assertEquals(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientAuth.getMethod());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
-		assertNull(clientAuth.getClientX509Certificate());
+		assertNull(clientAuth.getClientX509CertificateSubjectDN()); // n/a
+		assertNull(clientAuth.getClientX509CertificateRootDN()); // n/a
 		
 		HTTPRequest httpRequest = new HTTPRequest(
 			HTTPRequest.Method.POST,
@@ -67,13 +63,13 @@ public class TLSClientAuthenticationTest extends TestCase {
 		
 		TLSClientAuthentication clientAuth = new TLSClientAuthentication(
 			new ClientID("123"),
-			sslSocketFactory
-		);
+			sslSocketFactory);
 		
 		assertEquals(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientAuth.getMethod());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertEquals(sslSocketFactory, clientAuth.getSSLSocketFactory());
-		assertNull(clientAuth.getClientX509Certificate());
+		assertNull(clientAuth.getClientX509CertificateSubjectDN()); // n/a
+		assertNull(clientAuth.getClientX509CertificateRootDN()); // n/a
 		
 		HTTPRequest httpRequest = new HTTPRequest(
 			HTTPRequest.Method.POST,
@@ -87,22 +83,45 @@ public class TLSClientAuthenticationTest extends TestCase {
 	}
 	
 	
-	public void testCertificateConstructor()
+	public void testValidatedCertificateConstructor()
 		throws Exception {
-		
-		X509Certificate clientCert = X509CertificateGenerator.generateCertificate(
-			new Issuer("123"),
-			new Subject("456"),
-			X509CertificateUtilsTest.PUBLIC_KEY,
-			X509CertificateUtilsTest.PRIVATE_KEY);
 		
 		TLSClientAuthentication clientAuth = new TLSClientAuthentication(
 			new ClientID("123"),
-			clientCert);
+			"cn=client-123",
+			"cn=root-CA");
 		
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
-		assertEquals(clientCert, clientAuth.getClientX509Certificate());
+		assertEquals("cn=client-123", clientAuth.getClientX509CertificateSubjectDN()); // assume validated
+		assertEquals("cn=root-CA", clientAuth.getClientX509CertificateRootDN()); // assume validated
+		
+		// This constructor is not intended to be used for setting an
+		// HTTPRequest, but still this shouldn't produce any errors
+		HTTPRequest httpRequest = new HTTPRequest(
+			HTTPRequest.Method.POST,
+			new URL("https://c2id.com/token"));
+		
+		assertNull(httpRequest.getSSLSocketFactory());
+		
+		clientAuth.applyTo(httpRequest);
+		
+		assertNull(httpRequest.getSSLSocketFactory());
+	}
+	
+	
+	public void testCertificateConstructor_certRootOmitted()
+		throws Exception {
+		
+		TLSClientAuthentication clientAuth = new TLSClientAuthentication(
+			new ClientID("123"),
+			"cn=client-123",
+			null);
+		
+		assertEquals(new ClientID("123"), clientAuth.getClientID());
+		assertNull(clientAuth.getSSLSocketFactory());
+		assertEquals("cn=client-123", clientAuth.getClientX509CertificateSubjectDN());
+		assertNull(clientAuth.getClientX509CertificateRootDN());
 		
 		// This constructor is not intended to be used for setting an
 		// HTTPRequest, but still this shouldn't produce any errors
@@ -124,7 +143,7 @@ public class TLSClientAuthenticationTest extends TestCase {
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
 		
 		try {
-			PublicKeyTLSClientAuthentication.parse(httpRequest);
+			TLSClientAuthentication.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Missing HTTP POST request entity body", e.getMessage());
@@ -140,7 +159,7 @@ public class TLSClientAuthenticationTest extends TestCase {
 		httpRequest.setQuery("a=b");
 		
 		try {
-			PublicKeyTLSClientAuthentication.parse(httpRequest);
+			TLSClientAuthentication.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Missing client_id parameter", e.getMessage());
@@ -156,7 +175,7 @@ public class TLSClientAuthenticationTest extends TestCase {
 		httpRequest.setQuery("client_id=");
 		
 		try {
-			PublicKeyTLSClientAuthentication.parse(httpRequest);
+			TLSClientAuthentication.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Missing client_id parameter", e.getMessage());
@@ -164,7 +183,7 @@ public class TLSClientAuthenticationTest extends TestCase {
 	}
 	
 	
-	public void testParse_missingClientCertificate()
+	public void testParse_missingClientCertificateSubjectDN()
 		throws Exception {
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
@@ -172,10 +191,10 @@ public class TLSClientAuthenticationTest extends TestCase {
 		httpRequest.setQuery("client_id=123");
 		
 		try {
-			PublicKeyTLSClientAuthentication.parse(httpRequest);
+			TLSClientAuthentication.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing client X.509 certificate", e.getMessage());
+			assertEquals("Missing client X.509 certificate subject DN", e.getMessage());
 		}
 	}
 	
@@ -183,20 +202,16 @@ public class TLSClientAuthenticationTest extends TestCase {
 	public void testParse_ok()
 		throws Exception {
 		
-		X509Certificate clientCert = X509CertificateGenerator.generateCertificate(
-			new Issuer("123"),
-			new Subject("456"),
-			X509CertificateUtilsTest.PUBLIC_KEY,
-			X509CertificateUtilsTest.PRIVATE_KEY);
-		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
 		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=123");
-		httpRequest.setClientX509Certificate(clientCert);
+		httpRequest.setClientX509CertificateSubjectDN("cn=client-123");
+		httpRequest.setClientX509CertificateRootDN("cn=root-CA");
 		
 		TLSClientAuthentication clientAuth = TLSClientAuthentication.parse(httpRequest);
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
-		assertEquals(clientCert, clientAuth.getClientX509Certificate());
+		assertEquals("cn=client-123", clientAuth.getClientX509CertificateSubjectDN());
+		assertEquals("cn=root-CA", clientAuth.getClientX509CertificateRootDN());
 	}
 }

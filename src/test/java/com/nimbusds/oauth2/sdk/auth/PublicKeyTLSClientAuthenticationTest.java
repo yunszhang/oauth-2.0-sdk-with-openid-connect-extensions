@@ -91,8 +91,7 @@ public class PublicKeyTLSClientAuthenticationTest extends TestCase {
 		
 		PublicKeyTLSClientAuthentication clientAuth = new PublicKeyTLSClientAuthentication(
 			new ClientID("123"),
-			clientCert
-		);
+			clientCert);
 		
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
