@@ -719,6 +719,18 @@ version 5.33 (2017-07-29)
     * Adds support for tls_client_auth_subject_dn client metadata field.
     * Adds support for tls_client_auth_root_dn client metadata field.
 
+version 5.34 (2017-07-31)
+    * Adds new ClientX509CertificateBindingVerifier interface for verifying
+      that the subject and root issuer of a client X.509 certificate submitted
+      during successful mutual TLS authentication (in tls_client_auth) match
+      the registered tls_client_auth_subject_dn and tls_client_auth_root_dn
+      values for the submitted client ID.
+    * Extends ClientAuthenticationVerifier to support PKI-bound
+      tls_client_auth.
+    * Refactors TLSClientAuthentication and PublicKeyTLSClientAuthentication
+      for draft-ietf-oauth-mtls-03.
+    * Adds X.509 client certificate subject DN and root DN getters / setters
+      to HTTPRequest.
 
 
 
