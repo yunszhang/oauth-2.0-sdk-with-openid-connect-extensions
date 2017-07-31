@@ -33,7 +33,7 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
  * verification. The select methods should typically return a single candidate,
  * but may also return multiple in case the client rotates its keys.
  *
- * <p>Implementations should be tread-safe.
+ * <p>Implementations must be tread-safe.
  *
  * <p>Selection of {@link com.nimbusds.oauth2.sdk.auth.ClientSecretBasic
  * client_secret_basic}, {@link com.nimbusds.oauth2.sdk.auth.ClientSecretPost
