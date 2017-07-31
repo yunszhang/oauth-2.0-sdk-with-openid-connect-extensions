@@ -31,7 +31,7 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
  *
  * <p>Implementations must be tread-safe.
  */
-public interface ClientX509CertificateBindingVerifier {
+public interface ClientX509CertificateBindingVerifier<T> {
 	
 	
 	/**
@@ -42,12 +42,14 @@ public interface ClientX509CertificateBindingVerifier {
 	 * @param subjectDN The X.509 certificate subject DN. Not {@code null}.
 	 * @param rootDN    The X.509 certificate root DN, {@code null} if not
 	 *                  available.
+	 * @param context   Additional context. May be {@code null}.
 	 *
 	 * @throws InvalidClientException If client ID and issuer / subject DN
 	 *                                tuple don't bind or are invalid.
 	 */
 	void verifyCertificateBinding(final ClientID clientID,
 				      final String subjectDN,
-				      final String rootDN)
+				      final String rootDN,
+				      final Context<T> context)
 		throws InvalidClientException;
 }

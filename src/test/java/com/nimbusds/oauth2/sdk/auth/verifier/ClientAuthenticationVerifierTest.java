@@ -60,12 +60,14 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 	private static final Set<Audience> EXPECTED_JWT_AUDIENCE = new LinkedHashSet<>(Arrays.asList(
 		new Audience("https://c2id.com/token"),
 		new Audience("https://c2id.com")));
-
-
-	private static final String VALID_ROOT_DN = "cn=root";
 	
-	private static final String VALID_SUBJECT_DN = "";
+	
+	private static final String VALID_SUBJECT_DN = "cn=client-123";
+	
+	
+	private static final String VALID_ROOT_DN = "cn=root-CA";
 
+	
 	private static final RSAKey VALID_RSA_KEY_PAIR_1;
 
 
@@ -156,14 +158,25 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 	};
 	
 	
-	private static final ClientX509CertificateBindingVerifier CERT_BINDING_VERIFIER = new ClientX509CertificateBindingVerifier() {
+	private static final ClientX509CertificateBindingVerifier<ClientMetadata> CERT_BINDING_VERIFIER = new ClientX509CertificateBindingVerifier<ClientMetadata>() {
 		
 		@Override
-		public void verifyCertificateBinding(ClientID clientID, String subjectDN, String rootDN)
+		public void verifyCertificateBinding(ClientID clientID,
+						     String subjectDN,
+						     String rootDN,
+						     Context<ClientMetadata> ctx)
 			throws InvalidClientException {
 			
 			if (! VALID_CLIENT_ID.equals(clientID)) {
 				throw InvalidClientException.BAD_ID;
+			}
+			
+			if (! VALID_SUBJECT_DN.equalsIgnoreCase(subjectDN)) {
+				throw new InvalidClientException("Bad subject DN");
+			}
+			
+			if (rootDN != null && ! VALID_ROOT_DN.equalsIgnoreCase(rootDN)) {
+				throw new InvalidClientException("Bad root DN");
 			}
 		}
 	};
@@ -198,6 +211,12 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 	private static ClientAuthenticationVerifier<ClientMetadata> createBasicVerifier() {
 
 		return new ClientAuthenticationVerifier<>(CLIENT_CREDENTIALS_SELECTOR, null, EXPECTED_JWT_AUDIENCE);
+	}
+	
+	
+	private static ClientAuthenticationVerifier<ClientMetadata> createVerifierWithPKIBoundCertSupport() {
+		
+		return new ClientAuthenticationVerifier<>(CLIENT_CREDENTIALS_SELECTOR, CERT_BINDING_VERIFIER, EXPECTED_JWT_AUDIENCE);
 	}
 
 
@@ -490,14 +509,75 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		
 		ClientAuthentication clientAuthentication = new PublicKeyTLSClientAuthentication(
 			VALID_CLIENT_ID,
-			(SSLSocketFactory) null
-		);
+			(SSLSocketFactory) null);
 		
 		try {
 			createBasicVerifier().verify(clientAuthentication, null, null);
 			fail();
 		} catch (InvalidClientException e) {
 			assertEquals("Missing client X.509 certificate", e.getMessage());
+		}
+	}
+	
+	
+	public void testTLSClientAuth_ok()
+		throws Exception {
+		
+		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
+			VALID_CLIENT_ID,
+			VALID_SUBJECT_DN,
+			VALID_ROOT_DN
+		);
+		
+		createVerifierWithPKIBoundCertSupport().verify(clientAuthentication, null, null);
+	}
+	
+	
+	public void testTLSClientAuth_ok_rootDNMissing()
+		throws Exception {
+		
+		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
+			VALID_CLIENT_ID,
+			VALID_SUBJECT_DN,
+			null
+		);
+		
+		createVerifierWithPKIBoundCertSupport().verify(clientAuthentication, null, null);
+	}
+	
+	
+	public void testTLSClientAuth_badSubjectDN()
+		throws Exception {
+		
+		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
+			VALID_CLIENT_ID,
+			"cn=invalid-subject",
+			VALID_ROOT_DN
+		);
+		
+		try {
+			createVerifierWithPKIBoundCertSupport().verify(clientAuthentication, null, null);
+			fail();
+		} catch (InvalidClientException e) {
+			assertEquals("Bad subject DN", e.getMessage());
+		}
+	}
+	
+	
+	public void testTLSClientAuth_badRootDN()
+		throws Exception {
+		
+		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
+			VALID_CLIENT_ID,
+			VALID_SUBJECT_DN,
+			"cn=invalid-root-ca"
+		);
+		
+		try {
+			createVerifierWithPKIBoundCertSupport().verify(clientAuthentication, null, null);
+			fail();
+		} catch (InvalidClientException e) {
+			assertEquals("Bad root DN", e.getMessage());
 		}
 	}
 }

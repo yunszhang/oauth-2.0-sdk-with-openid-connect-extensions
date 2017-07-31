@@ -65,7 +65,7 @@ public class ClientAuthenticationVerifier<T> {
 	 * Optional client X.509 certificate binding verifier for
 	 * {@code tls_client_auth}.
 	 */
-	private final ClientX509CertificateBindingVerifier certBindingVerifier;
+	private final ClientX509CertificateBindingVerifier<T> certBindingVerifier;
 
 
 	/**
@@ -98,7 +98,7 @@ public class ClientAuthenticationVerifier<T> {
 	 *                                  include the issuer URI.
 	 */
 	public ClientAuthenticationVerifier(final ClientCredentialsSelector<T> clientCredentialsSelector,
-					    final ClientX509CertificateBindingVerifier certBindingVerifier,
+					    final ClientX509CertificateBindingVerifier<T> certBindingVerifier,
 					    final Set<Audience> expectedAudience) {
 
 		claimsSetVerifier = new JWTAuthenticationClaimsSetVerifier(expectedAudience);
@@ -131,7 +131,7 @@ public class ClientAuthenticationVerifier<T> {
 	 * @return The client X.509 certificate binding verifier, {@code null}
 	 *         if not specified.
 	 */
-	public ClientX509CertificateBindingVerifier getClientX509CertificateBindingVerifier() {
+	public ClientX509CertificateBindingVerifier<T> getClientX509CertificateBindingVerifier() {
 		
 		return certBindingVerifier;
 	}
@@ -382,7 +382,8 @@ public class ClientAuthenticationVerifier<T> {
 			certBindingVerifier.verifyCertificateBinding(
 				clientAuth.getClientID(),
 				tlsClientAuth.getClientX509CertificateSubjectDN(),
-				tlsClientAuth.getClientX509CertificateRootDN());
+				tlsClientAuth.getClientX509CertificateRootDN(),
+				context);
 
 		} else {
 			throw new RuntimeException("Unexpected client authentication: " + clientAuth.getMethod());
