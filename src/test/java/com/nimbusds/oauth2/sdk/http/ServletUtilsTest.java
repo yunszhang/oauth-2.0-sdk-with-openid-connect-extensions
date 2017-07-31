@@ -23,7 +23,10 @@ import java.net.URI;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 
+import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.oauth2.sdk.util.X509CertificateUtilsTest;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
@@ -88,6 +91,43 @@ public class ServletUtilsTest extends TestCase {
 		assertEquals(cert, httpRequest.getClientX509Certificate());
 		assertEquals("CN=123", httpRequest.getClientX509CertificateSubjectDN());
 		assertEquals("CN=123", httpRequest.getClientX509CertificateRootDN());
+	}
+
+
+	public void testConstructWithClientCertificate()
+		throws Exception {
+
+		X509Certificate cert = X509CertificateGenerator.generateCertificate(
+			new Issuer("123"),
+			new Subject("456"),
+			X509CertificateUtilsTest.PUBLIC_KEY,
+			X509CertificateUtilsTest.PRIVATE_KEY
+		);
+		
+		MockServletRequest servletRequest = new MockServletRequest();
+		servletRequest.setMethod("POST");
+		servletRequest.setHeader("Content-Type", CommonContentTypes.APPLICATION_JSON.toString());
+		servletRequest.setLocalAddr("c2id.com");
+		servletRequest.setLocalPort(8080);
+		servletRequest.setRequestURI("/clients");
+		servletRequest.setQueryString(null);
+		String entityBody = "{\"grant_types\":[\"code\"]}";
+		servletRequest.setEntityBody(entityBody);
+		servletRequest.setAttribute("javax.servlet.request.X509Certificate", new X509Certificate[]{cert});
+		
+
+		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(servletRequest);
+		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
+		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpRequest.getContentType().toString());
+		assertNull(httpRequest.getAccept());
+		assertNull(httpRequest.getAuthorization());
+		assertEquals(entityBody, httpRequest.getQuery());
+		JSONObject jsonObject = httpRequest.getQueryAsJSONObject();
+		assertEquals("code", JSONObjectUtils.getStringArray(jsonObject, "grant_types")[0]);
+		assertEquals(1, jsonObject.size());
+		assertEquals(cert, httpRequest.getClientX509Certificate());
+		assertEquals("CN=456", httpRequest.getClientX509CertificateSubjectDN());
+		assertNull("Root not recorded for non-self-signed cert", httpRequest.getClientX509CertificateRootDN());
 	}
 
 
