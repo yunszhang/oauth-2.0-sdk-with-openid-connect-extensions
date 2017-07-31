@@ -19,6 +19,7 @@ package com.nimbusds.oauth2.sdk.http;
 
 
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.KeyPair;
@@ -427,4 +428,27 @@ public class HTTPRequestTest {
 		}
 	}
 	
+	
+	@Test
+	public void testGetAndSetSubjectDN()
+		throws MalformedURLException {
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
+		
+		assertNull(httpRequest.getClientX509CertificateSubjectDN());
+		httpRequest.setClientX509CertificateSubjectDN("cn=subject");
+		assertEquals("cn=subject", httpRequest.getClientX509CertificateSubjectDN());
+	}
+	
+	
+	@Test
+	public void testGetAndSetRootDN()
+		throws MalformedURLException {
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
+		
+		assertNull(httpRequest.getClientX509CertificateRootDN());
+		httpRequest.setClientX509CertificateRootDN("cn=root");
+		assertEquals("cn=root", httpRequest.getClientX509CertificateRootDN());
+	}
 }

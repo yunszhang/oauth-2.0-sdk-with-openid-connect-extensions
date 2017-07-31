@@ -153,6 +153,20 @@ public class HTTPRequest extends HTTPMessage {
 	
 	
 	/**
+	 * The subject DN of a received client X.509 certificate for a received
+	 * HTTPS request, {@code null} if not specified.
+	 */
+	private String clientX509CertificateSubjectDN = null;
+	
+	
+	/**
+	 * The root issuer DN of a received client X.509 certificate for a
+	 * received HTTPS request, {@code null} if not specified.
+	 */
+	private String clientX509CertificateRootDN = null;
+	
+	
+	/**
 	 * The hostname verifier to use for outgoing HTTPS requests,
 	 * {@code null} implies the default one.
 	 */
@@ -508,6 +522,54 @@ public class HTTPRequest extends HTTPMessage {
 	public void setClientX509Certificate(final X509Certificate clientX509Certificate) {
 		
 		this.clientX509Certificate = clientX509Certificate;
+	}
+	
+	
+	/**
+	 * Gets the subject DN of a received validated client X.509 certificate
+	 * for a received HTTPS request.
+	 *
+	 * @return The subject DN, {@code null} if not specified.
+	 */
+	public String getClientX509CertificateSubjectDN() {
+		
+		return clientX509CertificateSubjectDN;
+	}
+	
+	
+	/**
+	 * Sets the subject DN of a received validated client X.509 certificate
+	 * for a received HTTPS request.
+	 *
+	 * @param subjectDN The subject DN, {@code null} if not specified.
+	 */
+	public void setClientX509CertificateSubjectDN(final String subjectDN) {
+		
+		this.clientX509CertificateSubjectDN = subjectDN;
+	}
+	
+	
+	/**
+	 * Gets the root issuer DN of a received validated client X.509
+	 * certificate for a received HTTPS request.
+	 *
+	 * @return The root DN, {@code null} if not specified.
+	 */
+	public String getClientX509CertificateRootDN() {
+		
+		return clientX509CertificateRootDN;
+	}
+	
+	
+	/**
+	 * Sets the root issuer DN of a received validated client X.509
+	 * certificate for a received HTTPS request.
+	 *
+	 * @param rootDN The root DN, {@code null} if not specified.
+	 */
+	public void setClientX509CertificateRootDN(final String rootDN) {
+		
+		this.clientX509CertificateRootDN = rootDN;
 	}
 	
 	
