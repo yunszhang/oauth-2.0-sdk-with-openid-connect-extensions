@@ -59,7 +59,7 @@ public class ServletUtilsTest extends TestCase {
 	}
 
 
-	public void testConstructWithClientCertificate()
+	public void testConstructWithSelfSignedClientCertificate()
 		throws Exception {
 
 		X509Certificate cert = X509CertificateGenerator.generateSampleClientCertificate();
@@ -86,6 +86,8 @@ public class ServletUtilsTest extends TestCase {
 		assertEquals("code", JSONObjectUtils.getStringArray(jsonObject, "grant_types")[0]);
 		assertEquals(1, jsonObject.size());
 		assertEquals(cert, httpRequest.getClientX509Certificate());
+		assertEquals("CN=123", httpRequest.getClientX509CertificateSubjectDN());
+		assertEquals("CN=123", httpRequest.getClientX509CertificateRootDN());
 	}
 
 

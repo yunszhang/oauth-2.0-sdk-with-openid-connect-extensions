@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
+import com.nimbusds.oauth2.sdk.util.X509CertificateUtils;
 import net.jcip.annotations.ThreadSafe;
 
 
@@ -223,7 +224,17 @@ public class ServletUtils {
 		}
 		
 		// Extract validated client X.509 if we have mutual TLS
-		request.setClientX509Certificate(extractClientX509Certificate(sr));
+		X509Certificate cert = extractClientX509Certificate(sr);
+		if (cert != null) {
+			request.setClientX509Certificate(cert);
+			request.setClientX509CertificateSubjectDN(cert.getSubjectDN() != null ? cert.getSubjectDN().getName() : null);
+			
+			// The root DN cannot be reliably set for a CA-signed
+			// client cert from a servlet request, unless self-issued
+			if (X509CertificateUtils.hasMatchingIssuerAndSubject(cert)) {
+				request.setClientX509CertificateRootDN(cert.getIssuerDN() != null ? cert.getIssuerDN().getName() : null);
+			}
+		}
 
 		return request;
 	}
