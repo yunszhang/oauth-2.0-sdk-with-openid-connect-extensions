@@ -95,6 +95,7 @@ public class PublicKeyTLSClientAuthenticationTest extends TestCase {
 			new ClientID("123"),
 			clientCert);
 		
+		assertEquals(ClientAuthenticationMethod.PUB_KEY_TLS_CLIENT_AUTH, clientAuth.getMethod());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals(clientCert, clientAuth.getClientX509Certificate());

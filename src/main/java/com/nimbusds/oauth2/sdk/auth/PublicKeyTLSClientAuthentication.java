@@ -89,7 +89,7 @@ public class PublicKeyTLSClientAuthentication extends AbstractTLSClientAuthentic
 	public PublicKeyTLSClientAuthentication(final ClientID clientID,
 						final X509Certificate x509Certificate) {
 		
-		super(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientID);
+		super(ClientAuthenticationMethod.PUB_KEY_TLS_CLIENT_AUTH, clientID);
 		
 		if (x509Certificate == null) {
 			throw new IllegalArgumentException("The client X.509 certificate must not be null");

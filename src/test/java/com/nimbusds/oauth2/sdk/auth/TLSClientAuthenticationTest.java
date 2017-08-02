@@ -93,6 +93,7 @@ public class TLSClientAuthenticationTest extends TestCase {
 			"cn=client-123",
 			"cn=root-CA");
 		
+		assertEquals(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientAuth.getMethod());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals("cn=client-123", clientAuth.getClientX509CertificateSubjectDN()); // assume validated
@@ -121,6 +122,7 @@ public class TLSClientAuthenticationTest extends TestCase {
 			"cn=client-123",
 			null);
 		
+		assertEquals(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientAuth.getMethod());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals("cn=client-123", clientAuth.getClientX509CertificateSubjectDN());

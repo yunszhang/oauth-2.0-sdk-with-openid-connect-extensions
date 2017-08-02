@@ -134,7 +134,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			final Set<ClientAuthenticationMethod> permittedClientAuthMethods =
 				new HashSet<>(Arrays.asList(
 					ClientAuthenticationMethod.PRIVATE_KEY_JWT,
-					ClientAuthenticationMethod.TLS_CLIENT_AUTH));
+					ClientAuthenticationMethod.PUB_KEY_TLS_CLIENT_AUTH));
 			
 			assert permittedClientAuthMethods.contains(authMethod);
 
