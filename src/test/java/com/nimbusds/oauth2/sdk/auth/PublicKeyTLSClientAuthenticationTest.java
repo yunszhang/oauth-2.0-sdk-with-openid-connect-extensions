@@ -48,6 +48,7 @@ public class PublicKeyTLSClientAuthenticationTest extends TestCase {
 		HTTPRequest httpRequest = new HTTPRequest(
 			HTTPRequest.Method.POST,
 			new URL("https://c2id.com/token"));
+		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
 		
 		assertNull(httpRequest.getSSLSocketFactory());
 		
@@ -75,6 +76,7 @@ public class PublicKeyTLSClientAuthenticationTest extends TestCase {
 		HTTPRequest httpRequest = new HTTPRequest(
 			HTTPRequest.Method.POST,
 			new URL("https://c2id.com/token"));
+		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
 		
 		assertNull(httpRequest.getSSLSocketFactory());
 		
@@ -102,6 +104,7 @@ public class PublicKeyTLSClientAuthenticationTest extends TestCase {
 		HTTPRequest httpRequest = new HTTPRequest(
 			HTTPRequest.Method.POST,
 			new URL("https://c2id.com/token"));
+		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
 		
 		assertNull(httpRequest.getSSLSocketFactory());
 		

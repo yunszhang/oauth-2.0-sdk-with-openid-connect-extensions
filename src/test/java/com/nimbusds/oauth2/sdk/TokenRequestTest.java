@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.crypto.spec.SecretKeySpec;
+import javax.net.ssl.SSLSocketFactory;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.util.Base64;
@@ -45,7 +46,6 @@ import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import junit.framework.TestCase;
-import net.minidev.json.JSONAware;
 import org.opensaml.xml.security.credential.BasicCredential;
 import org.opensaml.xml.signature.SignatureConstants;
 
@@ -111,6 +111,58 @@ public class TokenRequestTest extends TestCase {
 		assertEquals(GrantType.AUTHORIZATION_CODE.getValue(), params.get("grant_type"));
 		assertEquals("abc", params.get("code"));
 		assertEquals(2, params.size());
+	}
+
+
+	public void testConstructorWithPubKeyTLSClientAuth()
+		throws Exception {
+
+		URI uri = new URI("https://c2id.com/token");
+		ClientAuthentication clientAuth = new PublicKeyTLSClientAuthentication(new ClientID("123"), (SSLSocketFactory)null);
+		AuthorizationCodeGrant grant = new AuthorizationCodeGrant(new AuthorizationCode("abc"), null);
+
+		TokenRequest request = new TokenRequest(uri, clientAuth, grant);
+
+		assertEquals(uri, request.getEndpointURI());
+		assertEquals(clientAuth, request.getClientAuthentication());
+		assertNull(request.getClientID());
+		assertEquals(grant, request.getAuthorizationGrant());
+		assertNull(request.getScope());
+
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		assertEquals(uri.toURL(), httpRequest.getURL());
+		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
+		Map<String,String> params = httpRequest.getQueryParameters();
+		assertEquals(GrantType.AUTHORIZATION_CODE.getValue(), params.get("grant_type"));
+		assertEquals("abc", params.get("code"));
+		assertEquals("123", params.get("client_id"));
+		assertEquals(3, params.size());
+	}
+
+
+	public void testConstructorWithTLSClientAuth()
+		throws Exception {
+
+		URI uri = new URI("https://c2id.com/token");
+		ClientAuthentication clientAuth = new TLSClientAuthentication(new ClientID("123"), null);
+		AuthorizationCodeGrant grant = new AuthorizationCodeGrant(new AuthorizationCode("abc"), null);
+
+		TokenRequest request = new TokenRequest(uri, clientAuth, grant);
+
+		assertEquals(uri, request.getEndpointURI());
+		assertEquals(clientAuth, request.getClientAuthentication());
+		assertNull(request.getClientID());
+		assertEquals(grant, request.getAuthorizationGrant());
+		assertNull(request.getScope());
+
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		assertEquals(uri.toURL(), httpRequest.getURL());
+		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
+		Map<String,String> params = httpRequest.getQueryParameters();
+		assertEquals(GrantType.AUTHORIZATION_CODE.getValue(), params.get("grant_type"));
+		assertEquals("abc", params.get("code"));
+		assertEquals("123", params.get("client_id"));
+		assertEquals(3, params.size());
 	}
 
 

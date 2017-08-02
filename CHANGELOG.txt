@@ -732,5 +732,10 @@ version 5.34 (2017-07-31)
     * Adds X.509 client certificate subject DN and root DN getters / setters
       to HTTPRequest.
 
+version 5.34.1 (2017-08-02)
+    * Fixes missing setting of the client_id parameter in the token request
+      body when PKI bound or public key bound TLS client authentication is
+      used.
+
 
 
