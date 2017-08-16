@@ -300,6 +300,22 @@ public class ClientMetadata {
 
 		return redirectURIs;
 	}
+	
+	
+	/**
+	 * Gets one of the redirection URIs for this client. Corresponds to the
+	 * {@code redirect_uris} client metadata field.
+	 *
+	 * @return The redirection URI, {@code null} if not specified.
+	 */
+	public URI getRedirectionURI() {
+		
+		if (redirectURIs != null && ! redirectURIs.isEmpty()) {
+			return redirectURIs.iterator().next();
+		} else {
+			return null;
+		}
+	}
 
 
 	/**

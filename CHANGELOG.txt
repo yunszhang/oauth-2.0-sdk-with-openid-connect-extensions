@@ -736,6 +736,12 @@ version 5.34.1 (2017-08-02)
     * Fixes missing setting of the client_id parameter in the token request
       body when PKI bound or public key bound TLS client authentication is
       used.
+
 version 5.34.2 (2017-08-02)
     * Fixes bug in PublicKeyTLSClientAuthentication(ClientID,X509Certificate)
       constructor.
+
+version 5.35 (2017-08-16)
+    * Adds shorthand ClientMetadata.getRedirectionURI method for getting a
+      single redirection URI.
+

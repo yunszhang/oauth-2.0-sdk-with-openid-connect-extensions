@@ -910,4 +910,21 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals("bob@wonderland.net", emails.get(1).getAddress());
 		assertEquals(2, emails.size());
 	}
+	
+	
+	public void testGetOneRedirectionURI() {
+		
+		ClientMetadata clientMetadata = new ClientMetadata();
+		
+		assertNull(clientMetadata.getRedirectionURI());
+		
+		URI uri1 = URI.create("https://example.com/cb-1");
+		clientMetadata.setRedirectionURI(uri1);
+		assertEquals(uri1, clientMetadata.getRedirectionURI());
+		
+		URI uri2 = URI.create("https://example.com/cb-2");
+		Set<URI> uriSet = new HashSet<>(Arrays.asList(uri1, uri2));
+		clientMetadata.setRedirectionURIs(uriSet);
+		assertTrue(uriSet.contains(clientMetadata.getRedirectionURI()));
+	}
 }
