@@ -68,9 +68,8 @@ public class ClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("software_version"));
 		assertTrue(paramNames.contains("mutual_tls_sender_constrained_access_tokens"));
 		assertTrue(paramNames.contains("tls_client_auth_subject_dn"));
-		assertTrue(paramNames.contains("tls_client_auth_root_dn"));
 
-		assertEquals(25, paramNames.size());
+		assertEquals(24, paramNames.size());
 	}
 
 
