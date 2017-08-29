@@ -748,3 +748,4 @@ version 5.35 (2017-08-16)
 version 5.36 (2017-08-29)
     * Removes tls_client_auth_root_dn OAuth 2.0 client registration parameter
       (in anticipation of raft-ietf-oauth-mtls-04).
+    * Upgrades minimal Nimbus JOSE+JWT dependency to 5.0+.

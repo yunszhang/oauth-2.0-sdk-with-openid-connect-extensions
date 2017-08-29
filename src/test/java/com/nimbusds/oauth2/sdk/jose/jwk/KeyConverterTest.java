@@ -34,13 +34,9 @@ import java.security.spec.EllipticCurve;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import javax.crypto.SecretKey;
 
-import com.nimbusds.jose.jwk.ECKey;
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.OctetSequenceKey;
-import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.*;
 import junit.framework.TestCase;
 import org.junit.Assert;
 
@@ -93,7 +89,7 @@ public class KeyConverterTest extends TestCase {
 		pairGen.initialize(EC256SPEC);
 		keyPair = pairGen.generateKeyPair();
 
-		ECKey ecJWK = new ECKey.Builder(ECKey.Curve.P_256, (ECPublicKey)keyPair.getPublic())
+		ECKey ecJWK = new ECKey.Builder(Curve.P_256, (ECPublicKey)keyPair.getPublic())
 			.privateKey((ECPrivateKey)keyPair.getPrivate())
 			.build();
 
