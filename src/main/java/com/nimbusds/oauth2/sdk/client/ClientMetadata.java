@@ -97,7 +97,6 @@ public class ClientMetadata {
 		p.add("software_version");
 		p.add("mutual_tls_sender_constrained_access_tokens");
 		p.add("tls_client_auth_subject_dn");
-		p.add("tls_client_auth_root_dn");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -216,13 +215,6 @@ public class ClientMetadata {
 	 * certificate the in mutual TLS authentication.
 	 */
 	private String tlsClientAuthSubjectDN = null;
-	
-	
-	/**
-	 * The expected distinguished name (DN) of the root issuer of the X.509
-	 * client certificate in mutual TLS authentication.
-	 */
-	private String tlsClientAuthRootDN = null;
 
 
 	/**
@@ -273,7 +265,6 @@ public class ClientMetadata {
 		softwareVersion = metadata.softwareVersion;
 		mutualTLSSenderConstrainedAccessTokens = metadata.mutualTLSSenderConstrainedAccessTokens;
 		tlsClientAuthSubjectDN = metadata.tlsClientAuthSubjectDN;
-		tlsClientAuthRootDN = metadata.tlsClientAuthRootDN;
 		customFields = metadata.customFields;
 	}
 
@@ -1094,33 +1085,6 @@ public class ClientMetadata {
 	
 	
 	/**
-	 * Gets the expected distinguished name (DN) of the root issuer of the
-	 * X.509 client certificate in mutual TLS authentication.
-	 *
-	 * @return The expected distinguished name (DN) of the root issuer of
-	 *         the X.509 client certificate, {@code null} if not specified.
-	 */
-	public String getTLSClientAuthRootDN() {
-		
-		return tlsClientAuthRootDN;
-	}
-	
-	
-	/**
-	 * Sets the expected distinguished name (DN) of the root issuer of the
-	 * X.509 client certificate in mutual TLS authentication.
-	 *
-	 * @param rootDN The expected distinguished name (DN) of the root
-	 *               issuer of the X.509 client certificate, {@code null}
-	 *               if not specified.
-	 */
-	public void setTLSClientAuthRootDN(final String rootDN) {
-		
-		this.tlsClientAuthRootDN = rootDN;
-	}
-	
-	
-	/**
 	 * Gets the specified custom metadata field.
 	 *
 	 * @param name The field name. Must not be {@code null}.
@@ -1395,13 +1359,8 @@ public class ClientMetadata {
 		
 		o.put("mutual_tls_sender_constrained_access_tokens", mutualTLSSenderConstrainedAccessTokens);
 		
-		if (tlsClientAuthSubjectDN != null) {
+		if (tlsClientAuthSubjectDN != null)
 			o.put("tls_client_auth_subject_dn", tlsClientAuthSubjectDN);
-		
-			if (tlsClientAuthRootDN != null) {
-				o.put("tls_client_auth_root_dn", tlsClientAuthRootDN);
-			}
-		}
 
 		return o;
 	}
@@ -1649,11 +1608,6 @@ public class ClientMetadata {
 			if (jsonObject.get("tls_client_auth_subject_dn") != null) {
 				metadata.setTLSClientAuthSubjectDN(JSONObjectUtils.getString(jsonObject, "tls_client_auth_subject_dn"));
 				jsonObject.remove("tls_client_auth_subject_dn");
-				
-				if (jsonObject.get("tls_client_auth_root_dn") != null) {
-					metadata.setTLSClientAuthRootDN(JSONObjectUtils.getString(jsonObject, "tls_client_auth_root_dn"));
-					jsonObject.remove("tls_client_auth_root_dn");
-				}
 			}
 
 		} catch (ParseException e) {
