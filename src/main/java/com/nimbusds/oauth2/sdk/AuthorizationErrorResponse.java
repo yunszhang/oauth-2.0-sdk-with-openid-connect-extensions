@@ -38,7 +38,17 @@ import com.nimbusds.oauth2.sdk.util.URLUtils;
 
 
 /**
- * Authorisation error response.
+ * Authorisation error response. Intended only for errors which are allowed to
+ * be communicated back to the requesting OAuth 2.0 client, such as
+ * {@code access_denied}. For a complete list see OAuth 2.0 (RFC 6749),
+ * sections 4.1.2.1 and 4.2.2.1, and OpenID Connect Core 1.0 for compliant
+ * OpenID providers.
+ *
+ * <p>If the authorisation request fails due to a missing, invalid, or
+ * mismatching {@code redirect_uri}, or if the {@code client_id} is missing or
+ * invalid, a response <strong>must not</strong> be sent back to the requesting
+ * client. Instead, the error condition should simply be displayed to the
+ * end-user (resource owner).
  *
  * <p>Standard authorisation errors:
  *
