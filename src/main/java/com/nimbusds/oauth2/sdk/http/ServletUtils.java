@@ -235,6 +235,9 @@ public class ServletUtils {
 				request.setClientX509CertificateRootDN(cert.getIssuerDN() != null ? cert.getIssuerDN().getName() : null);
 			}
 		}
+		
+		// Extract client IP address, X-Forwarded-For not checked
+		request.setClientIPAddress(sr.getRemoteAddr());
 
 		return request;
 	}

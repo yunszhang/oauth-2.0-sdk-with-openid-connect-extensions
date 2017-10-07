@@ -55,10 +55,32 @@ public class ServletUtilsTest extends TestCase {
 		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpRequest.getContentType().toString());
 		assertNull(httpRequest.getAccept());
 		assertNull(httpRequest.getAuthorization());
+		assertNull(httpRequest.getClientIPAddress());
 		assertEquals(entityBody, httpRequest.getQuery());
 		JSONObject jsonObject = httpRequest.getQueryAsJSONObject();
 		assertEquals("code", JSONObjectUtils.getStringArray(jsonObject, "grant_types")[0]);
 		assertEquals(1, jsonObject.size());
+	}
+
+	
+	public void testConstructFromServletRequestWithClientIPAddress()
+		throws Exception {
+
+		MockServletRequest servletRequest = new MockServletRequest();
+		servletRequest.setMethod("GET");
+		servletRequest.setLocalAddr("c2id.com");
+		servletRequest.setLocalPort(8080);
+		servletRequest.setRequestURI("/");
+		servletRequest.setQueryString(null);
+		servletRequest.setRemoteAddr("192.168.0.1");
+
+		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(servletRequest);
+		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
+		assertNull(httpRequest.getContentType());
+		assertNull(httpRequest.getAccept());
+		assertNull(httpRequest.getAuthorization());
+		assertNull(httpRequest.getQuery());
+		assertEquals("192.168.0.1", httpRequest.getClientIPAddress());
 	}
 
 

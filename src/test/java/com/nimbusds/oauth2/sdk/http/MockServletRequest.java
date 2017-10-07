@@ -47,6 +47,9 @@ public class MockServletRequest implements HttpServletRequest {
 
 	
 	private String addr;
+	
+	
+	private String remoteAddr;
 
 
 	private int localPort;
@@ -378,11 +381,17 @@ public class MockServletRequest implements HttpServletRequest {
 
 		return new BufferedReader(new StringReader(entityBody));
 	}
+	
+	
+	public void setRemoteAddr(final String remoteAddr) {
+		
+		this.remoteAddr = remoteAddr;
+	}
 
 
 	@Override
 	public String getRemoteAddr() {
-		return null;
+		return remoteAddr;
 	}
 
 
