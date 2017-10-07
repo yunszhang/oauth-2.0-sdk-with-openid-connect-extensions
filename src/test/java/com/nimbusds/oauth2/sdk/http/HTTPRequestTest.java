@@ -451,4 +451,18 @@ public class HTTPRequestTest {
 		httpRequest.setClientX509CertificateRootDN("cn=root");
 		assertEquals("cn=root", httpRequest.getClientX509CertificateRootDN());
 	}
+	
+	
+	@Test
+	public void testClientIP()
+		throws MalformedURLException {
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
+		
+		assertNull(httpRequest.getClientIPAddress());
+		
+		String ip = "192.168.0.1";
+		httpRequest.setClientIPAddress(ip);
+		assertEquals(ip, httpRequest.getClientIPAddress());
+	}
 }

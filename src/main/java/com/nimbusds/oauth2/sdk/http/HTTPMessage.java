@@ -36,6 +36,12 @@ abstract class HTTPMessage {
 	 * The HTTP request / response headers.
 	 */
 	private final Map<String,String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+	
+	
+	/**
+	 * The client IP address.
+	 */
+	private String clientIPAddress;
 
 
 	/**
@@ -166,5 +172,28 @@ abstract class HTTPMessage {
 	public Map<String,String> getHeaders() {
 
 		return headers;
+	}
+	
+	
+	/**
+	 * Gets the client IP address.
+	 *
+	 * @return The client IP address, {@code null} if not specified.
+	 */
+	public String getClientIPAddress() {
+		
+		return clientIPAddress;
+	}
+	
+	
+	/**
+	 * Sets the client IP address.
+	 *
+	 * @param clientIPAddress The client IP address, {@code null} if not
+	 *                        specified.
+	 */
+	public void setClientIPAddress(final String clientIPAddress) {
+		
+		this.clientIPAddress = clientIPAddress;
 	}
 }

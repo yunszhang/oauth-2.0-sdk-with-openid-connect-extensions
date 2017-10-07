@@ -756,3 +756,5 @@ version 5.36.1 (2017-10-03)
       conditions which are allowed to be relayed back to the requesting OAuth
       2.0 client / OpenID relying party (iss #222).
 
+version 5.37 (2017-10-07)
+    * Adds HTTPMessage.getClientIPAddress and setClientIPAddress methods.

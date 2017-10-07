@@ -18,18 +18,17 @@
 package com.nimbusds.oauth2.sdk.http;
 
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import junit.framework.TestCase;
-
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
+import java.net.URL;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jwt.JWT;
-
 import com.nimbusds.oauth2.sdk.ParseException;
+import junit.framework.TestCase;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -164,5 +163,18 @@ public class HTTPResponseTest extends TestCase {
 		response.setHeader("LOCATION", null);
 
 		assertNull(response.getLocation());
+	}
+	
+	
+	public void testClientIP()
+		throws MalformedURLException {
+		
+		HTTPResponse httpResponse = new HTTPResponse(200);
+		
+		assertNull(httpResponse.getClientIPAddress());
+		
+		String ip = "192.168.0.1";
+		httpResponse.setClientIPAddress(ip);
+		assertEquals(ip, httpResponse.getClientIPAddress());
 	}
 }
