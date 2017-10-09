@@ -77,19 +77,25 @@ public class ResponseTypeTest extends TestCase {
 
 	public void testCodeFlowDetection() {
 
-		ResponseType rt = new ResponseType();
-		rt.add(ResponseType.Value.CODE);
-		assertTrue(rt.impliesCodeFlow());
-		assertFalse(rt.impliesImplicitFlow());
+		assertTrue(new ResponseType("code").impliesCodeFlow());
+		assertFalse(new ResponseType("token").impliesCodeFlow());
+		assertFalse(new ResponseType("code token").impliesCodeFlow());
+		assertFalse(new ResponseType("code token id_token").impliesCodeFlow());
+		assertFalse(new ResponseType("token id_token").impliesCodeFlow());
+		assertFalse(new ResponseType("code id_token").impliesCodeFlow());
+		assertFalse(new ResponseType("id_token").impliesCodeFlow());
 	}
 
 
 	public void testImplicitFlowDetection() {
-
-		ResponseType rt = new ResponseType();
-		rt.add(ResponseType.Value.TOKEN);
-		assertTrue(rt.impliesImplicitFlow());
-		assertFalse(rt.impliesCodeFlow());
+		
+		assertFalse(new ResponseType("code").impliesImplicitFlow());
+		assertTrue(new ResponseType("token").impliesImplicitFlow());
+		assertFalse(new ResponseType("code token").impliesImplicitFlow());
+		assertFalse(new ResponseType("code token id_token").impliesImplicitFlow());
+		assertFalse(new ResponseType("token id_token").impliesImplicitFlow());
+		assertFalse(new ResponseType("code id_token").impliesImplicitFlow());
+		assertFalse(new ResponseType("id_token").impliesImplicitFlow());
 	}
 
 

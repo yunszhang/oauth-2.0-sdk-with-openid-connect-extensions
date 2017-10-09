@@ -199,7 +199,7 @@ public class ResponseType extends HashSet<ResponseType.Value> {
 	 */
 	public boolean impliesCodeFlow() {
 
-		return this.contains(Value.CODE) && this.size() == 1;
+		return this.equals(new ResponseType(Value.CODE));
 	}
 	
 	
@@ -211,7 +211,7 @@ public class ResponseType extends HashSet<ResponseType.Value> {
 	 */
 	public boolean impliesImplicitFlow() {
 	
-		return ! impliesCodeFlow();
+		return this.equals(new ResponseType(Value.TOKEN));
 	}
 
 

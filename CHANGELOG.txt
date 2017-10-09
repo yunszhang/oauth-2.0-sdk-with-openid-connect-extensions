@@ -760,3 +760,7 @@ version 5.37 (2017-10-07)
     * Adds HTTPMessage.getClientIPAddress and setClientIPAddress methods.
     * ServletUtils.createHTTPRequest extracts the client IP address from the
       ServletRequest.getRemoteAddr method.
+
+version 5.38 (2017-10-09)
+    * Fixes ResponseType.impliesImplicitFlow for OpenID Connect response types
+      (iss #220).
