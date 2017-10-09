@@ -1001,7 +1001,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		
 		
 		// Nonce required for implicit protocol flow
-		if (rt.impliesImplicitFlow() && nonce == null)
+		if (nonce == null && (rt.impliesImplicitFlow() || rt.impliesHybridFlow()))
 			throw new IllegalArgumentException("Nonce is required in implicit / hybrid protocol flow");
 		
 		this.nonce = nonce;

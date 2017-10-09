@@ -651,7 +651,7 @@ public class AuthorizationRequest extends AbstractRequest {
 
 		if (rm != null) {
 			return rm;
-		} else if (rt.impliesImplicitFlow()) {
+		} else if (rt.impliesImplicitFlow() || rt.impliesHybridFlow()) {
 			return ResponseMode.FRAGMENT;
 		} else {
 			return ResponseMode.QUERY;
