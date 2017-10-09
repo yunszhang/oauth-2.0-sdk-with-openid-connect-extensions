@@ -22,12 +22,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.StringTokenizer;
 
+import com.nimbusds.oauth2.sdk.id.Identifier;
+import com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue;
 import net.jcip.annotations.Immutable;
 import net.jcip.annotations.NotThreadSafe;
-
 import org.apache.commons.lang3.StringUtils;
-
-import com.nimbusds.oauth2.sdk.id.Identifier;
 
 
 /**
@@ -193,12 +192,15 @@ public class ResponseType extends HashSet<ResponseType.Value> {
 	
 	
 	/**
-	 * Returns {@code true} if this response type implies a code flow.
+	 * Returns {@code true} if this response type implies an authorisation
+	 * code flow.
+	 *
+	 * <p>Code flow response_type values: code
 	 *
 	 * @return {@code true} if a code flow is implied, else {@code false}.
 	 */
 	public boolean impliesCodeFlow() {
-
+		
 		return this.equals(new ResponseType(Value.CODE));
 	}
 	
@@ -206,12 +208,37 @@ public class ResponseType extends HashSet<ResponseType.Value> {
 	/**
 	 * Returns {@code true} if this response type implies an implicit flow.
 	 *
+	 * <p>Implicit flow response_type values: token, id_token token,
+	 * id_token
+	 *
 	 * @return {@code true} if an implicit flow is implied, else 
 	 *         {@code false}.
 	 */
 	public boolean impliesImplicitFlow() {
 	
-		return this.equals(new ResponseType(Value.TOKEN));
+		return
+			this.equals(new ResponseType(Value.TOKEN)) ||
+			this.equals(new ResponseType(OIDCResponseTypeValue.ID_TOKEN, Value.TOKEN)) ||
+			this.equals(new ResponseType(OIDCResponseTypeValue.ID_TOKEN));
+	}
+	
+	
+	/**
+	 * Returns {@code true} if this response type implies an OpenID Connect
+	 * hybrid flow.
+	 *
+	 * <p>Hybrid flow response_type values: code id_token, code token,
+	 * code id_token token
+	 *
+	 * @return {@code true} if a hybrid flow is implied, else
+	 *         {@code false}.
+	 */
+	public boolean impliesHybridFlow() {
+	
+		return
+			this.equals(new ResponseType(Value.CODE, OIDCResponseTypeValue.ID_TOKEN)) ||
+			this.equals(new ResponseType(Value.CODE, Value.TOKEN)) ||
+			this.equals(new ResponseType(Value.CODE, OIDCResponseTypeValue.ID_TOKEN, Value.TOKEN));
 	}
 
 

@@ -762,5 +762,7 @@ version 5.37 (2017-10-07)
       ServletRequest.getRemoteAddr method.
 
 version 5.38 (2017-10-09)
+    * Adds new ResponseType.impliesHybridFlow method to check if a given
+      response_type implies an OpenID Connect hybrid flow.
     * Fixes ResponseType.impliesImplicitFlow for OpenID Connect response types
       (iss #220).

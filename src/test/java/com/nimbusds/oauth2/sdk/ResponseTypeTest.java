@@ -79,10 +79,10 @@ public class ResponseTypeTest extends TestCase {
 
 		assertTrue(new ResponseType("code").impliesCodeFlow());
 		assertFalse(new ResponseType("token").impliesCodeFlow());
-		assertFalse(new ResponseType("code token").impliesCodeFlow());
-		assertFalse(new ResponseType("code token id_token").impliesCodeFlow());
-		assertFalse(new ResponseType("token id_token").impliesCodeFlow());
-		assertFalse(new ResponseType("code id_token").impliesCodeFlow());
+		assertFalse(new ResponseType("code", "token").impliesCodeFlow());
+		assertFalse(new ResponseType("code", "id_token", "token").impliesCodeFlow());
+		assertFalse(new ResponseType("token", "id_token").impliesCodeFlow());
+		assertFalse(new ResponseType("code", "id_token").impliesCodeFlow());
 		assertFalse(new ResponseType("id_token").impliesCodeFlow());
 	}
 
@@ -91,11 +91,23 @@ public class ResponseTypeTest extends TestCase {
 		
 		assertFalse(new ResponseType("code").impliesImplicitFlow());
 		assertTrue(new ResponseType("token").impliesImplicitFlow());
-		assertFalse(new ResponseType("code token").impliesImplicitFlow());
-		assertFalse(new ResponseType("code token id_token").impliesImplicitFlow());
-		assertFalse(new ResponseType("token id_token").impliesImplicitFlow());
-		assertFalse(new ResponseType("code id_token").impliesImplicitFlow());
-		assertFalse(new ResponseType("id_token").impliesImplicitFlow());
+		assertFalse(new ResponseType("code", "token").impliesImplicitFlow());
+		assertFalse(new ResponseType("code", "id_token", "token").impliesImplicitFlow());
+		assertTrue(new ResponseType("token", "id_token").impliesImplicitFlow());
+		assertFalse(new ResponseType("code", "id_token").impliesImplicitFlow());
+		assertTrue(new ResponseType("id_token").impliesImplicitFlow());
+	}
+
+
+	public void testHybridFlowDetection() {
+		
+		assertFalse(new ResponseType("code").impliesHybridFlow());
+		assertFalse(new ResponseType("token").impliesHybridFlow());
+		assertTrue(new ResponseType("code", "token").impliesHybridFlow());
+		assertTrue(new ResponseType("code", "id_token", "token").impliesHybridFlow());
+		assertFalse(new ResponseType("token", "id_token").impliesHybridFlow());
+		assertTrue(new ResponseType("code", "id_token").impliesHybridFlow());
+		assertFalse(new ResponseType("id_token").impliesHybridFlow());
 	}
 
 
