@@ -34,7 +34,7 @@ public class ClientAuthenticationMethodTest extends TestCase {
 		assertEquals("client_secret_jwt", ClientAuthenticationMethod.CLIENT_SECRET_JWT.getValue());
 		assertEquals("private_key_jwt", ClientAuthenticationMethod.PRIVATE_KEY_JWT.getValue());
 		assertEquals("tls_client_auth", ClientAuthenticationMethod.TLS_CLIENT_AUTH.getValue());
-		assertEquals("pub_key_tls_client_auth", ClientAuthenticationMethod.PUB_KEY_TLS_CLIENT_AUTH.getValue());
+		assertEquals("self_signed_tls_client_auth", ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH.getValue());
 		assertEquals("none", ClientAuthenticationMethod.NONE.getValue());
 	}
 
@@ -53,7 +53,7 @@ public class ClientAuthenticationMethodTest extends TestCase {
 		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_JWT, ClientAuthenticationMethod.parse("client_secret_jwt"));
 		assertEquals(ClientAuthenticationMethod.PRIVATE_KEY_JWT, ClientAuthenticationMethod.parse("private_key_jwt"));
 		assertEquals(ClientAuthenticationMethod.TLS_CLIENT_AUTH, ClientAuthenticationMethod.parse("tls_client_auth"));
-		assertEquals(ClientAuthenticationMethod.PUB_KEY_TLS_CLIENT_AUTH, ClientAuthenticationMethod.parse("pub_key_tls_client_auth"));
+		assertEquals(ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH, ClientAuthenticationMethod.parse("self_signed_tls_client_auth"));
 		assertEquals(ClientAuthenticationMethod.NONE, ClientAuthenticationMethod.parse("none"));
 	}
 

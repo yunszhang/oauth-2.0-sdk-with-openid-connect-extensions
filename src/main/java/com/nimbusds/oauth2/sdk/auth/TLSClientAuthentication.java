@@ -32,14 +32,14 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * TLS / X.509 certificate client authentication at the Token endpoint. The
  * client certificate is PKI bound, as opposed to
- * {@link PublicKeyTLSClientAuthentication pub_key_tls_client_auth} which
- * relies on direct public key binding. Implements
+ * {@link SelfSignedTLSClientAuthentication self_signed_tls_client_auth} which
+ * relies on a self-signed certificate. Implements
  * {@link ClientAuthenticationMethod#TLS_CLIENT_AUTH}.
  *
  * <p>Related specifications:
  *
  * <ul>
- *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-03), section
+ *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-04), section
  *         2.1.
  * </ul>
  */

@@ -34,8 +34,8 @@ import org.apache.commons.lang3.StringUtils;
  *
  * <ul>
  *     <li>OAuth 2.0 (RFC 6749), section 2.3.
- *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-03), section
- *         2.1.
+ *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-04), section
+ *         2.
  * </ul>
  */
 public abstract class ClientAuthentication {
@@ -140,10 +140,10 @@ public abstract class ClientAuthentication {
 			return JWTAuthentication.parse(httpRequest);
 		}
 		
-		// Public key bound client TLS?
+		// Self-signed client TLS?
 		if (StringUtils.isNotBlank(params.get("client_id")) && httpRequest.getClientX509Certificate() != null) {
 			// Don't do self-signed check, too expensive in terms of CPU time
-			return PublicKeyTLSClientAuthentication.parse(httpRequest);
+			return SelfSignedTLSClientAuthentication.parse(httpRequest);
 		}
 		
 		// PKI bound client TLS?

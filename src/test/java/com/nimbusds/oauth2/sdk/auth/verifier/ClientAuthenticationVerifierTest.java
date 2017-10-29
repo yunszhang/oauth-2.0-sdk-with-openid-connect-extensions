@@ -134,7 +134,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			final Set<ClientAuthenticationMethod> permittedClientAuthMethods =
 				new HashSet<>(Arrays.asList(
 					ClientAuthenticationMethod.PRIVATE_KEY_JWT,
-					ClientAuthenticationMethod.PUB_KEY_TLS_CLIENT_AUTH));
+					ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH));
 			
 			assert permittedClientAuthMethods.contains(authMethod);
 
@@ -456,7 +456,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			VALID_RSA_KEY_PAIR_1.toRSAPrivateKey()
 		);
 		
-		ClientAuthentication clientAuthentication = new PublicKeyTLSClientAuthentication(
+		ClientAuthentication clientAuthentication = new SelfSignedTLSClientAuthentication(
 			VALID_CLIENT_ID,
 			clientCert
 		);
@@ -474,7 +474,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			VALID_RSA_KEY_PAIR_2.toRSAPrivateKey()
 		);
 		
-		ClientAuthentication clientAuthentication = new PublicKeyTLSClientAuthentication(
+		ClientAuthentication clientAuthentication = new SelfSignedTLSClientAuthentication(
 			VALID_CLIENT_ID,
 			clientCert
 		);
@@ -491,7 +491,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			INVALID_RSA_KEY_PAIR.toRSAPrivateKey()
 		);
 		
-		ClientAuthentication clientAuthentication = new PublicKeyTLSClientAuthentication(
+		ClientAuthentication clientAuthentication = new SelfSignedTLSClientAuthentication(
 			VALID_CLIENT_ID,
 			clientCert
 		);
@@ -507,7 +507,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 	public void testPubKeyTLSClientAuth_missingCertificate()
 		throws Exception {
 		
-		ClientAuthentication clientAuthentication = new PublicKeyTLSClientAuthentication(
+		ClientAuthentication clientAuthentication = new SelfSignedTLSClientAuthentication(
 			VALID_CLIENT_ID,
 			(SSLSocketFactory) null);
 		

@@ -31,21 +31,20 @@ import org.apache.commons.lang3.StringUtils;
 
 
 /**
- * Public key TLS / X.509 certificate client authentication at the Token
- * endpoint. The client certificate is public key bound and typically
- * self-signed, as opposed to {@link TLSClientAuthentication tls_client_auth}
- * which relies on PKI binding. Implements
- * {@link ClientAuthenticationMethod#PUB_KEY_TLS_CLIENT_AUTH}.
+ * Self-signed TLS / X.509 certificate client authentication at the Token
+ * endpoint. The client certificate is self-signed, as opposed to
+ * {@link TLSClientAuthentication tls_client_auth} which relies on PKI binding.
+ * Implements {@link ClientAuthenticationMethod#SELF_SIGNED_TLS_CLIENT_AUTH}.
  *
  * <p>Related specifications:
  *
  * <ul>
- *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-03), section
- *         2.1.
+ *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-04), section
+ *         2.2.
  * </ul>
  */
 @Immutable
-public class PublicKeyTLSClientAuthentication extends AbstractTLSClientAuthentication {
+public class SelfSignedTLSClientAuthentication extends AbstractTLSClientAuthentication {
 	
 	
 	/**
@@ -56,7 +55,7 @@ public class PublicKeyTLSClientAuthentication extends AbstractTLSClientAuthentic
 	
 	
 	/**
-	 * Creates a new public key TLS / X.509 certificate client
+	 * Creates a new self-signed TLS / X.509 certificate client
 	 * authentication. This constructor is intended for an outgoing token
 	 * request.
 	 *
@@ -67,16 +66,16 @@ public class PublicKeyTLSClientAuthentication extends AbstractTLSClientAuthentic
 	 *                         client certificate(s), {@code null} to use
 	 *                         the default one.
 	 */
-	public PublicKeyTLSClientAuthentication(final ClientID clientID,
-						final SSLSocketFactory sslSocketFactory) {
+	public SelfSignedTLSClientAuthentication(final ClientID clientID,
+						 final SSLSocketFactory sslSocketFactory) {
 		
-		super(ClientAuthenticationMethod.PUB_KEY_TLS_CLIENT_AUTH, clientID, sslSocketFactory);
+		super(ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH, clientID, sslSocketFactory);
 		x509Certificate = null;
 	}
 	
 	
 	/**
-	 * Creates a new public key TLS / X.509 certificate client
+	 * Creates a new self-signed TLS / X.509 certificate client
 	 * authentication. This constructor is intended for a received token
 	 * request.
 	 *
@@ -86,10 +85,10 @@ public class PublicKeyTLSClientAuthentication extends AbstractTLSClientAuthentic
 	 *                        the received HTTPS request. Must not be
 	 *                        {@code null}.
 	 */
-	public PublicKeyTLSClientAuthentication(final ClientID clientID,
-						final X509Certificate x509Certificate) {
+	public SelfSignedTLSClientAuthentication(final ClientID clientID,
+						 final X509Certificate x509Certificate) {
 		
-		super(ClientAuthenticationMethod.PUB_KEY_TLS_CLIENT_AUTH, clientID);
+		super(ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH, clientID);
 		
 		if (x509Certificate == null) {
 			throw new IllegalArgumentException("The client X.509 certificate must not be null");
@@ -113,20 +112,20 @@ public class PublicKeyTLSClientAuthentication extends AbstractTLSClientAuthentic
 	
 	
 	/**
-	 * Parses a public key TLS / X.509 certificate client authentication
+	 * Parses a self-signed TLS / X.509 certificate client authentication
 	 * from the specified HTTP request.
 	 *
 	 * @param httpRequest The HTTP request to parse. Must not be
 	 *                    {@code null} and must include a validated client
 	 *                    X.509 certificate.
 	 *
-	 * @return The public key TLS / X.509 certificate client
+	 * @return The self-signed TLS / X.509 certificate client
 	 *         authentication.
 	 *
 	 * @throws ParseException If the {@code client_id} or client X.509
 	 *                        certificate is missing.
 	 */
-	public static PublicKeyTLSClientAuthentication parse(final HTTPRequest httpRequest)
+	public static SelfSignedTLSClientAuthentication parse(final HTTPRequest httpRequest)
 		throws ParseException {
 		
 		String query = httpRequest.getQuery();
@@ -149,6 +148,6 @@ public class PublicKeyTLSClientAuthentication extends AbstractTLSClientAuthentic
 			throw new ParseException("Missing client X.509 certificate");
 		}
 		
-		return new PublicKeyTLSClientAuthentication(new ClientID(clientIDString), cert);
+		return new SelfSignedTLSClientAuthentication(new ClientID(clientIDString), cert);
 	}
 }

@@ -30,17 +30,17 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import junit.framework.TestCase;
 
 
-public class PublicKeyTLSClientAuthenticationTest extends TestCase {
+public class SelfSignedTLSClientAuthenticationTest extends TestCase {
 	
 	
 	public void testSSLSocketFactoryConstructor_defaultSSL()
 		throws Exception {
 		
-		PublicKeyTLSClientAuthentication clientAuth = new PublicKeyTLSClientAuthentication(
+		SelfSignedTLSClientAuthentication clientAuth = new SelfSignedTLSClientAuthentication(
 			new ClientID("123"),
 			(SSLSocketFactory)null);
 		
-		assertEquals(ClientAuthenticationMethod.PUB_KEY_TLS_CLIENT_AUTH, clientAuth.getMethod());
+		assertEquals(ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH, clientAuth.getMethod());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertNull(clientAuth.getClientX509Certificate());
@@ -63,12 +63,12 @@ public class PublicKeyTLSClientAuthenticationTest extends TestCase {
 		
 		SSLSocketFactory sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 		
-		PublicKeyTLSClientAuthentication clientAuth = new PublicKeyTLSClientAuthentication(
+		SelfSignedTLSClientAuthentication clientAuth = new SelfSignedTLSClientAuthentication(
 			new ClientID("123"),
 			sslSocketFactory
 		);
 		
-		assertEquals(ClientAuthenticationMethod.PUB_KEY_TLS_CLIENT_AUTH, clientAuth.getMethod());
+		assertEquals(ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH, clientAuth.getMethod());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertEquals(sslSocketFactory, clientAuth.getSSLSocketFactory());
 		assertNull(clientAuth.getClientX509Certificate());
@@ -91,11 +91,11 @@ public class PublicKeyTLSClientAuthenticationTest extends TestCase {
 		
 		X509Certificate clientCert = X509CertificateGenerator.generateSampleClientCertificate();
 		
-		PublicKeyTLSClientAuthentication clientAuth = new PublicKeyTLSClientAuthentication(
+		SelfSignedTLSClientAuthentication clientAuth = new SelfSignedTLSClientAuthentication(
 			new ClientID("123"),
 			clientCert);
 		
-		assertEquals(ClientAuthenticationMethod.PUB_KEY_TLS_CLIENT_AUTH, clientAuth.getMethod());
+		assertEquals(ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH, clientAuth.getMethod());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals(clientCert, clientAuth.getClientX509Certificate());
@@ -121,7 +121,7 @@ public class PublicKeyTLSClientAuthenticationTest extends TestCase {
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
 		
 		try {
-			PublicKeyTLSClientAuthentication.parse(httpRequest);
+			SelfSignedTLSClientAuthentication.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Missing HTTP POST request entity body", e.getMessage());
@@ -137,7 +137,7 @@ public class PublicKeyTLSClientAuthenticationTest extends TestCase {
 		httpRequest.setQuery("a=b");
 		
 		try {
-			PublicKeyTLSClientAuthentication.parse(httpRequest);
+			SelfSignedTLSClientAuthentication.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Missing client_id parameter", e.getMessage());
@@ -153,7 +153,7 @@ public class PublicKeyTLSClientAuthenticationTest extends TestCase {
 		httpRequest.setQuery("client_id=");
 		
 		try {
-			PublicKeyTLSClientAuthentication.parse(httpRequest);
+			SelfSignedTLSClientAuthentication.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Missing client_id parameter", e.getMessage());
@@ -169,7 +169,7 @@ public class PublicKeyTLSClientAuthenticationTest extends TestCase {
 		httpRequest.setQuery("client_id=123");
 		
 		try {
-			PublicKeyTLSClientAuthentication.parse(httpRequest);
+			SelfSignedTLSClientAuthentication.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Missing client X.509 certificate", e.getMessage());
@@ -187,7 +187,7 @@ public class PublicKeyTLSClientAuthenticationTest extends TestCase {
 		httpRequest.setQuery("client_id=123");
 		httpRequest.setClientX509Certificate(clientCert);
 		
-		PublicKeyTLSClientAuthentication clientAuth = PublicKeyTLSClientAuthentication.parse(httpRequest);
+		SelfSignedTLSClientAuthentication clientAuth = SelfSignedTLSClientAuthentication.parse(httpRequest);
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals(clientCert, clientAuth.getClientX509Certificate());

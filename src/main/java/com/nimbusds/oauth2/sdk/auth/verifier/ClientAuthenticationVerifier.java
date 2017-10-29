@@ -303,9 +303,9 @@ public class ClientAuthenticationVerifier<T> {
 			
 			throw InvalidClientException.BAD_JWT_SIGNATURE;
 			
-		} else if (clientAuth instanceof PublicKeyTLSClientAuthentication) {
+		} else if (clientAuth instanceof SelfSignedTLSClientAuthentication) {
 			
-			PublicKeyTLSClientAuthentication tlsClientAuth = (PublicKeyTLSClientAuthentication) clientAuth;
+			SelfSignedTLSClientAuthentication tlsClientAuth = (SelfSignedTLSClientAuthentication) clientAuth;
 			
 			X509Certificate clientCert = tlsClientAuth.getClientX509Certificate();
 			

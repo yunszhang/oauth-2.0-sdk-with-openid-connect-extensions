@@ -23,7 +23,7 @@ import java.util.List;
 
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
-import com.nimbusds.oauth2.sdk.auth.PublicKeyTLSClientAuthentication;
+import com.nimbusds.oauth2.sdk.auth.SelfSignedTLSClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 
@@ -43,7 +43,7 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
  *
  * <p>Selection of {@link com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT
  * private_key_jwt} and
- * {@link PublicKeyTLSClientAuthentication pub_key_tls_client_auth}
+ * {@link SelfSignedTLSClientAuthentication pub_key_tls_client_auth}
  * keys is handled by the {@link #selectPublicKeys} method.
  *
  * <p>The generic {@link Context context object} may be used to return
@@ -79,7 +79,7 @@ public interface ClientCredentialsSelector<T> {
 	/**
 	 * Selects one or more public key candidates (e.g. RSA or EC) for
 	 * {@link com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT private_key_jwt}
-	 * and {@link PublicKeyTLSClientAuthentication
+	 * and {@link SelfSignedTLSClientAuthentication
 	 * pub_key_tls_client_auth} authentication.
 	 *
 	 * @param claimedClientID The client identifier (to be verified). Not
