@@ -1000,7 +1000,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			throw new IllegalArgumentException("The scope must include an \"openid\" token");
 		
 		
-		// Nonce required for implicit protocol flow
+		// Nonce required in the implicit and hybrid flows
 		if (nonce == null && (rt.impliesImplicitFlow() || rt.impliesHybridFlow()))
 			throw new IllegalArgumentException("Nonce is required in implicit / hybrid protocol flow");
 		
@@ -1410,9 +1410,9 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		// Parse the remaining OIDC parameters
 		Nonce nonce = Nonce.parse(params.get("nonce"));
 		
-		// Nonce required in implicit flow
-		if (rt.impliesImplicitFlow() && nonce == null) {
-			String msg = "Missing \"nonce\" parameter: Required in implicit flow";
+		// Nonce required in the implicit and hybrid flows
+		if (nonce == null && (rt.impliesImplicitFlow() || rt.impliesHybridFlow())) {
+			String msg = "Missing \"nonce\" parameter: Required in the implicit and hybrid flows";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 				                 clientID, redirectURI, ar.impliedResponseMode(), state);
 		}

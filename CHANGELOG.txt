@@ -766,3 +766,9 @@ version 5.38 (2017-10-09)
       response_type implies an OpenID Connect hybrid flow.
     * Fixes ResponseType.impliesImplicitFlow for OpenID Connect response types
       (iss #220).
+
+version 5.39 (2017-10-29)
+    * Fixes AuthenticationRequest.parse to throw a ParseException instead of an
+      IllegalArgument exception if the parsed hybrid request is missing the
+      required "nonce" parameter (iss #225).
+

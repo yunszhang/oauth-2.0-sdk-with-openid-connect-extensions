@@ -1245,9 +1245,9 @@ public class AuthenticationRequestTest extends TestCase {
 			AuthenticationRequest.parse(query);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing \"nonce\" parameter: Required in implicit flow", e.getMessage());
+			assertEquals("Missing \"nonce\" parameter: Required in the implicit and hybrid flows", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing \"nonce\" parameter: Required in implicit flow", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Missing \"nonce\" parameter: Required in the implicit and hybrid flows", e.getErrorObject().getDescription());
 			assertEquals(ResponseMode.FRAGMENT, e.getResponseMode());
 			assertNull(e.getErrorObject().getURI());
 		}
@@ -1404,6 +1404,10 @@ public class AuthenticationRequestTest extends TestCase {
 		throws Exception {
 
 		// See https://bitbucket.org/openid/connect/issues/972/nonce-requirement-in-hybrid-auth-request
+		
+		// Spec discussion about nonce in hybrid flow https://bitbucket.org/openid/connect/issues/972/nonce-requirement-in-hybrid-auth-request
+		
+		// Test constructor
 
 		new AuthenticationRequest.Builder(
 			ResponseType.parse("code"),
@@ -1450,6 +1454,27 @@ public class AuthenticationRequestTest extends TestCase {
 			fail();
 		} catch (IllegalStateException e) {
 			assertEquals("Nonce is required in implicit / hybrid protocol flow", e.getMessage());
+		}
+		
+		// Test static parse method
+		try {
+			AuthenticationRequest.parse(new URI(
+				"https://server.example.com" +
+				"/authorize?" +
+				"response_type=code%20id_token" +
+				"&client_id=s6BhdRkqt3" +
+				"&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb" +
+				"&scope=openid%20profile" +
+				"&state=af0ifjsldkj"));
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing \"nonce\" parameter: Required in the implicit and hybrid flows", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals("Invalid request: Missing \"nonce\" parameter: Required in the implicit and hybrid flows", e.getErrorObject().getDescription());
+			assertEquals(new ClientID("s6BhdRkqt3"), e.getClientID());
+			assertEquals(new URI("https://client.example.org/cb"), e.getRedirectionURI());
+			assertEquals(ResponseMode.FRAGMENT, e.getResponseMode());
+			assertEquals(new State("af0ifjsldkj"), e.getState());
 		}
 	}
 
