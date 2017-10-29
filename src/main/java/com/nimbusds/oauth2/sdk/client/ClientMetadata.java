@@ -63,7 +63,7 @@ import net.minidev.json.JSONObject;
  * <ul>
  *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section
  *         2.
- *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-03), section
+ *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-04), section
  *         2.3.
  * </ul>
  */
