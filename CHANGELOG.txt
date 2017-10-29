@@ -747,7 +747,7 @@ version 5.35 (2017-08-16)
 
 version 5.36 (2017-08-29)
     * Removes tls_client_auth_root_dn OAuth 2.0 client registration parameter
-      (in anticipation of raft-ietf-oauth-mtls-04).
+      (in anticipation of draft-ietf-oauth-mtls-04).
     * Upgrades minimal Nimbus JOSE+JWT dependency to 5.0+.
 
 version 5.36.1 (2017-10-03)
@@ -768,7 +768,8 @@ version 5.38 (2017-10-09)
       (iss #220).
 
 version 5.39 (2017-10-29)
+    * Updates self-signed TLS / X.509 certificate client authentication to
+      draft-ietf-oauth-mtls-04.
     * Fixes AuthenticationRequest.parse to throw a ParseException instead of an
       IllegalArgument exception if the parsed hybrid request is missing the
       required "nonce" parameter (iss #225).
-
