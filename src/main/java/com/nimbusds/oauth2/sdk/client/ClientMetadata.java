@@ -1364,8 +1364,14 @@ public class ClientMetadata {
 
 		return o;
 	}
-
-
+	
+	
+	@Override
+	public String toString() {
+		return toJSONObject().toJSONString();
+	}
+	
+	
 	/**
 	 * Parses an client metadata instance from the specified JSON object.
 	 *

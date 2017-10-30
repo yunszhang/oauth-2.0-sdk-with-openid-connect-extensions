@@ -773,3 +773,6 @@ version 5.39 (2017-10-29)
     * Fixes AuthenticationRequest.parse to throw a ParseException instead of an
       IllegalArgument exception if the parsed hybrid request is missing the
       required "nonce" parameter (iss #225).
+
+version 5.40 (2017-10-30)
+    * ClientMetadata overrides toString to return JSON object string.
