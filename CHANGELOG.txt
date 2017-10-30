@@ -775,4 +775,7 @@ version 5.39 (2017-10-29)
       required "nonce" parameter (iss #225).
 
 version 5.40 (2017-10-30)
-    * ClientMetadata overrides toString to return JSON object string.
+    * ClientMetadata overrides toString to return a JSON object string
+      representation of itself.
+    * OIDCProviderMetadata overrides toString to return a JSON object string
+      representation of itself.

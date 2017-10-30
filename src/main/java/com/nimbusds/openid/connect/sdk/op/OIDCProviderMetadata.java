@@ -2004,9 +2004,14 @@ public class OIDCProviderMetadata {
 
 		return o;
 	}
-
-
-
+	
+	
+	@Override
+	public String toString() {
+		return toJSONObject().toJSONString();
+	}
+	
+	
 	/**
 	 * Parses an OpenID Connect provider metadata from the specified JSON 
 	 * object.
