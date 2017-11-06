@@ -216,7 +216,7 @@ public class BearerAccessTokenTest extends TestCase {
 			BearerAccessToken.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing access token value", e.getMessage());
+			assertEquals("Missing access token parameter", e.getMessage());
 			assertEquals(BearerTokenError.MISSING_TOKEN.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
 			assertEquals(BearerTokenError.MISSING_TOKEN.getCode(), e.getErrorObject().getCode());
 		}

@@ -280,7 +280,7 @@ public final class BearerAccessToken extends AccessToken {
 		throws ParseException {
 		
 		if (! parameters.containsKey("access_token")) {
-			throw new ParseException("Missing access token value", BearerTokenError.MISSING_TOKEN);
+			throw new ParseException("Missing access token parameter", BearerTokenError.MISSING_TOKEN);
 		}
 		
 		String accessTokenValue = parameters.get("access_token");

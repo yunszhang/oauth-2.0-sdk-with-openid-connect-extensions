@@ -783,3 +783,5 @@ version 5.40 (2017-10-30)
 version 5.41 (2017-11-06)
     * Adds BearerAccessToken.parse(Map<String,String>) method for pasing
       bearer access tokens from query and form parameters.
+    * Improves the exception message on missing access token parameter in
+      BearerAccessToken.parse(<String,String>).
