@@ -20,16 +20,13 @@ package com.nimbusds.oauth2.sdk.token;
 
 import java.util.Map;
 
-import net.jcip.annotations.Immutable;
-
-import net.minidev.json.JSONObject;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -270,6 +267,34 @@ public final class BearerAccessToken extends AccessToken {
 	
 	
 	/**
+	 * Parses a query or form parameters map for a bearer access token.
+	 *
+	 * @param parameters The query parameters. Must not be {@code null}.
+	 *
+	 * @return The bearer access token.
+	 *
+	 * @throws ParseException If a bearer access token wasn't found in the
+	 *                        parameters.
+	 */
+	public static BearerAccessToken parse(final Map<String,String> parameters)
+		throws ParseException {
+		
+		if (! parameters.containsKey("access_token")) {
+			throw new ParseException("Missing access token value", BearerTokenError.MISSING_TOKEN);
+		}
+		
+		String accessTokenValue = parameters.get("access_token");
+		
+		if (StringUtils.isBlank(accessTokenValue)) {
+			throw new ParseException("Blank / empty access token", BearerTokenError.INVALID_REQUEST);
+		}
+		
+		return new BearerAccessToken(accessTokenValue);
+	}
+	
+	
+	
+	/**
 	 * Parses an HTTP request for a bearer access token.
 	 * 
 	 * @param request The HTTP request to parse. Must not be {@code null}.
@@ -295,12 +320,7 @@ public final class BearerAccessToken extends AccessToken {
 		// parameters are not differentiated here
 
 		Map<String,String> params = request.getQueryParameters();
-
-		String accessTokenValue = params.get("access_token");
-
-		if (StringUtils.isBlank(accessTokenValue))
-			throw new ParseException("Missing access token value", BearerTokenError.MISSING_TOKEN);
 			
-		return new BearerAccessToken(accessTokenValue);
+		return parse(params);
 	}
 }

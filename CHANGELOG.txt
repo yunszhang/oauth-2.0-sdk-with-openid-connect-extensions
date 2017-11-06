@@ -779,3 +779,7 @@ version 5.40 (2017-10-30)
       representation of itself.
     * OIDCProviderMetadata overrides toString to return a JSON object string
       representation of itself.
+
+version 5.41 (2017-11-06)
+    * Adds BearerAccessToken.parse(Map<String,String>) method for pasing
+      bearer access tokens from query and form parameters.

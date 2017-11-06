@@ -19,6 +19,8 @@ package com.nimbusds.oauth2.sdk.token;
 
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -135,7 +137,7 @@ public class BearerAccessTokenTest extends TestCase {
 	}
 	
 	
-	public void testParse()
+	public void testParseFromHeader()
 		throws Exception {
 	
 		AccessToken token = AccessToken.parse("Bearer abc");
@@ -150,7 +152,7 @@ public class BearerAccessTokenTest extends TestCase {
 	}
 
 
-	public void testParseExceptionMissingAuthorizationHeader() {
+	public void testParseFromHeader_missing() {
 
 		try {
 			AccessToken.parse((String)null);
@@ -165,7 +167,7 @@ public class BearerAccessTokenTest extends TestCase {
 	}
 	
 	
-	public void testParseExceptionMissingBearerIdentifier() {
+	public void testParseFromHeader_missingName() {
 	
 		try {
 			AccessToken.parse("abc");
@@ -180,7 +182,7 @@ public class BearerAccessTokenTest extends TestCase {
 	}
 	
 	
-	public void testParseExceptionMissingTokenValue() {
+	public void testParseFromHeader_missingValue() {
 	
 		try {
 			AccessToken.parse("Bearer ");
@@ -189,6 +191,48 @@ public class BearerAccessTokenTest extends TestCase {
 			
 		} catch (ParseException e) {
 
+			assertEquals(BearerTokenError.INVALID_REQUEST.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
+			assertEquals(BearerTokenError.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+		}
+	}
+	
+	
+	public void testParseFromQueryParameters()
+		throws Exception {
+		
+		Map<String,String> params = new HashMap<>();
+		params.put("access_token", "abc");
+		
+		assertEquals("abc", BearerAccessToken.parse(params).getValue());
+	}
+	
+	
+	public void testParseFromQueryParameters_missing() {
+		
+		Map<String,String> params = new HashMap<>();
+		params.put("some_param", "abc");
+		
+		try {
+			BearerAccessToken.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing access token value", e.getMessage());
+			assertEquals(BearerTokenError.MISSING_TOKEN.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
+			assertEquals(BearerTokenError.MISSING_TOKEN.getCode(), e.getErrorObject().getCode());
+		}
+	}
+	
+	
+	public void testParseFromQueryParameters_empty() {
+		
+		Map<String,String> params = new HashMap<>();
+		params.put("access_token", "");
+		
+		try {
+			BearerAccessToken.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Blank / empty access token", e.getMessage());
 			assertEquals(BearerTokenError.INVALID_REQUEST.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
 			assertEquals(BearerTokenError.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
 		}
@@ -207,7 +251,7 @@ public class BearerAccessTokenTest extends TestCase {
 	}
 
 
-	public void testParseFromHTTPRequestMissing()
+	public void testParseFromHTTPRequest_missing()
 		throws Exception {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, new URL("http://c2id.com/reg/123"));
@@ -224,7 +268,7 @@ public class BearerAccessTokenTest extends TestCase {
 	}
 
 
-	public void testParseFromHTTPRequestInvalid()
+	public void testParseFromHTTPRequest_invalid()
 		throws Exception {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, new URL("http://c2id.com/reg/123"));
