@@ -43,7 +43,7 @@ public abstract class AssertionGrant extends AuthorizationGrant {
 	 */
 	protected static final ParseException MISSING_GRANT_TYPE_PARAM_EXCEPTION
 		= new ParseException(MISSING_GRANT_TYPE_PARAM_MESSAGE,
-			OAuth2Error.INVALID_REQUEST.appendDescription(MISSING_GRANT_TYPE_PARAM_MESSAGE));
+			OAuth2Error.INVALID_REQUEST.appendDescription(": " + MISSING_GRANT_TYPE_PARAM_MESSAGE));
 
 
 	/**
@@ -51,7 +51,7 @@ public abstract class AssertionGrant extends AuthorizationGrant {
 	 */
 	protected static final ParseException MISSING_ASSERTION_PARAM_EXCEPTION
 		= new ParseException(MISSING_ASSERTION_PARAM_MESSAGE,
-			OAuth2Error.INVALID_REQUEST.appendDescription(MISSING_ASSERTION_PARAM_MESSAGE));
+			OAuth2Error.INVALID_REQUEST.appendDescription(": " + MISSING_ASSERTION_PARAM_MESSAGE));
 
 
 	/**

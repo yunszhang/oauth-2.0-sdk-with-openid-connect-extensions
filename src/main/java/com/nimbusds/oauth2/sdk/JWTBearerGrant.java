@@ -71,7 +71,7 @@ public class JWTBearerGrant extends AssertionGrant {
 	 */
 	private static final ParseException UNSUPPORTED_GRANT_TYPE_EXCEPTION
 		= new ParseException(UNSUPPORTED_GRANT_TYPE_MESSAGE,
-			OAuth2Error.UNSUPPORTED_GRANT_TYPE.appendDescription(UNSUPPORTED_GRANT_TYPE_MESSAGE));
+			OAuth2Error.UNSUPPORTED_GRANT_TYPE.appendDescription(": " + UNSUPPORTED_GRANT_TYPE_MESSAGE));
 
 
 	/**
@@ -79,7 +79,7 @@ public class JWTBearerGrant extends AssertionGrant {
 	 */
 	private static final ParseException PLAIN_ASSERTION_REJECTED_EXCEPTION
 		= new ParseException(PLAIN_ASSERTION_REJECTED_MESSAGE,
-			OAuth2Error.INVALID_REQUEST.appendDescription(PLAIN_ASSERTION_REJECTED_MESSAGE));
+			OAuth2Error.INVALID_REQUEST.appendDescription(": " + PLAIN_ASSERTION_REJECTED_MESSAGE));
 
 
 	/**
@@ -87,7 +87,7 @@ public class JWTBearerGrant extends AssertionGrant {
 	 */
 	private static final ParseException JWT_PARSE_EXCEPTION
 		= new ParseException(JWT_PARSE_MESSAGE,
-			OAuth2Error.INVALID_REQUEST.appendDescription(JWT_PARSE_MESSAGE));
+			OAuth2Error.INVALID_REQUEST.appendDescription(": " + JWT_PARSE_MESSAGE));
 
 	/**
 	 * The assertion - signed JWT, encrypted JWT or nested signed+encrypted

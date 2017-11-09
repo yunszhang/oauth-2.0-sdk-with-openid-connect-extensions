@@ -24,6 +24,7 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
+import org.opensaml.xml.signature.P;
 
 
 /**
@@ -56,6 +57,55 @@ public class RefreshTokenGrantTest extends TestCase {
 		RefreshTokenGrant grant = RefreshTokenGrant.parse(params);
 		assertEquals(GrantType.REFRESH_TOKEN, grant.getType());
 		assertEquals("abc123", grant.getRefreshToken().getValue());
+	}
+
+
+	public void testParse_missingGrantType()
+		throws Exception {
+
+		Map<String,String> params = new HashMap<>();
+		params.put("refresh_token", "abc123");
+
+		try {
+			RefreshTokenGrant.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals("Invalid request: Missing \"grant_type\" parameter", e.getErrorObject().getDescription());
+		}
+	}
+
+
+	public void testParse_unsupportedGrantType()
+		throws Exception {
+
+		Map<String,String> params = new HashMap<>();
+		params.put("grant_type", "unsupported");
+		params.put("refresh_token", "abc123");
+
+		try {
+			RefreshTokenGrant.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals(OAuth2Error.UNSUPPORTED_GRANT_TYPE.getCode(), e.getErrorObject().getCode());
+			assertEquals("Unsupported grant type: The \"grant_type\" must be \"refresh_token\"", e.getErrorObject().getDescription());
+		}
+	}
+
+
+	public void testParse_missingRefreshToken()
+		throws Exception {
+
+		Map<String,String> params = new HashMap<>();
+		params.put("grant_type", "refresh_token");
+
+		try {
+			RefreshTokenGrant.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals("Invalid request: Missing or empty \"refresh_token\" parameter", e.getErrorObject().getDescription());
+		}
 	}
 
 

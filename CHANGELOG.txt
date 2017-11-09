@@ -785,3 +785,6 @@ version 5.41 (2017-11-06)
       bearer access tokens from query and form parameters.
     * Improves the exception message on missing access token parameter in
       BearerAccessToken.parse(<String,String>).
+
+version 5.41.1 (2017-11-09)
+    * Adds detailed "error_description" on OAuth 2.0 grant parsing errors.

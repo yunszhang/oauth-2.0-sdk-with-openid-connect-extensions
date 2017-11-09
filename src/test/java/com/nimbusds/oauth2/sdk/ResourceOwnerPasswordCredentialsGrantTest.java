@@ -74,7 +74,8 @@ public class ResourceOwnerPasswordCredentialsGrantTest extends TestCase {
 			ResourceOwnerPasswordCredentialsGrant.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
+			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals("Invalid request: Missing \"grant_type\" parameter", e.getErrorObject().getDescription());
 		}
 	}
 
@@ -90,7 +91,8 @@ public class ResourceOwnerPasswordCredentialsGrantTest extends TestCase {
 			ResourceOwnerPasswordCredentialsGrant.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals(OAuth2Error.UNSUPPORTED_GRANT_TYPE, e.getErrorObject());
+			assertEquals(OAuth2Error.UNSUPPORTED_GRANT_TYPE.getCode(), e.getErrorObject().getCode());
+			assertEquals("Unsupported grant type: The \"grant_type\" must be password", e.getErrorObject().getDescription());
 		}
 	}
 
@@ -105,7 +107,8 @@ public class ResourceOwnerPasswordCredentialsGrantTest extends TestCase {
 			ResourceOwnerPasswordCredentialsGrant.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
+			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals("Invalid request: Missing or empty \"username\" parameter", e.getErrorObject().getDescription());
 		}
 	}
 
@@ -120,7 +123,8 @@ public class ResourceOwnerPasswordCredentialsGrantTest extends TestCase {
 			ResourceOwnerPasswordCredentialsGrant.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
+			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals("Invalid request: Missing or empty \"password\" parameter", e.getErrorObject().getDescription());
 		}
 	}
 
