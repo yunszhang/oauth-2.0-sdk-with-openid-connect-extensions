@@ -100,10 +100,18 @@ public abstract class AuthorizationGrant {
 		// Parse grant type
 		String grantTypeString = params.get("grant_type");
 
-		if (grantTypeString == null)
-			throw new ParseException("Missing \"grant_type\" parameter", OAuth2Error.INVALID_REQUEST);
+		if (grantTypeString == null) {
+			String msg = "Missing \"grant_type\" parameter";
+			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
+		}
 
-		GrantType grantType = GrantType.parse(grantTypeString);
+		GrantType grantType = null;
+		try {
+			grantType = GrantType.parse(grantTypeString);
+		} catch (ParseException e) {
+			String msg = "Invalid grant type: " + e.getMessage();
+			throw new ParseException(msg, OAuth2Error.UNSUPPORTED_GRANT_TYPE.appendDescription(": " + msg));
+		}
 
 		if (grantType.equals(GrantType.AUTHORIZATION_CODE)) {
 
