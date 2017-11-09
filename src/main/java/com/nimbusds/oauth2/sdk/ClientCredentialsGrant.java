@@ -86,11 +86,15 @@ public class ClientCredentialsGrant extends AuthorizationGrant {
 		// Parse grant type
 		String grantTypeString = params.get("grant_type");
 
-		if (grantTypeString == null)
-			throw new ParseException("Missing \"grant_type\" parameter", OAuth2Error.INVALID_REQUEST);
+		if (grantTypeString == null) {
+			String msg = "Missing \"grant_type\" parameter";
+			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
+		}
 
-		if (! GrantType.parse(grantTypeString).equals(GRANT_TYPE))
-			throw new ParseException("The \"grant_type\" must be " + GRANT_TYPE, OAuth2Error.UNSUPPORTED_GRANT_TYPE);
+		if (! GrantType.parse(grantTypeString).equals(GRANT_TYPE)) {
+		    String msg = "The \"grant_type\" must be " + GRANT_TYPE;
+            throw new ParseException(msg, OAuth2Error.UNSUPPORTED_GRANT_TYPE.appendDescription(": " + msg));
+        }
 
 		return new ClientCredentialsGrant();
 	}

@@ -131,17 +131,23 @@ public class RefreshTokenGrant extends AuthorizationGrant {
 		// Parse grant type
 		String grantTypeString = params.get("grant_type");
 
-		if (grantTypeString == null)
-			throw new ParseException("Missing \"grant_type\" parameter", OAuth2Error.INVALID_REQUEST);
+		if (grantTypeString == null) {
+			String msg = "Missing \"grant_type\" parameter";
+			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
+		}
 
-		if (! GrantType.parse(grantTypeString).equals(GRANT_TYPE))
-			throw new ParseException("The \"grant_type\" must be " + GRANT_TYPE, OAuth2Error.UNSUPPORTED_GRANT_TYPE);
+		if (! GrantType.parse(grantTypeString).equals(GRANT_TYPE)) {
+			String msg = "The \"grant_type\" must be \"" + GRANT_TYPE + "\"";
+			throw new ParseException(msg, OAuth2Error.UNSUPPORTED_GRANT_TYPE.appendDescription(": " + msg));
+		}
 
 		// Parse refresh token
 		String refreshTokenString = params.get("refresh_token");
 
-		if (refreshTokenString == null || refreshTokenString.trim().isEmpty())
-			throw new ParseException("Missing or empty \"refresh_token\" parameter", OAuth2Error.INVALID_REQUEST);
+		if (refreshTokenString == null || refreshTokenString.trim().isEmpty()) {
+			String msg = "Missing or empty \"refresh_token\" parameter";
+			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
+		}
 
 		RefreshToken refreshToken = new RefreshToken(refreshTokenString);
 

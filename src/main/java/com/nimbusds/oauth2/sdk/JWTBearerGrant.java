@@ -56,26 +56,33 @@ public class JWTBearerGrant extends AssertionGrant {
 	 */
 	public static final GrantType GRANT_TYPE = GrantType.JWT_BEARER;
 
+	private static final String UNSUPPORTED_GRANT_TYPE_MESSAGE = "The \"grant_type\" must be " + GRANT_TYPE;
+	private static final String PLAIN_ASSERTION_REJECTED_MESSAGE = "The JWT assertion must not be unsecured (plain)";
+	private static final String JWT_PARSE_MESSAGE = "The \"assertion\" is not a JWT";
+
 
 	/**
 	 * Cached {@code unsupported_grant_type} exception.
 	 */
 	private static final ParseException UNSUPPORTED_GRANT_TYPE_EXCEPTION
-		= new ParseException("The \"grant_type\" must be " + GRANT_TYPE, OAuth2Error.UNSUPPORTED_GRANT_TYPE);
+		= new ParseException(UNSUPPORTED_GRANT_TYPE_MESSAGE,
+			OAuth2Error.UNSUPPORTED_GRANT_TYPE.appendDescription(UNSUPPORTED_GRANT_TYPE_MESSAGE));
 
 
 	/**
 	 * Cached plain JOSE / JWT rejected exception.
 	 */
 	private static final ParseException PLAIN_ASSERTION_REJECTED_EXCEPTION
-		= new ParseException("The JWT assertion must not be unsecured (plain)", OAuth2Error.INVALID_REQUEST);
+		= new ParseException(PLAIN_ASSERTION_REJECTED_MESSAGE,
+			OAuth2Error.INVALID_REQUEST.appendDescription(PLAIN_ASSERTION_REJECTED_MESSAGE));
 
 
 	/**
 	 * Cached JWT assertion parse exception.
 	 */
 	private static final ParseException JWT_PARSE_EXCEPTION
-		= new ParseException("The \"assertion\" is not a JWT", OAuth2Error.INVALID_REQUEST);
+		= new ParseException(JWT_PARSE_MESSAGE,
+			OAuth2Error.INVALID_REQUEST.appendDescription(JWT_PARSE_MESSAGE));
 
 	/**
 	 * The assertion - signed JWT, encrypted JWT or nested signed+encrypted
