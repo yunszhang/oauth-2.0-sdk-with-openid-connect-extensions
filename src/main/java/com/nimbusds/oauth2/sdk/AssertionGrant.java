@@ -30,9 +30,14 @@ package com.nimbusds.oauth2.sdk;
  * </ul>
  */
 public abstract class AssertionGrant extends AuthorizationGrant {
+	
+	
 	private static final String MISSING_GRANT_TYPE_PARAM_MESSAGE = "Missing \"grant_type\" parameter";
+	
+	
 	private static final String MISSING_ASSERTION_PARAM_MESSAGE = "Missing or empty \"assertion\" parameter";
 
+	
 	/**
 	 * Cached missing {@code grant_type} parameter exception.
 	 */

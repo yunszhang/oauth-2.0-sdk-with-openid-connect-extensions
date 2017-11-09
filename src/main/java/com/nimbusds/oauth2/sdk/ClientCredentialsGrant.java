@@ -92,9 +92,9 @@ public class ClientCredentialsGrant extends AuthorizationGrant {
 		}
 
 		if (! GrantType.parse(grantTypeString).equals(GRANT_TYPE)) {
-		    String msg = "The \"grant_type\" must be " + GRANT_TYPE;
-            throw new ParseException(msg, OAuth2Error.UNSUPPORTED_GRANT_TYPE.appendDescription(": " + msg));
-        }
+		    	String msg = "The \"grant_type\" must be " + GRANT_TYPE;
+			throw new ParseException(msg, OAuth2Error.UNSUPPORTED_GRANT_TYPE.appendDescription(": " + msg));
+        	}
 
 		return new ClientCredentialsGrant();
 	}

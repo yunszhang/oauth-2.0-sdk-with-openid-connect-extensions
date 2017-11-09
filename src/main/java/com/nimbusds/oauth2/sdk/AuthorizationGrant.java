@@ -105,7 +105,7 @@ public abstract class AuthorizationGrant {
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 		}
 
-		GrantType grantType = null;
+		GrantType grantType;
 		try {
 			grantType = GrantType.parse(grantTypeString);
 		} catch (ParseException e) {
