@@ -218,8 +218,7 @@ public class ACRRequestTest extends TestCase {
 	}
 	
 	
-	public void testApplyDefaultACR_nothingToApply()
-		throws Exception {
+	public void testApplyDefaultACR_nothingToApply() {
 		
 		ACRRequest acrRequest = new ACRRequest(null, null);
 		
@@ -235,8 +234,7 @@ public class ACRRequestTest extends TestCase {
 	}
 	
 	
-	public void testApplyDefaultACR_explicitACRs_essential()
-		throws Exception {
+	public void testApplyDefaultACR_explicitACRs_essential() {
 		
 		ACRRequest acrRequest = new ACRRequest(Collections.singletonList(new ACR("1")), null);
 		
@@ -257,8 +255,7 @@ public class ACRRequestTest extends TestCase {
 	}
 	
 	
-	public void testApplyDefaultACR_explicitACRs_voluntary()
-		throws Exception {
+	public void testApplyDefaultACR_explicitACRs_voluntary() {
 		
 		ACRRequest acrRequest = new ACRRequest(null, Collections.singletonList(new ACR("1")));
 		
@@ -279,8 +276,7 @@ public class ACRRequestTest extends TestCase {
 	}
 	
 	
-	public void testApplyDefaultACR_applyRegisteredACRValue()
-		throws Exception {
+	public void testApplyDefaultACR_applyRegisteredACRValue() {
 		
 		ACRRequest acrRequest = new ACRRequest(null, null);
 		
@@ -302,8 +298,7 @@ public class ACRRequestTest extends TestCase {
 	}
 	
 	
-	public void testApplyDefaultACR_applyRegisteredACRValuesMultiple()
-		throws Exception {
+	public void testApplyDefaultACR_applyRegisteredACRValuesMultiple() {
 		
 		ACRRequest acrRequest = new ACRRequest(null, null);
 		
@@ -348,8 +343,7 @@ public class ACRRequestTest extends TestCase {
 	}
 	
 	
-	public void testEnsureACRSupport_noEssenialACRsSupported()
-		throws GeneralException {
+	public void testEnsureACRSupport_noEssenialACRsSupported() {
 		
 		ClaimsRequest claimsRequest = new ClaimsRequest();
 		claimsRequest.addIDTokenClaim("acr", ClaimRequirement.ESSENTIAL, null, "1");
@@ -380,8 +374,7 @@ public class ACRRequestTest extends TestCase {
 	}
 	
 	
-	public void testEnsureACRSupport_essenialACRsSupported()
-		throws GeneralException {
+	public void testEnsureACRSupport_essenialACRsSupported() {
 		
 		ClaimsRequest claimsRequest = new ClaimsRequest();
 		claimsRequest.addIDTokenClaim("acr", ClaimRequirement.ESSENTIAL, null, "1");

@@ -788,3 +788,8 @@ version 5.41 (2017-11-06)
 
 version 5.41.1 (2017-11-09)
     * Adds detailed "error_description" on OAuth 2.0 grant parsing errors.
+
+version 5.42 (2017-12-18)
+    * Adds ACRRequest.ensureACRSupport(AuthenticationRequest, List<ACR>),
+      deprecates ACRRequest.ensureACRSupport(AuthenticationRequest,
+      OIDCProviderMetadata).

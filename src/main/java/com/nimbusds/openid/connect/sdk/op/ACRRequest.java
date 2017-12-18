@@ -24,13 +24,12 @@ import java.util.List;
 
 import com.nimbusds.oauth2.sdk.GeneralException;
 import com.nimbusds.oauth2.sdk.OAuth2Error;
-import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
-import net.jcip.annotations.Immutable;
-
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
+import net.jcip.annotations.Immutable;
 
 
 /**
@@ -131,18 +130,18 @@ public final class ACRRequest {
 	
 	
 	/**
-	 * Ensures all requested essential ACR values are supported by the
-	 * OpenID provider.
+	 * Ensures all requested essential ACR values are supported by those
+	 * supported by the OpenID provider.
 	 *
-	 * @param authRequest The OpenID authentication request. Must not be
-	 *                    {@code null}.
-	 * @param opMetadata  The OpenID provider metadata. Must not be
-	 *                    {@code null}.
+	 * @param authRequest   The OpenID authentication request. Must not be
+	 *                      {@code null}.
+	 * @param supportedACRs The ACR values supported by the OpenID
+	 *                      provider, {@code null} if not specified.
 	 *
 	 * @throws GeneralException If a requested essential ACR value is not
 	 *                          supported by the OpenID provider.
 	 */
-	public void ensureACRSupport(final AuthenticationRequest authRequest, final OIDCProviderMetadata opMetadata)
+	public void ensureACRSupport(final AuthenticationRequest authRequest, final List<ACR> supportedACRs)
 		throws GeneralException {
 		
 		// Ensure any requested essential ACR is supported
@@ -152,7 +151,7 @@ public final class ACRRequest {
 			
 			for (ACR acr: getEssentialACRs()) {
 				
-				if (opMetadata.getACRs() != null && opMetadata.getACRs().contains(acr)) {
+				if (supportedACRs != null && supportedACRs.contains(acr)) {
 					foundSupportedEssentialACR = true;
 					break;
 				}
@@ -168,6 +167,26 @@ public final class ACRRequest {
 					authRequest.getState());
 			}
 		}
+	}
+	
+	
+	/**
+	 * Ensures all requested essential ACR values are supported by the
+	 * OpenID provider.
+	 *
+	 * @param authRequest The OpenID authentication request. Must not be
+	 *                    {@code null}.
+	 * @param opMetadata  The OpenID provider metadata. Must not be
+	 *                    {@code null}.
+	 *
+	 * @throws GeneralException If a requested essential ACR value is not
+	 *                          supported by the OpenID provider.
+	 */
+	@Deprecated
+	public void ensureACRSupport(final AuthenticationRequest authRequest, final OIDCProviderMetadata opMetadata)
+		throws GeneralException {
+		
+		ensureACRSupport(authRequest, opMetadata.getACRs());
 	}
 	
 	
