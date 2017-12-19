@@ -89,12 +89,6 @@ public class JWTAssertionDetailsVerifier extends DefaultJWTClaimsVerifier {
 
 
 	/**
-	 * Cached unexpected JWT audience claim exception.
-	 */
-	private final BadJWTException unexpectedAudClaimException;
-
-
-	/**
 	 * Creates a new JWT bearer assertion details (claims set) verifier.
 	 *
 	 * @param expectedAudience The expected audience (aud) claim values.
@@ -110,8 +104,6 @@ public class JWTAssertionDetailsVerifier extends DefaultJWTClaimsVerifier {
 		}
 
 		this.expectedAudience = expectedAudience;
-
-		unexpectedAudClaimException = new BadJWTException("Invalid JWT audience claim, expected " + expectedAudience);
 	}
 
 
@@ -154,7 +146,7 @@ public class JWTAssertionDetailsVerifier extends DefaultJWTClaimsVerifier {
 		}
 
 		if (! audMatch) {
-			throw unexpectedAudClaimException;
+			throw new BadJWTException("Invalid JWT audience claim, expected " + expectedAudience);
 		}
 
 		if (claimsSet.getIssuer() == null) {
