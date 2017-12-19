@@ -20,6 +20,7 @@ package com.nimbusds.oauth2.sdk.assertions.jwt;
 
 import java.util.Set;
 
+import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
@@ -116,13 +117,13 @@ public class JWTAssertionDetailsVerifier extends DefaultJWTClaimsVerifier {
 
 		return expectedAudience;
 	}
-
-
+	
+	
 	@Override
-	public void verify(final JWTClaimsSet claimsSet)
+	public void verify(final JWTClaimsSet claimsSet, final SecurityContext securityContext)
 		throws BadJWTException {
 
-		super.verify(claimsSet);
+		super.verify(claimsSet, null);
 
 		if (claimsSet.getExpirationTime() == null) {
 			throw MISSING_EXP_CLAIM_EXCEPTION;

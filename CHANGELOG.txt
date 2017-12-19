@@ -793,3 +793,8 @@ version 5.42 (2017-12-18)
     * Adds ACRRequest.ensureACRSupport(AuthenticationRequest, List<ACR>),
       deprecates ACRRequest.ensureACRSupport(AuthenticationRequest,
       OIDCProviderMetadata).
+
+version 5.43 (2017-12-19)
+    * JWTAssertionDetailsVerifier overrides verify(JWTClaimsSet,
+      SecurityContext) instead of verify(JWTClaimsSet) which may cause claims
+      verification to be missed by the DefaultJWTProcessor.
