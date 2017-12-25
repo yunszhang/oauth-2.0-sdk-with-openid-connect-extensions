@@ -34,6 +34,28 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
  * </ul>
  */
 public abstract class ClientRegistrationResponse implements Response {
+	
+	
+	/**
+	 * Casts this response to a client information response.
+	 *
+	 * @return The client information response.
+	 */
+	public ClientInformationResponse toSuccessResponse() {
+		
+		return (ClientInformationResponse) this;
+	}
+	
+	
+	/**
+	 * Casts this response to a client registration error response.
+	 *
+	 * @return The client registration error response.
+	 */
+	public ClientRegistrationErrorResponse toErrorResponse() {
+		
+		return (ClientRegistrationErrorResponse) this;
+	}
 
 
 	/**
