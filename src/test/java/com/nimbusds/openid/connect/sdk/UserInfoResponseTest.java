@@ -43,7 +43,7 @@ public class UserInfoResponseTest extends TestCase {
 
 		assertTrue(userInfoResponse.indicatesSuccess());
 
-		successResponse = (UserInfoSuccessResponse)userInfoResponse;
+		successResponse = userInfoResponse.toSuccessResponse();
 
 		assertEquals(new Subject("alice"), successResponse.getUserInfo().getSubject());
 	}
@@ -60,7 +60,7 @@ public class UserInfoResponseTest extends TestCase {
 
 		assertFalse(userInfoResponse.indicatesSuccess());
 
-		errorResponse = (UserInfoErrorResponse)userInfoResponse;
+		errorResponse = userInfoResponse.toErrorResponse();
 
 		assertEquals(BearerTokenError.INVALID_TOKEN, errorResponse.getErrorObject());
 	}

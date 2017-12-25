@@ -798,3 +798,6 @@ version 5.43 (2017-12-19)
     * JWTAssertionDetailsVerifier overrides verify(JWTClaimsSet,
       SecurityContext) instead of verify(JWTClaimsSet) which may cause claims
       verification to be missed by the DefaultJWTProcessor.
+
+version 5.44 (2017-12-25)
+    * Adds UserInfoResponse.toSuccessResponse() and toErrorResponse() methods.

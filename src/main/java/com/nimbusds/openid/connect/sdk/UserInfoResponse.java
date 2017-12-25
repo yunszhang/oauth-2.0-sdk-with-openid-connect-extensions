@@ -34,6 +34,26 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
  * </ul>
  */
 public abstract class UserInfoResponse implements Response {
+	
+	
+	/**
+	 * Casts this response to a UserInfo success response.
+	 *
+	 * @return The UserInfo success response.
+	 */
+	public UserInfoSuccessResponse toSuccessResponse() {
+		return (UserInfoSuccessResponse) this;
+	}
+	
+	
+	/**
+	 * Casts this response to a UserInfo error response.
+	 *
+	 * @return The UserInfo error response.
+	 */
+	public UserInfoErrorResponse toErrorResponse() {
+		return (UserInfoErrorResponse) this;
+	}
 
 
 	/**
