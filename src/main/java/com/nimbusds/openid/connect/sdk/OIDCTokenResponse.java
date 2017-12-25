@@ -21,14 +21,12 @@ package com.nimbusds.openid.connect.sdk;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.jcip.annotations.Immutable;
-
-import net.minidev.json.JSONObject;
-
 import com.nimbusds.oauth2.sdk.AccessTokenResponse;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -139,6 +137,12 @@ public class OIDCTokenResponse extends AccessTokenResponse {
 		JSONObject o = super.toJSONObject();
 		o.put("id_token", getOIDCTokens().getIDTokenString());
 		return o;
+	}
+	
+	
+	@Override
+	public OIDCTokenResponse toSuccessResponse() {
+		return this;
 	}
 	
 	

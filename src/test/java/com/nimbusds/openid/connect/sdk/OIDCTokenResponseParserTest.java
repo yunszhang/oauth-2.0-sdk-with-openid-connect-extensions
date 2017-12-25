@@ -18,11 +18,8 @@
 package com.nimbusds.openid.connect.sdk;
 
 
-import junit.framework.TestCase;
-
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
-
 import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 import com.nimbusds.oauth2.sdk.TokenResponse;
@@ -30,6 +27,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
+import junit.framework.TestCase;
 
 
 /**
@@ -83,9 +81,7 @@ public class OIDCTokenResponseParserTest extends TestCase {
 
 		assertTrue(tokenResponse.indicatesSuccess());
 
-		assertTrue(tokenResponse instanceof OIDCTokenResponse);
-
-		response = (OIDCTokenResponse)tokenResponse;
+		response = (OIDCTokenResponse)tokenResponse.toSuccessResponse();
 
 		assertEquals("abc123", response.getTokens().getAccessToken().getValue());
 		assertEquals("def456", response.getTokens().getRefreshToken().getValue());
@@ -104,8 +100,7 @@ public class OIDCTokenResponseParserTest extends TestCase {
 		TokenResponse tokenResponse = OIDCTokenResponseParser.parse(httpResponse);
 
 		assertFalse(tokenResponse.indicatesSuccess());
-		assertTrue(tokenResponse instanceof TokenErrorResponse);
-		response = (TokenErrorResponse)tokenResponse;
+		response = tokenResponse.toErrorResponse();
 		assertEquals(OAuth2Error.INVALID_GRANT, response.getErrorObject());
 	}
 }

@@ -804,6 +804,7 @@ version 5.44 (2017-12-25)
     * Adds AuthenticationResponse.toSuccessResponse() and toErrorResponse()
       methods.
     * Adds TokenResponse.toSuccessResponse() and toErrorResponse() methods.
+    * Adds OIDCTokenResponse.toSuccessResponse() method.
     * Adds UserInfoResponse.toSuccessResponse() and toErrorResponse() methods.
     * Adds ClientRegistrationResponse.toSuccessResponse() and toErrorResponse()
       methods.
