@@ -800,7 +800,9 @@ version 5.43 (2017-12-19)
       verification to be missed by the DefaultJWTProcessor.
 
 version 5.44 (2017-12-25)
-    * Adds UserInfoResponse.toSuccessResponse() and toErrorResponse() methods.
+    * Adds AuthorizationResponse.toSuccessResponse() and toErrorResponse()
+      methods.
     * Adds TokenResponse.toSuccessResponse() and toErrorResponse() methods.
+    * Adds UserInfoResponse.toSuccessResponse() and toErrorResponse() methods.
     * Adds ClientRegistrationResponse.toSuccessResponse() and toErrorResponse()
       methods.

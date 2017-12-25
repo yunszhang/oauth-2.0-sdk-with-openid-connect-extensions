@@ -20,9 +20,8 @@ package com.nimbusds.oauth2.sdk;
 
 import java.net.URI;
 
-import junit.framework.TestCase;
-
 import com.nimbusds.oauth2.sdk.id.State;
+import junit.framework.TestCase;
 
 
 /**
@@ -52,5 +51,37 @@ public class AuthorizationResponseTest extends TestCase {
 
 		assertEquals(code, successResponse.getAuthorizationCode());
 		assertNull(successResponse.getAccessToken());
+	}
+	
+	
+	public void testToSuccessResponse()
+		throws Exception {
+		
+		AuthorizationCode code = new AuthorizationCode();
+		State state = new State();
+		AuthorizationSuccessResponse successResponse = new AuthorizationSuccessResponse(URI.create("https://example.com/in"), code, null, state, ResponseMode.QUERY);
+		
+		URI uri = successResponse.toURI();
+		
+		successResponse = AuthorizationResponse.parse(uri).toSuccessResponse();
+		
+		assertEquals(code, successResponse.getAuthorizationCode());
+		assertEquals(state, successResponse.getState());
+	}
+	
+	
+	public void testToErrorResponse()
+		throws Exception {
+		
+		State state = new State();
+		
+		AuthorizationErrorResponse errorResponse = new AuthorizationErrorResponse(URI.create("https://example.com/in"), OAuth2Error.ACCESS_DENIED, state, ResponseMode.QUERY);
+		
+		URI uri = errorResponse.toURI();
+		
+		errorResponse = AuthorizationResponse.parse(uri).toErrorResponse();
+		
+		assertEquals(OAuth2Error.ACCESS_DENIED, errorResponse.getErrorObject());
+		assertEquals(state, errorResponse.getState());
 	}
 }

@@ -260,6 +260,28 @@ public abstract class AuthorizationResponse implements Response {
 		request.setQuery(URLUtils.serializeParameters(toParameters()));
 		return request;
 	}
+	
+	
+	/**
+	 * Casts this response to an authorisation success response.
+	 *
+	 * @return The authorisation success response.
+	 */
+	public AuthorizationSuccessResponse toSuccessResponse() {
+		
+		return (AuthorizationSuccessResponse) this;
+	}
+	
+	
+	/**
+	 * Casts this response to an authorisation error response.
+	 *
+	 * @return The authorisation error response.
+	 */
+	public AuthorizationErrorResponse toErrorResponse() {
+		
+		return (AuthorizationErrorResponse) this;
+	}
 
 
 	/**
