@@ -19,7 +19,6 @@ package com.nimbusds.oauth2.sdk;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Set;
 
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
@@ -38,8 +37,11 @@ public class TokenErrorResponseTest extends TestCase {
 	private static URI ERROR_PAGE_URI = null;
 	
 	
+	@Override
 	public void setUp()
-		throws URISyntaxException {
+		throws Exception {
+		
+		super.setUp();
 		
 		ERROR_PAGE_URI = new URI("http://server.example.com/error/123");
 	}

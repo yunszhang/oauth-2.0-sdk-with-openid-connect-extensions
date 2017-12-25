@@ -18,9 +18,8 @@
 package com.nimbusds.oauth2.sdk;
 
 
-import net.minidev.json.JSONObject;
-
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -34,6 +33,28 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
  * </ul>
  */
 public abstract class TokenResponse implements Response {
+	
+	
+	/**
+	 * Casts this response to an access token response.
+	 *
+	 * @return The access token response.
+	 */
+	public AccessTokenResponse toSuccessResponse() {
+		
+		return (AccessTokenResponse) this;
+	}
+	
+	
+	/**
+	 * Casts this response to a token error response.
+	 *
+	 * @return The token error response.
+	 */
+	public TokenErrorResponse toErrorResponse() {
+		
+		return (TokenErrorResponse) this;
+	}
 
 
 	/**
