@@ -25,14 +25,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import net.jcip.annotations.Immutable;
-
-import com.nimbusds.oauth2.sdk.*;
-
-import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.AuthorizationErrorResponse;
+import com.nimbusds.oauth2.sdk.ErrorObject;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.ResponseMode;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
+import net.jcip.annotations.Immutable;
 
 
 /**
@@ -154,8 +155,20 @@ public class AuthenticationErrorResponse
 					  
 		super(redirectURI, error, state, rm);
 	}
-
-
+	
+	
+	@Override
+	public AuthenticationSuccessResponse toSuccessResponse() {
+		throw new ClassCastException("Cannot cast to AuthenticationSuccessResponse");
+	}
+	
+	
+	@Override
+	public AuthenticationErrorResponse toErrorResponse() {
+		return this;
+	}
+	
+	
 	/**
 	 * Parses an OpenID Connect authentication error response.
 	 *

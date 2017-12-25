@@ -51,4 +51,20 @@ public interface AuthenticationResponse extends Response {
 	 * @return The state, {@code null} if not requested.
 	 */
 	State getState();
+	
+	
+	/**
+	 * Casts this response to an authentication success response.
+	 *
+	 * @return The authentication success response.
+	 */
+	AuthenticationSuccessResponse toSuccessResponse();
+	
+	
+	/**
+	 * Casts this response to an authentication error response.
+	 *
+	 * @return The authentication error response.
+	 */
+	AuthenticationErrorResponse toErrorResponse();
 }

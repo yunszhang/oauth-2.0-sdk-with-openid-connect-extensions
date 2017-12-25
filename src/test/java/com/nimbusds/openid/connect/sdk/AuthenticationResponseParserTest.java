@@ -59,8 +59,9 @@ public class AuthenticationResponseParserTest extends TestCase {
 		assertEquals(redirectURI, response.getRedirectionURI());
 		assertEquals(state, response.getState());
 
-		successResponse = (AuthenticationSuccessResponse)response;
+		successResponse = response.toSuccessResponse();
 		assertEquals(code, successResponse.getAuthorizationCode());
+		assertEquals(state, successResponse.getState());
 	}
 
 
@@ -86,8 +87,9 @@ public class AuthenticationResponseParserTest extends TestCase {
 		assertEquals(redirectURI, response.getRedirectionURI());
 		assertEquals(state, response.getState());
 
-		errorResponse = (AuthenticationErrorResponse)response;
+		errorResponse = response.toErrorResponse();
 		assertEquals(OAuth2Error.ACCESS_DENIED, errorResponse.getErrorObject());
+		assertEquals(state, errorResponse.getState());
 	}
 
 

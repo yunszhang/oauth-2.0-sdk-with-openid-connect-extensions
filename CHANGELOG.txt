@@ -801,6 +801,7 @@ version 5.43 (2017-12-19)
 
 version 5.44 (2017-12-25)
     * Adds AuthorizationResponse.toSuccessResponse() and toErrorResponse()
+    * Adds AuthenticationResponse.toSuccessResponse() and toErrorResponse()
       methods.
     * Adds TokenResponse.toSuccessResponse() and toErrorResponse() methods.
     * Adds UserInfoResponse.toSuccessResponse() and toErrorResponse() methods.

@@ -22,20 +22,17 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-import net.jcip.annotations.Immutable;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
-
 import com.nimbusds.oauth2.sdk.*;
-import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
+import net.jcip.annotations.Immutable;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -208,8 +205,20 @@ public class AuthenticationSuccessResponse
 
 		return params;
 	}
-
-
+	
+	
+	@Override
+	public AuthenticationSuccessResponse toSuccessResponse() {
+		return this;
+	}
+	
+	
+	@Override
+	public AuthenticationErrorResponse toErrorResponse() {
+		throw new ClassCastException("Cannot cast to AuthenticationErrorResponse");
+	}
+	
+	
 	/**
 	 * Parses an OpenID Connect authentication success response.
 	 *
