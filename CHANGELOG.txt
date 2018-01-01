@@ -810,5 +810,7 @@ version 5.44 (2017-12-25)
       methods.
 
 version 5.45 (2018-01-01)
+    * Adds new OIDCProviderConfigurationRequest class for representing OpenID
+      OpenID provider configuration requests.
     * Adds URIUtils.removeTrailingSlash(URI) method.
     * Upgrades to org.apache.commons:commons-lang3:3.7.
