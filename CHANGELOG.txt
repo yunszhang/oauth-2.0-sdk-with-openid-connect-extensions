@@ -808,3 +808,6 @@ version 5.44 (2017-12-25)
     * Adds UserInfoResponse.toSuccessResponse() and toErrorResponse() methods.
     * Adds ClientRegistrationResponse.toSuccessResponse() and toErrorResponse()
       methods.
+
+version 5.45 (2018-01-01)
+    * Upgrades to org.apache.commons:commons-lang3:3.7
