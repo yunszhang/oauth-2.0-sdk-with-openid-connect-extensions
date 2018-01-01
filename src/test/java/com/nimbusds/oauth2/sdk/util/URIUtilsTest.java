@@ -50,4 +50,20 @@ public class URIUtilsTest extends TestCase {
 
 		assertEquals("http://client.example.com:8080/endpoints/openid/connect/cb", baseURI.toString());
 	}
+	
+	
+	public void testRemoveTrailingSlash() {
+		
+		URI uri = URI.create("https://example.com/");
+		
+		assertEquals("https://example.com", URIUtils.removeTrailingSlash(uri).toString());
+	}
+	
+	
+	public void testRemoveTrailingSlash_notFound() {
+		
+		URI uri = URI.create("https://example.com");
+		
+		assertEquals("https://example.com", URIUtils.removeTrailingSlash(uri).toString());
+	}
 }

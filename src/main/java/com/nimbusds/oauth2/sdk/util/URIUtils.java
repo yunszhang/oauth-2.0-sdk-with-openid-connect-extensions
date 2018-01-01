@@ -50,6 +50,29 @@ public class URIUtils {
 			return null;
 		}
 	}
+	
+	
+	/**
+	 * Removes the trailing slash ("/") from the specified URI, if present.
+	 *
+	 * @param uri The URI. May be {@code null}.
+	 *
+	 * @return The URI with no trailing slash, {@code null} if the original
+	 *         URI is {@code null}.
+	 */
+	public static URI removeTrailingSlash(final URI uri) {
+		
+		if (uri == null)
+			return null;
+		
+		String uriString = uri.toString();
+		
+		if (uriString.charAt(uriString.length() - 1 ) == '/') {
+			return URI.create(uriString.substring(0, uriString.length() - 1));
+		}
+		
+		return uri;
+	}
 
 
 	/**
