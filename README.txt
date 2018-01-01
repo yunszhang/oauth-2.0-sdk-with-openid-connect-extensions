@@ -70,6 +70,8 @@ and OpenID Connect based applications:
 		  
 		- Make requests to an OpenID Connect UserInfo Endpoint and process the
 		  responses;
+
+		- Make requests to an OpenID Connect Provider Configuration endpoint.
 		  
 		- Make requests to an OpenID Connect Client Registration Endpoint and
 		  process the responses.
@@ -146,4 +148,4 @@ This SDK is provided under the terms of the Apache 2.0 licence.
 Questions or comments? Email support@connect2id.com
 
 
-2017-10-29
+2018-01-01
