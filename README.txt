@@ -1,6 +1,6 @@
 Nimbus OAuth 2.0 SDK with OpenID Connect extensions
 
-Copyright (c) Connect2id Ltd., 2012 - 2017
+Copyright (c) Connect2id Ltd., 2012 - 2018
 
 
 README
@@ -8,7 +8,7 @@ README
 This open source Java library is your starting point for developing OAuth 2.0
 and OpenID Connect based applications:
 
-	* Developing OAuth 2.0 servers:
+	* For OAuth 2.0 Authorisation Servers:
 
 		- Parse and process requests at the Authorisation Endpoint, then
 		  generate the appropriate responses with an authorisation code or
@@ -24,7 +24,7 @@ and OpenID Connect based applications:
 		- Parse and process requests at the Client Registration Endpoint, then
 		  generate the appropriate responses.
 
-	* Developing OAuth 2.0 clients:
+	* For OAuth 2.0 clients:
 
 		- Make requests to an OAuth 2.0 Authorisation Endpoint and parse the
 		  responses;
@@ -37,17 +37,16 @@ and OpenID Connect based applications:
 		- Make requests to an OAuth 2.0 Token Revocation Endpoint and parse the
 		  responses;
 
-		- Make requests to a protected resource using an OAuth 2.0
-		  access token.
+		- Make requests to a protected resource with an OAuth 2.0 access token.
 
-	* Developing OpenID Connect provider (OP) servers:
+	* For OpenID Connect Providers:
 	
-		- Parse and process requests at the OpenID Connect Authorisation
+		- Parse and process OpenID Authentication requests at the Authorisation
 		  Endpoint, then generate the appropriate responses with an
 		  authorisation code, ID Token and / or UserInfo access token;
 		  
-		- Parse and process requests at the OpenID Connect Token Endpoint, then
-		  generate the appropriate responses;
+		- Parse and process requests at the Token Endpoint, then generate the
+		  appropriate responses;
 		  
 		- Parse and process requests at the OpenID Connect UserInfo Endpoint,
 		  then generate the appropriate responses;
@@ -60,18 +59,18 @@ and OpenID Connect based applications:
 
 		- Make requests to a Relying Party Back-Channel Logout Endpoint.
 	
-	* Developing OpenID Connect relying party (RP) clients:
+	* For OpenID Connect Relying Parties:
 	
-		- Make requests to an OpenID Connect Authorisation Endpoint and process
-		  the responses;
+		- Make OpenID Authentication requests to an Authorisation Endpoint and
+		  process the responses;
 		  
-		- Make requests to an OpenID Connect Token Endpoint and process the
-		  responses;
+		- Make requests to a Token Endpoint and process the responses;
 		  
 		- Make requests to an OpenID Connect UserInfo Endpoint and process the
 		  responses;
 
-		- Make requests to an OpenID Connect Provider Configuration endpoint.
+		- Make requests to an OpenID Connect Provider Configuration endpoint
+		  and process the responses;
 		  
 		- Make requests to an OpenID Connect Client Registration Endpoint and
 		  process the responses.
@@ -148,4 +147,4 @@ This SDK is provided under the terms of the Apache 2.0 licence.
 Questions or comments? Email support@connect2id.com
 
 
-2018-01-01
+2018-01-02
