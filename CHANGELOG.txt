@@ -819,3 +819,6 @@ version 5.46 (2018-02-04)
     * Updates the SDK to draft-ietf-oauth-mtls-07.
     * Adds new X509CertificateConfirmation class for use in mutual TLS client
       client authentication and certificate-bound access tokens.
+
+version 5.47 (2018-02-04)
+    * Adds X509CertificateConfirmation.toJWTClaim method.

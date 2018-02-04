@@ -19,12 +19,14 @@ package com.nimbusds.oauth2.sdk.auth;
 
 
 import java.text.ParseException;
+import java.util.Map;
 
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 
 /**
@@ -83,10 +85,32 @@ public final class X509CertificateConfirmation {
 	public JSONObject toJSONObject() {
 		
 		JSONObject jsonObject = new JSONObject();
+		Map.Entry<String, JSONObject> cnfClaim = toJWTClaim();
+		jsonObject.put(cnfClaim.getKey(), cnfClaim.getValue());
+		return jsonObject;
+	}
+	
+	
+	/**
+	 * Returns this X.509 certificate SHA-256 confirmation as a JWT claim.
+	 *
+	 * <p>Example:
+	 *
+	 * <pre>
+	 * "cnf" -> { "x5t#S256" : "bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2" }
+	 * </pre>
+	 *
+	 * @return The JWT claim name / value.
+	 */
+	public Map.Entry<String,JSONObject> toJWTClaim() {
+		
 		JSONObject cnf = new JSONObject();
 		cnf.put("x5t#S256", x5tS256.toString());
-		jsonObject.put("cnf", cnf);
-		return jsonObject;
+		
+		return new ImmutablePair<>(
+			"cnf",
+			cnf
+		);
 	}
 	
 	
