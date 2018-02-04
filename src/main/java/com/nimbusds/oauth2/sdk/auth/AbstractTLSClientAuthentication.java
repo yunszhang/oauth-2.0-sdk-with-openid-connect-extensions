@@ -30,8 +30,8 @@ import com.nimbusds.oauth2.sdk.util.URLUtils;
 
 
 /**
- * The base abstract class for TLS / X.509 certificate client authentication at
- * the Token endpoint.
+ * The base abstract class for mutual TLS client authentication at the Token
+ * endpoint.
  */
 abstract class AbstractTLSClientAuthentication extends ClientAuthentication {
 	
@@ -44,9 +44,8 @@ abstract class AbstractTLSClientAuthentication extends ClientAuthentication {
 	
 	
 	/**
-	 * Creates a new abstract TLS / X.509 certificate client
-	 * authentication. This constructor is intended for an outgoing token
-	 * request.
+	 * Creates a new abstract mutual TLS client authentication. This
+	 * constructor is intended for an outgoing token request.
 	 *
 	 * @param method           The client authentication method. Must not
 	 *                         be {@code null}.
@@ -67,9 +66,8 @@ abstract class AbstractTLSClientAuthentication extends ClientAuthentication {
 	
 	
 	/**
-	 * Creates a new abstract TLS / X.509 certificate client
-	 * authentication. This constructor is intended for a received token
-	 * request.
+	 * Creates a new abstract mutual TLS client authentication. This
+	 * constructor is intended for a received token request.
 	 *
 	 * @param method   The client authentication method. Must not be
 	 *                 {@code null}.

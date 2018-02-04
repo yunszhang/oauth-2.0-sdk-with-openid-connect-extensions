@@ -56,7 +56,8 @@ import net.minidev.json.JSONObject;
  *     <li>OpenID Connect Session Management 1.0, section 2.1 (draft 28).
  *     <li>OpenID Connect Front-Channel Logout 1.0, section 3 (draft 02).
  *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.1 (draft 04).
- *     <li>Mutual TLS Profile for OAuth 2.0, (draft-ietf-oauth-mtls-04).
+ *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
+ *         Access Tokens (draft-ietf-oauth-mtls-07)
  * </ul>
  */
 public class OIDCProviderMetadata {

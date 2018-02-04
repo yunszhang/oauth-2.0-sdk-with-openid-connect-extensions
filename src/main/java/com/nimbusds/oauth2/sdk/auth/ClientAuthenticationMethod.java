@@ -45,8 +45,8 @@ import net.jcip.annotations.Immutable;
  *     <li>OAuth 2.0 (RFC 6749), section 2.3.
  *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section
  *         2.
- *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-04), section
- *         2.2.
+ *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
+ *         Access Tokens (draft-ietf-oauth-mtls-07), section 2.
  * </ul>
  */
 @Immutable
@@ -97,16 +97,18 @@ public final class ClientAuthenticationMethod extends Identifier {
 	
 	
 	/**
-	 * Client TLS / X.509 certificate authentication using PKI. See Mutual
-	 * TLS Profile for OAuth 2.0, section 2.1.
+	 * PKI mutual TLS OAuth client authentication. See OAuth 2.0 Mutual TLS
+	 * Client Authentication and Certificate Bound Access Tokens, section
+	 * 2.1.
 	 */
 	public static final ClientAuthenticationMethod TLS_CLIENT_AUTH =
 		new ClientAuthenticationMethod("tls_client_auth");
 	
 	
 	/**
-	 * Self-signed client TLS / X.509 certificate authentication. See
-	 * Mutual TLS Profile for OAuth 2.0, section 2.2.
+	 * Self-signed certificate mutual TLS OAuth client authentication. See
+	 * OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
+	 * Access Tokens, section 2.2.
 	 */
 	public static final ClientAuthenticationMethod SELF_SIGNED_TLS_CLIENT_AUTH =
 		new ClientAuthenticationMethod("self_signed_tls_client_auth");

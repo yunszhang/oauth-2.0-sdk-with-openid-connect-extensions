@@ -31,7 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 
 
 /**
- * Self-signed TLS / X.509 certificate client authentication at the Token
+ * Self-signed certificate mutual TLS client authentication at the Token
  * endpoint. The client certificate is self-signed, as opposed to
  * {@link TLSClientAuthentication tls_client_auth} which relies on PKI binding.
  * Implements {@link ClientAuthenticationMethod#SELF_SIGNED_TLS_CLIENT_AUTH}.
@@ -39,8 +39,8 @@ import org.apache.commons.lang3.StringUtils;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-04), section
- *         2.2.
+ *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
+ *         Access Tokens (draft-ietf-oauth-mtls-07), section 2.2.
  * </ul>
  */
 @Immutable
@@ -55,7 +55,7 @@ public class SelfSignedTLSClientAuthentication extends AbstractTLSClientAuthenti
 	
 	
 	/**
-	 * Creates a new self-signed TLS / X.509 certificate client
+	 * Creates a new self-signed certificate mutual TLS client
 	 * authentication. This constructor is intended for an outgoing token
 	 * request.
 	 *
@@ -75,7 +75,7 @@ public class SelfSignedTLSClientAuthentication extends AbstractTLSClientAuthenti
 	
 	
 	/**
-	 * Creates a new self-signed TLS / X.509 certificate client
+	 * Creates a new self-signed certificate mutual TLS client
 	 * authentication. This constructor is intended for a received token
 	 * request.
 	 *
@@ -112,7 +112,7 @@ public class SelfSignedTLSClientAuthentication extends AbstractTLSClientAuthenti
 	
 	
 	/**
-	 * Parses a self-signed TLS / X.509 certificate client authentication
+	 * Parses a self-signed certificate mutual TLS client authentication
 	 * from the specified HTTP request.
 	 *
 	 * @param httpRequest The HTTP request to parse. Must not be

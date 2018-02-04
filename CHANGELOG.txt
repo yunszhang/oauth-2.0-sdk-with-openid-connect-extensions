@@ -814,3 +814,8 @@ version 5.45 (2018-01-01)
       OpenID provider configuration requests.
     * Adds URIUtils.removeTrailingSlash(URI) method.
     * Upgrades to org.apache.commons:commons-lang3:3.7.
+
+version 5.46 (2018-02-04)
+    * Updates the SDK to draft-ietf-oauth-mtls-07.
+    * Adds new X509CertificateConfirmation class for use in mutual TLS client
+      client authentication and certificate-bound access tokens.

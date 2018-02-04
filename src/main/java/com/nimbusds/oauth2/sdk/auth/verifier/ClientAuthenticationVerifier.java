@@ -47,8 +47,8 @@ import org.apache.commons.collections4.CollectionUtils;
  *     <li>OpenID Connect Core 1.0, section 9.
  *     <li>JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and
  *         Authorization Grants (RFC 7523).
- *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-04), section
- *         2.
+ *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
+ *         Access Tokens (draft-ietf-oauth-mtls-07), section 2.
  * </ul>
  */
 @ThreadSafe
@@ -382,7 +382,6 @@ public class ClientAuthenticationVerifier<T> {
 			certBindingVerifier.verifyCertificateBinding(
 				clientAuth.getClientID(),
 				tlsClientAuth.getClientX509CertificateSubjectDN(),
-				tlsClientAuth.getClientX509CertificateRootDN(),
 				context);
 
 		} else {

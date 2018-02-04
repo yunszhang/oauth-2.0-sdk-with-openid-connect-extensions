@@ -36,13 +36,12 @@ public class TLSClientAuthenticationTest extends TestCase {
 		
 		TLSClientAuthentication clientAuth = new TLSClientAuthentication(
 			new ClientID("123"),
-			null);
+			(SSLSocketFactory) null);
 		
 		assertEquals(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientAuth.getMethod());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertNull(clientAuth.getClientX509CertificateSubjectDN()); // n/a
-		assertNull(clientAuth.getClientX509CertificateRootDN()); // n/a
 		
 		HTTPRequest httpRequest = new HTTPRequest(
 			HTTPRequest.Method.POST,
@@ -70,7 +69,6 @@ public class TLSClientAuthenticationTest extends TestCase {
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertEquals(sslSocketFactory, clientAuth.getSSLSocketFactory());
 		assertNull(clientAuth.getClientX509CertificateSubjectDN()); // n/a
-		assertNull(clientAuth.getClientX509CertificateRootDN()); // n/a
 		
 		HTTPRequest httpRequest = new HTTPRequest(
 			HTTPRequest.Method.POST,
@@ -90,14 +88,12 @@ public class TLSClientAuthenticationTest extends TestCase {
 		
 		TLSClientAuthentication clientAuth = new TLSClientAuthentication(
 			new ClientID("123"),
-			"cn=client-123",
-			"cn=root-CA");
+			"cn=client-123");
 		
 		assertEquals(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientAuth.getMethod());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals("cn=client-123", clientAuth.getClientX509CertificateSubjectDN()); // assume validated
-		assertEquals("cn=root-CA", clientAuth.getClientX509CertificateRootDN()); // assume validated
 		
 		// This constructor is not intended to be used for setting an
 		// HTTPRequest, but still this shouldn't produce any errors
@@ -119,14 +115,12 @@ public class TLSClientAuthenticationTest extends TestCase {
 		
 		TLSClientAuthentication clientAuth = new TLSClientAuthentication(
 			new ClientID("123"),
-			"cn=client-123",
-			null);
+			"cn=client-123");
 		
 		assertEquals(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientAuth.getMethod());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals("cn=client-123", clientAuth.getClientX509CertificateSubjectDN());
-		assertNull(clientAuth.getClientX509CertificateRootDN());
 		
 		// This constructor is not intended to be used for setting an
 		// HTTPRequest, but still this shouldn't produce any errors
@@ -212,12 +206,10 @@ public class TLSClientAuthenticationTest extends TestCase {
 		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=123");
 		httpRequest.setClientX509CertificateSubjectDN("cn=client-123");
-		httpRequest.setClientX509CertificateRootDN("cn=root-CA");
 		
 		TLSClientAuthentication clientAuth = TLSClientAuthentication.parse(httpRequest);
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals("cn=client-123", clientAuth.getClientX509CertificateSubjectDN());
-		assertEquals("cn=root-CA", clientAuth.getClientX509CertificateRootDN());
 	}
 }

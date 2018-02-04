@@ -30,8 +30,8 @@ import org.apache.commons.lang3.StringUtils;
 
 
 /**
- * TLS / X.509 certificate client authentication at the Token endpoint. The
- * client certificate is PKI bound, as opposed to
+ * PKI mutual TLS client authentication at the Token endpoint. The client
+ * certificate is PKI bound, as opposed to
  * {@link SelfSignedTLSClientAuthentication self_signed_tls_client_auth} which
  * relies on a self-signed certificate. Implements
  * {@link ClientAuthenticationMethod#TLS_CLIENT_AUTH}.
@@ -39,8 +39,8 @@ import org.apache.commons.lang3.StringUtils;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-04), section
- *         2.1.
+ *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
+ *         Access Tokens (draft-ietf-oauth-mtls-07), section 2.1.
  * </ul>
  */
 @Immutable
@@ -54,14 +54,8 @@ public class TLSClientAuthentication extends AbstractTLSClientAuthentication {
 	
 	
 	/**
-	 * The client X.509 certificate root DN, {@code null} if not specified.
-	 */
-	private final String certRootDN;
-	
-	
-	/**
-	 * Creates a new TLS / X.509 certificate client authentication. This
-	 * constructor is intended for an outgoing token request.
+	 * Creates a new PKI mutual TLS client authentication. This constructor
+	 * is intended for an outgoing token request.
 	 *
 	 * @param clientID         The client identifier. Must not be
 	 *                         {@code null}.
@@ -75,25 +69,20 @@ public class TLSClientAuthentication extends AbstractTLSClientAuthentication {
 		
 		super(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientID, sslSocketFactory);
 		certSubjectDN = null;
-		certRootDN = null;
 	}
 	
 	
 	/**
-	 * Creates a new TLS / X.509 certificate client authentication. This
-	 * constructor is intended for a received token request.
+	 * Creates a new PKI mutual TLS client authentication. This constructor
+	 * is intended for a received token request.
 	 *
 	 * @param clientID      The client identifier. Must not be
 	 *                      {@code null}.
 	 * @param certSubjectDN The subject DN of the received validated client
 	 *                      X.509 certificate. Must not be {@code null}.
-	 * @param certRootDN    The root issuer DN of the received validated
-	 *                      client X.509 certificate, {@code null} if not
-	 *                      specified.
 	 */
 	public TLSClientAuthentication(final ClientID clientID,
-				       final String certSubjectDN,
-				       final String certRootDN) {
+				       final String certSubjectDN) {
 		
 		super(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientID);
 		
@@ -101,8 +90,6 @@ public class TLSClientAuthentication extends AbstractTLSClientAuthentication {
 			throw new IllegalArgumentException("The X.509 client certificate subject DN must not be null");
 		}
 		this.certSubjectDN = certSubjectDN;
-		
-		this.certRootDN = certRootDN;
 	}
 	
 	
@@ -119,26 +106,14 @@ public class TLSClientAuthentication extends AbstractTLSClientAuthentication {
 	
 	
 	/**
-	 * Gets the root issuer DN of the received validated client X.509
-	 * certificate.
-	 *
-	 * @return The root DN, {@code null} if not specified.
-	 */
-	public String getClientX509CertificateRootDN() {
-		
-		return certRootDN;
-	}
-	
-	
-	/**
-	 * Parses a TLS / X.509 certificate client authentication from the
-	 * specified HTTP request.
+	 * Parses a PKI mutual TLS client authentication from the specified
+	 * HTTP request.
 	 *
 	 * @param httpRequest The HTTP request to parse. Must not be
 	 *                    {@code null} and must include a validated client
 	 *                    X.509 certificate.
 	 *
-	 * @return The TLS / X.509 certificate client authentication.
+	 * @return The PKI mutual TLS client authentication.
 	 *
 	 * @throws ParseException If the {@code client_id} or client X.509
 	 *                        certificate is missing.
@@ -166,7 +141,7 @@ public class TLSClientAuthentication extends AbstractTLSClientAuthentication {
 		
 		return new TLSClientAuthentication(
 			new ClientID(clientIDString),
-			httpRequest.getClientX509CertificateSubjectDN(),
-			httpRequest.getClientX509CertificateRootDN());
+			httpRequest.getClientX509CertificateSubjectDN()
+		);
 	}
 }

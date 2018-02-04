@@ -34,8 +34,8 @@ import org.apache.commons.lang3.StringUtils;
  *
  * <ul>
  *     <li>OAuth 2.0 (RFC 6749), section 2.3.
- *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-04), section
- *         2.
+ *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
+ *         Access Tokens (draft-ietf-oauth-mtls-07), section 2.
  * </ul>
  */
 public abstract class ClientAuthentication {

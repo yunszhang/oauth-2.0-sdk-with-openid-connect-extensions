@@ -23,11 +23,11 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 
 /**
  * Client X.509 certificate binding verifier. Intended for verifying that the
- * subject and root issuer of a client X.509 certificate submitted during
- * successful mutual TLS authentication (in
+ * subject of a client X.509 certificate submitted during successful PKI mutual
+ * TLS authentication (in
  * {@link com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod#TLS_CLIENT_AUTH
- * tls_client_auth}) match the registered {@code tls_client_auth_subject_dn}
- * and {@code tls_client_auth_root_dn} values for the submitted client ID.
+ * tls_client_auth}) matches the registered {@code tls_client_auth_subject_dn}
+ * values for the submitted client ID.
  *
  * <p>Implementations must be tread-safe.
  */
@@ -35,21 +35,18 @@ public interface ClientX509CertificateBindingVerifier<T> {
 	
 	
 	/**
-	 * Verifies that the specified X.509 certificate issuer DN and subject
-	 * DN bind to the claimed client ID.
+	 * Verifies that the specified X.509 certificate subject DN binds to
+	 * the claimed client ID.
 	 *
 	 * @param clientID  The claimed client ID. Not {@code null}.
 	 * @param subjectDN The X.509 certificate subject DN. Not {@code null}.
-	 * @param rootDN    The X.509 certificate root DN, {@code null} if not
-	 *                  available.
 	 * @param context   Additional context. May be {@code null}.
 	 *
-	 * @throws InvalidClientException If client ID and issuer / subject DN
-	 *                                tuple don't bind or are invalid.
+	 * @throws InvalidClientException If client ID and subject DN don't
+	 *                                bind or are invalid.
 	 */
 	void verifyCertificateBinding(final ClientID clientID,
 				      final String subjectDN,
-				      final String rootDN,
 				      final Context<T> context)
 		throws InvalidClientException;
 }

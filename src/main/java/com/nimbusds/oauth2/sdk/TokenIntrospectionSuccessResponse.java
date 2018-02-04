@@ -39,8 +39,8 @@ import net.minidev.json.JSONObject;
  *
  * <ul>
  *     <li>OAuth 2.0 Token Introspection (RFC 7662).
- *     <li>Mutual TLS Profile for OAuth 2.0 (draft-ietf-oauth-mtls-04), section
- *         3.2.
+ *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
+ *         Access Tokens (draft-ietf-oauth-mtls-07).
  * </ul>
  */
 @Immutable

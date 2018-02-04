@@ -26,6 +26,8 @@
  *     <li>{@link com.nimbusds.oauth2.sdk.auth.ClientSecretPost}
  *     <li>{@link com.nimbusds.oauth2.sdk.auth.ClientSecretJWT}
  *     <li>{@link com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT}
+ *     <li>{@link com.nimbusds.oauth2.sdk.auth.TLSClientAuthentication}
+ *     <li>{@link com.nimbusds.oauth2.sdk.auth.SelfSignedTLSClientAuthentication}
  * </ul>
  */
 package com.nimbusds.oauth2.sdk.auth;

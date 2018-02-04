@@ -63,9 +63,6 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 	
 	
 	private static final String VALID_SUBJECT_DN = "cn=client-123";
-	
-	
-	private static final String VALID_ROOT_DN = "cn=root-CA";
 
 	
 	private static final RSAKey VALID_RSA_KEY_PAIR_1;
@@ -163,7 +160,6 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		@Override
 		public void verifyCertificateBinding(ClientID clientID,
 						     String subjectDN,
-						     String rootDN,
 						     Context<ClientMetadata> ctx)
 			throws InvalidClientException {
 			
@@ -173,10 +169,6 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			
 			if (! VALID_SUBJECT_DN.equalsIgnoreCase(subjectDN)) {
 				throw new InvalidClientException("Bad subject DN");
-			}
-			
-			if (rootDN != null && ! VALID_ROOT_DN.equalsIgnoreCase(rootDN)) {
-				throw new InvalidClientException("Bad root DN");
 			}
 		}
 	};
@@ -525,21 +517,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		
 		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
 			VALID_CLIENT_ID,
-			VALID_SUBJECT_DN,
-			VALID_ROOT_DN
-		);
-		
-		createVerifierWithPKIBoundCertSupport().verify(clientAuthentication, null, null);
-	}
-	
-	
-	public void testTLSClientAuth_ok_rootDNMissing()
-		throws Exception {
-		
-		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
-			VALID_CLIENT_ID,
-			VALID_SUBJECT_DN,
-			null
+			VALID_SUBJECT_DN
 		);
 		
 		createVerifierWithPKIBoundCertSupport().verify(clientAuthentication, null, null);
@@ -551,8 +529,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		
 		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
 			VALID_CLIENT_ID,
-			"cn=invalid-subject",
-			VALID_ROOT_DN
+			"cn=invalid-subject"
 		);
 		
 		try {
@@ -560,24 +537,6 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			fail();
 		} catch (InvalidClientException e) {
 			assertEquals("Bad subject DN", e.getMessage());
-		}
-	}
-	
-	
-	public void testTLSClientAuth_badRootDN()
-		throws Exception {
-		
-		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
-			VALID_CLIENT_ID,
-			VALID_SUBJECT_DN,
-			"cn=invalid-root-ca"
-		);
-		
-		try {
-			createVerifierWithPKIBoundCertSupport().verify(clientAuthentication, null, null);
-			fail();
-		} catch (InvalidClientException e) {
-			assertEquals("Bad root DN", e.getMessage());
 		}
 	}
 }

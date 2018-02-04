@@ -83,13 +83,11 @@ public class ClientAuthenticationTest extends TestCase {
 		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=123");
 		httpRequest.setClientX509CertificateSubjectDN("cn=client-123");
-		httpRequest.setClientX509CertificateRootDN("cn=root-CA");
 		
 		TLSClientAuthentication clientAuth = (TLSClientAuthentication) ClientAuthentication.parse(httpRequest);
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals("cn=client-123", clientAuth.getClientX509CertificateSubjectDN());
-		assertEquals("cn=root-CA", clientAuth.getClientX509CertificateRootDN());
 	}
 	
 	
