@@ -308,4 +308,27 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		
 		assertEquals(response.toJSONObject(), copy.toJSONObject());
 	}
+	
+	
+	public void testGetParameters() throws ParseException {
+		
+		TokenIntrospectionSuccessResponse response = new TokenIntrospectionSuccessResponse.Builder(true)
+			.issuer(new Issuer("https://c2id.com"))
+			.subject(new Subject("alice"))
+			.scope(new Scope("openid", "email"))
+			.build();
+		
+		JSONObject parameters = response.getParameters();
+		assertEquals(true, JSONObjectUtils.getBoolean(parameters, "active"));
+		assertEquals(response.getIssuer().getValue(), JSONObjectUtils.getString(parameters, "iss"));
+		assertEquals(response.getSubject().getValue(), JSONObjectUtils.getString(parameters, "sub"));
+		assertEquals(response.getScope().toString(), JSONObjectUtils.getString(parameters, "scope"));
+		assertEquals(4, parameters.size());
+		
+		// modify subject
+		parameters.put("sub", "bob");
+		
+		// change reflected in response object
+		assertEquals(new Subject("bob"), response.getSubject());
+	}
 }

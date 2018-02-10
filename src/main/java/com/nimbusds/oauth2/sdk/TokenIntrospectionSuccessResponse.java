@@ -543,6 +543,17 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 			return null;
 		}
 	}
+	
+	
+	/**
+	 * Returns the underlying parameters.
+	 *
+	 * @return The parameters, as JSON object.
+	 */
+	public JSONObject getParameters() {
+		
+		return params;
+	}
 
 
 	/**
