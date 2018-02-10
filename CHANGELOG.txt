@@ -1,24 +1,24 @@
 version 1.0 (2012-05-29)
-    * First official release with authorisation endpoint, token endpoint, check 
+    * First official release with authorisation endpoint, token endpoint, check
       ID endpoint and UserInfo endpoint support.
     * JSON Web Tokens (JWTs) support through the Nimbus-JWT library.
     * Language Tags (RFC 5646) support through the Nimbus-LangTag library.
     * JSON support through the JSON Smart library.
 
 version 2.0 (2013-05-13)
-    * Intermediary development release with Maven build, published to 
+    * Intermediary development release with Maven build, published to
       Maven Central.
 
 version 2.1 (2013-06-06)
-    * Updates the APIs to OpenID Connect Messages draft 20, OpenID Connect 
-      Standard draft 21, OpenID Connect Discovery draft 17 and OpenID 
+    * Updates the APIs to OpenID Connect Messages draft 20, OpenID Connect
+      Standard draft 21, OpenID Connect Discovery draft 17 and OpenID
       Connect Registration draft 19.
     * Major refactoring of the APIs for greater simplicity.
     * Adds JUnit tests.
-    
+
 version 2.2 (2013-06-18)
     * Refactors dynamic OpenID Connect client registration.
-    * Adds partial support of the OAuth 2.0 Dynamic Client Registration 
+    * Adds partial support of the OAuth 2.0 Dynamic Client Registration
       Protocol (draft-ietf-oauth-dyn-reg-12).
     * Optimises parsing of request parameters consisting of one or more
       tokens (scope, response type, etc).
@@ -66,7 +66,7 @@ version 2.11 (2013-10-07)
     * Renames ACRRequest empty check method.
     * Refactors GeneralException and extending classes.
     * Upgrades Nimbus JOSE+JWT dependency.
-    
+
 version 2.12 (2013-10-21)
     * Refactors ClaimsRequest resolution methods, fixes bugs that affected the
       correct parsing, serialisation and proper  ID token claims redirection.
@@ -826,3 +826,8 @@ version 5.47 (2018-02-04)
 version 5.48 (2018-02-09)
     * Adds TokenIntrospectionSuccessResponse.Builder copy constructor.
     * Adds TokenIntrospectionSuccessResponse.getParameters method.
+    * Adds TokenIntrospectionSuccessResponse.getStringParameter method.
+    * Adds TokenIntrospectionSuccessResponse.getBooleanParameter method.
+    * Adds TokenIntrospectionSuccessResponse.getNumberParameter method.
+    * Adds TokenIntrospectionSuccessResponse.getStringListParameter method.
+    * Adds TokenIntrospectionSuccessResponse.getJSONObjectParameter method.

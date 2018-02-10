@@ -546,6 +546,95 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 	
 	
 	/**
+	 * Returns the string parameter with the specified name.
+	 *
+	 * @param name The parameter name. Must not be {@code null}.
+	 *
+	 * @return The parameter value, {@code null} if not specified or if
+	 *         parsing failed.
+	 */
+	public String getStringParameter(final String name) {
+		
+		try {
+			return JSONObjectUtils.getString(params, name);
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Returns the boolean parameter with the specified name.
+	 *
+	 * @param name The parameter name. Must not be {@code null}.
+	 *
+	 * @return The parameter value.
+	 *
+	 * @throws ParseException If the parameter isn't specified or parsing
+	 *                        failed.
+	 */
+	public boolean getBooleanParameter(final String name)
+		throws ParseException {
+		
+		return JSONObjectUtils.getBoolean(params, name);
+	}
+	
+	
+	/**
+	 * Returns the number parameter with the specified name.
+	 *
+	 * @param name The parameter name. Must not be {@code null}.
+	 *
+	 * @return The parameter value, {@code null} if not specified or
+	 *         parsing failed.
+	 */
+	public Number getNumberParameter(final String name) {
+		
+		try {
+			return JSONObjectUtils.getNumber(params, name);
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Returns the string list parameter with the specified name.
+	 *
+	 * @param name The parameter name. Must not be {@code null}.
+	 *
+	 * @return The parameter value, {@code null} if not specified or if
+	 *         parsing failed.
+	 */
+	public List<String> getStringListParameter(final String name) {
+		
+		try {
+			return JSONObjectUtils.getStringList(params, name);
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Returns the JSON object parameter with the specified name.
+	 *
+	 * @param name The parameter name. Must not be {@code null}.
+	 *
+	 * @return The parameter value, {@code null} if not specified or if
+	 *         parsing failed.
+	 */
+	public JSONObject getJSONObjectParameter(final String name) {
+		
+		try {
+			return JSONObjectUtils.getJSONObject(params, name);
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+	
+	
+	/**
 	 * Returns the underlying parameters.
 	 *
 	 * @return The parameters, as JSON object.

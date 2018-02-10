@@ -18,6 +18,7 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import java.util.Arrays;
 import java.util.Date;
 
 import com.nimbusds.jose.util.Base64URL;
@@ -330,5 +331,92 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		
 		// change reflected in response object
 		assertEquals(new Subject("bob"), response.getSubject());
+	}
+	
+	
+	public void testGetStringParameter() {
+		
+		Date iat = new Date();
+		
+		TokenIntrospectionSuccessResponse response = new TokenIntrospectionSuccessResponse.Builder(true)
+			.issuer(new Issuer("https://c2id.com"))
+			.issueTime(iat)
+			.subject(new Subject("alice"))
+			.scope(new Scope("openid", "email"))
+			.build();
+		
+		assertEquals("alice", response.getStringParameter("sub"));
+		assertNull(response.getStringParameter("iat")); // not string
+	}
+	
+	
+	public void testGetBooleanParameter()
+		throws ParseException {
+		
+		Date iat = new Date();
+		
+		TokenIntrospectionSuccessResponse response = new TokenIntrospectionSuccessResponse.Builder(true)
+			.issuer(new Issuer("https://c2id.com"))
+			.issueTime(iat)
+			.subject(new Subject("alice"))
+			.scope(new Scope("openid", "email"))
+			.build();
+		
+		assertTrue(response.getBooleanParameter("active"));
+		try {
+			response.getBooleanParameter("iat");
+		} catch (ParseException e) {
+			assertEquals("Unexpected type of JSON object member with key \"iat\"", e.getMessage());
+		}
+	}
+	
+	
+	public void testGetNumberParameter() {
+		
+		Date iat = new Date(new Date().getTime() / 1000 * 1000);
+		
+		TokenIntrospectionSuccessResponse response = new TokenIntrospectionSuccessResponse.Builder(true)
+			.issuer(new Issuer("https://c2id.com"))
+			.issueTime(iat)
+			.subject(new Subject("alice"))
+			.scope(new Scope("openid", "email"))
+			.build();
+		
+		assertEquals(iat.getTime() / 1000L, response.getNumberParameter("iat").longValue());
+		
+		assertNull(response.getNumberParameter("sub")); // invalid number
+	}
+	
+	
+	public void testGetStringListParameter() {
+		
+		TokenIntrospectionSuccessResponse response = new TokenIntrospectionSuccessResponse.Builder(true)
+			.issuer(new Issuer("https://c2id.com"))
+			.subject(new Subject("alice"))
+			.scope(new Scope("openid", "email"))
+			.parameter("claims", Arrays.asList("email", "email_verified"))
+			.build();
+		
+		assertEquals(Arrays.asList("email", "email_verified"), response.getStringListParameter("claims"));
+		
+		assertNull(response.getStringListParameter("sub")); // invalid string list
+	}
+	
+	
+	public void testGetJSONObjectParameter() {
+		
+		JSONObject data = new JSONObject();
+		data.put("ip", "192.168.0.1");
+		
+		TokenIntrospectionSuccessResponse response = new TokenIntrospectionSuccessResponse.Builder(true)
+			.issuer(new Issuer("https://c2id.com"))
+			.subject(new Subject("alice"))
+			.scope(new Scope("openid", "email"))
+			.parameter("data", data)
+			.build();
+		
+		assertEquals(data, response.getJSONObjectParameter("data"));
+		
+		assertNull(response.getJSONObjectParameter("sub")); // invalid parameter
 	}
 }
