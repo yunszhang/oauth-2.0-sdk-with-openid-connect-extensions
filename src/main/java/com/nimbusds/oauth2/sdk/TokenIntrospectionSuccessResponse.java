@@ -69,6 +69,19 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 			
 			params.put("active", active);
 		}
+		
+		
+		/**
+		 * Creates a new token introspection success response builder
+		 * with the parameters of the specified response.
+		 *
+		 * @param response The response which parameters to use. Not
+		 *                 {@code null}.
+		 */
+		public Builder(final TokenIntrospectionSuccessResponse response) {
+			
+			params.putAll(response.params);
+		}
 
 
 		/**

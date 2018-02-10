@@ -288,4 +288,24 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertEquals(new Date(1493722800*1000L), response.getNotBeforeTime());
 		assertEquals(new Base64URL("bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2"), response.getX509CertificateSHA256Thumbprint());
 	}
+	
+	
+	public void testCopyConstructorBuilder() {
+		
+		TokenIntrospectionSuccessResponse response = new TokenIntrospectionSuccessResponse.Builder(true)
+			.issuer(new Issuer("https://c2id.com"))
+			.subject(new Subject("alice"))
+			.scope(new Scope("openid", "email"))
+			.build();
+		
+		TokenIntrospectionSuccessResponse copy = new TokenIntrospectionSuccessResponse.Builder(response)
+			.build();
+		
+		assertEquals(response.isActive(), copy.isActive());
+		assertEquals(response.getIssuer(), copy.getIssuer());
+		assertEquals(response.getSubject(), copy.getSubject());
+		assertEquals(response.getScope(), copy.getScope());
+		
+		assertEquals(response.toJSONObject(), copy.toJSONObject());
+	}
 }

@@ -822,3 +822,6 @@ version 5.46 (2018-02-04)
 
 version 5.47 (2018-02-04)
     * Adds X509CertificateConfirmation.toJWTClaim method.
+
+version 5.48 (2018-02-09)
+    * Adds TokenIntrospectionSuccessResponse.Builder copy constructor.
