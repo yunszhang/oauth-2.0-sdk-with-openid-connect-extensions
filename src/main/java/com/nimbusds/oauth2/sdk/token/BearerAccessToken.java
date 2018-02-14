@@ -57,7 +57,7 @@ import org.apache.commons.lang3.StringUtils;
  * </ul>
  */
 @Immutable
-public final class BearerAccessToken extends AccessToken {
+public class BearerAccessToken extends AccessToken {
 
 	
 	/**

@@ -845,3 +845,6 @@ version 5.50 (2018-02-14)
 version 5.51 (2018-02-14)
     * Refactors X509CertificateConfirmation.parse(JSONObject) to avoid
       unnecessary ParseException.
+
+version 5.52 (2018-02-14)
+    * BearerAccessToken no longer final, permits extension.
