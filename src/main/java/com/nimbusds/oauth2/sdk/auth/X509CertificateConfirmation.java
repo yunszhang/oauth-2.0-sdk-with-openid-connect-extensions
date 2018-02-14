@@ -182,6 +182,38 @@ public final class X509CertificateConfirmation {
 	
 	
 	/**
+	 * Parses a X.509 certificate confirmation from the specified JSON
+	 * object representation of a JWT claims set.
+	 *
+	 * @param jsonObject The JSON object.
+	 *
+	 * @return The X.509 certificate confirmation, {@code null} if not
+	 *         found.
+	 */
+	public static X509CertificateConfirmation parse(final JSONObject jsonObject) {
+		
+		try {
+			JSONObject cnf = JSONObjectUtils.getJSONObject(jsonObject, "cnf");
+			
+			if (cnf == null) {
+				return null;
+			}
+			
+			String x5tString = JSONObjectUtils.getString(cnf, "x5t#S256");
+			
+			if (x5tString == null) {
+				return null;
+			}
+			
+			return new X509CertificateConfirmation(new Base64URL(x5tString));
+			
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+	
+	
+	/**
 	 * Creates a confirmation of the specified X.509 certificate.
 	 *
 	 * @param x509Cert The X.509 certificate.

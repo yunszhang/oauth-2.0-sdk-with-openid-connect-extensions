@@ -22,9 +22,9 @@ import java.security.cert.X509Certificate;
 
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jose.util.ByteUtils;
-import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jose.util.X509CertUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
@@ -117,10 +117,10 @@ public class X509CertificateConfirmationTest extends TestCase {
 	}
 	
 	
-	public void testExtractNull() {
+	public void testParse_nullJWTClaimsSet() {
 		
 		try {
-			X509CertificateConfirmation.parse(null);
+			X509CertificateConfirmation.parse((JWTClaimsSet) null);
 			fail();
 		} catch (NullPointerException e) {
 			// ok
@@ -128,7 +128,18 @@ public class X509CertificateConfirmationTest extends TestCase {
 	}
 	
 	
-	public void testParse()
+	public void testParse_nullJSONObject() {
+		
+		try {
+			X509CertificateConfirmation.parse((JSONObject)null);
+			fail();
+		} catch (NullPointerException e) {
+			// ok
+		}
+	}
+	
+	
+	public void testParseClaimsSet()
 		throws Exception {
 		
 		String json = "{\n" +
@@ -141,12 +152,13 @@ public class X509CertificateConfirmationTest extends TestCase {
 			"       }\n" +
 			"     }";
 		
-		Base64URL x5t = X509CertificateConfirmation.parse(JWTClaimsSet.parse(json)).getValue();
-		assertEquals(new Base64URL("bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2"), x5t);
+		assertEquals(new Base64URL("bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2"), X509CertificateConfirmation.parse(JWTClaimsSet.parse(json)).getValue());
+		
+		assertEquals(new Base64URL("bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2"), X509CertificateConfirmation.parse(JSONObjectUtils.parse(json)).getValue());
 	}
 	
 	
-	public void testExtractX5TMissing()
+	public void testParseX5TMissing()
 		throws Exception {
 		
 		String json = "{\n" +
@@ -159,5 +171,7 @@ public class X509CertificateConfirmationTest extends TestCase {
 			"     }";
 		
 		assertNull(X509CertificateConfirmation.parse(JWTClaimsSet.parse(json)));
+		
+		assertNull(X509CertificateConfirmation.parse(JSONObjectUtils.parse(json)));
 	}
 }
