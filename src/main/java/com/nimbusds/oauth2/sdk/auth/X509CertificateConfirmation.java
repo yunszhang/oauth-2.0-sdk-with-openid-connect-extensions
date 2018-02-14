@@ -18,11 +18,13 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
+import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.Map;
 
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jose.util.JSONObjectUtils;
+import com.nimbusds.jose.util.X509CertUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
@@ -158,5 +160,18 @@ public final class X509CertificateConfirmation {
 		} catch (ParseException e) {
 			return null;
 		}
+	}
+	
+	
+	/**
+	 * Creates a confirmation of the specified X.509 certificate.
+	 *
+	 * @param x509Cert The X.509 certificate.
+	 *
+	 * @return The X.509 certificate confirmation.
+	 */
+	public static X509CertificateConfirmation of(final X509Certificate x509Cert) {
+		
+		return new X509CertificateConfirmation(X509CertUtils.computeSHA256Thumbprint(x509Cert));
 	}
 }

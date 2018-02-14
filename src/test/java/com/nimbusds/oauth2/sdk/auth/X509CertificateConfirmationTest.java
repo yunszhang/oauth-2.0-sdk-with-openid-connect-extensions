@@ -32,26 +32,27 @@ import net.minidev.json.JSONObject;
 public class X509CertificateConfirmationTest extends TestCase {
 	
 	
+	private static final String PEM_CERT = "-----BEGIN CERTIFICATE-----" +
+		"MIICUTCCAfugAwIBAgIBADANBgkqhkiG9w0BAQQFADBXMQswCQYDVQQGEwJDTjEL" +
+		"MAkGA1UECBMCUE4xCzAJBgNVBAcTAkNOMQswCQYDVQQKEwJPTjELMAkGA1UECxMC" +
+		"VU4xFDASBgNVBAMTC0hlcm9uZyBZYW5nMB4XDTA1MDcxNTIxMTk0N1oXDTA1MDgx" +
+		"NDIxMTk0N1owVzELMAkGA1UEBhMCQ04xCzAJBgNVBAgTAlBOMQswCQYDVQQHEwJD" +
+		"TjELMAkGA1UEChMCT04xCzAJBgNVBAsTAlVOMRQwEgYDVQQDEwtIZXJvbmcgWWFu" +
+		"ZzBcMA0GCSqGSIb3DQEBAQUAA0sAMEgCQQCp5hnG7ogBhtlynpOS21cBewKE/B7j" +
+		"V14qeyslnr26xZUsSVko36ZnhiaO/zbMOoRcKK9vEcgMtcLFuQTWDl3RAgMBAAGj" +
+		"gbEwga4wHQYDVR0OBBYEFFXI70krXeQDxZgbaCQoR4jUDncEMH8GA1UdIwR4MHaA" +
+		"FFXI70krXeQDxZgbaCQoR4jUDncEoVukWTBXMQswCQYDVQQGEwJDTjELMAkGA1UE" +
+		"CBMCUE4xCzAJBgNVBAcTAkNOMQswCQYDVQQKEwJPTjELMAkGA1UECxMCVU4xFDAS" +
+		"BgNVBAMTC0hlcm9uZyBZYW5nggEAMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEE" +
+		"BQADQQA/ugzBrjjK9jcWnDVfGHlk3icNRq0oV7Ri32z/+HQX67aRfgZu7KWdI+Ju" +
+		"Wm7DCfrPNGVwFWUQOmsPue9rZBgO" +
+		"-----END CERTIFICATE-----";
+	
+	
 	public void testLifeCycle()
 		throws Exception {
 		
-		String pemCert = "-----BEGIN CERTIFICATE-----" +
-			"MIICUTCCAfugAwIBAgIBADANBgkqhkiG9w0BAQQFADBXMQswCQYDVQQGEwJDTjEL" +
-			"MAkGA1UECBMCUE4xCzAJBgNVBAcTAkNOMQswCQYDVQQKEwJPTjELMAkGA1UECxMC" +
-			"VU4xFDASBgNVBAMTC0hlcm9uZyBZYW5nMB4XDTA1MDcxNTIxMTk0N1oXDTA1MDgx" +
-			"NDIxMTk0N1owVzELMAkGA1UEBhMCQ04xCzAJBgNVBAgTAlBOMQswCQYDVQQHEwJD" +
-			"TjELMAkGA1UEChMCT04xCzAJBgNVBAsTAlVOMRQwEgYDVQQDEwtIZXJvbmcgWWFu" +
-			"ZzBcMA0GCSqGSIb3DQEBAQUAA0sAMEgCQQCp5hnG7ogBhtlynpOS21cBewKE/B7j" +
-			"V14qeyslnr26xZUsSVko36ZnhiaO/zbMOoRcKK9vEcgMtcLFuQTWDl3RAgMBAAGj" +
-			"gbEwga4wHQYDVR0OBBYEFFXI70krXeQDxZgbaCQoR4jUDncEMH8GA1UdIwR4MHaA" +
-			"FFXI70krXeQDxZgbaCQoR4jUDncEoVukWTBXMQswCQYDVQQGEwJDTjELMAkGA1UE" +
-			"CBMCUE4xCzAJBgNVBAcTAkNOMQswCQYDVQQKEwJPTjELMAkGA1UECxMCVU4xFDAS" +
-			"BgNVBAMTC0hlcm9uZyBZYW5nggEAMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEE" +
-			"BQADQQA/ugzBrjjK9jcWnDVfGHlk3icNRq0oV7Ri32z/+HQX67aRfgZu7KWdI+Ju" +
-			"Wm7DCfrPNGVwFWUQOmsPue9rZBgO" +
-			"-----END CERTIFICATE-----";
-		
-		X509Certificate clientCert = X509CertUtils.parse(pemCert);
+		X509Certificate clientCert = X509CertUtils.parse(PEM_CERT);
 		
 		Base64URL x5t = X509CertUtils.computeSHA256Thumbprint(clientCert);
 		assertEquals(256, ByteUtils.bitLength(x5t.decode()));
@@ -68,6 +69,24 @@ public class X509CertificateConfirmationTest extends TestCase {
 		
 		certCnf = X509CertificateConfirmation.parse(JWTClaimsSet.parse(jsonObject));
 		assertEquals(x5t, certCnf.getValue());
+	}
+	
+	
+	public void testOf()
+		throws Exception {
+		
+		X509Certificate clientCert = X509CertUtils.parse(PEM_CERT);
+		
+		Base64URL x5t = X509CertUtils.computeSHA256Thumbprint(clientCert);
+		assertEquals(256, ByteUtils.bitLength(x5t.decode()));
+		
+		X509CertificateConfirmation certCnf = X509CertificateConfirmation.of(clientCert);
+		
+		JSONObject jsonObject = certCnf.toJSONObject();
+		JSONObject cnfObject = JSONObjectUtils.getJSONObject(jsonObject, "cnf");
+		assertEquals(x5t.toString(), JSONObjectUtils.getString(cnfObject, "x5t#S256"));
+		assertEquals(1, cnfObject.size());
+		assertEquals(1, jsonObject.size());
 	}
 	
 	

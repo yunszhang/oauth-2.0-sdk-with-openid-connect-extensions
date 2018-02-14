@@ -831,3 +831,6 @@ version 5.48 (2018-02-09)
     * Adds TokenIntrospectionSuccessResponse.getNumberParameter method.
     * Adds TokenIntrospectionSuccessResponse.getStringListParameter method.
     * Adds TokenIntrospectionSuccessResponse.getJSONObjectParameter method.
+
+version 5.49 (2018-02-14)
+    * Adds static X509CertificateConfirmation.of(X509Certificate) method.
