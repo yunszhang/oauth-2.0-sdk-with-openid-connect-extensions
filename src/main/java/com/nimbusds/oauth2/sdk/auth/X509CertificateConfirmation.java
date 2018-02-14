@@ -182,14 +182,15 @@ public final class X509CertificateConfirmation {
 	 */
 	public static X509CertificateConfirmation parse(final JSONObject jsonObject) {
 		
-		JSONObject cnf;
-		try {
-			cnf = JSONObjectUtils.getJSONObject(jsonObject, "cnf");
-		} catch (ParseException e) {
+		if (! jsonObject.containsKey("cnf")) {
 			return null;
 		}
 		
-		return parseFromConfirmationJSONObject(cnf);
+		try {
+			return parseFromConfirmationJSONObject(JSONObjectUtils.getJSONObject(jsonObject, "cnf"));
+		} catch (ParseException e) {
+			return null;
+		}
 	}
 	
 	

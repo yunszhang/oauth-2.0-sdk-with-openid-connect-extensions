@@ -835,9 +835,13 @@ version 5.48 (2018-02-09)
 version 5.49 (2018-02-14)
     * Adds static X509CertificateConfirmation.of(X509Certificate) method.
 
-version version 5.50 (2018-02-14)
+version 5.50 (2018-02-14)
     * Adds X509CertificateConfirmation.applyTo(JWTClaimsSet) method.
     * Adds static X509CertificateConfirmation.parse(JSONObject) method.
     * Adds static
       X509CertificateConfirmation.parseFromConfirmationJSONObject(JSONObject)
       method.
+
+version 5.51 (2018-02-14)
+    * Refactors X509CertificateConfirmation.parse(JSONObject) to avoid
+      unnecessary ParseException.
