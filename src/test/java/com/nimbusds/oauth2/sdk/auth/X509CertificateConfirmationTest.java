@@ -99,4 +99,49 @@ public class X509CertificateConfirmationTest extends TestCase {
 			assertEquals("The X.509 certificate thumbprint must not be null", e.getMessage());
 		}
 	}
+	
+	
+	public void testExtractNull() {
+		
+		try {
+			X509CertificateConfirmation.parse(null);
+			fail();
+		} catch (NullPointerException e) {
+			// ok
+		}
+	}
+	
+	
+	public void testParse()
+		throws Exception {
+		
+		String json = "{\n" +
+			"       \"iss\": \"https://server.example.com\",\n" +
+			"       \"sub\": \"ty.webb@example.com\",\n" +
+			"       \"exp\": 1493726400,\n" +
+			"       \"nbf\": 1493722800,\n" +
+			"       \"cnf\":{\n" +
+			"         \"x5t#S256\": \"bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2\"\n" +
+			"       }\n" +
+			"     }";
+		
+		Base64URL x5t = X509CertificateConfirmation.parse(JWTClaimsSet.parse(json)).getValue();
+		assertEquals(new Base64URL("bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2"), x5t);
+	}
+	
+	
+	public void testExtractX5TMissing()
+		throws Exception {
+		
+		String json = "{\n" +
+			"       \"iss\": \"https://server.example.com\",\n" +
+			"       \"sub\": \"ty.webb@example.com\",\n" +
+			"       \"exp\": 1493726400,\n" +
+			"       \"nbf\": 1493722800,\n" +
+			"       \"cnf\":{\n" +
+			"       }\n" +
+			"     }";
+		
+		assertNull(X509CertificateConfirmation.parse(JWTClaimsSet.parse(json)));
+	}
 }
