@@ -90,6 +90,22 @@ public class X509CertificateConfirmationTest extends TestCase {
 	}
 	
 	
+	public void testApplyToJWTClaimsSet()
+		throws Exception {
+		
+		X509Certificate clientCert = X509CertUtils.parse(PEM_CERT);
+		
+		X509CertificateConfirmation certCnf = X509CertificateConfirmation.of(clientCert);
+		
+		JWTClaimsSet jwtClaimsSet = certCnf.applyTo(new JWTClaimsSet.Builder().build());
+		
+		JSONObject cnfObject = jwtClaimsSet.getJSONObjectClaim("cnf");
+		assertEquals(certCnf.getValue().toString(), JSONObjectUtils.getString(cnfObject, "x5t#S256"));
+		
+		assertEquals(1, jwtClaimsSet.getClaims().size());
+	}
+	
+	
 	public void testRejectNullArg() {
 		
 		try {

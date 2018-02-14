@@ -116,6 +116,24 @@ public final class X509CertificateConfirmation {
 	}
 	
 	
+	/**
+	 * Applies this X.509 certificate SHA-256 confirmation to the specified
+	 * JWT claims set.
+	 *
+	 * @param jwtClaimsSet The JWT claims set.
+	 *
+	 * @return The modified JWT claims set.
+	 */
+	public JWTClaimsSet applyTo(final JWTClaimsSet jwtClaimsSet) {
+		
+		Map.Entry<String, JSONObject> cnfClaim = toJWTClaim();
+		
+		return new JWTClaimsSet.Builder(jwtClaimsSet)
+			.claim(cnfClaim.getKey(), cnfClaim.getValue())
+			.build();
+	}
+	
+	
 	@Override
 	public boolean equals(final Object o) {
 		if (this == o) return true;
