@@ -174,4 +174,12 @@ public class X509CertificateConfirmationTest extends TestCase {
 		
 		assertNull(X509CertificateConfirmation.parse(JSONObjectUtils.parse(json)));
 	}
+	
+	
+	public void testToString() {
+		
+		assertEquals(
+			"{\"cnf\":{\"x5t#S256\":\"bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2\"}}",
+			new X509CertificateConfirmation(new Base64URL("bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2")).toString());
+	}
 }

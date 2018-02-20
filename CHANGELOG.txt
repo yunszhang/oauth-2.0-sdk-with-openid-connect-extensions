@@ -851,3 +851,5 @@ version 5.52 (2018-02-14)
 
 version 5.53 (2018-02-20)
     * Overrides Actor.toString() with toJSONString().
+    * Overrides X509CertificateConfirmation.toString() with
+      toJSONObject().toJSONString().

@@ -135,6 +135,12 @@ public final class X509CertificateConfirmation {
 	
 	
 	@Override
+	public String toString() {
+		return toJSONObject().toJSONString();
+	}
+	
+	
+	@Override
 	public boolean equals(final Object o) {
 		if (this == o) return true;
 		if (!(o instanceof X509CertificateConfirmation)) return false;
