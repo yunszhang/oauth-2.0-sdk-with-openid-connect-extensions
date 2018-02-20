@@ -848,3 +848,6 @@ version 5.51 (2018-02-14)
 
 version 5.52 (2018-02-14)
     * BearerAccessToken no longer final, permits extension.
+
+version 5.53 (2018-02-20)
+    * Overrides Actor.toString() with toJSONString().

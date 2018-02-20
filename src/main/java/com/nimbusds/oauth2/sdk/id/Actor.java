@@ -161,8 +161,14 @@ public final class Actor implements Serializable, Comparable<Actor>, JSONAware {
 	public String toJSONString() {
 		return toJSONObject().toJSONString();
 	}
-
-
+	
+	
+	@Override
+	public String toString() {
+		return toJSONString();
+	}
+	
+	
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

@@ -97,6 +97,14 @@ public class ActorTest extends TestCase {
 
 		assertNull(Actor.parseTopLevel(jsonObject));
 	}
+	
+	
+	public void testToString() {
+		
+		Actor actor = new Actor(new Subject("claire"));
+		
+		assertEquals("{\"sub\":\"claire\"}", actor.toString());
+	}
 
 
 	public void testEquality() {
