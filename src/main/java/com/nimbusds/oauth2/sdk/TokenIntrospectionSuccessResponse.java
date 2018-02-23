@@ -20,9 +20,11 @@ package com.nimbusds.oauth2.sdk;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.util.DateUtils;
+import com.nimbusds.oauth2.sdk.auth.X509CertificateConfirmation;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.*;
@@ -249,13 +251,15 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 		
 		/**
 		 * Sets the client X.509 certificate SHA-256 thumbprint, for a
-		 * mutual TLS sender constrained access token. Corresponds to
-		 * the {@code cnf.x5t#S256} claim.
+		 * mutual TLS client certificate bound access token.
+		 * Corresponds to the {@code cnf.x5t#S256} claim.
 		 *
+		 * @param x5t The client X.509 certificate SHA-256 thumbprint,
+		 *            {@code null} if not specified.
 		 *
-		 * @return The client X.509 certificate SHA-256 thumbprint,
-		 *         {@code null} if not specified.
+		 * @return This builder.
 		 */
+		@Deprecated
 		public Builder x509CertificateSHA256Thumbprint(final Base64URL x5t) {
 			
 			if (x5t != null) {
@@ -275,6 +279,28 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 				}
 			}
 			
+			return this;
+		}
+		
+		
+		/**
+		 * Sets the client X.509 certificate confirmation, for a mutual
+		 * TLS client certificate bound access token. Corresponds to
+		 * the {@code cnf.x5t#S256} claim.
+		 *
+		 * @param cnf The client X.509 certificate confirmation,
+		 *            {@code null} if not specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder x509CertificateConfirmation(final X509CertificateConfirmation cnf) {
+			
+			if (cnf != null) {
+				Map.Entry<String, JSONObject> param = cnf.toJWTClaim();
+				params.put(param.getKey(), param.getValue());
+			} else {
+				params.remove("cnf");
+			}
 			return this;
 		}
 
@@ -527,13 +553,14 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 	
 	/**
 	 * Returns the client X.509 certificate SHA-256 thumbprint, for a
-	 * mutual TLS sender constrained access token. Corresponds to the
+	 * mutual TLS client certificate bound access token. Corresponds to the
 	 * {@code cnf.x5t#S256} claim.
 	 *
 	 *
 	 * @return The client X.509 certificate SHA-256 thumbprint,
 	 *         {@code null} if not specified.
 	 */
+	@Deprecated
 	public Base64URL getX509CertificateSHA256Thumbprint() {
 	
 		try {
@@ -542,6 +569,20 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 		} catch (ParseException e) {
 			return null;
 		}
+	}
+	
+	
+	/**
+	 * Returns the client X.509 certificate confirmation, for a mutual TLS
+	 * client certificate bound access token. Corresponds to the
+	 * {@code cnf.x5t#S256} claim.
+	 *
+	 * @return The client X.509 certificate confirmation, {@code null} if
+	 *         not specified.
+	 */
+	public X509CertificateConfirmation getX509CertificateConfirmation() {
+		
+		return X509CertificateConfirmation.parse(params);
 	}
 	
 	

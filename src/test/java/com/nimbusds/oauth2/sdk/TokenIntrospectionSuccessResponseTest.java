@@ -23,6 +23,7 @@ import java.util.Date;
 
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.util.DateUtils;
+import com.nimbusds.oauth2.sdk.auth.X509CertificateConfirmation;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.*;
@@ -71,6 +72,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertEquals(DateUtils.fromSecondsSinceEpoch(1419356238L), response.getExpirationTime());
 		assertEquals(DateUtils.fromSecondsSinceEpoch(1419350238L), response.getIssueTime());
 		assertNull(response.getX509CertificateSHA256Thumbprint());
+		assertNull(response.getX509CertificateConfirmation());
 		assertEquals("twenty-seven", response.toJSONObject().get("extension_field"));
 
 		httpResponse = response.toHTTPResponse();
@@ -88,6 +90,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertEquals(DateUtils.fromSecondsSinceEpoch(1419356238L), response.getExpirationTime());
 		assertEquals(DateUtils.fromSecondsSinceEpoch(1419350238L), response.getIssueTime());
 		assertNull(response.getX509CertificateSHA256Thumbprint());
+		assertNull(response.getX509CertificateConfirmation());
 		assertEquals("twenty-seven", response.toJSONObject().get("extension_field"));
 	}
 
@@ -111,6 +114,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertNull(response.getIssuer());
 		assertNull(response.getJWTID());
 		assertNull(response.getX509CertificateSHA256Thumbprint());
+		assertNull(response.getX509CertificateConfirmation());
 
 		JSONObject jsonObject = response.toJSONObject();
 		assertTrue((Boolean) jsonObject.get("active"));
@@ -139,6 +143,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertNull(response.getIssuer());
 		assertNull(response.getJWTID());
 		assertNull(response.getX509CertificateSHA256Thumbprint());
+		assertNull(response.getX509CertificateConfirmation());
 	}
 
 
@@ -161,6 +166,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertNull(response.getIssuer());
 		assertNull(response.getJWTID());
 		assertNull(response.getX509CertificateSHA256Thumbprint());
+		assertNull(response.getX509CertificateConfirmation());
 
 		JSONObject jsonObject = response.toJSONObject();
 		assertFalse((Boolean) jsonObject.get("active"));
@@ -200,6 +206,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertNull(response.getIssuer());
 		assertNull(response.getJWTID());
 		assertNull(response.getX509CertificateSHA256Thumbprint());
+		assertNull(response.getX509CertificateConfirmation());
 	}
 
 
@@ -218,7 +225,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 			.audience(Audience.create("456", "789"))
 			.issuer(new Issuer("https://c2id.com"))
 			.jwtID(new JWTID("xyz"))
-			.x509CertificateSHA256Thumbprint(new Base64URL("abc"))
+			.x509CertificateConfirmation(new X509CertificateConfirmation(new Base64URL("abc")))
 			.parameter("ip", "10.20.30.40")
 			.build();
 
@@ -234,7 +241,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertEquals(Audience.create("456", "789"), response.getAudience());
 		assertEquals(new Issuer("https://c2id.com"), response.getIssuer());
 		assertEquals(new JWTID("xyz"), response.getJWTID());
-		assertEquals(new Base64URL("abc"), response.getX509CertificateSHA256Thumbprint());
+		assertEquals(new Base64URL("abc"), response.getX509CertificateConfirmation().getValue());
 		assertEquals("10.20.30.40", response.toJSONObject().get("ip"));
 
 		assertEquals(14, response.toJSONObject().size());
@@ -258,10 +265,39 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertEquals(Audience.create("456", "789"), response.getAudience());
 		assertEquals(new Issuer("https://c2id.com"), response.getIssuer());
 		assertEquals(new JWTID("xyz"), response.getJWTID());
-		assertEquals(new Base64URL("abc"), response.getX509CertificateSHA256Thumbprint());
+		assertEquals(new Base64URL("abc"), response.getX509CertificateConfirmation().getValue());
 		assertEquals("10.20.30.40", response.toJSONObject().get("ip"));
 
 		assertEquals(14, response.toJSONObject().size());
+	}
+
+
+	public void testBuilder_deprecatedCnfX5t()
+		throws Exception {
+
+		TokenIntrospectionSuccessResponse response = new TokenIntrospectionSuccessResponse.Builder(true)
+			.scope(Scope.parse("read write"))
+			.x509CertificateSHA256Thumbprint(new Base64URL("abc"))
+			.build();
+
+		assertTrue(response.isActive());
+		assertEquals(Scope.parse("read write"), response.getScope());
+		assertEquals(new Base64URL("abc"), response.getX509CertificateSHA256Thumbprint());
+
+		assertEquals(3, response.toJSONObject().size());
+
+		HTTPResponse httpResponse = response.toHTTPResponse();
+
+		assertEquals(200, httpResponse.getStatusCode());
+		assertEquals("application/json; charset=UTF-8", httpResponse.getContentType().toString());
+
+		response = TokenIntrospectionSuccessResponse.parse(httpResponse);
+		
+		assertTrue(response.isActive());
+		assertEquals(Scope.parse("read write"), response.getScope());
+		assertEquals(new Base64URL("abc"), response.getX509CertificateSHA256Thumbprint());
+
+		assertEquals(3, response.toJSONObject().size());
 	}
 	
 	
@@ -287,6 +323,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertEquals(new Subject("ty.webb@example.com"), response.getSubject());
 		assertEquals(new Date(1493726400*1000L), response.getExpirationTime());
 		assertEquals(new Date(1493722800*1000L), response.getNotBeforeTime());
+		assertEquals(new Base64URL("bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2"), response.getX509CertificateConfirmation().getValue());
 		assertEquals(new Base64URL("bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2"), response.getX509CertificateSHA256Thumbprint());
 	}
 	

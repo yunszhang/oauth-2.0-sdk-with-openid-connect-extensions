@@ -853,3 +853,7 @@ version 5.53 (2018-02-20)
     * Overrides Actor.toString() with toJSONString().
     * Overrides X509CertificateConfirmation.toString() with
       toJSONObject().toJSONString().
+
+version 5.54 (2018-02-23)
+    * Updates TokenIntrospectionSuccessResponse to use new
+      X509CertificateConfirmation, deprecates old methods.
