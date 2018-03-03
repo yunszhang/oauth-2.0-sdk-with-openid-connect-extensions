@@ -857,3 +857,7 @@ version 5.53 (2018-02-20)
 version 5.54 (2018-02-23)
     * Updates TokenIntrospectionSuccessResponse to use new
       X509CertificateConfirmation, deprecates old methods.
+
+version 5.55 (2018-03-03)
+    * Updates KeyConverter to reflect AsymmetricJWK interface name change in
+      Nimbus JOSE+JWT 5.5 (iss #235).
