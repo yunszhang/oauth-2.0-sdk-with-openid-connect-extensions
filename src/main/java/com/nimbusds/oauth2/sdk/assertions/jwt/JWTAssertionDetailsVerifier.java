@@ -25,8 +25,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import com.nimbusds.oauth2.sdk.id.Audience;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import net.jcip.annotations.Immutable;
-import org.apache.commons.collections4.CollectionUtils;
 
 
 /**

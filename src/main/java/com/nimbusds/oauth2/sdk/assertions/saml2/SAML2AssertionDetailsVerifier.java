@@ -24,8 +24,8 @@ import java.util.Set;
 import com.nimbusds.jose.util.DateUtils;
 import com.nimbusds.jwt.proc.ClockSkewAware;
 import com.nimbusds.oauth2.sdk.id.Audience;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import net.jcip.annotations.Immutable;
-import org.apache.commons.collections4.CollectionUtils;
 
 
 /**

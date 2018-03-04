@@ -32,9 +32,9 @@ import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.oauth2.sdk.auth.*;
 import com.nimbusds.oauth2.sdk.id.Audience;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.X509CertificateUtils;
 import net.jcip.annotations.ThreadSafe;
-import org.apache.commons.collections4.CollectionUtils;
 
 
 /**
