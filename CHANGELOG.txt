@@ -861,3 +861,6 @@ version 5.54 (2018-02-23)
 version 5.55 (2018-03-03)
     * Updates KeyConverter to reflect AsymmetricJWK interface name change in
       Nimbus JOSE+JWT 5.5 (iss #235).
+
+version 5.56 (2018-03-04)
+    * Adds UserInfo.getIssuer() and setIssuer(Issuer) methods.

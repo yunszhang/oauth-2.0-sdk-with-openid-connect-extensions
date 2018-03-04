@@ -28,6 +28,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.TypelessAccessToken;
@@ -67,6 +68,12 @@ public class UserInfo extends ClaimsSet {
 	 * The subject claim name.
 	 */
 	public static final String SUB_CLAIM_NAME = "sub";
+	
+	
+	/**
+	 * The issuer claim name.
+	 */
+	public static final String ISS_CLAIM_NAME = "iss";
 
 
 	/**
@@ -191,6 +198,7 @@ public class UserInfo extends ClaimsSet {
 	
 	static {
 		stdClaimNames.add(SUB_CLAIM_NAME);
+		stdClaimNames.add(ISS_CLAIM_NAME);
 		stdClaimNames.add(NAME_CLAIM_NAME);
 		stdClaimNames.add(GIVEN_NAME_CLAIM_NAME);
 		stdClaimNames.add(FAMILY_NAME_CLAIM_NAME);
@@ -357,6 +365,33 @@ public class UserInfo extends ClaimsSet {
 	public Subject getSubject() {
 	
 		return new Subject(getStringClaim(SUB_CLAIM_NAME));
+	}
+	
+	
+	/**
+	 * Gets the issuer. Corresponds to the {@code iss} claim.
+	 *
+	 * @return The issuer, {@code null} if not specified.
+	 */
+	public Issuer getIssuer() {
+		
+		String iss = getStringClaim(ISS_CLAIM_NAME);
+		
+		return iss != null ? new Issuer(iss) : null;
+	}
+	
+	
+	/**
+	 * Sets the issuer. Corresponds to the {@code iss} claim.
+	 *
+	 * @param iss The issuer, {@code null} if not specified.
+	 */
+	public void setIssuer(final Issuer iss) {
+		
+		if (iss != null)
+			setClaim(ISS_CLAIM_NAME, iss.getValue());
+		else
+			setClaim(ISS_CLAIM_NAME, null);
 	}
 
 	

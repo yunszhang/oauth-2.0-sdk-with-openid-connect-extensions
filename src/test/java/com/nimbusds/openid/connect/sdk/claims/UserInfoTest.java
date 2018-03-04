@@ -26,6 +26,7 @@ import com.nimbusds.jose.util.DateUtils;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.TypelessAccessToken;
@@ -857,5 +858,34 @@ public class UserInfoTest extends TestCase {
 		} catch (IllegalArgumentException e) {
 			assertEquals("Distributed claims source ID conflict: src1", e.getMessage());
 		}
+	}
+	
+	
+	public void testIssuerClaim()
+		throws Exception {
+		
+		UserInfo userInfo = new UserInfo(new Subject("alice"));
+		
+		assertNull(userInfo.getIssuer());
+		
+		Issuer issuer = new Issuer("https://c2id.com");
+		
+		userInfo.setIssuer(issuer);
+		
+		assertEquals(issuer, userInfo.getIssuer());
+		
+		JSONObject jsonObject = userInfo.toJSONObject();
+		
+		assertEquals(userInfo.getSubject().getValue(), jsonObject.get("sub"));
+		assertEquals(issuer.getValue(), jsonObject.get("iss"));
+		assertEquals(2, jsonObject.size());
+		
+		userInfo = UserInfo.parse(jsonObject.toJSONString());
+		
+		assertEquals(issuer, userInfo.getIssuer());
+		
+		userInfo.setIssuer(null);
+		
+		assertNull(userInfo.getIssuer());
 	}
 }
