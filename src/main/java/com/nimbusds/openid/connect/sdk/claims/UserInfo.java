@@ -28,6 +28,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
@@ -399,6 +400,47 @@ public class UserInfo extends ClaimsSet {
 			setClaim(ISS_CLAIM_NAME, iss.getValue());
 		else
 			setClaim(ISS_CLAIM_NAME, null);
+	}
+	
+	
+	/**
+	 * Gets the audience. Corresponds to the {@code aud} claim.
+	 *
+	 * @return The audience list, {@code null} if not specified.
+	 */
+	public List<Audience> getAudience() {
+		
+		List<String> list = getStringListClaim(AUD_CLAIM_NAME);
+		
+		return list != null && ! list.isEmpty() ? Audience.create(list) : null;
+	}
+	
+	
+	/**
+	 * Sets the audience. Corresponds to the {@code aud} claim.
+	 *
+	 * @param aud The audience, {@code null} if not specified.
+	 */
+	public void setAudience(final Audience aud) {
+		
+		if (aud != null)
+			setAudience(aud.toSingleAudienceList());
+		else
+			setClaim(AUD_CLAIM_NAME, null);
+	}
+	
+	
+	/**
+	 * Sets the audience list. Corresponds to the {@code aud} claim.
+	 *
+	 * @param audList The audience list, {@code null} if not specified.
+	 */
+	public void setAudience(final List<Audience> audList) {
+	
+		if (audList != null)
+			setClaim(AUD_CLAIM_NAME, Audience.toStringList(audList));
+		else
+			setClaim(AUD_CLAIM_NAME, null);
 	}
 
 	

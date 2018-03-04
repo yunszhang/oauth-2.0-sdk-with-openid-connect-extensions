@@ -864,3 +864,5 @@ version 5.55 (2018-03-03)
 
 version 5.56 (2018-03-04)
     * Adds UserInfo.getIssuer() and setIssuer(Issuer) methods.
+    * Adds UserInfo.getAudience(), setAudience(Audience), and
+      setAudience(List<Audience>) methods.

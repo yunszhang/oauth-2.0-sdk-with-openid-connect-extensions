@@ -26,10 +26,12 @@ import com.nimbusds.jose.util.DateUtils;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.TypelessAccessToken;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
@@ -915,5 +917,61 @@ public class UserInfoTest extends TestCase {
 		userInfo.setIssuer(null);
 		
 		assertNull(userInfo.getIssuer());
+	}
+	
+	
+	
+	public void testAudienceClaim_single()
+		throws Exception {
+		
+		UserInfo userInfo = new UserInfo(new Subject("alice"));
+		
+		assertNull(userInfo.getAudience());
+		
+		Audience aud = new Audience("123");
+		
+		userInfo.setAudience(aud);
+		
+		assertEquals(aud.toSingleAudienceList(), userInfo.getAudience());
+		
+		JSONObject jsonObject = userInfo.toJSONObject();
+		
+		assertEquals(Audience.toStringList(aud), JSONObjectUtils.getStringList(jsonObject, "aud"));
+		
+		userInfo = UserInfo.parse(jsonObject.toJSONString());
+		
+		assertEquals(aud.toSingleAudienceList(), userInfo.getAudience());
+		
+		userInfo.setAudience((Audience) null);
+		
+		assertNull(userInfo.getAudience());
+	}
+	
+	
+	
+	public void testAudienceClaim_list()
+		throws Exception {
+		
+		UserInfo userInfo = new UserInfo(new Subject("alice"));
+		
+		assertNull(userInfo.getAudience());
+		
+		List<Audience> audList = Arrays.asList(new Audience("123"), new Audience("456"));
+		
+		userInfo.setAudience(audList);
+		
+		assertEquals(audList, userInfo.getAudience());
+		
+		JSONObject jsonObject = userInfo.toJSONObject();
+		
+		assertEquals(Audience.toStringList(audList), JSONObjectUtils.getStringList(jsonObject, "aud"));
+		
+		userInfo = UserInfo.parse(jsonObject.toJSONString());
+		
+		assertEquals(audList, userInfo.getAudience());
+		
+		userInfo.setAudience((List<Audience>)null);
+		
+		assertNull(userInfo.getAudience());
 	}
 }
