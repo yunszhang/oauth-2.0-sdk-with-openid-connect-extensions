@@ -18,9 +18,8 @@
 package com.nimbusds.oauth2.sdk.id;
 
 
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 import net.jcip.annotations.Immutable;
-
-import org.apache.commons.lang3.StringUtils;
 
 
 /**

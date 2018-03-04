@@ -23,10 +23,10 @@ import java.util.HashSet;
 import java.util.StringTokenizer;
 
 import com.nimbusds.oauth2.sdk.id.Identifier;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue;
 import net.jcip.annotations.Immutable;
 import net.jcip.annotations.NotThreadSafe;
-import org.apache.commons.lang3.StringUtils;
 
 
 /**

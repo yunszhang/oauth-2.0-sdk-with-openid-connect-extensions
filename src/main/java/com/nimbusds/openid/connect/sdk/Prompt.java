@@ -21,8 +21,8 @@ package com.nimbusds.openid.connect.sdk;
 import java.util.*;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 import net.jcip.annotations.NotThreadSafe;
-import org.apache.commons.lang3.StringUtils;
 
 
 /**

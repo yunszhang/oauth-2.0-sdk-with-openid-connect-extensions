@@ -24,8 +24,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 import net.jcip.annotations.Immutable;
-import org.apache.commons.lang3.StringUtils;
 
 
 /**

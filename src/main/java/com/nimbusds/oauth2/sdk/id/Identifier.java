@@ -21,10 +21,8 @@ package com.nimbusds.oauth2.sdk.id;
 import java.io.Serializable;
 import java.security.SecureRandom;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.nimbusds.jose.util.Base64URL;
-
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 import net.minidev.json.JSONAware;
 import net.minidev.json.JSONValue;
 

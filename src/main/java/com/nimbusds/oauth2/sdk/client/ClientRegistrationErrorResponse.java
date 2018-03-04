@@ -28,9 +28,9 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.token.BearerTokenError;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 
 
 /**
