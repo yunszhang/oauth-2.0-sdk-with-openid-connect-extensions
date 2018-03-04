@@ -74,6 +74,12 @@ public class UserInfo extends ClaimsSet {
 	 * The issuer claim name.
 	 */
 	public static final String ISS_CLAIM_NAME = "iss";
+	
+	
+	/**
+	 * The audience claim name.
+	 */
+	public static final String AUD_CLAIM_NAME = "aud";
 
 
 	/**
@@ -199,6 +205,7 @@ public class UserInfo extends ClaimsSet {
 	static {
 		stdClaimNames.add(SUB_CLAIM_NAME);
 		stdClaimNames.add(ISS_CLAIM_NAME);
+		stdClaimNames.add(AUD_CLAIM_NAME);
 		stdClaimNames.add(NAME_CLAIM_NAME);
 		stdClaimNames.add(GIVEN_NAME_CLAIM_NAME);
 		stdClaimNames.add(FAMILY_NAME_CLAIM_NAME);

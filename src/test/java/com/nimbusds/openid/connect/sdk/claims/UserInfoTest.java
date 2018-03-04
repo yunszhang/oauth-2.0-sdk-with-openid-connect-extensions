@@ -38,6 +38,34 @@ import net.minidev.json.JSONObject;
  * Tests the UserInfo claims set.
  */
 public class UserInfoTest extends TestCase {
+	
+	
+	public void testClaimNameConstants() {
+		
+		assertTrue(UserInfo.getStandardClaimNames().contains("sub"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("iss"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("aud"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("name"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("given_name"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("family_name"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("middle_name"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("nickname"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("preferred_username"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("profile"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("picture"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("website"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("email"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("email_verified"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("gender"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("birthdate"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("zoneinfo"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("locale"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("phone_number"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("phone_number_verified"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("address"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("updated_at"));
+		assertEquals(22, UserInfo.getStandardClaimNames().size());
+	}
 
 
 	public void testParseRoundTrip()
