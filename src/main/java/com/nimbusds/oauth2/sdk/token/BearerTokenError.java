@@ -57,6 +57,8 @@ import net.jcip.annotations.Immutable;
  *
  * <ul>
  *     <li>OAuth 2.0 Bearer Token Usage (RFC 6750), section 3.1.
+ *     <li>Hypertext Transfer Protocol (HTTP/1.1): Authentication (RFC 7235),
+ *         section 4.1.
  * </ul>
  */
 @Immutable
@@ -109,17 +111,83 @@ public class BearerTokenError extends ErrorObject {
 	
 	
 	/**
+	 * Returns {@code true} if the specified error code consists of valid
+	 * characters. Values for the "error" and "error_description"
+	 * attributes must not include characters outside the set %x20-21 /
+	 * %x23-5B / %x5D-7E. See RFC 6750, section 3.
+	 *
+	 * @param errorCode The error code string.
+	 *
+	 * @return {@code true} if the error code string contains valid
+	 *         characters, else {@code false}.
+	 */
+	public static boolean isCodeWithValidChars(final String errorCode) {
+		
+		for (char c: errorCode.toCharArray()) {
+			
+			if ((c < 0x20 || c > 0x21) && (c < 0x23 || c > 0x5B) && (c < 0x5D || c > 0x7E))
+				return false;
+		}
+		
+		return true;
+	}
+	
+	
+	/**
+	 * Returns {@code true} if the specified error description consists of
+	 * valid characters. Values for the "error" and "error_description"
+	 * attributes must not include characters outside the set %x20-21 /
+	 * %x23-5B / %x5D-7E. See RFC 6750, section 3.
+	 *
+	 * @param errorDescription The error description string.
+	 *
+	 * @return {@code true} if the error description string contains valid
+	 *         characters, else {@code false}.
+	 */
+	public static boolean isDescriptionWithValidChars(final String errorDescription) {
+	
+		return isCodeWithValidChars(errorDescription);
+	}
+	
+	
+	/**
+	 * Returns {@code true} if the specified scope consists of valid
+	 * characters. Values for the "scope" attributes must not include
+	 * characters outside the set %x21 / %x23-5B / %x5D-7E. See RFC 6750,
+	 * section 3.
+	 *
+	 * @param scope The scope.
+	 *
+	 * @return {@code true} if the scope contains valid characters, else
+	 *         {@code false}.
+	 */
+	public static boolean isScopeWithValidChars(final Scope scope) {
+		
+		
+		for (Scope.Value sv: scope) {
+			for (char c : sv.getValue().toCharArray()) {
+				
+				if ((c != 0x21) && (c < 0x23 || c > 0x5B) && (c < 0x5D || c > 0x7E))
+					return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	
+	/**
 	 * Regex pattern for matching the realm parameter of a WWW-Authenticate 
 	 * header.
 	 */
-	private static final Pattern realmPattern = Pattern.compile("realm=\"([^\"]+)");
+	private static final Pattern realmPattern = Pattern.compile("realm=\"(([^\\\\\"]|\\\\.)*)\"");
 
 	
 	/**
 	 * Regex pattern for matching the error parameter of a WWW-Authenticate 
 	 * header. Double quoting is optional.
 	 */
-	private static final Pattern errorPattern = Pattern.compile("error=[\"]?([\\w\\_-]+)[\"]?");
+	private static final Pattern errorPattern = Pattern.compile("error=(\"([\\w\\_-]+)\"|([\\w\\_-]+))");
 
 
 	/**
@@ -208,6 +276,15 @@ public class BearerTokenError extends ErrorObject {
 		super(code, description, httpStatusCode, uri);
 		this.realm = realm;
 		this.scope = scope;
+		
+		if (code != null && ! isCodeWithValidChars(code))
+			throw new IllegalArgumentException("The error code contains invalid ASCII characters, see RFC 6750, section 3");
+		
+		if (description != null && ! isDescriptionWithValidChars(description))
+			throw new IllegalArgumentException("The error description contains invalid ASCII characters, see RFC 6750, section 3");
+		
+		if (scope != null && ! isScopeWithValidChars(scope))
+			throw new IllegalArgumentException("The scope contains invalid ASCII characters, see RFC 6750, section 3");
 	}
 
 
@@ -322,10 +399,10 @@ public class BearerTokenError extends ErrorObject {
 		
 		int numParams = 0;
 		
-		// Serialise realm
+		// Serialise realm, may contain double quotes
 		if (realm != null) {
 			sb.append(" realm=\"");
-			sb.append(getRealm().replaceAll("\\\"","\\\\\""));
+			sb.append(getRealm().replaceAll("\"","\\\\\""));
 			sb.append('"');
 			
 			numParams++;
@@ -338,7 +415,7 @@ public class BearerTokenError extends ErrorObject {
 				sb.append(',');
 			
 			sb.append(" error=\"");
-			sb.append(getCode().replaceAll("\\\"","\\\\\""));
+			sb.append(getCode());
 			sb.append('"');
 			numParams++;
 			
@@ -348,7 +425,7 @@ public class BearerTokenError extends ErrorObject {
 					sb.append(',');
 
 				sb.append(" error_description=\"");
-				sb.append(getDescription().replaceAll("\\\"","\\\\\""));
+				sb.append(getDescription());
 				sb.append('"');
 				numParams++;
 			}
@@ -372,7 +449,7 @@ public class BearerTokenError extends ErrorObject {
 				sb.append(',');
 
 			sb.append(" scope=\"");
-			sb.append(scope.toString().replaceAll("\\\"","\\\\\""));
+			sb.append(scope.toString());
 			sb.append('"');
 		}
 
@@ -408,6 +485,9 @@ public class BearerTokenError extends ErrorObject {
 		if (m.find())
 			realm = m.group(1);
 		
+		if (realm != null)
+			realm = realm.replace("\\\"", "\""); // strip escaped double quotes
+		
 		
 		// Parse optional error 
 		String errorCode = null;
@@ -417,8 +497,12 @@ public class BearerTokenError extends ErrorObject {
 		m = errorPattern.matcher(wwwAuth);
 		
 		if (m.find()) {
-
-			errorCode = m.group(1);
+			
+			// Error code: try group with double quotes, else group with no quotes
+			errorCode = m.group(2) != null ? m.group(2) : m.group(3);
+			
+			if (errorCode != null && ! isCodeWithValidChars(errorCode))
+				errorCode = null; // found invalid chars
 
 			// Parse optional error description
 			m = errorDescriptionPattern.matcher(wwwAuth);
@@ -453,7 +537,7 @@ public class BearerTokenError extends ErrorObject {
 
 		return new BearerTokenError(errorCode, 
 			                    errorDescription, 
-			                    0, // HTTP status code
+			                    0, // HTTP status code not known
 			                    errorURI, 
 			                    realm, 
 			                    scope);
