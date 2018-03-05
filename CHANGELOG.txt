@@ -873,3 +873,6 @@ version 5.56 (2018-03-04)
       error_uri parameters (the URI syntax exception is swallowed).
     * Fixes parsing in BearerTokenError of WWW-Authenticate headers with
       escaped double quotes in the realm parameter.
+    * Updates PairwiseSubjectCodec.decode to return Map.Entry instead of Pair
+      (breaking change) (iss #231).
+    * Removes Apache Commons Lang 3 dependency (iss #231).
