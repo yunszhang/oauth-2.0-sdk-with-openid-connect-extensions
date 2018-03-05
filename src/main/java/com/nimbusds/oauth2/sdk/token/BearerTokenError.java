@@ -515,13 +515,10 @@ public class BearerTokenError extends ErrorObject {
 			m = errorURIPattern.matcher(wwwAuth);
 			
 			if (m.find()) {
-			
 				try {
 					errorURI = new URI(m.group(1));
-					
 				} catch (URISyntaxException e) {
-				
-					throw new ParseException("Invalid error URI: " + m.group(1), e);
+					// ignore, URI is not required to construct error object
 				}
 			}
 		}

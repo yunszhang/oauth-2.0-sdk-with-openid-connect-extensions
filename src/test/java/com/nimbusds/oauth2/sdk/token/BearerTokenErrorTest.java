@@ -217,4 +217,14 @@ public class BearerTokenErrorTest extends TestCase {
 		// skip invalid error code
 		assertNull(BearerTokenError.parse("Bearer error=\"\"invalid token\"").getCode());
 	}
+	
+	
+	public void testIgnoreParseInvalidErrorURI()
+		throws ParseException {
+		
+		BearerTokenError error = BearerTokenError.parse("Bearer error=invalid_token, error_uri=\"a b c\"");
+		
+		assertEquals(BearerTokenError.INVALID_TOKEN.getCode(), error.getCode());
+		assertNull(error.getURI());
+	}
 }
