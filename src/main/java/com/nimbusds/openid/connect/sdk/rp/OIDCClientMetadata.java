@@ -28,13 +28,13 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.oauth2.sdk.client.RegistrationError;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.id.SectorID;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.apache.commons.collections.CollectionUtils;
 
 
 /**

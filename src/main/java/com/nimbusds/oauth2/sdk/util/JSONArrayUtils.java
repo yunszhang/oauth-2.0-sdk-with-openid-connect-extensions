@@ -26,7 +26,6 @@ import java.util.List;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import net.minidev.json.JSONArray;
-import org.apache.commons.collections.CollectionUtils;
 
 
 /**
