@@ -862,7 +862,7 @@ version 5.55 (2018-03-03)
     * Updates KeyConverter to reflect AsymmetricJWK interface name change in
       Nimbus JOSE+JWT 5.5 (iss #235).
 
-version 5.56 (2018-03-04)
+version 5.56 (2018-03-05)
     * Adds UserInfo.getIssuer() and setIssuer(Issuer) methods.
     * Adds UserInfo.getAudience(), setAudience(Audience), and
       setAudience(List<Audience>) methods.
@@ -877,3 +877,4 @@ version 5.56 (2018-03-04)
       (breaking change) (iss #231).
     * Removes Apache Commons Lang 3 dependency (iss #231).
     * Removes Apache Commons Collections 4 dependency (iss #232).
+    * Bumps Nimbus JOSE+JWT dependency to 5.5+.
