@@ -20,6 +20,7 @@ package com.nimbusds.oauth2.sdk.auth;
 
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
+import java.util.AbstractMap;
 import java.util.Map;
 
 import com.nimbusds.jose.util.Base64URL;
@@ -28,7 +29,6 @@ import com.nimbusds.jose.util.X509CertUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 
 /**
@@ -109,7 +109,7 @@ public final class X509CertificateConfirmation {
 		JSONObject cnf = new JSONObject();
 		cnf.put("x5t#S256", x5tS256.toString());
 		
-		return new ImmutablePair<>(
+		return new AbstractMap.SimpleImmutableEntry<>(
 			"cnf",
 			cnf
 		);
