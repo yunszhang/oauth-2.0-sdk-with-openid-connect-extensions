@@ -21,10 +21,10 @@ package com.nimbusds.openid.connect.sdk.id;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.security.Provider;
+import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.id.Subject;
 import net.jcip.annotations.ThreadSafe;
-import org.apache.commons.lang3.tuple.Pair;
 
 
 /**
@@ -155,7 +155,7 @@ public abstract class PairwiseSubjectCodec {
 	 * @throws InvalidPairwiseSubjectException If the pairwise subject is
 	 *                                         invalid.
 	 */
-	public Pair<SectorID,Subject> decode(final Subject pairwiseSubject)
+	public Map.Entry<SectorID,Subject> decode(final Subject pairwiseSubject)
 		throws InvalidPairwiseSubjectException {
 
 		throw new UnsupportedOperationException("Pairwise subject decoding is not supported");

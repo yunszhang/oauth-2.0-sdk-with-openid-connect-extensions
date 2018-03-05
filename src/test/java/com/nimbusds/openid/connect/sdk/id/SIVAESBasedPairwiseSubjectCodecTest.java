@@ -53,8 +53,8 @@ public class SIVAESBasedPairwiseSubjectCodecTest extends TestCase {
 			assertEquals(pairwiseSubject, codec.encode(sectorID, subject));
 		}
 		
-		assertEquals(subject, codec.decode(pairwiseSubject).getRight());
-		assertEquals(sectorID, codec.decode(pairwiseSubject).getLeft());
+		assertEquals(sectorID, codec.decode(pairwiseSubject).getKey());
+		assertEquals(subject, codec.decode(pairwiseSubject).getValue());
 	}
 	
 	
@@ -80,8 +80,8 @@ public class SIVAESBasedPairwiseSubjectCodecTest extends TestCase {
 			assertEquals(pairwiseSubject, codec.encode(sectorID, subject));
 		}
 		
-		assertEquals(subject, codec.decode(pairwiseSubject).getRight());
-		assertEquals(sectorID, codec.decode(pairwiseSubject).getLeft());
+		assertEquals(sectorID, codec.decode(pairwiseSubject).getKey());
+		assertEquals(subject, codec.decode(pairwiseSubject).getValue());
 	}
 	
 	
@@ -107,13 +107,12 @@ public class SIVAESBasedPairwiseSubjectCodecTest extends TestCase {
 			assertEquals(pairwiseSubject, codec.encode(sectorID, subject));
 		}
 		
-		assertEquals(subject, codec.decode(pairwiseSubject).getRight());
-		assertEquals(sectorID, codec.decode(pairwiseSubject).getLeft());
+		assertEquals(sectorID, codec.decode(pairwiseSubject).getKey());
+		assertEquals(subject, codec.decode(pairwiseSubject).getValue());
 	}
 	
 	
-	public void testUnsupportedKeyLength()
-		throws Exception {
+	public void testUnsupportedKeyLength() {
 		
 		byte[] keyBytes = new byte[ByteUtils.byteLength(128)];
 		new SecureRandom().nextBytes(keyBytes);
@@ -127,8 +126,7 @@ public class SIVAESBasedPairwiseSubjectCodecTest extends TestCase {
 	}
 	
 	
-	public void testDecryptFail()
-		throws Exception {
+	public void testDecryptFail() {
 		
 		byte[] keyBytes = new byte[ByteUtils.byteLength(256)];
 		new SecureRandom().nextBytes(keyBytes);

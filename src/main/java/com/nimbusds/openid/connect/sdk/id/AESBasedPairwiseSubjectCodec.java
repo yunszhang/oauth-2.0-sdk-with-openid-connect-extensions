@@ -18,6 +18,8 @@
 package com.nimbusds.openid.connect.sdk.id;
 
 
+import java.util.AbstractMap;
+import java.util.Map;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
@@ -25,8 +27,6 @@ import javax.crypto.spec.IvParameterSpec;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import net.jcip.annotations.ThreadSafe;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
 
 /**
@@ -132,7 +132,7 @@ public class AESBasedPairwiseSubjectCodec extends PairwiseSubjectCodec {
 
 
 	@Override
-	public Pair<SectorID, Subject> decode(final Subject pairwiseSubject)
+	public Map.Entry<SectorID, Subject> decode(final Subject pairwiseSubject)
 		throws InvalidPairwiseSubjectException {
 
 		byte[] cipherText = new Base64URL(pairwiseSubject.getValue()).decode();
@@ -158,6 +158,6 @@ public class AESBasedPairwiseSubjectCodec extends PairwiseSubjectCodec {
 			throw new InvalidPairwiseSubjectException("Invalid format: Unexpected number of tokens: " + parts.length);
 		}
 
-		return new ImmutablePair<>(new SectorID(parts[0]), new Subject(parts[1]));
+		return new AbstractMap.SimpleImmutableEntry<>(new SectorID(parts[0]), new Subject(parts[1]));
 	}
 }

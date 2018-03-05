@@ -20,6 +20,7 @@ package com.nimbusds.openid.connect.sdk.id;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Map;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
@@ -27,7 +28,6 @@ import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import junit.framework.TestCase;
-import org.apache.commons.lang3.tuple.Pair;
 
 
 public class AESBasedPairwiseSubjectCodecTest extends TestCase {
@@ -58,7 +58,7 @@ public class AESBasedPairwiseSubjectCodecTest extends TestCase {
 		Subject pairwiseSubject = codec.encode(sectorID, localSubject);
 		System.out.println("Pairwise subject: " + pairwiseSubject);
 
-		Pair<SectorID,Subject> out = codec.decode(pairwiseSubject);
+		Map.Entry<SectorID,Subject> out = codec.decode(pairwiseSubject);
 		assertEquals(sectorID, out.getKey());
 		assertEquals(localSubject, out.getValue());
 	}
@@ -89,7 +89,7 @@ public class AESBasedPairwiseSubjectCodecTest extends TestCase {
 		Subject pairwiseSubject = codec.encode(sectorID, localSubject);
 		System.out.println("Pairwise subject: " + pairwiseSubject);
 
-		Pair<SectorID,Subject> out = codec.decode(pairwiseSubject);
+		Map.Entry<SectorID,Subject> out = codec.decode(pairwiseSubject);
 		assertEquals(sectorID, out.getKey());
 		assertEquals(localSubject, out.getValue());
 	}
@@ -123,7 +123,7 @@ public class AESBasedPairwiseSubjectCodecTest extends TestCase {
 		Subject pairwiseSubject = codec.encode(sectorID, localSubject);
 		System.out.println("Pairwise subject: " + pairwiseSubject);
 
-		Pair<SectorID,Subject> out = codec.decode(pairwiseSubject);
+		Map.Entry<SectorID,Subject> out = codec.decode(pairwiseSubject);
 		assertEquals(sectorID, out.getKey());
 		assertEquals(localSubject, out.getValue());
 	}
