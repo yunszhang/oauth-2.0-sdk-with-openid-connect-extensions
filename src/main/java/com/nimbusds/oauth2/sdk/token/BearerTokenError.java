@@ -23,14 +23,11 @@ import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.jcip.annotations.Immutable;
-
-import org.apache.commons.lang3.StringEscapeUtils;
-
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import net.jcip.annotations.Immutable;
 
 
 /**
@@ -328,7 +325,7 @@ public class BearerTokenError extends ErrorObject {
 		// Serialise realm
 		if (realm != null) {
 			sb.append(" realm=\"");
-			sb.append(StringEscapeUtils.escapeJava(realm));
+			sb.append(getRealm().replaceAll("\\\"","\\\\\""));
 			sb.append('"');
 			
 			numParams++;
@@ -341,7 +338,7 @@ public class BearerTokenError extends ErrorObject {
 				sb.append(',');
 			
 			sb.append(" error=\"");
-			sb.append(StringEscapeUtils.escapeJava(getCode()));
+			sb.append(getCode().replaceAll("\\\"","\\\\\""));
 			sb.append('"');
 			numParams++;
 			
@@ -351,7 +348,7 @@ public class BearerTokenError extends ErrorObject {
 					sb.append(',');
 
 				sb.append(" error_description=\"");
-				sb.append(StringEscapeUtils.escapeJava(getDescription()));
+				sb.append(getDescription().replaceAll("\\\"","\\\\\""));
 				sb.append('"');
 				numParams++;
 			}
@@ -362,7 +359,7 @@ public class BearerTokenError extends ErrorObject {
 					sb.append(',');
 				
 				sb.append(" error_uri=\"");
-				sb.append(StringEscapeUtils.escapeJava(getURI().toString()));
+				sb.append(getURI().toString()); // double quotes always escaped in URI representation
 				sb.append('"');
 				numParams++;
 			}
@@ -375,7 +372,7 @@ public class BearerTokenError extends ErrorObject {
 				sb.append(',');
 
 			sb.append(" scope=\"");
-			sb.append(StringEscapeUtils.escapeJava(scope.toString()));
+			sb.append(scope.toString().replaceAll("\\\"","\\\\\""));
 			sb.append('"');
 		}
 

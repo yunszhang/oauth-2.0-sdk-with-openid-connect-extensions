@@ -20,14 +20,12 @@ package com.nimbusds.oauth2.sdk.token;
 
 import java.net.URI;
 
+import com.nimbusds.oauth2.sdk.ParseException;
 import junit.framework.TestCase;
 
 import com.nimbusds.oauth2.sdk.Scope;
 
 
-/**
- * Tests the bearer token error class.
- */
 public class BearerTokenErrorTest extends TestCase {
 
 
@@ -49,8 +47,6 @@ public class BearerTokenErrorTest extends TestCase {
 		assertEquals("invalid_token", error.getCode());
 
 		String wwwAuth = error.toWWWAuthenticateHeader();
-
-		System.out.println("WWW-Authenticate: " + wwwAuth);
 
 		error = BearerTokenError.parse(wwwAuth);
 
@@ -88,8 +84,6 @@ public class BearerTokenErrorTest extends TestCase {
 		error = error.setScope(Scope.parse("offline_access"));
 
 		String wwwAuth = error.toWWWAuthenticateHeader();
-
-		System.out.println("WWW-Authenticate: " + wwwAuth);
 
 		error = BearerTokenError.parse(wwwAuth);
 
@@ -165,5 +159,28 @@ public class BearerTokenErrorTest extends TestCase {
 		assertEquals("Invalid access token", error.getDescription());
 		assertNull(error.getURI());
 		assertEquals("https://acounts.google.com/", error.getRealm());
+	}
+	
+	
+	public void testToWWWAuthenticateHeaderEscapeDoubleQuotes()
+		throws ParseException {
+		
+		BearerTokenError error = new BearerTokenError(
+			"\"invalid_token\"",
+			"Invalid token \"abc\"",
+			403,
+			URI.create("https://c2id.com/api/errors/%22invalid_token%22"),
+			"\"realm\"",
+			new Scope("\"read\"", "\"write\""));
+		
+		assertEquals("Bearer realm=\"\\\"realm\\\"\", error=\"\\\"invalid_token\\\"\", error_description=\"Invalid token \\\"abc\\\"\", error_uri=\"https://c2id.com/api/errors/%22invalid_token%22\", scope=\"\\\"read\\\" \\\"write\\\"\"", error.toWWWAuthenticateHeader());
+		
+		BearerTokenError parsed = BearerTokenError.parse(error.toWWWAuthenticateHeader());
+		
+		assertEquals(error.getCode(), parsed.getCode());
+		assertEquals(error.getDescription(), parsed.getDescription());
+		assertEquals(error.getHTTPStatusCode(), parsed.getHTTPStatusCode());
+		assertEquals(error.getURI(), parsed.getURI());
+		assertEquals(error.getScope(), parsed.getScope());
 	}
 }
