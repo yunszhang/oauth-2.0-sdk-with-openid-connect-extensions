@@ -876,3 +876,4 @@ version 5.56 (2018-03-04)
     * Updates PairwiseSubjectCodec.decode to return Map.Entry instead of Pair
       (breaking change) (iss #231).
     * Removes Apache Commons Lang 3 dependency (iss #231).
+    * Removes Apache Commons Collections 4 dependency (iss #232).
