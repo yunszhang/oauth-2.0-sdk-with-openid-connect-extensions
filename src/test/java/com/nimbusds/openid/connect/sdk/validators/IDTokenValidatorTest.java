@@ -24,10 +24,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -60,9 +57,7 @@ import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 import junit.framework.TestCase;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+import org.junit.Assert;
 
 
 /**
@@ -653,7 +648,7 @@ public class IDTokenValidatorTest extends TestCase {
 	}
 
 
-	public static Pair<OIDCProviderMetadata,List<RSAKey>> createOPMetadata()
+	public static Map.Entry<OIDCProviderMetadata,List<RSAKey>> createOPMetadata()
 		throws Exception {
 
 		// Generate 2 RSA keys for the OP
@@ -684,7 +679,7 @@ public class IDTokenValidatorTest extends TestCase {
 		opMetadata.setTokenEndpointAuthMethods(Collections.singletonList(ClientAuthenticationMethod.CLIENT_SECRET_BASIC));
 		opMetadata.applyDefaults();
 
-		return new ImmutablePair<>(opMetadata, Arrays.asList(rsaJWK1, rsaJWK2));
+		return new AbstractMap.SimpleImmutableEntry<>(opMetadata, Arrays.asList(rsaJWK1, rsaJWK2));
 	}
 
 
@@ -692,7 +687,7 @@ public class IDTokenValidatorTest extends TestCase {
 		throws Exception {
 
 		// Create OP metadata
-		OIDCProviderMetadata opMetadata = createOPMetadata().getLeft();
+		OIDCProviderMetadata opMetadata = createOPMetadata().getKey();
 
 		// Create client registration
 		OIDCClientMetadata metadata = new OIDCClientMetadata();
@@ -712,7 +707,7 @@ public class IDTokenValidatorTest extends TestCase {
 		// Check JWS key selector
 		List<Key> matches = v.getJWSKeySelector().selectJWSKeys(new JWSHeader(JWSAlgorithm.HS256), null);
 		assertEquals(1, matches.size());
-		assertTrue(ArrayUtils.isEquals(clientInfo.getSecret().getValueBytes(), matches.get(0).getEncoded()));
+		Assert.assertArrayEquals(clientInfo.getSecret().getValueBytes(), matches.get(0).getEncoded());
 
 		matches = v.getJWSKeySelector().selectJWSKeys(new JWSHeader.Builder(JWSAlgorithm.HS256).keyID("xxx").build(), null);
 		assertTrue(matches.isEmpty());

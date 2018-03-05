@@ -54,7 +54,7 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
-import org.apache.commons.lang3.ArrayUtils;
+import org.junit.Assert;
 
 
 public class LogoutTokenValidatorTest extends TestCase {
@@ -645,7 +645,7 @@ public class LogoutTokenValidatorTest extends TestCase {
 		throws Exception {
 		
 		// Create OP metadata (based on ID_token algs)
-		OIDCProviderMetadata opMetadata = IDTokenValidatorTest.createOPMetadata().getLeft();
+		OIDCProviderMetadata opMetadata = IDTokenValidatorTest.createOPMetadata().getKey();
 		
 		// Create client registration
 		OIDCClientMetadata metadata = new OIDCClientMetadata();
@@ -665,7 +665,7 @@ public class LogoutTokenValidatorTest extends TestCase {
 		// Check JWS key selector
 		List<Key> matches = v.getJWSKeySelector().selectJWSKeys(new JWSHeader(JWSAlgorithm.HS256), null);
 		assertEquals(1, matches.size());
-		assertTrue(ArrayUtils.isEquals(clientInfo.getSecret().getValueBytes(), matches.get(0).getEncoded()));
+		Assert.assertArrayEquals(clientInfo.getSecret().getValueBytes(), matches.get(0).getEncoded());
 		
 		matches = v.getJWSKeySelector().selectJWSKeys(new JWSHeader.Builder(JWSAlgorithm.HS256).keyID("xxx").build(), null);
 		assertTrue(matches.isEmpty());

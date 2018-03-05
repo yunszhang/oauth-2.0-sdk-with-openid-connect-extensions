@@ -24,10 +24,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static net.jadler.Jadler.*;
 
@@ -53,8 +50,6 @@ import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 import junit.framework.TestCase;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.After;
 import org.junit.Before;
 
@@ -77,7 +72,7 @@ public class IDTokenValidatorWithHTTPTest extends TestCase {
 	}
 
 
-	private Pair<OIDCProviderMetadata,List<RSAKey>> createOPMetadata()
+	private Map.Entry<OIDCProviderMetadata,List<RSAKey>> createOPMetadata()
 		throws Exception {
 
 		// Generate 2 RSA keys for the OP
@@ -116,7 +111,7 @@ public class IDTokenValidatorWithHTTPTest extends TestCase {
 			.withHeader("Content-Type", "application/json")
 			.withBody(new JWKSet(Arrays.asList((JWK)rsaJWK1, (JWK)rsaJWK2)).toJSONObject().toJSONString());
 
-		return new ImmutablePair<>(opMetadata, Arrays.asList(rsaJWK1, rsaJWK2));
+		return new AbstractMap.SimpleImmutableEntry<>(opMetadata, Arrays.asList(rsaJWK1, rsaJWK2));
 	}
 
 
@@ -124,10 +119,10 @@ public class IDTokenValidatorWithHTTPTest extends TestCase {
 		throws Exception {
 
 		// Create OP metadata
-		Pair<OIDCProviderMetadata,List<RSAKey>> opInfo = createOPMetadata();
-		OIDCProviderMetadata opMetadata = opInfo.getLeft();
-		RSAKey rsaKey1 = opInfo.getRight().get(0);
-		RSAKey rsaKey2 = opInfo.getRight().get(1);
+		Map.Entry<OIDCProviderMetadata,List<RSAKey>> opInfo = createOPMetadata();
+		OIDCProviderMetadata opMetadata = opInfo.getKey();
+		RSAKey rsaKey1 = opInfo.getValue().get(0);
+		RSAKey rsaKey2 = opInfo.getValue().get(1);
 
 		// Create client registration
 		OIDCClientMetadata metadata = new OIDCClientMetadata();
@@ -224,10 +219,10 @@ public class IDTokenValidatorWithHTTPTest extends TestCase {
 		throws Exception {
 
 		// Create OP metadata
-		Pair<OIDCProviderMetadata,List<RSAKey>> opInfo = createOPMetadata();
-		OIDCProviderMetadata opMetadata = opInfo.getLeft();
-		RSAKey rsaKey1 = opInfo.getRight().get(0);
-		RSAKey rsaKey2 = opInfo.getRight().get(1);
+		Map.Entry<OIDCProviderMetadata,List<RSAKey>> opInfo = createOPMetadata();
+		OIDCProviderMetadata opMetadata = opInfo.getKey();
+		RSAKey rsaKey1 = opInfo.getValue().get(0);
+		RSAKey rsaKey2 = opInfo.getValue().get(1);
 
 		// Create client registration
 		KeyPairGenerator pairGen = KeyPairGenerator.getInstance("RSA");
@@ -344,10 +339,10 @@ public class IDTokenValidatorWithHTTPTest extends TestCase {
 		throws Exception {
 		
 		// Create OP metadata
-		Pair<OIDCProviderMetadata,List<RSAKey>> opInfo = createOPMetadata();
-		OIDCProviderMetadata opMetadata = opInfo.getLeft();
-		RSAKey rsaKey1 = opInfo.getRight().get(0);
-		RSAKey rsaKey2 = opInfo.getRight().get(1);
+		Map.Entry<OIDCProviderMetadata,List<RSAKey>> opInfo = createOPMetadata();
+		OIDCProviderMetadata opMetadata = opInfo.getKey();
+		RSAKey rsaKey1 = opInfo.getValue().get(0);
+		RSAKey rsaKey2 = opInfo.getValue().get(1);
 		
 		// Create client registration
 		OIDCClientMetadata metadata = new OIDCClientMetadata();
