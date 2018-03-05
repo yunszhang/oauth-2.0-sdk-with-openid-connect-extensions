@@ -29,7 +29,6 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 
 /**
@@ -438,14 +437,14 @@ public class ClaimsRequest {
 	/**
 	 * The requested ID token claims, keyed by claim name and language tag.
 	 */
-	private final Map<ImmutablePair<String,LangTag>,Entry> idTokenClaims =
+	private final Map<Map.Entry<String,LangTag>,Entry> idTokenClaims =
 		new HashMap<>();
 
 
 	/**
 	 * The requested UserInfo claims, keyed by claim name and language tag.
 	 */
-	private final Map<ImmutablePair<String,LangTag>,Entry> userInfoClaims =
+	private final Map<Map.Entry<String,LangTag>,Entry> userInfoClaims =
 		new HashMap<>();
 	
 
@@ -558,8 +557,9 @@ public class ClaimsRequest {
 	 */
 	public void addIDTokenClaim(final Entry entry) {
 
-		ImmutablePair<String,LangTag> key = 
-			new ImmutablePair<>(entry.getClaimName(), entry.getLangTag());
+		Map.Entry<String,LangTag> key = new AbstractMap.SimpleImmutableEntry<>(
+			entry.getClaimName(),
+			entry.getLangTag());
 
 		idTokenClaims.put(key, entry);
 	}
@@ -608,8 +608,9 @@ public class ClaimsRequest {
 	 */
 	public Entry removeIDTokenClaim(final String claimName, final LangTag langTag) {
 
-		ImmutablePair<String,LangTag> key = 
-			new ImmutablePair<>(claimName, langTag);
+		Map.Entry<String,LangTag> key = new AbstractMap.SimpleImmutableEntry<>(
+			claimName,
+			langTag);
 
 		return idTokenClaims.remove(key);
 	}
@@ -628,13 +629,13 @@ public class ClaimsRequest {
 
 		Collection<Entry> removedClaims = new LinkedList<>();
 
-		Iterator<Map.Entry<ImmutablePair<String,LangTag>,Entry>> it = idTokenClaims.entrySet().iterator();
+		Iterator<Map.Entry<Map.Entry<String,LangTag>,Entry>> it = idTokenClaims.entrySet().iterator();
 
 		while (it.hasNext()) {
 
-			Map.Entry<ImmutablePair<String,LangTag>,Entry> reqEntry = it.next();
+			Map.Entry<Map.Entry<String,LangTag>,Entry> reqEntry = it.next();
 
-			if (reqEntry.getKey().getLeft().equals(claimName)) {
+			if (reqEntry.getKey().getKey().equals(claimName)) {
 
 				removedClaims.add(reqEntry.getValue());
 
@@ -730,8 +731,9 @@ public class ClaimsRequest {
 	 */
 	public void addUserInfoClaim(final Entry entry) {
 
-		ImmutablePair<String,LangTag> key = 
-			new ImmutablePair<>(entry.getClaimName(), entry.getLangTag());
+		Map.Entry<String,LangTag> key = new AbstractMap.SimpleImmutableEntry<>(
+			entry.getClaimName(),
+			entry.getLangTag());
 
 		userInfoClaims.put(key, entry);
 	}
@@ -780,8 +782,9 @@ public class ClaimsRequest {
 	 */
 	public Entry removeUserInfoClaim(final String claimName, final LangTag langTag) {
 
-		ImmutablePair<String,LangTag> key = 
-			new ImmutablePair<>(claimName, langTag);
+		Map.Entry<String,LangTag> key = new AbstractMap.SimpleImmutableEntry<>(
+			claimName,
+			langTag);
 
 		return userInfoClaims.remove(key);
 	}
@@ -800,13 +803,13 @@ public class ClaimsRequest {
 
 		Collection<Entry> removedClaims = new LinkedList<>();
 
-		Iterator<Map.Entry<ImmutablePair<String,LangTag>,Entry>> it = userInfoClaims.entrySet().iterator();
+		Iterator<Map.Entry<Map.Entry<String,LangTag>,Entry>> it = userInfoClaims.entrySet().iterator();
 
 		while (it.hasNext()) {
 
-			Map.Entry<ImmutablePair<String,LangTag>,Entry> reqEntry = it.next();
+			Map.Entry<Map.Entry<String,LangTag>,Entry> reqEntry = it.next();
 
-			if (reqEntry.getKey().getLeft().equals(claimName)) {
+			if (reqEntry.getKey().getKey().equals(claimName)) {
 
 				removedClaims.add(reqEntry.getValue());
 
