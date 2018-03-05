@@ -869,3 +869,5 @@ version 5.56 (2018-03-04)
     * Updates the constructor of BearerTokenError to reject error code, error
       description and scope arguments with invalid characters. See RFC 6750,
       section 3.
+    * Fixes parsing in BearerTokenError of WWW-Authenticate headers with
+      escaped double quotes in the realm parameter.
