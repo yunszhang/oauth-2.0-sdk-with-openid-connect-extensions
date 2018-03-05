@@ -866,3 +866,6 @@ version 5.56 (2018-03-04)
     * Adds UserInfo.getIssuer() and setIssuer(Issuer) methods.
     * Adds UserInfo.getAudience(), setAudience(Audience), and
       setAudience(List<Audience>) methods.
+    * Updates the constructor of BearerTokenError to reject error code, error
+      description and scope arguments with invalid characters. See RFC 6750,
+      section 3.
