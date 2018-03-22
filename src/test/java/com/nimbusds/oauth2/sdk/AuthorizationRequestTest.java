@@ -29,6 +29,7 @@ import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
+import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import junit.framework.TestCase;
 
@@ -621,5 +622,35 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(in.getCodeChallengeMethod(), out.getCodeChallengeMethod());
 		assertEquals(in.getCustomParameters(), out.getCustomParameters());
 		assertEquals(in.getEndpointURI(), out.getEndpointURI());
+	}
+	
+	
+	public void testQueryParamsInEndpoint()
+		throws Exception {
+		
+		URI endpoint = new URI("https://c2id.com/login?foo=bar");
+		
+		AuthorizationRequest request = new AuthorizationRequest(endpoint, new ResponseType(ResponseType.Value.CODE), new ClientID("123"));
+		
+		// query parameters belonging to the authz endpoint not included here
+		Map<String, String> requestParameters = request.toParameters();
+		assertEquals("code", requestParameters.get("response_type"));
+		assertEquals("123", requestParameters.get("client_id"));
+		assertEquals(2, requestParameters.size());
+		
+		Map<String, String> queryParams = URLUtils.parseParameters(request.toQueryString());
+		assertEquals("bar", queryParams.get("foo"));
+		assertEquals("code", queryParams.get("response_type"));
+		assertEquals("123", queryParams.get("client_id"));
+		assertEquals(3, queryParams.size());
+		
+		URI redirectToAS = request.toURI();
+		
+		Map<String, String> finalParameters = URLUtils.parseParameters(redirectToAS.getQuery());
+		assertEquals("bar", finalParameters.get("foo"));
+		assertEquals("code", finalParameters.get("response_type"));
+		assertEquals("123", finalParameters.get("client_id"));
+		assertEquals(3, finalParameters.size());
+		
 	}
 }

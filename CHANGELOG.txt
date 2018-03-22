@@ -878,3 +878,8 @@ version 5.56 (2018-03-05)
     * Removes Apache Commons Lang 3 dependency (iss #231).
     * Removes Apache Commons Collections 4 dependency (iss #232).
     * Bumps Nimbus JOSE+JWT dependency to 5.5+.
+
+version 5.57 (2018-03-22)
+    * Adds new URIUtils.stripQueryString method.
+    * Fixes AuthorizationRequest and AuthenticationRequest serialisation of
+      query parameters in the authorisation endpoint URI (iss #237).

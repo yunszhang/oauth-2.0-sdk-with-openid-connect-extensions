@@ -754,7 +754,9 @@ public class AuthorizationRequest extends AbstractRequest {
 
 
 	/**
-	 * Returns the parameters for this authorisation request.
+	 * Returns the parameters for this authorisation request. Query
+	 * parameters which are part of the authorisation endpoint are not
+	 * included.
 	 *
 	 * <p>Example parameters:
 	 *
@@ -821,7 +823,13 @@ public class AuthorizationRequest extends AbstractRequest {
 	 */
 	public String toQueryString() {
 		
-		return URLUtils.serializeParameters(toParameters());
+		Map<String, String> params = new HashMap<>();
+		if (getEndpointURI() != null) {
+			params.putAll(URLUtils.parseParameters(getEndpointURI().getQuery()));
+		}
+		params.putAll(toParameters());
+		
+		return URLUtils.serializeParameters(params);
 	}
 
 
@@ -846,8 +854,8 @@ public class AuthorizationRequest extends AbstractRequest {
 
 		if (getEndpointURI() == null)
 			throw new SerializeException("The authorization endpoint URI is not specified");
-
-		StringBuilder sb = new StringBuilder(getEndpointURI().toString());
+		
+		StringBuilder sb = new StringBuilder(URIUtils.stripQueryString(getEndpointURI()).toString());
 		sb.append('?');
 		sb.append(toQueryString());
 		try {

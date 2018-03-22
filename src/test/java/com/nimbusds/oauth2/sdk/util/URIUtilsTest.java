@@ -66,4 +66,17 @@ public class URIUtilsTest extends TestCase {
 		
 		assertEquals("https://example.com", URIUtils.removeTrailingSlash(uri).toString());
 	}
+	
+	
+	public void testStripQueryString() {
+		
+		// Null safe
+		assertNull(URIUtils.stripQueryString(null));
+		
+		URI out = URIUtils.stripQueryString(URI.create("https://client.example.com:8080/endpoints/openid/connect/cb?param1=one&param2=two#fragment"));
+		assertEquals("https://client.example.com:8080/endpoints/openid/connect/cb#fragment", out.toString());
+		
+		out = URIUtils.stripQueryString(URI.create("https://c2id.com:8080/login?param1=one&param2=two"));
+		assertEquals("https://c2id.com:8080/login", out.toString());
+	}
 }

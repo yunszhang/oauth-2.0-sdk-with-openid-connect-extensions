@@ -53,6 +53,28 @@ public class URIUtils {
 	
 	
 	/**
+	 * Strips the query string from the specified URI.
+	 *
+	 * @param uri The URI. May be {@code null}.'
+	 *
+	 * @return The URI with stripped query string, {@code null} if the
+	 *         original URI is {@code null} or doesn't specify a protocol.
+	 */
+	public static URI stripQueryString(final URI uri) {
+		
+		if (uri == null)
+			return null;
+		
+		try {
+			return new URI(uri.getScheme(), null, uri.getHost(), uri.getPort(), uri.getPath(), null, uri.getFragment());
+			
+		} catch (URISyntaxException e) {
+			return null;
+		}
+	}
+	
+	
+	/**
 	 * Removes the trailing slash ("/") from the specified URI, if present.
 	 *
 	 * @param uri The URI. May be {@code null}.

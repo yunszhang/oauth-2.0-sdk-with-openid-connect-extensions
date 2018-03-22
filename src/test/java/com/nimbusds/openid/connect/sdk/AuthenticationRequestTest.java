@@ -42,6 +42,7 @@ import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
+import com.nimbusds.oauth2.sdk.util.URLUtils;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import junit.framework.TestCase;
 
@@ -54,7 +55,6 @@ public class AuthenticationRequestTest extends TestCase {
 		"eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFt" +
      		"cGxlLmNvbS9pc19yb290Ijp0cnVlfQ." +
      		"dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
-
 
 
 	public void testRegisteredParameters() {
@@ -1851,5 +1851,46 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(in.getCodeChallengeMethod(), out.getCodeChallengeMethod());
 		assertEquals(in.getCustomParameters(), out.getCustomParameters());
 		assertEquals(in.getEndpointURI(), out.getEndpointURI());
+	}
+	
+	
+	public void testQueryParamsInEndpoint()
+		throws Exception {
+		
+		URI endpoint = new URI("https://c2id.com/login?foo=bar");
+		
+		AuthenticationRequest request = new AuthenticationRequest.Builder(
+			new ResponseType(ResponseType.Value.CODE),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.endpointURI(endpoint)
+			.build();
+		
+		// query parameters belonging to the authz endpoint not included here
+		Map<String, String> requestParameters = request.toParameters();
+		assertEquals("code", requestParameters.get("response_type"));
+		assertEquals("123", requestParameters.get("client_id"));
+		assertEquals("openid", requestParameters.get("scope"));
+		assertEquals("https://example.com/cb", requestParameters.get("redirect_uri"));
+		assertEquals(4, requestParameters.size());
+		
+		Map<String, String> queryParams = URLUtils.parseParameters(request.toQueryString());
+		assertEquals("bar", queryParams.get("foo"));
+		assertEquals("code", queryParams.get("response_type"));
+		assertEquals("123", queryParams.get("client_id"));
+		assertEquals("openid", queryParams.get("scope"));
+		assertEquals("https://example.com/cb", queryParams.get("redirect_uri"));
+		assertEquals(5, queryParams.size());
+		
+		URI redirectToAS = request.toURI();
+		
+		Map<String, String> finalParameters = URLUtils.parseParameters(redirectToAS.getQuery());
+		assertEquals("bar", finalParameters.get("foo"));
+		assertEquals("code", finalParameters.get("response_type"));
+		assertEquals("123", finalParameters.get("client_id"));
+		assertEquals("openid", finalParameters.get("scope"));
+		assertEquals("https://example.com/cb", finalParameters.get("redirect_uri"));
+		assertEquals(5, finalParameters.size());
 	}
 }
