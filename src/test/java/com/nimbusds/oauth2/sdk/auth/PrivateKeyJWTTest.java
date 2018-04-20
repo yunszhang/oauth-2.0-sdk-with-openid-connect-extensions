@@ -56,9 +56,10 @@ public class PrivateKeyJWTTest extends TestCase {
 		assertTrue(algs.contains(JWSAlgorithm.PS384));
 		assertTrue(algs.contains(JWSAlgorithm.PS512));
 		assertTrue(algs.contains(JWSAlgorithm.ES256));
+		assertTrue(algs.contains(JWSAlgorithm.ES256K));
 		assertTrue(algs.contains(JWSAlgorithm.ES384));
 		assertTrue(algs.contains(JWSAlgorithm.ES512));
-		assertEquals(9, algs.size());
+		assertEquals(10, algs.size());
 	}
 
 
