@@ -93,7 +93,7 @@ public class IDTokenValidatorWithHTTPTest extends TestCase {
 			.build();
 
 		OIDCProviderMetadata opMetadata = new OIDCProviderMetadata(
-			new Issuer("https://c2id.com"),
+			new Issuer("http://localhost:" + port()),
 			Collections.singletonList(SubjectType.PUBLIC),
 			URI.create("http://localhost:" + port() + "/jwks.json"));
 
