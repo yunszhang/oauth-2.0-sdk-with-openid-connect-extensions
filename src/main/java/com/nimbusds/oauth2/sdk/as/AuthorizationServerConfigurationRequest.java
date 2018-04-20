@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package com.nimbusds.openid.connect.sdk.op;
+package com.nimbusds.oauth2.sdk.as;
 
 
 import java.net.MalformedURLException;
@@ -31,38 +31,39 @@ import net.jcip.annotations.Immutable;
 
 
 /**
- * OpenID Provider (OP) configuration request.
+ * OAuth 2.0 Authorisation Server (AS) configuration request.
  *
  * <p>Example HTTP request:
  *
  * <pre>
- * GET /.well-known/openid-configuration HTTP/1.1
+ * GET /.well-known/oauth-authorization-server HTTP/1.1
  * Host: example.com
  * </pre>
  *
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OpenID Connect Discovery 1.0, section 4.1.
+ *     <li>OAuth 2.0 Authorization Server Metadata 
+ *         (draft-ietf-oauth-discovery-10)
  * </ul>
  */
 @Immutable
-public class OIDCProviderConfigurationRequest extends AbstractRequest {
+public class AuthorizationServerConfigurationRequest extends AbstractRequest {
 	
 	
 	/**
-	 * The well-known path for OpenID Provider metadata.
+	 * The well-known path for OAuth 2.0 Authorisation Server metadata.
 	 */
-	public static final String OPENID_PROVIDER_WELL_KNOWN_PATH = "/.well-known/openid-configuration";
+	public static final String OAUTH_SERVER_WELL_KNOWN_PATH = "/.well-known/oauth-authorization-server";
 	
 	
 	/**
-	 * Creates a new OpenID Provider configuration request.
+	 * Creates a new OAuth 2.0 Authorisation Server configuration request.
 	 *
 	 * @param issuer The issuer. Must represent a valid URL.
 	 */
-	public OIDCProviderConfigurationRequest(final Issuer issuer) {
-		super(URI.create(URIUtils.removeTrailingSlash(URI.create(issuer.getValue())) + OPENID_PROVIDER_WELL_KNOWN_PATH));
+	public AuthorizationServerConfigurationRequest(final Issuer issuer) {
+		super(URI.create(URIUtils.removeTrailingSlash(URI.create(issuer.getValue())) + OAUTH_SERVER_WELL_KNOWN_PATH));
 	}
 	
 	

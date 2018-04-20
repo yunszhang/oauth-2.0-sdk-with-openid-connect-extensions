@@ -21,11 +21,17 @@ package com.nimbusds.openid.connect.sdk.op;
 import java.net.URI;
 import java.util.*;
 
+import static net.jadler.Jadler.onRequest;
+import static net.jadler.Jadler.port;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.*;
+import com.nimbusds.oauth2.sdk.as.AuthorizationServerMetadata;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
@@ -39,6 +45,7 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimType;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
+import org.junit.Test;
 
 
 /**
@@ -90,14 +97,18 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("check_session_iframe"));
 		assertTrue(paramNames.contains("end_session_endpoint"));
 		assertTrue(paramNames.contains("introspection_endpoint"));
+		assertTrue(paramNames.contains("introspection_endpoint_auth_methods_supported"));
+		assertTrue(paramNames.contains("introspection_endpoint_auth_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("revocation_endpoint"));
+		assertTrue(paramNames.contains("revocation_endpoint_auth_methods_supported"));
+		assertTrue(paramNames.contains("revocation_endpoint_auth_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("frontchannel_logout_supported"));
 		assertTrue(paramNames.contains("frontchannel_logout_session_supported"));
 		assertTrue(paramNames.contains("backchannel_logout_supported"));
 		assertTrue(paramNames.contains("backchannel_logout_session_supported"));
 		assertTrue(paramNames.contains("mutual_tls_sender_constrained_access_tokens"));
 
-		assertEquals(45, paramNames.size());
+		assertEquals(49, paramNames.size());
 	}
 
 

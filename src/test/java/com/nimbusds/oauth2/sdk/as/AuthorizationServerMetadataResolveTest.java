@@ -1,5 +1,5 @@
 /*
- * oauth2-oidc-sdk
+ * oauth2-oidc-sdk 
  *
  * Copyright 2012-2016, Connect2id Ltd and contributors.
  *
@@ -15,12 +15,10 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package com.nimbusds.openid.connect.sdk.op;
+package com.nimbusds.oauth2.sdk.as;
 
 
 import java.io.IOException;
-import java.net.URI;
-import java.util.Collections;
 
 import static net.jadler.Jadler.*;
 import static org.junit.Assert.assertEquals;
@@ -29,14 +27,12 @@ import static org.junit.Assert.fail;
 import com.nimbusds.oauth2.sdk.GeneralException;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Issuer;
-import com.nimbusds.openid.connect.sdk.SubjectType;
-import net.minidev.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 
-public class OIDCProviderMetadataResolveTest {
+public class AuthorizationServerMetadataResolveTest {
 	
 	
 	@Before
@@ -57,21 +53,18 @@ public class OIDCProviderMetadataResolveTest {
 		
 		Issuer issuer = new Issuer("http://localhost:" + port());
 		
-		OIDCProviderMetadata metadata = new OIDCProviderMetadata(
-			issuer,
-			Collections.singletonList(SubjectType.PAIRWISE),
-			URI.create("http://localhost:" + port() + "/jwks.json"));
+		AuthorizationServerMetadata metadata = new AuthorizationServerMetadata(issuer);
 		metadata.applyDefaults();
 		
 		onRequest()
 			.havingMethodEqualTo("GET")
-			.havingPathEqualTo("/.well-known/openid-configuration")
+			.havingPathEqualTo("/.well-known/oauth-authorization-server")
 			.respond()
 			.withStatus(200)
 			.withContentType("application/json")
 			.withBody(metadata.toJSONObject().toJSONString());
 		
-		OIDCProviderMetadata result = OIDCProviderMetadata.resolve(issuer);
+		AuthorizationServerMetadata result = AuthorizationServerMetadata.resolve(issuer);
 		
 		assertEquals(issuer, result.getIssuer());
 	}
@@ -83,21 +76,18 @@ public class OIDCProviderMetadataResolveTest {
 		
 		Issuer issuer = new Issuer("http://localhost:" + port() + "/tenant-1");
 		
-		OIDCProviderMetadata metadata = new OIDCProviderMetadata(
-			issuer,
-			Collections.singletonList(SubjectType.PAIRWISE),
-			URI.create("http://localhost:" + port() + "/jwks.json"));
+		AuthorizationServerMetadata metadata = new AuthorizationServerMetadata(issuer);
 		metadata.applyDefaults();
 		
 		onRequest()
 			.havingMethodEqualTo("GET")
-			.havingPathEqualTo("/tenant-1/.well-known/openid-configuration")
+			.havingPathEqualTo("/tenant-1/.well-known/oauth-authorization-server")
 			.respond()
 			.withStatus(200)
 			.withContentType("application/json")
 			.withBody(metadata.toJSONObject().toJSONString());
 		
-		OIDCProviderMetadata result = OIDCProviderMetadata.resolve(issuer);
+		AuthorizationServerMetadata result = AuthorizationServerMetadata.resolve(issuer);
 		
 		assertEquals(issuer, result.getIssuer());
 	}
@@ -109,21 +99,18 @@ public class OIDCProviderMetadataResolveTest {
 		
 		Issuer issuer = new Issuer("http://localhost:" + port() + "/tenant-1/");
 		
-		OIDCProviderMetadata metadata = new OIDCProviderMetadata(
-			issuer,
-			Collections.singletonList(SubjectType.PAIRWISE),
-			URI.create("http://localhost:" + port() + "/jwks.json"));
+		AuthorizationServerMetadata metadata = new AuthorizationServerMetadata(issuer);
 		metadata.applyDefaults();
 		
 		onRequest()
 			.havingMethodEqualTo("GET")
-			.havingPathEqualTo("/tenant-1/.well-known/openid-configuration")
+			.havingPathEqualTo("/tenant-1/.well-known/oauth-authorization-server")
 			.respond()
 			.withStatus(200)
 			.withContentType("application/json")
 			.withBody(metadata.toJSONObject().toJSONString());
 		
-		OIDCProviderMetadata result = OIDCProviderMetadata.resolve(issuer);
+		AuthorizationServerMetadata result = AuthorizationServerMetadata.resolve(issuer);
 		
 		assertEquals(issuer, result.getIssuer());
 	}
@@ -135,22 +122,19 @@ public class OIDCProviderMetadataResolveTest {
 		
 		Issuer issuer = new Issuer("http://localhost:" + port());
 		
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("issuer", issuer.getValue());
-		
 		onRequest()
 			.havingMethodEqualTo("GET")
-			.havingPathEqualTo("/.well-known/openid-configuration")
+			.havingPathEqualTo("/.well-known/oauth-authorization-server")
 			.respond()
 			.withStatus(200)
 			.withContentType("application/json")
-			.withBody(jsonObject.toJSONString());
+			.withBody("{}");
 		
 		try {
-			OIDCProviderMetadata.resolve(issuer);
+			AuthorizationServerMetadata.resolve(issuer);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing JSON object member with key \"subject_types_supported\"", e.getMessage());
+			assertEquals("Missing JSON object member with key \"issuer\"", e.getMessage());
 		}
 	}
 	
@@ -163,17 +147,17 @@ public class OIDCProviderMetadataResolveTest {
 		
 		onRequest()
 			.havingMethodEqualTo("GET")
-			.havingPathEqualTo("/.well-known/openid-configuration")
+			.havingPathEqualTo("/.well-known/oauth-authorization-server")
 			.respond()
 			.withStatus(404)
 			.withContentType("text/plain")
 			.withBody("Not Found");
 		
 		try {
-			OIDCProviderMetadata.resolve(issuer);
+			AuthorizationServerMetadata.resolve(issuer);
 			fail();
 		} catch (IOException e) {
-			assertEquals("Couldn't download OpenID Provider metadata from http://localhost:"+port()+"/.well-known/openid-configuration: Status code 404", e.getMessage());
+			assertEquals("Couldn't download OAuth 2.0 Authorization Server metadata from http://localhost:"+port()+"/.well-known/oauth-authorization-server: Status code 404", e.getMessage());
 		}
 	}
 	
@@ -184,26 +168,22 @@ public class OIDCProviderMetadataResolveTest {
 		
 		Issuer issuer = new Issuer("http://localhost:" + port());
 		
-		OIDCProviderMetadata metadata = new OIDCProviderMetadata(
-			new Issuer("http://localhost/abcdef"),
-			Collections.singletonList(SubjectType.PAIRWISE),
-			URI.create("http://localhost:" + port() + "/jwks.json"));
+		AuthorizationServerMetadata metadata = new AuthorizationServerMetadata(new Issuer("http://localhost/abcdef"));
 		metadata.applyDefaults();
 		
 		onRequest()
 			.havingMethodEqualTo("GET")
-			.havingPathEqualTo("/.well-known/openid-configuration")
+			.havingPathEqualTo("/.well-known/oauth-authorization-server")
 			.respond()
 			.withStatus(200)
 			.withContentType("application/json")
 			.withBody(metadata.toJSONObject().toJSONString());
 		
 		try {
-			OIDCProviderMetadata.resolve(issuer);
-			fail("Didn't raise issuer mismatch exception");
+			AuthorizationServerMetadata.resolve(issuer);
+			fail();
 		} catch (GeneralException e) {
 			assertEquals("The returned issuer doesn't match the expected: http://localhost/abcdef", e.getMessage());
 		}
 	}
 }
-

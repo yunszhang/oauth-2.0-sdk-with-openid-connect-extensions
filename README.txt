@@ -99,7 +99,7 @@ This SDK version implements the following standards and drafts:
 
 	* OAuth 2.0 Token Revocation (RFC 7009)
 
-	* OAuth 2.0 Authorization Server Metadata (draft-ietf-oauth-discovery-04)
+	* OAuth 2.0 Authorization Server Metadata (draft-ietf-oauth-discovery-10)
 
 	* OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591)
 
@@ -148,4 +148,4 @@ This SDK is provided under the terms of the Apache 2.0 licence.
 Questions or comments? Email support@connect2id.com
 
 
-2018-02-04
+2018-04-20
