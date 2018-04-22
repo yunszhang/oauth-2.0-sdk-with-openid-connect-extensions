@@ -884,7 +884,7 @@ version 5.57 (2018-03-22)
     * Fixes AuthorizationRequest and AuthenticationRequest serialisation of
       query parameters in the authorisation endpoint URI (iss #237).
 
-version 5.58 (2018-04-20)
+version 5.58 (2018-04-22)
     * Adds new AuthorizationServerMetadata class for representing OAuth 2.0
       Authorisation Server (AS) metadata, see draft-ietf-oauth-discovery-10
       (iss #166).
