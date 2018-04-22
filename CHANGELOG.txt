@@ -888,3 +888,7 @@ version 5.58 (2018-04-22)
     * Adds new AuthorizationServerMetadata class for representing OAuth 2.0
       Authorisation Server (AS) metadata, see draft-ietf-oauth-discovery-10
       (iss #166).
+
+version 5.59 (2018-04-22)
+    * Refactors ACRRequest to enable ACR support checks with OAuth 2.0
+      authorisation servers in addition to OpenID providers.

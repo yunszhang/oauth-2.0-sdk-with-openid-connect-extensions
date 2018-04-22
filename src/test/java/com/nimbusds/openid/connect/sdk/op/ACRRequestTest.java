@@ -321,7 +321,7 @@ public class ACRRequestTest extends TestCase {
 	}
 	
 	
-	public void testEnsureACRSupport_noEssenialACRsRequested()
+	public void testEnsureACRSupport_noEssentialACRsRequested()
 		throws GeneralException {
 		
 		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
@@ -340,10 +340,12 @@ public class ACRRequestTest extends TestCase {
 		opMetadata.applyDefaults();
 		
 		acrRequest.ensureACRSupport(authRequest, opMetadata);
+		
+		acrRequest.ensureACRSupport((AuthorizationRequest) authRequest, opMetadata.getACRs());
 	}
 	
 	
-	public void testEnsureACRSupport_noEssenialACRsSupported() {
+	public void testEnsureACRSupport_noEssentialACRsSupported() {
 		
 		ClaimsRequest claimsRequest = new ClaimsRequest();
 		claimsRequest.addIDTokenClaim("acr", ClaimRequirement.ESSENTIAL, null, "1");
@@ -371,10 +373,18 @@ public class ACRRequestTest extends TestCase {
 			assertEquals("Access denied by resource owner or authorization server: Requested essential ACR(s) not supported", e.getErrorObject().getDescription());
 			assertEquals("Requested essential ACR(s) not supported", e.getMessage());
 		}
+		
+		try {
+			acrRequest.ensureACRSupport((AuthorizationRequest) authRequest, opMetadata.getACRs());
+		} catch (GeneralException e) {
+			assertEquals(OAuth2Error.ACCESS_DENIED, e.getErrorObject());
+			assertEquals("Access denied by resource owner or authorization server: Requested essential ACR(s) not supported", e.getErrorObject().getDescription());
+			assertEquals("Requested essential ACR(s) not supported", e.getMessage());
+		}
 	}
 	
 	
-	public void testEnsureACRSupport_essenialACRsSupported() {
+	public void testEnsureACRSupport_essentialACRsSupported() {
 		
 		ClaimsRequest claimsRequest = new ClaimsRequest();
 		claimsRequest.addIDTokenClaim("acr", ClaimRequirement.ESSENTIAL, null, "1");
@@ -398,6 +408,14 @@ public class ACRRequestTest extends TestCase {
 		
 		try {
 			acrRequest.ensureACRSupport(authRequest, opMetadata);
+		} catch (GeneralException e) {
+			assertEquals(OAuth2Error.ACCESS_DENIED, e.getErrorObject());
+			assertEquals("Access denied by resource owner or authorization server: Requested essential ACR(s) not supported", e.getErrorObject().getDescription());
+			assertEquals("Requested essential ACR(s) not supported", e.getMessage());
+		}
+		
+		try {
+			acrRequest.ensureACRSupport((AuthorizationRequest) authRequest, opMetadata.getACRs());
 		} catch (GeneralException e) {
 			assertEquals(OAuth2Error.ACCESS_DENIED, e.getErrorObject());
 			assertEquals("Access denied by resource owner or authorization server: Requested essential ACR(s) not supported", e.getErrorObject().getDescription());
