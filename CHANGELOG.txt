@@ -892,3 +892,7 @@ version 5.58 (2018-04-22)
 version 5.59 (2018-04-22)
     * Refactors ACRRequest to enable ACR support checks with OAuth 2.0
       authorisation servers in addition to OpenID providers.
+
+version 5.60 (2018-04-22)
+    * Refactors ACRRequest.resolve to accept plain OAuth 2.0 authorisation
+      requests.

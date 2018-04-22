@@ -70,6 +70,23 @@ public class ACRRequestTest extends TestCase {
 	}
 	
 	
+	public void testResolvePlainOAuthRequest()
+		throws Exception {
+		
+		AuthorizationRequest authzRequest = new AuthorizationRequest(
+			new URI("https://c2id.com/login"),
+			new ResponseType("token"),
+			new ClientID("abc"));
+		
+		ACRRequest acrRequest = ACRRequest.resolve(authzRequest);
+		
+		assertNull(acrRequest.getEssentialACRs());
+		assertNull(acrRequest.getVoluntaryACRs());
+		
+		assertTrue(acrRequest.isEmpty());
+	}
+	
+	
 	public void testResolveNone()
 		throws Exception {
 		

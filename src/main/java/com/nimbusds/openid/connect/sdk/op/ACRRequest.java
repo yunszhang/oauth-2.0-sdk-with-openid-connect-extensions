@@ -194,17 +194,27 @@ public final class ACRRequest {
 	
 	/**
 	 * Resolves the requested essential and voluntary ACR values from the
-	 * specified OpenID authentication request.
+	 * specified OAuth 2.0 authorisation request / OpenID authentication
+	 * request.
 	 * 
-	 * @param authRequest The OpenID authentication request. Should be
-	 *                    resolved. Must not be {@code null}.
+	 * @param authzRequest The OAuth 2.0 authorisation request / OpenID
+	 *                     authentication request. Should be resolved. Must
+	 *                     not be {@code null}.
 	 * 
 	 * @return The resolved ACR request.
 	 */
-	public static ACRRequest resolve(final AuthenticationRequest authRequest) {
+	public static ACRRequest resolve(final AuthorizationRequest authzRequest) {
 		
 		List<ACR> essentialACRs = null;
 		List<ACR> voluntaryACRs = null;
+		
+		if (! (authzRequest instanceof AuthenticationRequest)) {
+			// Plain OAuth 2.0
+			return new ACRRequest(essentialACRs, voluntaryACRs);
+		}
+		
+		// OpenID
+		AuthenticationRequest authRequest = (AuthenticationRequest) authzRequest;
 		
 		ClaimsRequest claimsRequest = authRequest.getClaims();
 		
