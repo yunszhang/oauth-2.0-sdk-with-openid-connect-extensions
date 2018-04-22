@@ -995,6 +995,12 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		op.setTokenEndpointAuthMethods(as.getTokenEndpointAuthMethods());
 		op.setTokenEndpointJWSAlgs(as.getTokenEndpointJWSAlgs());
 		
+		op.setIntrospectionEndpointAuthMethods(as.getIntrospectionEndpointAuthMethods());
+		op.setIntrospectionEndpointJWSAlgs(as.getIntrospectionEndpointJWSAlgs());
+		
+		op.setRevocationEndpointAuthMethods(as.getRevocationEndpointAuthMethods());
+		op.setRevocationEndpointJWSAlgs(as.getRevocationEndpointJWSAlgs());
+		
 		op.setRequestObjectJWSAlgs(as.getRequestObjectJWSAlgs());
 		op.setRequestObjectJWEAlgs(as.getRequestObjectJWEAlgs());
 		op.setRequestObjectJWEEncs(as.getRequestObjectJWEEncs());

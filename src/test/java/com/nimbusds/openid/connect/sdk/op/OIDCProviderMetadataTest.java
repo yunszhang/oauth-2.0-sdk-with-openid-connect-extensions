@@ -415,20 +415,24 @@ public class OIDCProviderMetadataTest extends TestCase {
 		acrList.add(new ACR("1"));
 		meta.setACRs(acrList);
 		assertEquals("1", meta.getACRs().get(0).getValue());
+		
+		meta.setTokenEndpointAuthMethods(Collections.singletonList(ClientAuthenticationMethod.CLIENT_SECRET_BASIC));
+		assertEquals(Collections.singletonList(ClientAuthenticationMethod.CLIENT_SECRET_BASIC), meta.getTokenEndpointAuthMethods());
 
-		List<ClientAuthenticationMethod> authMethods = new LinkedList<>();
-		authMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC);
-		meta.setTokenEndpointAuthMethods(authMethods);
-		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, meta.getTokenEndpointAuthMethods().get(0));
-
-		List<JWSAlgorithm> tokenEndpointJWSAlgs = new LinkedList<>();
-		tokenEndpointJWSAlgs.add(JWSAlgorithm.HS256);
-		tokenEndpointJWSAlgs.add(JWSAlgorithm.HS384);
-		tokenEndpointJWSAlgs.add(JWSAlgorithm.HS512);
-		meta.setTokenEndpointJWSAlgs(tokenEndpointJWSAlgs);
-		assertEquals(JWSAlgorithm.HS256, meta.getTokenEndpointJWSAlgs().get(0));
-		assertEquals(JWSAlgorithm.HS384, meta.getTokenEndpointJWSAlgs().get(1));
-		assertEquals(JWSAlgorithm.HS512, meta.getTokenEndpointJWSAlgs().get(2));
+		meta.setTokenEndpointJWSAlgs(Arrays.asList(JWSAlgorithm.HS256, JWSAlgorithm.HS384, JWSAlgorithm.HS512));
+		assertEquals(Arrays.asList(JWSAlgorithm.HS256, JWSAlgorithm.HS384, JWSAlgorithm.HS512), meta.getTokenEndpointJWSAlgs());
+		
+		meta.setIntrospectionEndpointAuthMethods(Collections.singletonList(ClientAuthenticationMethod.CLIENT_SECRET_POST));
+		assertEquals(Collections.singletonList(ClientAuthenticationMethod.CLIENT_SECRET_POST), meta.getIntrospectionEndpointAuthMethods());
+		
+		meta.setIntrospectionEndpointJWSAlgs(Collections.singletonList(JWSAlgorithm.HS256));
+		assertEquals(Collections.singletonList(JWSAlgorithm.HS256), meta.getIntrospectionEndpointJWSAlgs());
+		
+		meta.setRevocationEndpointAuthMethods(Collections.singletonList(ClientAuthenticationMethod.PRIVATE_KEY_JWT));
+		assertEquals(Collections.singletonList(ClientAuthenticationMethod.PRIVATE_KEY_JWT), meta.getRevocationEndpointAuthMethods());
+		
+		meta.setRevocationEndpointJWSAlgs(Collections.singletonList(JWSAlgorithm.RS256));
+		assertEquals(Collections.singletonList(JWSAlgorithm.RS256), meta.getRevocationEndpointJWSAlgs());
 
 		List<JWSAlgorithm> requestObjectJWSAlgs = new LinkedList<>();
 		requestObjectJWSAlgs.add(JWSAlgorithm.HS256);
@@ -553,7 +557,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 
 		String json = meta.toJSONObject().toJSONString();
 
-		meta = OIDCProviderMetadata.parse(JSONObjectUtils.parse(json));
+		meta = OIDCProviderMetadata.parse(json);
 
 		assertEquals(issuer.getValue(), meta.getIssuer().getValue());
 		assertEquals(SubjectType.PAIRWISE, meta.getSubjectTypes().get(0));
@@ -586,11 +590,16 @@ public class OIDCProviderMetadataTest extends TestCase {
 
 		assertEquals("1", meta.getACRs().get(0).getValue());
 
-		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, meta.getTokenEndpointAuthMethods().get(0));
-
-		assertEquals(JWSAlgorithm.HS256, meta.getTokenEndpointJWSAlgs().get(0));
-		assertEquals(JWSAlgorithm.HS384, meta.getTokenEndpointJWSAlgs().get(1));
-		assertEquals(JWSAlgorithm.HS512, meta.getTokenEndpointJWSAlgs().get(2));
+		assertEquals(Collections.singletonList(ClientAuthenticationMethod.CLIENT_SECRET_BASIC), meta.getTokenEndpointAuthMethods());
+		
+		assertEquals(Collections.singletonList(ClientAuthenticationMethod.CLIENT_SECRET_BASIC), meta.getTokenEndpointAuthMethods());
+		assertEquals(Arrays.asList(JWSAlgorithm.HS256, JWSAlgorithm.HS384, JWSAlgorithm.HS512), meta.getTokenEndpointJWSAlgs());
+		
+		assertEquals(Collections.singletonList(ClientAuthenticationMethod.CLIENT_SECRET_POST), meta.getIntrospectionEndpointAuthMethods());
+		assertEquals(Collections.singletonList(JWSAlgorithm.HS256), meta.getIntrospectionEndpointJWSAlgs());
+		
+		assertEquals(Collections.singletonList(ClientAuthenticationMethod.PRIVATE_KEY_JWT), meta.getRevocationEndpointAuthMethods());
+		assertEquals(Collections.singletonList(JWSAlgorithm.RS256), meta.getRevocationEndpointJWSAlgs());
 
 		assertEquals(JWSAlgorithm.HS256, meta.getRequestObjectJWSAlgs().get(0));
 

@@ -64,7 +64,6 @@ public class AuthorizationServerMetadata {
 	
 	static {
 		Set<String> p = new HashSet<>();
-		
 		p.add("issuer");
 		p.add("authorization_endpoint");
 		p.add("token_endpoint");
@@ -191,6 +190,34 @@ public class AuthorizationServerMetadata {
 	 * {@code client_secret_jwt} token endpoint authentication methods.
 	 */
 	private List<JWSAlgorithm> tokenEndpointJWSAlgs;
+	
+	
+	/**
+	 * The supported introspection endpoint authentication methods.
+	 */
+	private List<ClientAuthenticationMethod> introspectionEndpointAuthMethods;
+	
+	
+	/**
+	 * The supported JWS algorithms for the {@code private_key_jwt} and
+	 * {@code client_secret_jwt} introspection endpoint authentication
+	 * methods.
+	 */
+	private List<JWSAlgorithm> introspectionEndpointJWSAlgs;
+	
+	
+	/**
+	 * The supported revocation endpoint authentication methods.
+	 */
+	private List<ClientAuthenticationMethod> revocationEndpointAuthMethods;
+	
+	
+	/**
+	 * The supported JWS algorithms for the {@code private_key_jwt} and
+	 * {@code client_secret_jwt} revocation endpoint authentication
+	 * methods.
+	 */
+	private List<JWSAlgorithm> revocationEndpointJWSAlgs;
 	
 	
 	/**
@@ -609,13 +636,12 @@ public class AuthorizationServerMetadata {
 	 * Corresponds to the {@code token_endpoint_auth_methods_supported}
 	 * metadata field.
 	 *
-	 * @param tokenEndpointAuthMethods The supported token endpoint
-	 *                                 authentication methods, {@code null}
-	 *                                 if not specified.
+	 * @param authMethods The supported token endpoint authentication
+	 *                    methods, {@code null} if not specified.
 	 */
-	public void setTokenEndpointAuthMethods(final List<ClientAuthenticationMethod> tokenEndpointAuthMethods) {
+	public void setTokenEndpointAuthMethods(final List<ClientAuthenticationMethod> authMethods) {
 		
-		this.tokenEndpointAuthMethods = tokenEndpointAuthMethods;
+		this.tokenEndpointAuthMethods = authMethods;
 	}
 	
 	
@@ -641,16 +667,144 @@ public class AuthorizationServerMetadata {
 	 * {@code token_endpoint_auth_signing_alg_values_supported} metadata
 	 * field.
 	 *
-	 * @param tokenEndpointJWSAlgs The supported JWS algorithms,
-	 *                             {@code null} if not specified. Must not
-	 *                             contain the {@code none} algorithm.
+	 * @param jwsAlgs The supported JWS algorithms, {@code null} if not
+	 *                specified. Must not contain the {@code none}
+	 *                algorithm.
 	 */
-	public void setTokenEndpointJWSAlgs(final List<JWSAlgorithm> tokenEndpointJWSAlgs) {
+	public void setTokenEndpointJWSAlgs(final List<JWSAlgorithm> jwsAlgs) {
 		
-		if (tokenEndpointJWSAlgs != null && tokenEndpointJWSAlgs.contains(Algorithm.NONE))
-			throw new IllegalArgumentException("The none algorithm is not accepted");
+		if (jwsAlgs != null && jwsAlgs.contains(Algorithm.NONE))
+			throw new IllegalArgumentException("The \"none\" algorithm is not accepted");
 		
-		this.tokenEndpointJWSAlgs = tokenEndpointJWSAlgs;
+		this.tokenEndpointJWSAlgs = jwsAlgs;
+	}
+	
+	
+	/**
+	 * Gets the supported introspection endpoint authentication methods.
+	 * Corresponds to the
+	 * {@code introspection_endpoint_auth_methods_supported} metadata
+	 * field.
+	 *
+	 * @return The supported introspection endpoint authentication methods,
+	 *         {@code null} if not specified.
+	 */
+	public List<ClientAuthenticationMethod> getIntrospectionEndpointAuthMethods() {
+		return introspectionEndpointAuthMethods;
+	}
+	
+	
+	/**
+	 * Sets the supported introspection endpoint authentication methods.
+	 * Corresponds to the
+	 * {@code introspection_endpoint_auth_methods_supported} metadata
+	 * field.
+	 *
+	 * @param authMethods The supported introspection endpoint
+	 *                    authentication methods, {@code null} if not
+	 *                    specified.
+	 */
+	public void setIntrospectionEndpointAuthMethods(final List<ClientAuthenticationMethod> authMethods) {
+		
+		this.introspectionEndpointAuthMethods = authMethods;
+	}
+	
+	
+	/**
+	 * Gets the supported JWS algorithms for the {@code private_key_jwt}
+	 * and {@code client_secret_jwt} introspection endpoint authentication
+	 * methods. Corresponds to the
+	 * {@code introspection_endpoint_auth_signing_alg_values_supported}
+	 * metadata field.
+	 *
+	 * @return The supported JWS algorithms, {@code null} if not specified.
+	 */
+	public List<JWSAlgorithm> getIntrospectionEndpointJWSAlgs() {
+		
+		return introspectionEndpointJWSAlgs;
+	}
+	
+	
+	/**
+	 * Sets the supported JWS algorithms for the {@code private_key_jwt}
+	 * and {@code client_secret_jwt} introspection endpoint authentication
+	 * methods. Corresponds to the
+	 * {@code introspection_endpoint_auth_signing_alg_values_supported}
+	 * metadata field.
+	 *
+	 * @param jwsAlgs The supported JWS algorithms, {@code null} if not
+	 *                specified. Must not contain the {@code none}
+	 *                algorithm.
+	 */
+	public void setIntrospectionEndpointJWSAlgs(final List<JWSAlgorithm> jwsAlgs) {
+		
+		if (jwsAlgs != null && jwsAlgs.contains(Algorithm.NONE))
+			throw new IllegalArgumentException("The \"none\" algorithm is not accepted");
+		
+		introspectionEndpointJWSAlgs = jwsAlgs;
+	}
+	
+	
+	/**
+	 * Gets the supported revocation endpoint authentication methods.
+	 * Corresponds to the
+	 * {@code revocation_endpoint_auth_methods_supported} metadata field.
+	 *
+	 * @return The supported revocation endpoint authentication methods,
+	 *         {@code null} if not specified.
+	 */
+	public List<ClientAuthenticationMethod> getRevocationEndpointAuthMethods() {
+		
+		return revocationEndpointAuthMethods;
+	}
+	
+	
+	/**
+	 * Sets the supported revocation endpoint authentication methods.
+	 * Corresponds to the
+	 * {@code revocation_endpoint_auth_methods_supported} metadata field.
+	 *
+	 * @param authMethods The supported revocation endpoint authentication
+	 *                    methods, {@code null} if not specified.
+	 */
+	public void setRevocationEndpointAuthMethods(final List<ClientAuthenticationMethod> authMethods) {
+		
+		revocationEndpointAuthMethods = authMethods;
+	}
+	
+	
+	/**
+	 * Gets the supported JWS algorithms for the {@code private_key_jwt}
+	 * and {@code client_secret_jwt} revocation endpoint authentication
+	 * methods. Corresponds to the
+	 * {@code revocation_endpoint_auth_signing_alg_values_supported}
+	 * metadata field.
+	 *
+	 * @return The supported JWS algorithms, {@code null} if not specified.
+	 */
+	public List<JWSAlgorithm> getRevocationEndpointJWSAlgs() {
+		
+		return revocationEndpointJWSAlgs;
+	}
+	
+	
+	/**
+	 * Sets the supported JWS algorithms for the {@code private_key_jwt}
+	 * and {@code client_secret_jwt} revocation endpoint authentication
+	 * methods. Corresponds to the
+	 * {@code revocation_endpoint_auth_signing_alg_values_supported}
+	 * metadata field.
+	 *
+	 * @param jwsAlgs The supported JWS algorithms, {@code null} if not
+	 *                specified. Must not contain the {@code none}
+	 *                algorithm.
+	 */
+	public void setRevocationEndpointJWSAlgs(final List<JWSAlgorithm> jwsAlgs) {
+		
+		if (jwsAlgs != null && jwsAlgs.contains(Algorithm.NONE))
+			throw new IllegalArgumentException("The \"none\" algorithm is not accepted");
+		
+		revocationEndpointJWSAlgs = jwsAlgs;
 	}
 	
 	
@@ -1140,6 +1294,46 @@ public class AuthorizationServerMetadata {
 			o.put("token_endpoint_auth_signing_alg_values_supported", stringList);
 		}
 		
+		if (introspectionEndpointAuthMethods != null) {
+			
+			stringList = new ArrayList<>(introspectionEndpointAuthMethods.size());
+			
+			for (ClientAuthenticationMethod m: introspectionEndpointAuthMethods)
+				stringList.add(m.getValue());
+			
+			o.put("introspection_endpoint_auth_methods_supported", stringList);
+		}
+		
+		if (introspectionEndpointJWSAlgs != null) {
+			
+			stringList = new ArrayList<>(introspectionEndpointJWSAlgs.size());
+			
+			for (JWSAlgorithm alg: introspectionEndpointJWSAlgs)
+				stringList.add(alg.getName());
+			
+			o.put("introspection_endpoint_auth_signing_alg_values_supported", stringList);
+		}
+		
+		if (revocationEndpointAuthMethods != null) {
+			
+			stringList = new ArrayList<>(revocationEndpointAuthMethods.size());
+			
+			for (ClientAuthenticationMethod m: revocationEndpointAuthMethods)
+				stringList.add(m.getValue());
+			
+			o.put("revocation_endpoint_auth_methods_supported", stringList);
+		}
+		
+		if (revocationEndpointJWSAlgs != null) {
+			
+			stringList = new ArrayList<>(revocationEndpointJWSAlgs.size());
+			
+			for (JWSAlgorithm alg: revocationEndpointJWSAlgs)
+				stringList.add(alg.getName());
+			
+			o.put("revocation_endpoint_auth_signing_alg_values_supported", stringList);
+		}
+		
 		if (requestObjectJWSAlgs != null) {
 			
 			stringList = new ArrayList<>(requestObjectJWSAlgs.size());
@@ -1332,6 +1526,56 @@ public class AuthorizationServerMetadata {
 				
 				if (v != null)
 					as.tokenEndpointJWSAlgs.add(JWSAlgorithm.parse(v));
+			}
+		}
+		
+		if (jsonObject.get("introspection_endpoint_auth_methods_supported") != null) {
+			
+			as.introspectionEndpointAuthMethods = new ArrayList<>();
+			
+			for (String v: JSONObjectUtils.getStringArray(jsonObject, "introspection_endpoint_auth_methods_supported")) {
+				
+				if (v != null)
+					as.introspectionEndpointAuthMethods.add(ClientAuthenticationMethod.parse(v));
+			}
+		}
+		
+		if (jsonObject.get("introspection_endpoint_auth_signing_alg_values_supported") != null) {
+			
+			as.introspectionEndpointJWSAlgs = new ArrayList<>();
+			
+			for (String v: JSONObjectUtils.getStringArray(jsonObject, "introspection_endpoint_auth_signing_alg_values_supported")) {
+				
+				if (v != null && v.equals(Algorithm.NONE.getName()))
+					throw new ParseException("The none algorithm is not accepted");
+				
+				if (v != null)
+					as.introspectionEndpointJWSAlgs.add(JWSAlgorithm.parse(v));
+			}
+		}
+		
+		if (jsonObject.get("revocation_endpoint_auth_methods_supported") != null) {
+			
+			as.revocationEndpointAuthMethods = new ArrayList<>();
+			
+			for (String v: JSONObjectUtils.getStringArray(jsonObject, "revocation_endpoint_auth_methods_supported")) {
+				
+				if (v != null)
+					as.revocationEndpointAuthMethods.add(ClientAuthenticationMethod.parse(v));
+			}
+		}
+		
+		if (jsonObject.get("revocation_endpoint_auth_signing_alg_values_supported") != null) {
+			
+			as.revocationEndpointJWSAlgs = new ArrayList<>();
+			
+			for (String v: JSONObjectUtils.getStringArray(jsonObject, "revocation_endpoint_auth_signing_alg_values_supported")) {
+				
+				if (v != null && v.equals(Algorithm.NONE.getName()))
+					throw new ParseException("The none algorithm is not accepted");
+				
+				if (v != null)
+					as.revocationEndpointJWSAlgs.add(JWSAlgorithm.parse(v));
 			}
 		}
 		

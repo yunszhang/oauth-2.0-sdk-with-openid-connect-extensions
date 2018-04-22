@@ -20,9 +20,11 @@ package com.nimbusds.oauth2.sdk.as;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
@@ -190,6 +192,33 @@ public class AuthorizationServerMetadataTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals("The issuer URI must be without a fragment component", e.getMessage());
+		}
+	}
+	
+	
+	public void testRejectAlgNoneInEndpointJWSAlgs() {
+		
+		AuthorizationServerMetadata as = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
+		
+		try {
+			as.setTokenEndpointJWSAlgs(Collections.singletonList(new JWSAlgorithm("none")));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The \"none\" algorithm is not accepted", e.getMessage());
+		}
+		
+		try {
+			as.setIntrospectionEndpointJWSAlgs(Collections.singletonList(new JWSAlgorithm("none")));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The \"none\" algorithm is not accepted", e.getMessage());
+		}
+		
+		try {
+			as.setRevocationEndpointJWSAlgs(Collections.singletonList(new JWSAlgorithm("none")));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The \"none\" algorithm is not accepted", e.getMessage());
 		}
 	}
 }
