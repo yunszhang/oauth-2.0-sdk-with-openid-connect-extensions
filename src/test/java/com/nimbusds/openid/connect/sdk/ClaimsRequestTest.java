@@ -71,6 +71,26 @@ public class ClaimsRequestTest extends TestCase {
 		
 		return false;
 	}
+	
+	
+	public void testResolveOAuthAuthorizationRequestWithNoScope() {
+		
+		ClaimsRequest cr = ClaimsRequest.resolve(new ResponseType(ResponseType.Value.CODE), null);
+		assertTrue(cr.getIDTokenClaims().isEmpty());
+		assertTrue(cr.getUserInfoClaims().isEmpty());
+		
+		cr = ClaimsRequest.resolve(new ResponseType(ResponseType.Value.CODE), null, (Map)null);
+		assertTrue(cr.getIDTokenClaims().isEmpty());
+		assertTrue(cr.getUserInfoClaims().isEmpty());
+		
+		cr = ClaimsRequest.resolve(new ResponseType(ResponseType.Value.CODE), null, (ClaimsRequest) null);
+		assertTrue(cr.getIDTokenClaims().isEmpty());
+		assertTrue(cr.getUserInfoClaims().isEmpty());
+		
+		cr = ClaimsRequest.resolve(new ResponseType(ResponseType.Value.CODE), null, null, null);
+		assertTrue(cr.getIDTokenClaims().isEmpty());
+		assertTrue(cr.getUserInfoClaims().isEmpty());
+	}
 
 
 	public void testResolveSimple()

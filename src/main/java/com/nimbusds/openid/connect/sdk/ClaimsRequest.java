@@ -884,7 +884,9 @@ public class ClaimsRequest {
 	 * claims requests, any other scope values are ignored.
 	 *
 	 * @param responseType The response type. Must not be {@code null}.
-	 * @param scope        The scope. Must not be {@code null}.
+	 * @param scope        The scope, {@code null} if not specified (for a
+	 *                     plain OAuth 2.0 authorisation request with no
+	 *                     scope explicitly specified).
 	 * 
 	 * @return The claims request.
 	 */
@@ -902,7 +904,9 @@ public class ClaimsRequest {
 	 * custom claims map and resolved accordingly.
 	 *
 	 * @param responseType The response type. Must not be {@code null}.
-	 * @param scope        The scope. Must not be {@code null}.
+	 * @param scope        The scope, {@code null} if not specified (for a
+	 *                     plain OAuth 2.0 authorisation request with no
+	 *                     scope explicitly specified).
 	 * @param customClaims Custom scope to claim name map, {@code null} if
 	 *                     not specified.
 	 *
@@ -919,6 +923,11 @@ public class ClaimsRequest {
 			! responseType.contains(ResponseType.Value.TOKEN);
 
 		ClaimsRequest claimsRequest = new ClaimsRequest();
+		
+		if (scope == null) {
+			// Plain OAuth 2.0 mode
+			return claimsRequest;
+		}
 		
 		for (Scope.Value value: scope) {
 			
@@ -980,7 +989,9 @@ public class ClaimsRequest {
 	 * are ignored.
 	 *
 	 * @param responseType  The response type. Must not be {@code null}.
-	 * @param scope         The scope. Must not be {@code null}.
+	 * @param scope         The scope, {@code null} if not specified (for a
+	 * 	                plain OAuth 2.0 authorisation request with no
+	 * 	                scope explicitly specified).
 	 * @param claimsRequest The claims request, corresponding to the
 	 *                      optional {@code claims} OpenID Connect
 	 *                      authorisation request parameter, {@code null}
@@ -1005,7 +1016,9 @@ public class ClaimsRequest {
 	 * accordingly.
 	 *
 	 * @param responseType  The response type. Must not be {@code null}.
-	 * @param scope         The scope. Must not be {@code null}.
+	 * @param scope         The scope, {@code null} if not specified (for a
+	 * 	                plain OAuth 2.0 authorisation request with no
+	 * 	                scope explicitly specified).
 	 * @param claimsRequest The claims request, corresponding to the
 	 *                      optional {@code claims} OpenID Connect
 	 *                      authorisation request parameter, {@code null}
