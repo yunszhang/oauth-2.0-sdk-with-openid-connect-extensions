@@ -135,7 +135,7 @@ public class OIDCTokenResponse extends AccessTokenResponse {
 	public JSONObject toJSONObject() {
 	
 		JSONObject o = super.toJSONObject();
-		o.put("id_token", getOIDCTokens().getIDTokenString());
+		o.putAll(getOIDCTokens().toJSONObject());
 		return o;
 	}
 	

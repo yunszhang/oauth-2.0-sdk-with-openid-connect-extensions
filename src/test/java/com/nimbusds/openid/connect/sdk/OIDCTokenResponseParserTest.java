@@ -88,6 +88,36 @@ public class OIDCTokenResponseParserTest extends TestCase {
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDTokenString());
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDToken().serialize());
 	}
+	
+	
+	// Token response with no id_token (e.g. in response to a refresh_token grant)
+	public void testParseSuccess_noIDToken()
+		throws Exception {
+		
+		OIDCTokens tokens = new OIDCTokens(
+			new BearerAccessToken("abc123"),
+			new RefreshToken("def456"));
+		
+		OIDCTokenResponse response = new OIDCTokenResponse(tokens);
+		
+		assertEquals(tokens, response.getOIDCTokens());
+		assertEquals(tokens, response.getTokens());
+		
+		HTTPResponse httpResponse = response.toHTTPResponse();
+		
+		System.out.println(httpResponse.getContent());
+		
+		TokenResponse tokenResponse = OIDCTokenResponseParser.parse(httpResponse);
+		
+		assertTrue(tokenResponse.indicatesSuccess());
+		
+		response = (OIDCTokenResponse)tokenResponse.toSuccessResponse();
+		
+		assertEquals("abc123", response.getTokens().getAccessToken().getValue());
+		assertEquals("def456", response.getTokens().getRefreshToken().getValue());
+		assertNull(response.getOIDCTokens().getIDToken());
+		assertNull(response.getOIDCTokens().getIDTokenString());
+	}
 
 
 	public void testParseError()

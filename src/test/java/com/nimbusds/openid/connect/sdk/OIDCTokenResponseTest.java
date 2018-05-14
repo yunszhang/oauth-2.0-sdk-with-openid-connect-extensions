@@ -21,6 +21,7 @@ package com.nimbusds.openid.connect.sdk;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import junit.framework.TestCase;
 
 import net.minidev.json.JSONObject;
@@ -78,7 +79,7 @@ public class OIDCTokenResponseTest extends TestCase {
 		assertEquals("def456", response.getOIDCTokens().getRefreshToken().getValue());
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDTokenString());
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDToken().serialize());
-		assertTrue(response.getCustomParams().isEmpty());
+		assertTrue(response.getCustomParameters().isEmpty());
 
 		HTTPResponse httpResponse = response.toHTTPResponse();
 
@@ -89,7 +90,7 @@ public class OIDCTokenResponseTest extends TestCase {
 		assertEquals("def456", response.getOIDCTokens().getRefreshToken().getValue());
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDTokenString());
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDToken().serialize());
-		assertTrue(response.getCustomParams().isEmpty());
+		assertTrue(response.getCustomParameters().isEmpty());
 	}
 
 
@@ -108,9 +109,9 @@ public class OIDCTokenResponseTest extends TestCase {
 		assertEquals("def456", response.getOIDCTokens().getRefreshToken().getValue());
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDTokenString());
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDToken().serialize());
-		assertEquals("abc", (String)response.getCustomParams().get("sub_sid"));
-		assertEquals(10, ((Number)response.getCustomParams().get("priority")).intValue());
-		assertEquals(2, response.getCustomParams().size());
+		assertEquals("abc", (String)response.getCustomParameters().get("sub_sid"));
+		assertEquals(10, ((Number)response.getCustomParameters().get("priority")).intValue());
+		assertEquals(2, response.getCustomParameters().size());
 
 		HTTPResponse httpResponse = response.toHTTPResponse();
 
@@ -121,9 +122,9 @@ public class OIDCTokenResponseTest extends TestCase {
 		assertEquals("def456", response.getOIDCTokens().getRefreshToken().getValue());
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDTokenString());
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDToken().serialize());
-		assertEquals("abc", (String)response.getCustomParams().get("sub_sid"));
-		assertEquals(10, ((Number)response.getCustomParams().get("priority")).intValue());
-		assertEquals(2, response.getCustomParams().size());
+		assertEquals("abc", (String)response.getCustomParameters().get("sub_sid"));
+		assertEquals(10, ((Number)response.getCustomParameters().get("priority")).intValue());
+		assertEquals(2, response.getCustomParameters().size());
 	}
 
 
@@ -139,7 +140,7 @@ public class OIDCTokenResponseTest extends TestCase {
 		assertEquals("def456", response.getOIDCTokens().getRefreshToken().getValue());
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDTokenString());
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDToken().serialize());
-		assertTrue(response.getCustomParams().isEmpty());
+		assertTrue(response.getCustomParameters().isEmpty());
 
 		HTTPResponse httpResponse = response.toHTTPResponse();
 
@@ -150,7 +151,7 @@ public class OIDCTokenResponseTest extends TestCase {
 		assertEquals("def456", response.getOIDCTokens().getRefreshToken().getValue());
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDTokenString());
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDToken().serialize());
-		assertTrue(response.getCustomParams().isEmpty());
+		assertTrue(response.getCustomParameters().isEmpty());
 	}
 
 
@@ -169,9 +170,9 @@ public class OIDCTokenResponseTest extends TestCase {
 		assertEquals("def456", response.getOIDCTokens().getRefreshToken().getValue());
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDTokenString());
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDToken().serialize());
-		assertEquals("abc", (String)response.getCustomParams().get("sub_sid"));
-		assertEquals(10, ((Number)response.getCustomParams().get("priority")).intValue());
-		assertEquals(2, response.getCustomParams().size());
+		assertEquals("abc", (String)response.getCustomParameters().get("sub_sid"));
+		assertEquals(10, ((Number)response.getCustomParameters().get("priority")).intValue());
+		assertEquals(2, response.getCustomParameters().size());
 
 		HTTPResponse httpResponse = response.toHTTPResponse();
 
@@ -182,9 +183,9 @@ public class OIDCTokenResponseTest extends TestCase {
 		assertEquals("def456", response.getOIDCTokens().getRefreshToken().getValue());
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDTokenString());
 		assertEquals(ID_TOKEN_STRING, response.getOIDCTokens().getIDToken().serialize());
-		assertEquals("abc", (String)response.getCustomParams().get("sub_sid"));
-		assertEquals(10, ((Number)response.getCustomParams().get("priority")).intValue());
-		assertEquals(2, response.getCustomParams().size());
+		assertEquals("abc", (String)response.getCustomParameters().get("sub_sid"));
+		assertEquals(10, ((Number)response.getCustomParameters().get("priority")).intValue());
+		assertEquals(2, response.getCustomParameters().size());
 	}
 
 
@@ -210,5 +211,31 @@ public class OIDCTokenResponseTest extends TestCase {
 		} catch (ParseException e) {
 			// ok
 		}
+	}
+
+
+	public void testWithoutIDToken()
+		throws Exception {
+		
+		OIDCTokens tokens = new OIDCTokens(new BearerAccessToken("abc123"), new RefreshToken("def456"));
+		OIDCTokenResponse response = new OIDCTokenResponse(tokens);
+
+		assertTrue(response.indicatesSuccess());
+		assertEquals("abc123", response.getOIDCTokens().getAccessToken().getValue());
+		assertEquals("def456", response.getOIDCTokens().getRefreshToken().getValue());
+		assertNull(response.getOIDCTokens().getIDToken());
+		assertNull(response.getOIDCTokens().getIDTokenString());
+		
+		JSONObject jsonObject = response.toJSONObject();
+		assertEquals(tokens.getAccessToken().getValue(), jsonObject.get("access_token"));
+		assertEquals("Bearer", jsonObject.get("token_type"));
+		assertEquals(3, jsonObject.size());
+		
+
+		OIDCTokenResponse parsedResponse = OIDCTokenResponse.parse(jsonObject);
+		assertEquals(tokens.getAccessToken().getValue(), parsedResponse.getOIDCTokens().getAccessToken().getValue());
+		assertEquals(tokens.getRefreshToken().getValue(), parsedResponse.getOIDCTokens().getRefreshToken().getValue());
+		assertNull(parsedResponse.getOIDCTokens().getIDToken());
+		assertNull(parsedResponse.getOIDCTokens().getIDTokenString());
 	}
 }

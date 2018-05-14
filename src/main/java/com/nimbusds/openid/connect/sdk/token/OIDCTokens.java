@@ -21,18 +21,14 @@ package com.nimbusds.openid.connect.sdk.token;
 import java.util.Set;
 
 import com.nimbusds.jwt.JWT;
-
-import net.jcip.annotations.Immutable;
-
-import net.minidev.json.JSONObject;
-
 import com.nimbusds.jwt.JWTParser;
-
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.token.Tokens;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -43,19 +39,18 @@ public final class OIDCTokens extends Tokens {
 
 
 	/**
-	 * The ID Token serialised to a JWT. If not specified then the
-	 * serialised variant.
+	 * The ID Token serialised to a JWT, {@code null} if not specified.
 	 */
 	private final JWT idToken;
 
 
 	/**
-	 * The ID Token as raw string (for more efficient serialisation). If
-	 * not specified then the unserialised variant.
+	 * The ID Token as raw string (for more efficient serialisation),
+	 * {@code null} if not specified.
 	 */
 	private final String idTokenString;
-
-
+	
+	
 	/**
 	 * Creates a new OpenID Connect tokens instance.
 	 *
@@ -74,8 +69,8 @@ public final class OIDCTokens extends Tokens {
 		this.idToken = idToken;
 		idTokenString = null;
 	}
-
-
+	
+	
 	/**
 	 * Creates a new OpenID Connect tokens instance.
 	 *
@@ -93,6 +88,22 @@ public final class OIDCTokens extends Tokens {
 
 		this.idTokenString = idTokenString;
 		idToken = null;
+	}
+	
+	
+	/**
+	 * Creates a new OpenID Connect tokens instance without an ID token.
+	 * Intended for token responses from a refresh token grant where the ID
+	 * token is optional.
+	 *
+	 * @param accessToken  The access token. Must not be {@code null}.
+	 * @param refreshToken The refresh token. If none {@code null}.
+	 */
+	public OIDCTokens(final AccessToken accessToken, final RefreshToken refreshToken) {
+		
+		super(accessToken, refreshToken);
+		this.idToken = null;
+		this.idTokenString = null;
 	}
 
 
@@ -156,7 +167,9 @@ public final class OIDCTokens extends Tokens {
 	public Set<String> getParameterNames() {
 
 		Set<String> paramNames = super.getParameterNames();
-		paramNames.add("id_token");
+		if (idToken != null || idTokenString != null) {
+			paramNames.add("id_token");
+		}
 		return paramNames;
 	}
 
@@ -165,7 +178,9 @@ public final class OIDCTokens extends Tokens {
 	public JSONObject toJSONObject() {
 
 		JSONObject o = super.toJSONObject();
-		o.put("id_token", getIDTokenString());
+		if (getIDTokenString() != null) {
+			o.put("id_token", getIDTokenString());
+		}
 		return o;
 	}
 
@@ -183,17 +198,26 @@ public final class OIDCTokens extends Tokens {
 	 */
 	public static OIDCTokens parse(final JSONObject jsonObject)
 		throws ParseException {
-
-		JWT idToken;
-
-		try {
-			idToken = JWTParser.parse(JSONObjectUtils.getString(jsonObject, "id_token"));
-
-		} catch (java.text.ParseException e) {
-
-			throw new ParseException("Couldn't parse ID token: " + e.getMessage(), e);
+		
+		AccessToken accessToken = AccessToken.parse(jsonObject);
+		
+		RefreshToken refreshToken = RefreshToken.parse(jsonObject);
+		
+		if (jsonObject.get("id_token") != null) {
+			
+			JWT idToken;
+			try {
+				idToken = JWTParser.parse(JSONObjectUtils.getString(jsonObject, "id_token"));
+			} catch (java.text.ParseException e) {
+				throw new ParseException("Couldn't parse ID token: " + e.getMessage(), e);
+			}
+			
+			return new OIDCTokens(idToken, accessToken, refreshToken);
+			
+		} else {
+		
+			// Likely a token response from a refresh token grant without an ID token
+			return new OIDCTokens(accessToken, refreshToken);
 		}
-
-		return new OIDCTokens(idToken, AccessToken.parse(jsonObject), RefreshToken.parse(jsonObject));
 	}
 }

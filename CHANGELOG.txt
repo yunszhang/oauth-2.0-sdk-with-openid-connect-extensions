@@ -906,3 +906,6 @@ version 5.62 (2018-05-14)
       the mutual_tls_sender_constrained_access_tokens metadata field is renamed
       to tls_client_certificate_bound_access_tokens. Introduces new getters and
       setters, deprecates the old ones (iss #244).
+    * Allows OpenID Connect token responses without an ID token, which may
+      occur in token responses to a refresh token grant where the OpenID
+      Provider may not issue an ID token(iss #243).

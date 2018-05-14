@@ -18,18 +18,16 @@
 package com.nimbusds.openid.connect.sdk.token;
 
 
-import junit.framework.TestCase;
-
-import net.minidev.json.JSONObject;
-
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
-
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.oauth2.sdk.token.AccessTokenType;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
+import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -66,7 +64,7 @@ public class OIDCTokensTest extends TestCase {
 	public void testAllDefined()
 		throws ParseException {
 
-		AccessToken accessToken = new BearerAccessToken(60l, Scope.parse("openid email"));
+		AccessToken accessToken = new BearerAccessToken(60L, Scope.parse("openid email"));
 		RefreshToken refreshToken = new RefreshToken();
 
 		OIDCTokens tokens = new OIDCTokens(ID_TOKEN, accessToken, refreshToken);
@@ -89,7 +87,7 @@ public class OIDCTokensTest extends TestCase {
 		assertEquals(ID_TOKEN_STRING, jsonObject.get("id_token"));
 		assertEquals("Bearer", jsonObject.get("token_type"));
 		assertEquals(accessToken.getValue(), jsonObject.get("access_token"));
-		assertEquals(60l, jsonObject.get("expires_in"));
+		assertEquals(60L, jsonObject.get("expires_in"));
 		assertEquals("openid email", jsonObject.get("scope"));
 		assertEquals(refreshToken.getValue(), jsonObject.get("refresh_token"));
 		assertEquals(6, jsonObject.size());
@@ -108,7 +106,7 @@ public class OIDCTokensTest extends TestCase {
 	public void testAllDefined_fromIDTokenString()
 		throws ParseException {
 
-		AccessToken accessToken = new BearerAccessToken(60l, Scope.parse("openid email"));
+		AccessToken accessToken = new BearerAccessToken(60L, Scope.parse("openid email"));
 		RefreshToken refreshToken = new RefreshToken();
 
 		OIDCTokens tokens = new OIDCTokens(ID_TOKEN_STRING, accessToken, refreshToken);
@@ -131,7 +129,7 @@ public class OIDCTokensTest extends TestCase {
 		assertEquals(ID_TOKEN_STRING, jsonObject.get("id_token"));
 		assertEquals("Bearer", jsonObject.get("token_type"));
 		assertEquals(accessToken.getValue(), jsonObject.get("access_token"));
-		assertEquals(60l, jsonObject.get("expires_in"));
+		assertEquals(60L, jsonObject.get("expires_in"));
 		assertEquals("openid email", jsonObject.get("scope"));
 		assertEquals(refreshToken.getValue(), jsonObject.get("refresh_token"));
 		assertEquals(6, jsonObject.size());
@@ -144,6 +142,40 @@ public class OIDCTokensTest extends TestCase {
 		assertEquals(accessToken.getLifetime(), tokens.getAccessToken().getLifetime());
 		assertEquals(accessToken.getScope(), tokens.getAccessToken().getScope());
 		assertEquals(refreshToken.getValue(), tokens.getRefreshToken().getValue());
+	}
+
+
+	// The token response from a refresh token grant may not include an id_token
+	public void testNoIDToken()
+		throws ParseException {
+
+		AccessToken accessToken = new BearerAccessToken();
+
+		OIDCTokens tokens = new OIDCTokens(accessToken, null);
+
+		assertNull(tokens.getIDToken());
+		assertNull(tokens.getIDTokenString());
+		assertEquals(accessToken, tokens.getAccessToken());
+		assertEquals(accessToken, tokens.getBearerAccessToken());
+		assertNull(tokens.getRefreshToken());
+
+		assertTrue(tokens.getParameterNames().contains("token_type"));
+		assertTrue(tokens.getParameterNames().contains("access_token"));
+		assertEquals(2, tokens.getParameterNames().size());
+
+		JSONObject jsonObject = tokens.toJSONObject();
+		assertEquals("Bearer", jsonObject.get("token_type"));
+		assertEquals(accessToken.getValue(), jsonObject.get("access_token"));
+		assertEquals(2, jsonObject.size());
+
+		tokens = OIDCTokens.parse(jsonObject);
+
+		assertNull(tokens.getIDToken());
+		assertNull(tokens.getIDTokenString());
+		assertEquals(accessToken.getValue(), tokens.getAccessToken().getValue());
+		assertEquals(0L, tokens.getAccessToken().getLifetime());
+		assertNull(tokens.getAccessToken().getScope());
+		assertNull(tokens.getRefreshToken());
 	}
 
 
@@ -176,7 +208,7 @@ public class OIDCTokensTest extends TestCase {
 		assertEquals(ID_TOKEN.getParsedString(), tokens.getIDToken().getParsedString());
 		assertEquals(ID_TOKEN_STRING, tokens.getIDTokenString());
 		assertEquals(accessToken.getValue(), tokens.getAccessToken().getValue());
-		assertEquals(0l, tokens.getAccessToken().getLifetime());
+		assertEquals(0L, tokens.getAccessToken().getLifetime());
 		assertNull(tokens.getAccessToken().getScope());
 		assertNull(tokens.getRefreshToken());
 	}
@@ -211,7 +243,7 @@ public class OIDCTokensTest extends TestCase {
 		assertEquals(ID_TOKEN_STRING, tokens.getIDToken().getParsedString());
 		assertEquals(ID_TOKEN_STRING, tokens.getIDTokenString());
 		assertEquals(accessToken.getValue(), tokens.getAccessToken().getValue());
-		assertEquals(0l, tokens.getAccessToken().getLifetime());
+		assertEquals(0L, tokens.getAccessToken().getLifetime());
 		assertNull(tokens.getAccessToken().getScope());
 		assertNull(tokens.getRefreshToken());
 	}
@@ -245,7 +277,7 @@ public class OIDCTokensTest extends TestCase {
 		jsonObject.put("id_token", "ey..."); // invalid
 		jsonObject.put("token_type", "Bearer");
 		jsonObject.put("access_token", "abc123");
-		jsonObject.put("expires_in", 60l);
+		jsonObject.put("expires_in", 60L);
 
 		try {
 			OIDCTokens.parse(jsonObject);
@@ -253,5 +285,25 @@ public class OIDCTokensTest extends TestCase {
 		} catch (ParseException e) {
 			assertTrue(e.getMessage().startsWith("Couldn't parse ID token: Invalid unsecured/JWS/JWE header:"));
 		}
+	}
+	
+	
+	public void testParseNullIDToken()
+		throws ParseException {
+		
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("id_token", null); // invalid
+		jsonObject.put("token_type", "Bearer");
+		jsonObject.put("access_token", "abc123");
+		jsonObject.put("expires_in", 60L);
+		
+		OIDCTokens oidcTokens = OIDCTokens.parse(jsonObject);
+		
+		assertNull(oidcTokens.getIDToken());
+		assertNull(oidcTokens.getIDTokenString());
+		
+		assertEquals("abc123", oidcTokens.getAccessToken().getValue());
+		assertEquals(60L, oidcTokens.getAccessToken().getLifetime());
+		assertEquals(AccessTokenType.BEARER, oidcTokens.getAccessToken().getType());
 	}
 }
