@@ -70,7 +70,7 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("revocation_endpoint"));
 		assertTrue(paramNames.contains("revocation_endpoint_auth_methods_supported"));
 		assertTrue(paramNames.contains("revocation_endpoint_auth_signing_alg_values_supported"));
-		assertTrue(paramNames.contains("mutual_tls_sender_constrained_access_tokens"));
+		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
 		
 		assertEquals(49, paramNames.size());
 	}

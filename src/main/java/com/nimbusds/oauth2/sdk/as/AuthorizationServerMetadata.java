@@ -51,7 +51,7 @@ import net.minidev.json.JSONObject;
  *     <li>OAuth 2.0 Authorization Server Metadata
  *         (draft-ietf-oauth-discovery-10)
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *  *      Access Tokens (draft-ietf-oauth-mtls-07)
+ *  *      Access Tokens (draft-ietf-oauth-mtls-08)
  * </ul>
  */
 public class AuthorizationServerMetadata {
@@ -89,7 +89,7 @@ public class AuthorizationServerMetadata {
 		p.add("revocation_endpoint");
 		p.add("revocation_endpoint_auth_methods_supported");
 		p.add("revocation_endpoint_auth_signing_alg_values_supported");
-		p.add("mutual_tls_sender_constrained_access_tokens");
+		p.add("tls_client_certificate_bound_access_tokens");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 	
@@ -285,10 +285,10 @@ public class AuthorizationServerMetadata {
 	
 	/**
 	 * If {@code true} the
-	 * {@code mutual_tls_sender_constrained_access_tokens} if set, else
+	 * {@code tls_client_certificate_bound_access_tokens} if set, else
 	 * not.
 	 */
-	private boolean mutualTLSSenderConstrainedAccessTokens = false;
+	private boolean tlsClientCertificateBoundAccessTokens = false;
 	
 	
 	/**
@@ -1080,33 +1080,64 @@ public class AuthorizationServerMetadata {
 	
 	
 	/**
-	 * Gets the support for mutual TLS sender constrained access tokens.
+	 * Gets the support for TLS client certificate bound access tokens.
 	 * Corresponds to the
-	 * {@code mutual_tls_sender_constrained_access_tokens} metadata field.
+	 * {@code tls_client_certificate_bound_access_tokens} metadata field.
 	 *
-	 * @return {@code true} if mutual TLS sender constrained access tokens
+	 * @return {@code true} if TLS client certificate bound access tokens
 	 *         are supported, else {@code false}.
 	 */
-	public boolean supportsMutualTLSSenderConstrainedAccessTokens() {
+	public boolean supportsTLSClientCertificateBoundAccessTokens() {
 		
-		return mutualTLSSenderConstrainedAccessTokens;
+		return tlsClientCertificateBoundAccessTokens;
 	}
 	
 	
 	/**
-	 * Sets the support for mutual TLS sender constrained access tokens.
+	 * Sets the support for TLS client certificate bound access tokens.
 	 * Corresponds to the
-	 * {@code mutual_tls_sender_constrained_access_tokens} metadata field.
+	 * {@code tls_client_certificate_bound_access_tokens} metadata field.
 	 *
-	 * @param mutualTLSSenderConstrainedAccessTokens {@code true} if mutual
-	 *                                               TLS sender constrained
-	 *                                               access tokens are
-	 *                                               supported, else
+	 * @param tlsClientCertBoundTokens {@code true} if TLS client
+	 *                                 certificate bound access tokens are
+	 *                                 supported, else {@code false}.
+	 */
+	public void setSupportsTLSClientCertificateBoundAccessTokens(final boolean tlsClientCertBoundTokens) {
+		
+		tlsClientCertificateBoundAccessTokens = tlsClientCertBoundTokens;
+	}
+	
+	
+	/**
+	 * Gets the support for TLS client certificate bound access tokens.
+	 * Corresponds to the
+	 * {@code tls_client_certificate_bound_access_tokens} metadata field.
+	 *
+	 * @return {@code true} if TLS client certificate bound access tokens
+	 *         are supported, else {@code false}.
+	 */
+	@Deprecated
+	public boolean supportsMutualTLSSenderConstrainedAccessTokens() {
+		
+		return supportsTLSClientCertificateBoundAccessTokens();
+	}
+	
+	
+	/**
+	 * Sets the support for TLS client certificate bound access tokens.
+	 * Corresponds to the
+	 * {@code tls_client_certificate_bound_access_tokens} metadata field.
+	 *
+	 * @param mutualTLSSenderConstrainedAccessTokens {@code true} if TLS
+	 *                                               client certificate
+	 *                                               bound access tokens
+	 *                                               are supported, else
 	 *                                               {@code false}.
 	 */
+	@Deprecated
 	public void setSupportsMutualTLSSenderConstrainedAccessTokens(final boolean mutualTLSSenderConstrainedAccessTokens) {
 		
-		this.mutualTLSSenderConstrainedAccessTokens = mutualTLSSenderConstrainedAccessTokens;
+		setSupportsTLSClientCertificateBoundAccessTokens(mutualTLSSenderConstrainedAccessTokens);
 	}
 	
 	
@@ -1387,7 +1418,7 @@ public class AuthorizationServerMetadata {
 		o.put("request_uri_parameter_supported", requestURIParamSupported);
 		o.put("require_request_uri_registration", requireRequestURIReg);
 		
-		o.put("mutual_tls_sender_constrained_access_tokens", mutualTLSSenderConstrainedAccessTokens);
+		o.put("tls_client_certificate_bound_access_tokens", tlsClientCertificateBoundAccessTokens);
 		
 		// Append any custom (not registered) parameters
 		o.putAll(customParameters);
@@ -1657,8 +1688,8 @@ public class AuthorizationServerMetadata {
 		if (jsonObject.get("require_request_uri_registration") != null)
 			as.requireRequestURIReg = JSONObjectUtils.getBoolean(jsonObject, "require_request_uri_registration");
 		
-		if (jsonObject.get("mutual_tls_sender_constrained_access_tokens") != null)
-			as.mutualTLSSenderConstrainedAccessTokens = JSONObjectUtils.getBoolean(jsonObject, "mutual_tls_sender_constrained_access_tokens");
+		if (jsonObject.get("tls_client_certificate_bound_access_tokens") != null)
+			as.tlsClientCertificateBoundAccessTokens = JSONObjectUtils.getBoolean(jsonObject, "tls_client_certificate_bound_access_tokens");
 		
 		// Parse custom (not registered) parameters
 		JSONObject customParams = new JSONObject(jsonObject);

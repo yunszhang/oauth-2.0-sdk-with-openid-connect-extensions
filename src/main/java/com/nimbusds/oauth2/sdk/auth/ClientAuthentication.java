@@ -34,8 +34,10 @@ import com.nimbusds.oauth2.sdk.util.StringUtils;
  *
  * <ul>
  *     <li>OAuth 2.0 (RFC 6749), section 2.3.
+ *     <li>JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and
+ *         Authorization Grants (RFC 7523), section 2.2.
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-07), section 2.
+ *         Access Tokens (draft-ietf-oauth-mtls-08), section 2.
  * </ul>
  */
 public abstract class ClientAuthentication {

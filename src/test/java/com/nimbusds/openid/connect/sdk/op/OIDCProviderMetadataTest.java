@@ -21,8 +21,6 @@ package com.nimbusds.openid.connect.sdk.op;
 import java.net.URI;
 import java.util.*;
 
-import static net.jadler.Jadler.onRequest;
-import static net.jadler.Jadler.port;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -31,7 +29,6 @@ import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.*;
-import com.nimbusds.oauth2.sdk.as.AuthorizationServerMetadata;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
@@ -45,7 +42,6 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimType;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
-import org.junit.Test;
 
 
 /**
@@ -106,7 +102,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("frontchannel_logout_session_supported"));
 		assertTrue(paramNames.contains("backchannel_logout_supported"));
 		assertTrue(paramNames.contains("backchannel_logout_session_supported"));
-		assertTrue(paramNames.contains("mutual_tls_sender_constrained_access_tokens"));
+		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
 
 		assertEquals(49, paramNames.size());
 	}
@@ -331,6 +327,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertFalse(op.supportsBackChannelLogout());
 		assertFalse(op.supportsBackChannelLogoutSession());
 		
+		assertFalse(op.supportsTLSClientCertificateBoundAccessTokens());
 		assertFalse(op.supportsMutualTLSSenderConstrainedAccessTokens());
 
 		assertTrue(op.getCustomParameters().isEmpty());
@@ -546,8 +543,11 @@ public class OIDCProviderMetadataTest extends TestCase {
 		meta.setSupportsBackChannelLogoutSession(true);
 		assertTrue(meta.supportsBackChannelLogoutSession());
 		
+		assertFalse(meta.supportsTLSClientCertificateBoundAccessTokens());
 		assertFalse(meta.supportsMutualTLSSenderConstrainedAccessTokens());
+		meta.setSupportsTLSClientCertificateBoundAccessTokens(true);
 		meta.setSupportsMutualTLSSenderConstrainedAccessTokens(true);
+		assertTrue(meta.supportsTLSClientCertificateBoundAccessTokens());
 		assertTrue(meta.supportsMutualTLSSenderConstrainedAccessTokens());
 		
 		meta.setCustomParameter("x-custom", "xyz");
@@ -650,7 +650,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(meta.supportsBackChannelLogout());
 		assertTrue(meta.supportsBackChannelLogoutSession());
 		
-		assertTrue(meta.supportsMutualTLSSenderConstrainedAccessTokens());
+		assertTrue(meta.supportsTLSClientCertificateBoundAccessTokens());
 		
 		assertEquals(1, meta.getCustomParameters().size());
 		assertEquals("xyz", meta.getCustomParameter("x-custom"));
@@ -960,7 +960,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 	}
 	
 	
-	public void testOutputTLSSenderConstrainedTokensSupport()
+	public void testOutputTLSClientCertificateBoundAccessTokensSupport()
 		throws ParseException {
 		
 		OIDCProviderMetadata meta = new OIDCProviderMetadata(
@@ -972,21 +972,21 @@ public class OIDCProviderMetadataTest extends TestCase {
 		
 		JSONObject jsonObject = meta.toJSONObject();
 		
-		assertFalse((Boolean) jsonObject.get("mutual_tls_sender_constrained_access_tokens"));
+		assertFalse((Boolean) jsonObject.get("tls_client_certificate_bound_access_tokens"));
 		
-		assertFalse(OIDCProviderMetadata.parse(jsonObject).supportsMutualTLSSenderConstrainedAccessTokens());
+		assertFalse(OIDCProviderMetadata.parse(jsonObject).supportsTLSClientCertificateBoundAccessTokens());
 		
 		// default to false
-		assertNotNull(jsonObject.remove("mutual_tls_sender_constrained_access_tokens"));
+		assertNotNull(jsonObject.remove("tls_client_certificate_bound_access_tokens"));
 		
-		assertFalse(OIDCProviderMetadata.parse(jsonObject).supportsMutualTLSSenderConstrainedAccessTokens());
+		assertFalse(OIDCProviderMetadata.parse(jsonObject).supportsTLSClientCertificateBoundAccessTokens());
 		
-		meta.setSupportsMutualTLSSenderConstrainedAccessTokens(true);
+		meta.setSupportsTLSClientCertificateBoundAccessTokens(true);
 		
 		jsonObject = meta.toJSONObject();
 		
-		assertTrue((Boolean)jsonObject.get("mutual_tls_sender_constrained_access_tokens"));
+		assertTrue((Boolean)jsonObject.get("tls_client_certificate_bound_access_tokens"));
 		
-		assertTrue(OIDCProviderMetadata.parse(jsonObject).supportsMutualTLSSenderConstrainedAccessTokens());
+		assertTrue(OIDCProviderMetadata.parse(jsonObject).supportsTLSClientCertificateBoundAccessTokens());
 	}
 }

@@ -56,7 +56,7 @@ import net.minidev.json.JSONObject;
  *     <li>OAuth 2.0 Authorization Server Metadata
  *         (draft-ietf-oauth-discovery-10)
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-07)
+ *         Access Tokens (draft-ietf-oauth-mtls-08)
  * </ul>
  */
 public class OIDCProviderMetadata extends AuthorizationServerMetadata {
@@ -1173,7 +1173,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		if (op.frontChannelLogoutSupported && jsonObject.get("backchannel_logout_session_supported") != null)
 			op.backChannelLogoutSessionSupported = JSONObjectUtils.getBoolean(jsonObject, "backchannel_logout_session_supported");
 		
-		op.setSupportsMutualTLSSenderConstrainedAccessTokens(as.supportsMutualTLSSenderConstrainedAccessTokens());
+		op.setSupportsTLSClientCertificateBoundAccessTokens(as.supportsTLSClientCertificateBoundAccessTokens());
 		
 		// Parse custom (not registered) parameters
 		for (Map.Entry<String,?> entry: as.getCustomParameters().entrySet()) {

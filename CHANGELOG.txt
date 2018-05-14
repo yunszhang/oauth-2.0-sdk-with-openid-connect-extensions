@@ -900,3 +900,9 @@ version 5.60 (2018-04-22)
 version 5.61 (2018-04-24)
     * Updates the ClaimsRequest.resolve methods to support plain OAuth 2.0
       authorisation requests.
+
+version 5.62 (2018-05-14)
+    * Updates AuthorizationServerMetadata for draft-ietf-oauth-mtls-08 where
+      the mutual_tls_sender_constrained_access_tokens metadata field is renamed
+      to tls_client_certificate_bound_access_tokens. Introduces new getters and
+      setters, deprecates the old ones (iss #244).
