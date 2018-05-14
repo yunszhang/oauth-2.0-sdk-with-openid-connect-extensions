@@ -95,7 +95,7 @@ public class ClientMetadata {
 		p.add("jwks");
 		p.add("software_id");
 		p.add("software_version");
-		p.add("mutual_tls_sender_constrained_access_tokens");
+		p.add("tls_client_certificate_bound_access_tokens");
 		p.add("tls_client_auth_subject_dn");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
@@ -205,9 +205,9 @@ public class ClientMetadata {
 	
 	
 	/**
-	 * Preference for mutual TLS sender constrained access tokens.
+	 * Preference for TLS client certificate bound access tokens.
 	 */
-	private boolean mutualTLSSenderConstrainedAccessTokens = false;
+	private boolean tlsClientCertificateBoundAccessTokens = false;
 	
 	
 	/**
@@ -263,7 +263,7 @@ public class ClientMetadata {
 		jwkSet = metadata.getJWKSet();
 		softwareID = metadata.softwareID;
 		softwareVersion = metadata.softwareVersion;
-		mutualTLSSenderConstrainedAccessTokens = metadata.mutualTLSSenderConstrainedAccessTokens;
+		tlsClientCertificateBoundAccessTokens = metadata.tlsClientCertificateBoundAccessTokens;
 		tlsClientAuthSubjectDN = metadata.tlsClientAuthSubjectDN;
 		customFields = metadata.customFields;
 	}
@@ -1027,33 +1027,67 @@ public class ClientMetadata {
 	
 	
 	/**
-	 * Sets the preference for mutual TLS sender constrained access tokens.
+	 * Sets the preference for TLS client certificate bound access tokens.
 	 * Corresponds to the
-	 * {@code mutual_tls_sender_constrained_access_tokens} client metadata
+	 * {@code tls_client_certificate_bound_access_tokens} client metadata
 	 * field.
 	 *
-	 * @return {@code true} indicates a preference for mutual TLS sender
-	 *         constrained access tokens, {@code false} if none.
+	 * @return {@code true} indicates a preference for TLS client
+	 *         certificate bound access tokens, {@code false} if none.
 	 */
-	public boolean getMutualTLSSenderConstrainedAccessTokens() {
+	public boolean getTLSClientCertificateBoundAccessTokens() {
 		
-		return mutualTLSSenderConstrainedAccessTokens;
+		return tlsClientCertificateBoundAccessTokens;
 	}
 	
 	
 	/**
-	 * Gets the preference for mutual TLS sender constrained access tokens.
+	 * Gets the preference for TLS client certificate bound access tokens.
 	 * Corresponds to the
-	 * {@code mutual_tls_sender_constrained_access_tokens} client metadata
+	 * {@code tls_client_certificate_bound_access_tokens} client metadata
+	 * field.
+	 *
+	 * @param tlsClientCertBoundTokens {@code true} indicates a preference
+	 *                                 for TLS client certificate bound
+	 *                                 access tokens, {@code false} if
+	 *                                 none.
+	 */
+	public void setTLSClientCertificateBoundAccessTokens(final boolean tlsClientCertBoundTokens) {
+		
+		tlsClientCertificateBoundAccessTokens = tlsClientCertBoundTokens;
+	}
+	
+	
+	/**
+	 * Sets the preference for TLS client certificate bound access tokens.
+	 * Corresponds to the
+	 * {@code tls_client_certificate_bound_access_tokens} client metadata
+	 * field.
+	 *
+	 * @return {@code true} indicates a preference for TLS client
+	 *         certificate bound access tokens, {@code false} if none.
+	 */
+	@Deprecated
+	public boolean getMutualTLSSenderConstrainedAccessTokens() {
+		
+		return tlsClientCertificateBoundAccessTokens;
+	}
+	
+	
+	/**
+	 * Gets the preference for TLS client certificate bound access tokens.
+	 * Corresponds to the
+	 * {@code tls_client_certificate_bound_access_tokens} client metadata
 	 * field.
 	 *
 	 * @param tlsSenderAccessTokens {@code true} indicates a preference for
-	 *                              mutual TLS sender constrained access
+	 *                              TLS client certificate bound access
 	 *                              tokens, {@code false} if none.
 	 */
+	@Deprecated
 	public void setMutualTLSSenderConstrainedAccessTokens(final boolean tlsSenderAccessTokens) {
 		
-		mutualTLSSenderConstrainedAccessTokens = tlsSenderAccessTokens;
+		tlsClientCertificateBoundAccessTokens = tlsSenderAccessTokens;
 	}
 	
 	
@@ -1357,7 +1391,7 @@ public class ClientMetadata {
 		if (softwareVersion != null)
 			o.put("software_version", softwareVersion.getValue());
 		
-		o.put("mutual_tls_sender_constrained_access_tokens", mutualTLSSenderConstrainedAccessTokens);
+		o.put("tls_client_certificate_bound_access_tokens", tlsClientCertificateBoundAccessTokens);
 		
 		if (tlsClientAuthSubjectDN != null)
 			o.put("tls_client_auth_subject_dn", tlsClientAuthSubjectDN);
@@ -1606,9 +1640,9 @@ public class ClientMetadata {
 				jsonObject.remove("software_version");
 			}
 			
-			if (jsonObject.get("mutual_tls_sender_constrained_access_tokens") != null) {
-				metadata.setMutualTLSSenderConstrainedAccessTokens(JSONObjectUtils.getBoolean(jsonObject, "mutual_tls_sender_constrained_access_tokens"));
-				jsonObject.remove("mutual_tls_sender_constrained_access_tokens");
+			if (jsonObject.get("tls_client_certificate_bound_access_tokens") != null) {
+				metadata.setTLSClientCertificateBoundAccessTokens(JSONObjectUtils.getBoolean(jsonObject, "tls_client_certificate_bound_access_tokens"));
+				jsonObject.remove("tls_client_certificate_bound_access_tokens");
 			}
 			
 			if (jsonObject.get("tls_client_auth_subject_dn") != null) {

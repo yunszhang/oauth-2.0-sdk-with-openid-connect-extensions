@@ -66,7 +66,7 @@ public class ClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("jwks"));
 		assertTrue(paramNames.contains("software_id"));
 		assertTrue(paramNames.contains("software_version"));
-		assertTrue(paramNames.contains("mutual_tls_sender_constrained_access_tokens"));
+		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
 		assertTrue(paramNames.contains("tls_client_auth_subject_dn"));
 
 		assertEquals(24, paramNames.size());
@@ -207,7 +207,7 @@ public class ClientInformationTest extends TestCase {
 		assertEquals("https://example.com/in", ((List<String>)o.get("redirect_uris")).get(0));
 		assertEquals("secret", (String)o.get("client_secret"));
 		assertEquals(0L, ((Long)o.get("client_secret_expires_at")).longValue());
-		assertFalse((Boolean)o.get("mutual_tls_sender_constrained_access_tokens"));
+		assertFalse((Boolean)o.get("tls_client_certificate_bound_access_tokens"));
 		assertEquals(5, o.size());
 
 		String jsonString = o.toJSONString();
@@ -251,12 +251,12 @@ public class ClientInformationTest extends TestCase {
 		assertEquals("https://example.com/in", ((List<String>)o.get("redirect_uris")).get(0));
 		assertEquals("secret", (String)o.get("client_secret"));
 		assertEquals(0L, ((Long)o.get("client_secret_expires_at")).longValue());
-		assertFalse((Boolean) o.get("mutual_tls_sender_constrained_access_tokens"));
+		assertFalse((Boolean) o.get("tls_client_certificate_bound_access_tokens"));
 		assertEquals(5, o.size());
 
 		String jsonString = o.toJSONString();
 
-		o = com.nimbusds.jose.util.JSONObjectUtils.parseJSONObject(jsonString);
+		o = com.nimbusds.jose.util.JSONObjectUtils.parse(jsonString);
 
 		clientInfo = ClientInformation.parse(o);
 

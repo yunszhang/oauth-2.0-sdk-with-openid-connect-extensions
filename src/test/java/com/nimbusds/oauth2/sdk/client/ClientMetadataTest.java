@@ -65,7 +65,7 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("jwks"));
 		assertTrue(paramNames.contains("software_id"));
 		assertTrue(paramNames.contains("software_version"));
-		assertTrue(paramNames.contains("mutual_tls_sender_constrained_access_tokens"));
+		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
 		assertTrue(paramNames.contains("tls_client_auth_subject_dn"));
 
 		assertEquals(18, ClientMetadata.getRegisteredParameterNames().size());
@@ -151,8 +151,9 @@ public class ClientMetadataTest extends TestCase {
 		SoftwareVersion softwareVersion = new SoftwareVersion("1.0");
 		meta.setSoftwareVersion(softwareVersion);
 		
+		assertFalse(meta.getTLSClientCertificateBoundAccessTokens());
 		assertFalse(meta.getMutualTLSSenderConstrainedAccessTokens());
-		meta.setMutualTLSSenderConstrainedAccessTokens(true);
+		meta.setTLSClientCertificateBoundAccessTokens(true);
 		
 		assertNull(meta.getTLSClientAuthSubjectDN());
 		String subjectDN = "cn=123";
@@ -186,6 +187,7 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(1, meta.getJWKSet().getKeys().size());
 		assertEquals(softwareID, meta.getSoftwareID());
 		assertEquals(softwareVersion, meta.getSoftwareVersion());
+		assertTrue(meta.getTLSClientCertificateBoundAccessTokens());
 		assertTrue(meta.getMutualTLSSenderConstrainedAccessTokens());
 		assertEquals(subjectDN, meta.getTLSClientAuthSubjectDN());
 		assertTrue(meta.getCustomFields().isEmpty());
@@ -226,6 +228,7 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(1, meta.getJWKSet().getKeys().size());
 		assertEquals(softwareID, meta.getSoftwareID());
 		assertEquals(softwareVersion, meta.getSoftwareVersion());
+		assertTrue(meta.getTLSClientCertificateBoundAccessTokens());
 		assertTrue(meta.getMutualTLSSenderConstrainedAccessTokens());
 		assertEquals(subjectDN, meta.getTLSClientAuthSubjectDN());
 
@@ -459,7 +462,7 @@ public class ClientMetadataTest extends TestCase {
 		SoftwareVersion softwareVersion = new SoftwareVersion("1.0");
 		meta.setSoftwareVersion(softwareVersion);
 		
-		meta.setMutualTLSSenderConstrainedAccessTokens(true);
+		meta.setTLSClientCertificateBoundAccessTokens(true);
 		
 		String subjectDN = "cn=123";
 		meta.setTLSClientAuthSubjectDN(subjectDN);
@@ -495,6 +498,7 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(1, copy.getJWKSet().getKeys().size());
 		assertEquals(softwareID, copy.getSoftwareID());
 		assertEquals(softwareVersion, copy.getSoftwareVersion());
+		assertTrue(copy.getTLSClientCertificateBoundAccessTokens());
 		assertTrue(copy.getMutualTLSSenderConstrainedAccessTokens());
 		assertEquals(subjectDN, copy.getTLSClientAuthSubjectDN());
 		assertTrue(copy.getCustomFields().isEmpty());
@@ -533,6 +537,7 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(1, copy.getJWKSet().getKeys().size());
 		assertEquals(softwareID, copy.getSoftwareID());
 		assertEquals(softwareVersion, copy.getSoftwareVersion());
+		assertTrue(copy.getTLSClientCertificateBoundAccessTokens());
 		assertTrue(copy.getMutualTLSSenderConstrainedAccessTokens());
 		assertEquals(subjectDN, copy.getTLSClientAuthSubjectDN());
 

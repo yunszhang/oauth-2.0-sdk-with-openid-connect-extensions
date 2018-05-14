@@ -62,7 +62,7 @@ public class OIDCClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("jwks"));
 		assertTrue(paramNames.contains("software_id"));
 		assertTrue(paramNames.contains("software_version"));
-		assertTrue(paramNames.contains("mutual_tls_sender_constrained_access_tokens"));
+		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
 		assertTrue(paramNames.contains("tls_client_auth_subject_dn"));
 
 		// OIDC specifid params

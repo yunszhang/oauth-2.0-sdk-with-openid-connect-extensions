@@ -902,10 +902,14 @@ version 5.61 (2018-04-24)
       authorisation requests.
 
 version 5.62 (2018-05-14)
+    * Updates ClientMetadata for draft-ietf-oauth-mtls-08 where the
+      mutual_tls_sender_constrained_access_tokens metadata field is renamed to
+      tls_client_certificate_bound_access_tokens. Introduces new getter and
+      setter, deprecates the old ones (iss #244).
     * Updates AuthorizationServerMetadata for draft-ietf-oauth-mtls-08 where
       the mutual_tls_sender_constrained_access_tokens metadata field is renamed
-      to tls_client_certificate_bound_access_tokens. Introduces new getters and
-      setters, deprecates the old ones (iss #244).
+      to tls_client_certificate_bound_access_tokens. Introduces new getter and
+      setter, deprecates the old ones (iss #244).
     * Allows OpenID Connect token responses without an ID token, which may
       occur in token responses to a refresh token grant where the OpenID
       Provider may not issue an ID token(iss #243).

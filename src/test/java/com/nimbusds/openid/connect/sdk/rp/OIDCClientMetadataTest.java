@@ -67,7 +67,7 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("jwks"));
 		assertTrue(paramNames.contains("software_id"));
 		assertTrue(paramNames.contains("software_version"));
-		assertTrue(paramNames.contains("mutual_tls_sender_constrained_access_tokens"));
+		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
 		assertTrue(paramNames.contains("tls_client_auth_subject_dn"));
 
 		// OIDC specifid params
@@ -577,7 +577,7 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertNotNull(jsonObject.get("subject_type"));
 		assertNotNull(jsonObject.get("sector_identifier_uri"));
 		assertNotNull(jsonObject.get("id_token_signed_response_alg"));
-		assertFalse((Boolean) jsonObject.get("mutual_tls_sender_constrained_access_tokens"));
+		assertFalse((Boolean) jsonObject.get("tls_client_certificate_bound_access_tokens"));
 		
 		assertEquals(9, jsonObject.size());
 	}
