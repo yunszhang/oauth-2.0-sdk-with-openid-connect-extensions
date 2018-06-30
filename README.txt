@@ -118,8 +118,10 @@ This SDK version implements the following standards and drafts:
 
     * Authentication Method Reference Values (RFC 8176)
 
+    * OAuth 2.0 Authorization Server Metadata (RFC 8414)
+
     * OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound Access
-      Tokens (draft-ietf-oauth-mtls-07)
+      Tokens (draft-ietf-oauth-mtls-08)
 
 	* OpenID Connect Core 1.0 (2014-02-25)
 
@@ -148,4 +150,4 @@ This SDK is provided under the terms of the Apache 2.0 licence.
 Questions or comments? Email support@connect2id.com
 
 
-2018-04-20
+2018-06-30

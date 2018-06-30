@@ -43,8 +43,7 @@ import net.jcip.annotations.Immutable;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OAuth 2.0 Authorization Server Metadata 
- *         (draft-ietf-oauth-discovery-10)
+ *     <li>OAuth 2.0 Authorization Server Metadata (RFC 8414)
  * </ul>
  */
 @Immutable

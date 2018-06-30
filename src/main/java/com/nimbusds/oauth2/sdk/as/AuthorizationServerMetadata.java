@@ -48,8 +48,7 @@ import net.minidev.json.JSONObject;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OAuth 2.0 Authorization Server Metadata
- *         (draft-ietf-oauth-discovery-10)
+ *     <li>OAuth 2.0 Authorization Server Metadata (RFC 8414)
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
  *  *      Access Tokens (draft-ietf-oauth-mtls-08)
  * </ul>
