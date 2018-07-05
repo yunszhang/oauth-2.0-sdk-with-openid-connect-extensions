@@ -202,7 +202,7 @@ public class AESBasedPairwiseSubjectCodecTest extends TestCase {
 		try {
 			codec.decode(new Subject(Base64URL.encode(cipherText).toString()));
 		} catch (InvalidPairwiseSubjectException e) {
-			assertEquals("Decryption failed: Given final block not properly padded", e.getMessage());
+			assertEquals("Decryption failed: Given final block not properly padded. Such issues can arise if a bad key is used during decryption.", e.getMessage());
 		}
 	}
 
