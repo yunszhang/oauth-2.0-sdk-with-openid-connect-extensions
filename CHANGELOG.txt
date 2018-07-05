@@ -913,3 +913,10 @@ version 5.62 (2018-05-14)
     * Allows OpenID Connect token responses without an ID token, which may
       occur in token responses to a refresh token grant where the OpenID
       Provider may not issue an ID token(iss #243).
+
+version 5.63 (2018-07-05)
+    * Fixes missing default setting of token_endpoint_auth_methods_supported to
+      [ "client_secret_basic" ] in AuthorizationServerMetadata.applyDefaults
+      (iss #248).
+    * Updates reference to OAuth 2.0 Authorization Server Metadata (RFC 8414).
+

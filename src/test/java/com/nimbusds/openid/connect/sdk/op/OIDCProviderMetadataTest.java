@@ -725,6 +725,8 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(grantTypes.contains(GrantType.AUTHORIZATION_CODE));
 		assertTrue(grantTypes.contains(GrantType.IMPLICIT));
 		assertEquals(2, grantTypes.size());
+		
+		assertEquals(Collections.singletonList(ClientAuthenticationMethod.CLIENT_SECRET_BASIC), meta.getTokenEndpointAuthMethods());
 
 		List<ClaimType> claimTypes = meta.getClaimTypes();
 		assertTrue(claimTypes.contains(ClaimType.NORMAL));

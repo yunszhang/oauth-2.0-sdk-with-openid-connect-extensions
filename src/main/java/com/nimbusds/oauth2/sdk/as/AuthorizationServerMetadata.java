@@ -1222,6 +1222,11 @@ public class AuthorizationServerMetadata {
 			gts.add(GrantType.AUTHORIZATION_CODE);
 			gts.add(GrantType.IMPLICIT);
 		}
+		
+		if (tokenEndpointAuthMethods == null) {
+			tokenEndpointAuthMethods = new ArrayList<>();
+			tokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC);
+		}
 	}
 	
 	
