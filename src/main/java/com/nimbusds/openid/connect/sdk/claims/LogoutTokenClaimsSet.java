@@ -52,6 +52,7 @@ import net.minidev.json.JSONObject;
  *
  * <ul>
  *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.4 (draft 04).
+ *     <li>Security Event Token (SET) (RFC 8417)
  * </ul>
  */
 public class LogoutTokenClaimsSet extends CommonClaimsSet {
