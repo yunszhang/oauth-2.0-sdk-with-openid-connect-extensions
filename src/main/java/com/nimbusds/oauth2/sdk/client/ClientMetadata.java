@@ -625,6 +625,8 @@ public class ClientMetadata {
 	 * {@code logo_uri} client metadata field, with an optional
 	 * language tag.
 	 *
+	 * @param langTag The language tag, {@code null} if not specified.
+	 *
 	 * @return The logo URI, {@code null} if not specified.
 	 */
 	public URI getLogoURI(final LangTag langTag) {
@@ -688,6 +690,8 @@ public class ClientMetadata {
 	 * Gets the client home page. Corresponds to the {@code client_uri}
 	 * client metadata field, with an optional language tag.
 	 *
+	 * @param langTag The language tag, {@code null} if not specified.
+	 *
 	 * @return The client URI, {@code null} if not specified.
 	 */
 	public URI getURI(final LangTag langTag) {
@@ -750,6 +754,8 @@ public class ClientMetadata {
 	 * Gets the client policy for use of end-user data. Corresponds to the
 	 * {@code policy_uri} client metadata field, with an optional
 	 * language tag.
+	 *
+	 * @param langTag The language tag, {@code null} if not specified.
 	 *
 	 * @return The policy URI, {@code null} if not specified.
 	 */
@@ -815,6 +821,8 @@ public class ClientMetadata {
 	 * Gets the client's terms of service. Corresponds to the
 	 * {@code tos_uri} client metadata field, with an optional
 	 * language tag.
+	 *
+	 * @param langTag The language tag, {@code null} if not specified.
 	 *
 	 * @return The terms of service URI, {@code null} if not specified.
 	 */

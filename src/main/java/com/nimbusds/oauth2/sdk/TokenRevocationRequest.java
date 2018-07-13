@@ -52,7 +52,7 @@ import net.minidev.json.JSONObject;
  * Content-Type: application/x-www-form-urlencoded
  * Authorization: Basic czZCaGRSa3F0MzpnWDFmQmF0M2JW
  *
- * token=45ghiukldjahdnhzdauz&token_type_hint=refresh_token
+ * token=45ghiukldjahdnhzdauz&amp;token_type_hint=refresh_token
  * </pre>
  *
  * <p>Example token revocation request for a public client:
@@ -62,7 +62,7 @@ import net.minidev.json.JSONObject;
  * Host: server.example.com
  * Content-Type: application/x-www-form-urlencoded
  *
- * token=45ghiukldjahdnhzdauz&token_type_hint=refresh_token&client_id=123456
+ * token=45ghiukldjahdnhzdauz&amp;token_type_hint=refresh_token&amp;client_id=123456
  * </pre>
  *
  * <p>Related specifications:

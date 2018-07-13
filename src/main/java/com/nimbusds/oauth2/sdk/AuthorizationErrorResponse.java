@@ -337,6 +337,8 @@ public class AuthorizationErrorResponse
 	 * @param httpRequest The HTTP request to parse. Must not be
 	 *                    {@code null}.
 	 *
+	 * @return The authorisation error response.
+	 *
 	 * @throws ParseException If the HTTP request couldn't be parsed to an
 	 *                        authorisation error response.
 	 */

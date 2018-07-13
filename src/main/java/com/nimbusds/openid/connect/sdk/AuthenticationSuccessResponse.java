@@ -279,7 +279,7 @@ public class AuthenticationSuccessResponse
 	 * known:
 	 *
 	 * <pre>
-	 * URI relUrl = new URI("https:///?code=Qcb0Orv1...&state=af0ifjsldkj");
+	 * URI relUrl = new URI("https:///?code=Qcb0Orv1...&amp;state=af0ifjsldkj");
 	 * </pre>
 	 *
 	 * <p>Example URI:
@@ -372,6 +372,8 @@ public class AuthenticationSuccessResponse
 	 *
 	 * @param httpRequest The HTTP request to parse. Must not be
 	 *                    {@code null}.
+	 *
+	 * @return The authentication success response.
 	 *
 	 * @throws ParseException If the HTTP request couldn't be parsed to an
 	 *                        OpenID Connect authentication success

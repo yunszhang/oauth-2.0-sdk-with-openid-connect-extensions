@@ -209,6 +209,8 @@ public class ClientRegistrationErrorResponse
 	 * @param httpResponse The HTTP response to parse. Its status code must
 	 *                     not be 200 (OK). Must not be {@code null}.
 	 *
+	 * @return The client registration error response.
+	 *
 	 * @throws ParseException If the HTTP response couldn't be parsed to a
 	 *                        client registration error response.
 	 */

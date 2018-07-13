@@ -255,6 +255,8 @@ public final class Actor implements Serializable, Comparable<Actor>, JSONAware {
 	 * </pre>
 	 *
 	 * <p>With nesting:
+	 *
+	 * <pre>
 	 * {
 	 *   "aud" : "https://backend.example.com",
 	 *   "iss" : "https://issuer.example.com",
@@ -265,8 +267,6 @@ public final class Actor implements Serializable, Comparable<Actor>, JSONAware {
 	 *             "iss" : "https://issuer.example.net",
 	 *             "act" : { "sub":"admin@example.com" } }
 	 * }
-	 * <pre>
-	 *
 	 * </pre>
 	 *
 	 * @param jsonObject The top-level JSON object to parse. Must not be

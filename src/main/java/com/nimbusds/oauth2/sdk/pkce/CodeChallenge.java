@@ -89,6 +89,8 @@ public class CodeChallenge extends Identifier {
 	 * @param value The code challenge value.
 	 *
 	 * @return The code challenge.
+	 *
+	 * @throws ParseException If parsing failed.
 	 */
 	public static CodeChallenge parse(final String value)
 		throws ParseException {

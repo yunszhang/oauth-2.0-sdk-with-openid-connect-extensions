@@ -186,13 +186,14 @@ public class SAML2AssertionValidator {
 	/**
 	 * Validates the specified SAML 2.0 assertion.
 	 *
-	 * @param assertion The SAML 2.0 assertion XML. Must not be
-	 *                  {@code null}.
-	 * @param key       The key to verify the signature. Should be an
-	 *                  {@link SecretKey} instance for HMAC,
-	 *                  {@link RSAPublicKey} for RSA signatures or
-	 *                  {@link ECPublicKey} for EC signatures. Must not be
-	 *                  {@code null}.
+	 * @param assertion      The SAML 2.0 assertion XML. Must not be
+	 *                       {@code null}.
+	 * @param expectedIssuer The expected issuer. Must not be {@code null}.
+	 * @param key            The key to verify the signature. Should be an
+	 *                       {@link SecretKey} instance for HMAC,
+	 *                       {@link RSAPublicKey} for RSA signatures or
+	 *                       {@link ECPublicKey} for EC signatures. Must
+	 *                       not be {@code null}.
 	 *
 	 * @return The validated SAML 2.0 assertion.
 	 *
@@ -233,11 +234,14 @@ public class SAML2AssertionValidator {
 	/**
 	 * Validates the specified SAML 2.0 assertion.
 	 *
-	 * @param xml The SAML 2.0 assertion XML. Must not be {@code null}.
-	 * @param key The key to verify the signature. Should be an
-	 *            {@link SecretKey} instance for HMAC, {@link RSAPublicKey}
-	 *            for RSA signatures or {@link ECPublicKey} for EC
-	 *            signatures. Must not be {@code null}.
+	 * @param xml            The SAML 2.0 assertion XML. Must not be
+	 *                       {@code null}.
+	 * @param expectedIssuer The expected issuer. Must not be {@code null}.
+	 * @param key            The key to verify the signature. Should be an
+	 *                       {@link SecretKey} instance for HMAC,
+	 *                       {@link RSAPublicKey} for RSA signatures or
+	 *                       {@link ECPublicKey} for EC signatures. Must
+	 *                       not be {@code null}.
 	 *
 	 * @return The validated SAML 2.0 assertion.
 	 *

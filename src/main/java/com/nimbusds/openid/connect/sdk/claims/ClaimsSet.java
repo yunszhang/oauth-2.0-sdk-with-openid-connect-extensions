@@ -140,10 +140,10 @@ public abstract class ClaimsSet {
 	 * <p>The "month" claim instances as java.util.Map:
 	 *
 	 * <pre>
-	 * null => "January" (no language tag)
-	 * "de" => "Januar"
-	 * "es" => "enero"
-	 * "it" => "gennaio"
+	 * null = "January" (no language tag)
+	 * "de" = "Januar"
+	 * "es" = "enero"
+	 * "it" = "gennaio"
 	 * </pre>
 	 *
 	 * @param name  The claim name. Must not be {@code null}.

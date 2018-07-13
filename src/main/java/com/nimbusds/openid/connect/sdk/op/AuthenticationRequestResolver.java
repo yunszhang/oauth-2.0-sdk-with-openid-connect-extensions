@@ -198,6 +198,7 @@ public class AuthenticationRequestResolver<C extends SecurityContext> {
 	 *         specified.
 	 *
 	 * @throws ResolveException If the request couldn't be resolved.
+	 * @throws JOSEException    If an invalid request JWT is found.
 	 */
 	public AuthenticationRequest resolve(final AuthenticationRequest request,
 					     final C securityContext)

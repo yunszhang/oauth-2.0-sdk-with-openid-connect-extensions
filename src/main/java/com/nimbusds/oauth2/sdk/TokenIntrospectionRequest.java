@@ -60,7 +60,7 @@ import net.minidev.json.JSONObject;
  * Content-Type: application/x-www-form-urlencoded
  * Authorization: Basic czZCaGRSa3F0MzpnWDFmQmF0M2JW
  *
- * token=mF_9.B5f-4.1JqM&token_type_hint=access_token
+ * token=mF_9.B5f-4.1JqM&amp;token_type_hint=access_token
  * </pre>
  *
  * <p>Example token introspection request, where the protected resource

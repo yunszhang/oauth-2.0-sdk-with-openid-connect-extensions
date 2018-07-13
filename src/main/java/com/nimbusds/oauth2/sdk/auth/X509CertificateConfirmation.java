@@ -99,7 +99,7 @@ public final class X509CertificateConfirmation {
 	 * <p>Example:
 	 *
 	 * <pre>
-	 * "cnf" -> { "x5t#S256" : "bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2" }
+	 * "cnf" : { "x5t#S256" : "bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2" }
 	 * </pre>
 	 *
 	 * @return The JWT claim name / value.

@@ -604,7 +604,7 @@ public class UserInfo extends ClaimsSet {
 	
 	/**
 	 * Gets the surname or last name entries. Correspond to the 
-	 * @code family_name} claim.
+	 * {@code family_name} claim.
 	 *
 	 * @return The surname or last name entries, empty map if none.
 	 */

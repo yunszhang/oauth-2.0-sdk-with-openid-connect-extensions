@@ -228,6 +228,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	 *                     component. Must not be {@code null}.
 	 * @param subjectTypes The supported subject types. At least one must
 	 *                     be specified. Must not be {@code null}.
+	 * @param jwkSetURI    The JWK set URI. Must not be {@code null}.
 	 */
 	public OIDCProviderMetadata(final Issuer issuer,
 				    final List<SubjectType> subjectTypes,

@@ -448,6 +448,8 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		 * {@code nonce} parameter.
 		 *
 		 * @param nonce The nonce, {@code null} if not specified.
+		 *
+		 * @return This builder.
 		 */
 		public Builder nonce(final Nonce nonce) {
 
@@ -462,6 +464,8 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		 *
 		 * @param display The requested display type, {@code null} if
 		 *                not specified.
+		 *
+		 * @return This builder.
 		 */
 		public Builder display(final Display display) {
 
@@ -476,6 +480,8 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		 *
 		 * @param prompt The requested prompt, {@code null} if not
 		 *               specified.
+		 *
+		 * @return This builder.
 		 */
 		public Builder prompt(final Prompt prompt) {
 
@@ -490,6 +496,8 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		 *
 		 * @param maxAge The maximum authentication age, in seconds; 0
 		 *               if not specified.
+		 *
+		 * @return This builder.
 		 */
 		public Builder maxAge(final int maxAge) {
 
@@ -505,6 +513,8 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		 *
 		 * @param uiLocales The preferred UI locales, {@code null} if
 		 *                  not specified.
+		 *
+		 * @return This builder.
 		 */
 		public Builder uiLocales(final List<LangTag> uiLocales) {
 
@@ -520,6 +530,8 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		 *
 		 * @param claimsLocales The preferred claims locales,
 		 *                      {@code null} if not specified.
+		 *
+		 * @return This builder.
 		 */
 		public Builder claimsLocales(final List<LangTag> claimsLocales) {
 
@@ -534,6 +546,8 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		 *
 		 * @param idTokenHint The ID Token hint, {@code null} if not
 		 *                    specified.
+		 *
+		 * @return This builder.
 		 */
 		public Builder idTokenHint(final JWT idTokenHint) {
 
@@ -548,6 +562,8 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		 *
 		 * @param loginHint The login hint, {@code null} if not
 		 *                  specified.
+		 *
+		 * @return This builder.
 		 */
 		public Builder loginHint(final String loginHint) {
 
@@ -563,6 +579,8 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		 *
 		 * @param acrValues The requested ACR values, {@code null} if
 		 *                  not specified.
+		 *
+		 * @return This builder.
 		 */
 		public Builder acrValues(final List<ACR> acrValues) {
 
@@ -577,6 +595,8 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		 *
 		 * @param claims The individual claims to be returned,
 		 *               {@code null} if not specified.
+		 *
+		 * @return This builder.
 		 */
 		public Builder claims(final ClaimsRequest claims) {
 
@@ -590,7 +610,10 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		 * {@code request} parameter. Must not be specified together
 		 * with a request object URI.
 		 *
-		 * @return The request object, {@code null} if not specified.
+		 * @param requestObject The request object, {@code null} if not
+		 *                      specified.
+		 *
+		 * @return This builder.
 		 */
 		public Builder requestObject(final JWT requestObject) {
 
@@ -606,6 +629,8 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		 *
 		 * @param requestURI The request object URI, {@code null} if
 		 *                   not specified.
+		 *
+		 * @return This builder.
 		 */
 		public Builder requestURI(final URI requestURI) {
 

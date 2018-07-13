@@ -61,7 +61,7 @@ public abstract class TokenResponse implements Response {
 	 * Parses a token response from the specified JSON object.
 	 *
 	 * @param jsonObject The JSON object to parse. Must not be 
-	 *                   @code null}.
+	 *                   {@code null}.
 	 *
 	 * @return The access token or token error response.
 	 *

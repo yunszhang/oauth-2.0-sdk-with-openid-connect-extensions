@@ -82,5 +82,6 @@
  *     <li>{@link com.nimbusds.oauth2.sdk.ProtectedResourceRequest} The client
  *         makes a request to a protected resource using an OAuth 2.0 access
  *         token.
+ * </ul>
  */
 package com.nimbusds.oauth2.sdk;

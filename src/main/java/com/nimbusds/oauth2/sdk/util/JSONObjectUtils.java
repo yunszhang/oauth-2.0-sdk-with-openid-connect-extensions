@@ -90,6 +90,13 @@ public class JSONObjectUtils {
 
 	/**
 	 * Use {@link #parse(String)} instead.
+	 *
+	 * @param s The JSON object string to parse. Must not be {@code null}.
+	 *
+	 * @return The JSON object.
+	 *
+	 * @throws ParseException If the string cannot be parsed to a JSON
+	 *                        object.
 	 */
 	@Deprecated
 	public static JSONObject parseJSONObject(final String s)

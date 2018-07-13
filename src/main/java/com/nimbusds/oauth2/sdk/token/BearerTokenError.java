@@ -465,6 +465,8 @@ public class BearerTokenError extends ErrorObject {
 	 * @param wwwAuth The {@code WWW-Authenticate} header value to parse. 
 	 *                Must not be {@code null}.
 	 *
+	 * @return The bearer token error.
+	 *
 	 * @throws ParseException If the {@code WWW-Authenticate} header value 
 	 *                        couldn't be parsed to a Bearer token error.
 	 */

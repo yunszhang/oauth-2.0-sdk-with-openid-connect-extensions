@@ -72,6 +72,8 @@ public enum ClaimType {
 	 * @param s The string to parse. Must not be {@code null}.
 	 * 
 	 * @return The claim type.
+	 *
+	 * @throws ParseException If parsing failed.
 	 */
 	public static ClaimType parse(final String s)
 		throws ParseException {

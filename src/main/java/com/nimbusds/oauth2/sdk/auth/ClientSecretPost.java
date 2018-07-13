@@ -68,8 +68,8 @@ public final class ClientSecretPost extends PlainClientSecret {
 	 * <p>Parameters map:
 	 *
 	 * <pre>
-	 * "client_id" -> [client-identifier]
-	 * "client_secret" -> [client-secret]
+	 * "client_id" = [client-identifier]
+	 * "client_secret" = [client-secret]
 	 * </pre>
 	 *
 	 * @return The parameters map, with keys "client_id" and 

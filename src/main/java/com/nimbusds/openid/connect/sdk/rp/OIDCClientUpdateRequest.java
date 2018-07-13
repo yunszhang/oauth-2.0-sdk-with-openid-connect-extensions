@@ -83,6 +83,7 @@ public class OIDCClientUpdateRequest extends ClientUpdateRequest {
 	 * @param uri         The URI of the client update endpoint. May be
 	 *                    {@code null} if the {@link #toHTTPRequest()}
 	 *                    method will not be used.
+	 * @param id          The client ID. Must not be {@code null}.
 	 * @param accessToken The client registration access token. Must not be
 	 *                    {@code null}.
 	 * @param metadata    The client metadata. Must not be {@code null} and 

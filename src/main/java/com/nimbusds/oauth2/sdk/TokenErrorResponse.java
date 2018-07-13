@@ -197,6 +197,8 @@ public class TokenErrorResponse extends TokenResponse implements ErrorResponse {
 	 * @param jsonObject The JSON object to parse. Its status code must not
 	 *                   be 200 (OK). Must not be {@code null}.
 	 *
+	 * @return The token error response.
+	 *
 	 * @throws ParseException If the JSON object couldn't be parsed to an 
 	 *                        OAuth 2.0 Token Error response.
 	 */
@@ -247,6 +249,8 @@ public class TokenErrorResponse extends TokenResponse implements ErrorResponse {
 	 *
 	 * @param httpResponse The HTTP response to parse. Its status code must
 	 *                     not be 200 (OK). Must not be {@code null}.
+	 *
+	 * @return The token error response.
 	 *
 	 * @throws ParseException If the HTTP response couldn't be parsed to an 
 	 *                        OAuth 2.0 Token Error response.

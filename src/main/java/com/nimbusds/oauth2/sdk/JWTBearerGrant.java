@@ -199,7 +199,7 @@ public class JWTBearerGrant extends AssertionGrant {
 	 *
 	 * <pre>
 	 * grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer
-	 * &assertion=eyJhbGciOiJFUzI1NiJ9.eyJpc3Mi[...omitted for brevity...].
+	 * &amp;assertion=eyJhbGciOiJFUzI1NiJ9.eyJpc3Mi[...omitted for brevity...].
 	 * J9l-ZhwP[...omitted for brevity...]
 	 * </pre>
 	 *

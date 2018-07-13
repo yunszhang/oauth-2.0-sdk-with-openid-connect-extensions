@@ -178,8 +178,8 @@ public abstract class JWTAuthentication extends ClientAuthentication {
 	 * <p>Parameters map:
 	 *
 	 * <pre>
-	 * "client_assertion" -> [serialised-JWT]
-	 * "client_assertion_type" -> "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
+	 * "client_assertion" = [serialised-JWT]
+	 * "client_assertion_type" = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
 	 * </pre>
 	 *
 	 * @return The parameters map, with keys "client_assertion",

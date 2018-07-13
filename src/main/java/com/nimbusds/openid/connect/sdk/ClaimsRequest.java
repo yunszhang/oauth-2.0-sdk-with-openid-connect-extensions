@@ -347,6 +347,11 @@ public class ClaimsRequest {
 		 * Parses a collection of individual claim requests from the
 		 * specified JSON object. Request entries that are not 
 		 * understood are silently ignored.
+		 *
+		 * @param jsonObject The JSON object to parse. Must not be
+		 *                   {@code null}.
+		 *
+		 * @return The collection of claim requests.
 		 */
 		public static Collection<Entry> parseEntries(final JSONObject jsonObject) {
 

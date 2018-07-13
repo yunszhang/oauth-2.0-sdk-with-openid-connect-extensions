@@ -314,7 +314,7 @@ public abstract class AuthorizationResponse implements Response {
 	 * known:
 	 *
 	 * <pre>
-	 * URI relUrl = new URI("https:///?code=Qcb0Orv1...&state=af0ifjsldkj");
+	 * URI relUrl = new URI("https:///?code=Qcb0Orv1...&amp;state=af0ifjsldkj");
 	 * </pre>
 	 *
 	 * @param uri The URI to parse. Can be absolute or relative, with a
@@ -359,6 +359,8 @@ public abstract class AuthorizationResponse implements Response {
 	 * @param httpResponse The HTTP response to parse. Must not be
 	 *                     {@code null}.
 	 *
+	 * @return The authorisation response.
+	 *
 	 * @throws ParseException If the HTTP response couldn't be parsed to an
 	 *                        authorisation response.
 	 */
@@ -391,6 +393,8 @@ public abstract class AuthorizationResponse implements Response {
 	 *
 	 * @param httpRequest The HTTP request to parse. Must not be
 	 *                    {@code null}.
+	 *
+	 * @return The authorisation response.
 	 *
 	 * @throws ParseException If the HTTP request couldn't be parsed to an
 	 *                        authorisation response.
