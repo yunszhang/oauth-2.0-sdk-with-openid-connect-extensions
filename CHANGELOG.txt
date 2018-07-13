@@ -920,3 +920,5 @@ version 5.63 (2018-07-05)
       (iss #248).
     * Updates reference to OAuth 2.0 Authorization Server Metadata (RFC 8414).
 
+version 5.64 (2018-07-13)
+    * Adds Java 6, 7, 8 and 10 build profiles (iss #247).
