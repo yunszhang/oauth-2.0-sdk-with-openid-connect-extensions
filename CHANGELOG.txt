@@ -927,3 +927,6 @@ version 5.64.1 (2018-07-16)
     * Previous release signed with expired GPG key, repeat release with new
       GPG key.
 
+version 5.64.2 (2018-07-18)
+    * Fixes pom.xml to include JAR classifies for new build profiles.
+
