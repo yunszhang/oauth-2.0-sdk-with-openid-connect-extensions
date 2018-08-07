@@ -930,3 +930,5 @@ version 5.64.1 (2018-07-16)
 version 5.64.2 (2018-07-18)
     * Fixes pom.xml to include JAR classifies for new build profiles.
 
+version 5.64.3 (2018-08-07)
+    * Updates javax Mail API dependency to 1.6.1 (iss #251).

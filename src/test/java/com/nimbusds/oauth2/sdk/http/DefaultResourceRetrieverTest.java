@@ -163,7 +163,7 @@ public class DefaultResourceRetrieverTest extends TestCase {
 			resourceRetriever.retrieveResource(new URL("http://localhost:" + port() + "/c2id/jwks.json"));
 			fail();
 		} catch (IOException e) {
-			assertEquals("Couldn't parse Content-Type header: Expected ';', got \"/\"", e.getMessage());
+			assertEquals("Couldn't parse Content-Type header: In parameter list </foo>, expected ';', got \"/\"", e.getMessage());
 		}
 	}
 
