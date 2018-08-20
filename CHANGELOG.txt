@@ -937,3 +937,4 @@ version 5.64.4 (2018-08-20)
     * Removes redundant javax.mail:javax.mail-api:1.6.1 dependency, API
       definition is included in the com.sun.mail:javax.mail implementation (iss
       #253).
+    * Fixes jdk6, jdk8 and jdk10 releases (iss #250).
