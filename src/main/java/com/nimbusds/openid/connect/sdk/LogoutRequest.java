@@ -22,7 +22,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.jwt.JWT;
@@ -176,7 +178,7 @@ public class LogoutRequest extends AbstractRequest {
 	}
 
 	/**
-	 * Returns the parameters for this logout request.
+	 * Returns the URI query parameters for this logout request.
 	 *
 	 * <p>Example parameters:
 	 *
@@ -188,24 +190,24 @@ public class LogoutRequest extends AbstractRequest {
 	 *
 	 * @return The parameters.
 	 */
-	public Map<String,String> toParameters() {
+	public Map<String,List<String>> toParameters() {
 
-		Map <String,String> params = new LinkedHashMap<>();
+		Map <String,List<String>> params = new LinkedHashMap<>();
 		
 		if (idTokenHint != null) {
 			try {
-				params.put("id_token_hint", idTokenHint.serialize());
+				params.put("id_token_hint", Collections.singletonList(idTokenHint.serialize()));
 			} catch (IllegalStateException e) {
 				throw new SerializeException("Couldn't serialize ID token: " + e.getMessage(), e);
 			}
 		}
 
 		if (postLogoutRedirectURI != null) {
-			params.put("post_logout_redirect_uri", postLogoutRedirectURI.toString());
+			params.put("post_logout_redirect_uri", Collections.singletonList(postLogoutRedirectURI.toString()));
 		}
 
 		if (state != null) {
-			params.put("state", state.getValue());
+			params.put("state", Collections.singletonList(state.getValue()));
 		}
 
 		return params;
@@ -296,7 +298,7 @@ public class LogoutRequest extends AbstractRequest {
 
 
 	/**
-	 * Parses a logout request from the specified parameters.
+	 * Parses a logout request from the specified URI query parameters.
 	 *
 	 * <p>Example parameters:
 	 *
@@ -314,7 +316,7 @@ public class LogoutRequest extends AbstractRequest {
 	 * @throws ParseException If the parameters couldn't be parsed to a
 	 *                        logout request.
 	 */
-	public static LogoutRequest parse(final Map<String,String> params)
+	public static LogoutRequest parse(final Map<String,List<String>> params)
 		throws ParseException {
 
 		return parse(null, params);
@@ -322,7 +324,7 @@ public class LogoutRequest extends AbstractRequest {
 
 
 	/**
-	 * Parses a logout request from the specified parameters.
+	 * Parses a logout request from the specified URI and query parameters.
 	 *
 	 * <p>Example parameters:
 	 *
@@ -343,10 +345,10 @@ public class LogoutRequest extends AbstractRequest {
 	 * @throws ParseException If the parameters couldn't be parsed to a
 	 *                        logout request.
 	 */
-	public static LogoutRequest parse(final URI uri, final Map<String,String> params)
+	public static LogoutRequest parse(final URI uri, final Map<String,List<String>> params)
 		throws ParseException {
 
-		String v = params.get("id_token_hint");
+		String v = URLUtils.getFirstValue(params, "id_token_hint");
 
 		JWT idTokenHint = null;
 		
@@ -359,7 +361,7 @@ public class LogoutRequest extends AbstractRequest {
 			}
 		}
 
-		v = params.get("post_logout_redirect_uri");
+		v = URLUtils.getFirstValue(params, "post_logout_redirect_uri");
 
 		URI postLogoutRedirectURI = null;
 
@@ -374,7 +376,7 @@ public class LogoutRequest extends AbstractRequest {
 
 		State state = null;
 
-		v = params.get("state");
+		v = URLUtils.getFirstValue(params, "state");
 
 		if (postLogoutRedirectURI != null && StringUtils.isNotBlank(v)) {
 			state = new State(v);

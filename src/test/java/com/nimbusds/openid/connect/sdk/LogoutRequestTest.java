@@ -20,6 +20,7 @@ package com.nimbusds.openid.connect.sdk;
 
 import java.net.URI;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -130,19 +131,19 @@ public class LogoutRequestTest extends TestCase {
 		assertEquals(postLogoutRedirectURI, request.getPostLogoutRedirectionURI());
 		assertEquals(state, request.getState());
 
-		Map<String,String> params = request.toParameters();
-		assertEquals(idToken.serialize(), params.get("id_token_hint"));
-		assertEquals(postLogoutRedirectURI.toString(), params.get("post_logout_redirect_uri"));
-		assertEquals(state.getValue(), params.get("state"));
+		Map<String,List<String>> params = request.toParameters();
+		assertEquals(Collections.singletonList(idToken.serialize()), params.get("id_token_hint"));
+		assertEquals(Collections.singletonList(postLogoutRedirectURI.toString()), params.get("post_logout_redirect_uri"));
+		assertEquals(Collections.singletonList(state.getValue()), params.get("state"));
 		assertEquals(3, params.size());
 
 		URI outputURI = request.toURI();
 
 		assertTrue(outputURI.toString().startsWith("https://c2id.com/logout"));
 		params = URLUtils.parseParameters(outputURI.getQuery());
-		assertEquals(idToken.serialize(), params.get("id_token_hint"));
-		assertEquals(postLogoutRedirectURI.toString(), params.get("post_logout_redirect_uri"));
-		assertEquals(state.getValue(), params.get("state"));
+		assertEquals(Collections.singletonList(idToken.serialize()), params.get("id_token_hint"));
+		assertEquals(Collections.singletonList(postLogoutRedirectURI.toString()), params.get("post_logout_redirect_uri"));
+		assertEquals(Collections.singletonList(state.getValue()), params.get("state"));
 		assertEquals(3, params.size());
 
 		request = LogoutRequest.parse(outputURI);

@@ -20,6 +20,8 @@ package com.nimbusds.openid.connect.sdk;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.jwt.JWT;
@@ -182,14 +184,14 @@ public class AuthenticationSuccessResponse
 	
 	
 	@Override
-	public Map<String,String> toParameters() {
+	public Map<String,List<String>> toParameters() {
 	
-		Map<String,String> params = super.toParameters();
+		Map<String,List<String>> params = super.toParameters();
 
 		if (idToken != null) {
 
 			try {
-				params.put("id_token", idToken.serialize());		
+				params.put("id_token", Collections.singletonList(idToken.serialize()));
 				
 			} catch (IllegalStateException e) {
 			
@@ -200,7 +202,7 @@ public class AuthenticationSuccessResponse
 
 		if (sessionState != null) {
 
-			params.put("session_state", sessionState.getValue());
+			params.put("session_state", Collections.singletonList(sessionState.getValue()));
 		}
 
 		return params;
@@ -234,18 +236,18 @@ public class AuthenticationSuccessResponse
 	 *                        response.
 	 */
 	public static AuthenticationSuccessResponse parse(final URI redirectURI,
-							  final Map<String,String> params)
+							  final Map<String,List<String>> params)
 		throws ParseException {
 
 		AuthorizationSuccessResponse asr = AuthorizationSuccessResponse.parse(redirectURI, params);
 
 		// Parse id_token parameter
+		String idTokenString = URLUtils.getFirstValue(params, "id_token");
 		JWT idToken = null;
-		
-		if (params.get("id_token") != null) {
+		if (idTokenString != null) {
 			
 			try {
-				idToken = JWTParser.parse(params.get("id_token"));
+				idToken = JWTParser.parse(idTokenString);
 				
 			} catch (java.text.ParseException e) {
 			
@@ -257,9 +259,9 @@ public class AuthenticationSuccessResponse
 
 		State sessionState = null;
 
-		if (StringUtils.isNotBlank(params.get("session_state"))) {
+		if (StringUtils.isNotBlank(URLUtils.getFirstValue(params, "session_state"))) {
 
-			sessionState = new State(params.get("session_state"));
+			sessionState = new State(URLUtils.getFirstValue(params, "session_state"));
 		}
 
 		return new AuthenticationSuccessResponse(redirectURI,
@@ -301,7 +303,7 @@ public class AuthenticationSuccessResponse
 	public static AuthenticationSuccessResponse parse(final URI uri)
 		throws ParseException {
 
-		Map<String,String> params;
+		Map<String,List<String>> params;
 
 		if (uri.getRawFragment() != null) {
 

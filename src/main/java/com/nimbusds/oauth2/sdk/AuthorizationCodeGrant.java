@@ -20,11 +20,14 @@ package com.nimbusds.oauth2.sdk;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
+import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
 
 
@@ -149,17 +152,17 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
 
 
 	@Override
-	public Map<String,String> toParameters() {
+	public Map<String,List<String>> toParameters() {
 
-		Map<String,String> params = new LinkedHashMap<>();
-		params.put("grant_type", GRANT_TYPE.getValue());
-		params.put("code", code.getValue());
+		Map<String,List<String>> params = new LinkedHashMap<>();
+		params.put("grant_type", Collections.singletonList(GRANT_TYPE.getValue()));
+		params.put("code", Collections.singletonList(code.getValue()));
 
 		if (redirectURI != null)
-			params.put("redirect_uri", redirectURI.toString());
+			params.put("redirect_uri", Collections.singletonList(redirectURI.toString()));
 
 		if (codeVerifier != null)
-			params.put("code_verifier", codeVerifier.getValue());
+			params.put("code_verifier", Collections.singletonList(codeVerifier.getValue()));
 
 		return params;
 	}
@@ -190,7 +193,8 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
 
 
 	/**
-	 * Parses an authorisation code grant from the specified parameters.
+	 * Parses an authorisation code grant from the specified request body
+	 * parameters.
 	 *
 	 * <p>Example:
 	 *
@@ -206,11 +210,11 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
 	 *
 	 * @throws ParseException If parsing failed.
 	 */
-	public static AuthorizationCodeGrant parse(final Map<String,String> params)
+	public static AuthorizationCodeGrant parse(final Map<String,List<String>> params)
 		throws ParseException {
 
 		// Parse grant type
-		String grantTypeString = params.get("grant_type");
+		String grantTypeString = URLUtils.getFirstValue(params, "grant_type");
 
 		if (grantTypeString == null) {
 			String msg = "Missing \"grant_type\" parameter";
@@ -223,7 +227,7 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
 		}
 
 		// Parse authorisation code
-		String codeString = params.get("code");
+		String codeString = URLUtils.getFirstValue(params, "code");
 
 		if (codeString == null || codeString.trim().isEmpty()) {
 			String msg = "Missing or empty \"code\" parameter";
@@ -233,7 +237,7 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
 		AuthorizationCode code = new AuthorizationCode(codeString);
 
 		// Parse optional redirection URI
-		String redirectURIString = params.get("redirect_uri");
+		String redirectURIString = URLUtils.getFirstValue(params, "redirect_uri");
 
 		URI redirectURI = null;
 
@@ -248,7 +252,7 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
 
 
 		// Parse optional code verifier
-		String codeVerifierString = params.get("code_verifier");
+		String codeVerifierString = URLUtils.getFirstValue(params,"code_verifier");
 
 		CodeVerifier codeVerifier = null;
 

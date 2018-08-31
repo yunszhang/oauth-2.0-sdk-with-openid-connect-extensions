@@ -27,6 +27,8 @@ import java.security.KeyPairGenerator;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -101,9 +103,9 @@ public class HTTPRequestTest {
 		request.setQuery("x=123&y=456");
 		assertEquals("x=123&y=456", request.getQuery());
 
-		Map<String,String> params = request.getQueryParameters();
-		assertEquals("123", params.get("x"));
-		assertEquals("456", params.get("y"));
+		Map<String,List<String>> params = request.getQueryParameters();
+		assertEquals(Collections.singletonList("123"), params.get("x"));
+		assertEquals(Collections.singletonList("456"), params.get("y"));
 
 		request.setQuery("{\"apples\":\"123\"}");
 		JSONObject jsonObject = request.getQueryAsJSONObject();
@@ -385,8 +387,7 @@ public class HTTPRequestTest {
 	
 	
 	@Test
-	public void testGetAndSetDefaultHostnameVerifier()
-		throws Exception {
+	public void testGetAndSetDefaultHostnameVerifier() {
 		
 		HostnameVerifier mockHostnameVerifier = new HostnameVerifier() {
 			@Override

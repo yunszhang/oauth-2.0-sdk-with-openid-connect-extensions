@@ -19,6 +19,7 @@ package com.nimbusds.oauth2.sdk;
 
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 import static net.jadler.Jadler.*;
@@ -73,9 +74,9 @@ public class HTTPTokenRequestTest {
 			.havingBody(new BaseMatcher<String>() {
 				@Override
 				public boolean matches(Object o) {
-					Map<String,String> postParams = URLUtils.parseParameters(o.toString());
-					Map<String,String> expectedPostParams = codeGrant.toParameters();
-					for (Map.Entry<String,String> exp: expectedPostParams.entrySet()) {
+					Map<String,List<String>> postParams = URLUtils.parseParameters(o.toString());
+					Map<String,List<String>> expectedPostParams = codeGrant.toParameters();
+					for (Map.Entry<String,List<String>> exp: expectedPostParams.entrySet()) {
 						if (! postParams.get(exp.getKey()).equals(exp.getValue()))
 							return false;
 					}

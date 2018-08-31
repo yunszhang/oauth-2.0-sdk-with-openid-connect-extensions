@@ -18,9 +18,12 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
 
 
@@ -57,16 +60,17 @@ public class ClientCredentialsGrant extends AuthorizationGrant {
 
 
 	@Override
-	public Map<String,String> toParameters() {
+	public Map<String,List<String>> toParameters() {
 
-		Map<String,String> params = new LinkedHashMap<>();
-		params.put("grant_type", GRANT_TYPE.getValue());
+		Map<String,List<String>> params = new LinkedHashMap<>();
+		params.put("grant_type", Collections.singletonList(GRANT_TYPE.getValue()));
 		return params;
 	}
 
 
 	/**
-	 * Parses a client credentials grant from the specified parameters.
+	 * Parses a client credentials grant from the specified request body
+	 * parameters.
 	 *
 	 * <p>Example:
 	 *
@@ -80,11 +84,11 @@ public class ClientCredentialsGrant extends AuthorizationGrant {
 	 *
 	 * @throws ParseException If parsing failed.
 	 */
-	public static ClientCredentialsGrant parse(final Map<String,String> params)
+	public static ClientCredentialsGrant parse(final Map<String,List<String>> params)
 		throws ParseException {
 
 		// Parse grant type
-		String grantTypeString = params.get("grant_type");
+		String grantTypeString = URLUtils.getFirstValue(params, "grant_type");
 
 		if (grantTypeString == null) {
 			String msg = "Missing \"grant_type\" parameter";

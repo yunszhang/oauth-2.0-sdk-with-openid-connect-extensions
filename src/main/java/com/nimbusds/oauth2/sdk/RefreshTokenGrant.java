@@ -18,9 +18,12 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
@@ -82,11 +85,11 @@ public class RefreshTokenGrant extends AuthorizationGrant {
 
 
 	@Override
-	public Map<String,String> toParameters() {
+	public Map<String,List<String>> toParameters() {
 
-		Map<String,String> params = new LinkedHashMap<>();
-		params.put("grant_type", GRANT_TYPE.getValue());
-		params.put("refresh_token", refreshToken.getValue());
+		Map<String,List<String>> params = new LinkedHashMap<>();
+		params.put("grant_type", Collections.singletonList(GRANT_TYPE.getValue()));
+		params.put("refresh_token", Collections.singletonList(refreshToken.getValue()));
 		return params;
 	}
 
@@ -110,7 +113,8 @@ public class RefreshTokenGrant extends AuthorizationGrant {
 
 
 	/**
-	 * Parses a refresh token grant from the specified parameters.
+	 * Parses a refresh token grant from the specified request body
+	 * parameters.
 	 *
 	 * <p>Example:
 	 *
@@ -125,11 +129,11 @@ public class RefreshTokenGrant extends AuthorizationGrant {
 	 *
 	 * @throws ParseException If parsing failed.
 	 */
-	public static RefreshTokenGrant parse(final Map<String,String> params)
+	public static RefreshTokenGrant parse(final Map<String,List<String>> params)
 		throws ParseException {
 
 		// Parse grant type
-		String grantTypeString = params.get("grant_type");
+		String grantTypeString = URLUtils.getFirstValue(params, "grant_type");
 
 		if (grantTypeString == null) {
 			String msg = "Missing \"grant_type\" parameter";
@@ -142,7 +146,7 @@ public class RefreshTokenGrant extends AuthorizationGrant {
 		}
 
 		// Parse refresh token
-		String refreshTokenString = params.get("refresh_token");
+		String refreshTokenString = URLUtils.getFirstValue(params, "refresh_token");
 
 		if (refreshTokenString == null || refreshTokenString.trim().isEmpty()) {
 			String msg = "Missing or empty \"refresh_token\" parameter";

@@ -19,10 +19,7 @@ package com.nimbusds.oauth2.sdk.auth;
 
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import net.jcip.annotations.Immutable;
 
@@ -142,7 +139,7 @@ public final class ClientSecretJWT extends JWTAuthentication {
 	 *                        client secret JSON Web Token (JWT) 
 	 *                        authentication.
 	 */
-	public static ClientSecretJWT parse(final Map<String,String> params)
+	public static ClientSecretJWT parse(final Map<String,List<String>> params)
 		throws ParseException {
 	
 		JWTAuthentication.ensureClientAssertionType(params);
@@ -193,7 +190,7 @@ public final class ClientSecretJWT extends JWTAuthentication {
 	public static ClientSecretJWT parse(final String paramsString)
 		throws ParseException {
 		
-		Map<String,String> params = URLUtils.parseParameters(paramsString);
+		Map<String,List<String>> params = URLUtils.parseParameters(paramsString);
 		
 		return parse(params);
 	}

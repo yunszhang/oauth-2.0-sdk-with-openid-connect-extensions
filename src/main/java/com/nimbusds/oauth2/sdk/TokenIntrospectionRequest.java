@@ -22,10 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
@@ -101,7 +98,7 @@ public class TokenIntrospectionRequest extends AbstractOptionallyAuthenticatedRe
 	/**
 	 * Optional additional parameters.
 	 */
-	private final Map<String,String> customParams;
+	private final Map<String,List<String>> customParams;
 
 
 	/**
@@ -135,7 +132,7 @@ public class TokenIntrospectionRequest extends AbstractOptionallyAuthenticatedRe
 	 */
 	public TokenIntrospectionRequest(final URI uri,
 					 final Token token,
-					 final Map<String,String> customParams) {
+					 final Map<String,List<String>> customParams) {
 
 		super(uri, null);
 
@@ -144,7 +141,7 @@ public class TokenIntrospectionRequest extends AbstractOptionallyAuthenticatedRe
 
 		this.token = token;
 		this.clientAuthz = null;
-		this.customParams = customParams != null ? customParams : Collections.<String,String>emptyMap();
+		this.customParams = customParams != null ? customParams : Collections.<String,List<String>>emptyMap();
 	}
 
 
@@ -183,7 +180,7 @@ public class TokenIntrospectionRequest extends AbstractOptionallyAuthenticatedRe
 	public TokenIntrospectionRequest(final URI uri,
 					 final ClientAuthentication clientAuth,
 					 final Token token,
-					 final Map<String,String> customParams) {
+					 final Map<String,List<String>> customParams) {
 
 		super(uri, clientAuth);
 
@@ -192,7 +189,7 @@ public class TokenIntrospectionRequest extends AbstractOptionallyAuthenticatedRe
 
 		this.token = token;
 		this.clientAuthz = null;
-		this.customParams = customParams != null ? customParams : Collections.<String,String>emptyMap();
+		this.customParams = customParams != null ? customParams : Collections.<String,List<String>>emptyMap();
 	}
 
 
@@ -231,7 +228,7 @@ public class TokenIntrospectionRequest extends AbstractOptionallyAuthenticatedRe
 	public TokenIntrospectionRequest(final URI uri,
 					 final AccessToken clientAuthz,
 					 final Token token,
-					 final Map<String,String> customParams) {
+					 final Map<String,List<String>> customParams) {
 
 		super(uri, null);
 
@@ -240,7 +237,7 @@ public class TokenIntrospectionRequest extends AbstractOptionallyAuthenticatedRe
 
 		this.token = token;
 		this.clientAuthz = clientAuthz;
-		this.customParams = customParams != null ? customParams : Collections.<String,String>emptyMap();
+		this.customParams = customParams != null ? customParams : Collections.<String,List<String>>emptyMap();
 	}
 
 
@@ -277,7 +274,7 @@ public class TokenIntrospectionRequest extends AbstractOptionallyAuthenticatedRe
 	 *
 	 * @return The custom request parameters, empty map if none.
 	 */
-	public Map<String,String> getCustomParameters() {
+	public Map<String,List<String>> getCustomParameters() {
 
 		return customParams;
 	}
@@ -302,13 +299,13 @@ public class TokenIntrospectionRequest extends AbstractOptionallyAuthenticatedRe
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, url);
 		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
 
-		Map<String,String> params = new HashMap<>();
-		params.put("token", token.getValue());
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("token", Collections.singletonList(token.getValue()));
 
 		if (token instanceof AccessToken) {
-			params.put("token_type_hint", "access_token");
+			params.put("token_type_hint", Collections.singletonList("access_token"));
 		} else if (token instanceof RefreshToken) {
-			params.put("token_type_hint", "refresh_token");
+			params.put("token_type_hint", Collections.singletonList("refresh_token"));
 		}
 
 		params.putAll(customParams);
@@ -343,9 +340,9 @@ public class TokenIntrospectionRequest extends AbstractOptionallyAuthenticatedRe
 		httpRequest.ensureMethod(HTTPRequest.Method.POST);
 		httpRequest.ensureContentType(CommonContentTypes.APPLICATION_URLENCODED);
 
-		Map<String,String> params = httpRequest.getQueryParameters();
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
 
-		final String tokenValue = params.remove("token");
+		final String tokenValue = URLUtils.removeAndReturnFirstValue(params, "token");
 
 		if (tokenValue == null || tokenValue.isEmpty()) {
 			throw new ParseException("Missing required token parameter");
@@ -354,7 +351,7 @@ public class TokenIntrospectionRequest extends AbstractOptionallyAuthenticatedRe
 		// Detect the token type
 		Token token = null;
 
-		final String tokenTypeHint = params.remove("token_type_hint");
+		final String tokenTypeHint = URLUtils.removeAndReturnFirstValue(params, "token_type_hint");
 
 		if (tokenTypeHint == null) {
 

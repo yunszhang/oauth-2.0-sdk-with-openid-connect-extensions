@@ -25,9 +25,7 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import junit.framework.TestCase;
@@ -218,11 +216,11 @@ public class PrivateKeyJWTTest extends TestCase {
 		
 		PrivateKeyJWT privateKeyJWT = new PrivateKeyJWT(clientID, tokenEndpoint, JWSAlgorithm.RS256, priv, null, null);
 		
-		Map<String,String> params = privateKeyJWT.toParameters();
+		Map<String,List<String>> params = privateKeyJWT.toParameters();
 		
 		assertNull(params.get("client_id"));
 		
-		params.put("client_id", "456"); // different client_id
+		params.put("client_id", Collections.singletonList("456")); // different client_id
 		
 		try {
 			PrivateKeyJWT.parse(params);

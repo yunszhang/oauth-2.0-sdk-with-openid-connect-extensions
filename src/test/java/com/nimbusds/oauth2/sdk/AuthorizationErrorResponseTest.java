@@ -20,6 +20,8 @@ package com.nimbusds.oauth2.sdk;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -86,11 +88,11 @@ public class AuthorizationErrorResponseTest extends TestCase {
 
 		assertEquals(state, r.getState());
 
-		Map<String,String> params = r.toParameters();
-		assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), params.get("error"));
-		assertEquals(OAuth2Error.INVALID_REQUEST.getDescription(), params.get("error_description"));
+		Map<String,List<String>> params = r.toParameters();
+		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getCode()), params.get("error"));
+		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getDescription()), params.get("error_description"));
 		assertNull(params.get("error_uri"));
-		assertEquals(state.toString(), params.get("state"));
+		assertEquals(Collections.singletonList(state.toString()), params.get("state"));
 		assertEquals(3, params.size());
 
 		URI location = r.toURI();
@@ -106,9 +108,9 @@ public class AuthorizationErrorResponseTest extends TestCase {
 			
 		params = URLUtils.parseParameters(location.getQuery());
 			
-		assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), params.get("error"));
-		assertEquals(OAuth2Error.INVALID_REQUEST.getDescription(), params.get("error_description"));
-		assertEquals(state.toString(), params.get("state"));
+		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getCode()), params.get("error"));
+		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getDescription()), params.get("error_description"));
+		assertEquals(Collections.singletonList(state.toString()), params.get("state"));
 		assertEquals(3, params.size());
 			
 		HTTPResponse httpResponse = r.toHTTPResponse();
@@ -247,19 +249,19 @@ public class AuthorizationErrorResponseTest extends TestCase {
 
 		AuthorizationErrorResponse response = new AuthorizationErrorResponse(redirectURI, error, state, ResponseMode.QUERY);
 
-		Map<String,String> params = response.toParameters();
-		assertEquals(OAuth2Error.ACCESS_DENIED.getCode(), params.get("error"));
-		assertEquals(OAuth2Error.ACCESS_DENIED.getDescription(), params.get("error_description"));
-		assertEquals(state.getValue(), params.get("state"));
+		Map<String,List<String>> params = response.toParameters();
+		assertEquals(Collections.singletonList(OAuth2Error.ACCESS_DENIED.getCode()), params.get("error"));
+		assertEquals(Collections.singletonList(OAuth2Error.ACCESS_DENIED.getDescription()), params.get("error_description"));
+		assertEquals(Collections.singletonList(state.getValue()), params.get("state"));
 		assertEquals(3, params.size());
 
 		URI uri = response.toURI();
 
 		params = URLUtils.parseParameters(uri.getQuery());
-		assertEquals("oidccallback", params.get("action"));
-		assertEquals(OAuth2Error.ACCESS_DENIED.getCode(), params.get("error"));
-		assertEquals(OAuth2Error.ACCESS_DENIED.getDescription(), params.get("error_description"));
-		assertEquals(state.getValue(), params.get("state"));
+		assertEquals(Collections.singletonList("oidccallback"), params.get("action"));
+		assertEquals(Collections.singletonList(OAuth2Error.ACCESS_DENIED.getCode()), params.get("error"));
+		assertEquals(Collections.singletonList(OAuth2Error.ACCESS_DENIED.getDescription()), params.get("error_description"));
+		assertEquals(Collections.singletonList(state.getValue()), params.get("state"));
 		assertEquals(4, params.size());
 	}
 }

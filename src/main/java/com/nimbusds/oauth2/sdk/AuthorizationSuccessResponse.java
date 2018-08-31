@@ -20,9 +20,12 @@ package com.nimbusds.oauth2.sdk;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.nimbusds.oauth2.sdk.util.MapUtils;
 import net.jcip.annotations.Immutable;
 
 import net.minidev.json.JSONObject;
@@ -167,23 +170,23 @@ public class AuthorizationSuccessResponse
 
 
 	@Override
-	public Map<String,String> toParameters() {
+	public Map<String,List<String>> toParameters() {
 
-		Map<String,String> params = new HashMap<>();
+		Map<String,List<String>> params = new HashMap<>();
 
 		if (code != null)
-			params.put("code", code.getValue());
+			params.put("code", Collections.singletonList(code.getValue()));
 
 		if (accessToken != null) {
 			
 			for (Map.Entry<String,Object> entry: accessToken.toJSONObject().entrySet()) {
 
-				params.put(entry.getKey(), entry.getValue().toString());
+				params.put(entry.getKey(), Collections.singletonList(entry.getValue().toString()));
 			}
 		}
 			
 		if (getState() != null)
-			params.put("state", getState().getValue());
+			params.put("state", Collections.singletonList(getState().getValue()));
 
 		return params;
 	}
@@ -203,7 +206,7 @@ public class AuthorizationSuccessResponse
 	 *                        authorisation success response.
 	 */
 	public static AuthorizationSuccessResponse parse(final URI redirectURI,
-		                                         final Map<String,String> params)
+		                                         final Map<String,List<String>> params)
 		throws ParseException {
 	
 		// Parse code parameter
@@ -211,7 +214,7 @@ public class AuthorizationSuccessResponse
 		AuthorizationCode code = null;
 		
 		if (params.get("code") != null) {
-			code = new AuthorizationCode(params.get("code"));
+			code = new AuthorizationCode(URLUtils.getFirstValue(params, "code"));
 		}
 		
 		// Parse access_token parameters
@@ -221,12 +224,12 @@ public class AuthorizationSuccessResponse
 		if (params.get("access_token") != null) {
 
 			JSONObject jsonObject = new JSONObject();
-			jsonObject.putAll(params);
+			jsonObject.putAll(MapUtils.toSingleValuedMap(params));
 			accessToken = AccessToken.parse(jsonObject);
 		}
 		
 		// Parse optional state parameter
-		State state = State.parse(params.get("state"));
+		State state = State.parse(URLUtils.getFirstValue(params, "state"));
 		
 		return new AuthorizationSuccessResponse(redirectURI, code, accessToken, state, null);
 	}
@@ -260,7 +263,7 @@ public class AuthorizationSuccessResponse
 	public static AuthorizationSuccessResponse parse(final URI uri)
 		throws ParseException {
 
-		Map<String,String> params;
+		Map<String,List<String>> params;
 
 		if (uri.getRawFragment() != null) {
 

@@ -18,7 +18,9 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
@@ -53,10 +55,10 @@ public class ClientSecretPostTest extends TestCase {
 		assertEquals(id, csp.getClientID().getValue());
 		assertEquals(pw, csp.getClientSecret().getValue());
 
-		Map<String,String> params = csp.toParameters();
+		Map<String,List<String>> params = csp.toParameters();
 
-		assertEquals(id, params.get("client_id"));
-		assertEquals(pw, params.get("client_secret"));
+		assertEquals(Collections.singletonList(id), params.get("client_id"));
+		assertEquals(Collections.singletonList(pw), params.get("client_secret"));
 		assertEquals(2, params.size());
 
 		csp = ClientSecretPost.parse(params);
@@ -68,8 +70,8 @@ public class ClientSecretPostTest extends TestCase {
 	
 	public void testParse_missingClientID() {
 		
-		Map<String,String> params = new HashMap<>();
-		params.put("client_secret", "secret");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("client_secret", Collections.singletonList("secret"));
 		try {
 			ClientSecretPost.parse(params);
 			fail();
@@ -81,8 +83,8 @@ public class ClientSecretPostTest extends TestCase {
 	
 	public void testParse_missingClientSecret() {
 		
-		Map<String,String> params = new HashMap<>();
-		params.put("client_id", "alice");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("client_id", Collections.singletonList("alice"));
 		try {
 			ClientSecretPost.parse(params);
 			fail();

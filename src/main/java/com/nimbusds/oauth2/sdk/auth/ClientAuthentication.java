@@ -18,6 +18,7 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
+import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -25,6 +26,7 @@ import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
+import com.nimbusds.oauth2.sdk.util.URLUtils;
 
 
 /**
@@ -130,20 +132,20 @@ public abstract class ClientAuthentication {
 			return null; // no auth
 		}
 		
-		Map<String,String> params = httpRequest.getQueryParameters();
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
 		
 		// We have client secret post
-		if (StringUtils.isNotBlank(params.get("client_id")) && StringUtils.isNotBlank(params.get("client_secret"))) {
+		if (StringUtils.isNotBlank(URLUtils.getFirstValue(params, "client_id")) && StringUtils.isNotBlank(URLUtils.getFirstValue(params, "client_secret"))) {
 			return ClientSecretPost.parse(httpRequest);
 		}
 		
 		// Do we have a signed JWT assertion?
-		if (StringUtils.isNotBlank(params.get("client_assertion")) && StringUtils.isNotBlank(params.get("client_assertion_type"))) {
+		if (StringUtils.isNotBlank(URLUtils.getFirstValue(params, "client_assertion")) && StringUtils.isNotBlank(URLUtils.getFirstValue(params, "client_assertion_type"))) {
 			return JWTAuthentication.parse(httpRequest);
 		}
 		
 		// Self-signed client TLS?
-		if (StringUtils.isNotBlank(params.get("client_id")) && httpRequest.getClientX509Certificate() != null) {
+		if (StringUtils.isNotBlank(URLUtils.getFirstValue(params, "client_id")) && httpRequest.getClientX509Certificate() != null) {
 			// Don't do self-signed check, too expensive in terms of CPU time
 			return SelfSignedTLSClientAuthentication.parse(httpRequest);
 		}

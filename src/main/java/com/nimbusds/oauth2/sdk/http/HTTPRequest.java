@@ -370,7 +370,7 @@ public class HTTPRequest extends HTTPMessage {
 	 * @return The request query parameters, decoded. If none the map will
 	 *         be empty.
 	 */
-	public Map<String,String> getQueryParameters() {
+	public Map<String,List<String>> getQueryParameters() {
 	
 		return URLUtils.parseParameters(query);
 	}

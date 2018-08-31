@@ -18,7 +18,9 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
@@ -41,10 +43,10 @@ public class AuthorizationGrantTest extends TestCase {
 	public void testParseCode()
 		throws Exception {
 		
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "authorization_code");
-		params.put("code", "abc");
-		params.put("redirect_uri", "https://client.com/in");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("authorization_code"));
+		params.put("code", Collections.singletonList("abc"));
+		params.put("redirect_uri", Collections.singletonList("https://client.com/in"));
 		
 		AuthorizationCodeGrant grant = (AuthorizationCodeGrant)AuthorizationGrant.parse(params);
 		
@@ -57,9 +59,9 @@ public class AuthorizationGrantTest extends TestCase {
 	public void testParseRefreshToken()
 		throws Exception {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "refresh_token");
-		params.put("refresh_token", "abc123");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("refresh_token"));
+		params.put("refresh_token", Collections.singletonList("abc123"));
 
 		RefreshTokenGrant grant = (RefreshTokenGrant)AuthorizationGrant.parse(params);
 
@@ -71,10 +73,10 @@ public class AuthorizationGrantTest extends TestCase {
 	public void testParsePassword()
 		throws Exception {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "password");
-		params.put("username", "alice");
-		params.put("password", "secret");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("password"));
+		params.put("username", Collections.singletonList("alice"));
+		params.put("password", Collections.singletonList("secret"));
 
 		ResourceOwnerPasswordCredentialsGrant grant = (ResourceOwnerPasswordCredentialsGrant)AuthorizationGrant.parse(params);
 
@@ -87,8 +89,8 @@ public class AuthorizationGrantTest extends TestCase {
 	public void testParseClientCredentials()
 		throws Exception {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "client_credentials");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("client_credentials"));
 
 		ClientCredentialsGrant grant = (ClientCredentialsGrant)AuthorizationGrant.parse(params);
 
@@ -107,9 +109,9 @@ public class AuthorizationGrantTest extends TestCase {
 		SignedJWT assertion = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claimsSet);
 		assertion.sign(new MACSigner(new Secret().getValueBytes()));
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", GrantType.JWT_BEARER.getValue());
-		params.put("assertion", assertion.serialize());
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList(GrantType.JWT_BEARER.getValue()));
+		params.put("assertion", Collections.singletonList(assertion.serialize()));
 
 		JWTBearerGrant grant = (JWTBearerGrant)AuthorizationGrant.parse(params);
 
@@ -122,9 +124,9 @@ public class AuthorizationGrantTest extends TestCase {
 	public void testParseSAML2Bearer()
 		throws Exception {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", GrantType.SAML2_BEARER.getValue());
-		params.put("assertion", "abc");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList(GrantType.SAML2_BEARER.getValue()));
+		params.put("assertion", Collections.singletonList("abc"));
 
 		SAML2BearerGrant grant = (SAML2BearerGrant)AuthorizationGrant.parse(params);
 

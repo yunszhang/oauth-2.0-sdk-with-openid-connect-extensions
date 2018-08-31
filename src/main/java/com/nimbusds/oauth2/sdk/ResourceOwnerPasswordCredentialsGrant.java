@@ -18,12 +18,14 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-import net.jcip.annotations.Immutable;
-
 import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.util.URLUtils;
+import net.jcip.annotations.Immutable;
 
 
 /**
@@ -106,12 +108,12 @@ public class ResourceOwnerPasswordCredentialsGrant extends AuthorizationGrant {
 
 
 	@Override
-	public Map<String,String> toParameters() {
+	public Map<String,List<String>> toParameters() {
 
-		Map<String,String> params = new LinkedHashMap<>();
-		params.put("grant_type", GRANT_TYPE.getValue());
-		params.put("username", username);
-		params.put("password", password.getValue());
+		Map<String,List<String>> params = new LinkedHashMap<>();
+		params.put("grant_type", Collections.singletonList(GRANT_TYPE.getValue()));
+		params.put("username", Collections.singletonList(username));
+		params.put("password", Collections.singletonList(password.getValue()));
 		return params;
 	}
 
@@ -136,7 +138,7 @@ public class ResourceOwnerPasswordCredentialsGrant extends AuthorizationGrant {
 
 	/**
 	 * Parses a resource owner password credentials grant from the
-	 * specified parameters.
+	 * specified request body parameters.
 	 *
 	 * <p>Example:
 	 *
@@ -152,11 +154,11 @@ public class ResourceOwnerPasswordCredentialsGrant extends AuthorizationGrant {
 	 *
 	 * @throws ParseException If parsing failed.
 	 */
-	public static ResourceOwnerPasswordCredentialsGrant parse(final Map<String,String> params)
+	public static ResourceOwnerPasswordCredentialsGrant parse(final Map<String,List<String>> params)
 		throws ParseException {
 
 		// Parse grant type
-		String grantTypeString = params.get("grant_type");
+		String grantTypeString = URLUtils.getFirstValue(params, "grant_type");
 
 		if (grantTypeString == null) {
 			String msg = "Missing \"grant_type\" parameter";
@@ -170,7 +172,7 @@ public class ResourceOwnerPasswordCredentialsGrant extends AuthorizationGrant {
 
 
 		// Parse the username
-		String username = params.get("username");
+		String username = URLUtils.getFirstValue(params, "username");
 
 		if (username == null || username.trim().isEmpty()) {
 			String msg = "Missing or empty \"username\" parameter";
@@ -178,7 +180,7 @@ public class ResourceOwnerPasswordCredentialsGrant extends AuthorizationGrant {
 		}
 
 		// Parse the password
-		String passwordString = params.get("password");
+		String passwordString = URLUtils.getFirstValue(params, "password");
 
 		if (passwordString == null || passwordString.trim().isEmpty()) {
 			String msg = "Missing or empty \"password\" parameter";

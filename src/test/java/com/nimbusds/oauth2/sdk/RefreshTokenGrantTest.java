@@ -18,7 +18,9 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
@@ -40,9 +42,9 @@ public class RefreshTokenGrantTest extends TestCase {
 		assertEquals(GrantType.REFRESH_TOKEN, grant.getType());
 		assertEquals(refreshToken, grant.getRefreshToken());
 
-		Map<String,String> params = grant.toParameters();
-		assertEquals(GrantType.REFRESH_TOKEN.getValue(), params.get("grant_type"));
-		assertEquals(refreshToken.getValue(), params.get("refresh_token"));
+		Map<String,List<String>> params = grant.toParameters();
+		assertEquals(Collections.singletonList(GrantType.REFRESH_TOKEN.getValue()), params.get("grant_type"));
+		assertEquals(Collections.singletonList(refreshToken.getValue()), params.get("refresh_token"));
 		assertEquals(2, params.size());
 	}
 
@@ -50,9 +52,9 @@ public class RefreshTokenGrantTest extends TestCase {
 	public void testParse()
 		throws Exception {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "refresh_token");
-		params.put("refresh_token", "abc123");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("refresh_token"));
+		params.put("refresh_token", Collections.singletonList("abc123"));
 
 		RefreshTokenGrant grant = RefreshTokenGrant.parse(params);
 		assertEquals(GrantType.REFRESH_TOKEN, grant.getType());
@@ -63,8 +65,8 @@ public class RefreshTokenGrantTest extends TestCase {
 	public void testParse_missingGrantType()
 		throws Exception {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("refresh_token", "abc123");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("refresh_token", Collections.singletonList("abc123"));
 
 		try {
 			RefreshTokenGrant.parse(params);
@@ -79,9 +81,9 @@ public class RefreshTokenGrantTest extends TestCase {
 	public void testParse_unsupportedGrantType()
 		throws Exception {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "unsupported");
-		params.put("refresh_token", "abc123");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("unsupported"));
+		params.put("refresh_token", Collections.singletonList("abc123"));
 
 		try {
 			RefreshTokenGrant.parse(params);
@@ -96,8 +98,8 @@ public class RefreshTokenGrantTest extends TestCase {
 	public void testParse_missingRefreshToken()
 		throws Exception {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "refresh_token");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("refresh_token"));
 
 		try {
 			RefreshTokenGrant.parse(params);
@@ -110,8 +112,8 @@ public class RefreshTokenGrantTest extends TestCase {
 
 
 	public void testEquality() {
-
-		assertTrue(new RefreshTokenGrant(new RefreshToken("xyz")).equals(new RefreshTokenGrant(new RefreshToken("xyz"))));
+		
+		assertEquals(new RefreshTokenGrant(new RefreshToken("xyz")), new RefreshTokenGrant(new RefreshToken("xyz")));
 	}
 
 

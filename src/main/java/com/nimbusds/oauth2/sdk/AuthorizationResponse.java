@@ -21,6 +21,7 @@ package com.nimbusds.oauth2.sdk;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
@@ -142,7 +143,7 @@ public abstract class AuthorizationResponse implements Response {
 	 *
 	 * @return The parameters as a map.
 	 */
-	public abstract Map<String,String> toParameters();
+	public abstract Map<String,List<String>> toParameters();
 
 
 	/**
@@ -296,10 +297,10 @@ public abstract class AuthorizationResponse implements Response {
 	 * @throws ParseException If the parameters couldn't be parsed to an
 	 *                        authorisation success or error response.
 	 */
-	public static AuthorizationResponse parse(final URI redirectURI, final Map<String,String> params)
+	public static AuthorizationResponse parse(final URI redirectURI, final Map<String,List<String>> params)
 		throws ParseException {
 
-		if (StringUtils.isNotBlank(params.get("error"))) {
+		if (StringUtils.isNotBlank(URLUtils.getFirstValue(params, "error"))) {
 			return AuthorizationErrorResponse.parse(redirectURI, params);
 		} else {
 			return AuthorizationSuccessResponse.parse(redirectURI, params);
@@ -329,7 +330,7 @@ public abstract class AuthorizationResponse implements Response {
 	public static AuthorizationResponse parse(final URI uri)
 		throws ParseException {
 
-		Map<String,String> params;
+		Map<String,List<String>> params;
 
 		if (uri.getRawFragment() != null) {
 			params = URLUtils.parseParameters(uri.getRawFragment());

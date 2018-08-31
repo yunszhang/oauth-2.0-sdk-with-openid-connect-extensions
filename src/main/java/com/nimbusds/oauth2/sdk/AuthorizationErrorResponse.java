@@ -164,20 +164,20 @@ public class AuthorizationErrorResponse
 
 
 	@Override
-	public Map<String,String> toParameters() {
+	public Map<String,List<String>> toParameters() {
 
-		Map<String,String> params = new HashMap<>();
+		Map<String,List<String>> params = new HashMap<>();
 
-		params.put("error", error.getCode());
+		params.put("error", Collections.singletonList(error.getCode()));
 
 		if (error.getDescription() != null)
-			params.put("error_description", error.getDescription());
+			params.put("error_description", Collections.singletonList(error.getDescription()));
 
 		if (error.getURI() != null)
-			params.put("error_uri", error.getURI().toString());
+			params.put("error_uri", Collections.singletonList(error.getURI().toString()));
 
 		if (getState() != null)
-			params.put("state", getState().getValue());
+			params.put("state", Collections.singletonList(getState().getValue()));
 
 		return params;
 	}
@@ -197,19 +197,19 @@ public class AuthorizationErrorResponse
 	 *                        authorisation error response.
 	 */
 	public static AuthorizationErrorResponse parse(final URI redirectURI,
-		                                       final Map<String,String> params)
+		                                       final Map<String,List<String>> params)
 		throws ParseException {
 
 		// Parse the error
-		if (StringUtils.isBlank(params.get("error")))
+		if (StringUtils.isBlank(URLUtils.getFirstValue(params, "error")))
 			throw new ParseException("Missing error code");
 
 		// Parse error code
-		String errorCode = params.get("error");
+		String errorCode = URLUtils.getFirstValue(params, "error");
 
-		String errorDescription = params.get("error_description");
+		String errorDescription = URLUtils.getFirstValue(params, "error_description");
 
-		String errorURIString = params.get("error_uri");
+		String errorURIString = URLUtils.getFirstValue(params, "error_uri");
 
 		URI errorURI = null;
 
@@ -228,7 +228,7 @@ public class AuthorizationErrorResponse
 		
 		
 		// State
-		State state = State.parse(params.get("state"));
+		State state = State.parse(URLUtils.getFirstValue(params, "state"));
 		
 		return new AuthorizationErrorResponse(redirectURI, error, state, null);
 	}
@@ -265,7 +265,7 @@ public class AuthorizationErrorResponse
 	public static AuthorizationErrorResponse parse(final URI uri)
 		throws ParseException {
 		
-		Map<String,String> params;
+		Map<String,List<String>> params;
 
 		if (uri.getRawFragment() != null) {
 

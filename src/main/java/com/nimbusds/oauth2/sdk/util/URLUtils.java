@@ -23,9 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 
 
 /**
@@ -88,35 +86,40 @@ public class URLUtils {
 	 *
 	 * @return The serialised URL query string, empty if no parameters.
 	 */
-	public static String serializeParameters(final Map<String,String> params) {
+	public static String serializeParameters(final Map<String,List<String>> params) {
 	
 		if (params == null || params.isEmpty())
 			return "";
 		
 		StringBuilder sb = new StringBuilder();
 		
-		for (Map.Entry<String,String> entry: params.entrySet()) {
+		for (Map.Entry<String,List<String>> entry: params.entrySet()) {
 			
-			if (entry.getKey() == null)
+			if (entry.getKey() == null || entry.getValue() == null)
 				continue;
 
-			String value = entry.getValue() != null ? entry.getValue() : "";
-			
-			try {
-				String encodedKey = URLEncoder.encode(entry.getKey(), CHARSET);
-				String encodedValue = URLEncoder.encode(value, CHARSET);
+			for (String value: entry.getValue()) {
 				
-				if (sb.length() > 0)
-					sb.append('&');
+				if (value == null) {
+					value = "";
+				}
 				
-				sb.append(encodedKey);
-				sb.append('=');
-				sb.append(encodedValue);
-	
-			} catch (UnsupportedEncodingException e) {
-
-				// UTF-8 should always be supported
-				throw new RuntimeException(e.getMessage(), e);
+				try {
+					String encodedKey = URLEncoder.encode(entry.getKey(), CHARSET);
+					String encodedValue = URLEncoder.encode(value, CHARSET);
+					
+					if (sb.length() > 0)
+						sb.append('&');
+					
+					sb.append(encodedKey);
+					sb.append('=');
+					sb.append(encodedValue);
+					
+				} catch (UnsupportedEncodingException e) {
+					
+					// UTF-8 should always be supported
+					throw new RuntimeException(e.getMessage(), e);
+				}
 			}
 		}
 		
@@ -150,42 +153,22 @@ public class URLUtils {
 	 * @return The serialised URL query string, empty if no parameters.
 	 */
 	public static String serializeParametersAlt(final Map<String,String[]> params) {
-
-		if (params == null || params.isEmpty())
-			return "";
-
-		StringBuilder sb = new StringBuilder();
-
-		for (Map.Entry<String,String[]> entry: params.entrySet()) {
-
-			if (entry.getKey() == null || entry.getValue() == null)
-				continue;
-
-			for (String value: entry.getValue()) {
-
-				if (value == null)
-					value = "";
-
-				try {
-					String encodedKey = URLEncoder.encode(entry.getKey(), CHARSET);
-					String encodedValue = URLEncoder.encode(value, CHARSET);
-
-					if (sb.length() > 0)
-						sb.append('&');
-
-					sb.append(encodedKey);
-					sb.append('=');
-					sb.append(encodedValue);
-
-				} catch (UnsupportedEncodingException e) {
-
-					// UTF-8 should always be supported
-					throw new RuntimeException(e.getMessage(), e);
-				}
-			}
+		
+		if (params == null) {
+			return serializeParameters(null);
 		}
 
-		return sb.toString();
+		Map<String,List<String>> out = new HashMap<>();
+		
+		for (Map.Entry<String,String[]> entry: params.entrySet()) {
+			if (entry.getValue() == null) {
+				out.put(entry.getKey(), null);
+			} else {
+				out.put(entry.getKey(), Arrays.asList(entry.getValue()));
+			}
+		}
+		
+		return serializeParameters(out);
 	}
 
 
@@ -213,9 +196,9 @@ public class URLUtils {
 	 *
 	 * @return A map of the URL query parameters, empty if none are found.
 	 */
-	public static Map<String,String> parseParameters(final String query) {
+	public static Map<String,List<String>> parseParameters(final String query) {
 		
-		Map<String,String> params = new HashMap<>();
+		Map<String,List<String>> params = new HashMap<>();
 		
 		if (StringUtils.isBlank(query)) {
 			return params; // empty map
@@ -242,7 +225,14 @@ public class URLUtils {
 					value = URLDecoder.decode(pair[1], CHARSET);
 				}
 				
-				params.put(key, value);
+				if (params.containsKey(key)) {
+					List<String> otherValues = params.get(key);
+					List<String> combinedValues = new LinkedList<>(otherValues);
+					combinedValues.add(value);
+					params.put(key, Collections.unmodifiableList(combinedValues));
+				} else {
+					params.put(key, Collections.singletonList(value));
+				}
 			}
 			
 		} catch (UnsupportedEncodingException e) {
@@ -251,6 +241,47 @@ public class URLUtils {
 		}
 		
 		return params;
+	}
+	
+	
+	/**
+	 * Gets the first value for the specified parameter key.
+	 *
+	 * @param params The map of parameters. Must not be {@code null}.
+	 * @param key    The parameter key. Must not be {@code null}.
+	 *
+	 * @return The first parameter value, {@code null} if not found.
+	 */
+	public static String getFirstValue(final Map<String,List<String>> params, final String key) {
+		
+		List<String> valueList = params.get(key);
+		
+		if (valueList == null || valueList.isEmpty()) {
+			return null;
+		}
+		
+		return valueList.get(0);
+	}
+	
+	
+	/**
+	 * Removes the entry for the specified parameter key and returns its
+	 * first value.
+	 *
+	 * @param params The map of parameters. Must not be {@code null}.
+	 * @param key    The parameter key. Must not be {@code null}.
+	 *
+	 * @return The first parameter value, {@code null} if not found.
+	 */
+	public static String removeAndReturnFirstValue(final Map<String,List<String>> params, final String key) {
+		
+		List<String> valueList = params.remove(key);
+		
+		if (valueList == null || valueList.isEmpty()) {
+			return null;
+		}
+		
+		return valueList.get(0);
 	}
 
 

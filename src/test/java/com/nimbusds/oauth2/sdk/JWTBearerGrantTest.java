@@ -19,7 +19,9 @@ package com.nimbusds.oauth2.sdk;
 
 
 import java.security.SecureRandom;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -35,6 +37,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.util.URLUtils;
 import junit.framework.TestCase;
 
 
@@ -89,9 +92,9 @@ public class JWTBearerGrantTest extends TestCase {
 		assertEquals(assertion, grant.getJWTAssertion());
 		assertEquals(assertion.serialize(), grant.getAssertion());
 
-		Map<String,String> params = grant.toParameters();
-		assertEquals(GrantType.JWT_BEARER.getValue(), params.get("grant_type"));
-		assertEquals(assertion.serialize(), params.get("assertion"));
+		Map<String,List<String>> params = grant.toParameters();
+		assertEquals(GrantType.JWT_BEARER.getValue(), URLUtils.getFirstValue(params, "grant_type"));
+		assertEquals(assertion.serialize(), URLUtils.getFirstValue(params, "assertion"));
 		assertEquals(2, params.size());
 
 		grant = JWTBearerGrant.parse(params);
@@ -121,9 +124,9 @@ public class JWTBearerGrantTest extends TestCase {
 		assertEquals(assertion, grant.getJWTAssertion());
 		assertEquals(assertion.serialize(), grant.getAssertion());
 
-		Map<String,String> params = grant.toParameters();
-		assertEquals(GrantType.JWT_BEARER.getValue(), params.get("grant_type"));
-		assertEquals(assertion.serialize(), params.get("assertion"));
+		Map<String,List<String>> params = grant.toParameters();
+		assertEquals(GrantType.JWT_BEARER.getValue(), URLUtils.getFirstValue(params, "grant_type"));
+		assertEquals(assertion.serialize(), URLUtils.getFirstValue(params, "assertion"));
 		assertEquals(2, params.size());
 
 		grant = JWTBearerGrant.parse(params);
@@ -143,9 +146,9 @@ public class JWTBearerGrantTest extends TestCase {
 		SignedJWT assertion = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claimsSet);
 		assertion.sign(new MACSigner(new Secret().getValueBytes()));
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "invalid-grant");
-		params.put("assertion", assertion.serialize());
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("invalid-grant"));
+		params.put("assertion", Collections.singletonList(assertion.serialize()));
 
 		try {
 			JWTBearerGrant.parse(params);
@@ -159,8 +162,8 @@ public class JWTBearerGrantTest extends TestCase {
 
 	public void testParseMissingAssertion() {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", GrantType.JWT_BEARER.getValue());
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList(GrantType.JWT_BEARER.getValue()));
 
 		try {
 			JWTBearerGrant.parse(params);
@@ -174,9 +177,9 @@ public class JWTBearerGrantTest extends TestCase {
 
 	public void testParseInvalidJWTAssertion() {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", GrantType.JWT_BEARER.getValue());
-		params.put("assertion", "invalid-jwt");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList(GrantType.JWT_BEARER.getValue()));
+		params.put("assertion", Collections.singletonList("invalid-jwt"));
 
 		try {
 			JWTBearerGrant.parse(params);
@@ -190,9 +193,9 @@ public class JWTBearerGrantTest extends TestCase {
 
 	public void testParseRejectPlainJWT() {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", GrantType.JWT_BEARER.getValue());
-		params.put("assertion", new PlainJWT(new JWTClaimsSet.Builder().subject("alice").build()).serialize());
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList(GrantType.JWT_BEARER.getValue()));
+		params.put("assertion", Collections.singletonList(new PlainJWT(new JWTClaimsSet.Builder().subject("alice").build()).serialize()));
 
 		try {
 			JWTBearerGrant.parse(params);
@@ -225,7 +228,7 @@ public class JWTBearerGrantTest extends TestCase {
 
 		JWTBearerGrant jwtBearerGrant = new JWTBearerGrant(jwt);
 
-		Map<String,String> params = jwtBearerGrant.toParameters();
+		Map<String,List<String>> params = jwtBearerGrant.toParameters();
 
 		jwtBearerGrant = JWTBearerGrant.parse(params);
 
@@ -260,7 +263,7 @@ public class JWTBearerGrantTest extends TestCase {
 
 		JWTBearerGrant jwtBearerGrant = new JWTBearerGrant(jwt);
 
-		Map<String,String> params = jwtBearerGrant.toParameters();
+		Map<String,List<String>> params = jwtBearerGrant.toParameters();
 
 		jwtBearerGrant = JWTBearerGrant.parse(params);
 
@@ -305,7 +308,7 @@ public class JWTBearerGrantTest extends TestCase {
 
 		JWTBearerGrant jwtBearerGrant = new JWTBearerGrant(jweObject);
 
-		Map<String,String> params = jwtBearerGrant.toParameters();
+		Map<String,List<String>> params = jwtBearerGrant.toParameters();
 
 		jwtBearerGrant = JWTBearerGrant.parse(params);
 
@@ -356,7 +359,7 @@ public class JWTBearerGrantTest extends TestCase {
 
 		JWTBearerGrant jwtBearerGrant = new JWTBearerGrant(jweObject);
 
-		Map<String,String> params = jwtBearerGrant.toParameters();
+		Map<String,List<String>> params = jwtBearerGrant.toParameters();
 
 		jwtBearerGrant = JWTBearerGrant.parse(params);
 

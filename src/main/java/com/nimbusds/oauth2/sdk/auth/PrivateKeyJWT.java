@@ -22,24 +22,19 @@ import java.net.URI;
 import java.security.Provider;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import net.jcip.annotations.Immutable;
+import java.util.*;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jwt.SignedJWT;
-
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.id.Audience;
-import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.assertions.jwt.JWTAssertionFactory;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.id.Audience;
+import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
+import net.jcip.annotations.Immutable;
 
 
 /**
@@ -275,7 +270,7 @@ public final class PrivateKeyJWT extends JWTAuthentication {
 	 *                        private key JSON Web Token (JWT) 
 	 *                        authentication.
 	 */
-	public static PrivateKeyJWT parse(final Map<String,String> params)
+	public static PrivateKeyJWT parse(final Map<String,List<String>> params)
 		throws ParseException {
 	
 		JWTAuthentication.ensureClientAssertionType(params);
@@ -326,7 +321,7 @@ public final class PrivateKeyJWT extends JWTAuthentication {
 	public static PrivateKeyJWT parse(final String paramsString)
 		throws ParseException {
 		
-		Map<String,String> params = URLUtils.parseParameters(paramsString);
+		Map<String,List<String>> params = URLUtils.parseParameters(paramsString);
 		
 		return parse(params);
 	}

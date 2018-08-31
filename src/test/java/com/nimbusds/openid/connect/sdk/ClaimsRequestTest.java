@@ -372,7 +372,7 @@ public class ClaimsRequestTest extends TestCase {
 		assertTrue(userInfoClaims.contains("email_verified"));
 		assertEquals(2, userInfoClaims.size());
 
-		Map<String,String> authRequestParams = authRequest.toParameters();
+		Map<String,List<String>> authRequestParams = authRequest.toParameters();
 
 		authRequest = AuthenticationRequest.parse(new URI("https://c2id.com/login"), authRequestParams);
 
@@ -408,7 +408,7 @@ public class ClaimsRequestTest extends TestCase {
 		assertTrue(idTokenClaims.contains("email_verified"));
 		assertEquals(2, idTokenClaims.size());
 
-		Map<String,String> authRequestParams = authRequest.toParameters();
+		Map<String,List<String>> authRequestParams = authRequest.toParameters();
 
 		authRequest = AuthenticationRequest.parse(new URI("https://c2id.com/login"), authRequestParams);
 
@@ -454,7 +454,7 @@ public class ClaimsRequestTest extends TestCase {
 		assertEquals(2, userInfoClaims.size());
 
 
-		Map<String,String> authRequestParams = authRequest.toParameters();
+		Map<String,List<String>> authRequestParams = authRequest.toParameters();
 
 		authRequest = AuthenticationRequest.parse(new URI("https://c2id.com/login"), authRequestParams);
 

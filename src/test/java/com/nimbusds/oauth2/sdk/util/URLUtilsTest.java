@@ -21,7 +21,9 @@ package com.nimbusds.oauth2.sdk.util;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
@@ -66,14 +68,14 @@ public class URLUtilsTest extends TestCase {
 	
 	public void testSerializeParameters() {
 	
-		Map<String,String> params = new LinkedHashMap<>();
+		Map<String,List<String>> params = new LinkedHashMap<>();
 		
-		params.put("response_type", "code id_token");
-		params.put("client_id", "s6BhdRkqt3");
-		params.put("redirect_uri", "https://client.example.com/cb");
-		params.put("scope", "openid");
-		params.put("nonce", "n-0S6_WzA2Mj");
-		params.put("state", "af0ifjsldkj");
+		params.put("response_type", Collections.singletonList("code id_token"));
+		params.put("client_id", Collections.singletonList("s6BhdRkqt3"));
+		params.put("redirect_uri", Collections.singletonList("https://client.example.com/cb"));
+		params.put("scope", Collections.singletonList("openid"));
+		params.put("nonce", Collections.singletonList("n-0S6_WzA2Mj"));
+		params.put("state", Collections.singletonList("af0ifjsldkj"));
 		
 		String query = URLUtils.serializeParameters(params);
 		
@@ -88,14 +90,14 @@ public class URLUtilsTest extends TestCase {
 
 	public void testSerializeParameters_nullValue() {
 
-		Map<String,String> params = new LinkedHashMap<>();
+		Map<String,List<String>> params = new LinkedHashMap<>();
 
-		params.put("response_type", "code");
+		params.put("response_type", Collections.singletonList("code"));
 		params.put("display", null);
 
 		String query = URLUtils.serializeParameters(params);
 
-		assertEquals("response_type=code&display=", query);
+		assertEquals("response_type=code", query);
 	}
 	
 	
@@ -116,14 +118,14 @@ public class URLUtilsTest extends TestCase {
 				"&nonce=n-0S6_WzA2Mj" +
 				"&state=af0ifjsldkj";
 	
-		Map<String,String> params = URLUtils.parseParameters(query);
+		Map<String,List<String>> params = URLUtils.parseParameters(query);
 
-		assertEquals("code id_token", params.get("response_type"));
-		assertEquals("s6BhdRkqt3", params.get("client_id"));
-		assertEquals("https://client.example.com/cb", params.get("redirect_uri"));
-		assertEquals("openid", params.get("scope"));
-		assertEquals("n-0S6_WzA2Mj", params.get("nonce"));
-		assertEquals("af0ifjsldkj", params.get("state"));
+		assertEquals(Collections.singletonList("code id_token"), params.get("response_type"));
+		assertEquals(Collections.singletonList("s6BhdRkqt3"), params.get("client_id"));
+		assertEquals(Collections.singletonList("https://client.example.com/cb"), params.get("redirect_uri"));
+		assertEquals(Collections.singletonList("openid"), params.get("scope"));
+		assertEquals(Collections.singletonList("n-0S6_WzA2Mj"), params.get("nonce"));
+		assertEquals(Collections.singletonList("af0ifjsldkj"), params.get("state"));
 	}
 
 
@@ -143,10 +145,10 @@ public class URLUtilsTest extends TestCase {
 
 		String query = "\np1=abc&p2=def  \n";
 
-		Map<String,String> params = URLUtils.parseParameters(query);
+		Map<String,List<String>> params = URLUtils.parseParameters(query);
 
-		assertEquals("abc", params.get("p1"));
-		assertEquals("def", params.get("p2"));
+		assertEquals(Collections.singletonList("abc"), params.get("p1"));
+		assertEquals(Collections.singletonList("def"), params.get("p2"));
 		assertEquals(2, params.size());
 	}
 
@@ -158,11 +160,11 @@ public class URLUtilsTest extends TestCase {
 			"&state=cVIe4g4D1J3tYtZgnTL-Po9QpozQJdikDCBp7KJorIQ" +
 			"&code=1nf1ljB0JkPIbhMcYMeoT9Q5oGt28ggDsUiWLvCL81YTqCZMzAbVCGLUPrDHouda4cELZRujcS7d8rUNcZVl7HxUXdDsOUtc65s2knGbxSo%3D";
 
-		Map<String,String> params = URLUtils.parseParameters(fragment);
+		Map<String,List<String>> params = URLUtils.parseParameters(fragment);
 
-		assertEquals("openid email profile", params.get("scope"));
-		assertEquals("cVIe4g4D1J3tYtZgnTL-Po9QpozQJdikDCBp7KJorIQ", params.get("state"));
-		assertEquals("1nf1ljB0JkPIbhMcYMeoT9Q5oGt28ggDsUiWLvCL81YTqCZMzAbVCGLUPrDHouda4cELZRujcS7d8rUNcZVl7HxUXdDsOUtc65s2knGbxSo=", params.get("code"));
+		assertEquals(Collections.singletonList("openid email profile"), params.get("scope"));
+		assertEquals(Collections.singletonList("cVIe4g4D1J3tYtZgnTL-Po9QpozQJdikDCBp7KJorIQ"), params.get("state"));
+		assertEquals(Collections.singletonList("1nf1ljB0JkPIbhMcYMeoT9Q5oGt28ggDsUiWLvCL81YTqCZMzAbVCGLUPrDHouda4cELZRujcS7d8rUNcZVl7HxUXdDsOUtc65s2knGbxSo="), params.get("code"));
 	}
 
 
@@ -171,11 +173,11 @@ public class URLUtilsTest extends TestCase {
 
 		String query = "key0=value&key1=value=&key2=value==&key3=value===";
 
-		Map<String,String> params = URLUtils.parseParameters(query);
-		assertEquals("value", params.get("key0"));
-		assertEquals("value=", params.get("key1"));
-		assertEquals("value==", params.get("key2"));
-		assertEquals("value===", params.get("key3"));
+		Map<String,List<String>> params = URLUtils.parseParameters(query);
+		assertEquals(Collections.singletonList("value"), params.get("key0"));
+		assertEquals(Collections.singletonList("value="), params.get("key1"));
+		assertEquals(Collections.singletonList("value=="), params.get("key2"));
+		assertEquals(Collections.singletonList("value==="), params.get("key3"));
 		assertEquals(4, params.size());
 	}
 
@@ -193,7 +195,20 @@ public class URLUtilsTest extends TestCase {
 	}
 
 
-	public void testSerializeAlt_nullKey() {
+	public void testSerializeAlt_nullValue() {
+
+		Map<String,String[]> params = new LinkedHashMap<>();
+
+		params.put("fruit", null);
+		params.put("veg", new String[]{"lettuce"});
+
+		String s = URLUtils.serializeParametersAlt(params);
+
+		assertEquals("veg=lettuce", s);
+	}
+
+
+	public void testSerializeAlt_nullValueInArray() {
 
 		Map<String,String[]> params = new LinkedHashMap<>();
 

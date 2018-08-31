@@ -21,6 +21,8 @@ package com.nimbusds.oauth2.sdk.http;
 import java.io.IOException;
 import java.net.URI;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.id.Issuer;
@@ -172,9 +174,9 @@ public class ServletUtilsTest extends TestCase {
 		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
 		assertNull(httpRequest.getAccept());
 		assertNull(httpRequest.getAuthorization());
-		Map<String, String> queryParams = httpRequest.getQueryParameters();
-		assertEquals("abc", queryParams.get("token"));
-		assertEquals("bearer", queryParams.get("type"));
+		Map<String, List<String>> queryParams = httpRequest.getQueryParameters();
+		assertEquals(Collections.singletonList("abc"), queryParams.get("token"));
+		assertEquals(Collections.singletonList("bearer"), queryParams.get("type"));
 		assertEquals(2, queryParams.size());
 	}
 
@@ -194,9 +196,9 @@ public class ServletUtilsTest extends TestCase {
 		assertNull(httpRequest.getContentType());
 		assertNull(httpRequest.getAccept());
 		assertNull(httpRequest.getAuthorization());
-		Map<String,String> queryParams = httpRequest.getQueryParameters();
-		assertEquals("abc", queryParams.get("token"));
-		assertEquals("bearer", queryParams.get("type"));
+		Map<String,List<String>> queryParams = httpRequest.getQueryParameters();
+		assertEquals(Collections.singletonList("abc"), queryParams.get("token"));
+		assertEquals(Collections.singletonList("bearer"), queryParams.get("type"));
 		assertEquals(2, queryParams.size());
 	}
 

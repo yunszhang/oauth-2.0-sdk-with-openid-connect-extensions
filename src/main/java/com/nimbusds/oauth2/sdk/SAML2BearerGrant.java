@@ -18,10 +18,13 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.jose.util.Base64URL;
+import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
 
 
@@ -97,11 +100,11 @@ public class SAML2BearerGrant extends AssertionGrant {
 
 
 	@Override
-	public Map<String,String> toParameters() {
+	public Map<String,List<String>> toParameters() {
 
-		Map<String,String> params = new LinkedHashMap<>();
-		params.put("grant_type", GRANT_TYPE.getValue());
-		params.put("assertion", assertion.toString());
+		Map<String,List<String>> params = new LinkedHashMap<>();
+		params.put("grant_type", Collections.singletonList(GRANT_TYPE.getValue()));
+		params.put("assertion", Collections.singletonList(assertion.toString()));
 		return params;
 	}
 
@@ -125,7 +128,8 @@ public class SAML2BearerGrant extends AssertionGrant {
 
 
 	/**
-	 * Parses a SAML 2.0 bearer grant from the specified parameters.
+	 * Parses a SAML 2.0 bearer grant from the specified request body
+	 * parameters.
 	 *
 	 * <p>Example:
 	 *
@@ -141,11 +145,11 @@ public class SAML2BearerGrant extends AssertionGrant {
 	 *
 	 * @throws ParseException If parsing failed.
 	 */
-	public static SAML2BearerGrant parse(final Map<String,String> params)
+	public static SAML2BearerGrant parse(final Map<String,List<String>> params)
 		throws ParseException {
 
 		// Parse grant type
-		String grantTypeString = params.get("grant_type");
+		String grantTypeString = URLUtils.getFirstValue(params, "grant_type");
 
 		if (grantTypeString == null)
 			throw MISSING_GRANT_TYPE_PARAM_EXCEPTION;
@@ -154,7 +158,7 @@ public class SAML2BearerGrant extends AssertionGrant {
 			throw UNSUPPORTED_GRANT_TYPE_EXCEPTION;
 
 		// Parse JWT assertion
-		String assertionString = params.get("assertion");
+		String assertionString = URLUtils.getFirstValue(params, "assertion");
 
 		if (assertionString == null || assertionString.trim().isEmpty())
 			throw MISSING_ASSERTION_PARAM_EXCEPTION;

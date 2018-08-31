@@ -145,7 +145,7 @@ public class AuthorizationRequest extends AbstractRequest {
 	/**
 	 * Additional custom parameters.
 	 */
-	private final Map<String,String> customParams;
+	private final Map<String,List<String>> customParams;
 
 
 	/**
@@ -211,9 +211,9 @@ public class AuthorizationRequest extends AbstractRequest {
 
 
 		/**
-		 * The additional custom parameters.
+		 * Additional custom parameters.
 		 */
-		private Map<String,String> customParams = new HashMap<>();
+		private Map<String,List<String>> customParams = new HashMap<>();
 
 
 		/**
@@ -377,17 +377,22 @@ public class AuthorizationRequest extends AbstractRequest {
 
 
 		/**
-		 * Sets the specified additional custom parameter.
+		 * Sets a custom parameter.
 		 *
-		 * @param name  The parameter name. Must not be {@code null}.
-		 * @param value The parameter value, {@code null} if not
-		 *              specified.
+		 * @param name   The parameter name. Must not be {@code null}.
+		 * @param values The parameter values, {@code null} if not
+		 *               specified.
 		 *
 		 * @return This builder.
 		 */
-		public Builder customParameter(final String name, final String value) {
+		public Builder customParameter(final String name, final String ... values) {
 
-			customParams.put(name, value);
+			if (values == null || values.length == 0) {
+				customParams.remove(name);
+			} else {
+				customParams.put(name, Arrays.asList(values));
+			}
+			
 			return this;
 		}
 
@@ -522,7 +527,7 @@ public class AuthorizationRequest extends AbstractRequest {
 				    final CodeChallenge codeChallenge,
 				    final CodeChallengeMethod codeChallengeMethod) {
 
-		this(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, Collections.<String,String>emptyMap());
+		this(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, Collections.<String,List<String>>emptyMap());
 	}
 
 
@@ -570,7 +575,7 @@ public class AuthorizationRequest extends AbstractRequest {
 				    final State state,
 				    final CodeChallenge codeChallenge,
 				    final CodeChallengeMethod codeChallengeMethod,
-				    final Map<String,String> customParams) {
+				    final Map<String,List<String>> customParams) {
 
 		super(uri);
 
@@ -734,7 +739,7 @@ public class AuthorizationRequest extends AbstractRequest {
 	 * @return The additional custom parameters as a unmodifiable map,
 	 *         empty map if none.
 	 */
-	public Map<String,String> getCustomParameters () {
+	public Map<String,List<String>> getCustomParameters () {
 
 		return customParams;
 	}
@@ -745,18 +750,18 @@ public class AuthorizationRequest extends AbstractRequest {
 	 *
 	 * @param name The parameter name. Must not be {@code null}.
 	 *
-	 * @return The parameter value, {@code null} if not specified.
+	 * @return The parameter value(s), {@code null} if not specified.
 	 */
-	public String getCustomParameter(final String name) {
+	public List<String> getCustomParameter(final String name) {
 
 		return customParams.get(name);
 	}
 
 
 	/**
-	 * Returns the parameters for this authorisation request. Query
-	 * parameters which are part of the authorisation endpoint are not
-	 * included.
+	 * Returns the URI query parameters for this authorisation request.
+	 * Query parameters which are part of the authorisation endpoint are
+	 * not included.
 	 *
 	 * <p>Example parameters:
 	 *
@@ -769,34 +774,34 @@ public class AuthorizationRequest extends AbstractRequest {
 	 * 
 	 * @return The parameters.
 	 */
-	public Map<String,String> toParameters() {
+	public Map<String,List<String>> toParameters() {
 
-		Map <String,String> params = new LinkedHashMap<>();
+		Map<String,List<String>> params = new LinkedHashMap<>();
 
 		// Put custom params first, so they may be overwritten by std params
 		params.putAll(customParams);
 		
-		params.put("response_type", rt.toString());
-		params.put("client_id", clientID.getValue());
+		params.put("response_type", Collections.singletonList(rt.toString()));
+		params.put("client_id", Collections.singletonList(clientID.getValue()));
 
 		if (rm != null) {
-			params.put("response_mode", rm.getValue());
+			params.put("response_mode", Collections.singletonList(rm.getValue()));
 		}
 
 		if (redirectURI != null)
-			params.put("redirect_uri", redirectURI.toString());
+			params.put("redirect_uri", Collections.singletonList(redirectURI.toString()));
 
 		if (scope != null)
-			params.put("scope", scope.toString());
+			params.put("scope", Collections.singletonList(scope.toString()));
 		
 		if (state != null)
-			params.put("state", state.getValue());
+			params.put("state", Collections.singletonList(state.getValue()));
 
 		if (codeChallenge != null) {
-			params.put("code_challenge", codeChallenge.getValue());
+			params.put("code_challenge", Collections.singletonList(codeChallenge.getValue()));
 
 			if (codeChallengeMethod != null) {
-				params.put("code_challenge_method", codeChallengeMethod.getValue());
+				params.put("code_challenge_method", Collections.singletonList(codeChallengeMethod.getValue()));
 			}
 		}
 
@@ -823,7 +828,7 @@ public class AuthorizationRequest extends AbstractRequest {
 	 */
 	public String toQueryString() {
 		
-		Map<String, String> params = new HashMap<>();
+		Map<String, List<String>> params = new HashMap<>();
 		if (getEndpointURI() != null) {
 			params.putAll(URLUtils.parseParameters(getEndpointURI().getQuery()));
 		}
@@ -918,7 +923,8 @@ public class AuthorizationRequest extends AbstractRequest {
 
 
 	/**
-	 * Parses an authorisation request from the specified parameters.
+	 * Parses an authorisation request from the specified URI query
+	 * parameters.
 	 *
 	 * <p>Example parameters:
 	 *
@@ -936,7 +942,7 @@ public class AuthorizationRequest extends AbstractRequest {
 	 * @throws ParseException If the parameters couldn't be parsed to an
 	 *                        authorisation request.
 	 */
-	public static AuthorizationRequest parse(final Map<String,String> params)
+	public static AuthorizationRequest parse(final Map<String,List<String>> params)
 		throws ParseException {
 
 		return parse(null, params);
@@ -944,7 +950,8 @@ public class AuthorizationRequest extends AbstractRequest {
 
 
 	/**
-	 * Parses an authorisation request from the specified parameters.
+	 * Parses an authorisation request from the specified URI and query
+	 * parameters.
 	 *
 	 * <p>Example parameters:
 	 *
@@ -965,11 +972,11 @@ public class AuthorizationRequest extends AbstractRequest {
 	 * @throws ParseException If the parameters couldn't be parsed to an
 	 *                        authorisation request.
 	 */
-	public static AuthorizationRequest parse(final URI uri, final Map<String,String> params)
+	public static AuthorizationRequest parse(final URI uri, final Map<String,List<String>> params)
 		throws ParseException {
 
 		// Parse mandatory client ID first
-		String v = params.get("client_id");
+		String v = URLUtils.getFirstValue(params, "client_id");
 
 		if (StringUtils.isBlank(v)) {
 			String msg = "Missing \"client_id\" parameter";
@@ -980,7 +987,7 @@ public class AuthorizationRequest extends AbstractRequest {
 
 
 		// Parse optional redirection URI second
-		v = params.get("redirect_uri");
+		v = URLUtils.getFirstValue(params, "redirect_uri");
 
 		URI redirectURI = null;
 
@@ -998,11 +1005,11 @@ public class AuthorizationRequest extends AbstractRequest {
 
 
 		// Parse optional state third
-		State state = State.parse(params.get("state"));
+		State state = State.parse(URLUtils.getFirstValue(params, "state"));
 
 
 		// Parse mandatory response type
-		v = params.get("response_type");
+		v = URLUtils.getFirstValue(params, "response_type");
 
 		ResponseType rt;
 
@@ -1018,7 +1025,7 @@ public class AuthorizationRequest extends AbstractRequest {
 
 
 		// Parse the optional response mode
-		v = params.get("response_mode");
+		v = URLUtils.getFirstValue(params, "response_mode");
 
 		ResponseMode rm = null;
 
@@ -1028,7 +1035,7 @@ public class AuthorizationRequest extends AbstractRequest {
 
 
 		// Parse optional scope
-		v = params.get("scope");
+		v = URLUtils.getFirstValue(params, "scope");
 
 		Scope scope = null;
 
@@ -1040,23 +1047,23 @@ public class AuthorizationRequest extends AbstractRequest {
 		CodeChallenge codeChallenge = null;
 		CodeChallengeMethod codeChallengeMethod = null;
 
-		v = params.get("code_challenge");
+		v = URLUtils.getFirstValue(params, "code_challenge");
 
 		if (StringUtils.isNotBlank(v))
 			codeChallenge = CodeChallenge.parse(v);
 
 		if (codeChallenge != null) {
 
-			v = params.get("code_challenge_method");
+			v = URLUtils.getFirstValue(params, "code_challenge_method");
 
 			if (StringUtils.isNotBlank(v))
 				codeChallengeMethod = CodeChallengeMethod.parse(v);
 		}
 
 		// Parse additional custom parameters
-		Map<String,String> customParams = null;
+		Map<String,List<String>> customParams = null;
 
-		for (Map.Entry<String,String> p: params.entrySet()) {
+		for (Map.Entry<String,List<String>> p: params.entrySet()) {
 
 			if (! REGISTERED_PARAMETER_NAMES.contains(p.getKey())) {
 				// We have a custom parameter
@@ -1099,7 +1106,8 @@ public class AuthorizationRequest extends AbstractRequest {
 	
 	
 	/**
-	 * Parses an authorisation request from the specified URI query string.
+	 * Parses an authorisation request from the specified URI and query
+	 * string.
 	 *
 	 * <p>Example URI query string:
 	 *

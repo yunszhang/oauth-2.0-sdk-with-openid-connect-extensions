@@ -19,15 +19,16 @@ package com.nimbusds.openid.connect.sdk;
 
 
 import java.net.URI;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-
-import junit.framework.TestCase;
 
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ResponseMode;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
+import junit.framework.TestCase;
 
 
 /**
@@ -121,19 +122,19 @@ public class AuthenticationErrorResponseTest extends TestCase {
 
 		AuthenticationErrorResponse response = new AuthenticationErrorResponse(redirectURI, error, state, ResponseMode.QUERY);
 
-		Map<String,String> params = response.toParameters();
-		assertEquals(OAuth2Error.ACCESS_DENIED.getCode(), params.get("error"));
-		assertEquals(OAuth2Error.ACCESS_DENIED.getDescription(), params.get("error_description"));
-		assertEquals(state.getValue(), params.get("state"));
+		Map<String,List<String>> params = response.toParameters();
+		assertEquals(Collections.singletonList(OAuth2Error.ACCESS_DENIED.getCode()), params.get("error"));
+		assertEquals(Collections.singletonList(OAuth2Error.ACCESS_DENIED.getDescription()), params.get("error_description"));
+		assertEquals(Collections.singletonList(state.getValue()), params.get("state"));
 		assertEquals(3, params.size());
 
 		URI uri = response.toURI();
 
 		params = URLUtils.parseParameters(uri.getQuery());
-		assertEquals("oidccallback", params.get("action"));
-		assertEquals(OAuth2Error.ACCESS_DENIED.getCode(), params.get("error"));
-		assertEquals(OAuth2Error.ACCESS_DENIED.getDescription(), params.get("error_description"));
-		assertEquals(state.getValue(), params.get("state"));
+		assertEquals(Collections.singletonList("oidccallback"), params.get("action"));
+		assertEquals(Collections.singletonList(OAuth2Error.ACCESS_DENIED.getCode()), params.get("error"));
+		assertEquals(Collections.singletonList(OAuth2Error.ACCESS_DENIED.getDescription()), params.get("error_description"));
+		assertEquals(Collections.singletonList(state.getValue()), params.get("state"));
 		assertEquals(4, params.size());
 	}
 }

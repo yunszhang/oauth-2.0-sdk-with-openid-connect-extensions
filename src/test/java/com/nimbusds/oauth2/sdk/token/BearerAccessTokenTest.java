@@ -19,18 +19,17 @@ package com.nimbusds.oauth2.sdk.token;
 
 
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import com.nimbusds.jose.util.Base64;
-
-import net.minidev.json.JSONObject;
-
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -200,8 +199,8 @@ public class BearerAccessTokenTest extends TestCase {
 	public void testParseFromQueryParameters()
 		throws Exception {
 		
-		Map<String,String> params = new HashMap<>();
-		params.put("access_token", "abc");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("access_token", Collections.singletonList("abc"));
 		
 		assertEquals("abc", BearerAccessToken.parse(params).getValue());
 	}
@@ -209,8 +208,8 @@ public class BearerAccessTokenTest extends TestCase {
 	
 	public void testParseFromQueryParameters_missing() {
 		
-		Map<String,String> params = new HashMap<>();
-		params.put("some_param", "abc");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("some_param", Collections.singletonList("abc"));
 		
 		try {
 			BearerAccessToken.parse(params);
@@ -225,8 +224,8 @@ public class BearerAccessTokenTest extends TestCase {
 	
 	public void testParseFromQueryParameters_empty() {
 		
-		Map<String,String> params = new HashMap<>();
-		params.put("access_token", "");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("access_token", Collections.singletonList(""));
 		
 		try {
 			BearerAccessToken.parse(params);

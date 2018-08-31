@@ -18,6 +18,7 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
+import java.util.List;
 import java.util.Map;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -127,9 +128,9 @@ public class TLSClientAuthentication extends AbstractTLSClientAuthentication {
 			throw new ParseException("Missing HTTP POST request entity body");
 		}
 		
-		Map<String,String> params = URLUtils.parseParameters(query);
+		Map<String,List<String>> params = URLUtils.parseParameters(query);
 		
-		String clientIDString = params.get("client_id");
+		String clientIDString = URLUtils.getFirstValue(params, "client_id");
 		
 		if (StringUtils.isBlank(clientIDString)) {
 			throw new ParseException("Missing client_id parameter");

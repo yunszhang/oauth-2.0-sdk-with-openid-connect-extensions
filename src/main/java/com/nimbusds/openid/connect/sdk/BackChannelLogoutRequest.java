@@ -22,7 +22,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.jwt.JWT;
@@ -115,12 +117,12 @@ public class BackChannelLogoutRequest extends AbstractRequest {
 	 *
 	 * @return The parameters.
 	 */
-	public Map<String,String> toParameters() {
+	public Map<String,List<String>> toParameters() {
 		
-		Map <String,String> params = new LinkedHashMap<>();
+		Map <String,List<String>> params = new LinkedHashMap<>();
 		
 		try {
-			params.put("logout_token", logoutToken.serialize());
+			params.put("logout_token", Collections.singletonList(logoutToken.serialize()));
 		} catch (IllegalStateException e) {
 			throw new SerializeException("Couldn't serialize logout token: " + e.getMessage(), e);
 		}
@@ -156,7 +158,8 @@ public class BackChannelLogoutRequest extends AbstractRequest {
 	
 	
 	/**
-	 * Parses a back-channel logout request from the specified parameters.
+	 * Parses a back-channel logout request from the specified request body
+	 * parameters.
 	 *
 	 * <p>Example parameters:
 	 *
@@ -171,7 +174,7 @@ public class BackChannelLogoutRequest extends AbstractRequest {
 	 * @throws ParseException If the parameters couldn't be parsed to a
 	 *                        back-channel logout request.
 	 */
-	public static BackChannelLogoutRequest parse(final Map<String,String> params)
+	public static BackChannelLogoutRequest parse(final Map<String,List<String>> params)
 		throws ParseException {
 		
 		return parse(null, params);
@@ -179,7 +182,8 @@ public class BackChannelLogoutRequest extends AbstractRequest {
 	
 	
 	/**
-	 * Parses a back-channel logout request from the specified parameters.
+	 * Parses a back-channel logout request from the specified URI and
+	 * request body parameters.
 	 *
 	 * <p>Example parameters:
 	 *
@@ -196,10 +200,10 @@ public class BackChannelLogoutRequest extends AbstractRequest {
 	 * @throws ParseException If the parameters couldn't be parsed to a
 	 *                        back-channel logout request.
 	 */
-	public static BackChannelLogoutRequest parse(final URI uri, Map<String,String> params)
+	public static BackChannelLogoutRequest parse(final URI uri, Map<String,List<String>> params)
 		throws ParseException {
 		
-		String logoutTokenString = params.get("logout_token");
+		String logoutTokenString = URLUtils.getFirstValue(params, "logout_token");
 		
 		if (logoutTokenString == null) {
 			throw new ParseException("Missing logout_token parameter");
@@ -255,7 +259,7 @@ public class BackChannelLogoutRequest extends AbstractRequest {
 		if (query == null)
 			throw new ParseException("Missing URI query string");
 		
-		Map<String,String> params = URLUtils.parseParameters(query);
+		Map<String,List<String>> params = URLUtils.parseParameters(query);
 		
 		try {
 			return parse(URIUtils.getBaseURI(httpRequest.getURL().toURI()), params);

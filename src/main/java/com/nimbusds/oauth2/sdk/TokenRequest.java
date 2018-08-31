@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
@@ -82,7 +83,7 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 	/**
 	 * Additional custom request parameters.
 	 */
-	private final Map<String,String> customParams;
+	private final Map<String,List<String>> customParams;
 
 
 	/**
@@ -128,7 +129,7 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 			    final ClientAuthentication clientAuth,
 			    final AuthorizationGrant authzGrant,
 			    final Scope scope,
-			    final Map<String,String> customParams) {
+			    final Map<String,List<String>> customParams) {
 
 		super(uri, clientAuth);
 
@@ -210,7 +211,7 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 			    final ClientID clientID,
 			    final AuthorizationGrant authzGrant,
 			    final Scope scope,
-			    final Map<String,String> customParams) {
+			    final Map<String,List<String>> customParams) {
 
 		super(uri, clientID);
 
@@ -323,9 +324,9 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 	 * @return The additional custom parameters as a unmodifiable map,
 	 *         empty map if none.
 	 */
-	public Map<String,String> getCustomParameters () {
+	public Map<String,List<String>> getCustomParameters () {
 
-		return customParams;
+		return Collections.unmodifiableMap(customParams);
 	}
 
 
@@ -334,9 +335,9 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 	 *
 	 * @param name The parameter name. Must not be {@code null}.
 	 *
-	 * @return The parameter value, {@code null} if not specified.
+	 * @return The parameter value(s), {@code null} if not specified.
 	 */
-	public String getCustomParameter(final String name) {
+	public List<String> getCustomParameter(final String name) {
 
 		return customParams.get(name);
 	}
@@ -365,16 +366,16 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 			getClientAuthentication().applyTo(httpRequest);
 		}
 
-		Map<String,String> params = httpRequest.getQueryParameters();
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
 
 		params.putAll(authzGrant.toParameters());
 
 		if (scope != null && ! scope.isEmpty()) {
-			params.put("scope", scope.toString());
+			params.put("scope", Collections.singletonList(scope.toString()));
 		}
 
 		if (getClientID() != null) {
-			params.put("client_id", getClientID().getValue());
+			params.put("client_id", Collections.singletonList(getClientID().getValue()));
 		}
 
 		if (! getCustomParameters().isEmpty()) {
@@ -424,11 +425,11 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 		}
 
 		// No fragment! May use query component!
-		Map<String,String> params = httpRequest.getQueryParameters();
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
 		
 		// Multiple conflicting client auth methods (issue #203)?
 		if (clientAuth instanceof ClientSecretBasic) {
-			if (StringUtils.isNotBlank(params.get("client_assertion")) || StringUtils.isNotBlank(params.get("client_assertion_type"))) {
+			if (StringUtils.isNotBlank(URLUtils.getFirstValue(params, "client_assertion")) || StringUtils.isNotBlank(URLUtils.getFirstValue(params, "client_assertion_type"))) {
 				String msg = "Multiple conflicting client authentication methods found: Basic and JWT assertion";
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 			}
@@ -448,7 +449,7 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 		if (clientAuth == null) {
 
 			// Parse optional client ID
-			String clientIDString = params.get("client_id");
+			String clientIDString = URLUtils.getFirstValue(params, "client_id");
 
 			if (clientIDString != null && ! clientIDString.trim().isEmpty())
 				clientID = new ClientID(clientIDString);
@@ -460,7 +461,7 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 		}
 
 		// Parse optional scope
-		String scopeValue = params.get("scope");
+		String scopeValue = URLUtils.getFirstValue(params, "scope");
 
 		Scope scope = null;
 
@@ -469,9 +470,9 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 		}
 
 		// Parse custom parameters
-		Map<String,String> customParams = new HashMap<>();
+		Map<String,List<String>> customParams = new HashMap<>();
 
-		for (Map.Entry<String,String> p: params.entrySet()) {
+		for (Map.Entry<String,List<String>> p: params.entrySet()) {
 
 			if (p.getKey().equalsIgnoreCase("grant_type")) {
 				continue; // skip

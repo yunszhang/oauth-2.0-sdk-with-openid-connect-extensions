@@ -20,10 +20,7 @@ package com.nimbusds.openid.connect.sdk;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.nimbusds.oauth2.sdk.AuthorizationErrorResponse;
 import com.nimbusds.oauth2.sdk.ErrorObject;
@@ -183,7 +180,7 @@ public class AuthenticationErrorResponse
 	 *                        OpenID Connect authentication error response.
 	 */
 	public static AuthenticationErrorResponse parse(final URI redirectURI,
-							final Map<String,String> params)
+							final Map<String,List<String>> params)
 		throws ParseException {
 
 		AuthorizationErrorResponse resp = AuthorizationErrorResponse.parse(redirectURI, params);

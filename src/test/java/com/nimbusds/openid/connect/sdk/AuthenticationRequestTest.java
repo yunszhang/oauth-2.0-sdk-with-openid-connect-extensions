@@ -122,13 +122,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(scopeOut.contains(OIDCScopeValue.EMAIL));
 		assertTrue(scopeOut.contains(OIDCScopeValue.PROFILE));
 		assertEquals(3, scopeOut.size());
-
-		assertTrue(new ClientID("123456789").equals(request.getClientID()));
-
-		assertTrue(new URI("http://www.deezer.com/en/").equals(request.getRedirectionURI()));
-
-		assertTrue(new State("abc").equals(request.getState()));
-		assertTrue(new Nonce("xyz").equals(request.getNonce()));
+		
+		assertEquals(new ClientID("123456789"), request.getClientID());
+		
+		assertEquals(new URI("http://www.deezer.com/en/"), request.getRedirectionURI());
+		
+		assertEquals(new State("abc"), request.getState());
+		assertEquals(new Nonce("xyz"), request.getNonce());
 
 		assertNull(request.getResponseMode());
 		assertNull(request.getDisplay());
@@ -165,13 +165,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(scopeOut.contains(OIDCScopeValue.EMAIL));
 		assertTrue(scopeOut.contains(OIDCScopeValue.PROFILE));
 		assertEquals(3, scopeOut.size());
-
-		assertTrue(new ClientID("123456789").equals(request.getClientID()));
-
-		assertTrue(new URI("http://www.deezer.com/en/").equals(request.getRedirectionURI()));
-
-		assertTrue(new State("abc").equals(request.getState()));
-		assertTrue(new Nonce("xyz").equals(request.getNonce()));
+		
+		assertEquals(new ClientID("123456789"), request.getClientID());
+		
+		assertEquals(new URI("http://www.deezer.com/en/"), request.getRedirectionURI());
+		
+		assertEquals(new State("abc"), request.getState());
+		assertEquals(new Nonce("xyz"), request.getNonce());
 
 		assertNull(request.getResponseMode());
 		assertNull(request.getDisplay());
@@ -233,13 +233,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(scopeOut.contains(OIDCScopeValue.EMAIL));
 		assertTrue(scopeOut.contains(OIDCScopeValue.PROFILE));
 		assertEquals(3, scopeOut.size());
-
-		assertTrue(new ClientID("123456789").equals(request.getClientID()));
-
-		assertTrue(new URI("http://www.deezer.com/en/").equals(request.getRedirectionURI()));
-
-		assertTrue(new State("abc").equals(request.getState()));
-		assertTrue(new Nonce("xyz").equals(request.getNonce()));
+		
+		assertEquals(new ClientID("123456789"), request.getClientID());
+		
+		assertEquals(new URI("http://www.deezer.com/en/"), request.getRedirectionURI());
+		
+		assertEquals(new State("abc"), request.getState());
+		assertEquals(new Nonce("xyz"), request.getNonce());
 
 		assertEquals(-1, request.getMaxAge());
 
@@ -322,13 +322,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(scopeOut.contains(OIDCScopeValue.EMAIL));
 		assertTrue(scopeOut.contains(OIDCScopeValue.PROFILE));
 		assertEquals(3, scopeOut.size());
-
-		assertTrue(new ClientID("123456789").equals(request.getClientID()));
-
-		assertTrue(new URI("http://www.deezer.com/en/").equals(request.getRedirectionURI()));
-
-		assertTrue(new State("abc").equals(request.getState()));
-		assertTrue(new Nonce("xyz").equals(request.getNonce()));
+		
+		assertEquals(new ClientID("123456789"), request.getClientID());
+		
+		assertEquals(new URI("http://www.deezer.com/en/"), request.getRedirectionURI());
+		
+		assertEquals(new State("abc"), request.getState());
+		assertEquals(new Nonce("xyz"), request.getNonce());
 
 		// Check extended parameters
 
@@ -345,13 +345,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(3600, request.getMaxAge());
 
 		uiLocales = request.getUILocales();
-		assertTrue("UI locale en-US", uiLocales.get(0).equals(LangTag.parse("en-US")));
-		assertTrue("UI locale en-GB", uiLocales.get(1).equals(LangTag.parse("en-GB")));
+		assertEquals("UI locale en-US", uiLocales.get(0), LangTag.parse("en-US"));
+		assertEquals("UI locale en-GB", uiLocales.get(1), LangTag.parse("en-GB"));
 		assertEquals("UI locales size", 2, uiLocales.size());
 
 		claimsLocales = request.getClaimsLocales();
-		assertTrue("Claims locale en-US", claimsLocales.get(0).equals(LangTag.parse("en-US")));
-		assertTrue("Claims locale en-US", claimsLocales.get(1).equals(LangTag.parse("en-GB")));
+		assertEquals("Claims locale en-US", claimsLocales.get(0), LangTag.parse("en-US"));
+		assertEquals("Claims locale en-US", claimsLocales.get(1), LangTag.parse("en-GB"));
 		assertEquals("Claims locales size", 2, claimsLocales.size());
 
 		assertEquals(EXAMPLE_JWT_STRING, request.getIDTokenHint().getParsedString());
@@ -391,13 +391,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(scopeOut.contains(OIDCScopeValue.EMAIL));
 		assertTrue(scopeOut.contains(OIDCScopeValue.PROFILE));
 		assertEquals(3, scopeOut.size());
-
-		assertTrue(new ClientID("123456789").equals(request.getClientID()));
-
-		assertTrue(new URI("http://www.deezer.com/en/").equals(request.getRedirectionURI()));
-
-		assertTrue(new State("abc").equals(request.getState()));
-		assertTrue(new Nonce("xyz").equals(request.getNonce()));
+		
+		assertEquals(new ClientID("123456789"), request.getClientID());
+		
+		assertEquals(new URI("http://www.deezer.com/en/"), request.getRedirectionURI());
+		
+		assertEquals(new State("abc"), request.getState());
+		assertEquals(new Nonce("xyz"), request.getNonce());
 
 		// Check extended parameters
 
@@ -414,13 +414,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(3600, request.getMaxAge());
 
 		uiLocales = request.getUILocales();
-		assertTrue("UI locale en-US", uiLocales.get(0).equals(LangTag.parse("en-US")));
-		assertTrue("UI locale en-GB", uiLocales.get(1).equals(LangTag.parse("en-GB")));
+		assertEquals("UI locale en-US", uiLocales.get(0), LangTag.parse("en-US"));
+		assertEquals("UI locale en-GB", uiLocales.get(1), LangTag.parse("en-GB"));
 		assertEquals("UI locales size", 2, uiLocales.size());
 
 		claimsLocales = request.getClaimsLocales();
-		assertTrue("Claims locale en-US", claimsLocales.get(0).equals(LangTag.parse("en-US")));
-		assertTrue("Claims locale en-US", claimsLocales.get(1).equals(LangTag.parse("en-GB")));
+		assertEquals("Claims locale en-US", claimsLocales.get(0), LangTag.parse("en-US"));
+		assertEquals("Claims locale en-US", claimsLocales.get(1), LangTag.parse("en-GB"));
 		assertEquals("Claims locales size", 2, claimsLocales.size());
 
 		assertEquals(EXAMPLE_JWT_STRING, request.getIDTokenHint().getParsedString());
@@ -434,7 +434,7 @@ public class AuthenticationRequestTest extends TestCase {
 
 		claimsOut = request.getClaims();
 
-		System.out.println("OIDC login request claims: " + claimsOut.toJSONObject().toString());
+//		System.out.println("OIDC login request claims: " + claimsOut.toJSONObject().toString());
 
 		assertEquals(2, claimsOut.getUserInfoClaims().size());
 
@@ -498,10 +498,10 @@ public class AuthenticationRequestTest extends TestCase {
 		CodeChallengeMethod codeChallengeMethod = CodeChallengeMethod.S256;
 		CodeChallenge codeChallenge = CodeChallenge.compute(codeChallengeMethod, codeVerifier);
 
-		Map<String,String> customParams = new HashMap<>();
-		customParams.put("x", "100");
-		customParams.put("y", "200");
-		customParams.put("z", "300");
+		Map<String,List<String>> customParams = new HashMap<>();
+		customParams.put("x", Collections.singletonList("100"));
+		customParams.put("y", Collections.singletonList("200"));
+		customParams.put("z", Collections.singletonList("300"));
 
 		AuthenticationRequest request = new AuthenticationRequest(
 			uri, rts, rm, scope, clientID, redirectURI, state, nonce,
@@ -521,13 +521,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(scopeOut.contains(OIDCScopeValue.EMAIL));
 		assertTrue(scopeOut.contains(OIDCScopeValue.PROFILE));
 		assertEquals(3, scopeOut.size());
-
-		assertTrue(new ClientID("123456789").equals(request.getClientID()));
-
-		assertTrue(new URI("http://www.deezer.com/en/").equals(request.getRedirectionURI()));
-
-		assertTrue(new State("abc").equals(request.getState()));
-		assertTrue(new Nonce("xyz").equals(request.getNonce()));
+		
+		assertEquals(new ClientID("123456789"), request.getClientID());
+		
+		assertEquals(new URI("http://www.deezer.com/en/"), request.getRedirectionURI());
+		
+		assertEquals(new State("abc"), request.getState());
+		assertEquals(new Nonce("xyz"), request.getNonce());
 
 		// Check extended parameters
 
@@ -544,13 +544,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(3600, request.getMaxAge());
 
 		uiLocales = request.getUILocales();
-		assertTrue("UI locale en-US", uiLocales.get(0).equals(LangTag.parse("en-US")));
-		assertTrue("UI locale en-GB", uiLocales.get(1).equals(LangTag.parse("en-GB")));
+		assertEquals("UI locale en-US", uiLocales.get(0), LangTag.parse("en-US"));
+		assertEquals("UI locale en-GB", uiLocales.get(1), LangTag.parse("en-GB"));
 		assertEquals("UI locales size", 2, uiLocales.size());
 
 		claimsLocales = request.getClaimsLocales();
-		assertTrue("Claims locale en-US", claimsLocales.get(0).equals(LangTag.parse("en-US")));
-		assertTrue("Claims locale en-US", claimsLocales.get(1).equals(LangTag.parse("en-GB")));
+		assertEquals("Claims locale en-US", claimsLocales.get(0), LangTag.parse("en-US"));
+		assertEquals("Claims locale en-US", claimsLocales.get(1), LangTag.parse("en-GB"));
 		assertEquals("Claims locales size", 2, claimsLocales.size());
 
 		assertEquals(EXAMPLE_JWT_STRING, request.getIDTokenHint().getParsedString());
@@ -564,16 +564,16 @@ public class AuthenticationRequestTest extends TestCase {
 
 		ClaimsRequest claimsOut = request.getClaims();
 
-		System.out.println("OIDC login request claims: " + claimsOut.toJSONObject().toString());
+//		System.out.println("OIDC login request claims: " + claimsOut.toJSONObject().toString());
 
 		assertEquals(2, claimsOut.getUserInfoClaims().size());
 
 		assertEquals(codeChallenge, request.getCodeChallenge());
 		assertEquals(codeChallengeMethod, request.getCodeChallengeMethod());
 
-		assertEquals("100", request.getCustomParameter("x"));
-		assertEquals("200", request.getCustomParameter("y"));
-		assertEquals("300", request.getCustomParameter("z"));
+		assertEquals(Collections.singletonList("100"), request.getCustomParameter("x"));
+		assertEquals(Collections.singletonList("200"), request.getCustomParameter("y"));
+		assertEquals(Collections.singletonList("300"), request.getCustomParameter("z"));
 		assertEquals(3, request.getCustomParameters().size());
 
 		// Check the resulting query string
@@ -594,13 +594,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(scopeOut.contains(OIDCScopeValue.EMAIL));
 		assertTrue(scopeOut.contains(OIDCScopeValue.PROFILE));
 		assertEquals(3, scopeOut.size());
-
-		assertTrue(new ClientID("123456789").equals(request.getClientID()));
-
-		assertTrue(new URI("http://www.deezer.com/en/").equals(request.getRedirectionURI()));
-
-		assertTrue(new State("abc").equals(request.getState()));
-		assertTrue(new Nonce("xyz").equals(request.getNonce()));
+		
+		assertEquals(new ClientID("123456789"), request.getClientID());
+		
+		assertEquals(new URI("http://www.deezer.com/en/"), request.getRedirectionURI());
+		
+		assertEquals(new State("abc"), request.getState());
+		assertEquals(new Nonce("xyz"), request.getNonce());
 
 		// Check extended parameters
 
@@ -617,13 +617,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(3600, request.getMaxAge());
 
 		uiLocales = request.getUILocales();
-		assertTrue("UI locale en-US", uiLocales.get(0).equals(LangTag.parse("en-US")));
-		assertTrue("UI locale en-GB", uiLocales.get(1).equals(LangTag.parse("en-GB")));
+		assertEquals("UI locale en-US", uiLocales.get(0), LangTag.parse("en-US"));
+		assertEquals("UI locale en-GB", uiLocales.get(1), LangTag.parse("en-GB"));
 		assertEquals("UI locales size", 2, uiLocales.size());
 
 		claimsLocales = request.getClaimsLocales();
-		assertTrue("Claims locale en-US", claimsLocales.get(0).equals(LangTag.parse("en-US")));
-		assertTrue("Claims locale en-US", claimsLocales.get(1).equals(LangTag.parse("en-GB")));
+		assertEquals("Claims locale en-US", claimsLocales.get(0), LangTag.parse("en-US"));
+		assertEquals("Claims locale en-US", claimsLocales.get(1), LangTag.parse("en-GB"));
 		assertEquals("Claims locales size", 2, claimsLocales.size());
 
 		assertEquals(EXAMPLE_JWT_STRING, request.getIDTokenHint().getParsedString());
@@ -637,16 +637,16 @@ public class AuthenticationRequestTest extends TestCase {
 
 		claimsOut = request.getClaims();
 
-		System.out.println("OIDC login request claims: " + claimsOut.toJSONObject().toString());
+//		System.out.println("OIDC login request claims: " + claimsOut.toJSONObject().toString());
 
 		assertEquals(2, claimsOut.getUserInfoClaims().size());
 
 		assertEquals(codeChallenge, request.getCodeChallenge());
 		assertEquals(codeChallengeMethod, request.getCodeChallengeMethod());
 
-		assertEquals("100", request.getCustomParameter("x"));
-		assertEquals("200", request.getCustomParameter("y"));
-		assertEquals("300", request.getCustomParameter("z"));
+		assertEquals(Collections.singletonList("100"), request.getCustomParameter("x"));
+		assertEquals(Collections.singletonList("200"), request.getCustomParameter("y"));
+		assertEquals(Collections.singletonList("300"), request.getCustomParameter("z"));
 		assertEquals(3, request.getCustomParameters().size());
 	}
 
@@ -719,13 +719,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(scopeOut.contains(OIDCScopeValue.EMAIL));
 		assertTrue(scopeOut.contains(OIDCScopeValue.PROFILE));
 		assertEquals(3, scopeOut.size());
-
-		assertTrue(new ClientID("123456789").equals(request.getClientID()));
-
-		assertTrue(new URI("http://www.deezer.com/en/").equals(request.getRedirectionURI()));
-
-		assertTrue(new State("abc").equals(request.getState()));
-		assertTrue(new Nonce("xyz").equals(request.getNonce()));
+		
+		assertEquals(new ClientID("123456789"), request.getClientID());
+		
+		assertEquals(new URI("http://www.deezer.com/en/"), request.getRedirectionURI());
+		
+		assertEquals(new State("abc"), request.getState());
+		assertEquals(new Nonce("xyz"), request.getNonce());
 
 		// Check extended parameters
 
@@ -741,13 +741,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(3600, request.getMaxAge());
 
 		uiLocales = request.getUILocales();
-		assertTrue("UI locale en-US", uiLocales.get(0).equals(LangTag.parse("en-US")));
-		assertTrue("UI locale en-GB", uiLocales.get(1).equals(LangTag.parse("en-GB")));
+		assertEquals("UI locale en-US", uiLocales.get(0), LangTag.parse("en-US"));
+		assertEquals("UI locale en-GB", uiLocales.get(1), LangTag.parse("en-GB"));
 		assertEquals("UI locales size", 2, uiLocales.size());
 
 		claimsLocales = request.getClaimsLocales();
-		assertTrue("Claims locale en-US", claimsLocales.get(0).equals(LangTag.parse("en-US")));
-		assertTrue("Claims locale en-US", claimsLocales.get(1).equals(LangTag.parse("en-GB")));
+		assertEquals("Claims locale en-US", claimsLocales.get(0), LangTag.parse("en-US"));
+		assertEquals("Claims locale en-US", claimsLocales.get(1), LangTag.parse("en-GB"));
 		assertEquals("Claims locales size", 2, claimsLocales.size());
 
 		assertEquals(EXAMPLE_JWT_STRING, request.getIDTokenHint().getParsedString());
@@ -761,7 +761,7 @@ public class AuthenticationRequestTest extends TestCase {
 
 		ClaimsRequest claimsOut = request.getClaims();
 
-		System.out.println("OIDC login request claims: " + claimsOut.toJSONObject().toString());
+//		System.out.println("OIDC login request claims: " + claimsOut.toJSONObject().toString());
 
 		assertEquals(2, claimsOut.getUserInfoClaims().size());
 
@@ -771,7 +771,7 @@ public class AuthenticationRequestTest extends TestCase {
 		// Check the resulting query string
 		String queryString = request.toQueryString();
 
-		System.out.println("OIDC login query string: " + queryString);
+//		System.out.println("OIDC login query string: " + queryString);
 
 
 		request = AuthenticationRequest.parse(uri, queryString);
@@ -787,13 +787,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(scopeOut.contains(OIDCScopeValue.EMAIL));
 		assertTrue(scopeOut.contains(OIDCScopeValue.PROFILE));
 		assertEquals(3, scopeOut.size());
-
-		assertTrue(new ClientID("123456789").equals(request.getClientID()));
-
-		assertTrue(new URI("http://www.deezer.com/en/").equals(request.getRedirectionURI()));
-
-		assertTrue(new State("abc").equals(request.getState()));
-		assertTrue(new Nonce("xyz").equals(request.getNonce()));
+		
+		assertEquals(new ClientID("123456789"), request.getClientID());
+		
+		assertEquals(new URI("http://www.deezer.com/en/"), request.getRedirectionURI());
+		
+		assertEquals(new State("abc"), request.getState());
+		assertEquals(new Nonce("xyz"), request.getNonce());
 
 		// Check extended parameters
 
@@ -809,13 +809,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(3600, request.getMaxAge());
 
 		uiLocales = request.getUILocales();
-		assertTrue("UI locale en-US", uiLocales.get(0).equals(LangTag.parse("en-US")));
-		assertTrue("UI locale en-GB", uiLocales.get(1).equals(LangTag.parse("en-GB")));
+		assertEquals("UI locale en-US", uiLocales.get(0), LangTag.parse("en-US"));
+		assertEquals("UI locale en-GB", uiLocales.get(1), LangTag.parse("en-GB"));
 		assertEquals("UI locales size", 2, uiLocales.size());
 
 		claimsLocales = request.getClaimsLocales();
-		assertTrue("Claims locale en-US", claimsLocales.get(0).equals(LangTag.parse("en-US")));
-		assertTrue("Claims locale en-US", claimsLocales.get(1).equals(LangTag.parse("en-GB")));
+		assertEquals("Claims locale en-US", claimsLocales.get(0), LangTag.parse("en-US"));
+		assertEquals("Claims locale en-US", claimsLocales.get(1), LangTag.parse("en-GB"));
 		assertEquals("Claims locales size", 2, claimsLocales.size());
 
 		assertEquals(EXAMPLE_JWT_STRING, request.getIDTokenHint().getParsedString());
@@ -905,13 +905,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(scopeOut.contains(OIDCScopeValue.EMAIL));
 		assertTrue(scopeOut.contains(OIDCScopeValue.PROFILE));
 		assertEquals(3, scopeOut.size());
-
-		assertTrue(new ClientID("123456789").equals(request.getClientID()));
-
-		assertTrue(new URI("http://www.deezer.com/en/").equals(request.getRedirectionURI()));
-
-		assertTrue(new State("abc").equals(request.getState()));
-		assertTrue(new Nonce("xyz").equals(request.getNonce()));
+		
+		assertEquals(new ClientID("123456789"), request.getClientID());
+		
+		assertEquals(new URI("http://www.deezer.com/en/"), request.getRedirectionURI());
+		
+		assertEquals(new State("abc"), request.getState());
+		assertEquals(new Nonce("xyz"), request.getNonce());
 
 		// Check extended parameters
 
@@ -927,13 +927,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(3600, request.getMaxAge());
 
 		uiLocales = request.getUILocales();
-		assertTrue("UI locale en-US", uiLocales.get(0).equals(LangTag.parse("en-US")));
-		assertTrue("UI locale en-GB", uiLocales.get(1).equals(LangTag.parse("en-GB")));
+		assertEquals("UI locale en-US", uiLocales.get(0), LangTag.parse("en-US"));
+		assertEquals("UI locale en-GB", uiLocales.get(1), LangTag.parse("en-GB"));
 		assertEquals("UI locales size", 2, uiLocales.size());
 
 		claimsLocales = request.getClaimsLocales();
-		assertTrue("Claims locale en-US", claimsLocales.get(0).equals(LangTag.parse("en-US")));
-		assertTrue("Claims locale en-US", claimsLocales.get(1).equals(LangTag.parse("en-GB")));
+		assertEquals("Claims locale en-US", claimsLocales.get(0), LangTag.parse("en-US"));
+		assertEquals("Claims locale en-US", claimsLocales.get(1), LangTag.parse("en-GB"));
 		assertEquals("Claims locales size", 2, claimsLocales.size());
 
 		assertEquals(EXAMPLE_JWT_STRING, request.getIDTokenHint().getParsedString());
@@ -973,13 +973,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(scopeOut.contains(OIDCScopeValue.EMAIL));
 		assertTrue(scopeOut.contains(OIDCScopeValue.PROFILE));
 		assertEquals(3, scopeOut.size());
-
-		assertTrue(new ClientID("123456789").equals(request.getClientID()));
-
-		assertTrue(new URI("http://www.deezer.com/en/").equals(request.getRedirectionURI()));
-
-		assertTrue(new State("abc").equals(request.getState()));
-		assertTrue(new Nonce("xyz").equals(request.getNonce()));
+		
+		assertEquals(new ClientID("123456789"), request.getClientID());
+		
+		assertEquals(new URI("http://www.deezer.com/en/"), request.getRedirectionURI());
+		
+		assertEquals(new State("abc"), request.getState());
+		assertEquals(new Nonce("xyz"), request.getNonce());
 
 		// Check extended parameters
 
@@ -995,13 +995,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(3600, request.getMaxAge());
 
 		uiLocales = request.getUILocales();
-		assertTrue("UI locale en-US", uiLocales.get(0).equals(LangTag.parse("en-US")));
-		assertTrue("UI locale en-GB", uiLocales.get(1).equals(LangTag.parse("en-GB")));
+		assertEquals("UI locale en-US", uiLocales.get(0), LangTag.parse("en-US"));
+		assertEquals("UI locale en-GB", uiLocales.get(1), LangTag.parse("en-GB"));
 		assertEquals("UI locales size", 2, uiLocales.size());
 
 		claimsLocales = request.getClaimsLocales();
-		assertTrue("Claims locale en-US", claimsLocales.get(0).equals(LangTag.parse("en-US")));
-		assertTrue("Claims locale en-US", claimsLocales.get(1).equals(LangTag.parse("en-GB")));
+		assertEquals("Claims locale en-US", claimsLocales.get(0), LangTag.parse("en-US"));
+		assertEquals("Claims locale en-US", claimsLocales.get(1), LangTag.parse("en-GB"));
 		assertEquals("Claims locales size", 2, claimsLocales.size());
 
 		assertEquals(EXAMPLE_JWT_STRING, request.getIDTokenHint().getParsedString());
@@ -1031,11 +1031,11 @@ public class AuthenticationRequestTest extends TestCase {
 			new Scope("openid", "email"),
 			new ClientID("123"),
 			new URI("https://client.com/cb")).build();
-
-		assertTrue(new ResponseType("code").equals(request.getResponseType()));
-		assertTrue(new Scope("openid", "email").equals(request.getScope()));
-		assertTrue(new ClientID("123").equals(request.getClientID()));
-		assertTrue(new URI("https://client.com/cb").equals(request.getRedirectionURI()));
+		
+		assertEquals(new ResponseType("code"), request.getResponseType());
+		assertEquals(new Scope("openid", "email"), request.getScope());
+		assertEquals(new ClientID("123"), request.getClientID());
+		assertEquals(new URI("https://client.com/cb"), request.getRedirectionURI());
 		assertNull(request.getState());
 		assertNull(request.getNonce());
 		assertNull(request.getResponseMode());
@@ -1093,31 +1093,31 @@ public class AuthenticationRequestTest extends TestCase {
 			.customParameter("z", "300")
 			.endpointURI(new URI("https://c2id.com/login"))
 			.build();
-
-		assertTrue(new ResponseType("code", "id_token").equals(request.getResponseType()));
+		
+		assertEquals(new ResponseType("code", "id_token"), request.getResponseType());
 		assertEquals(ResponseMode.FORM_POST, request.getResponseMode());
 		assertEquals(ResponseMode.FORM_POST, request.impliedResponseMode());
-		assertTrue(new Scope("openid", "email").equals(request.getScope()));
-		assertTrue(new ClientID("123").equals(request.getClientID()));
-		assertTrue(new URI("https://client.com/cb").equals(request.getRedirectionURI()));
-		assertTrue(new State("abc").equals(request.getState()));
-		assertTrue(new Nonce("def").equals(request.getNonce()));
-		assertTrue(Display.POPUP.equals(request.getDisplay()));
-		assertTrue(new Prompt(Prompt.Type.NONE).equals(request.getPrompt()));
+		assertEquals(new Scope("openid", "email"), request.getScope());
+		assertEquals(new ClientID("123"), request.getClientID());
+		assertEquals(new URI("https://client.com/cb"), request.getRedirectionURI());
+		assertEquals(new State("abc"), request.getState());
+		assertEquals(new Nonce("def"), request.getNonce());
+		assertEquals(Display.POPUP, request.getDisplay());
+		assertEquals(new Prompt(Prompt.Type.NONE), request.getPrompt());
 		assertEquals(3600, request.getMaxAge());
-		assertTrue(Arrays.asList(LangTag.parse("en-GB"), LangTag.parse("en-US")).equals(request.getUILocales()));
-		assertTrue(Arrays.asList(LangTag.parse("bg-BG"), LangTag.parse("fr-FR")).equals(request.getClaimsLocales()));
+		assertEquals(Arrays.asList(LangTag.parse("en-GB"), LangTag.parse("en-US")), request.getUILocales());
+		assertEquals(Arrays.asList(LangTag.parse("bg-BG"), LangTag.parse("fr-FR")), request.getClaimsLocales());
 		assertEquals(EXAMPLE_JWT_STRING, request.getIDTokenHint().getParsedString());
 		assertEquals("alice@wonderland.net", request.getLoginHint());
 		assertEquals(acrValues, request.getACRValues());
 		assertEquals(claims, request.getClaims());
 		assertEquals(CodeChallenge.compute(CodeChallengeMethod.S256, codeVerifier), request.getCodeChallenge());
 		assertEquals(CodeChallengeMethod.S256, request.getCodeChallengeMethod());
-		assertEquals("100", request.getCustomParameter("x"));
-		assertEquals("200", request.getCustomParameter("y"));
-		assertEquals("300", request.getCustomParameter("z"));
+		assertEquals(Collections.singletonList("100"), request.getCustomParameter("x"));
+		assertEquals(Collections.singletonList("200"), request.getCustomParameter("y"));
+		assertEquals(Collections.singletonList("300"), request.getCustomParameter("z"));
 		assertEquals(3, request.getCustomParameters().size());
-		assertTrue(new URI("https://c2id.com/login").equals(request.getEndpointURI()));
+		assertEquals(new URI("https://c2id.com/login"), request.getEndpointURI());
 	}
 
 
@@ -1132,13 +1132,13 @@ public class AuthenticationRequestTest extends TestCase {
 			nonce(new Nonce("xyz")).
 			requestObject(JWTParser.parse(EXAMPLE_JWT_STRING)).
 			build();
-
-		assertTrue(new ResponseType("code", "id_token").equals(request.getResponseType()));
+		
+		assertEquals(new ResponseType("code", "id_token"), request.getResponseType());
 		assertEquals(ResponseMode.FRAGMENT, request.impliedResponseMode());
-		assertTrue(new Scope("openid", "email").equals(request.getScope()));
-		assertTrue(new ClientID("123").equals(request.getClientID()));
-		assertTrue(new URI("https://client.com/cb").equals(request.getRedirectionURI()));
-		assertTrue(new Nonce("xyz").equals(request.getNonce()));
+		assertEquals(new Scope("openid", "email"), request.getScope());
+		assertEquals(new ClientID("123"), request.getClientID());
+		assertEquals(new URI("https://client.com/cb"), request.getRedirectionURI());
+		assertEquals(new Nonce("xyz"), request.getNonce());
 		assertEquals(EXAMPLE_JWT_STRING, request.getRequestObject().getParsedString());
 		assertEquals(-1, request.getMaxAge());
 	}
@@ -1155,14 +1155,14 @@ public class AuthenticationRequestTest extends TestCase {
 			requestURI(new URI("https://client.com/request#123")).
 			nonce(new Nonce("xyz")).
 			build();
-
-		assertTrue(new ResponseType("code", "id_token").equals(request.getResponseType()));
+		
+		assertEquals(new ResponseType("code", "id_token"), request.getResponseType());
 		assertEquals(ResponseMode.FRAGMENT, request.impliedResponseMode());
-		assertTrue(new Scope("openid", "email").equals(request.getScope()));
-		assertTrue(new ClientID("123").equals(request.getClientID()));
-		assertTrue(new URI("https://client.com/cb").equals(request.getRedirectionURI()));
-		assertTrue(new Nonce("xyz").equals(request.getNonce()));
-		assertTrue(new URI("https://client.com/request#123").equals(request.getRequestURI()));
+		assertEquals(new Scope("openid", "email"), request.getScope());
+		assertEquals(new ClientID("123"), request.getClientID());
+		assertEquals(new URI("https://client.com/cb"), request.getRedirectionURI());
+		assertEquals(new Nonce("xyz"), request.getNonce());
+		assertEquals(new URI("https://client.com/request#123"), request.getRequestURI());
 		assertEquals(-1, request.getMaxAge());
 	}
 
@@ -1363,15 +1363,15 @@ public class AuthenticationRequestTest extends TestCase {
 			"&scope=openid";
 
 		AuthenticationRequest request = AuthenticationRequest.parse(query);
-
-		assertTrue(request.getResponseType().equals(new ResponseType("code", "id_token")));
+		
+		assertEquals(request.getResponseType(), new ResponseType("code", "id_token"));
 		assertNull(request.getResponseMode());
 		assertEquals(ResponseMode.FRAGMENT, request.impliedResponseMode());
-		assertTrue(request.getClientID().equals(new ClientID("s6BhdRkqt3")));
-		assertTrue(request.getRequestURI().equals(new URI("https://client.example.org/request.jwt#GkurKxf5T0Y-mnPFCHqWOMiZi4VS138cQO_V7PZHAdM")));
-		assertTrue(request.getState().equals(new State("af0ifjsldkj")));
-		assertTrue(request.getNonce().equals(new Nonce("n-0S6_WzA2Mj")));
-		assertTrue(request.getScope().equals(Scope.parse("openid")));
+		assertEquals(request.getClientID(), new ClientID("s6BhdRkqt3"));
+		assertEquals(request.getRequestURI(), new URI("https://client.example.org/request.jwt#GkurKxf5T0Y-mnPFCHqWOMiZi4VS138cQO_V7PZHAdM"));
+		assertEquals(request.getState(), new State("af0ifjsldkj"));
+		assertEquals(request.getNonce(), new Nonce("n-0S6_WzA2Mj"));
+		assertEquals(request.getScope(), Scope.parse("openid"));
 		assertEquals(-1, request.getMaxAge());
 	}
 
@@ -1388,15 +1388,15 @@ public class AuthenticationRequestTest extends TestCase {
 			.nonce(new Nonce("n-0S6_WzA2Mj"))
 			.requestURI(new URI("https://client.example.org/request.jwt#GkurKxf5T0Y-mnPFCHqWOMiZi4VS138cQO_V7PZHAdM"))
 			.build();
-
-		assertTrue(request.getResponseType().equals(new ResponseType("code", "id_token")));
+		
+		assertEquals(request.getResponseType(), new ResponseType("code", "id_token"));
 		assertNull(request.getResponseMode());
 		assertEquals(ResponseMode.FRAGMENT, request.impliedResponseMode());
-		assertTrue(request.getClientID().equals(new ClientID("s6BhdRkqt3")));
-		assertTrue(request.getRequestURI().equals(new URI("https://client.example.org/request.jwt#GkurKxf5T0Y-mnPFCHqWOMiZi4VS138cQO_V7PZHAdM")));
-		assertTrue(request.getState().equals(new State("af0ifjsldkj")));
-		assertTrue(request.getNonce().equals(new Nonce("n-0S6_WzA2Mj")));
-		assertTrue(request.getScope().equals(Scope.parse("openid")));
+		assertEquals(request.getClientID(), new ClientID("s6BhdRkqt3"));
+		assertEquals(request.getRequestURI(), new URI("https://client.example.org/request.jwt#GkurKxf5T0Y-mnPFCHqWOMiZi4VS138cQO_V7PZHAdM"));
+		assertEquals(request.getState(), new State("af0ifjsldkj"));
+		assertEquals(request.getNonce(), new Nonce("n-0S6_WzA2Mj"));
+		assertEquals(request.getScope(), Scope.parse("openid"));
 	}
 
 
@@ -1553,8 +1553,8 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(r.getClaims().getIDTokenClaimNames(false).contains("given_name"));
 		assertEquals(2, r.getClaims().getIDTokenClaimNames(false).size());
 		assertEquals(URI.create("https://example.com:9090/example/implicitFlow"), r.getRedirectionURI());
-		assertEquals("MS-GLOBAL01", r.getCustomParameter("context")); // custom
-		assertEquals("zh", r.getCustomParameter("language")); // custom
+		assertEquals(Collections.singletonList("MS-GLOBAL01"), r.getCustomParameter("context")); // custom
+		assertEquals(Collections.singletonList("zh"), r.getCustomParameter("language")); // custom
 	}
 	
 	
@@ -1626,8 +1626,8 @@ public class AuthenticationRequestTest extends TestCase {
 			.codeChallenge((CodeVerifier) null, null)
 			.build();
 		
-		assertTrue(new ResponseType("code").equals(request.getResponseType()));
-		assertTrue(new ClientID("123").equals(request.getClientID()));
+		assertEquals(new ResponseType("code"), request.getResponseType());
+		assertEquals(new ClientID("123"), request.getClientID());
 		assertNull(request.getEndpointURI());
 		assertEquals(URI.create("https://example.com/cb"), request.getRedirectionURI());
 		assertNull(request.getResponseMode());
@@ -1650,8 +1650,8 @@ public class AuthenticationRequestTest extends TestCase {
 			.codeChallenge((CodeChallenge) null, null)
 			.build();
 		
-		assertTrue(new ResponseType("code").equals(request.getResponseType()));
-		assertTrue(new ClientID("123").equals(request.getClientID()));
+		assertEquals(new ResponseType("code"), request.getResponseType());
+		assertEquals(new ClientID("123"), request.getClientID());
 		assertNull(request.getEndpointURI());
 		assertEquals(URI.create("https://example.com/cb"), request.getRedirectionURI());
 		assertNull(request.getResponseMode());
@@ -1676,8 +1676,8 @@ public class AuthenticationRequestTest extends TestCase {
 			.codeChallenge(pkceVerifier, null)
 			.build();
 		
-		assertTrue(new ResponseType("code").equals(request.getResponseType()));
-		assertTrue(new ClientID("123").equals(request.getClientID()));
+		assertEquals(new ResponseType("code"), request.getResponseType());
+		assertEquals(new ClientID("123"), request.getClientID());
 		assertNull(request.getEndpointURI());
 		assertEquals(URI.create("https://example.com/cb"), request.getRedirectionURI());
 		assertNull(request.getResponseMode());
@@ -1702,8 +1702,8 @@ public class AuthenticationRequestTest extends TestCase {
 			.codeChallenge(pkceVerifier, CodeChallengeMethod.PLAIN)
 			.build();
 		
-		assertTrue(new ResponseType("code").equals(request.getResponseType()));
-		assertTrue(new ClientID("123").equals(request.getClientID()));
+		assertEquals(new ResponseType("code"), request.getResponseType());
+		assertEquals(new ClientID("123"), request.getClientID());
 		assertNull(request.getEndpointURI());
 		assertEquals(URI.create("https://example.com/cb"), request.getRedirectionURI());
 		assertNull(request.getResponseMode());
@@ -1728,8 +1728,8 @@ public class AuthenticationRequestTest extends TestCase {
 			.codeChallenge(pkceVerifier, CodeChallengeMethod.S256)
 			.build();
 		
-		assertTrue(new ResponseType("code").equals(request.getResponseType()));
-		assertTrue(new ClientID("123").equals(request.getClientID()));
+		assertEquals(new ResponseType("code"), request.getResponseType());
+		assertEquals(new ClientID("123"), request.getClientID());
 		assertNull(request.getEndpointURI());
 		assertEquals(URI.create("https://example.com/cb"), request.getRedirectionURI());
 		assertNull(request.getResponseMode());
@@ -1868,29 +1868,29 @@ public class AuthenticationRequestTest extends TestCase {
 			.build();
 		
 		// query parameters belonging to the authz endpoint not included here
-		Map<String, String> requestParameters = request.toParameters();
-		assertEquals("code", requestParameters.get("response_type"));
-		assertEquals("123", requestParameters.get("client_id"));
-		assertEquals("openid", requestParameters.get("scope"));
-		assertEquals("https://example.com/cb", requestParameters.get("redirect_uri"));
+		Map<String,List<String>> requestParameters = request.toParameters();
+		assertEquals(Collections.singletonList("code"), requestParameters.get("response_type"));
+		assertEquals(Collections.singletonList("123"), requestParameters.get("client_id"));
+		assertEquals(Collections.singletonList("openid"), requestParameters.get("scope"));
+		assertEquals(Collections.singletonList("https://example.com/cb"), requestParameters.get("redirect_uri"));
 		assertEquals(4, requestParameters.size());
 		
-		Map<String, String> queryParams = URLUtils.parseParameters(request.toQueryString());
-		assertEquals("bar", queryParams.get("foo"));
-		assertEquals("code", queryParams.get("response_type"));
-		assertEquals("123", queryParams.get("client_id"));
-		assertEquals("openid", queryParams.get("scope"));
-		assertEquals("https://example.com/cb", queryParams.get("redirect_uri"));
+		Map<String,List<String>> queryParams = URLUtils.parseParameters(request.toQueryString());
+		assertEquals(Collections.singletonList("bar"), queryParams.get("foo"));
+		assertEquals(Collections.singletonList("code"), queryParams.get("response_type"));
+		assertEquals(Collections.singletonList("123"), queryParams.get("client_id"));
+		assertEquals(Collections.singletonList("openid"), queryParams.get("scope"));
+		assertEquals(Collections.singletonList("https://example.com/cb"), queryParams.get("redirect_uri"));
 		assertEquals(5, queryParams.size());
 		
 		URI redirectToAS = request.toURI();
 		
-		Map<String, String> finalParameters = URLUtils.parseParameters(redirectToAS.getQuery());
-		assertEquals("bar", finalParameters.get("foo"));
-		assertEquals("code", finalParameters.get("response_type"));
-		assertEquals("123", finalParameters.get("client_id"));
-		assertEquals("openid", finalParameters.get("scope"));
-		assertEquals("https://example.com/cb", finalParameters.get("redirect_uri"));
+		Map<String,List<String>> finalParameters = URLUtils.parseParameters(redirectToAS.getQuery());
+		assertEquals(Collections.singletonList("bar"), finalParameters.get("foo"));
+		assertEquals(Collections.singletonList("code"), finalParameters.get("response_type"));
+		assertEquals(Collections.singletonList("123"), finalParameters.get("client_id"));
+		assertEquals(Collections.singletonList("openid"), finalParameters.get("scope"));
+		assertEquals(Collections.singletonList("https://example.com/cb"), finalParameters.get("redirect_uri"));
 		assertEquals(5, finalParameters.size());
 	}
 }

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.jose.JOSEException;
@@ -154,8 +155,8 @@ public class AuthenticationRequestResolver<C extends SecurityContext> {
 
 
 	/**
-	 * Reformats the specified JWT claims set to a 
-	 * {@literal java.util.Map&<String,String>} instance.
+	 * Reformats the specified JWT claims set to a
+	 * {@literal java.util.Map} instance.
 	 *
 	 * @param claimsSet The JWT claims set to reformat. Must not be
 	 *                  {@code null}.
@@ -163,12 +164,12 @@ public class AuthenticationRequestResolver<C extends SecurityContext> {
 	 * @return The JWT claims set as an unmodifiable map of string keys / 
 	 *         string values.
 	 */
-	public static Map<String,String> reformatClaims(final JWTClaimsSet claimsSet) {
+	public static Map<String,List<String>> reformatClaims(final JWTClaimsSet claimsSet) {
 
 		Map<String,Object> claims = claimsSet.getClaims();
 
 		// Reformat all claim values as strings
-		Map<String,String> reformattedClaims = new HashMap<>();
+		Map<String,List<String>> reformattedClaims = new HashMap<>();
 
 		for (Map.Entry<String,Object> entry: claims.entrySet()) {
 
@@ -176,7 +177,7 @@ public class AuthenticationRequestResolver<C extends SecurityContext> {
 				continue; // skip
 			}
 
-			reformattedClaims.put(entry.getKey(), entry.getValue().toString());
+			reformattedClaims.put(entry.getKey(), Collections.singletonList(entry.getValue().toString()));
 		}
 
 		return Collections.unmodifiableMap(reformattedClaims);
@@ -252,7 +253,7 @@ public class AuthenticationRequestResolver<C extends SecurityContext> {
 				request, e);
 		}
 
-		Map<String,String> finalParams = new HashMap<>();
+		Map<String,List<String>> finalParams = new HashMap<>();
 		finalParams.putAll(request.toParameters());
 		finalParams.putAll(reformatClaims(jwtClaims)); // Merge params from request object
 		finalParams.remove("request"); // make sure request object is deleted

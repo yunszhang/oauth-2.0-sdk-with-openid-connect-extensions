@@ -18,20 +18,20 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
 import javax.mail.internet.ContentType;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jwt.SignedJWT;
-
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
-import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 
 
@@ -185,19 +185,19 @@ public abstract class JWTAuthentication extends ClientAuthentication {
 	 * @return The parameters map, with keys "client_assertion",
 	 *         "client_assertion_type" and "client_id".
 	 */
-	public Map<String,String> toParameters() {
+	public Map<String,List<String>> toParameters() {
 	
-		Map<String,String> params = new HashMap<>();
+		Map<String,List<String>> params = new HashMap<>();
 		
 		try {
-			params.put("client_assertion", clientAssertion.serialize());
+			params.put("client_assertion", Collections.singletonList(clientAssertion.serialize()));
 		
 		} catch (IllegalStateException e) {
 		
 			throw new SerializeException("Couldn't serialize JWT to a client assertion string: " + e.getMessage(), e);
 		}	
 		
-		params.put("client_assertion_type", CLIENT_ASSERTION_TYPE);
+		params.put("client_assertion_type", Collections.singletonList(CLIENT_ASSERTION_TYPE));
 		
 		return params;
 	}
@@ -217,7 +217,7 @@ public abstract class JWTAuthentication extends ClientAuthentication {
 		if (! ct.match(CommonContentTypes.APPLICATION_URLENCODED))
 			throw new SerializeException("The HTTP Content-Type header must be " + CommonContentTypes.APPLICATION_URLENCODED);
 		
-		Map <String,String> params = httpRequest.getQueryParameters();
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
 		
 		params.putAll(toParameters());
 		
@@ -240,10 +240,10 @@ public abstract class JWTAuthentication extends ClientAuthentication {
 	 * @throws ParseException If expected "client_assertion_type" entry 
 	 *                        wasn't found.
 	 */
-	protected static void ensureClientAssertionType(final Map<String,String> params)
+	protected static void ensureClientAssertionType(final Map<String,List<String>> params)
 		throws ParseException {
 		
-		final String clientAssertionType = params.get("client_assertion_type");
+		final String clientAssertionType = URLUtils.getFirstValue(params, "client_assertion_type");
 		
 		if (clientAssertionType == null)
 			throw new ParseException("Missing \"client_assertion_type\" parameter");
@@ -269,10 +269,10 @@ public abstract class JWTAuthentication extends ClientAuthentication {
 	 * @throws ParseException If a "client_assertion" entry couldn't be
 	 *                        retrieved from the parameters map.
 	 */
-	protected static SignedJWT parseClientAssertion(final Map<String,String> params)
+	protected static SignedJWT parseClientAssertion(final Map<String,List<String>> params)
 		throws ParseException {
 		
-		final String clientAssertion = params.get("client_assertion");
+		final String clientAssertion = URLUtils.getFirstValue(params, "client_assertion");
 		
 		if (clientAssertion == null)
 			throw new ParseException("Missing \"client_assertion\" parameter");
@@ -299,9 +299,9 @@ public abstract class JWTAuthentication extends ClientAuthentication {
 	 *
 	 * @return The client identifier, {@code null} if not specified.
 	 */
-	protected static ClientID parseClientID(final Map<String,String> params) {
+	protected static ClientID parseClientID(final Map<String,List<String>> params) {
 		
-		String clientIDString = params.get("client_id");
+		String clientIDString = URLUtils.getFirstValue(params, "client_id");
 
 		if (clientIDString == null)
 			return null;
@@ -334,7 +334,7 @@ public abstract class JWTAuthentication extends ClientAuthentication {
 		if (query == null)
 			throw new ParseException("Missing HTTP POST request entity body");
 		
-		Map<String,String> params = URLUtils.parseParameters(query);
+		Map<String,List<String>> params = URLUtils.parseParameters(query);
 		
 		JWSAlgorithm alg = parseClientAssertion(params).getHeader().getAlgorithm();
 			

@@ -18,9 +18,12 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.nimbusds.oauth2.sdk.util.URLUtils;
 import junit.framework.TestCase;
 
 
@@ -35,8 +38,8 @@ public class ClientCredentialsGrantTest extends TestCase {
 		ClientCredentialsGrant grant = new ClientCredentialsGrant();
 		assertEquals(GrantType.CLIENT_CREDENTIALS, grant.getType());
 
-		Map<String,String> params = grant.toParameters();
-		assertEquals("client_credentials", params.get("grant_type"));
+		Map<String,List<String>> params = grant.toParameters();
+		assertEquals("client_credentials", URLUtils.getFirstValue(params, "grant_type"));
 		assertEquals(1, params.size());
 	}
 
@@ -44,8 +47,8 @@ public class ClientCredentialsGrantTest extends TestCase {
 	public void testParse()
 		throws Exception {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "client_credentials");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("client_credentials"));
 
 		ClientCredentialsGrant grant = ClientCredentialsGrant.parse(params);
 		assertEquals(GrantType.CLIENT_CREDENTIALS, grant.getType());
@@ -55,7 +58,7 @@ public class ClientCredentialsGrantTest extends TestCase {
 	public void testParseMissingGrantType() {
 
 		try {
-			ClientCredentialsGrant.parse(new HashMap<String, String>());
+			ClientCredentialsGrant.parse(new HashMap<String,List<String>>());
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
@@ -66,8 +69,8 @@ public class ClientCredentialsGrantTest extends TestCase {
 
 	public void testParseInvalidGrantType(){
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "invalid-grant");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("invalid-grant"));
 
 		try {
 			ClientCredentialsGrant.parse(params);

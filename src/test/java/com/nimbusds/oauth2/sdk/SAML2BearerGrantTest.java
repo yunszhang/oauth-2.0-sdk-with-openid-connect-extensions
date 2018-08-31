@@ -18,6 +18,8 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
@@ -41,9 +43,9 @@ public class SAML2BearerGrantTest extends TestCase {
 		assertEquals(assertion, grant.getSAML2Assertion());
 		assertEquals("abc", grant.getAssertion());
 
-		Map<String,String> params = grant.toParameters();
-		assertEquals(GrantType.SAML2_BEARER.getValue(), params.get("grant_type"));
-		assertEquals("abc", params.get("assertion"));
+		Map<String,List<String>> params = grant.toParameters();
+		assertEquals(Collections.singletonList(GrantType.SAML2_BEARER.getValue()), params.get("grant_type"));
+		assertEquals(Collections.singletonList("abc"), params.get("assertion"));
 		assertEquals(2, params.size());
 
 		grant = SAML2BearerGrant.parse(params);

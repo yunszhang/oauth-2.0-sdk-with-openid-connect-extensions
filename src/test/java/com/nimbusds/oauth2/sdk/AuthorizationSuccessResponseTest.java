@@ -20,21 +20,19 @@ package com.nimbusds.oauth2.sdk;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
-import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.JWTParser;
-import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
-import junit.framework.TestCase;
-
-import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.AccessTokenType;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
+import junit.framework.TestCase;
 
 
 /**
@@ -92,9 +90,9 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 
 		assertEquals(ResponseMode.QUERY, resp.impliedResponseMode());
 
-		Map<String,String> params = resp.toParameters();
-		assertEquals(CODE, new AuthorizationCode(params.get("code")));
-		assertEquals(STATE, new State(params.get("state")));
+		Map<String,List<String>> params = resp.toParameters();
+		assertEquals(CODE, new AuthorizationCode(URLUtils.getFirstValue(params, "code")));
+		assertEquals(STATE, new State(URLUtils.getFirstValue(params,"state")));
 		assertEquals(2, params.size());
 
 		URI uri = resp.toURI();
@@ -134,11 +132,11 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 
 		assertEquals(ResponseMode.FRAGMENT, resp.impliedResponseMode());
 
-		Map<String,String> params = resp.toParameters();
-		assertEquals(TOKEN.getValue(), params.get("access_token"));
-		assertEquals(STATE, new State(params.get("state")));
-		assertEquals(TOKEN.getType(), new AccessTokenType(params.get("token_type")));
-		assertEquals("3600", params.get("expires_in"));
+		Map<String,List<String>> params = resp.toParameters();
+		assertEquals(TOKEN.getValue(), URLUtils.getFirstValue(params,"access_token"));
+		assertEquals(STATE, new State(URLUtils.getFirstValue(params, "state")));
+		assertEquals(TOKEN.getType(), new AccessTokenType(URLUtils.getFirstValue(params,"token_type")));
+		assertEquals("3600", URLUtils.getFirstValue(params, "expires_in"));
 		assertEquals(4, params.size());
 
 		URI uri = resp.toURI();
@@ -174,7 +172,7 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 			ResponseMode.FORM_POST);
 
 		ResponseType responseType = resp.impliedResponseType();
-		assertTrue(new ResponseType("token").equals(responseType));
+		assertEquals(new ResponseType("token"), responseType);
 
 		assertEquals(ResponseMode.FORM_POST, resp.getResponseMode());
 		assertEquals(ResponseMode.FORM_POST, resp.impliedResponseMode());
@@ -191,10 +189,10 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
 		assertEquals(ABS_REDIRECT_URI, httpRequest.getURL().toURI());
 
-		assertEquals("Bearer", httpRequest.getQueryParameters().get("token_type"));
-		assertEquals(TOKEN.getLifetime() + "", httpRequest.getQueryParameters().get("expires_in"));
-		assertEquals(TOKEN.getValue(), httpRequest.getQueryParameters().get("access_token"));
-		assertEquals(STATE.getValue(), httpRequest.getQueryParameters().get("state"));
+		assertEquals(Collections.singletonList("Bearer"), httpRequest.getQueryParameters().get("token_type"));
+		assertEquals(Collections.singletonList(TOKEN.getLifetime() + ""), httpRequest.getQueryParameters().get("expires_in"));
+		assertEquals(Collections.singletonList(TOKEN.getValue()), httpRequest.getQueryParameters().get("access_token"));
+		assertEquals(Collections.singletonList(STATE.getValue()), httpRequest.getQueryParameters().get("state"));
 		assertEquals(4, httpRequest.getQueryParameters().size());
 	}
 
@@ -210,7 +208,7 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 			ResponseMode.FRAGMENT);
 
 		ResponseType responseType = resp.impliedResponseType();
-		assertTrue(new ResponseType("code").equals(responseType));
+		assertEquals(new ResponseType("code"), responseType);
 
 		assertEquals(ResponseMode.FRAGMENT, resp.getResponseMode());
 		assertEquals(ResponseMode.FRAGMENT, resp.impliedResponseMode());
@@ -224,9 +222,9 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 
 		URI uri = resp.toURI();
 		assertNull(uri.getQuery());
-		Map<String,String> params = URLUtils.parseParameters(uri.getRawFragment());
-		assertEquals(CODE.getValue(), params.get("code"));
-		assertEquals(STATE.getValue(), params.get("state"));
+		Map<String,List<String>> params = URLUtils.parseParameters(uri.getRawFragment());
+		assertEquals(CODE.getValue(), URLUtils.getFirstValue(params, "code"));
+		assertEquals(STATE.getValue(), URLUtils.getFirstValue(params, "state"));
 		assertEquals(2, params.size());
 	}
 
@@ -242,7 +240,7 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 			ResponseMode.QUERY);
 
 		ResponseType responseType = resp.impliedResponseType();
-		assertTrue(new ResponseType("token").equals(responseType));
+		assertEquals(new ResponseType("token"), responseType);
 
 		assertEquals(ResponseMode.QUERY, resp.getResponseMode());
 		assertEquals(ResponseMode.QUERY, resp.impliedResponseMode());
@@ -256,11 +254,11 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 
 		URI uri = resp.toURI();
 		assertNull(uri.getRawFragment());
-		Map<String,String> params = URLUtils.parseParameters(uri.getQuery());
-		assertEquals("Bearer", params.get("token_type"));
-		assertEquals(TOKEN.getValue(), params.get("access_token"));
-		assertEquals(TOKEN.getLifetime() + "", params.get("expires_in"));
-		assertEquals(STATE.getValue(), params.get("state"));
+		Map<String,List<String>> params = URLUtils.parseParameters(uri.getQuery());
+		assertEquals("Bearer", URLUtils.getFirstValue(params, "token_type"));
+		assertEquals(TOKEN.getValue(), URLUtils.getFirstValue(params, "access_token"));
+		assertEquals(TOKEN.getLifetime() + "", URLUtils.getFirstValue(params, "expires_in"));
+		assertEquals(STATE.getValue(), URLUtils.getFirstValue(params, "state"));
 		assertEquals(4, params.size());
 	}
 
@@ -291,7 +289,7 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 		assertEquals("xyz", response.getState().getValue());
 		BearerAccessToken accessToken = (BearerAccessToken)response.getAccessToken();
 		assertEquals("2YotnFZFEjr1zCsicMWpAA", accessToken.getValue());
-		assertEquals(3600l, accessToken.getLifetime());
+		assertEquals(3600L, accessToken.getLifetime());
 	}
 
 
@@ -307,17 +305,17 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 
 		AuthorizationSuccessResponse response = new AuthorizationSuccessResponse(redirectURI, code, null, state, ResponseMode.QUERY);
 
-		Map<String,String> params = response.toParameters();
-		assertEquals(code.getValue(), params.get("code"));
-		assertEquals(state.getValue(), params.get("state"));
+		Map<String,List<String>> params = response.toParameters();
+		assertEquals(code.getValue(), URLUtils.getFirstValue(params, "code"));
+		assertEquals(state.getValue(), URLUtils.getFirstValue(params, "state"));
 		assertEquals(2, params.size());
 
 		URI uri = response.toURI();
 
 		params = URLUtils.parseParameters(uri.getQuery());
-		assertEquals("oidccallback", params.get("action"));
-		assertEquals(code.getValue(), params.get("code"));
-		assertEquals(state.getValue(), params.get("state"));
+		assertEquals("oidccallback", URLUtils.getFirstValue(params, "action"));
+		assertEquals(code.getValue(), URLUtils.getFirstValue(params, "code"));
+		assertEquals(state.getValue(), URLUtils.getFirstValue(params, "state"));
 		assertEquals(3, params.size());
 	}
 

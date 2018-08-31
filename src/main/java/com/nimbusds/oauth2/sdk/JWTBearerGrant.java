@@ -20,6 +20,7 @@ package com.nimbusds.oauth2.sdk;
 
 import java.util.*;
 
+import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.jose.*;
@@ -182,18 +183,19 @@ public class JWTBearerGrant extends AssertionGrant {
 
 
 	@Override
-	public Map<String,String> toParameters() {
+	public Map<String,List<String>> toParameters() {
 
-		Map<String,String> params = new LinkedHashMap<>();
-		params.put("grant_type", GRANT_TYPE.getValue());
-		params.put("assertion", assertion.serialize());
+		Map<String,List<String>> params = new LinkedHashMap<>();
+		params.put("grant_type", Collections.singletonList(GRANT_TYPE.getValue()));
+		params.put("assertion", Collections.singletonList(assertion.serialize()));
 		return params;
 	}
 
 
 	/**
-	 * Parses a JWT bearer grant from the specified parameters. The JWT
-	 * claims are not validated for compliance with the standard.
+	 * Parses a JWT bearer grant from the specified request body
+	 * parameters. The JWT claims are not validated for compliance with the
+	 * standard.
 	 *
 	 * <p>Example:
 	 *
@@ -209,11 +211,11 @@ public class JWTBearerGrant extends AssertionGrant {
 	 *
 	 * @throws ParseException If parsing failed.
 	 */
-	public static JWTBearerGrant parse(final Map<String,String> params)
+	public static JWTBearerGrant parse(final Map<String,List<String>> params)
 		throws ParseException {
 
 		// Parse grant type
-		String grantTypeString = params.get("grant_type");
+		String grantTypeString = URLUtils.getFirstValue(params, "grant_type");
 
 		if (grantTypeString == null)
 			throw MISSING_GRANT_TYPE_PARAM_EXCEPTION;
@@ -222,7 +224,7 @@ public class JWTBearerGrant extends AssertionGrant {
 			throw UNSUPPORTED_GRANT_TYPE_EXCEPTION;
 
 		// Parse JWT assertion
-		String assertionString = params.get("assertion");
+		String assertionString = URLUtils.getFirstValue(params, "assertion");
 
 		if (assertionString == null || assertionString.trim().isEmpty())
 			throw MISSING_ASSERTION_PARAM_EXCEPTION;

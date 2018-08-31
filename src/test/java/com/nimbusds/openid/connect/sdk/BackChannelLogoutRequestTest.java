@@ -26,9 +26,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -128,8 +126,8 @@ public class BackChannelLogoutRequestTest extends TestCase {
 		assertEquals(LOGOUT_ENDPOINT_URI, request.getEndpointURI());
 		assertEquals(logoutToken, request.getLogoutToken());
 		
-		Map<String,String> params = request.toParameters();
-		assertEquals(logoutToken.serialize(), params.get("logout_token"));
+		Map<String,List<String>> params = request.toParameters();
+		assertEquals(Collections.singletonList(logoutToken.serialize()), params.get("logout_token"));
 		assertEquals(1, params.size());
 		
 		HTTPRequest httpRequest = request.toHTTPRequest();
@@ -137,7 +135,7 @@ public class BackChannelLogoutRequestTest extends TestCase {
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
 		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
 		params = httpRequest.getQueryParameters();
-		assertEquals(logoutToken.serialize(), params.get("logout_token"));
+		assertEquals(Collections.singletonList(logoutToken.serialize()), params.get("logout_token"));
 		assertEquals(1, params.size());
 		
 		// Parse from HTTP request

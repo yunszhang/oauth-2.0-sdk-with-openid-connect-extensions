@@ -18,7 +18,10 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import java.util.List;
 import java.util.Map;
+
+import com.nimbusds.oauth2.sdk.util.URLUtils;
 
 
 /**
@@ -77,28 +80,29 @@ public abstract class AuthorizationGrant {
 
 
 	/**
-	 * Return the parameters for the authorisation grant.
+	 * Returns the request body parameters for the authorisation grant.
 	 *
 	 * @return The parameters.
 	 */
-	public abstract Map<String,String> toParameters();
+	public abstract Map<String,List<String>> toParameters();
 
 
 	/**
-	 * Parses an authorisation grant from the specified parameters.
+	 * Parses an authorisation grant from the specified request body
+	 * parameters.
 	 *
-	 * @param params The parameters. Must not be {@code null}.
+	 * @param params The request body parameters. Must not be {@code null}.
 	 *
 	 * @return The authorisation grant.
 	 *
 	 * @throws ParseException If parsing failed or the grant type is not
 	 *                        supported.
 	 */
-	public static AuthorizationGrant parse(final Map<String,String> params)
+	public static AuthorizationGrant parse(final Map<String,List<String>> params)
 		throws ParseException {
 
 		// Parse grant type
-		String grantTypeString = params.get("grant_type");
+		String grantTypeString = URLUtils.getFirstValue(params, "grant_type");
 
 		if (grantTypeString == null) {
 			String msg = "Missing \"grant_type\" parameter";

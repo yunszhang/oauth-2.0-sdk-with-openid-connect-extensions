@@ -19,9 +19,7 @@ package com.nimbusds.oauth2.sdk.auth;
 
 
 import java.net.URI;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -81,8 +79,8 @@ public class ClientSecretJWTTest extends TestCase {
 
 		ClientSecretJWT clientSecretJWT = new ClientSecretJWT(jwt);
 
-		Map<String,String> params = clientSecretJWT.toParameters();
-		params.put("client_id", clientID.getValue()); // add optional client_id to test parser
+		Map<String,List<String>> params = clientSecretJWT.toParameters();
+		params.put("client_id", Collections.singletonList(clientID.getValue())); // add optional client_id to test parser
 
 		System.out.println("Client secret JWT: " + params);
 
@@ -152,11 +150,11 @@ public class ClientSecretJWTTest extends TestCase {
 		
 		ClientSecretJWT clientSecretJWT = new ClientSecretJWT(clientID, tokenEndpoint, JWSAlgorithm.HS256, secret);
 		
-		Map<String,String> params = clientSecretJWT.toParameters();
+		Map<String,List<String>> params = clientSecretJWT.toParameters();
 		
 		assertNull(params.get("client_id"));
 		
-		params.put("client_id", "456"); // different client_id
+		params.put("client_id", Collections.singletonList("456")); // different client_id
 		
 		try {
 			ClientSecretJWT.parse(params);

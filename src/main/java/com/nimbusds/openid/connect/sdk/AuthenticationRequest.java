@@ -80,9 +80,8 @@ public class AuthenticationRequest extends AuthorizationRequest {
 	 * Initialises the registered parameter name set.
 	 */
 	static {
-		Set<String> p = new HashSet<>();
-
-		p.addAll(AuthorizationRequest.getRegisteredParameterNames());
+		
+		Set<String> p = new HashSet<>(AuthorizationRequest.getRegisteredParameterNames());
 
 		p.add("nonce");
 		p.add("display");
@@ -324,9 +323,9 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 
 		/**
-		 * The additional custom parameters.
+		 * Additional custom parameters.
 		 */
-		private Map<String,String> customParams = new HashMap<>();
+		private Map<String,List<String>> customParams = new HashMap<>();
 
 
 		/**
@@ -704,20 +703,25 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			}
 			return this;
 		}
-
-
+		
+		
 		/**
-		 * Sets the specified additional custom parameter.
+		 * Sets a custom parameter.
 		 *
-		 * @param name  The parameter name. Must not be {@code null}.
-		 * @param value The parameter value, {@code null} if not
-		 *              specified.
+		 * @param name   The parameter name. Must not be {@code null}.
+		 * @param values The parameter values, {@code null} if not
+		 *               specified.
 		 *
 		 * @return This builder.
 		 */
-		public Builder customParameter(final String name, final String value) {
-
-			customParams.put(name, value);
+		public Builder customParameter(final String name, final String ... values) {
+			
+			if (values == null || values.length == 0) {
+				customParams.remove(name);
+			} else {
+				customParams.put(name, Arrays.asList(values));
+			}
+			
 			return this;
 		}
 
@@ -897,7 +901,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			nonce, display, prompt, maxAge, uiLocales, claimsLocales,
 			idTokenHint, loginHint, acrValues, claims,
 			requestObject, requestURI, codeChallenge, codeChallengeMethod,
-			Collections.<String, String>emptyMap());
+			Collections.<String, List<String>>emptyMap());
 	}
 
 
@@ -1008,7 +1012,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				     final URI requestURI,
 				     final CodeChallenge codeChallenge,
 				     final CodeChallengeMethod codeChallengeMethod,
-				     final Map<String,String> customParams) {
+				     final Map<String,List<String>> customParams) {
 
 		super(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, customParams);
 
@@ -1240,21 +1244,21 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 
 	@Override
-	public Map<String,String> toParameters() {
+	public Map<String,List<String>> toParameters() {
 
-		Map <String,String> params = super.toParameters();
+		Map <String,List<String>> params = super.toParameters();
 		
 		if (nonce != null)
-			params.put("nonce", nonce.toString());
+			params.put("nonce", Collections.singletonList(nonce.toString()));
 		
 		if (display != null)
-			params.put("display", display.toString());
+			params.put("display", Collections.singletonList(display.toString()));
 		
 		if (prompt != null)
-			params.put("prompt", prompt.toString());
+			params.put("prompt", Collections.singletonList(prompt.toString()));
 
 		if (maxAge >= 0)
-			params.put("max_age", "" + maxAge);
+			params.put("max_age", Collections.singletonList("" + maxAge));
 
 		if (uiLocales != null) {
 
@@ -1268,7 +1272,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				sb.append(locale.toString());
 			}
 
-			params.put("ui_locales", sb.toString());
+			params.put("ui_locales", Collections.singletonList(sb.toString()));
 		}
 
 		if (claimsLocales != null) {
@@ -1283,13 +1287,13 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				sb.append(locale.toString());
 			}
 
-			params.put("claims_locales", sb.toString());
+			params.put("claims_locales", Collections.singletonList(sb.toString()));
 		}
 
 		if (idTokenHint != null) {
 		
 			try {
-				params.put("id_token_hint", idTokenHint.serialize());
+				params.put("id_token_hint", Collections.singletonList(idTokenHint.serialize()));
 				
 			} catch (IllegalStateException e) {
 			
@@ -1298,7 +1302,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		}
 
 		if (loginHint != null)
-			params.put("login_hint", loginHint);
+			params.put("login_hint", Collections.singletonList(loginHint));
 
 		if (acrValues != null) {
 
@@ -1312,17 +1316,17 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				sb.append(acr.toString());
 			}
 
-			params.put("acr_values", sb.toString());
+			params.put("acr_values", Collections.singletonList(sb.toString()));
 		}
 			
 
 		if (claims != null)
-			params.put("claims", claims.toJSONObject().toString());
+			params.put("claims", Collections.singletonList(claims.toJSONObject().toString()));
 		
 		if (requestObject != null) {
 		
 			try {
-				params.put("request", requestObject.serialize());
+				params.put("request", Collections.singletonList(requestObject.serialize()));
 				
 			} catch (IllegalStateException e) {
 			
@@ -1331,7 +1335,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		}
 		
 		if (requestURI != null)
-			params.put("request_uri", requestURI.toString());
+			params.put("request_uri", Collections.singletonList(requestURI.toString()));
 
 		return params;
 	}
@@ -1339,7 +1343,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 	/**
 	 * Parses an OpenID Connect authentication request from the specified
-	 * parameters.
+	 * URI query parameters.
 	 *
 	 * <p>Example parameters:
 	 *
@@ -1359,7 +1363,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 	 * @throws ParseException If the parameters couldn't be parsed to an
 	 *                        OpenID Connect authentication request.
 	 */
-	public static AuthenticationRequest parse(final Map<String,String> params)
+	public static AuthenticationRequest parse(final Map<String,List<String>> params)
 		throws ParseException {
 
 		return parse(null, params);
@@ -1368,7 +1372,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 	/**
 	 * Parses an OpenID Connect authentication request from the specified
-	 * parameters.
+	 * URI and query parameters.
 	 *
 	 * <p>Example parameters:
 	 *
@@ -1391,7 +1395,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 	 * @throws ParseException If the parameters couldn't be parsed to an
 	 *                        OpenID Connect authentication request.
 	 */
-	public static AuthenticationRequest parse(final URI uri, final Map<String,String> params)
+	public static AuthenticationRequest parse(final URI uri, final Map<String,List<String>> params)
 		throws ParseException {
 
 		// Parse and validate the core OAuth 2.0 autz request params in 
@@ -1433,7 +1437,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 
 		// Parse the remaining OIDC parameters
-		Nonce nonce = Nonce.parse(params.get("nonce"));
+		Nonce nonce = Nonce.parse(URLUtils.getFirstValue(params, "nonce"));
 		
 		// Nonce required in the implicit and hybrid flows
 		if (nonce == null && (rt.impliesImplicitFlow() || rt.impliesHybridFlow())) {
@@ -1446,7 +1450,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 		if (params.containsKey("display")) {
 			try {
-				display = Display.parse(params.get("display"));
+				display = Display.parse(URLUtils.getFirstValue(params, "display"));
 
 			} catch (ParseException e) {
 				String msg = "Invalid \"display\" parameter: " + e.getMessage();
@@ -1459,7 +1463,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		Prompt prompt;
 		
 		try {
-			prompt = Prompt.parse(params.get("prompt"));
+			prompt = Prompt.parse(URLUtils.getFirstValue(params, "prompt"));
 				
 		} catch (ParseException e) {
 			String msg = "Invalid \"prompt\" parameter: " + e.getMessage();
@@ -1468,7 +1472,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		}
 
 
-		String v = params.get("max_age");
+		String v = URLUtils.getFirstValue(params, "max_age");
 
 		int maxAge = -1;
 
@@ -1485,7 +1489,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		}
 
 
-		v = params.get("ui_locales");
+		v = URLUtils.getFirstValue(params, "ui_locales");
 
 		List<LangTag> uiLocales = null;
 
@@ -1509,7 +1513,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		}
 
 
-		v = params.get("claims_locales");
+		v = URLUtils.getFirstValue(params, "claims_locales");
 
 		List<LangTag> claimsLocales = null;
 
@@ -1533,7 +1537,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		}
 
 
-		v = params.get("id_token_hint");
+		v = URLUtils.getFirstValue(params, "id_token_hint");
 		
 		JWT idTokenHint = null;
 		
@@ -1549,10 +1553,10 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			}
 		}
 
-		String loginHint = params.get("login_hint");
+		String loginHint = URLUtils.getFirstValue(params, "login_hint");
 
 
-		v = params.get("acr_values");
+		v = URLUtils.getFirstValue(params, "acr_values");
 
 		List<ACR> acrValues = null;
 
@@ -1569,7 +1573,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		}
 
 
-		v = params.get("claims");
+		v = URLUtils.getFirstValue(params, "claims");
 
 		ClaimsRequest claims = null;
 
@@ -1591,7 +1595,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		}
 		
 		
-		v = params.get("request_uri");
+		v = URLUtils.getFirstValue(params, "request_uri");
 		
 		URI requestURI = null;
 		
@@ -1607,7 +1611,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			}
 		}
 
-		v = params.get("request");
+		v = URLUtils.getFirstValue(params, "request");
 
 		JWT requestObject = null;
 
@@ -1639,9 +1643,9 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		}
 
 		// Parse additional custom parameters
-		Map<String,String> customParams = null;
+		Map<String,List<String>> customParams = null;
 
-		for (Map.Entry<String,String> p: params.entrySet()) {
+		for (Map.Entry<String,List<String>> p: params.entrySet()) {
 
 			if (! REGISTERED_PARAMETER_NAMES.contains(p.getKey())) {
 				// We have a custom parameter

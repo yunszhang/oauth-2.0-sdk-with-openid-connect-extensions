@@ -18,19 +18,19 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
 import javax.mail.internet.ContentType;
-
-import net.jcip.annotations.Immutable;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
-import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
+import net.jcip.annotations.Immutable;
 
 
 /**
@@ -75,11 +75,11 @@ public final class ClientSecretPost extends PlainClientSecret {
 	 * @return The parameters map, with keys "client_id" and 
 	 *         "client_secret".
 	 */
-	public Map<String,String> toParameters() {
+	public Map<String,List<String>> toParameters() {
 	
-		Map<String,String> params = new HashMap<>();
-		params.put("client_id", getClientID().getValue());
-		params.put("client_secret", getClientSecret().getValue());
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("client_id", Collections.singletonList(getClientID().getValue()));
+		params.put("client_secret", Collections.singletonList(getClientSecret().getValue()));
 		return params;
 	}
 	
@@ -98,7 +98,7 @@ public final class ClientSecretPost extends PlainClientSecret {
 		if (! ct.match(CommonContentTypes.APPLICATION_URLENCODED))
 			throw new SerializeException("The HTTP Content-Type header must be " + CommonContentTypes.APPLICATION_URLENCODED);
 		
-		Map <String,String> params = httpRequest.getQueryParameters();
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
 		
 		params.putAll(toParameters());
 		
@@ -122,15 +122,15 @@ public final class ClientSecretPost extends PlainClientSecret {
 	 * @throws ParseException If the parameters map couldn't be parsed to a 
 	 *                        client secret post authentication.
 	 */
-	public static ClientSecretPost parse(final Map<String,String> params)
+	public static ClientSecretPost parse(final Map<String,List<String>> params)
 		throws ParseException {
 	
-		String clientIDString = params.get("client_id");
+		String clientIDString = URLUtils.getFirstValue(params, "client_id");
 		
 		if (clientIDString == null)
 			throw new ParseException("Malformed client secret post authentication: Missing \"client_id\" parameter");
 		
-		String secretValue = params.get("client_secret");
+		String secretValue = URLUtils.getFirstValue(params, "client_secret");
 		
 		if (secretValue == null)
 			throw new ParseException("Malformed client secret post authentication: Missing \"client_secret\" parameter");
@@ -156,7 +156,7 @@ public final class ClientSecretPost extends PlainClientSecret {
 	public static ClientSecretPost parse(final String paramsString)
 		throws ParseException {
 		
-		Map<String,String> params = URLUtils.parseParameters(paramsString);
+		Map<String,List<String>> params = URLUtils.parseParameters(paramsString);
 		
 		return parse(params);
 	}

@@ -938,3 +938,16 @@ version 5.64.4 (2018-08-20)
       definition is included in the com.sun.mail:javax.mail implementation (iss
       #253).
     * Fixes jdk6, jdk8 and jdk10 releases (iss #250).
+
+version 6.0 (2018-08-31)
+    * Updates AuthorizationRequest and AuthenticationRequest to support
+      multi-valued query parameters (breaking change).
+    * Updates the AuthorizationResponse classes to support multi-valued
+      parameters (breaking change).
+    * Updates TokenRequest to support multi-valued parameters in the request
+      body (breaking change).
+    * Updates the AuthorizationGrant classes to support multi-valued parameters
+      in the request body (breaking change).
+    * Updates HTTPRequest to support multi-valued parameters in the query and
+      body (breaking change).
+    * Updates Nimbus JOSE+JWT to 6.0.1 with Ed25519 and X25519 support.

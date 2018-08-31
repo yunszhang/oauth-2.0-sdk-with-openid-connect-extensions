@@ -20,10 +20,7 @@ package com.nimbusds.oauth2.sdk;
 
 import java.net.URI;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -78,10 +75,10 @@ public class TokenRequestTest extends TestCase {
 		ClientSecretBasic basic = ClientSecretBasic.parse(httpRequest.getAuthorization());
 		assertEquals("123", basic.getClientID().getValue());
 		assertEquals("secret", basic.getClientSecret().getValue());
-		Map<String,String> params = httpRequest.getQueryParameters();
-		assertEquals(GrantType.AUTHORIZATION_CODE.getValue(), params.get("grant_type"));
-		assertEquals("abc", params.get("code"));
-		assertTrue(Scope.parse("openid email").containsAll(Scope.parse(params.get("scope"))));
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
+		assertEquals(Collections.singletonList(GrantType.AUTHORIZATION_CODE.getValue()), params.get("grant_type"));
+		assertEquals(Collections.singletonList("abc"), params.get("code"));
+		assertTrue(Scope.parse("openid email").containsAll(Scope.parse(URLUtils.getFirstValue(params, "scope"))));
 		assertEquals(3, params.size());
 	}
 
@@ -107,9 +104,9 @@ public class TokenRequestTest extends TestCase {
 		ClientSecretBasic basic = ClientSecretBasic.parse(httpRequest.getAuthorization());
 		assertEquals("123", basic.getClientID().getValue());
 		assertEquals("secret", basic.getClientSecret().getValue());
-		Map<String,String> params = httpRequest.getQueryParameters();
-		assertEquals(GrantType.AUTHORIZATION_CODE.getValue(), params.get("grant_type"));
-		assertEquals("abc", params.get("code"));
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
+		assertEquals(Collections.singletonList(GrantType.AUTHORIZATION_CODE.getValue()), params.get("grant_type"));
+		assertEquals(Collections.singletonList("abc"), params.get("code"));
 		assertEquals(2, params.size());
 	}
 
@@ -132,10 +129,10 @@ public class TokenRequestTest extends TestCase {
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(uri.toURL(), httpRequest.getURL());
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		Map<String,String> params = httpRequest.getQueryParameters();
-		assertEquals(GrantType.AUTHORIZATION_CODE.getValue(), params.get("grant_type"));
-		assertEquals("abc", params.get("code"));
-		assertEquals("123", params.get("client_id"));
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
+		assertEquals(Collections.singletonList(GrantType.AUTHORIZATION_CODE.getValue()), params.get("grant_type"));
+		assertEquals(Collections.singletonList("abc"), params.get("code"));
+		assertEquals(Collections.singletonList("123"), params.get("client_id"));
 		assertEquals(3, params.size());
 	}
 
@@ -158,10 +155,10 @@ public class TokenRequestTest extends TestCase {
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(uri.toURL(), httpRequest.getURL());
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		Map<String,String> params = httpRequest.getQueryParameters();
-		assertEquals(GrantType.AUTHORIZATION_CODE.getValue(), params.get("grant_type"));
-		assertEquals("abc", params.get("code"));
-		assertEquals("123", params.get("client_id"));
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
+		assertEquals(Collections.singletonList(GrantType.AUTHORIZATION_CODE.getValue()), params.get("grant_type"));
+		assertEquals(Collections.singletonList("abc"), params.get("code"));
+		assertEquals(Collections.singletonList("123"), params.get("client_id"));
 		assertEquals(3, params.size());
 	}
 
@@ -199,11 +196,11 @@ public class TokenRequestTest extends TestCase {
 		assertEquals(uri.toURL(), httpRequest.getURL());
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
 		assertNull(httpRequest.getAuthorization());
-		Map<String,String> params = httpRequest.getQueryParameters();
-		assertEquals(GrantType.AUTHORIZATION_CODE.getValue(), params.get("grant_type"));
-		assertEquals("abc", params.get("code"));
-		assertEquals("123", params.get("client_id"));
-		assertEquals("http://example.com/in", params.get("redirect_uri"));
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
+		assertEquals(Collections.singletonList(GrantType.AUTHORIZATION_CODE.getValue()), params.get("grant_type"));
+		assertEquals(Collections.singletonList("abc"), params.get("code"));
+		assertEquals(Collections.singletonList("123"), params.get("client_id"));
+		assertEquals(Collections.singletonList("http://example.com/in"), params.get("redirect_uri"));
 		assertEquals(4, params.size());
 	}
 
@@ -227,11 +224,11 @@ public class TokenRequestTest extends TestCase {
 		assertEquals(uri.toURL(), httpRequest.getURL());
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
 		assertNull(httpRequest.getAuthorization());
-		Map<String,String> params = httpRequest.getQueryParameters();
-		assertEquals(GrantType.AUTHORIZATION_CODE.getValue(), params.get("grant_type"));
-		assertEquals("abc", params.get("code"));
-		assertEquals("123", params.get("client_id"));
-		assertEquals("http://example.com/in", params.get("redirect_uri"));
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
+		assertEquals(Collections.singletonList(GrantType.AUTHORIZATION_CODE.getValue()), params.get("grant_type"));
+		assertEquals(Collections.singletonList("abc"), params.get("code"));
+		assertEquals(Collections.singletonList("123"), params.get("client_id"));
+		assertEquals(Collections.singletonList("http://example.com/in"), params.get("redirect_uri"));
 		assertEquals(4, params.size());
 	}
 
@@ -271,11 +268,11 @@ public class TokenRequestTest extends TestCase {
 		assertEquals(uri.toURL(), httpRequest.getURL());
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
 		assertNull(httpRequest.getAuthorization());
-		Map<String,String> params = httpRequest.getQueryParameters();
-		assertEquals(GrantType.PASSWORD.getValue(), params.get("grant_type"));
-		assertEquals("alice", params.get("username"));
-		assertEquals("secret", params.get("password"));
-		assertTrue(Scope.parse("openid email").containsAll(Scope.parse(params.get("scope"))));
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
+		assertEquals(Collections.singletonList(GrantType.PASSWORD.getValue()), params.get("grant_type"));
+		assertEquals(Collections.singletonList("alice"), params.get("username"));
+		assertEquals(Collections.singletonList("secret"), params.get("password"));
+		assertEquals(Scope.parse("openid email"), Scope.parse(URLUtils.getFirstValue(params, "scope")));
 		assertEquals(4, params.size());
 	}
 
@@ -298,10 +295,10 @@ public class TokenRequestTest extends TestCase {
 		assertEquals(uri.toURL(), httpRequest.getURL());
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
 		assertNull(httpRequest.getAuthorization());
-		Map<String,String> params = httpRequest.getQueryParameters();
-		assertEquals(GrantType.PASSWORD.getValue(), params.get("grant_type"));
-		assertEquals("alice", params.get("username"));
-		assertEquals("secret", params.get("password"));
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
+		assertEquals(Collections.singletonList(GrantType.PASSWORD.getValue()), params.get("grant_type"));
+		assertEquals(Collections.singletonList("alice"), params.get("username"));
+		assertEquals(Collections.singletonList("secret"), params.get("password"));
 		assertEquals(3, params.size());
 	}
 
@@ -335,8 +332,8 @@ public class TokenRequestTest extends TestCase {
 		httpRequest.setQuery(postBody);
 		
 		TokenRequest tr = TokenRequest.parse(httpRequest);
-
-		assertTrue(new URI("https://connect2id.com/token/").equals(tr.getEndpointURI()));
+		
+		assertEquals(new URI("https://connect2id.com/token/"), tr.getEndpointURI());
 
 		ClientSecretBasic authBasic = (ClientSecretBasic)tr.getClientAuthentication();
 		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, authBasic.getMethod());
@@ -352,12 +349,12 @@ public class TokenRequestTest extends TestCase {
 		
 		httpRequest = tr.toHTTPRequest();
 		
-		assertTrue(new URL("https://connect2id.com/token/").equals(httpRequest.getURL()));
+		assertEquals(new URL("https://connect2id.com/token/"), httpRequest.getURL());
 		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
 		assertEquals("Basic " + authBasicString, httpRequest.getAuthorization());
-		assertEquals("authorization_code", httpRequest.getQueryParameters().get("grant_type"));
-		assertEquals("SplxlOBeZQQYbYS6WxSbIA", httpRequest.getQueryParameters().get("code"));
-		assertEquals("https://client.example.com/cb", httpRequest.getQueryParameters().get("redirect_uri"));
+		assertEquals(Collections.singletonList("authorization_code"), httpRequest.getQueryParameters().get("grant_type"));
+		assertEquals(Collections.singletonList("SplxlOBeZQQYbYS6WxSbIA"), httpRequest.getQueryParameters().get("code"));
+		assertEquals(Collections.singletonList("https://client.example.com/cb"), httpRequest.getQueryParameters().get("redirect_uri"));
 		assertEquals(3, httpRequest.getQueryParameters().size());
 	}
 	
@@ -380,12 +377,12 @@ public class TokenRequestTest extends TestCase {
 		
 		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
 		
-		Map<String,String> params = httpRequest.getQueryParameters();
-		assertEquals(GrantType.AUTHORIZATION_CODE.getValue(), params.get("grant_type"));
-		assertEquals(code.getValue(), params.get("code"));
-		assertEquals(redirectURI.toString(), params.get("redirect_uri"));
-		assertEquals("123", params.get("client_id"));
-		assertEquals(pkceVerifier.getValue(), params.get("code_verifier"));
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
+		assertEquals(Collections.singletonList(GrantType.AUTHORIZATION_CODE.getValue()), params.get("grant_type"));
+		assertEquals(Collections.singletonList(code.getValue()), params.get("code"));
+		assertEquals(Collections.singletonList(redirectURI.toString()), params.get("redirect_uri"));
+		assertEquals(Collections.singletonList("123"), params.get("client_id"));
+		assertEquals(Collections.singletonList(pkceVerifier.getValue()), params.get("code_verifier"));
 		assertEquals(5, params.size());
 	}
 
@@ -406,8 +403,8 @@ public class TokenRequestTest extends TestCase {
 		httpRequest.setQuery(postBody);
 
 		TokenRequest tr = TokenRequest.parse(httpRequest);
-
-		assertTrue(new URI("https://connect2id.com/token/").equals(tr.getEndpointURI()));
+		
+		assertEquals(new URI("https://connect2id.com/token/"), tr.getEndpointURI());
 
 		assertNull(tr.getClientAuthentication());
 		assertEquals(new ClientID("123"), tr.getClientID());
@@ -419,15 +416,15 @@ public class TokenRequestTest extends TestCase {
 		assertEquals("dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk", codeGrant.getCodeVerifier().getValue());
 
 		httpRequest = tr.toHTTPRequest();
-
-		assertTrue(new URL("https://connect2id.com/token/").equals(httpRequest.getURL()));
+		
+		assertEquals(new URL("https://connect2id.com/token/"), httpRequest.getURL());
 		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
 		assertNull(httpRequest.getAuthorization());
-		assertEquals("authorization_code", httpRequest.getQueryParameters().get("grant_type"));
-		assertEquals("SplxlOBeZQQYbYS6WxSbIA", httpRequest.getQueryParameters().get("code"));
-		assertEquals("https://client.example.com/cb", httpRequest.getQueryParameters().get("redirect_uri"));
-		assertEquals("dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk", httpRequest.getQueryParameters().get("code_verifier"));
-		assertEquals("123", httpRequest.getQueryParameters().get("client_id"));
+		assertEquals(Collections.singletonList("authorization_code"), httpRequest.getQueryParameters().get("grant_type"));
+		assertEquals(Collections.singletonList("SplxlOBeZQQYbYS6WxSbIA"), httpRequest.getQueryParameters().get("code"));
+		assertEquals(Collections.singletonList("https://client.example.com/cb"), httpRequest.getQueryParameters().get("redirect_uri"));
+		assertEquals(Collections.singletonList("dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"), httpRequest.getQueryParameters().get("code_verifier"));
+		assertEquals(Collections.singletonList("123"), httpRequest.getQueryParameters().get("client_id"));
 		assertEquals(5, httpRequest.getQueryParameters().size());
 	}
 
@@ -448,8 +445,8 @@ public class TokenRequestTest extends TestCase {
 		httpRequest.setQuery(postBody);
 		
 		TokenRequest tr = TokenRequest.parse(httpRequest);
-
-		assertTrue(new URI("https://connect2id.com/token/").equals(tr.getEndpointURI()));
+		
+		assertEquals(new URI("https://connect2id.com/token/"), tr.getEndpointURI());
 
 		ClientSecretBasic authBasic = (ClientSecretBasic)tr.getClientAuthentication();
 		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, authBasic.getMethod());
@@ -461,8 +458,8 @@ public class TokenRequestTest extends TestCase {
 		assertEquals("tGzv3JOkF0XG5Qx2TlKWIA", rtGrant.getRefreshToken().getValue());
 		
 		httpRequest = tr.toHTTPRequest();
-
-		assertTrue(new URL("https://connect2id.com/token/").equals(httpRequest.getURL()));
+		
+		assertEquals(new URL("https://connect2id.com/token/"), httpRequest.getURL());
 		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
 		assertEquals("Basic " + authBasicString, httpRequest.getAuthorization());
 		assertEquals(postBody, httpRequest.getQuery());
@@ -480,8 +477,8 @@ public class TokenRequestTest extends TestCase {
 		httpRequest.setQuery(postBody);
 
 		TokenRequest tr = TokenRequest.parse(httpRequest);
-
-		assertTrue(new URI("https://connect2id.com/token/").equals(tr.getEndpointURI()));
+		
+		assertEquals(new URI("https://connect2id.com/token/"), tr.getEndpointURI());
 
 		assertNull(tr.getClientAuthentication());
 		assertNull(tr.getClientID());
@@ -494,13 +491,13 @@ public class TokenRequestTest extends TestCase {
 		assertNull(tr.getScope());
 
 		httpRequest = tr.toHTTPRequest();
-
-		assertTrue(new URL("https://connect2id.com/token/").equals(httpRequest.getURL()));
+		
+		assertEquals(new URL("https://connect2id.com/token/"), httpRequest.getURL());
 		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
 		assertNull(httpRequest.getAuthorization());
-		assertEquals("password", httpRequest.getQueryParameters().get("grant_type"));
-		assertEquals("johndoe", httpRequest.getQueryParameters().get("username"));
-		assertEquals("A3ddj3w", httpRequest.getQueryParameters().get("password"));
+		assertEquals(Collections.singletonList("password"), httpRequest.getQueryParameters().get("grant_type"));
+		assertEquals(Collections.singletonList("johndoe"), httpRequest.getQueryParameters().get("username"));
+		assertEquals(Collections.singletonList("A3ddj3w"), httpRequest.getQueryParameters().get("password"));
 		assertEquals(3, httpRequest.getQueryParameters().size());
 	}
 
@@ -519,8 +516,8 @@ public class TokenRequestTest extends TestCase {
 		httpRequest.setQuery(postBody);
 
 		TokenRequest tr = TokenRequest.parse(httpRequest);
-
-		assertTrue(new URI("https://connect2id.com/token/").equals(tr.getEndpointURI()));
+		
+		assertEquals(new URI("https://connect2id.com/token/"), tr.getEndpointURI());
 
 		ClientSecretBasic authBasic = (ClientSecretBasic)tr.getClientAuthentication();
 		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, authBasic.getMethod());
@@ -535,13 +532,13 @@ public class TokenRequestTest extends TestCase {
 		assertNull(tr.getScope());
 
 		httpRequest = tr.toHTTPRequest();
-
-		assertTrue(new URL("https://connect2id.com/token/").equals(httpRequest.getURL()));
+		
+		assertEquals(new URL("https://connect2id.com/token/"), httpRequest.getURL());
 		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
 		assertEquals("Basic " + authBasicString, httpRequest.getAuthorization());
-		assertEquals("password", httpRequest.getQueryParameters().get("grant_type"));
-		assertEquals("johndoe", httpRequest.getQueryParameters().get("username"));
-		assertEquals("A3ddj3w", httpRequest.getQueryParameters().get("password"));
+		assertEquals(Collections.singletonList("password"), httpRequest.getQueryParameters().get("grant_type"));
+		assertEquals(Collections.singletonList("johndoe"), httpRequest.getQueryParameters().get("username"));
+		assertEquals(Collections.singletonList("A3ddj3w"), httpRequest.getQueryParameters().get("password"));
 		assertEquals(3, httpRequest.getQueryParameters().size());
 	}
 
@@ -560,8 +557,8 @@ public class TokenRequestTest extends TestCase {
 		httpRequest.setQuery(postBody);
 
 		TokenRequest tr = TokenRequest.parse(httpRequest);
-
-		assertTrue(new URI("https://connect2id.com/token/").equals(tr.getEndpointURI()));
+		
+		assertEquals(new URI("https://connect2id.com/token/"), tr.getEndpointURI());
 
 		ClientSecretBasic authBasic = (ClientSecretBasic)tr.getClientAuthentication();
 		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, authBasic.getMethod());
@@ -574,8 +571,8 @@ public class TokenRequestTest extends TestCase {
 		assertNull(tr.getScope());
 
 		httpRequest = tr.toHTTPRequest();
-
-		assertTrue(new URL("https://connect2id.com/token/").equals(httpRequest.getURL()));
+		
+		assertEquals(new URL("https://connect2id.com/token/"), httpRequest.getURL());
 		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
 		assertEquals("Basic " + authBasicString, httpRequest.getAuthorization());
 		assertEquals(postBody, httpRequest.getQuery());
@@ -1239,21 +1236,21 @@ public class TokenRequestTest extends TestCase {
 		throws Exception {
 
 		AuthorizationGrant grant = new AuthorizationCodeGrant(new AuthorizationCode(), URI.create("https://example.com/cb"));
-		Map<String,String> customParams = new HashMap<>();
-		customParams.put("resource", "http://xxxxxx/PartyOData");
+		Map<String,List<String>> customParams = new HashMap<>();
+		customParams.put("resource", Collections.singletonList("http://xxxxxx/PartyOData"));
 
 		TokenRequest request = new TokenRequest(URI.create("https://c2id.com/token"), new ClientSecretBasic(new ClientID(), new Secret()), grant, Scope.parse("read write"), customParams);
 
 		assertEquals(customParams, request.getCustomParameters());
-		assertEquals("http://xxxxxx/PartyOData", request.getCustomParameter("resource"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), request.getCustomParameter("resource"));
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
 
-		assertEquals("http://xxxxxx/PartyOData", httpRequest.getQueryParameters().get("resource"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), httpRequest.getQueryParameters().get("resource"));
 		assertEquals(5, httpRequest.getQueryParameters().size());
 
 		request = TokenRequest.parse(httpRequest);
-		assertEquals("http://xxxxxx/PartyOData", request.getCustomParameter("resource"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), request.getCustomParameter("resource"));
 		assertEquals(1, request.getCustomParameters().size());
 	}
 
@@ -1262,21 +1259,21 @@ public class TokenRequestTest extends TestCase {
 		throws Exception {
 
 		AuthorizationGrant grant = new AuthorizationCodeGrant(new AuthorizationCode(), URI.create("https://example.com/cb"));
-		Map<String,String> customParams = new HashMap<>();
-		customParams.put("resource", "http://xxxxxx/PartyOData");
+		Map<String,List<String>> customParams = new HashMap<>();
+		customParams.put("resource", Collections.singletonList("http://xxxxxx/PartyOData"));
 
 		TokenRequest request = new TokenRequest(URI.create("https://c2id.com/token"), new ClientSecretPost(new ClientID(), new Secret()), grant, Scope.parse("read write"), customParams);
 
 		assertEquals(customParams, request.getCustomParameters());
-		assertEquals("http://xxxxxx/PartyOData", request.getCustomParameter("resource"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), request.getCustomParameter("resource"));
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
 
-		assertEquals("http://xxxxxx/PartyOData", httpRequest.getQueryParameters().get("resource"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), httpRequest.getQueryParameters().get("resource"));
 		assertEquals(7, httpRequest.getQueryParameters().size());
 
 		request = TokenRequest.parse(httpRequest);
-		assertEquals("http://xxxxxx/PartyOData", request.getCustomParameter("resource"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), request.getCustomParameter("resource"));
 		assertEquals(1, request.getCustomParameters().size());
 	}
 
@@ -1285,20 +1282,20 @@ public class TokenRequestTest extends TestCase {
 		throws Exception {
 
 		AuthorizationGrant grant = new ResourceOwnerPasswordCredentialsGrant("alice", new Secret());
-		Map<String,String> customParams = new HashMap<>();
-		customParams.put("resource", "http://xxxxxx/PartyOData");
+		Map<String,List<String>> customParams = new HashMap<>();
+		customParams.put("resource", Collections.singletonList("http://xxxxxx/PartyOData"));
 
 		TokenRequest request = new TokenRequest(URI.create("https://c2id.com/token"), new ClientSecretPost(new ClientID(), new Secret()), grant, Scope.parse("read write"), customParams);
 
 		assertEquals(customParams, request.getCustomParameters());
-		assertEquals("http://xxxxxx/PartyOData", request.getCustomParameter("resource"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), request.getCustomParameter("resource"));
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
-		assertEquals("http://xxxxxx/PartyOData", httpRequest.getQueryParameters().get("resource"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), httpRequest.getQueryParameters().get("resource"));
 		assertEquals(7, httpRequest.getQueryParameters().size());
 
 		request = TokenRequest.parse(httpRequest);
-		assertEquals("http://xxxxxx/PartyOData", request.getCustomParameter("resource"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), request.getCustomParameter("resource"));
 		assertEquals(1, request.getCustomParameters().size());
 	}
 
@@ -1307,24 +1304,24 @@ public class TokenRequestTest extends TestCase {
 		throws Exception {
 
 		AuthorizationGrant grant = new ClientCredentialsGrant();
-		Map<String,String> customParams = new HashMap<>();
-		customParams.put("resource", "http://xxxxxx/PartyOData");
+		Map<String,List<String>> customParams = new HashMap<>();
+		customParams.put("resource", Collections.singletonList("http://xxxxxx/PartyOData"));
 
 		TokenRequest request = new TokenRequest(URI.create("https://c2id.com/token"), new ClientSecretBasic(new ClientID(), new Secret()), grant, Scope.parse("read write"), customParams);
 
 		assertEquals(customParams, request.getCustomParameters());
-		assertEquals("http://xxxxxx/PartyOData", request.getCustomParameter("resource"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), request.getCustomParameter("resource"));
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
 
 		System.out.println(httpRequest.getQuery());
-		assertEquals("client_credentials", httpRequest.getQueryParameters().get("grant_type"));
-		assertEquals("read write", httpRequest.getQueryParameters().get("scope"));
-		assertEquals("http://xxxxxx/PartyOData", httpRequest.getQueryParameters().get("resource"));
+		assertEquals(Collections.singletonList("client_credentials"), httpRequest.getQueryParameters().get("grant_type"));
+		assertEquals(Collections.singletonList("read write"), httpRequest.getQueryParameters().get("scope"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), httpRequest.getQueryParameters().get("resource"));
 		assertEquals(3, httpRequest.getQueryParameters().size());
 
 		request = TokenRequest.parse(httpRequest);
-		assertEquals("http://xxxxxx/PartyOData", request.getCustomParameter("resource"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), request.getCustomParameter("resource"));
 		assertEquals(1, request.getCustomParameters().size());
 	}
 
@@ -1333,21 +1330,21 @@ public class TokenRequestTest extends TestCase {
 		throws Exception {
 
 		AuthorizationGrant grant = new ClientCredentialsGrant();
-		Map<String,String> customParams = new HashMap<>();
-		customParams.put("resource", "http://xxxxxx/PartyOData");
+		Map<String,List<String>> customParams = new HashMap<>();
+		customParams.put("resource", Collections.singletonList("http://xxxxxx/PartyOData"));
 
 		TokenRequest request = new TokenRequest(URI.create("https://c2id.com/token"), new ClientSecretPost(new ClientID(), new Secret()), grant, Scope.parse("read write"), customParams);
 
 		assertEquals(customParams, request.getCustomParameters());
-		assertEquals("http://xxxxxx/PartyOData", request.getCustomParameter("resource"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), request.getCustomParameter("resource"));
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
 
 		System.out.println(httpRequest.getQuery());
-		assertEquals("http://xxxxxx/PartyOData", httpRequest.getQueryParameters().get("resource"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), httpRequest.getQueryParameters().get("resource"));
 
 		request = TokenRequest.parse(httpRequest);
-		assertEquals("http://xxxxxx/PartyOData", request.getCustomParameter("resource"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), request.getCustomParameter("resource"));
 		assertEquals(1, request.getCustomParameters().size());
 	}
 
@@ -1356,21 +1353,21 @@ public class TokenRequestTest extends TestCase {
 		throws Exception {
 
 		AuthorizationGrant grant = new ClientCredentialsGrant();
-		Map<String,String> customParams = new HashMap<>();
-		customParams.put("resource", "http://xxxxxx/PartyOData");
+		Map<String,List<String>> customParams = new HashMap<>();
+		customParams.put("resource", Collections.singletonList("http://xxxxxx/PartyOData"));
 
 		TokenRequest request = new TokenRequest(URI.create("https://c2id.com/token"), new ClientSecretJWT(new ClientID(), URI.create("https://c2id.com/token"), JWSAlgorithm.HS256, new Secret()), grant, Scope.parse("read write"), customParams);
 
 		assertEquals(customParams, request.getCustomParameters());
-		assertEquals("http://xxxxxx/PartyOData", request.getCustomParameter("resource"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), request.getCustomParameter("resource"));
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
 
 		System.out.println(httpRequest.getQuery());
-		assertEquals("http://xxxxxx/PartyOData", httpRequest.getQueryParameters().get("resource"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), httpRequest.getQueryParameters().get("resource"));
 
 		request = TokenRequest.parse(httpRequest);
-		assertEquals("http://xxxxxx/PartyOData", request.getCustomParameter("resource"));
+		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), request.getCustomParameter("resource"));
 		System.out.println(request.getCustomParameters());
 		assertEquals(1, request.getCustomParameters().size());
 	}
@@ -1420,7 +1417,7 @@ public class TokenRequestTest extends TestCase {
 		
 		ClientSecretJWT clientSecretJWT = new ClientSecretJWT(clientID, tokenEndpoint.toURI(), JWSAlgorithm.HS256, clientSecret);
 		
-		Map<String,String> bodyParams = new HashMap<>();
+		Map<String,List<String>> bodyParams = new HashMap<>();
 		bodyParams.putAll(grant.toParameters());
 		bodyParams.putAll(clientSecretJWT.toParameters());
 		

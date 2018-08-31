@@ -18,6 +18,8 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import javax.mail.internet.ContentType;
 import javax.net.ssl.SSLSocketFactory;
@@ -106,9 +108,9 @@ abstract class AbstractTLSClientAuthentication extends ClientAuthentication {
 		if (! ct.match(CommonContentTypes.APPLICATION_URLENCODED))
 			throw new SerializeException("The HTTP Content-Type header must be " + CommonContentTypes.APPLICATION_URLENCODED);
 		
-		Map<String,String> params = httpRequest.getQueryParameters();
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
 		
-		params.put("client_id", getClientID().getValue());
+		params.put("client_id", Collections.singletonList(getClientID().getValue()));
 		
 		String queryString = URLUtils.serializeParameters(params);
 		

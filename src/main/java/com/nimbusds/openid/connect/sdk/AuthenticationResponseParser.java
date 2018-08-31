@@ -19,6 +19,7 @@ package com.nimbusds.openid.connect.sdk;
 
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -56,7 +57,7 @@ public class AuthenticationResponseParser {
 	 *                        OpenID Connect authentication response.
 	 */
 	public static AuthenticationResponse parse(final URI redirectURI,
-						   final Map<String,String> params)
+						   final Map<String,List<String>> params)
 		throws ParseException {
 
 		if (params.containsKey("error"))
@@ -109,7 +110,7 @@ public class AuthenticationResponseParser {
 			throw new ParseException("Missing authorization response parameters");
 		}
 		
-		Map<String,String> params = URLUtils.parseParameters(paramString);
+		Map<String,List<String>> params = URLUtils.parseParameters(paramString);
 
 		if (params == null)
 			throw new ParseException("Missing or invalid authorization response parameters");

@@ -22,10 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
@@ -171,19 +168,19 @@ public final class TokenRevocationRequest extends AbstractOptionallyIdentifiedRe
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, url);
 		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
 
-		Map<String,String> params = new HashMap<>();
+		Map<String,List<String>> params = new HashMap<>();
 
 		if (getClientID() != null) {
 			// public client
-			params.put("client_id", getClientID().getValue());
+			params.put("client_id", Collections.singletonList(getClientID().getValue()));
 		}
 
-		params.put("token", token.getValue());
+		params.put("token", Collections.singletonList(token.getValue()));
 
 		if (token instanceof AccessToken) {
-			params.put("token_type_hint", "access_token");
+			params.put("token_type_hint", Collections.singletonList("access_token"));
 		} else if (token instanceof RefreshToken) {
-			params.put("token_type_hint", "refresh_token");
+			params.put("token_type_hint", Collections.singletonList("refresh_token"));
 		}
 
 		httpRequest.setQuery(URLUtils.serializeParameters(params));
@@ -214,9 +211,9 @@ public final class TokenRevocationRequest extends AbstractOptionallyIdentifiedRe
 		httpRequest.ensureMethod(HTTPRequest.Method.POST);
 		httpRequest.ensureContentType(CommonContentTypes.APPLICATION_URLENCODED);
 
-		Map<String,String> params = httpRequest.getQueryParameters();
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
 
-		final String tokenValue = params.get("token");
+		final String tokenValue = URLUtils.getFirstValue(params,"token");
 
 		if (tokenValue == null || tokenValue.isEmpty()) {
 			throw new ParseException("Missing required token parameter");
@@ -225,7 +222,7 @@ public final class TokenRevocationRequest extends AbstractOptionallyIdentifiedRe
 		// Detect the token type
 		Token token = null;
 
-		final String tokenTypeHint = params.get("token_type_hint");
+		final String tokenTypeHint = URLUtils.getFirstValue(params,"token_type_hint");
 
 		if (tokenTypeHint == null) {
 
@@ -284,7 +281,7 @@ public final class TokenRevocationRequest extends AbstractOptionallyIdentifiedRe
 		}
 
 		// Public client
-		final String clientIDString = params.get("client_id");
+		final String clientIDString = URLUtils.getFirstValue(params, "client_id");
 
 		if (StringUtils.isBlank(clientIDString)) {
 			throw new ParseException("Invalid token revocation request: No client authentication or client_id parameter found");

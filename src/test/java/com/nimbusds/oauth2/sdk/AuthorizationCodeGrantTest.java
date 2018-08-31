@@ -20,7 +20,9 @@ package com.nimbusds.oauth2.sdk;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
@@ -46,10 +48,10 @@ public class AuthorizationCodeGrantTest extends TestCase {
 
 		assertEquals(GrantType.AUTHORIZATION_CODE, grant.getType());
 
-		Map<String,String> params = grant.toParameters();
-		assertEquals("abc", params.get("code"));
-		assertEquals("https://client.com/in", params.get("redirect_uri"));
-		assertEquals("authorization_code", params.get("grant_type"));
+		Map<String,List<String>> params = grant.toParameters();
+		assertEquals(Collections.singletonList("abc"), params.get("code"));
+		assertEquals(Collections.singletonList("https://client.com/in"), params.get("redirect_uri"));
+		assertEquals(Collections.singletonList("authorization_code"), params.get("grant_type"));
 		assertEquals(3, params.size());
 
 		grant = AuthorizationCodeGrant.parse(params);
@@ -75,11 +77,11 @@ public class AuthorizationCodeGrantTest extends TestCase {
 
 		assertEquals(GrantType.AUTHORIZATION_CODE, grant.getType());
 
-		Map<String,String> params = grant.toParameters();
-		assertEquals("abc", params.get("code"));
-		assertEquals("https://client.com/in", params.get("redirect_uri"));
-		assertEquals("authorization_code", params.get("grant_type"));
-		assertEquals(codeVerifier.getValue(), params.get("code_verifier"));
+		Map<String,List<String>> params = grant.toParameters();
+		assertEquals(Collections.singletonList("abc"), params.get("code"));
+		assertEquals(Collections.singletonList("https://client.com/in"), params.get("redirect_uri"));
+		assertEquals(Collections.singletonList("authorization_code"), params.get("grant_type"));
+		assertEquals(Collections.singletonList(codeVerifier.getValue()), params.get("code_verifier"));
 		assertEquals(4, params.size());
 
 		grant = AuthorizationCodeGrant.parse(params);
@@ -102,9 +104,9 @@ public class AuthorizationCodeGrantTest extends TestCase {
 
 		assertEquals(GrantType.AUTHORIZATION_CODE, grant.getType());
 
-		Map<String,String> params = grant.toParameters();
-		assertEquals("abc", params.get("code"));
-		assertEquals("authorization_code", params.get("grant_type"));
+		Map<String,List<String>> params = grant.toParameters();
+		assertEquals(Collections.singletonList("abc"), params.get("code"));
+		assertEquals(Collections.singletonList("authorization_code"), params.get("grant_type"));
 		assertEquals(2, params.size());
 
 		grant = AuthorizationCodeGrant.parse(params);
@@ -117,10 +119,10 @@ public class AuthorizationCodeGrantTest extends TestCase {
 	public void testParse()
 		throws Exception {
 		
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "authorization_code");
-		params.put("code", "abc");
-		params.put("redirect_uri", "https://client.com/in");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("authorization_code"));
+		params.put("code", Collections.singletonList("abc"));
+		params.put("redirect_uri", Collections.singletonList("https://client.com/in"));
 		
 		AuthorizationCodeGrant grant = AuthorizationCodeGrant.parse(params);
 		
@@ -133,11 +135,11 @@ public class AuthorizationCodeGrantTest extends TestCase {
 	public void testParse_codeVerifierTooShort()
 		throws Exception {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "authorization_code");
-		params.put("code", "abc");
-		params.put("redirect_uri", "https://client.com/in");
-		params.put("code_verifier", "abc");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("authorization_code"));
+		params.put("code", Collections.singletonList("abc"));
+		params.put("redirect_uri", Collections.singletonList("https://client.com/in"));
+		params.put("code_verifier", Collections.singletonList("abc"));
 
 		try {
 			AuthorizationCodeGrant.parse(params);
@@ -150,10 +152,10 @@ public class AuthorizationCodeGrantTest extends TestCase {
 
 	public void testParseMissingGrantType() {
 
-		Map<String,String> params = new HashMap<>();
+		Map<String,List<String>> params = new HashMap<>();
 		params.put("grant_type", null);
-		params.put("code", "abc");
-		params.put("redirect_uri", "https://client.com/in");
+		params.put("code", Collections.singletonList("abc"));
+		params.put("redirect_uri", Collections.singletonList("https://client.com/in"));
 
 		try {
 			AuthorizationCodeGrant.parse(params);
@@ -168,10 +170,10 @@ public class AuthorizationCodeGrantTest extends TestCase {
 
 	public void testParseUnsupportedGrant() {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "no-such-grant");
-		params.put("code", "abc");
-		params.put("redirect_uri", "https://client.com/in");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("no-such-grant"));
+		params.put("code", Collections.singletonList("abc"));
+		params.put("redirect_uri", Collections.singletonList("https://client.com/in"));
 
 		try {
 			AuthorizationCodeGrant.parse(params);
@@ -186,10 +188,10 @@ public class AuthorizationCodeGrantTest extends TestCase {
 
 	public void testParseMissingCode() {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "authorization_code");
-		params.put("code", "");
-		params.put("redirect_uri", "https://client.com/in");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("authorization_code"));
+		params.put("code", Collections.singletonList(""));
+		params.put("redirect_uri", Collections.singletonList("https://client.com/in"));
 
 		try {
 			AuthorizationCodeGrant.parse(params);
@@ -204,10 +206,10 @@ public class AuthorizationCodeGrantTest extends TestCase {
 
 	public void testParseInvalidRedirectionURI() {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "authorization_code");
-		params.put("code", "abc");
-		params.put("redirect_uri", "invalid uri");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("authorization_code"));
+		params.put("code", Collections.singletonList("abc"));
+		params.put("redirect_uri", Collections.singletonList("invalid uri"));
 
 		try {
 			AuthorizationCodeGrant.parse(params);

@@ -18,12 +18,13 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import com.nimbusds.oauth2.sdk.auth.Secret;
+import junit.framework.TestCase;
 
 
 /**
@@ -41,10 +42,10 @@ public class ResourceOwnerPasswordCredentialsGrantTest extends TestCase {
 		assertEquals(username, grant.getUsername());
 		assertEquals(password, grant.getPassword());
 
-		Map<String,String> params = grant.toParameters();
-		assertEquals("password", params.get("grant_type"));
-		assertEquals("alice", params.get("username"));
-		assertEquals("secret", params.get("password"));
+		Map<String,List<String>> params = grant.toParameters();
+		assertEquals(Collections.singletonList("password"), params.get("grant_type"));
+		assertEquals(Collections.singletonList("alice"), params.get("username"));
+		assertEquals(Collections.singletonList("secret"), params.get("password"));
 		assertEquals(3, params.size());
 	}
 
@@ -52,10 +53,10 @@ public class ResourceOwnerPasswordCredentialsGrantTest extends TestCase {
 	public void testParse()
 		throws Exception {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "password");
-		params.put("username", "alice");
-		params.put("password", "secret");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("password"));
+		params.put("username", Collections.singletonList("alice"));
+		params.put("password", Collections.singletonList("secret"));
 
 		ResourceOwnerPasswordCredentialsGrant grant = ResourceOwnerPasswordCredentialsGrant.parse(params);
 		assertEquals(GrantType.PASSWORD, grant.getType());
@@ -66,9 +67,9 @@ public class ResourceOwnerPasswordCredentialsGrantTest extends TestCase {
 
 	public void testParseMissingGrantType() {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("username", "alice");
-		params.put("password", "secret");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("username", Collections.singletonList("alice"));
+		params.put("password", Collections.singletonList("secret"));
 
 		try {
 			ResourceOwnerPasswordCredentialsGrant.parse(params);
@@ -82,10 +83,10 @@ public class ResourceOwnerPasswordCredentialsGrantTest extends TestCase {
 
 	public void testParseUnsupportedGrantType() {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "invalid_grant");
-		params.put("username", "alice");
-		params.put("password", "secret");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("invalid_grant"));
+		params.put("username", Collections.singletonList("alice"));
+		params.put("password", Collections.singletonList("secret"));
 
 		try {
 			ResourceOwnerPasswordCredentialsGrant.parse(params);
@@ -99,9 +100,9 @@ public class ResourceOwnerPasswordCredentialsGrantTest extends TestCase {
 
 	public void testParseMissingUsername() {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "password");
-		params.put("password", "secret");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("password"));
+		params.put("password", Collections.singletonList("secret"));
 
 		try {
 			ResourceOwnerPasswordCredentialsGrant.parse(params);
@@ -115,9 +116,9 @@ public class ResourceOwnerPasswordCredentialsGrantTest extends TestCase {
 
 	public void testParseMissingPassword() {
 
-		Map<String,String> params = new HashMap<>();
-		params.put("grant_type", "password");
-		params.put("username", "alice");
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("password"));
+		params.put("username", Collections.singletonList("alice"));
 
 		try {
 			ResourceOwnerPasswordCredentialsGrant.parse(params);

@@ -21,7 +21,9 @@ package com.nimbusds.oauth2.sdk;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
@@ -62,9 +64,9 @@ public class TokenRevocationRequestTest extends TestCase {
 		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
 		assertNull(httpRequest.getAuthorization());
 
-		assertEquals(token.getValue(), httpRequest.getQueryParameters().get("token"));
-		assertEquals("access_token", httpRequest.getQueryParameters().get("token_type_hint"));
-		assertEquals("123", httpRequest.getQueryParameters().get("client_id"));
+		assertEquals(Collections.singletonList(token.getValue()), httpRequest.getQueryParameters().get("token"));
+		assertEquals(Collections.singletonList("access_token"), httpRequest.getQueryParameters().get("token_type_hint"));
+		assertEquals(Collections.singletonList("123"), httpRequest.getQueryParameters().get("client_id"));
 		assertEquals(3, httpRequest.getQueryParameters().size());
 
 		request = TokenRevocationRequest.parse(httpRequest);
@@ -94,8 +96,8 @@ public class TokenRevocationRequestTest extends TestCase {
 		assertEquals(endpointURI.toURL().toString(), httpRequest.getURL().toString());
 		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
 
-		assertEquals(token.getValue(), httpRequest.getQueryParameters().get("token"));
-		assertEquals("access_token", httpRequest.getQueryParameters().get("token_type_hint"));
+		assertEquals(Collections.singletonList(token.getValue()), httpRequest.getQueryParameters().get("token"));
+		assertEquals(Collections.singletonList("access_token"), httpRequest.getQueryParameters().get("token_type_hint"));
 		assertEquals(2, httpRequest.getQueryParameters().size());
 
 		ClientSecretBasic basicAuth = ClientSecretBasic.parse(httpRequest.getAuthorization());
@@ -129,9 +131,9 @@ public class TokenRevocationRequestTest extends TestCase {
 		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
 		assertNull(httpRequest.getAuthorization());
 
-		assertEquals(token.getValue(), httpRequest.getQueryParameters().get("token"));
-		assertEquals("refresh_token", httpRequest.getQueryParameters().get("token_type_hint"));
-		assertEquals("123", httpRequest.getQueryParameters().get("client_id"));
+		assertEquals(Collections.singletonList(token.getValue()), httpRequest.getQueryParameters().get("token"));
+		assertEquals(Collections.singletonList("refresh_token"), httpRequest.getQueryParameters().get("token_type_hint"));
+		assertEquals(Collections.singletonList("123"), httpRequest.getQueryParameters().get("client_id"));
 		assertEquals(3, httpRequest.getQueryParameters().size());
 
 		request = TokenRevocationRequest.parse(httpRequest);
@@ -160,8 +162,8 @@ public class TokenRevocationRequestTest extends TestCase {
 		assertEquals(endpointURI.toURL().toString(), httpRequest.getURL().toString());
 		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
 
-		assertEquals(token.getValue(), httpRequest.getQueryParameters().get("token"));
-		assertEquals("refresh_token", httpRequest.getQueryParameters().get("token_type_hint"));
+		assertEquals(Collections.singletonList(token.getValue()), httpRequest.getQueryParameters().get("token"));
+		assertEquals(Collections.singletonList("refresh_token"), httpRequest.getQueryParameters().get("token_type_hint"));
 		assertEquals(2, httpRequest.getQueryParameters().size());
 
 		ClientSecretBasic basicAuth = ClientSecretBasic.parse(httpRequest.getAuthorization());
@@ -184,9 +186,9 @@ public class TokenRevocationRequestTest extends TestCase {
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token/revoke"));
 		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
 
-		Map<String,String> queryParams = new HashMap<>();
-		queryParams.put("token", "abc");
-		queryParams.put("client_id", "123");
+		Map<String,List<String>> queryParams = new HashMap<>();
+		queryParams.put("token", Collections.singletonList("abc"));
+		queryParams.put("client_id", Collections.singletonList("123"));
 		httpRequest.setQuery(URLUtils.serializeParameters(queryParams));
 
 		TokenRevocationRequest request = TokenRevocationRequest.parse(httpRequest);
@@ -205,8 +207,8 @@ public class TokenRevocationRequestTest extends TestCase {
 		httpRequest.setAuthorization(new ClientSecretBasic(new ClientID("123"), new Secret("secret")).toHTTPAuthorizationHeader());
 		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
 
-		Map<String,String> queryParams = new HashMap<>();
-		queryParams.put("token", "abc");
+		Map<String,List<String>> queryParams = new HashMap<>();
+		queryParams.put("token", Collections.singletonList("abc"));
 		httpRequest.setQuery(URLUtils.serializeParameters(queryParams));
 
 		TokenRevocationRequest request = TokenRevocationRequest.parse(httpRequest);
@@ -247,8 +249,8 @@ public class TokenRevocationRequestTest extends TestCase {
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token/revoke"));
 		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
 
-		Map<String,String> queryParams = new HashMap<>();
-		queryParams.put("token", "abc");
+		Map<String,List<String>> queryParams = new HashMap<>();
+		queryParams.put("token", Collections.singletonList("abc"));
 		httpRequest.setQuery(URLUtils.serializeParameters(queryParams));
 
 		try {

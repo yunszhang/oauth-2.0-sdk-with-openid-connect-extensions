@@ -19,23 +19,22 @@ package com.nimbusds.openid.connect.sdk;
 
 
 import java.net.URI;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
-
-import junit.framework.TestCase;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.ResponseMode;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
+import junit.framework.TestCase;
 
 
 /**
@@ -62,10 +61,10 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 
 		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
 			.issuer("https://c2id.com")
-			.audience(Arrays.asList("https://client.com"))
+			.audience(Collections.singletonList("https://client.com"))
 			.subject("alice")
-			.issueTime(new Date(10000l))
-			.expirationTime(new Date(20000l))
+			.issueTime(new Date(10000L))
+			.expirationTime(new Date(20000L))
 			.claim("nonce", "123")
 			.build();
 
@@ -83,8 +82,8 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		assertNull(response.getAccessToken());
 		assertEquals("abc", response.getState().getValue());
 		assertNull(response.getSessionState());
-
-		assertTrue(new ResponseType("id_token").equals(response.impliedResponseType()));
+		
+		assertEquals(new ResponseType("id_token"), response.impliedResponseType());
 		assertEquals(ResponseMode.FRAGMENT, response.impliedResponseMode());
 
 		URI responseURI = response.toURI();
@@ -99,8 +98,8 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		assertEquals("https://c2id.com", response.getIDToken().getJWTClaimsSet().getIssuer());
 		assertEquals("https://client.com", response.getIDToken().getJWTClaimsSet().getAudience().get(0));
 		assertEquals("alice", response.getIDToken().getJWTClaimsSet().getSubject());
-		assertEquals(10000l, response.getIDToken().getJWTClaimsSet().getIssueTime().getTime());
-		assertEquals(20000l, response.getIDToken().getJWTClaimsSet().getExpirationTime().getTime());
+		assertEquals(10000L, response.getIDToken().getJWTClaimsSet().getIssueTime().getTime());
+		assertEquals(20000L, response.getIDToken().getJWTClaimsSet().getExpirationTime().getTime());
 		assertEquals("123", (String)response.getIDToken().getJWTClaimsSet().getClaim("nonce"));
 		assertNull(response.getAuthorizationCode());
 		assertNull(response.getAccessToken());
@@ -117,10 +116,10 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 
 		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
 			.issuer("https://c2id.com")
-			.audience(Arrays.asList("https://client.com"))
+			.audience(Collections.singletonList("https://client.com"))
 			.subject("alice")
-			.issueTime(new Date(10000l))
-			.expirationTime(new Date(20000l))
+			.issueTime(new Date(10000L))
+			.expirationTime(new Date(20000L))
 			.claim("nonce", "123")
 			.build();
 
@@ -138,8 +137,8 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		assertNull(response.getAccessToken());
 		assertEquals("abc", response.getState().getValue());
 		assertNull(response.getSessionState());
-
-		assertTrue(new ResponseType("code", "id_token").equals(response.impliedResponseType()));
+		
+		assertEquals(new ResponseType("code", "id_token"), response.impliedResponseType());
 		assertEquals(ResponseMode.FRAGMENT, response.impliedResponseMode());
 
 		URI responseURI = response.toURI();
@@ -154,8 +153,8 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		assertEquals("https://c2id.com", response.getIDToken().getJWTClaimsSet().getIssuer());
 		assertEquals("https://client.com", response.getIDToken().getJWTClaimsSet().getAudience().get(0));
 		assertEquals("alice", response.getIDToken().getJWTClaimsSet().getSubject());
-		assertEquals(10000l, response.getIDToken().getJWTClaimsSet().getIssueTime().getTime());
-		assertEquals(20000l, response.getIDToken().getJWTClaimsSet().getExpirationTime().getTime());
+		assertEquals(10000L, response.getIDToken().getJWTClaimsSet().getIssueTime().getTime());
+		assertEquals(20000L, response.getIDToken().getJWTClaimsSet().getExpirationTime().getTime());
 		assertEquals("123", (String)response.getIDToken().getJWTClaimsSet().getClaim("nonce"));
 		assertEquals(code, response.getAuthorizationCode());
 		assertNull(response.getAccessToken());
@@ -172,10 +171,10 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 
 		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
 			.issuer("https://c2id.com")
-			.audience(Arrays.asList("https://client.com"))
+			.audience(Collections.singletonList("https://client.com"))
 			.subject("alice")
-			.issueTime(new Date(10000l))
-			.expirationTime(new Date(20000l))
+			.issueTime(new Date(10000L))
+			.expirationTime(new Date(20000L))
 			.claim("nonce", "123")
 			.build();
 
@@ -193,8 +192,8 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		assertNull(response.getAccessToken());
 		assertEquals("abc", response.getState().getValue());
 		assertEquals("xyz", response.getSessionState().getValue());
-
-		assertTrue(new ResponseType("code", "id_token").equals(response.impliedResponseType()));
+		
+		assertEquals(new ResponseType("code", "id_token"), response.impliedResponseType());
 		assertEquals(ResponseMode.FRAGMENT, response.impliedResponseMode());
 
 		URI responseURI = response.toURI();
@@ -209,8 +208,8 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		assertEquals("https://c2id.com", response.getIDToken().getJWTClaimsSet().getIssuer());
 		assertEquals("https://client.com", response.getIDToken().getJWTClaimsSet().getAudience().get(0));
 		assertEquals("alice", response.getIDToken().getJWTClaimsSet().getSubject());
-		assertEquals(10000l, response.getIDToken().getJWTClaimsSet().getIssueTime().getTime());
-		assertEquals(20000l, response.getIDToken().getJWTClaimsSet().getExpirationTime().getTime());
+		assertEquals(10000L, response.getIDToken().getJWTClaimsSet().getIssueTime().getTime());
+		assertEquals(20000L, response.getIDToken().getJWTClaimsSet().getExpirationTime().getTime());
 		assertEquals("123", (String)response.getIDToken().getJWTClaimsSet().getClaim("nonce"));
 		assertEquals(code, response.getAuthorizationCode());
 		assertNull(response.getAccessToken());
@@ -235,8 +234,8 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		assertNull(response.getAccessToken());
 		assertEquals("abc", response.getState().getValue());
 		assertNull(response.getSessionState());
-
-		assertTrue(new ResponseType("code").equals(response.impliedResponseType()));
+		
+		assertEquals(new ResponseType("code"), response.impliedResponseType());
 		assertEquals(ResponseMode.QUERY, response.impliedResponseMode());
 
 		URI responseURI = response.toURI();
@@ -269,17 +268,17 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 
 		AuthenticationSuccessResponse response = new AuthenticationSuccessResponse(redirectURI, code, null, null, state, null, ResponseMode.QUERY);
 
-		Map<String,String> params = response.toParameters();
-		assertEquals(code.getValue(), params.get("code"));
-		assertEquals(state.getValue(), params.get("state"));
+		Map<String,List<String>> params = response.toParameters();
+		assertEquals(Collections.singletonList(code.getValue()), params.get("code"));
+		assertEquals(Collections.singletonList(state.getValue()), params.get("state"));
 		assertEquals(2, params.size());
 
 		URI uri = response.toURI();
 
 		params = URLUtils.parseParameters(uri.getQuery());
-		assertEquals("oidccallback", params.get("action"));
-		assertEquals(code.getValue(), params.get("code"));
-		assertEquals(state.getValue(), params.get("state"));
+		assertEquals(Collections.singletonList("oidccallback"), params.get("action"));
+		assertEquals(Collections.singletonList(code.getValue()), params.get("code"));
+		assertEquals(Collections.singletonList(state.getValue()), params.get("state"));
 		assertEquals(3, params.size());
 	}
 }
