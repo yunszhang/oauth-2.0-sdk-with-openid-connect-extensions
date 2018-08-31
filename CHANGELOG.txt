@@ -950,4 +950,32 @@ version 6.0 (2018-08-31)
       in the request body (breaking change).
     * Updates HTTPRequest to support multi-valued parameters in the query and
       body (breaking change).
+    * Switches com.nimbusds.openid.connect.sdk.op.AuthenticationRequestResolver
+      to com.nimbusds.jose.util.ResourceRetriever (breaking change).
+    * Removes deprecated com.nimbusds.oauth2.sdk.http.Resource class.
+    * Removes deprecated com.nimbusds.oauth2.sdk.http.ResourceRetriever
+      interface.
+    * Removes deprecated
+      com.nimbusds.oauth2.sdk.http.RestrictedResourceRetriever interface.
+    * Removes deprecated
+      com.nimbusds.oauth2.sdk.http.AbstractRestrictedResourceRetriever class.
+    * Removes deprecated
+      com.nimbusds.oauth2.sdk.http.DefaultResourceRetriever class.
+    * Removes deprecated com.nimbusds.oauth2.sdk.jose.jwk.JWKSource interface.
+    * Removes deprecated com.nimbusds.oauth2.sdk.jose.jwk.AbstractJWKSource
+      class.
+    * Removes deprecated com.nimbusds.oauth2.sdk.jose.jwk.ImmutableJWKSet
+      class.
+    * Removes deprecated com.nimbusds.oauth2.sdk.jose.jwk.ImmutableClientSecret
+      class.
+    * Removes deprecated com.nimbusds.oauth2.sdk.jose.jwk.RemoteJWKSet class.
+    * Removes deprecated com.nimbusds.oauth2.sdk.jose.jwk.AbstractJWKSelector
+      class.
+    * Removes deprecated
+      com.nimbusds.oauth2.sdk.jose.jwk.JWSVerificationKeySelector class.
+    * Removes deprecated
+      com.nimbusds.oauth2.sdk.jose.jwk.JWEDecryptionKeySelector class.
+    * Removes deprecated com.nimbusds.oauth2.sdk.jose.jwk.KeyConverter class.
+    * Removes deprecated
+      com.nimbusds.openid.connect.sdk.id.AESBasedPairwiseSubjectCodec class.
     * Updates Nimbus JOSE+JWT to 6.0.1 with Ed25519 and X25519 support.

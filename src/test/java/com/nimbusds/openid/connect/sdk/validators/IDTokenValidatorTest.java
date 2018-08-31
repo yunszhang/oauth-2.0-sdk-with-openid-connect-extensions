@@ -31,9 +31,8 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.*;
-import com.nimbusds.jose.proc.BadJOSEException;
-import com.nimbusds.jose.proc.BadJWEException;
-import com.nimbusds.jose.proc.BadJWSException;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.proc.*;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jose.util.ByteUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -47,9 +46,6 @@ import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
-import com.nimbusds.oauth2.sdk.jose.jwk.ImmutableJWKSet;
-import com.nimbusds.oauth2.sdk.jose.jwk.JWEDecryptionKeySelector;
-import com.nimbusds.oauth2.sdk.jose.jwk.JWSVerificationKeySelector;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
@@ -541,14 +537,12 @@ public class IDTokenValidatorTest extends TestCase {
 
 		IDTokenValidator verifier = new IDTokenValidator(iss, clientID,
 				new JWSVerificationKeySelector(
-						iss,
 						JWSAlgorithm.RS256,
-						new ImmutableJWKSet(iss, opJWKSet)),
+						new ImmutableJWKSet(opJWKSet)),
 				new JWEDecryptionKeySelector(
-						clientID,
 						JWEAlgorithm.RSA1_5,
 						EncryptionMethod.A128CBC_HS256,
-						new ImmutableJWKSet(clientID, rpJWKSet)));
+						new ImmutableJWKSet(rpJWKSet)));
 
 		assertEquals(iss, verifier.getExpectedIssuer());
 		assertEquals(clientID, verifier.getClientID());
@@ -621,14 +615,12 @@ public class IDTokenValidatorTest extends TestCase {
 
 		IDTokenValidator verifier = new IDTokenValidator(iss, clientID,
 				new JWSVerificationKeySelector(
-						iss,
 						JWSAlgorithm.RS256,
-						new ImmutableJWKSet(iss, opJWKSet)),
+						new ImmutableJWKSet(opJWKSet)),
 				new JWEDecryptionKeySelector(
-						clientID,
 						JWEAlgorithm.RSA1_5,
 						EncryptionMethod.A128CBC_HS256,
-						new ImmutableJWKSet(clientID, rpJWKSet)));
+						new ImmutableJWKSet(rpJWKSet)));
 
 		try {
 			verifier.validate(JWTParser.parse(idTokenString), null);

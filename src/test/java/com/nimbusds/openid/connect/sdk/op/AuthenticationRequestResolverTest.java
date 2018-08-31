@@ -32,14 +32,14 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jose.proc.JWSKeySelector;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.jose.util.Resource;
+import com.nimbusds.jose.util.ResourceRetriever;
 import com.nimbusds.jwt.*;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
-import com.nimbusds.oauth2.sdk.http.Resource;
-import com.nimbusds.oauth2.sdk.http.ResourceRetriever;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
@@ -173,7 +173,7 @@ public class AuthenticationRequestResolverTest extends TestCase {
 
 
 	public void testRequestObjectsOnly_plainJWT_missingRedirectURI()
-		throws ResolveException, JOSEException {
+		throws JOSEException {
 
 		DefaultJWTProcessor jwtProcessor = new DefaultJWTProcessor() {
 			@Override
@@ -255,7 +255,7 @@ public class AuthenticationRequestResolverTest extends TestCase {
 
 
 	public void testRequestObjectsOnly_plainJWT_badClaimsSetJSON()
-		throws ResolveException, JOSEException, ParseException {
+		throws JOSEException, ParseException {
 
 		DefaultJWTProcessor jwtProcessor = new DefaultJWTProcessor() {
 			@Override
@@ -332,7 +332,7 @@ public class AuthenticationRequestResolverTest extends TestCase {
 		ResourceRetriever jwtRetriever = new ResourceRetriever() {
 			@Override
 			public Resource retrieveResource(URL url) throws IOException {
-				return new Resource(requestObject.serialize(), CommonContentTypes.APPLICATION_JWT);
+				return new Resource(requestObject.serialize(), CommonContentTypes.APPLICATION_JWT.toString());
 			}
 		};
 
@@ -365,7 +365,7 @@ public class AuthenticationRequestResolverTest extends TestCase {
 
 
 	public void testRequestURI_hmacJWT_badHMAC()
-		throws ResolveException, JOSEException {
+		throws JOSEException {
 
 		final Secret clientSecret = new Secret();
 
@@ -396,8 +396,8 @@ public class AuthenticationRequestResolverTest extends TestCase {
 
 		ResourceRetriever jwtRetriever = new ResourceRetriever() {
 			@Override
-			public Resource retrieveResource(URL url) throws IOException {
-				return new Resource(requestObject.serialize(), CommonContentTypes.APPLICATION_JWT);
+			public Resource retrieveResource(URL url) {
+				return new Resource(requestObject.serialize(), CommonContentTypes.APPLICATION_JWT.toString());
 			}
 		};
 
@@ -425,7 +425,7 @@ public class AuthenticationRequestResolverTest extends TestCase {
 
 
 	public void testRequestURI_hmacJWT_badURL()
-		throws ResolveException, JOSEException {
+		throws JOSEException {
 
 		final Secret clientSecret = new Secret();
 
