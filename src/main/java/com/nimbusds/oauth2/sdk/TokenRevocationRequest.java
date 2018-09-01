@@ -32,6 +32,7 @@ import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.token.Token;
 import com.nimbusds.oauth2.sdk.token.TypelessAccessToken;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
@@ -213,7 +214,7 @@ public final class TokenRevocationRequest extends AbstractOptionallyIdentifiedRe
 
 		Map<String,List<String>> params = httpRequest.getQueryParameters();
 
-		final String tokenValue = URLUtils.getFirstValue(params,"token");
+		final String tokenValue = MultivaluedMapUtils.getFirstValue(params,"token");
 
 		if (tokenValue == null || tokenValue.isEmpty()) {
 			throw new ParseException("Missing required token parameter");
@@ -222,7 +223,7 @@ public final class TokenRevocationRequest extends AbstractOptionallyIdentifiedRe
 		// Detect the token type
 		Token token = null;
 
-		final String tokenTypeHint = URLUtils.getFirstValue(params,"token_type_hint");
+		final String tokenTypeHint = MultivaluedMapUtils.getFirstValue(params,"token_type_hint");
 
 		if (tokenTypeHint == null) {
 
@@ -281,7 +282,7 @@ public final class TokenRevocationRequest extends AbstractOptionallyIdentifiedRe
 		}
 
 		// Public client
-		final String clientIDString = URLUtils.getFirstValue(params, "client_id");
+		final String clientIDString = MultivaluedMapUtils.getFirstValue(params, "client_id");
 
 		if (StringUtils.isBlank(clientIDString)) {
 			throw new ParseException("Invalid token revocation request: No client authentication or client_id parameter found");

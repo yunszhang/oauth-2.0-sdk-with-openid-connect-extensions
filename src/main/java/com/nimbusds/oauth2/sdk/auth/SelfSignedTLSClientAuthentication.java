@@ -26,6 +26,7 @@ import javax.net.ssl.SSLSocketFactory;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
@@ -137,7 +138,7 @@ public class SelfSignedTLSClientAuthentication extends AbstractTLSClientAuthenti
 		
 		Map<String,List<String>> params = URLUtils.parseParameters(query);
 		
-		String clientIDString = URLUtils.getFirstValue(params, "client_id");
+		String clientIDString = MultivaluedMapUtils.getFirstValue(params, "client_id");
 		
 		if (StringUtils.isBlank(clientIDString)) {
 			throw new ParseException("Missing client_id parameter");

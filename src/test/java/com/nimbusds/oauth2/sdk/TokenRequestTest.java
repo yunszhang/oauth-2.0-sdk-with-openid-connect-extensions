@@ -41,6 +41,7 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import junit.framework.TestCase;
 import org.opensaml.security.credential.BasicCredential;
@@ -78,7 +79,7 @@ public class TokenRequestTest extends TestCase {
 		Map<String,List<String>> params = httpRequest.getQueryParameters();
 		assertEquals(Collections.singletonList(GrantType.AUTHORIZATION_CODE.getValue()), params.get("grant_type"));
 		assertEquals(Collections.singletonList("abc"), params.get("code"));
-		assertTrue(Scope.parse("openid email").containsAll(Scope.parse(URLUtils.getFirstValue(params, "scope"))));
+		assertTrue(Scope.parse("openid email").containsAll(Scope.parse(MultivaluedMapUtils.getFirstValue(params, "scope"))));
 		assertEquals(3, params.size());
 	}
 
@@ -272,7 +273,7 @@ public class TokenRequestTest extends TestCase {
 		assertEquals(Collections.singletonList(GrantType.PASSWORD.getValue()), params.get("grant_type"));
 		assertEquals(Collections.singletonList("alice"), params.get("username"));
 		assertEquals(Collections.singletonList("secret"), params.get("password"));
-		assertEquals(Scope.parse("openid email"), Scope.parse(URLUtils.getFirstValue(params, "scope")));
+		assertEquals(Scope.parse("openid email"), Scope.parse(MultivaluedMapUtils.getFirstValue(params, "scope")));
 		assertEquals(4, params.size());
 	}
 

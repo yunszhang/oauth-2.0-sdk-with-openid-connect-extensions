@@ -31,6 +31,7 @@ import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.AccessTokenType;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import junit.framework.TestCase;
 
@@ -91,8 +92,8 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 		assertEquals(ResponseMode.QUERY, resp.impliedResponseMode());
 
 		Map<String,List<String>> params = resp.toParameters();
-		assertEquals(CODE, new AuthorizationCode(URLUtils.getFirstValue(params, "code")));
-		assertEquals(STATE, new State(URLUtils.getFirstValue(params,"state")));
+		assertEquals(CODE, new AuthorizationCode(MultivaluedMapUtils.getFirstValue(params, "code")));
+		assertEquals(STATE, new State(MultivaluedMapUtils.getFirstValue(params,"state")));
 		assertEquals(2, params.size());
 
 		URI uri = resp.toURI();
@@ -133,10 +134,10 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 		assertEquals(ResponseMode.FRAGMENT, resp.impliedResponseMode());
 
 		Map<String,List<String>> params = resp.toParameters();
-		assertEquals(TOKEN.getValue(), URLUtils.getFirstValue(params,"access_token"));
-		assertEquals(STATE, new State(URLUtils.getFirstValue(params, "state")));
-		assertEquals(TOKEN.getType(), new AccessTokenType(URLUtils.getFirstValue(params,"token_type")));
-		assertEquals("3600", URLUtils.getFirstValue(params, "expires_in"));
+		assertEquals(TOKEN.getValue(), MultivaluedMapUtils.getFirstValue(params,"access_token"));
+		assertEquals(STATE, new State(MultivaluedMapUtils.getFirstValue(params, "state")));
+		assertEquals(TOKEN.getType(), new AccessTokenType(MultivaluedMapUtils.getFirstValue(params,"token_type")));
+		assertEquals("3600", MultivaluedMapUtils.getFirstValue(params, "expires_in"));
 		assertEquals(4, params.size());
 
 		URI uri = resp.toURI();
@@ -223,8 +224,8 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 		URI uri = resp.toURI();
 		assertNull(uri.getQuery());
 		Map<String,List<String>> params = URLUtils.parseParameters(uri.getRawFragment());
-		assertEquals(CODE.getValue(), URLUtils.getFirstValue(params, "code"));
-		assertEquals(STATE.getValue(), URLUtils.getFirstValue(params, "state"));
+		assertEquals(CODE.getValue(), MultivaluedMapUtils.getFirstValue(params, "code"));
+		assertEquals(STATE.getValue(), MultivaluedMapUtils.getFirstValue(params, "state"));
 		assertEquals(2, params.size());
 	}
 
@@ -255,10 +256,10 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 		URI uri = resp.toURI();
 		assertNull(uri.getRawFragment());
 		Map<String,List<String>> params = URLUtils.parseParameters(uri.getQuery());
-		assertEquals("Bearer", URLUtils.getFirstValue(params, "token_type"));
-		assertEquals(TOKEN.getValue(), URLUtils.getFirstValue(params, "access_token"));
-		assertEquals(TOKEN.getLifetime() + "", URLUtils.getFirstValue(params, "expires_in"));
-		assertEquals(STATE.getValue(), URLUtils.getFirstValue(params, "state"));
+		assertEquals("Bearer", MultivaluedMapUtils.getFirstValue(params, "token_type"));
+		assertEquals(TOKEN.getValue(), MultivaluedMapUtils.getFirstValue(params, "access_token"));
+		assertEquals(TOKEN.getLifetime() + "", MultivaluedMapUtils.getFirstValue(params, "expires_in"));
+		assertEquals(STATE.getValue(), MultivaluedMapUtils.getFirstValue(params, "state"));
 		assertEquals(4, params.size());
 	}
 
@@ -306,16 +307,16 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 		AuthorizationSuccessResponse response = new AuthorizationSuccessResponse(redirectURI, code, null, state, ResponseMode.QUERY);
 
 		Map<String,List<String>> params = response.toParameters();
-		assertEquals(code.getValue(), URLUtils.getFirstValue(params, "code"));
-		assertEquals(state.getValue(), URLUtils.getFirstValue(params, "state"));
+		assertEquals(code.getValue(), MultivaluedMapUtils.getFirstValue(params, "code"));
+		assertEquals(state.getValue(), MultivaluedMapUtils.getFirstValue(params, "state"));
 		assertEquals(2, params.size());
 
 		URI uri = response.toURI();
 
 		params = URLUtils.parseParameters(uri.getQuery());
-		assertEquals("oidccallback", URLUtils.getFirstValue(params, "action"));
-		assertEquals(code.getValue(), URLUtils.getFirstValue(params, "code"));
-		assertEquals(state.getValue(), URLUtils.getFirstValue(params, "state"));
+		assertEquals("oidccallback", MultivaluedMapUtils.getFirstValue(params, "action"));
+		assertEquals(code.getValue(), MultivaluedMapUtils.getFirstValue(params, "code"));
+		assertEquals(state.getValue(), MultivaluedMapUtils.getFirstValue(params, "state"));
 		assertEquals(3, params.size());
 	}
 

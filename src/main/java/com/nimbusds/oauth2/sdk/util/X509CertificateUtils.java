@@ -26,7 +26,7 @@ import java.security.cert.X509Certificate;
 /**
  * X.509 certificate utilities.
  */
-public class X509CertificateUtils {
+public final class X509CertificateUtils {
 	
 	
 	/**
@@ -103,4 +103,10 @@ public class X509CertificateUtils {
 		
 		return true;
 	}
+	
+	
+	/**
+	 * Prevents public instantiation.
+	 */
+	private X509CertificateUtils() {}
 }

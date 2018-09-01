@@ -33,6 +33,7 @@ import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.MapUtils;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
@@ -429,7 +430,7 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 		
 		// Multiple conflicting client auth methods (issue #203)?
 		if (clientAuth instanceof ClientSecretBasic) {
-			if (StringUtils.isNotBlank(URLUtils.getFirstValue(params, "client_assertion")) || StringUtils.isNotBlank(URLUtils.getFirstValue(params, "client_assertion_type"))) {
+			if (StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(params, "client_assertion")) || StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(params, "client_assertion_type"))) {
 				String msg = "Multiple conflicting client authentication methods found: Basic and JWT assertion";
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 			}
@@ -449,7 +450,7 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 		if (clientAuth == null) {
 
 			// Parse optional client ID
-			String clientIDString = URLUtils.getFirstValue(params, "client_id");
+			String clientIDString = MultivaluedMapUtils.getFirstValue(params, "client_id");
 
 			if (clientIDString != null && ! clientIDString.trim().isEmpty())
 				clientID = new ClientID(clientIDString);
@@ -461,7 +462,7 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 		}
 
 		// Parse optional scope
-		String scopeValue = URLUtils.getFirstValue(params, "scope");
+		String scopeValue = MultivaluedMapUtils.getFirstValue(params, "scope");
 
 		Scope scope = null;
 

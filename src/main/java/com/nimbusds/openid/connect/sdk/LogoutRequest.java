@@ -34,6 +34,7 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
@@ -348,7 +349,7 @@ public class LogoutRequest extends AbstractRequest {
 	public static LogoutRequest parse(final URI uri, final Map<String,List<String>> params)
 		throws ParseException {
 
-		String v = URLUtils.getFirstValue(params, "id_token_hint");
+		String v = MultivaluedMapUtils.getFirstValue(params, "id_token_hint");
 
 		JWT idTokenHint = null;
 		
@@ -361,7 +362,7 @@ public class LogoutRequest extends AbstractRequest {
 			}
 		}
 
-		v = URLUtils.getFirstValue(params, "post_logout_redirect_uri");
+		v = MultivaluedMapUtils.getFirstValue(params, "post_logout_redirect_uri");
 
 		URI postLogoutRedirectURI = null;
 
@@ -376,7 +377,7 @@ public class LogoutRequest extends AbstractRequest {
 
 		State state = null;
 
-		v = URLUtils.getFirstValue(params, "state");
+		v = MultivaluedMapUtils.getFirstValue(params, "state");
 
 		if (postLogoutRedirectURI != null && StringUtils.isNotBlank(v)) {
 			state = new State(v);

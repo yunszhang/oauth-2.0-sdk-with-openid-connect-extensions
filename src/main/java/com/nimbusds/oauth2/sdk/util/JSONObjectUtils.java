@@ -26,20 +26,18 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
+import com.nimbusds.oauth2.sdk.ParseException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-
-import com.nimbusds.oauth2.sdk.ParseException;
 
 
 /**
  * JSON object helper methods for parsing and typed retrieval of member values.
  */
-public class JSONObjectUtils {
+public final class JSONObjectUtils {
 	
 	
 	/**
@@ -504,11 +502,8 @@ public class JSONObjectUtils {
 	
 
 	/**
-	 * Prevents instantiation.
+	 * Prevents public instantiation.
 	 */
-	private JSONObjectUtils() {
-	
-		// Nothing to do
-	}
+	private JSONObjectUtils() {}
 }
 

@@ -23,7 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.nimbusds.oauth2.sdk.util.URLUtils;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
@@ -133,7 +133,7 @@ public class RefreshTokenGrant extends AuthorizationGrant {
 		throws ParseException {
 
 		// Parse grant type
-		String grantTypeString = URLUtils.getFirstValue(params, "grant_type");
+		String grantTypeString = MultivaluedMapUtils.getFirstValue(params, "grant_type");
 
 		if (grantTypeString == null) {
 			String msg = "Missing \"grant_type\" parameter";
@@ -146,7 +146,7 @@ public class RefreshTokenGrant extends AuthorizationGrant {
 		}
 
 		// Parse refresh token
-		String refreshTokenString = URLUtils.getFirstValue(params, "refresh_token");
+		String refreshTokenString = MultivaluedMapUtils.getFirstValue(params, "refresh_token");
 
 		if (refreshTokenString == null || refreshTokenString.trim().isEmpty()) {
 			String msg = "Missing or empty \"refresh_token\" parameter";

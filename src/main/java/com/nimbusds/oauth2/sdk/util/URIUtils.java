@@ -25,7 +25,7 @@ import java.net.URISyntaxException;
 /**
  * URI operations.
  */
-public class URIUtils {
+public final class URIUtils {
 
 
 	/**
@@ -98,10 +98,7 @@ public class URIUtils {
 
 
 	/**
-	 * Prevents instantiation.
+	 * Prevents public instantiation.
 	 */
-	private URIUtils() {
-
-		// do nothing
-	}
+	private URIUtils() {}
 }

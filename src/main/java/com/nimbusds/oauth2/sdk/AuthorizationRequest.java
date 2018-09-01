@@ -30,10 +30,7 @@ import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
-import com.nimbusds.oauth2.sdk.util.MapUtils;
-import com.nimbusds.oauth2.sdk.util.StringUtils;
-import com.nimbusds.oauth2.sdk.util.URIUtils;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
+import com.nimbusds.oauth2.sdk.util.*;
 import net.jcip.annotations.Immutable;
 
 
@@ -976,7 +973,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		throws ParseException {
 
 		// Parse mandatory client ID first
-		String v = URLUtils.getFirstValue(params, "client_id");
+		String v = MultivaluedMapUtils.getFirstValue(params, "client_id");
 
 		if (StringUtils.isBlank(v)) {
 			String msg = "Missing \"client_id\" parameter";
@@ -987,7 +984,7 @@ public class AuthorizationRequest extends AbstractRequest {
 
 
 		// Parse optional redirection URI second
-		v = URLUtils.getFirstValue(params, "redirect_uri");
+		v = MultivaluedMapUtils.getFirstValue(params, "redirect_uri");
 
 		URI redirectURI = null;
 
@@ -1005,11 +1002,11 @@ public class AuthorizationRequest extends AbstractRequest {
 
 
 		// Parse optional state third
-		State state = State.parse(URLUtils.getFirstValue(params, "state"));
+		State state = State.parse(MultivaluedMapUtils.getFirstValue(params, "state"));
 
 
 		// Parse mandatory response type
-		v = URLUtils.getFirstValue(params, "response_type");
+		v = MultivaluedMapUtils.getFirstValue(params, "response_type");
 
 		ResponseType rt;
 
@@ -1025,7 +1022,7 @@ public class AuthorizationRequest extends AbstractRequest {
 
 
 		// Parse the optional response mode
-		v = URLUtils.getFirstValue(params, "response_mode");
+		v = MultivaluedMapUtils.getFirstValue(params, "response_mode");
 
 		ResponseMode rm = null;
 
@@ -1035,7 +1032,7 @@ public class AuthorizationRequest extends AbstractRequest {
 
 
 		// Parse optional scope
-		v = URLUtils.getFirstValue(params, "scope");
+		v = MultivaluedMapUtils.getFirstValue(params, "scope");
 
 		Scope scope = null;
 
@@ -1047,14 +1044,14 @@ public class AuthorizationRequest extends AbstractRequest {
 		CodeChallenge codeChallenge = null;
 		CodeChallengeMethod codeChallengeMethod = null;
 
-		v = URLUtils.getFirstValue(params, "code_challenge");
+		v = MultivaluedMapUtils.getFirstValue(params, "code_challenge");
 
 		if (StringUtils.isNotBlank(v))
 			codeChallenge = CodeChallenge.parse(v);
 
 		if (codeChallenge != null) {
 
-			v = URLUtils.getFirstValue(params, "code_challenge_method");
+			v = MultivaluedMapUtils.getFirstValue(params, "code_challenge_method");
 
 			if (StringUtils.isNotBlank(v))
 				codeChallengeMethod = CodeChallengeMethod.parse(v);

@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
 
 
@@ -214,7 +214,7 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
 		throws ParseException {
 
 		// Parse grant type
-		String grantTypeString = URLUtils.getFirstValue(params, "grant_type");
+		String grantTypeString = MultivaluedMapUtils.getFirstValue(params, "grant_type");
 
 		if (grantTypeString == null) {
 			String msg = "Missing \"grant_type\" parameter";
@@ -227,7 +227,7 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
 		}
 
 		// Parse authorisation code
-		String codeString = URLUtils.getFirstValue(params, "code");
+		String codeString = MultivaluedMapUtils.getFirstValue(params, "code");
 
 		if (codeString == null || codeString.trim().isEmpty()) {
 			String msg = "Missing or empty \"code\" parameter";
@@ -237,7 +237,7 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
 		AuthorizationCode code = new AuthorizationCode(codeString);
 
 		// Parse optional redirection URI
-		String redirectURIString = URLUtils.getFirstValue(params, "redirect_uri");
+		String redirectURIString = MultivaluedMapUtils.getFirstValue(params, "redirect_uri");
 
 		URI redirectURI = null;
 
@@ -252,7 +252,7 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
 
 
 		// Parse optional code verifier
-		String codeVerifierString = URLUtils.getFirstValue(params,"code_verifier");
+		String codeVerifierString = MultivaluedMapUtils.getFirstValue(params,"code_verifier");
 
 		CodeVerifier codeVerifier = null;
 

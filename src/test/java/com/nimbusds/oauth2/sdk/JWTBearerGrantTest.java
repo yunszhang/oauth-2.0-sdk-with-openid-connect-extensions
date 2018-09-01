@@ -37,7 +37,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.auth.Secret;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import junit.framework.TestCase;
 
 
@@ -93,8 +93,8 @@ public class JWTBearerGrantTest extends TestCase {
 		assertEquals(assertion.serialize(), grant.getAssertion());
 
 		Map<String,List<String>> params = grant.toParameters();
-		assertEquals(GrantType.JWT_BEARER.getValue(), URLUtils.getFirstValue(params, "grant_type"));
-		assertEquals(assertion.serialize(), URLUtils.getFirstValue(params, "assertion"));
+		assertEquals(GrantType.JWT_BEARER.getValue(), MultivaluedMapUtils.getFirstValue(params, "grant_type"));
+		assertEquals(assertion.serialize(), MultivaluedMapUtils.getFirstValue(params, "assertion"));
 		assertEquals(2, params.size());
 
 		grant = JWTBearerGrant.parse(params);
@@ -125,8 +125,8 @@ public class JWTBearerGrantTest extends TestCase {
 		assertEquals(assertion.serialize(), grant.getAssertion());
 
 		Map<String,List<String>> params = grant.toParameters();
-		assertEquals(GrantType.JWT_BEARER.getValue(), URLUtils.getFirstValue(params, "grant_type"));
-		assertEquals(assertion.serialize(), URLUtils.getFirstValue(params, "assertion"));
+		assertEquals(GrantType.JWT_BEARER.getValue(), MultivaluedMapUtils.getFirstValue(params, "grant_type"));
+		assertEquals(assertion.serialize(), MultivaluedMapUtils.getFirstValue(params, "assertion"));
 		assertEquals(2, params.size());
 
 		grant = JWTBearerGrant.parse(params);

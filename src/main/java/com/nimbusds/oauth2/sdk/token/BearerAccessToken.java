@@ -25,8 +25,8 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
 
@@ -285,7 +285,7 @@ public class BearerAccessToken extends AccessToken {
 			throw new ParseException("Missing access token parameter", BearerTokenError.MISSING_TOKEN);
 		}
 		
-		String accessTokenValue = URLUtils.getFirstValue(parameters, "access_token");
+		String accessTokenValue = MultivaluedMapUtils.getFirstValue(parameters, "access_token");
 		
 		if (StringUtils.isBlank(accessTokenValue)) {
 			throw new ParseException("Blank / empty access token", BearerTokenError.INVALID_REQUEST);

@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * URL operations.
  */
-public class URLUtils {
+public final class URLUtils {
 
 	
 	/**
@@ -245,51 +245,7 @@ public class URLUtils {
 	
 	
 	/**
-	 * Gets the first value for the specified parameter key.
-	 *
-	 * @param params The map of parameters. Must not be {@code null}.
-	 * @param key    The parameter key. Must not be {@code null}.
-	 *
-	 * @return The first parameter value, {@code null} if not found.
+	 * Prevents public instantiation.
 	 */
-	public static String getFirstValue(final Map<String,List<String>> params, final String key) {
-		
-		List<String> valueList = params.get(key);
-		
-		if (valueList == null || valueList.isEmpty()) {
-			return null;
-		}
-		
-		return valueList.get(0);
-	}
-	
-	
-	/**
-	 * Removes the entry for the specified parameter key and returns its
-	 * first value.
-	 *
-	 * @param params The map of parameters. Must not be {@code null}.
-	 * @param key    The parameter key. Must not be {@code null}.
-	 *
-	 * @return The first parameter value, {@code null} if not found.
-	 */
-	public static String removeAndReturnFirstValue(final Map<String,List<String>> params, final String key) {
-		
-		List<String> valueList = params.remove(key);
-		
-		if (valueList == null || valueList.isEmpty()) {
-			return null;
-		}
-		
-		return valueList.get(0);
-	}
-
-
-	/**
-	 * Prevents instantiation.
-	 */
-	private URLUtils() {
-	
-		// do nothing
-	}
+	private URLUtils() {}
 }

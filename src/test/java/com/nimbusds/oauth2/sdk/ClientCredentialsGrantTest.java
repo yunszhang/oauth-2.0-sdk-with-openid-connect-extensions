@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.nimbusds.oauth2.sdk.util.URLUtils;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import junit.framework.TestCase;
 
 
@@ -39,7 +39,7 @@ public class ClientCredentialsGrantTest extends TestCase {
 		assertEquals(GrantType.CLIENT_CREDENTIALS, grant.getType());
 
 		Map<String,List<String>> params = grant.toParameters();
-		assertEquals("client_credentials", URLUtils.getFirstValue(params, "grant_type"));
+		assertEquals("client_credentials", MultivaluedMapUtils.getFirstValue(params, "grant_type"));
 		assertEquals(1, params.size());
 	}
 

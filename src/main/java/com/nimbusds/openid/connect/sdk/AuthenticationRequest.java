@@ -33,10 +33,7 @@ import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
-import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import com.nimbusds.oauth2.sdk.util.StringUtils;
-import com.nimbusds.oauth2.sdk.util.URIUtils;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
+import com.nimbusds.oauth2.sdk.util.*;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
@@ -1437,7 +1434,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 
 		// Parse the remaining OIDC parameters
-		Nonce nonce = Nonce.parse(URLUtils.getFirstValue(params, "nonce"));
+		Nonce nonce = Nonce.parse(MultivaluedMapUtils.getFirstValue(params, "nonce"));
 		
 		// Nonce required in the implicit and hybrid flows
 		if (nonce == null && (rt.impliesImplicitFlow() || rt.impliesHybridFlow())) {
@@ -1450,7 +1447,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 		if (params.containsKey("display")) {
 			try {
-				display = Display.parse(URLUtils.getFirstValue(params, "display"));
+				display = Display.parse(MultivaluedMapUtils.getFirstValue(params, "display"));
 
 			} catch (ParseException e) {
 				String msg = "Invalid \"display\" parameter: " + e.getMessage();
@@ -1463,7 +1460,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		Prompt prompt;
 		
 		try {
-			prompt = Prompt.parse(URLUtils.getFirstValue(params, "prompt"));
+			prompt = Prompt.parse(MultivaluedMapUtils.getFirstValue(params, "prompt"));
 				
 		} catch (ParseException e) {
 			String msg = "Invalid \"prompt\" parameter: " + e.getMessage();
@@ -1472,7 +1469,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		}
 
 
-		String v = URLUtils.getFirstValue(params, "max_age");
+		String v = MultivaluedMapUtils.getFirstValue(params, "max_age");
 
 		int maxAge = -1;
 
@@ -1489,7 +1486,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		}
 
 
-		v = URLUtils.getFirstValue(params, "ui_locales");
+		v = MultivaluedMapUtils.getFirstValue(params, "ui_locales");
 
 		List<LangTag> uiLocales = null;
 
@@ -1513,7 +1510,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		}
 
 
-		v = URLUtils.getFirstValue(params, "claims_locales");
+		v = MultivaluedMapUtils.getFirstValue(params, "claims_locales");
 
 		List<LangTag> claimsLocales = null;
 
@@ -1537,7 +1534,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		}
 
 
-		v = URLUtils.getFirstValue(params, "id_token_hint");
+		v = MultivaluedMapUtils.getFirstValue(params, "id_token_hint");
 		
 		JWT idTokenHint = null;
 		
@@ -1553,10 +1550,10 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			}
 		}
 
-		String loginHint = URLUtils.getFirstValue(params, "login_hint");
+		String loginHint = MultivaluedMapUtils.getFirstValue(params, "login_hint");
 
 
-		v = URLUtils.getFirstValue(params, "acr_values");
+		v = MultivaluedMapUtils.getFirstValue(params, "acr_values");
 
 		List<ACR> acrValues = null;
 
@@ -1573,7 +1570,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		}
 
 
-		v = URLUtils.getFirstValue(params, "claims");
+		v = MultivaluedMapUtils.getFirstValue(params, "claims");
 
 		ClaimsRequest claims = null;
 
@@ -1595,7 +1592,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		}
 		
 		
-		v = URLUtils.getFirstValue(params, "request_uri");
+		v = MultivaluedMapUtils.getFirstValue(params, "request_uri");
 		
 		URI requestURI = null;
 		
@@ -1611,7 +1608,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			}
 		}
 
-		v = URLUtils.getFirstValue(params, "request");
+		v = MultivaluedMapUtils.getFirstValue(params, "request");
 
 		JWT requestObject = null;
 

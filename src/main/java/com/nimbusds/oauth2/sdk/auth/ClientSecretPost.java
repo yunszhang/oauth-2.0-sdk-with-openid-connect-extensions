@@ -29,6 +29,7 @@ import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
 
@@ -125,12 +126,12 @@ public final class ClientSecretPost extends PlainClientSecret {
 	public static ClientSecretPost parse(final Map<String,List<String>> params)
 		throws ParseException {
 	
-		String clientIDString = URLUtils.getFirstValue(params, "client_id");
+		String clientIDString = MultivaluedMapUtils.getFirstValue(params, "client_id");
 		
 		if (clientIDString == null)
 			throw new ParseException("Malformed client secret post authentication: Missing \"client_id\" parameter");
 		
-		String secretValue = URLUtils.getFirstValue(params, "client_secret");
+		String secretValue = MultivaluedMapUtils.getFirstValue(params, "client_secret");
 		
 		if (secretValue == null)
 			throw new ParseException("Malformed client secret post authentication: Missing \"client_secret\" parameter");

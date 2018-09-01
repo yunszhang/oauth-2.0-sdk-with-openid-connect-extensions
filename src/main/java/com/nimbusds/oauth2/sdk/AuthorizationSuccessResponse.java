@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.nimbusds.oauth2.sdk.util.MapUtils;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import net.jcip.annotations.Immutable;
 
 import net.minidev.json.JSONObject;
@@ -214,7 +214,7 @@ public class AuthorizationSuccessResponse
 		AuthorizationCode code = null;
 		
 		if (params.get("code") != null) {
-			code = new AuthorizationCode(URLUtils.getFirstValue(params, "code"));
+			code = new AuthorizationCode(MultivaluedMapUtils.getFirstValue(params, "code"));
 		}
 		
 		// Parse access_token parameters
@@ -224,12 +224,12 @@ public class AuthorizationSuccessResponse
 		if (params.get("access_token") != null) {
 
 			JSONObject jsonObject = new JSONObject();
-			jsonObject.putAll(MapUtils.toSingleValuedMap(params));
+			jsonObject.putAll(MultivaluedMapUtils.toSingleValuedMap(params));
 			accessToken = AccessToken.parse(jsonObject);
 		}
 		
 		// Parse optional state parameter
-		State state = State.parse(URLUtils.getFirstValue(params, "state"));
+		State state = State.parse(MultivaluedMapUtils.getFirstValue(params, "state"));
 		
 		return new AuthorizationSuccessResponse(redirectURI, code, accessToken, state, null);
 	}

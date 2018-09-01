@@ -22,7 +22,7 @@ import java.util.Collection;
 
 
 /**
- * Map utilities. Replicates Apache Commons Collections.
+ * Collection utilities. Replicates Apache Commons Collections.
  */
 public final class CollectionUtils {
 	
@@ -54,4 +54,10 @@ public final class CollectionUtils {
 		
 		return collection != null && ! collection.isEmpty();
 	}
+	
+	
+	/**
+	 * Prevents public instantiation.
+	 */
+	private CollectionUtils() {}
 }

@@ -31,6 +31,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
@@ -242,7 +243,7 @@ public class AuthenticationSuccessResponse
 		AuthorizationSuccessResponse asr = AuthorizationSuccessResponse.parse(redirectURI, params);
 
 		// Parse id_token parameter
-		String idTokenString = URLUtils.getFirstValue(params, "id_token");
+		String idTokenString = MultivaluedMapUtils.getFirstValue(params, "id_token");
 		JWT idToken = null;
 		if (idTokenString != null) {
 			
@@ -259,9 +260,9 @@ public class AuthenticationSuccessResponse
 
 		State sessionState = null;
 
-		if (StringUtils.isNotBlank(URLUtils.getFirstValue(params, "session_state"))) {
+		if (StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(params, "session_state"))) {
 
-			sessionState = new State(URLUtils.getFirstValue(params, "session_state"));
+			sessionState = new State(MultivaluedMapUtils.getFirstValue(params, "session_state"));
 		}
 
 		return new AuthenticationSuccessResponse(redirectURI,

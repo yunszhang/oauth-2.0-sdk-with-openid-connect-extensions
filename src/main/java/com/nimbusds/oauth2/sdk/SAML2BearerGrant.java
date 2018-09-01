@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.jose.util.Base64URL;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import net.jcip.annotations.Immutable;
 
 
@@ -149,7 +149,7 @@ public class SAML2BearerGrant extends AssertionGrant {
 		throws ParseException {
 
 		// Parse grant type
-		String grantTypeString = URLUtils.getFirstValue(params, "grant_type");
+		String grantTypeString = MultivaluedMapUtils.getFirstValue(params, "grant_type");
 
 		if (grantTypeString == null)
 			throw MISSING_GRANT_TYPE_PARAM_EXCEPTION;
@@ -158,7 +158,7 @@ public class SAML2BearerGrant extends AssertionGrant {
 			throw UNSUPPORTED_GRANT_TYPE_EXCEPTION;
 
 		// Parse JWT assertion
-		String assertionString = URLUtils.getFirstValue(params, "assertion");
+		String assertionString = MultivaluedMapUtils.getFirstValue(params, "assertion");
 
 		if (assertionString == null || assertionString.trim().isEmpty())
 			throw MISSING_ASSERTION_PARAM_EXCEPTION;

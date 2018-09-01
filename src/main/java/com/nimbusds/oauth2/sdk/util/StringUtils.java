@@ -63,4 +63,10 @@ public final class StringUtils {
 		
 		return !isBlank(cs);
 	}
+	
+	
+	/**
+	 * Prevents public instantiation.
+	 */
+	private StringUtils() {}
 }

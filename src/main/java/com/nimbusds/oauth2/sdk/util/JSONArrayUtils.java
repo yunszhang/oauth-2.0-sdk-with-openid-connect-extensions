@@ -31,7 +31,7 @@ import net.minidev.json.JSONArray;
 /**
  * JSON array helper methods for parsing and typed retrieval of values.
  */
-public class JSONArrayUtils {
+public final class JSONArrayUtils {
 
 
 	/**
@@ -128,4 +128,10 @@ public class JSONArrayUtils {
 
 		return uriList;
 	}
+	
+	
+	/**
+	 * Prevents public instantiation.
+	 */
+	private JSONArrayUtils() {}
 }

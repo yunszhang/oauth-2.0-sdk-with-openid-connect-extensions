@@ -20,7 +20,7 @@ package com.nimbusds.oauth2.sdk;
 
 import java.util.*;
 
-import com.nimbusds.oauth2.sdk.util.URLUtils;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.jose.*;
@@ -215,7 +215,7 @@ public class JWTBearerGrant extends AssertionGrant {
 		throws ParseException {
 
 		// Parse grant type
-		String grantTypeString = URLUtils.getFirstValue(params, "grant_type");
+		String grantTypeString = MultivaluedMapUtils.getFirstValue(params, "grant_type");
 
 		if (grantTypeString == null)
 			throw MISSING_GRANT_TYPE_PARAM_EXCEPTION;
@@ -224,7 +224,7 @@ public class JWTBearerGrant extends AssertionGrant {
 			throw UNSUPPORTED_GRANT_TYPE_EXCEPTION;
 
 		// Parse JWT assertion
-		String assertionString = URLUtils.getFirstValue(params, "assertion");
+		String assertionString = MultivaluedMapUtils.getFirstValue(params, "assertion");
 
 		if (assertionString == null || assertionString.trim().isEmpty())
 			throw MISSING_ASSERTION_PARAM_EXCEPTION;

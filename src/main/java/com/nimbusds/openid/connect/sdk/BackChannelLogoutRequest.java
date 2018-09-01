@@ -35,6 +35,7 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
@@ -203,7 +204,7 @@ public class BackChannelLogoutRequest extends AbstractRequest {
 	public static BackChannelLogoutRequest parse(final URI uri, Map<String,List<String>> params)
 		throws ParseException {
 		
-		String logoutTokenString = URLUtils.getFirstValue(params, "logout_token");
+		String logoutTokenString = MultivaluedMapUtils.getFirstValue(params, "logout_token");
 		
 		if (logoutTokenString == null) {
 			throw new ParseException("Missing logout_token parameter");

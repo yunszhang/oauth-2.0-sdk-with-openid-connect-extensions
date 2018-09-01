@@ -25,7 +25,7 @@ import net.minidev.json.parser.JSONParser;
 /**
  * JSON helper methods.
  */
-class JSONUtils {
+final class JSONUtils {
 
 
 	/**

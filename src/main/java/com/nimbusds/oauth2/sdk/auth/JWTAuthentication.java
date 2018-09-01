@@ -32,6 +32,7 @@ import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 
 
@@ -243,7 +244,7 @@ public abstract class JWTAuthentication extends ClientAuthentication {
 	protected static void ensureClientAssertionType(final Map<String,List<String>> params)
 		throws ParseException {
 		
-		final String clientAssertionType = URLUtils.getFirstValue(params, "client_assertion_type");
+		final String clientAssertionType = MultivaluedMapUtils.getFirstValue(params, "client_assertion_type");
 		
 		if (clientAssertionType == null)
 			throw new ParseException("Missing \"client_assertion_type\" parameter");
@@ -272,7 +273,7 @@ public abstract class JWTAuthentication extends ClientAuthentication {
 	protected static SignedJWT parseClientAssertion(final Map<String,List<String>> params)
 		throws ParseException {
 		
-		final String clientAssertion = URLUtils.getFirstValue(params, "client_assertion");
+		final String clientAssertion = MultivaluedMapUtils.getFirstValue(params, "client_assertion");
 		
 		if (clientAssertion == null)
 			throw new ParseException("Missing \"client_assertion\" parameter");
@@ -301,7 +302,7 @@ public abstract class JWTAuthentication extends ClientAuthentication {
 	 */
 	protected static ClientID parseClientID(final Map<String,List<String>> params) {
 		
-		String clientIDString = URLUtils.getFirstValue(params, "client_id");
+		String clientIDString = MultivaluedMapUtils.getFirstValue(params, "client_id");
 
 		if (clientIDString == null)
 			return null;

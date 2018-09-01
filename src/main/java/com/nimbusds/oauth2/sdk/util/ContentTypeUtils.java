@@ -26,7 +26,7 @@ import com.nimbusds.oauth2.sdk.ParseException;
 /**
  * Content type matching.
  */
-public class ContentTypeUtils {
+public final class ContentTypeUtils {
 
 
 	/**
@@ -54,10 +54,7 @@ public class ContentTypeUtils {
 	
 
 	/**
-	 * Prevents instantiation.
+	 * Prevents public instantiation.
 	 */
-	private ContentTypeUtils() {
-	
-		// do nothing
-	}
+	private ContentTypeUtils() {}
 }

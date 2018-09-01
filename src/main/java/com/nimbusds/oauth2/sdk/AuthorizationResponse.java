@@ -28,6 +28,7 @@ import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
@@ -300,7 +301,7 @@ public abstract class AuthorizationResponse implements Response {
 	public static AuthorizationResponse parse(final URI redirectURI, final Map<String,List<String>> params)
 		throws ParseException {
 
-		if (StringUtils.isNotBlank(URLUtils.getFirstValue(params, "error"))) {
+		if (StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(params, "error"))) {
 			return AuthorizationErrorResponse.parse(redirectURI, params);
 		} else {
 			return AuthorizationSuccessResponse.parse(redirectURI, params);

@@ -25,6 +25,7 @@ import java.util.*;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
@@ -201,15 +202,15 @@ public class AuthorizationErrorResponse
 		throws ParseException {
 
 		// Parse the error
-		if (StringUtils.isBlank(URLUtils.getFirstValue(params, "error")))
+		if (StringUtils.isBlank(MultivaluedMapUtils.getFirstValue(params, "error")))
 			throw new ParseException("Missing error code");
 
 		// Parse error code
-		String errorCode = URLUtils.getFirstValue(params, "error");
+		String errorCode = MultivaluedMapUtils.getFirstValue(params, "error");
 
-		String errorDescription = URLUtils.getFirstValue(params, "error_description");
+		String errorDescription = MultivaluedMapUtils.getFirstValue(params, "error_description");
 
-		String errorURIString = URLUtils.getFirstValue(params, "error_uri");
+		String errorURIString = MultivaluedMapUtils.getFirstValue(params, "error_uri");
 
 		URI errorURI = null;
 
@@ -228,7 +229,7 @@ public class AuthorizationErrorResponse
 		
 		
 		// State
-		State state = State.parse(URLUtils.getFirstValue(params, "state"));
+		State state = State.parse(MultivaluedMapUtils.getFirstValue(params, "state"));
 		
 		return new AuthorizationErrorResponse(redirectURI, error, state, null);
 	}

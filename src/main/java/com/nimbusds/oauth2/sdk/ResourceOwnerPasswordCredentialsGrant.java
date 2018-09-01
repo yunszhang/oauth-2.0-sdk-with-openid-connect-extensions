@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.auth.Secret;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import net.jcip.annotations.Immutable;
 
 
@@ -158,7 +158,7 @@ public class ResourceOwnerPasswordCredentialsGrant extends AuthorizationGrant {
 		throws ParseException {
 
 		// Parse grant type
-		String grantTypeString = URLUtils.getFirstValue(params, "grant_type");
+		String grantTypeString = MultivaluedMapUtils.getFirstValue(params, "grant_type");
 
 		if (grantTypeString == null) {
 			String msg = "Missing \"grant_type\" parameter";
@@ -172,7 +172,7 @@ public class ResourceOwnerPasswordCredentialsGrant extends AuthorizationGrant {
 
 
 		// Parse the username
-		String username = URLUtils.getFirstValue(params, "username");
+		String username = MultivaluedMapUtils.getFirstValue(params, "username");
 
 		if (username == null || username.trim().isEmpty()) {
 			String msg = "Missing or empty \"username\" parameter";
@@ -180,7 +180,7 @@ public class ResourceOwnerPasswordCredentialsGrant extends AuthorizationGrant {
 		}
 
 		// Parse the password
-		String passwordString = URLUtils.getFirstValue(params, "password");
+		String passwordString = MultivaluedMapUtils.getFirstValue(params, "password");
 
 		if (passwordString == null || passwordString.trim().isEmpty()) {
 			String msg = "Missing or empty \"password\" parameter";
