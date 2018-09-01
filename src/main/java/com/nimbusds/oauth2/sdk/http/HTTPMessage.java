@@ -18,12 +18,15 @@
 package com.nimbusds.oauth2.sdk.http;
 
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.mail.internet.ContentType;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.ContentTypeUtils;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 
 
 /**
@@ -35,7 +38,7 @@ abstract class HTTPMessage {
 	/**
 	 * The HTTP request / response headers.
 	 */
-	private final Map<String,String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+	private final Map<String,List<String>> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 	
 	
 	/**
@@ -52,7 +55,7 @@ abstract class HTTPMessage {
 	 */
 	public ContentType getContentType() {
 
-		final String value = getHeader("Content-Type");
+		final String value = getHeaderValue("Content-Type");
 
 		if (value == null) {
 			return null;
@@ -135,29 +138,42 @@ abstract class HTTPMessage {
 
 
 	/**
-	 * Gets a HTTP header value.
+	 * Gets an HTTP header's value.
 	 *
 	 * @param name The header name. Must not be {@code null}.
 	 *
-	 * @return The header value, {@code null} if not specified.
+	 * @return The first header value, {@code null} if not specified.
 	 */
-	public String getHeader(final String name) {
+	public String getHeaderValue(final String name) {
+
+		return MultivaluedMapUtils.getFirstValue(headers, name);
+	}
+
+
+	/**
+	 * Gets an HTTP header's value(s).
+	 *
+	 * @param name The header name. Must not be {@code null}.
+	 *
+	 * @return The header value(s), {@code null} if not specified.
+	 */
+	public List<String> getHeaderValues(final String name) {
 
 		return headers.get(name);
 	}
 
 
 	/**
-	 * Sets a HTTP header value.
+	 * Sets an HTTP header.
 	 *
-	 * @param name  The header name. Must not be {@code null}.
-	 * @param value The header value. If {@code null} and a header with the
-	 *              same name is specified, it will be deleted.
+	 * @param name   The header name. Must not be {@code null}.
+	 * @param values The header value(s). If {@code null} and a header with
+	 *               the same name is specified, it will be deleted.
 	 */
-	public void setHeader(final String name, final String value) {
+	public void setHeader(final String name, final String ... values) {
 
-		if (value != null) {
-			headers.put(name, value);
+		if (values != null && values.length > 0) {
+			headers.put(name, Arrays.asList(values));
 		} else {
 			headers.remove(name);
 		}
@@ -169,7 +185,7 @@ abstract class HTTPMessage {
 	 *
 	 * @return The HTTP headers.
 	 */
-	public Map<String,String> getHeaders() {
+	public Map<String,List<String>> getHeaderMap() {
 
 		return headers;
 	}

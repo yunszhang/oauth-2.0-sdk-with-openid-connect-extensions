@@ -258,7 +258,7 @@ public class HTTPRequest extends HTTPMessage {
 	 */
 	public String getAuthorization() {
 	
-		return getHeader("Authorization");
+		return getHeaderValue("Authorization");
 	}
 	
 	
@@ -282,7 +282,7 @@ public class HTTPRequest extends HTTPMessage {
 	 */
 	public String getAccept() {
 
-		return getHeader("Accept");
+		return getHeaderValue("Accept");
 	}
 
 
@@ -777,8 +777,10 @@ public class HTTPRequest extends HTTPMessage {
 			sslConn.setSSLSocketFactory(sslSocketFactory != null ? sslSocketFactory : getDefaultSSLSocketFactory());
 		}
 
-		for (Map.Entry<String,String> header: getHeaders().entrySet()) {
-			conn.setRequestProperty(header.getKey(), header.getValue());
+		for (Map.Entry<String,List<String>> header: getHeaderMap().entrySet()) {
+			for (String headerValue: header.getValue()) {
+				conn.addRequestProperty(header.getKey(), headerValue);
+			}
 		}
 
 		conn.setRequestMethod(method.name());

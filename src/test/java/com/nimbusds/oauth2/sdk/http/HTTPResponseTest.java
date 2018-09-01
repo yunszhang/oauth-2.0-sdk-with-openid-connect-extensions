@@ -21,7 +21,6 @@ package com.nimbusds.oauth2.sdk.http;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jwt.JWT;
@@ -138,7 +137,7 @@ public class HTTPResponseTest extends TestCase {
 		HTTPResponse response = new HTTPResponse(302);
 		response.setHeader("Location", "http://example.org");
 
-		assertEquals("Location", response.getHeaders().keySet().iterator().next());
+		assertEquals("Location", response.getHeaderMap().keySet().iterator().next());
 	}
 
 

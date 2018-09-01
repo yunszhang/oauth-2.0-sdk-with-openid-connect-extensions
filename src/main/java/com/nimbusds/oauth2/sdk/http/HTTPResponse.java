@@ -236,7 +236,7 @@ public class HTTPResponse extends HTTPMessage {
 	 */
 	public URI getLocation() {
 
-		String value = getHeader("Location");
+		String value = getHeaderValue("Location");
 
 		if (value == null) {
 			return null;
@@ -269,7 +269,7 @@ public class HTTPResponse extends HTTPMessage {
 	 */
 	public String getCacheControl() {
 	
-		return getHeader("Cache-Control");
+		return getHeaderValue("Cache-Control");
 	}
 
 
@@ -291,7 +291,7 @@ public class HTTPResponse extends HTTPMessage {
 	 */
 	public String getPragma() {
 	
-		return getHeader("Pragma");
+		return getHeaderValue("Pragma");
 	}
 	
 	
@@ -313,7 +313,7 @@ public class HTTPResponse extends HTTPMessage {
 	 */
 	public String getWWWAuthenticate() {
 	
-		return getHeader("WWW-Authenticate");
+		return getHeaderValue("WWW-Authenticate");
 	}
 	
 	

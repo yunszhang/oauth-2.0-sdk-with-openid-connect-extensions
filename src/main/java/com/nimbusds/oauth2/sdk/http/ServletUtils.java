@@ -25,6 +25,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -178,8 +180,20 @@ public class ServletUtils {
 		Enumeration<String> headerNames = sr.getHeaderNames();
 
 		while (headerNames.hasMoreElements()) {
+			
 			final String headerName = headerNames.nextElement();
-			request.setHeader(headerName, sr.getHeader(headerName));
+			
+			Enumeration<String> headerValues = sr.getHeaders(headerName);
+			
+			if (headerValues == null)
+				continue;
+			
+			List<String> headerValuesList = new LinkedList<>();
+			while (headerValues.hasMoreElements()) {
+				headerValuesList.add(headerValues.nextElement());
+			}
+			
+			request.setHeader(headerName, headerValuesList.toArray(new String[0]));
 		}
 
 		if (method.equals(HTTPRequest.Method.GET) || method.equals(HTTPRequest.Method.DELETE)) {
@@ -262,8 +276,10 @@ public class ServletUtils {
 
 
 		// Set the headers, but only if explicitly specified
-		for (Map.Entry<String,String> header : httpResponse.getHeaders().entrySet()) {
-			servletResponse.setHeader(header.getKey(), header.getValue());
+		for (Map.Entry<String,List<String>> header : httpResponse.getHeaderMap().entrySet()) {
+			for (String headerValue: header.getValue()) {
+				servletResponse.addHeader(header.getKey(), headerValue);
+			}
 		}
 
 		if (httpResponse.getContentType() != null)

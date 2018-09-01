@@ -27,6 +27,7 @@ import java.security.KeyPairGenerator;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -348,8 +349,8 @@ public class HTTPRequestTest {
 		assertEquals(200, httpResponse.getStatusCode());
 		assertEquals("OK", httpResponse.getStatusMessage());
 		httpResponse.ensureContentType(CommonContentTypes.APPLICATION_JSON);
-		assertEquals("abc", httpResponse.getHeader("SID"));
-		assertEquals("123", httpResponse.getHeader("X-App"));
+		assertEquals("abc", httpResponse.getHeaderValue("SID"));
+		assertEquals("123", httpResponse.getHeaderValue("X-App"));
 
 		JSONArray jsonArray = httpResponse.getContentAsJSONArray();
 		assertEquals(10L, jsonArray.get(0));
@@ -465,5 +466,21 @@ public class HTTPRequestTest {
 		String ip = "192.168.0.1";
 		httpRequest.setClientIPAddress(ip);
 		assertEquals(ip, httpRequest.getClientIPAddress());
+	}
+	
+	
+	@Test
+	public void testMultivaluedHeader()
+		throws MalformedURLException {
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
+		
+		List<String> headerValues = Arrays.asList("V1", "V2");
+		
+		httpRequest.setHeader("X-Header", "V1", "V2");
+		
+		assertEquals(headerValues, httpRequest.getHeaderValues("X-Header"));
+		
+		assertEquals("V1", httpRequest.getHeaderValue("X-Header"));
 	}
 }

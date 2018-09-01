@@ -44,7 +44,7 @@ public class AuthorizationServerConfigurationRequestTest extends TestCase {
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
 		assertEquals("https://c2id.com/.well-known/oauth-authorization-server", httpRequest.getURL().toString());
-		assertTrue(httpRequest.getHeaders().isEmpty());
+		assertTrue(httpRequest.getHeaderMap().isEmpty());
 	}
 	
 	

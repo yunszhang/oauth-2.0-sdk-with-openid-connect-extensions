@@ -952,6 +952,8 @@ version 6.0 (2018-08-31)
       body (breaking change).
     * Switches com.nimbusds.openid.connect.sdk.op.AuthenticationRequestResolver
       to com.nimbusds.jose.util.ResourceRetriever (breaking change).
+    * Updates HTTPRequest and HTTPResponse to support multi-valued HTTP headers
+      (breaking change) (iss #252).
     * Removes deprecated com.nimbusds.oauth2.sdk.http.Resource class.
     * Removes deprecated com.nimbusds.oauth2.sdk.http.ResourceRetriever
       interface.

@@ -44,7 +44,7 @@ public class OIDCProviderConfigurationRequestTest extends TestCase {
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
 		assertEquals("https://c2id.com/.well-known/openid-configuration", httpRequest.getURL().toString());
-		assertTrue(httpRequest.getHeaders().isEmpty());
+		assertTrue(httpRequest.getHeaderMap().isEmpty());
 	}
 	
 	
