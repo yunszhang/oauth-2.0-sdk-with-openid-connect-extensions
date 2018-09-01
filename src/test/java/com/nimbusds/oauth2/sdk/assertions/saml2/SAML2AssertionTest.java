@@ -29,20 +29,22 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import static net.shibboleth.utilities.java.support.xml.SerializeSupport.nodeToString;
+
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Identifier;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import junit.framework.TestCase;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.NameIDType;
-import org.opensaml.saml2.core.SubjectConfirmation;
-import org.opensaml.xml.security.credential.BasicCredential;
-import org.opensaml.xml.security.credential.UsageType;
-import org.opensaml.xml.signature.SignatureConstants;
-import org.opensaml.xml.util.Pair;
-import org.opensaml.xml.util.XMLHelper;
+import net.shibboleth.utilities.java.support.collection.Pair;
+import net.shibboleth.utilities.java.support.xml.SerializeSupport;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.NameIDType;
+import org.opensaml.saml.saml2.core.SubjectConfirmation;
+import org.opensaml.security.credential.BasicCredential;
+import org.opensaml.security.credential.UsageType;
+import org.opensaml.xmlsec.signature.support.SignatureConstants;
 
 
 /**
@@ -95,13 +97,12 @@ public class SAML2AssertionTest extends TestCase {
 		assertNull(details.getClientInetAddress());
 		assertNull(details.getAttributeStatement());
 
-		BasicCredential credential = new BasicCredential();
+		
 		Pair<RSAPublicKey,RSAPrivateKey> keyPair = generateRSAKeyPair();
-		credential.setPublicKey(keyPair.getFirst());
-		credential.setPrivateKey(keyPair.getSecond());
+		BasicCredential credential = new BasicCredential(keyPair.getFirst(), keyPair.getSecond());
 		credential.setUsageType(UsageType.SIGNING);
 
-		String xml = SAML2AssertionFactory.createAsString(details, keyPair.getSecond());
+		String xml = SAML2AssertionFactory.createAsString(details, keyPair.getFirst(), keyPair.getSecond());
 
 		assertFalse(xml.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
 
@@ -173,9 +174,7 @@ public class SAML2AssertionTest extends TestCase {
 		assertNull(details.getClientInetAddress());
 		assertNull(details.getAttributeStatement());
 
-		BasicCredential credential = new BasicCredential();
-		SecretKey hmacKey = generateHMACKey();
-		credential.setSecretKey(hmacKey);
+		BasicCredential credential = new BasicCredential(generateHMACKey());
 
 		String xml = SAML2AssertionFactory.createAsString(details, SignatureConstants.ALGO_ID_MAC_HMAC_SHA256, credential);
 
@@ -261,17 +260,15 @@ public class SAML2AssertionTest extends TestCase {
 		assertEquals(clientAddress, details.getClientInetAddress());
 		assertEquals(attrs, details.getAttributeStatement());
 
-		BasicCredential credential = new BasicCredential();
 		Pair<RSAPublicKey,RSAPrivateKey> keyPair = generateRSAKeyPair();
-		credential.setPublicKey(keyPair.getFirst());
-		credential.setPrivateKey(keyPair.getSecond());
+		BasicCredential credential = new BasicCredential(keyPair.getFirst(), keyPair.getSecond());
 		credential.setUsageType(UsageType.SIGNING);
 
-		String xml = SAML2AssertionFactory.createAsString(details, keyPair.getSecond());
+		String xml = SAML2AssertionFactory.createAsString(details, keyPair.getFirst(), keyPair.getSecond());
 
 		assertFalse(xml.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
 
-		System.out.println(XMLHelper.prettyPrintXML(SAML2AssertionFactory.createAsElement(
+		System.out.println(SerializeSupport.prettyPrintXML(SAML2AssertionFactory.createAsElement(
 			details,
 			SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256,
 			credential)));
@@ -312,8 +309,7 @@ public class SAML2AssertionTest extends TestCase {
 	}
 
 
-	public void testMissingSignature()
-		throws Exception {
+	public void testMissingSignature() {
 
 		SAML2AssertionDetails details = new SAML2AssertionDetails(new Issuer("https://c2id.com"), new Subject("alice@wondlerland.net"), new Audience("https://client.com"));
 

@@ -23,10 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
-import org.opensaml.xml.signature.P;
+import junit.framework.TestCase;
 
 
 /**

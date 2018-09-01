@@ -89,16 +89,28 @@
 		</dependency>
 		<dependency>
 			<groupId>org.opensaml</groupId>
-			<artifactId>opensaml</artifactId>
-			<version>[2.6.4,3.0.0)</version>
+			<artifactId>opensaml-core</artifactId>
+			<version>[3.0.0,)</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>[1.7.13,2.0.0)</version>
+			<groupId>org.opensaml</groupId>
+			<artifactId>opensaml-saml-api</artifactId>
+			<version>[3.0.0,)</version>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>org.opensaml</groupId>
+			<artifactId>opensaml-saml-impl</artifactId>
+			<version>[3.0.0,)</version>
+			<optional>true</optional>
+		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>org.slf4j</groupId>-->
+			<!--<artifactId>slf4j-api</artifactId>-->
+			<!--<version>[1.7.13,2.0.0)</version>-->
+			<!--<optional>true</optional>-->
+		<!--</dependency>-->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

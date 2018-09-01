@@ -43,8 +43,8 @@ import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import junit.framework.TestCase;
-import org.opensaml.xml.security.credential.BasicCredential;
-import org.opensaml.xml.signature.SignatureConstants;
+import org.opensaml.security.credential.BasicCredential;
+import org.opensaml.xmlsec.signature.support.SignatureConstants;
 
 
 /**
@@ -1110,8 +1110,7 @@ public class TokenRequestTest extends TestCase {
 		Secret clientSecret = new Secret("secret");
 		ClientAuthentication clientAuth = new ClientSecretBasic(clientID, clientSecret);
 
-		BasicCredential credential = new BasicCredential();
-		credential.setSecretKey(new SecretKeySpec(new Secret().getValueBytes(), "HmacSha256"));
+		BasicCredential credential = new BasicCredential(new SecretKeySpec(new Secret().getValueBytes(), "HmacSha256"));
 		String samlAssertion = SAML2AssertionFactory.createAsString(new SAML2AssertionDetails(
 			new Issuer("123"),
 			new Subject("123"),
@@ -1146,8 +1145,7 @@ public class TokenRequestTest extends TestCase {
 		URI tokenEndpoint = new URI("https://c2id.com/token");
 		ClientID clientID = new ClientID("123");
 
-		BasicCredential credential = new BasicCredential();
-		credential.setSecretKey(new SecretKeySpec(new Secret().getValueBytes(), "HmacSha256"));
+		BasicCredential credential = new BasicCredential(new SecretKeySpec(new Secret().getValueBytes(), "HmacSha256"));
 		String samlAssertion = SAML2AssertionFactory.createAsString(new SAML2AssertionDetails(
 				new Issuer("123"),
 				new Subject("123"),
@@ -1180,8 +1178,7 @@ public class TokenRequestTest extends TestCase {
 		throws Exception {
 
 		URI tokenEndpoint = new URI("https://c2id.com/token");
-		BasicCredential credential = new BasicCredential();
-		credential.setSecretKey(new SecretKeySpec(new Secret().getValueBytes(), "HmacSha256"));
+		BasicCredential credential = new BasicCredential(new SecretKeySpec(new Secret().getValueBytes(), "HmacSha256"));
 		String samlAssertion = SAML2AssertionFactory.createAsString(new SAML2AssertionDetails(
 				new Issuer("123"),
 				new Subject("123"),

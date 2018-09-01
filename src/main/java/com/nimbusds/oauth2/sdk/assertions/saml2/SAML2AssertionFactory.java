@@ -19,22 +19,23 @@ package com.nimbusds.oauth2.sdk.assertions.saml2;
 
 
 import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+
+import static com.nimbusds.oauth2.sdk.assertions.saml2.SAML2Utils.buildSAMLObject;
+import static net.shibboleth.utilities.java.support.xml.SerializeSupport.nodeToString;
 
 import com.nimbusds.oauth2.sdk.SerializeException;
 import net.jcip.annotations.ThreadSafe;
-import org.opensaml.Configuration;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.impl.AssertionMarshaller;
-import org.opensaml.xml.io.MarshallerFactory;
-import org.opensaml.xml.io.MarshallingException;
-import org.opensaml.xml.security.credential.BasicCredential;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.credential.UsageType;
-import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.signature.SignatureConstants;
-import org.opensaml.xml.signature.SignatureException;
-import org.opensaml.xml.signature.Signer;
-import org.opensaml.xml.util.XMLHelper;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.security.credential.BasicCredential;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.credential.UsageType;
+import org.opensaml.xmlsec.signature.Signature;
+import org.opensaml.xmlsec.signature.support.SignatureConstants;
+import org.opensaml.xmlsec.signature.support.SignatureException;
+import org.opensaml.xmlsec.signature.support.Signer;
 import org.w3c.dom.Element;
 
 
@@ -75,21 +76,19 @@ public class SAML2AssertionFactory {
 		Assertion a = details.toSAML2Assertion();
 
 		// Create signature element
-		Signature signature = (Signature) Configuration.getBuilderFactory()
-			.getBuilder(Signature.DEFAULT_ELEMENT_NAME)
-			.buildObject(Signature.DEFAULT_ELEMENT_NAME);
-
+		Signature signature = buildSAMLObject(Signature.class);
 		signature.setSigningCredential(credential);
 		signature.setSignatureAlgorithm(xmlDsigAlg);
 		signature.setCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
 
 		a.setSignature(signature);
-
-		MarshallerFactory marshallerFactory = Configuration.getMarshallerFactory();
-
+		
 		try {
-			// Perform actual signing
-			marshallerFactory.getMarshaller(a).marshall(a);
+			// Marshall and sign
+			XMLObjectProviderRegistrySupport
+				.getMarshallerFactory()
+				.getMarshaller(a)
+				.marshall(a);
 			Signer.signObject(signature);
 		} catch (MarshallingException | SignatureException e) {
 			throw new SerializeException(e.getMessage(), e);
@@ -118,9 +117,11 @@ public class SAML2AssertionFactory {
 					      final Credential credential) {
 
 		Assertion a = create(details, xmlDsigAlg, credential);
-		AssertionMarshaller assertionMarshaller = new AssertionMarshaller();
 		try {
-			return assertionMarshaller.marshall(a);
+			return XMLObjectProviderRegistrySupport
+				.getMarshallerFactory()
+				.getMarshaller(a)
+				.marshall(a);
 		} catch (MarshallingException e) {
 			throw new SerializeException(e.getMessage(), e);
 		}
@@ -147,10 +148,15 @@ public class SAML2AssertionFactory {
 					    final Credential credential) {
 
 		Element a = createAsElement(details, xmlDsigAlg, credential);
-		String xml = XMLHelper.nodeToString(a);
+		String xml = nodeToString(a);
+		
 		// Strip XML doc declaration
 		final String header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-		return xml.substring(header.length());
+		if (xml.startsWith(header)) {
+			xml = xml.substring(header.length());
+		}
+		
+		return xml;
 	}
 
 
@@ -160,6 +166,7 @@ public class SAML2AssertionFactory {
 	 *
 	 * @param details       The SAML 2.0 bearer assertion details. Must not
 	 *                      be {@code null}.
+	 * @param rsaPublicKey  The public RSA key. Must not be {@code null}.
 	 * @param rsaPrivateKey The private RSA key to sign the assertion. Must
 	 *                      not be {@code null}.
 	 *
@@ -169,10 +176,10 @@ public class SAML2AssertionFactory {
 	 * @throws SerializeException If serialisation or signing failed.
 	 */
 	public static String createAsString(final SAML2AssertionDetails details,
+					    final RSAPublicKey rsaPublicKey,
 					    final RSAPrivateKey rsaPrivateKey) {
 
-		BasicCredential credential = new BasicCredential();
-		credential.setPrivateKey(rsaPrivateKey);
+		BasicCredential credential = new BasicCredential(rsaPublicKey, rsaPrivateKey);
 		credential.setUsageType(UsageType.SIGNING);
 		return createAsString(details, SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, credential);
 	}

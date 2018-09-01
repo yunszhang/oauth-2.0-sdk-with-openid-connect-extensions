@@ -978,4 +978,6 @@ version 6.0 (2018-08-31)
     * Removes deprecated com.nimbusds.oauth2.sdk.jose.jwk.KeyConverter class.
     * Removes deprecated
       com.nimbusds.openid.connect.sdk.id.AESBasedPairwiseSubjectCodec class.
+    * Upgrades optional OpenSAML dependency to 3.0+ (breaking change for all
+      OpenSAML APIs).
     * Updates Nimbus JOSE+JWT to 6.0.1 with Ed25519 and X25519 support.

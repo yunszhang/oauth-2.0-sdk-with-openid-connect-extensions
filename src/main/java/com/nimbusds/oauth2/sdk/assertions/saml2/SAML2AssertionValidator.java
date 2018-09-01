@@ -22,8 +22,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.Key;
 import java.security.PublicKey;
-import java.security.interfaces.RSAPublicKey;
 import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 import javax.crypto.SecretKey;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -32,20 +32,18 @@ import javax.xml.parsers.ParserConfigurationException;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import net.jcip.annotations.ThreadSafe;
-import org.opensaml.DefaultBootstrap;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.security.SAMLSignatureProfileValidator;
-import org.opensaml.xml.Configuration;
-import org.opensaml.xml.ConfigurationException;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.io.Unmarshaller;
-import org.opensaml.xml.io.UnmarshallerFactory;
-import org.opensaml.xml.io.UnmarshallingException;
-import org.opensaml.xml.security.credential.BasicCredential;
-import org.opensaml.xml.security.credential.UsageType;
-import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.signature.SignatureValidator;
-import org.opensaml.xml.validation.ValidationException;
+import org.opensaml.core.config.InitializationException;
+import org.opensaml.core.config.InitializationService;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.security.impl.SAMLSignatureProfileValidator;
+import org.opensaml.security.credential.BasicCredential;
+import org.opensaml.security.credential.UsageType;
+import org.opensaml.xmlsec.signature.Signature;
+import org.opensaml.xmlsec.signature.support.SignatureException;
+import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -69,8 +67,8 @@ public class SAML2AssertionValidator {
 
 	static {
 		try {
-			DefaultBootstrap.bootstrap();
-		} catch (ConfigurationException e) {
+			InitializationService.initialize();
+		} catch (InitializationException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -123,9 +121,10 @@ public class SAML2AssertionValidator {
 			Document document = docBuilder.parse(new InputSource(new ByteArrayInputStream(xml.getBytes("utf-8"))));
 			Element element = document.getDocumentElement();
 
-			UnmarshallerFactory unmarshallerFactory = Configuration.getUnmarshallerFactory();
-			Unmarshaller unmarshaller = unmarshallerFactory.getUnmarshaller(element);
-			xmlObject = unmarshaller.unmarshall(element);
+			xmlObject = XMLObjectProviderRegistrySupport
+				.getUnmarshallerFactory()
+				.getUnmarshaller(element)
+				.unmarshall(element);
 
 		} catch (ParserConfigurationException | IOException | SAXException | UnmarshallingException e) {
 			throw new ParseException("SAML 2.0 assertion parsing failed: " + e.getMessage(), e);
@@ -160,24 +159,23 @@ public class SAML2AssertionValidator {
 		SAMLSignatureProfileValidator profileValidator = new SAMLSignatureProfileValidator();
 		try {
 			profileValidator.validate(signature);
-		} catch (ValidationException e) {
+		} catch (SignatureException e) {
 			throw new BadSAML2AssertionException("Invalid SAML 2.0 signature format: " + e.getMessage(), e);
 		}
-
-		BasicCredential credential = new BasicCredential();
+		
+		final BasicCredential credential;
 		if (key instanceof SecretKey) {
-			credential.setSecretKey((SecretKey)key);
+			credential = new BasicCredential((SecretKey)key);
 		} else if (key instanceof PublicKey) {
-			credential.setPublicKey((PublicKey)key);
+			credential = new BasicCredential((PublicKey)key);
 			credential.setUsageType(UsageType.SIGNING);
 		} else {
 			throw new BadSAML2AssertionException("Unsupported key type: " + key.getAlgorithm());
 		}
 
-		SignatureValidator signatureValidator = new SignatureValidator(credential);
 		try {
-			signatureValidator.validate(signature);
-		} catch (ValidationException e) {
+			SignatureValidator.validate(signature, credential);
+		} catch (SignatureException e) {
 			throw new BadSAML2AssertionException("Bad SAML 2.0 signature: " + e.getMessage(), e);
 		}
 	}

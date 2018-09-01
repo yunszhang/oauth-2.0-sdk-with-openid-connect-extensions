@@ -22,6 +22,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 
+import static com.nimbusds.oauth2.sdk.assertions.saml2.SAML2Utils.buildSAMLObject;
+
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.assertions.AssertionDetails;
@@ -34,15 +36,13 @@ import com.nimbusds.oauth2.sdk.util.MapUtils;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import net.jcip.annotations.Immutable;
 import org.joda.time.DateTime;
-import org.opensaml.Configuration;
-import org.opensaml.DefaultBootstrap;
-import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.saml2.core.*;
-import org.opensaml.xml.ConfigurationException;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.xml.schema.XSString;
-import org.opensaml.xml.schema.impl.XSStringBuilder;
+import org.opensaml.core.config.InitializationException;
+import org.opensaml.core.config.InitializationService;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.schema.XSString;
+import org.opensaml.core.xml.schema.impl.XSStringBuilder;
+import org.opensaml.saml.saml2.core.*;
 
 
 /**
@@ -291,38 +291,31 @@ public class SAML2AssertionDetails extends AssertionDetails {
 		throws SerializeException {
 
 		try {
-			DefaultBootstrap.bootstrap();
-		} catch (ConfigurationException e) {
+			InitializationService.initialize();
+		} catch (InitializationException e) {
 			throw new SerializeException(e.getMessage(), e);
 		}
-
-		final XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
-
+		
 		// Top level assertion element
-		SAMLObjectBuilder<Assertion> assertionBuilder = (SAMLObjectBuilder<Assertion>) builderFactory.getBuilder(Assertion.DEFAULT_ELEMENT_NAME);
-
-		Assertion a = assertionBuilder.buildObject();
+		Assertion a = buildSAMLObject(Assertion.class);
+		
 		a.setID(getID().getValue());
 		a.setIssueInstant(new DateTime(getIssueTime()));
 
 		// Issuer
-		SAMLObjectBuilder<org.opensaml.saml2.core.Issuer> issuerBuilder = (SAMLObjectBuilder<org.opensaml.saml2.core.Issuer>) builderFactory.getBuilder(org.opensaml.saml2.core.Issuer.DEFAULT_ELEMENT_NAME);
-		org.opensaml.saml2.core.Issuer iss = issuerBuilder.buildObject();
+		org.opensaml.saml.saml2.core.Issuer iss = buildSAMLObject(org.opensaml.saml.saml2.core.Issuer.class);
 		iss.setValue(getIssuer().getValue());
 		a.setIssuer(iss);
 
 		// Conditions
-		SAMLObjectBuilder<Conditions> conditionsBuilder = (SAMLObjectBuilder<Conditions>) builderFactory.getBuilder(Conditions.DEFAULT_ELEMENT_NAME);
-		Conditions conditions = conditionsBuilder.buildObject();
+		Conditions conditions = buildSAMLObject(Conditions.class);
 
 		// Audience restriction
-		SAMLObjectBuilder<AudienceRestriction> audRestrictionBuilder = (SAMLObjectBuilder<AudienceRestriction>) builderFactory.getBuilder(AudienceRestriction.DEFAULT_ELEMENT_NAME);
-		AudienceRestriction audRestriction = audRestrictionBuilder.buildObject();
+		AudienceRestriction audRestriction = buildSAMLObject(AudienceRestriction.class);
 
 		// ... with single audience - the authz server
-		SAMLObjectBuilder<org.opensaml.saml2.core.Audience> audBuilder = (SAMLObjectBuilder<org.opensaml.saml2.core.Audience>) builderFactory.getBuilder(org.opensaml.saml2.core.Audience.DEFAULT_ELEMENT_NAME);
 		for (Audience audItem: getAudience()) {
-			org.opensaml.saml2.core.Audience aud = audBuilder.buildObject();
+			org.opensaml.saml.saml2.core.Audience aud = buildSAMLObject(org.opensaml.saml.saml2.core.Audience.class);
 			aud.setAudienceURI(audItem.getValue());
 			audRestriction.getAudiences().add(aud);
 		}
@@ -332,21 +325,17 @@ public class SAML2AssertionDetails extends AssertionDetails {
 
 
 		// Subject elements
-		SAMLObjectBuilder<org.opensaml.saml2.core.Subject> subBuilder = (SAMLObjectBuilder<org.opensaml.saml2.core.Subject>) builderFactory.getBuilder(org.opensaml.saml2.core.Subject.DEFAULT_ELEMENT_NAME);
-		org.opensaml.saml2.core.Subject sub = subBuilder.buildObject();
+		org.opensaml.saml.saml2.core.Subject sub = buildSAMLObject(org.opensaml.saml.saml2.core.Subject.class);
 
-		SAMLObjectBuilder<NameID> subIDBuilder = (SAMLObjectBuilder<NameID>) builderFactory.getBuilder(NameID.DEFAULT_ELEMENT_NAME);
-		NameID nameID = subIDBuilder.buildObject();
+		NameID nameID = buildSAMLObject(NameID.class);
 		nameID.setFormat(subjectFormat);
 		nameID.setValue(getSubject().getValue());
 		sub.setNameID(nameID);
 
-		SAMLObjectBuilder<SubjectConfirmation> subCmBuilder = (SAMLObjectBuilder<SubjectConfirmation>) builderFactory.getBuilder(SubjectConfirmation.DEFAULT_ELEMENT_NAME);
-		SubjectConfirmation subCm = subCmBuilder.buildObject();
+		SubjectConfirmation subCm = buildSAMLObject(SubjectConfirmation.class);
 		subCm.setMethod(SubjectConfirmation.METHOD_BEARER);
 
-		SAMLObjectBuilder<SubjectConfirmationData> subCmDataBuilder= (SAMLObjectBuilder<SubjectConfirmationData>) builderFactory.getBuilder(SubjectConfirmationData.DEFAULT_ELEMENT_NAME);
-		SubjectConfirmationData subCmData = subCmDataBuilder.buildObject();
+		SubjectConfirmationData subCmData = buildSAMLObject(SubjectConfirmationData.class);
 		subCmData.setNotOnOrAfter(new DateTime(getExpirationTime()));
 		subCmData.setNotBefore(getNotBeforeTime() != null ? new DateTime(getNotBeforeTime()) : null);
 		subCmData.setRecipient(getAudience().get(0).getValue()); // recipient is single-valued
@@ -364,18 +353,15 @@ public class SAML2AssertionDetails extends AssertionDetails {
 		// Auth time and class?
 		if (subjectAuthTime != null || subjectACR != null) {
 
-			SAMLObjectBuilder<AuthnStatement> authnStmtBuilder = (SAMLObjectBuilder<AuthnStatement>) builderFactory.getBuilder(AuthnStatement.DEFAULT_ELEMENT_NAME);
-			AuthnStatement authnStmt = authnStmtBuilder.buildObject();
+			AuthnStatement authnStmt = buildSAMLObject(AuthnStatement.class);
 
 			if (subjectAuthTime != null) {
 				authnStmt.setAuthnInstant(new DateTime(subjectAuthTime));
 			}
 
 			if (subjectACR != null) {
-				SAMLObjectBuilder<AuthnContext> authnCtxBuilder = (SAMLObjectBuilder<AuthnContext>) builderFactory.getBuilder(AuthnContext.DEFAULT_ELEMENT_NAME);
-				AuthnContext authnCtx = authnCtxBuilder.buildObject();
-				SAMLObjectBuilder<AuthnContextClassRef> acrBuilder = (SAMLObjectBuilder<AuthnContextClassRef>) builderFactory.getBuilder(AuthnContextClassRef.DEFAULT_ELEMENT_NAME);
-				AuthnContextClassRef acr = acrBuilder.buildObject();
+				AuthnContext authnCtx = buildSAMLObject(AuthnContext.class);
+				AuthnContextClassRef acr = buildSAMLObject(AuthnContextClassRef.class);
 				acr.setAuthnContextClassRef(subjectACR.getValue());
 				authnCtx.setAuthnContextClassRef(acr);
 				authnStmt.setAuthnContext(authnCtx);
@@ -387,18 +373,15 @@ public class SAML2AssertionDetails extends AssertionDetails {
 		// Attributes?
 		if (MapUtils.isNotEmpty(attrStatement)) {
 
-			SAMLObjectBuilder<AttributeStatement> attrContainerBuilder = (SAMLObjectBuilder<AttributeStatement>) builderFactory.getBuilder(AttributeStatement.DEFAULT_ELEMENT_NAME);
-			AttributeStatement attrSet = attrContainerBuilder.buildObject();
-
-			SAMLObjectBuilder<Attribute> attrBuilder = (SAMLObjectBuilder<Attribute>) builderFactory.getBuilder(Attribute.DEFAULT_ELEMENT_NAME);
+			AttributeStatement attrSet = buildSAMLObject(AttributeStatement.class);
 
 			for (Map.Entry<String,List<String>> entry: attrStatement.entrySet()) {
 
-				Attribute attr = attrBuilder.buildObject();
+				Attribute attr = buildSAMLObject(Attribute.class);
 				attr.setName(entry.getKey());
-
-				XSStringBuilder stringBuilder = (XSStringBuilder) Configuration.getBuilderFactory().getBuilder(XSString.TYPE_NAME);
-
+				
+				XSStringBuilder stringBuilder = (XSStringBuilder)XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(XSString.TYPE_NAME);
+				
 				for (String v: entry.getValue()) {
 					XSString stringValue = stringBuilder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
 					stringValue.setValue(v);
@@ -515,7 +498,7 @@ public class SAML2AssertionDetails extends AssertionDetails {
 				continue; // skip
 			}
 
-			for (org.opensaml.saml2.core.Audience aud: audRestriction.getAudiences()) {
+			for (org.opensaml.saml.saml2.core.Audience aud: audRestriction.getAudiences()) {
 				audSet.add(new Audience(aud.getAudienceURI()));
 			}
 		}
@@ -605,7 +588,6 @@ public class SAML2AssertionDetails extends AssertionDetails {
 				}
 			}
 		}
-
 
 		return new SAML2AssertionDetails(issuer, subject, subjectFormat, subjectAuthTime, subjectACR,
 			new ArrayList<>(audSet), exp, nbf, iat, id, clientAddress, attrStatement);
