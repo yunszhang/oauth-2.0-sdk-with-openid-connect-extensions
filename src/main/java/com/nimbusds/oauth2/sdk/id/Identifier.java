@@ -118,11 +118,8 @@ public class Identifier implements Serializable, Comparable<Identifier>, JSONAwa
 	 */
 	@Override
 	public String toJSONString() {
-
-		StringBuilder sb = new StringBuilder("\"");
-		sb.append(JSONValue.escape(value));
-		sb.append('"');
-		return sb.toString();
+		
+		return  "\"" + JSONValue.escape(value) + '"';
 	}
 	
 	

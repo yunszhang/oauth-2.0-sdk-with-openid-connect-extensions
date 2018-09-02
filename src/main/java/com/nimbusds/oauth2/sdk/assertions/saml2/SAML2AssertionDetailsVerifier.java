@@ -21,7 +21,7 @@ package com.nimbusds.oauth2.sdk.assertions.saml2;
 import java.util.Date;
 import java.util.Set;
 
-import com.nimbusds.jose.util.DateUtils;
+import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.jwt.proc.ClockSkewAware;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;

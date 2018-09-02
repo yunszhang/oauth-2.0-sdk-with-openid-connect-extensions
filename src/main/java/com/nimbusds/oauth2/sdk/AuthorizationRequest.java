@@ -75,9 +75,6 @@ public class AuthorizationRequest extends AbstractRequest {
 	private static final Set<String> REGISTERED_PARAMETER_NAMES;
 
 
-	/**
-	 * Initialises the registered parameter name set.
-	 */
 	static {
 		Set<String> p = new HashSet<>();
 
@@ -240,7 +237,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		/**
 		 * Custom parameters.
 		 */
-		private Map<String,List<String>> customParams = new HashMap<>();
+		private final Map<String,List<String>> customParams = new HashMap<>();
 
 
 		/**

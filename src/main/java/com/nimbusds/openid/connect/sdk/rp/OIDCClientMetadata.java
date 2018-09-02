@@ -1001,10 +1001,7 @@ public class OIDCClientMetadata extends ClientMetadata {
 		if (defaultACRs != null) {
 
 			JSONArray acrList = new JSONArray();
-
-			for (ACR acr: defaultACRs)
-				acrList.add(acr);
-
+			acrList.addAll(defaultACRs);
 			o.put("default_acr_values", acrList);
 		}
 

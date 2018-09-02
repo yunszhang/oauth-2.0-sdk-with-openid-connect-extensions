@@ -64,9 +64,6 @@ public class ClientInformation {
 	private static final Set<String> REGISTERED_PARAMETER_NAMES;
 
 
-	/**
-	 * Initialises the registered parameter name set.
-	 */
 	static {
 		Set<String> p = new HashSet<>(ClientMetadata.getRegisteredParameterNames());
 

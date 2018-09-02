@@ -75,9 +75,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 	private static final Set<String> REGISTERED_PARAMETER_NAMES;
 
 
-	/**
-	 * Initialises the registered parameter name set.
-	 */
 	static {
 		
 		Set<String> p = new HashSet<>(AuthorizationRequest.getRegisteredParameterNames());
@@ -336,7 +333,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		/**
 		 * Custom parameters.
 		 */
-		private Map<String,List<String>> customParams = new HashMap<>();
+		private final Map<String,List<String>> customParams = new HashMap<>();
 
 
 		/**
