@@ -22,20 +22,14 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.oauth2.sdk.util.MapUtils;
-import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
-import com.nimbusds.oauth2.sdk.util.StringUtils;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
+import com.nimbusds.oauth2.sdk.util.*;
 import net.jcip.annotations.Immutable;
 
 
@@ -63,6 +57,8 @@ import net.jcip.annotations.Immutable;
  *
  * <ul>
  *     <li>OAuth 2.0 (RFC 6749), sections 4.1.3, 4.3.2, 4.4.2 and 6.
+ *     <li>Resource Indicators for OAuth 2.0
+ *         (draft-ietf-oauth-resource-indicators-00)
  * </ul>
  */
 @Immutable
@@ -79,10 +75,16 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 	 * The requested scope, {@code null} if not specified.
 	 */
 	private final Scope scope;
+	
+	
+	/**
+	 * The resource URI(s), {@code null} if not specified.
+	 */
+	private final List<URI> resources;
 
 
 	/**
-	 * Additional custom request parameters.
+	 * Custom request parameters.
 	 */
 	private final Map<String,List<String>> customParams;
 
@@ -105,13 +107,13 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 			    final AuthorizationGrant authzGrant,
 			    final Scope scope) {
 
-		this(uri, clientAuth, authzGrant, scope, null);
+		this(uri, clientAuth, authzGrant, scope, null, null);
 	}
 
 
 	/**
 	 * Creates a new token request with the specified client
-	 * authentication and additional custom parameters.
+	 * authentication and extension and custom parameters.
 	 *
 	 * @param uri          The URI of the token endpoint. May be
 	 *                     {@code null} if the {@link #toHTTPRequest}
@@ -122,14 +124,16 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 	 *                     {@code null}.
 	 * @param scope        The requested scope, {@code null} if not
 	 *                     specified.
-	 * @param customParams Additional custom parameters to be included in
-	 *                     the request body, empty map or {@code null} if
-	 *                     none.
+	 * @param resources    The resource URI(s), {@code null} if not
+	 *                     specified.
+	 * @param customParams Custom parameters to be included in the request
+	 *                     body, empty map or {@code null} if none.
 	 */
 	public TokenRequest(final URI uri,
 			    final ClientAuthentication clientAuth,
 			    final AuthorizationGrant authzGrant,
 			    final Scope scope,
+			    final List<URI> resources,
 			    final Map<String,List<String>> customParams) {
 
 		super(uri, clientAuth);
@@ -140,6 +144,15 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 		this.authzGrant = authzGrant;
 
 		this.scope = scope;
+		
+		if (resources != null) {
+			for (URI resourceURI: resources) {
+				if (! ResourceUtils.isValidResourceURI(resourceURI))
+					throw new IllegalArgumentException("Resource URI must be absolute and with no query or fragment: " + resourceURI);
+			}
+		}
+		
+		this.resources = resources;
 
 		if (MapUtils.isNotEmpty(customParams)) {
 			this.customParams = customParams;
@@ -186,14 +199,14 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 			    final AuthorizationGrant authzGrant,
 			    final Scope scope) {
 
-		this(uri, clientID, authzGrant, scope, null);
+		this(uri, clientID, authzGrant, scope, null, null);
 	}
 
 
 	/**
 	 * Creates a new token request, with no explicit client authentication
-	 * (may be present in the grant depending on its type) and additional
-	 * custom parameters.
+	 * (may be present in the grant depending on its type) and extension
+	 * and custom parameters.
 	 *
 	 * @param uri          The URI of the token endpoint. May be
 	 *                     {@code null} if the {@link #toHTTPRequest}
@@ -204,14 +217,16 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 	 *                     {@code null}.
 	 * @param scope        The requested scope, {@code null} if not
 	 *                     specified.
-	 * @param customParams Additional custom parameters to be included in
-	 *                     the request body, empty map or {@code null} if
-	 *                     none.
+	 * @param resources    The resource URI(s), {@code null} if not
+	 *                     specified.
+	 * @param customParams Custom parameters to be included in the request
+	 *                     body, empty map or {@code null} if none.
 	 */
 	public TokenRequest(final URI uri,
 			    final ClientID clientID,
 			    final AuthorizationGrant authzGrant,
 			    final Scope scope,
+			    final List<URI> resources,
 			    final Map<String,List<String>> customParams) {
 
 		super(uri, clientID);
@@ -227,6 +242,15 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 		this.authzGrant = authzGrant;
 
 		this.scope = scope;
+		
+		if (resources != null) {
+			for (URI resourceURI: resources) {
+				if (! ResourceUtils.isValidResourceURI(resourceURI))
+					throw new IllegalArgumentException("Resource URI must be absolute and with no query or fragment: " + resourceURI);
+			}
+		}
+		
+		this.resources = resources;
 
 		if (MapUtils.isNotEmpty(customParams)) {
 			this.customParams = customParams;
@@ -291,7 +315,7 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 
 
 	/**
-	 * Gets the authorisation grant.
+	 * Returns the authorisation grant.
 	 *
 	 * @return The authorisation grant.
 	 */
@@ -302,13 +326,24 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 
 
 	/**
-	 * Gets the requested scope.
+	 * Returns the requested scope.
 	 *
 	 * @return The requested scope, {@code null} if not specified.
 	 */
 	public Scope getScope() {
 
 		return scope;
+	}
+	
+	
+	/**
+	 * Returns the resource server URI.
+	 *
+	 * @return The resource URI(s), {@code null} if not specified.
+	 */
+	public List<URI> getResources() {
+		
+		return resources;
 	}
 
 
@@ -377,6 +412,16 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 
 		if (getClientID() != null) {
 			params.put("client_id", Collections.singletonList(getClientID().getValue()));
+		}
+		
+		if (getResources() != null) {
+			List<String> values = new LinkedList<>();
+			for (URI uri: resources) {
+				if (uri == null)
+					continue;
+				values.add(uri.toString());
+			}
+			params.put("resource", values);
 		}
 
 		if (! getCustomParameters().isEmpty()) {
@@ -469,6 +514,37 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 		if (scopeValue != null) {
 			scope = Scope.parse(scopeValue);
 		}
+		
+		// Parse resource URIs
+		List<URI> resources = null;
+		
+		List<String> vList = params.get("resource");
+		
+		if (vList != null) {
+			
+			resources = new LinkedList<>();
+			
+			for (String uriValue: vList) {
+				
+				if (uriValue == null)
+					continue;
+				
+				String errMsg = "Invalid \"resource\" parameter: Must be an absolute URI and with no query or fragment: " + uriValue;
+				
+				URI resourceURI;
+				try {
+					resourceURI = new URI(uriValue);
+				} catch (URISyntaxException e) {
+					throw new ParseException(errMsg, OAuth2Error.INVALID_RESOURCE.setDescription(errMsg));
+				}
+				
+				if (! ResourceUtils.isValidResourceURI(resourceURI)) {
+					throw new ParseException(errMsg, OAuth2Error.INVALID_RESOURCE.setDescription(errMsg));
+				}
+				
+				resources.add(resourceURI);
+			}
+		}
 
 		// Parse custom parameters
 		Map<String,List<String>> customParams = new HashMap<>();
@@ -498,6 +574,10 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 			if (p.getKey().equalsIgnoreCase("scope")) {
 				continue; // skip
 			}
+			
+			if (p.getKey().equalsIgnoreCase("resource")) {
+				continue; // skip
+			}
 
 			if (! grant.getType().getRequestParameterNames().contains(p.getKey())) {
 				// We have a custom (non-registered) parameter
@@ -506,9 +586,9 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 		}
 
 		if (clientAuth != null) {
-			return new TokenRequest(uri, clientAuth, grant, scope, customParams);
+			return new TokenRequest(uri, clientAuth, grant, scope, resources, customParams);
 		} else {
-			return new TokenRequest(uri, clientID, grant, scope, customParams);
+			return new TokenRequest(uri, clientID, grant, scope, resources, customParams);
 		}
 	}
 }

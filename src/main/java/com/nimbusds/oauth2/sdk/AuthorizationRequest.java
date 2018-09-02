@@ -59,6 +59,8 @@ import net.jcip.annotations.Immutable;
  *     <li>OAuth 2.0 Multiple Response Type Encoding Practices 1.0.
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
  *     <li>Proof Key for Code Exchange by OAuth Public Clients (RFC 7636).
+ *     <li>Resource Indicators for OAuth 2.0
+ *         (draft-ietf-oauth-resource-indicators-00)
  * </ul>
  */
 @Immutable
@@ -85,6 +87,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		p.add("response_mode");
 		p.add("code_challenge");
 		p.add("code_challenge_method");
+		p.add("resource");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -137,10 +140,16 @@ public class AuthorizationRequest extends AbstractRequest {
 	 * The authorisation code challenge method for PKCE (optional).
 	 */
 	private final CodeChallengeMethod codeChallengeMethod;
+	
+	
+	/**
+	 * The resource URI(s) (optional).
+	 */
+	private final List<URI> resources;
 
 
 	/**
-	 * Additional custom parameters.
+	 * Custom parameters.
 	 */
 	private final Map<String,List<String>> customParams;
 
@@ -205,10 +214,16 @@ public class AuthorizationRequest extends AbstractRequest {
 		 * The authorisation code challenge method for PKCE (optional).
 		 */
 		private CodeChallengeMethod codeChallengeMethod;
+		
+		
+		/**
+		 * The resource URI(s) (optional).
+		 */
+		private List<URI> resources;
 
 
 		/**
-		 * Additional custom parameters.
+		 * Custom parameters.
 		 */
 		private Map<String,List<String>> customParams = new HashMap<>();
 
@@ -256,6 +271,7 @@ public class AuthorizationRequest extends AbstractRequest {
 			rm = request.getResponseMode();
 			codeChallenge = request.getCodeChallenge();
 			codeChallengeMethod = request.getCodeChallengeMethod();
+			resources = request.getResources();
 			customParams.putAll(request.getCustomParameters());
 		}
 
@@ -371,6 +387,24 @@ public class AuthorizationRequest extends AbstractRequest {
 			}
 			return this;
 		}
+		
+		
+		/**
+		 * Sets the resource server URI(s).
+		 *
+		 * @param resources The resource URI(s), {@code null} if not
+		 *                  specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder resources(final URI ... resources) {
+			if (resources != null) {
+				this.resources = Arrays.asList(resources);
+			} else {
+				this.resources = null;
+			}
+			return this;
+		}
 
 
 		/**
@@ -416,7 +450,11 @@ public class AuthorizationRequest extends AbstractRequest {
 		 */
 		public AuthorizationRequest build() {
 
-			return new AuthorizationRequest(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, customParams);
+			try {
+				return new AuthorizationRequest(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, resources, customParams);
+			} catch (IllegalArgumentException e) {
+				throw new IllegalStateException(e.getMessage(), e);
+			}
 		}
 	}
 
@@ -438,7 +476,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		                    final ResponseType rt,
 	                            final ClientID clientID) {
 
-		this(uri, rt, null, clientID, null, null, null, null, null);
+		this(uri, rt, null, clientID, null, null, null, null, null, null, null);
 	}
 
 
@@ -478,12 +516,13 @@ public class AuthorizationRequest extends AbstractRequest {
 	                            final Scope scope,
 				    final State state) {
 
-		this(uri, rt, rm, clientID, redirectURI, scope, state, null, null);
+		this(uri, rt, rm, clientID, redirectURI, scope, state, null, null, null, null);
 	}
 
 
 	/**
-	 * Creates a new authorisation request with PKCE support.
+	 * Creates a new authorisation request with extension and custom
+	 * parameters.
 	 *
 	 * @param uri                 The URI of the authorisation endpoint.
 	 *                            May be {@code null} if the
@@ -513,55 +552,10 @@ public class AuthorizationRequest extends AbstractRequest {
 	 *                            if not specified.
 	 * @param codeChallengeMethod The code challenge method for PKCE,
 	 *                            {@code null} if not specified.
-	 */
-	public AuthorizationRequest(final URI uri,
-		                    final ResponseType rt,
-				    final ResponseMode rm,
-	                            final ClientID clientID,
-				    final URI redirectURI,
-	                            final Scope scope,
-				    final State state,
-				    final CodeChallenge codeChallenge,
-				    final CodeChallengeMethod codeChallengeMethod) {
-
-		this(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, Collections.<String,List<String>>emptyMap());
-	}
-
-
-	/**
-	 * Creates a new authorisation request with PKCE support and additional
-	 * custom parameters.
-	 *
-	 * @param uri                 The URI of the authorisation endpoint.
-	 *                            May be {@code null} if the
-	 *                            {@link #toHTTPRequest} method will not be
-	 *                            used.
-	 * @param rt                  The response type. Corresponds to the
-	 *                            {@code response_type} parameter. Must not
-	 *                            be {@code null}.
-	 * @param rm                  The response mode. Corresponds to the
-	 *                            optional {@code response_mode} parameter.
-	 *                            Use of this parameter is not recommended
-	 *                            unless a non-default response mode is
-	 *                            requested (e.g. form_post).
-	 * @param clientID            The client identifier. Corresponds to the
-	 *                            {@code client_id} parameter. Must not be
-	 *                            {@code null}.
-	 * @param redirectURI         The redirection URI. Corresponds to the
-	 *                            optional {@code redirect_uri} parameter.
-	 *                            {@code null} if not specified.
-	 * @param scope               The request scope. Corresponds to the
-	 *                            optional {@code scope} parameter.
-	 *                            {@code null} if not specified.
-	 * @param state               The state. Corresponds to the recommended
-	 *                            {@code state} parameter. {@code null} if
-	 *                            not specified.
-	 * @param codeChallenge       The code challenge for PKCE, {@code null}
-	 *                            if not specified.
-	 * @param codeChallengeMethod The code challenge method for PKCE,
-	 *                            {@code null} if not specified.
-	 * @param customParams        Additional custom parameters, empty map
-	 *                            or {@code null} if none.
+	 * @param resources           The resource URI(s), {@code null} if not
+	 *                            specified.
+	 * @param customParams        Custom parameters, empty map or
+	 *                            {@code null} if none.
 	 */
 	public AuthorizationRequest(final URI uri,
 		                    final ResponseType rt,
@@ -572,6 +566,7 @@ public class AuthorizationRequest extends AbstractRequest {
 				    final State state,
 				    final CodeChallenge codeChallenge,
 				    final CodeChallengeMethod codeChallengeMethod,
+				    final List<URI> resources,
 				    final Map<String,List<String>> customParams) {
 
 		super(uri);
@@ -596,6 +591,15 @@ public class AuthorizationRequest extends AbstractRequest {
 
 		this.codeChallenge = codeChallenge;
 		this.codeChallengeMethod = codeChallengeMethod;
+		
+		if (resources != null) {
+			for (URI resourceURI: resources) {
+				if (! ResourceUtils.isValidResourceURI(resourceURI))
+					throw new IllegalArgumentException("Resource URI must be absolute and with no query or fragment: " + resourceURI);
+			}
+		}
+		
+		this.resources = resources;
 
 		if (MapUtils.isNotEmpty(customParams)) {
 			this.customParams = Collections.unmodifiableMap(customParams);
@@ -728,6 +732,17 @@ public class AuthorizationRequest extends AbstractRequest {
 
 		return codeChallengeMethod;
 	}
+	
+	
+	/**
+	 * Returns the resource server URI.
+	 *
+	 * @return The resource URI(s), {@code null} if not specified.
+	 */
+	public List<URI> getResources() {
+		
+		return resources;
+	}
 
 
 	/**
@@ -800,6 +815,16 @@ public class AuthorizationRequest extends AbstractRequest {
 			if (codeChallengeMethod != null) {
 				params.put("code_challenge_method", Collections.singletonList(codeChallengeMethod.getValue()));
 			}
+		}
+		
+		if (resources != null) {
+			List<String> resourceValues = new LinkedList<>();
+			for (URI resourceURI: resources) {
+				if (resourceURI != null) {
+					resourceValues.add(resourceURI.toString());
+				}
+			}
+			params.put("resource", resourceValues);
 		}
 
 		return params;
@@ -1056,7 +1081,39 @@ public class AuthorizationRequest extends AbstractRequest {
 			if (StringUtils.isNotBlank(v))
 				codeChallengeMethod = CodeChallengeMethod.parse(v);
 		}
-
+		
+		List<URI> resources = null;
+		
+		List<String> vList = params.get("resource");
+		
+		if (vList != null) {
+			
+			resources = new LinkedList<>();
+			
+			for (String uriValue: vList) {
+				
+				if (uriValue == null)
+					continue;
+				
+				String errMsg = "Invalid \"resource\" parameter: Must be an absolute URI and with no query or fragment: " + uriValue;
+				
+				URI resourceURI;
+				try {
+					resourceURI = new URI(uriValue);
+				} catch (URISyntaxException e) {
+					throw new ParseException(errMsg, OAuth2Error.INVALID_RESOURCE.setDescription(errMsg),
+						clientID, redirectURI, null, state, e);
+				}
+				
+				if (! ResourceUtils.isValidResourceURI(resourceURI)) {
+					throw new ParseException(errMsg, OAuth2Error.INVALID_RESOURCE.setDescription(errMsg),
+						clientID, redirectURI, null, state, null);
+				}
+				
+				resources.add(resourceURI);
+			}
+		}
+		
 		// Parse additional custom parameters
 		Map<String,List<String>> customParams = null;
 
@@ -1072,7 +1129,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		}
 
 
-		return new AuthorizationRequest(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, customParams);
+		return new AuthorizationRequest(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, resources, customParams);
 	}
 
 

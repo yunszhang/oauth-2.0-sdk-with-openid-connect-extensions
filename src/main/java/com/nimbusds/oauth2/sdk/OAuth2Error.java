@@ -114,6 +114,14 @@ public final class OAuth2Error {
 	 */
 	public static final ErrorObject UNSUPPORTED_GRANT_TYPE =
 		new ErrorObject("unsupported_grant_type", "Unsupported grant type", HTTPResponse.SC_BAD_REQUEST);
+	
+	
+	/**
+	 * The specified resource server URI is not valid or accepted by the
+	 * authorisation server.
+	 */
+	public static final ErrorObject INVALID_RESOURCE =
+		new ErrorObject("invalid_resource", "Invalid or unaccepted resource", HTTPResponse.SC_BAD_REQUEST);
 
 	
 	/**

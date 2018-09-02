@@ -39,5 +39,14 @@ public class OAuth2ErrorTest extends TestCase {
 		assertEquals(400, OAuth2Error.UNAUTHORIZED_CLIENT.getHTTPStatusCode());
 		assertEquals(400, OAuth2Error.UNSUPPORTED_GRANT_TYPE.getHTTPStatusCode());
 		assertEquals(400, OAuth2Error.UNSUPPORTED_RESPONSE_TYPE.getHTTPStatusCode());
+		assertEquals(400, OAuth2Error.INVALID_RESOURCE.getHTTPStatusCode());
+	}
+	
+	
+	public void testInvalidResourceError() {
+		
+		assertEquals("invalid_resource", OAuth2Error.INVALID_RESOURCE.getCode());
+		assertEquals("Invalid or unaccepted resource", OAuth2Error.INVALID_RESOURCE.getDescription());
+		assertEquals(400, OAuth2Error.INVALID_RESOURCE.getHTTPStatusCode());
 	}
 }

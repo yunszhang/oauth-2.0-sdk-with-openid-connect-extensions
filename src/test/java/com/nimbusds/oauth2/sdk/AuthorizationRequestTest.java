@@ -18,12 +18,10 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -48,7 +46,8 @@ public class AuthorizationRequestTest extends TestCase {
 		assertTrue(AuthorizationRequest.getRegisteredParameterNames().contains("state"));
 		assertTrue(AuthorizationRequest.getRegisteredParameterNames().contains("code_challenge"));
 		assertTrue(AuthorizationRequest.getRegisteredParameterNames().contains("code_challenge_method"));
-		assertEquals(8, AuthorizationRequest.getRegisteredParameterNames().size());
+		assertTrue(AuthorizationRequest.getRegisteredParameterNames().contains("resource"));
+		assertEquals(9, AuthorizationRequest.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -73,6 +72,8 @@ public class AuthorizationRequestTest extends TestCase {
 		assertNull(req.getState());
 		assertNull(req.getResponseMode());
 		assertEquals(ResponseMode.QUERY, req.impliedResponseMode());
+		
+		assertNull(req.getResources());
 
 		assertNull(req.getCustomParameter("custom-param"));
 		assertTrue(req.getCustomParameters().isEmpty());
@@ -103,6 +104,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertNull(req.getState());
 		assertNull(req.getResponseMode());
 		assertEquals(ResponseMode.QUERY, req.impliedResponseMode());
+		assertNull(req.getResources());
 
 		assertNull(req.getCustomParameter("custom-param"));
 		assertTrue(req.getCustomParameters().isEmpty());
@@ -134,6 +136,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertNull(req.getState());
 		assertNull(req.getResponseMode());
 		assertEquals(ResponseMode.QUERY, req.impliedResponseMode());
+		assertNull(req.getResources());
 		assertNull(req.getCustomParameter("custom-param"));
 		assertTrue(req.getCustomParameters().isEmpty());
 	}
@@ -165,6 +168,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(ResponseMode.QUERY, req.impliedResponseMode());
 		assertNull(req.getScope());
 		assertNull(req.getState());
+		assertNull(req.getResources());
 		assertNull(req.getCustomParameter("custom-param"));
 		assertTrue(req.getCustomParameters().isEmpty());
 	}
@@ -191,6 +195,8 @@ public class AuthorizationRequestTest extends TestCase {
 		CodeVerifier codeVerifier = new CodeVerifier();
 		CodeChallengeMethod codeChallengeMethod = CodeChallengeMethod.S256;
 		CodeChallenge codeChallenge = CodeChallenge.compute(codeChallengeMethod, codeVerifier);
+		
+		List<URI> resources = Arrays.asList(URI.create("https://rs1.com"), URI.create("https://rs2.com"));
 
 		Map<String,List<String>> customParams = new HashMap<>();
 		customParams.put("x", Collections.singletonList("100"));
@@ -198,7 +204,7 @@ public class AuthorizationRequestTest extends TestCase {
 		customParams.put("z", Collections.singletonList("300"));
 
 
-		AuthorizationRequest req = new AuthorizationRequest(uri, rts, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, customParams);
+		AuthorizationRequest req = new AuthorizationRequest(uri, rts, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, resources, customParams);
 
 		assertEquals(uri, req.getEndpointURI());
 		assertEquals(rts, req.getResponseType());
@@ -208,6 +214,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(redirectURI, req.getRedirectionURI());
 		assertEquals(scope, req.getScope());
 		assertEquals(state, req.getState());
+		assertEquals(resources, req.getResources());
 
 		String query = req.toQueryString();
 
@@ -223,10 +230,11 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(Collections.singletonList(state.getValue()), params.get("state"));
 		assertEquals(Collections.singletonList(codeChallenge.getValue()), params.get("code_challenge"));
 		assertEquals(Collections.singletonList(codeChallengeMethod.getValue()), params.get("code_challenge_method"));
+		assertEquals(Arrays.asList("https://rs1.com", "https://rs2.com"), params.get("resource"));
 		assertEquals(Collections.singletonList("100"), params.get("x"));
 		assertEquals(Collections.singletonList("200"), params.get("y"));
 		assertEquals(Collections.singletonList("300"), params.get("z"));
-		assertEquals(11, params.size());
+		assertEquals(12, params.size());
 
 		HTTPRequest httpReq = req.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.GET, httpReq.getMethod());
@@ -244,6 +252,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(state, req.getState());
 		assertEquals(codeChallenge, req.getCodeChallenge());
 		assertEquals(codeChallengeMethod, req.getCodeChallengeMethod());
+		assertEquals(resources, req.getResources());
 		assertEquals(Collections.singletonList("100"), req.getCustomParameter("x"));
 		assertEquals(Collections.singletonList("200"), req.getCustomParameter("y"));
 		assertEquals(Collections.singletonList("300"), req.getCustomParameter("z"));
@@ -271,8 +280,10 @@ public class AuthorizationRequestTest extends TestCase {
 
 		CodeVerifier verifier = new CodeVerifier();
 		CodeChallenge codeChallenge = CodeChallenge.compute(CodeChallengeMethod.PLAIN, verifier);
+		
+		List<URI> resources = Collections.singletonList(URI.create("https://rs1.com"));
 
-		AuthorizationRequest req = new AuthorizationRequest(uri, rts, null, clientID, redirectURI, scope, state, codeChallenge, null);
+		AuthorizationRequest req = new AuthorizationRequest(uri, rts, null, clientID, redirectURI, scope, state, codeChallenge, null, resources, null);
 
 		assertEquals(uri, req.getEndpointURI());
 		assertEquals(rts, req.getResponseType());
@@ -282,6 +293,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(redirectURI, req.getRedirectionURI());
 		assertEquals(scope, req.getScope());
 		assertEquals(state, req.getState());
+		assertEquals(resources, req.getResources());
 
 		String query = req.toQueryString();
 
@@ -295,13 +307,13 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(redirectURI, req.getRedirectionURI());
 		assertEquals(scope, req.getScope());
 		assertEquals(state, req.getState());
+		assertEquals(resources, req.getResources());
 		assertEquals(codeChallenge, req.getCodeChallenge());
 		assertNull(req.getCodeChallengeMethod());
 	}
 
 
-	public void testBuilderMinimal()
-		throws Exception {
+	public void testBuilderMinimal() {
 
 		AuthorizationRequest request = new AuthorizationRequest.Builder(new ResponseType("code"), new ClientID("123")).build();
 		
@@ -315,6 +327,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertNull(request.getState());
 		assertNull(request.getCodeChallenge());
 		assertNull(request.getCodeChallengeMethod());
+		assertNull(request.getResources());
 		assertTrue(request.getCustomParameters().isEmpty());
 	}
 
@@ -357,8 +370,7 @@ public class AuthorizationRequestTest extends TestCase {
 	}
 
 
-	public void testBuilderMinimalNullCodeChallenge_deprecated()
-		throws Exception {
+	public void testBuilderMinimalNullCodeChallenge_deprecated() {
 
 		AuthorizationRequest request = new AuthorizationRequest.Builder(new ResponseType("token"), new ClientID("123"))
 			.codeChallenge((CodeChallenge) null, null)
@@ -383,14 +395,15 @@ public class AuthorizationRequestTest extends TestCase {
 
 		CodeVerifier codeVerifier = new CodeVerifier();
 
-		AuthorizationRequest request = new AuthorizationRequest.Builder(new ResponseType("code"), new ClientID("123")).
-			endpointURI(new URI("https://c2id.com/login")).
-			redirectionURI(new URI("https://client.com/cb")).
-			scope(new Scope("openid", "email")).
-			state(new State("123")).
-			responseMode(ResponseMode.FORM_POST).
-			codeChallenge(codeVerifier, CodeChallengeMethod.S256).
-			build();
+		AuthorizationRequest request = new AuthorizationRequest.Builder(new ResponseType("code"), new ClientID("123"))
+			.endpointURI(new URI("https://c2id.com/login"))
+			.redirectionURI(new URI("https://client.com/cb"))
+			.scope(new Scope("openid", "email"))
+			.state(new State("123"))
+			.responseMode(ResponseMode.FORM_POST)
+			.codeChallenge(codeVerifier, CodeChallengeMethod.S256)
+			.resources(URI.create("https://rs1.com"), URI.create("https://rs2.com"))
+			.build();
 		
 		assertEquals(new ResponseType("code"), request.getResponseType());
 		assertEquals(ResponseMode.FORM_POST, request.getResponseMode());
@@ -402,6 +415,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(new State("123"), request.getState());
 		assertEquals(CodeChallenge.compute(CodeChallengeMethod.S256, codeVerifier), request.getCodeChallenge());
 		assertEquals(CodeChallengeMethod.S256, request.getCodeChallengeMethod());
+		assertEquals(Arrays.asList(URI.create("https://rs1.com"), URI.create("https://rs2.com")), request.getResources());
 	}
 
 
@@ -417,6 +431,7 @@ public class AuthorizationRequestTest extends TestCase {
 			.state(new State("123"))
 			.responseMode(ResponseMode.FORM_POST)
 			.codeChallenge(codeVerifier, null)
+			.resources(URI.create("https://rs1.com"))
 			.customParameter("x", "100")
 			.customParameter("y", "200")
 			.customParameter("z", "300")
@@ -432,6 +447,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(new State("123"), request.getState());
 		assertEquals(CodeChallenge.compute(CodeChallengeMethod.PLAIN, codeVerifier), request.getCodeChallenge());
 		assertEquals(CodeChallengeMethod.PLAIN, request.getCodeChallengeMethod());
+		assertEquals(Collections.singletonList(URI.create("https://rs1.com")), request.getResources());
 		assertEquals(Collections.singletonList("100"), request.getCustomParameter("x"));
 		assertEquals(Collections.singletonList("200"), request.getCustomParameter("y"));
 		assertEquals(Collections.singletonList("300"), request.getCustomParameter("z"));
@@ -607,6 +623,7 @@ public class AuthorizationRequestTest extends TestCase {
 			new State(),
 			CodeChallenge.compute(CodeChallengeMethod.S256, new CodeVerifier()),
 			CodeChallengeMethod.S256,
+			Collections.singletonList(URI.create("https://rs1.com")),
 			customParams);
 		
 		AuthorizationRequest out = new AuthorizationRequest.Builder(in).build();
@@ -619,6 +636,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(in.getResponseMode(), out.getResponseMode());
 		assertEquals(in.getCodeChallenge(), out.getCodeChallenge());
 		assertEquals(in.getCodeChallengeMethod(), out.getCodeChallengeMethod());
+		assertEquals(in.getResources(), out.getResources());
 		assertEquals(in.getCustomParameters(), out.getCustomParameters());
 		assertEquals(in.getEndpointURI(), out.getEndpointURI());
 	}
@@ -650,6 +668,113 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(Collections.singletonList("code"), finalParameters.get("response_type"));
 		assertEquals(Collections.singletonList("123"), finalParameters.get("client_id"));
 		assertEquals(3, finalParameters.size());
+	}
+	
+	
+	public void testBuilderWithResource_rejectNonAbsoluteURI() {
 		
+		try {
+			new AuthorizationRequest.Builder(new ResponseType("code"), new ClientID("123"))
+				.resources(URI.create("https:///api/v1"))
+				.build();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Resource URI must be absolute and with no query or fragment: https:///api/v1", e.getMessage());
+		}
+	}
+	
+	
+	public void testBuilderWithResource_rejectURIWithQuery() {
+		
+		try {
+			new AuthorizationRequest.Builder(new ResponseType("code"), new ClientID("123"))
+				.resources(URI.create("https://rs1.com/api/v1?query"))
+				.build();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Resource URI must be absolute and with no query or fragment: https://rs1.com/api/v1?query", e.getMessage());
+		}
+	}
+	
+	
+	public void testBuilderWithResource_rejectURIWithFragment() {
+		
+		try {
+			new AuthorizationRequest.Builder(new ResponseType("code"), new ClientID("123"))
+				.resources(URI.create("https://rs1.com/api/v1#fragment"))
+				.build();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Resource URI must be absolute and with no query or fragment: https://rs1.com/api/v1#fragment", e.getMessage());
+		}
+	}
+	
+	
+	public void testParseResourceIndicatorsExample()
+		throws ParseException {
+		
+		AuthorizationRequest request = AuthorizationRequest.parse(
+			URI.create(
+				"https://authorization-server.example.com" +
+				"/as/authorization.oauth2?response_type=token" +
+				"&client_id=s6BhdRkqt3&state=laeb" +
+				"&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb" +
+				"&resource=https%3A%2F%2Frs.example.com%2F"));
+		
+		assertEquals(new ClientID("s6BhdRkqt3"), request.getClientID());
+		assertEquals(new State("laeb"), request.getState());
+		assertEquals(new ResponseType("token"), request.getResponseType());
+		assertEquals(URI.create("https://client.example.com/cb"), request.getRedirectionURI());
+		assertEquals(Collections.singletonList(URI.create("https://rs.example.com/")), request.getResources());
+	}
+	
+	
+	public void testParse_rejectResourceURIWithHostNotAbsolute() {
+		
+		try {
+			AuthorizationRequest.parse(URI.create("https://authorization-server.example.com" +
+				"/as/authorization.oauth2?response_type=token" +
+				"&client_id=s6BhdRkqt3&state=laeb" +
+				"&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb" +
+				"&resource=https%3A%2F%2F%2F"));
+			fail();
+		} catch (ParseException e) {
+			assertEquals(OAuth2Error.INVALID_RESOURCE, e.getErrorObject());
+			assertEquals("Invalid \"resource\" parameter: Must be an absolute URI and with no query or fragment: https:///", e.getErrorObject().getDescription());
+		}
+	}
+	
+	
+	public void testParse_rejectResourceURIWithQuery()
+		throws UnsupportedEncodingException {
+		
+		try {
+			AuthorizationRequest.parse(URI.create("https://authorization-server.example.com" +
+				"/as/authorization.oauth2?response_type=token" +
+				"&client_id=s6BhdRkqt3&state=laeb" +
+				"&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb" +
+				"&resource=" + URLEncoder.encode("https://rs.example.com/?query", "utf-8")));
+			fail();
+		} catch (ParseException e) {
+			assertEquals(OAuth2Error.INVALID_RESOURCE, e.getErrorObject());
+			assertEquals("Invalid \"resource\" parameter: Must be an absolute URI and with no query or fragment: https://rs.example.com/?query", e.getErrorObject().getDescription());
+		}
+	}
+	
+	
+	public void testParse_rejectResourceURIWithFragment()
+		throws UnsupportedEncodingException {
+		
+		try {
+			AuthorizationRequest.parse(URI.create("https://authorization-server.example.com" +
+				"/as/authorization.oauth2?response_type=token" +
+				"&client_id=s6BhdRkqt3&state=laeb" +
+				"&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb" +
+				"&resource=" + URLEncoder.encode("https://rs.example.com/#fragment", "utf-8")));
+			fail();
+		} catch (ParseException e) {
+			assertEquals(OAuth2Error.INVALID_RESOURCE, e.getErrorObject());
+			assertEquals("Invalid \"resource\" parameter: Must be an absolute URI and with no query or fragment: https://rs.example.com/#fragment", e.getErrorObject().getDescription());
+		}
 	}
 }

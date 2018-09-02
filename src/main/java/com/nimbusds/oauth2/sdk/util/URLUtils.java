@@ -214,22 +214,14 @@ public final class URLUtils {
 				String pair[] = param.split("=", 2); // Split around the first '=', see issue #169
 
 				String key = URLDecoder.decode(pair[0], CHARSET);
-				
-				// Save the first value only
-				if (params.containsKey(key))
-					continue;
 
-				String value = "";
-
-				if (pair.length > 1) {
-					value = URLDecoder.decode(pair[1], CHARSET);
-				}
+				String value = pair.length > 1 ? URLDecoder.decode(pair[1], CHARSET) : "";
 				
 				if (params.containsKey(key)) {
-					List<String> otherValues = params.get(key);
-					List<String> combinedValues = new LinkedList<>(otherValues);
-					combinedValues.add(value);
-					params.put(key, Collections.unmodifiableList(combinedValues));
+					// Append value
+					List<String> updatedValueList = new LinkedList<>(params.get(key));
+					updatedValueList.add(value);
+					params.put(key, Collections.unmodifiableList(updatedValueList));
 				} else {
 					params.put(key, Collections.singletonList(value));
 				}

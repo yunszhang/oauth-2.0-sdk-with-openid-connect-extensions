@@ -939,7 +939,9 @@ version 5.64.4 (2018-08-20)
       #253).
     * Fixes jdk6, jdk8 and jdk10 releases (iss #250).
 
-version 6.0 (2018-08-31)
+version 6.0 (2018-09-01)
+    * Adds experimental support for Resource Indicators for OAuth 2.0
+      (draft-ietf-oauth-resource-indicators-00).
     * Updates AuthorizationRequest and AuthenticationRequest to support
       multi-valued query parameters (breaking change).
     * Updates the AuthorizationResponse classes to support multi-valued
