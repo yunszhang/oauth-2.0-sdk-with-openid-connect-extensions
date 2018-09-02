@@ -61,6 +61,8 @@ import net.jcip.annotations.Immutable;
  *     <li>Proof Key for Code Exchange by OAuth Public Clients (RFC 7636).
  *     <li>Resource Indicators for OAuth 2.0
  *         (draft-ietf-oauth-resource-indicators-00)
+ *     <li>OAuth 2.0 Incremental Authorization
+ *         (draft-ietf-oauth-incremental-authz-00)
  * </ul>
  */
 @Immutable
@@ -88,6 +90,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		p.add("code_challenge");
 		p.add("code_challenge_method");
 		p.add("resource");
+		p.add("include_granted_scopes");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -146,6 +149,12 @@ public class AuthorizationRequest extends AbstractRequest {
 	 * The resource URI(s) (optional).
 	 */
 	private final List<URI> resources;
+	
+	
+	/**
+	 * Indicates incremental authorisation (optional).
+	 */
+	private final boolean includeGrantedScopes;
 
 
 	/**
@@ -217,6 +226,12 @@ public class AuthorizationRequest extends AbstractRequest {
 		
 		
 		/**
+		 * Indicates incremental authorisation (optional).
+		 */
+		private boolean includeGrantedScopes;
+		
+		
+		/**
 		 * The resource URI(s) (optional).
 		 */
 		private List<URI> resources;
@@ -272,6 +287,7 @@ public class AuthorizationRequest extends AbstractRequest {
 			codeChallenge = request.getCodeChallenge();
 			codeChallengeMethod = request.getCodeChallengeMethod();
 			resources = request.getResources();
+			includeGrantedScopes = request.includeGrantedScopes();
 			customParams.putAll(request.getCustomParameters());
 		}
 
@@ -405,8 +421,23 @@ public class AuthorizationRequest extends AbstractRequest {
 			}
 			return this;
 		}
-
-
+		
+		
+		/**
+		 * Requests incremental authorisation.
+		 *
+		 * @param includeGrantedScopes {@code true} to request
+		 *                             incremental authorisation.
+		 *
+		 * @return This builder.
+		 */
+		public Builder includeGrantedScopes(final boolean includeGrantedScopes) {
+			
+			this.includeGrantedScopes = includeGrantedScopes;
+			return this;
+		}
+		
+		
 		/**
 		 * Sets a custom parameter.
 		 *
@@ -451,7 +482,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		public AuthorizationRequest build() {
 
 			try {
-				return new AuthorizationRequest(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, resources, customParams);
+				return new AuthorizationRequest(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, resources, includeGrantedScopes, customParams);
 			} catch (IllegalArgumentException e) {
 				throw new IllegalStateException(e.getMessage(), e);
 			}
@@ -476,7 +507,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		                    final ResponseType rt,
 	                            final ClientID clientID) {
 
-		this(uri, rt, null, clientID, null, null, null, null, null, null, null);
+		this(uri, rt, null, clientID, null, null, null, null, null, null, false, null);
 	}
 
 
@@ -516,7 +547,7 @@ public class AuthorizationRequest extends AbstractRequest {
 	                            final Scope scope,
 				    final State state) {
 
-		this(uri, rt, rm, clientID, redirectURI, scope, state, null, null, null, null);
+		this(uri, rt, rm, clientID, redirectURI, scope, state, null, null, null, false, null);
 	}
 
 
@@ -524,38 +555,41 @@ public class AuthorizationRequest extends AbstractRequest {
 	 * Creates a new authorisation request with extension and custom
 	 * parameters.
 	 *
-	 * @param uri                 The URI of the authorisation endpoint.
-	 *                            May be {@code null} if the
-	 *                            {@link #toHTTPRequest} method will not be
-	 *                            used.
-	 * @param rt                  The response type. Corresponds to the
-	 *                            {@code response_type} parameter. Must not
-	 *                            be {@code null}.
-	 * @param rm                  The response mode. Corresponds to the
-	 *                            optional {@code response_mode} parameter.
-	 *                            Use of this parameter is not recommended
-	 *                            unless a non-default response mode is
-	 *                            requested (e.g. form_post).
-	 * @param clientID            The client identifier. Corresponds to the
-	 *                            {@code client_id} parameter. Must not be
-	 *                            {@code null}.
-	 * @param redirectURI         The redirection URI. Corresponds to the
-	 *                            optional {@code redirect_uri} parameter.
-	 *                            {@code null} if not specified.
-	 * @param scope               The request scope. Corresponds to the
-	 *                            optional {@code scope} parameter.
-	 *                            {@code null} if not specified.
-	 * @param state               The state. Corresponds to the recommended
-	 *                            {@code state} parameter. {@code null} if
-	 *                            not specified.
-	 * @param codeChallenge       The code challenge for PKCE, {@code null}
-	 *                            if not specified.
-	 * @param codeChallengeMethod The code challenge method for PKCE,
-	 *                            {@code null} if not specified.
-	 * @param resources           The resource URI(s), {@code null} if not
-	 *                            specified.
-	 * @param customParams        Custom parameters, empty map or
-	 *                            {@code null} if none.
+	 * @param uri                  The URI of the authorisation endpoint.
+	 *                             May be {@code null} if the
+	 *                             {@link #toHTTPRequest} method will not
+	 *                             be used.
+	 * @param rt                   The response type. Corresponds to the
+	 *                             {@code response_type} parameter. Must
+	 *                             not be {@code null}.
+	 * @param rm                   The response mode. Corresponds to the
+	 *                             optional {@code response_mode}
+	 *                             parameter. Use of this parameter is not
+	 *                             recommended unless a non-default
+	 *                             response mode is requested (e.g.
+	 *                             form_post).
+	 * @param clientID             The client identifier. Corresponds to
+	 *                             the {@code client_id} parameter. Must
+	 *                             not be {@code null}.
+	 * @param redirectURI          The redirection URI. Corresponds to the
+	 *                             optional {@code redirect_uri} parameter.
+	 *                             {@code null} if not specified.
+	 * @param scope                The request scope. Corresponds to the
+	 *                             optional {@code scope} parameter.
+	 *                             {@code null} if not specified.
+	 * @param state                The state. Corresponds to the
+	 *                             recommended {@code state} parameter.
+	 *                             {@code null} if not specified.
+	 * @param codeChallenge        The code challenge for PKCE,
+	 *                             {@code null} if not specified.
+	 * @param codeChallengeMethod  The code challenge method for PKCE,
+	 *                             {@code null} if not specified.
+	 * @param resources            The resource URI(s), {@code null} if not
+	 *                             specified.
+	 * @param includeGrantedScopes {@code true} to request incremental
+	 *                             authorisation.
+	 * @param customParams         Custom parameters, empty map or
+	 *                             {@code null} if none.
 	 */
 	public AuthorizationRequest(final URI uri,
 		                    final ResponseType rt,
@@ -567,6 +601,7 @@ public class AuthorizationRequest extends AbstractRequest {
 				    final CodeChallenge codeChallenge,
 				    final CodeChallengeMethod codeChallengeMethod,
 				    final List<URI> resources,
+				    final boolean includeGrantedScopes,
 				    final Map<String,List<String>> customParams) {
 
 		super(uri);
@@ -600,6 +635,8 @@ public class AuthorizationRequest extends AbstractRequest {
 		}
 		
 		this.resources = resources;
+		
+		this.includeGrantedScopes = includeGrantedScopes;
 
 		if (MapUtils.isNotEmpty(customParams)) {
 			this.customParams = Collections.unmodifiableMap(customParams);
@@ -743,8 +780,20 @@ public class AuthorizationRequest extends AbstractRequest {
 		
 		return resources;
 	}
-
-
+	
+	
+	/**
+	 * Returns {@code true} if incremental authorisation is requested.
+	 *
+	 * @return {@code true} if incremental authorisation is requested,
+	 *         else {@code false}.
+	 */
+	public boolean includeGrantedScopes() {
+		
+		return includeGrantedScopes;
+	}
+	
+	
 	/**
 	 * Returns the additional custom parameters.
 	 *
@@ -815,6 +864,10 @@ public class AuthorizationRequest extends AbstractRequest {
 			if (codeChallengeMethod != null) {
 				params.put("code_challenge_method", Collections.singletonList(codeChallengeMethod.getValue()));
 			}
+		}
+		
+		if (includeGrantedScopes) {
+			params.put("include_granted_scopes", Collections.singletonList("true"));
 		}
 		
 		if (resources != null) {
@@ -1114,7 +1167,13 @@ public class AuthorizationRequest extends AbstractRequest {
 			}
 		}
 		
-		// Parse additional custom parameters
+		boolean includeGrantedScopes = false;
+		v = MultivaluedMapUtils.getFirstValue(params, "include_granted_scopes");
+		if ("true".equals(v)) {
+			includeGrantedScopes = true;
+		}
+		
+		// Parse custom parameters
 		Map<String,List<String>> customParams = null;
 
 		for (Map.Entry<String,List<String>> p: params.entrySet()) {
@@ -1129,7 +1188,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		}
 
 
-		return new AuthorizationRequest(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, resources, customParams);
+		return new AuthorizationRequest(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, resources, includeGrantedScopes, customParams);
 	}
 
 

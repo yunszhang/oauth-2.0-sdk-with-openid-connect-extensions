@@ -67,6 +67,7 @@ public class TokenRequestTest extends TestCase {
 		assertEquals(grant, request.getAuthorizationGrant());
 		assertEquals(scope, request.getScope());
 		assertNull(request.getResources());
+		assertNull(request.getExistingGrant());
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(uri.toURL(), httpRequest.getURL());
@@ -102,6 +103,7 @@ public class TokenRequestTest extends TestCase {
 		assertEquals(grant, request.getAuthorizationGrant());
 		assertEquals(scope, request.getScope());
 		assertEquals(resources, request.getResources());
+		assertNull(request.getExistingGrant());
 		assertEquals(customParams, request.getCustomParameters());
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
@@ -136,6 +138,7 @@ public class TokenRequestTest extends TestCase {
 		assertEquals(grant, request.getAuthorizationGrant());
 		assertNull(request.getScope());
 		assertNull(request.getResources());
+		assertNull(request.getExistingGrant());
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(uri.toURL(), httpRequest.getURL());
@@ -165,6 +168,7 @@ public class TokenRequestTest extends TestCase {
 		assertEquals(grant, request.getAuthorizationGrant());
 		assertNull(request.getScope());
 		assertNull(request.getResources());
+		assertNull(request.getExistingGrant());
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(uri.toURL(), httpRequest.getURL());
@@ -192,6 +196,7 @@ public class TokenRequestTest extends TestCase {
 		assertEquals(grant, request.getAuthorizationGrant());
 		assertNull(request.getScope());
 		assertNull(request.getResources());
+		assertNull(request.getExistingGrant());
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(uri.toURL(), httpRequest.getURL());
@@ -218,14 +223,14 @@ public class TokenRequestTest extends TestCase {
 	}
 
 
-	public void testConstructorWithClientID()
+	public void testPublicClientConstructor_minimal()
 		throws Exception {
 
 		URI uri = new URI("https://c2id.com/token");
 		ClientID clientID = new ClientID("123");
 		AuthorizationCodeGrant grant = new AuthorizationCodeGrant(new AuthorizationCode("abc"), new URI("http://example.com/in"));
 
-		TokenRequest request = new TokenRequest(uri, clientID, grant, null);
+		TokenRequest request = new TokenRequest(uri, clientID, grant, null, null, null, null);
 
 		assertEquals(uri, request.getEndpointURI());
 		assertNull(request.getClientAuthentication());
@@ -233,6 +238,8 @@ public class TokenRequestTest extends TestCase {
 		assertEquals(grant, request.getAuthorizationGrant());
 		assertNull(request.getScope());
 		assertNull(request.getResources());
+		assertNull(request.getExistingGrant());
+		assertTrue(request.getCustomParameters().isEmpty());
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(uri.toURL(), httpRequest.getURL());
@@ -244,6 +251,74 @@ public class TokenRequestTest extends TestCase {
 		assertEquals(Collections.singletonList("123"), params.get("client_id"));
 		assertEquals(Collections.singletonList("http://example.com/in"), params.get("redirect_uri"));
 		assertEquals(4, params.size());
+		
+		request = TokenRequest.parse(httpRequest);
+		
+		assertEquals(uri, request.getEndpointURI());
+		assertNull(request.getClientAuthentication());
+		assertEquals(clientID, request.getClientID());
+		assertEquals(grant, request.getAuthorizationGrant());
+		assertNull(request.getScope());
+		assertNull(request.getResources());
+		assertNull(request.getExistingGrant());
+		assertTrue(request.getCustomParameters().isEmpty());
+	}
+
+
+	public void testPublicClientConstructor_allSet()
+		throws Exception {
+
+		URI uri = new URI("https://c2id.com/token");
+		ClientID clientID = new ClientID("123");
+		AuthorizationCodeGrant grant = new AuthorizationCodeGrant(new AuthorizationCode("abc"), new URI("http://example.com/in"));
+		Scope scope = new Scope("read", "write");
+		List<URI> resources = Collections.singletonList(URI.create("https://rs1.com"));
+		RefreshToken existingGrant = new RefreshToken("shei6zoGhijohquu");
+		Map<String,List<String>> customParams = new HashMap<>();
+		customParams.put("x", Collections.singletonList("100"));
+		customParams.put("y", Collections.singletonList("200"));
+
+		TokenRequest request = new TokenRequest(uri, clientID, grant, scope, resources, existingGrant, customParams);
+
+		assertEquals(uri, request.getEndpointURI());
+		assertNull(request.getClientAuthentication());
+		assertEquals(clientID, request.getClientID());
+		assertEquals(grant, request.getAuthorizationGrant());
+		assertEquals(scope, request.getScope());
+		assertEquals(resources, request.getResources());
+		assertEquals(existingGrant, request.getExistingGrant());
+		assertEquals(customParams, request.getCustomParameters());
+		assertEquals(Collections.singletonList("100"), request.getCustomParameter("x"));
+		assertEquals(Collections.singletonList("200"), request.getCustomParameter("y"));
+
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		assertEquals(uri.toURL(), httpRequest.getURL());
+		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
+		assertNull(httpRequest.getAuthorization());
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
+		assertEquals(Collections.singletonList(GrantType.AUTHORIZATION_CODE.getValue()), params.get("grant_type"));
+		assertEquals(Collections.singletonList("abc"), params.get("code"));
+		assertEquals(Collections.singletonList("123"), params.get("client_id"));
+		assertEquals(Collections.singletonList("http://example.com/in"), params.get("redirect_uri"));
+		assertEquals(Collections.singletonList(scope.toString()), params.get("scope"));
+		assertEquals(Collections.singletonList("https://rs1.com"), params.get("resource"));
+		assertEquals(Collections.singletonList(existingGrant.getValue()), params.get("existing_grant"));
+		assertEquals(Collections.singletonList("100"), params.get("x"));
+		assertEquals(Collections.singletonList("200"), params.get("y"));
+		assertEquals(9, params.size());
+		
+		request = TokenRequest.parse(httpRequest);
+		
+		assertEquals(uri, request.getEndpointURI());
+		assertNull(request.getClientAuthentication());
+		assertEquals(clientID, request.getClientID());
+		assertEquals(grant, request.getAuthorizationGrant());
+		assertEquals(scope, request.getScope());
+		assertEquals(resources, request.getResources());
+		assertEquals(existingGrant, request.getExistingGrant());
+		assertEquals(customParams, request.getCustomParameters());
+		assertEquals(Collections.singletonList("100"), request.getCustomParameter("x"));
+		assertEquals(Collections.singletonList("200"), request.getCustomParameter("y"));
 	}
 
 

@@ -47,7 +47,8 @@ public class AuthorizationRequestTest extends TestCase {
 		assertTrue(AuthorizationRequest.getRegisteredParameterNames().contains("code_challenge"));
 		assertTrue(AuthorizationRequest.getRegisteredParameterNames().contains("code_challenge_method"));
 		assertTrue(AuthorizationRequest.getRegisteredParameterNames().contains("resource"));
-		assertEquals(9, AuthorizationRequest.getRegisteredParameterNames().size());
+		assertTrue(AuthorizationRequest.getRegisteredParameterNames().contains("include_granted_scopes"));
+		assertEquals(10, AuthorizationRequest.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -74,6 +75,8 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(ResponseMode.QUERY, req.impliedResponseMode());
 		
 		assertNull(req.getResources());
+		
+		assertFalse(req.includeGrantedScopes());
 
 		assertNull(req.getCustomParameter("custom-param"));
 		assertTrue(req.getCustomParameters().isEmpty());
@@ -105,6 +108,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertNull(req.getResponseMode());
 		assertEquals(ResponseMode.QUERY, req.impliedResponseMode());
 		assertNull(req.getResources());
+		assertFalse(req.includeGrantedScopes());
 
 		assertNull(req.getCustomParameter("custom-param"));
 		assertTrue(req.getCustomParameters().isEmpty());
@@ -137,6 +141,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertNull(req.getResponseMode());
 		assertEquals(ResponseMode.QUERY, req.impliedResponseMode());
 		assertNull(req.getResources());
+		assertFalse(req.includeGrantedScopes());
 		assertNull(req.getCustomParameter("custom-param"));
 		assertTrue(req.getCustomParameters().isEmpty());
 	}
@@ -169,6 +174,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertNull(req.getScope());
 		assertNull(req.getState());
 		assertNull(req.getResources());
+		assertFalse(req.includeGrantedScopes());
 		assertNull(req.getCustomParameter("custom-param"));
 		assertTrue(req.getCustomParameters().isEmpty());
 	}
@@ -204,7 +210,7 @@ public class AuthorizationRequestTest extends TestCase {
 		customParams.put("z", Collections.singletonList("300"));
 
 
-		AuthorizationRequest req = new AuthorizationRequest(uri, rts, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, resources, customParams);
+		AuthorizationRequest req = new AuthorizationRequest(uri, rts, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, resources, true, customParams);
 
 		assertEquals(uri, req.getEndpointURI());
 		assertEquals(rts, req.getResponseType());
@@ -231,10 +237,11 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(Collections.singletonList(codeChallenge.getValue()), params.get("code_challenge"));
 		assertEquals(Collections.singletonList(codeChallengeMethod.getValue()), params.get("code_challenge_method"));
 		assertEquals(Arrays.asList("https://rs1.com", "https://rs2.com"), params.get("resource"));
+		assertEquals(Collections.singletonList("true"), params.get("include_granted_scopes"));
 		assertEquals(Collections.singletonList("100"), params.get("x"));
 		assertEquals(Collections.singletonList("200"), params.get("y"));
 		assertEquals(Collections.singletonList("300"), params.get("z"));
-		assertEquals(12, params.size());
+		assertEquals(13, params.size());
 
 		HTTPRequest httpReq = req.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.GET, httpReq.getMethod());
@@ -253,6 +260,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(codeChallenge, req.getCodeChallenge());
 		assertEquals(codeChallengeMethod, req.getCodeChallengeMethod());
 		assertEquals(resources, req.getResources());
+		assertTrue(req.includeGrantedScopes());
 		assertEquals(Collections.singletonList("100"), req.getCustomParameter("x"));
 		assertEquals(Collections.singletonList("200"), req.getCustomParameter("y"));
 		assertEquals(Collections.singletonList("300"), req.getCustomParameter("z"));
@@ -283,7 +291,7 @@ public class AuthorizationRequestTest extends TestCase {
 		
 		List<URI> resources = Collections.singletonList(URI.create("https://rs1.com"));
 
-		AuthorizationRequest req = new AuthorizationRequest(uri, rts, null, clientID, redirectURI, scope, state, codeChallenge, null, resources, null);
+		AuthorizationRequest req = new AuthorizationRequest(uri, rts, null, clientID, redirectURI, scope, state, codeChallenge, null, resources, false, null);
 
 		assertEquals(uri, req.getEndpointURI());
 		assertEquals(rts, req.getResponseType());
@@ -307,8 +315,9 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(redirectURI, req.getRedirectionURI());
 		assertEquals(scope, req.getScope());
 		assertEquals(state, req.getState());
-		assertEquals(resources, req.getResources());
 		assertEquals(codeChallenge, req.getCodeChallenge());
+		assertEquals(resources, req.getResources());
+		assertFalse(req.includeGrantedScopes());
 		assertNull(req.getCodeChallengeMethod());
 	}
 
@@ -328,6 +337,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertNull(request.getCodeChallenge());
 		assertNull(request.getCodeChallengeMethod());
 		assertNull(request.getResources());
+		assertFalse(request.includeGrantedScopes());
 		assertTrue(request.getCustomParameters().isEmpty());
 	}
 
@@ -346,6 +356,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertNull(request.getState());
 		assertNull(request.getCodeChallenge());
 		assertNull(request.getCodeChallengeMethod());
+		assertFalse(request.includeGrantedScopes());
 		assertTrue(request.getCustomParameters().isEmpty());
 	}
 
@@ -366,6 +377,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertNull(request.getState());
 		assertNull(request.getCodeChallenge());
 		assertNull(request.getCodeChallengeMethod());
+		assertFalse(request.includeGrantedScopes());
 		assertTrue(request.getCustomParameters().isEmpty());
 	}
 
@@ -386,6 +398,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertNull(request.getState());
 		assertNull(request.getCodeChallenge());
 		assertNull(request.getCodeChallengeMethod());
+		assertFalse(request.includeGrantedScopes());
 		assertTrue(request.getCustomParameters().isEmpty());
 	}
 
@@ -403,6 +416,7 @@ public class AuthorizationRequestTest extends TestCase {
 			.responseMode(ResponseMode.FORM_POST)
 			.codeChallenge(codeVerifier, CodeChallengeMethod.S256)
 			.resources(URI.create("https://rs1.com"), URI.create("https://rs2.com"))
+			.includeGrantedScopes(true)
 			.build();
 		
 		assertEquals(new ResponseType("code"), request.getResponseType());
@@ -416,6 +430,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(CodeChallenge.compute(CodeChallengeMethod.S256, codeVerifier), request.getCodeChallenge());
 		assertEquals(CodeChallengeMethod.S256, request.getCodeChallengeMethod());
 		assertEquals(Arrays.asList(URI.create("https://rs1.com"), URI.create("https://rs2.com")), request.getResources());
+		assertTrue(request.includeGrantedScopes());
 	}
 
 
@@ -432,6 +447,7 @@ public class AuthorizationRequestTest extends TestCase {
 			.responseMode(ResponseMode.FORM_POST)
 			.codeChallenge(codeVerifier, null)
 			.resources(URI.create("https://rs1.com"))
+			.includeGrantedScopes(false)
 			.customParameter("x", "100")
 			.customParameter("y", "200")
 			.customParameter("z", "300")
@@ -448,6 +464,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(CodeChallenge.compute(CodeChallengeMethod.PLAIN, codeVerifier), request.getCodeChallenge());
 		assertEquals(CodeChallengeMethod.PLAIN, request.getCodeChallengeMethod());
 		assertEquals(Collections.singletonList(URI.create("https://rs1.com")), request.getResources());
+		assertFalse(request.includeGrantedScopes());
 		assertEquals(Collections.singletonList("100"), request.getCustomParameter("x"));
 		assertEquals(Collections.singletonList("200"), request.getCustomParameter("y"));
 		assertEquals(Collections.singletonList("300"), request.getCustomParameter("z"));
@@ -624,6 +641,7 @@ public class AuthorizationRequestTest extends TestCase {
 			CodeChallenge.compute(CodeChallengeMethod.S256, new CodeVerifier()),
 			CodeChallengeMethod.S256,
 			Collections.singletonList(URI.create("https://rs1.com")),
+			true,
 			customParams);
 		
 		AuthorizationRequest out = new AuthorizationRequest.Builder(in).build();
@@ -637,6 +655,7 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(in.getCodeChallenge(), out.getCodeChallenge());
 		assertEquals(in.getCodeChallengeMethod(), out.getCodeChallengeMethod());
 		assertEquals(in.getResources(), out.getResources());
+		assertEquals(in.includeGrantedScopes(), out.includeGrantedScopes());
 		assertEquals(in.getCustomParameters(), out.getCustomParameters());
 		assertEquals(in.getEndpointURI(), out.getEndpointURI());
 	}

@@ -68,6 +68,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("code_challenge"));
 		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("code_challenge_method"));
 		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("resource"));
+		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("include_granted_scopes"));
 
 		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("nonce"));
 		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("display"));
@@ -82,7 +83,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("request_uri"));
 		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("request"));
 
-		assertEquals(21, AuthenticationRequest.getRegisteredParameterNames().size());
+		assertEquals(22, AuthenticationRequest.getRegisteredParameterNames().size());
 	}
 
 	
@@ -146,6 +147,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertNull(request.getCodeChallenge());
 		assertNull(request.getCodeChallengeMethod());
 		assertNull(request.getResources());
+		assertFalse(request.includeGrantedScopes());
 		assertTrue(request.getCustomParameters().isEmpty());
 
 		// Check the resulting query string
@@ -190,6 +192,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertNull(request.getCodeChallenge());
 		assertNull(request.getCodeChallengeMethod());
 		assertNull(request.getResources());
+		assertFalse(request.includeGrantedScopes());
 		assertTrue(request.getCustomParameters().isEmpty());
 	}
 
@@ -250,6 +253,8 @@ public class AuthenticationRequestTest extends TestCase {
 		assertNull(request.getCodeChallengeMethod());
 		
 		assertNull(request.getResources());
+		
+		assertFalse(request.includeGrantedScopes());
 
 		assertTrue(request.getCustomParameters().isEmpty());
 	}
@@ -323,6 +328,7 @@ public class AuthenticationRequestTest extends TestCase {
 			idTokenHint, loginHint, acrValues, claims, null, null,
 			codeChallenge, codeChallengeMethod,
 			resources,
+			true,
 			customParams);
 
 		assertEquals(uri, request.getEndpointURI());
@@ -462,6 +468,8 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(codeChallengeMethod, request.getCodeChallengeMethod());
 		
 		assertEquals(resources, request.getResources());
+		
+		assertTrue(request.includeGrantedScopes());
 
 		assertEquals(Collections.singletonList("100"), request.getCustomParameter("x"));
 		assertEquals(Collections.singletonList("200"), request.getCustomParameter("y"));
@@ -525,7 +533,7 @@ public class AuthenticationRequestTest extends TestCase {
 			uri, rts, null, scope, clientID, redirectURI, state, nonce,
 			display, prompt, maxAge, uiLocales, claimsLocales,
 			idTokenHint, loginHint, acrValues, claims, requestObject, null,
-			null, null, null, null);
+			null, null, null, false, null);
 
 		assertEquals(uri, request.getEndpointURI());
 		
@@ -711,7 +719,7 @@ public class AuthenticationRequestTest extends TestCase {
 			uri, rts, null, scope, clientID, redirectURI, state, nonce,
 			display, prompt, maxAge, uiLocales, claimsLocales,
 			idTokenHint, loginHint, acrValues, claims, null, requestURI,
-			null, null, null, null);
+			null, null, null, false, null);
 
 		assertEquals(uri, request.getEndpointURI());
 		
@@ -873,6 +881,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertNull(request.getCodeChallenge());
 		assertNull(request.getCodeChallengeMethod());
 		assertNull(request.getResources());
+		assertFalse(request.includeGrantedScopes());
 		assertTrue(request.getCustomParameters().isEmpty());
 	}
 
@@ -909,6 +918,7 @@ public class AuthenticationRequestTest extends TestCase {
 			.responseMode(ResponseMode.FORM_POST)
 			.codeChallenge(codeVerifier, CodeChallengeMethod.S256)
 			.resources(URI.create("https://rs1.com"))
+			.includeGrantedScopes(true)
 			.customParameter("x", "100")
 			.customParameter("y", "200")
 			.customParameter("z", "300")
@@ -935,6 +945,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(CodeChallenge.compute(CodeChallengeMethod.S256, codeVerifier), request.getCodeChallenge());
 		assertEquals(CodeChallengeMethod.S256, request.getCodeChallengeMethod());
 		assertEquals(Collections.singletonList(URI.create("https://rs1.com")), request.getResources());
+		assertTrue(request.includeGrantedScopes());
 		assertEquals(Collections.singletonList("100"), request.getCustomParameter("x"));
 		assertEquals(Collections.singletonList("200"), request.getCustomParameter("y"));
 		assertEquals(Collections.singletonList("300"), request.getCustomParameter("z"));

@@ -126,6 +126,9 @@ This SDK version implements the following standards and drafts:
     * Resource Indicators for OAuth 2.0
       (draft-ietf-oauth-resource-indicators-00)
 
+    * OAuth 2.0 Incremental Authorization
+      (draft-ietf-oauth-incremental-authz-00)
+
 	* OpenID Connect Core 1.0 (2014-02-25)
 
 	* OpenID Connect Discovery 1.0 (2014-02-25)
