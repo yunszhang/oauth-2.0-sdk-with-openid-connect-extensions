@@ -21,6 +21,7 @@ package com.nimbusds.oauth2.sdk.http;
 import java.io.IOException;
 import java.net.URI;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,35 @@ public class ServletUtilsTest extends TestCase {
 		MockServletRequest servletRequest = new MockServletRequest();
 		servletRequest.setMethod("POST");
 		servletRequest.setHeader("Content-Type", CommonContentTypes.APPLICATION_JSON.toString());
+		servletRequest.setHeader("Accept", CommonContentTypes.APPLICATION_JSON.toString());
+		servletRequest.setHeader("Authorization", "Bearer yoto9reech8AhP2eibieg1uix2ahg5Ve");
+		servletRequest.setLocalAddr("c2id.com");
+		servletRequest.setLocalPort(8080);
+		servletRequest.setRequestURI("/clients");
+		servletRequest.setQueryString(null);
+		String entityBody = "{\"grant_types\":[\"code\"]}";
+		servletRequest.setEntityBody(entityBody);
+
+		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(servletRequest);
+		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
+		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpRequest.getContentType().toString());
+		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpRequest.getAccept());
+		assertEquals("Bearer yoto9reech8AhP2eibieg1uix2ahg5Ve", httpRequest.getAuthorization());
+		assertNull(httpRequest.getClientIPAddress());
+		assertEquals(entityBody, httpRequest.getQuery());
+		JSONObject jsonObject = httpRequest.getQueryAsJSONObject();
+		assertEquals("code", JSONObjectUtils.getStringArray(jsonObject, "grant_types")[0]);
+		assertEquals(1, jsonObject.size());
+	}
+
+
+	public void testConstructFromServletRequestWithMultiValuedHeader()
+		throws Exception {
+
+		MockServletRequest servletRequest = new MockServletRequest();
+		servletRequest.setMethod("POST");
+		servletRequest.setHeader("Content-Type", CommonContentTypes.APPLICATION_JSON.toString());
+		servletRequest.setHeader("Multivalued-Header", "A", "B", "C");
 		servletRequest.setLocalAddr("c2id.com");
 		servletRequest.setLocalPort(8080);
 		servletRequest.setRequestURI("/clients");
@@ -58,6 +88,7 @@ public class ServletUtilsTest extends TestCase {
 		assertNull(httpRequest.getAccept());
 		assertNull(httpRequest.getAuthorization());
 		assertNull(httpRequest.getClientIPAddress());
+		assertEquals(Arrays.asList("A", "B", "C"), httpRequest.getHeaderValues("Multivalued-Header"));
 		assertEquals(entityBody, httpRequest.getQuery());
 		JSONObject jsonObject = httpRequest.getQueryAsJSONObject();
 		assertEquals("code", JSONObjectUtils.getStringArray(jsonObject, "grant_types")[0]);

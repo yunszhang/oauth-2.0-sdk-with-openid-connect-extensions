@@ -27,6 +27,8 @@ import java.util.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
+
 
 /**
  * Mock servlet request.
@@ -37,7 +39,7 @@ public class MockServletRequest implements HttpServletRequest {
 	private String method;
 
 
-	private Map<String,String> headers = new LinkedHashMap<>();
+	private Map<String,List<String>> headers = new LinkedHashMap<>();
 
 	
 	private Map<String,String[]> parameters = new LinkedHashMap<>();
@@ -88,22 +90,28 @@ public class MockServletRequest implements HttpServletRequest {
 	}
 
 
-	public void setHeader(final String header, final String value) {
-
-		headers.put(header.toLowerCase(), value);
+	public void setHeader(final String header, final String ... value) {
+		
+		headers.put(header.toLowerCase(), Arrays.asList(value));
 	}
 
 
 	@Override
 	public String getHeader(String s) {
 
-		return headers.get(s.toLowerCase());
+		return MultivaluedMapUtils.getFirstValue(headers, s.toLowerCase());
 	}
 
 
 	@Override
 	public Enumeration<String> getHeaders(String s) {
-		return null;
+		
+		List<String> headerValues = headers.get(s);
+		
+		if (s == null)
+			return new Vector<String>().elements(); // empty
+		
+		return new Vector<>(headerValues).elements();
 	}
 
 
@@ -314,7 +322,7 @@ public class MockServletRequest implements HttpServletRequest {
 	@Override
 	public String getContentType() {
 
-		return headers.get("content-type");
+		return MultivaluedMapUtils.getFirstValue(headers, "content-type");
 	}
 
 
