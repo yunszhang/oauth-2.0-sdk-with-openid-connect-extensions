@@ -19,9 +19,8 @@ package com.nimbusds.oauth2.sdk.client;
 
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.net.URL;
+import java.util.*;
 
 import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
@@ -351,5 +350,43 @@ public class ClientRegistrationRequestTest extends TestCase {
 			// ok
 			assertEquals("The software statement JWT must contain an 'iss' claim", e.getMessage());
 		}
+	}
+	
+	
+	//     POST /register HTTP/1.1
+	//     Content-Type: application/json
+	//     Accept: application/json
+	//     Host: server.example.com
+	//     Authorization: Bearer
+	//
+	//     {
+	//      "redirect_uris": [
+	//        "https://client.example.org/callback",
+	//        "https://client.example.org/callback2"],
+	//      "client_name": "My Example Client",
+	//      "token_endpoint_auth_method": "client_secret_basic",
+	//     }
+	public void testParseExampleFromHTTPRequest()
+		throws Exception {
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://server.example.com/register"));
+		httpRequest.setAuthorization("Bearer ooyeph4wij2eyuagax4een8Eeshohpha");
+		httpRequest.setContentType("application/json");
+		httpRequest.setAccept("application/json");
+		httpRequest.setQuery("{\n" +
+			" \"redirect_uris\": [\n" +
+			"   \"https://client.example.org/callback\",\n" +
+			"   \"https://client.example.org/callback2\"],\n" +
+			" \"client_name\": \"My Example Client\",\n" +
+			" \"token_endpoint_auth_method\": \"client_secret_basic\"\n" +
+			"}");
+		
+		ClientRegistrationRequest registrationRequest = ClientRegistrationRequest.parse(httpRequest);
+		assertEquals(new BearerAccessToken("ooyeph4wij2eyuagax4een8Eeshohpha"), registrationRequest.getAccessToken());
+		assertEquals(new URI("https://server.example.com/register"), registrationRequest.getEndpointURI());
+		
+		assertEquals(new HashSet<>(Arrays.asList(new URI("https://client.example.org/callback"), new URI("https://client.example.org/callback2"))), registrationRequest.getClientMetadata().getRedirectionURIs());
+		assertEquals("My Example Client", registrationRequest.getClientMetadata().getName());
+		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, registrationRequest.getClientMetadata().getTokenEndpointAuthMethod());
 	}
 }
