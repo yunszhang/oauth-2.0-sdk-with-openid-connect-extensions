@@ -920,4 +920,19 @@ public class ClientMetadataTest extends TestCase {
 		clientMetadata.setRedirectionURIs(uriSet);
 		assertTrue(uriSet.contains(clientMetadata.getRedirectionURI()));
 	}
+	
+	
+	public void testCustomParameters()
+		throws ParseException {
+		
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("grant_types", Collections.singletonList("code"));
+		jsonObject.put("preferred_client_id", "123");
+		jsonObject.put("preferred_client_secret", "ahp7Thaeh4iedagohhaeThuhu9ahreiw");
+		
+		ClientMetadata clientMetadata = ClientMetadata.parse(jsonObject);
+		
+		assertEquals("123", clientMetadata.getCustomField("preferred_client_id"));
+		assertEquals("ahp7Thaeh4iedagohhaeThuhu9ahreiw", clientMetadata.getCustomField("preferred_client_secret"));
+	}
 }
