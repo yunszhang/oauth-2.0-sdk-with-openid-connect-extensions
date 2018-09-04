@@ -185,7 +185,7 @@ public class ServletUtils {
 			
 			Enumeration<String> headerValues = sr.getHeaders(headerName);
 			
-			if (headerValues == null)
+			if (headerValues == null || ! headerValues.hasMoreElements())
 				continue;
 			
 			List<String> headerValuesList = new LinkedList<>();
