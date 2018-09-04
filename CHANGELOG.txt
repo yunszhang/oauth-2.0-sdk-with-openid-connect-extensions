@@ -987,3 +987,6 @@ version 6.0 (2018-09-02)
     * Upgrades optional OpenSAML dependency to 3.0+ (breaking change for all
       OpenSAML APIs).
     * Updates Nimbus JOSE+JWT to 6.0.1 with Ed25519 and X25519 support.
+
+version 6.0.1 (2018-09-04)
+    * Optimises ServletUtils.createHTTPRequest.
