@@ -33,6 +33,28 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
  */
 public abstract class TokenIntrospectionResponse implements Response {
 	
+	
+	/**
+	 * Casts this response to a token introspection success response.
+	 *
+	 * @return The token introspection success response.
+	 */
+	public TokenIntrospectionSuccessResponse toSuccessResponse() {
+		
+		return (TokenIntrospectionSuccessResponse) this;
+	}
+	
+	
+	/**
+	 * Casts this response to a token introspection error response.
+	 *
+	 * @return The token introspection error response.
+	 */
+	public TokenIntrospectionErrorResponse toErrorResponse() {
+		
+		return (TokenIntrospectionErrorResponse) this;
+	}
+	
 
 	/**
 	 * Parses a token introspection response from the specified HTTP
