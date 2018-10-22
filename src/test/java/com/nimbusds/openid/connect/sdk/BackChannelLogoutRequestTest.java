@@ -64,7 +64,7 @@ public class BackChannelLogoutRequestTest extends TestCase {
 	static {
 		try {
 			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-			gen.initialize(1024);
+			gen.initialize(2048);
 			KeyPair kp = gen.generateKeyPair();
 			RSA_JWK = new RSAKey.Builder((RSAPublicKey)kp.getPublic())
 				.privateKey((RSAPrivateKey)kp.getPrivate())

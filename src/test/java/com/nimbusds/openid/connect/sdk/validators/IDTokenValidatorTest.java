@@ -132,7 +132,7 @@ public class IDTokenValidatorTest extends TestCase {
 		throws Exception {
 
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-		gen.initialize(1024);
+		gen.initialize(2048);
 		KeyPair keyPair = gen.generateKeyPair();
 		RSAKey rsaJWK = new RSAKey.Builder((RSAPublicKey)keyPair.getPublic())
 				.privateKey((RSAPrivateKey)keyPair.getPrivate())
@@ -173,7 +173,7 @@ public class IDTokenValidatorTest extends TestCase {
 		throws Exception {
 
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-		gen.initialize(1024);
+		gen.initialize(2048);
 		KeyPair keyPair = gen.generateKeyPair();
 		RSAKey rsaJWK = new RSAKey.Builder((RSAPublicKey)keyPair.getPublic())
 				.privateKey((RSAPrivateKey)keyPair.getPrivate())
@@ -213,7 +213,7 @@ public class IDTokenValidatorTest extends TestCase {
 		throws Exception {
 
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-		gen.initialize(1024);
+		gen.initialize(2048);
 		KeyPair keyPair = gen.generateKeyPair();
 		RSAKey rsaJWK = new RSAKey.Builder((RSAPublicKey)keyPair.getPublic())
 				.privateKey((RSAPrivateKey)keyPair.getPrivate())
@@ -474,7 +474,7 @@ public class IDTokenValidatorTest extends TestCase {
 		
 		SignedJWT idToken = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claimsSet);
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-		gen.initialize(1024);
+		gen.initialize(2048);
 		RSAPrivateKey rsaPrivateKey = (RSAPrivateKey)gen.generateKeyPair().getPrivate();
 		idToken.sign(new RSASSASigner(rsaPrivateKey));
 		
@@ -495,7 +495,7 @@ public class IDTokenValidatorTest extends TestCase {
 		throws Exception {
 
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-		gen.initialize(1024);
+		gen.initialize(2048);
 
 		// Generate OP key
 		KeyPair keyPair = gen.generateKeyPair();
@@ -563,7 +563,7 @@ public class IDTokenValidatorTest extends TestCase {
 		throws Exception {
 
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-		gen.initialize(1024);
+		gen.initialize(2048);
 
 		// Generate OP key
 		KeyPair keyPair = gen.generateKeyPair();
@@ -732,7 +732,7 @@ public class IDTokenValidatorTest extends TestCase {
 
 		// Sign ID token with invalid RSA key
 		KeyPairGenerator pairGen = KeyPairGenerator.getInstance("RSA");
-		pairGen.initialize(1024);
+		pairGen.initialize(2048);
 		KeyPair keyPair = pairGen.generateKeyPair();
 
 		final RSAKey badKey = new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())

@@ -77,7 +77,7 @@ public class IDTokenValidatorWithHTTPTest extends TestCase {
 
 		// Generate 2 RSA keys for the OP
 		KeyPairGenerator pairGen = KeyPairGenerator.getInstance("RSA");
-		pairGen.initialize(1024);
+		pairGen.initialize(2048);
 		KeyPair keyPair = pairGen.generateKeyPair();
 
 		final RSAKey rsaJWK1 = new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
@@ -184,7 +184,7 @@ public class IDTokenValidatorWithHTTPTest extends TestCase {
 
 		// Sign ID token with invalid RSA key
 		KeyPairGenerator pairGen = KeyPairGenerator.getInstance("RSA");
-		pairGen.initialize(1024);
+		pairGen.initialize(2048);
 		KeyPair keyPair = pairGen.generateKeyPair();
 
 		final RSAKey badKey = new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
@@ -226,7 +226,7 @@ public class IDTokenValidatorWithHTTPTest extends TestCase {
 
 		// Create client registration
 		KeyPairGenerator pairGen = KeyPairGenerator.getInstance("RSA");
-		pairGen.initialize(1024);
+		pairGen.initialize(2048);
 		KeyPair clientKeyPair = pairGen.generateKeyPair();
 
 		final RSAKey clientJWK = new RSAKey.Builder((RSAPublicKey) clientKeyPair.getPublic())
@@ -413,7 +413,7 @@ public class IDTokenValidatorWithHTTPTest extends TestCase {
 		
 		// Sign ID token with invalid RSA key
 		KeyPairGenerator pairGen = KeyPairGenerator.getInstance("RSA");
-		pairGen.initialize(1024);
+		pairGen.initialize(2048);
 		KeyPair keyPair = pairGen.generateKeyPair();
 		
 		final RSAKey badKey = new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())

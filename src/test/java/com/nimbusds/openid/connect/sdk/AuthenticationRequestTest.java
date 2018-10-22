@@ -1398,7 +1398,7 @@ public class AuthenticationRequestTest extends TestCase {
 			jwtClaims);
 		
 		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-		keyPairGenerator.initialize(1024);
+		keyPairGenerator.initialize(2048);
 		KeyPair rsaKeyPair = keyPairGenerator.generateKeyPair();
 		
 		jwt.sign(new RSASSASigner(rsaKeyPair.getPrivate()));

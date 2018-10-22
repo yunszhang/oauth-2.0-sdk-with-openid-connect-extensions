@@ -42,7 +42,7 @@ public class AggregatedClaimsTest extends TestCase {
 	static {
 		try {
 			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-			gen.initialize(1024);
+			gen.initialize(2048);
 			RSA_KEY_PAIR = gen.generateKeyPair();
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
