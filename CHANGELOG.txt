@@ -996,3 +996,7 @@ version 6.1 (2018-10-22)
       helper methods.
     * Updates tests for Nimbus JOSE+JWT 6.1.
 
+version 6.1.1 (2018-10-29)
+    * Fixes HTTPRequest.send to properly handle multi-valued headers introduced
+      in 6.0 (iss #252).
+

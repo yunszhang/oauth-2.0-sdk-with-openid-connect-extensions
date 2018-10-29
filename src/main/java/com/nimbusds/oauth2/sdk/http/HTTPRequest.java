@@ -928,7 +928,7 @@ public class HTTPRequest extends HTTPMessage {
 				continue; // skip header
 			}
 
-			response.setHeader(responseHeader.getKey(), values.get(0));
+			response.setHeader(responseHeader.getKey(), values.toArray(new String[]{}));
 		}
 
 		closeStreams(conn);

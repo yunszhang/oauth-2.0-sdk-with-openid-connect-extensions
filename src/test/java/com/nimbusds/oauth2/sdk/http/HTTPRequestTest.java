@@ -27,10 +27,8 @@ import java.security.KeyPairGenerator;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import javax.mail.internet.ContentType;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
@@ -356,6 +354,33 @@ public class HTTPRequestTest {
 		assertEquals(10L, jsonArray.get(0));
 		assertEquals(20L, jsonArray.get(1));
 		assertEquals(2, jsonArray.size());
+	}
+
+
+	@Test
+	public void testSendMultiValuedHeader()
+		throws Exception {
+
+		onRequest()
+			.havingMethodEqualTo("GET")
+			.havingPathEqualTo("/path")
+			.respond()
+			.withStatus(200)
+			.withHeader("Set-Cookie", "cookie-1")
+			.withHeader("Set-Cookie", "cookie-2")
+			.withBody("Hello, world!")
+			.withEncoding(Charset.forName("UTF-8"))
+			.withContentType("text/plain");
+
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, new URL("http://localhost:" + port() + "/path"));
+
+		HTTPResponse httpResponse = httpRequest.send();
+
+		assertEquals(200, httpResponse.getStatusCode());
+		assertEquals("OK", httpResponse.getStatusMessage());
+		assertEquals(new HashSet<>(Arrays.asList("cookie-1", "cookie-2")), new HashSet<>(httpResponse.getHeaderValues("Set-Cookie")));
+		httpResponse.ensureContentType(new ContentType("text/plain"));
+		assertEquals("Hello, world!\n", httpResponse.getContent());
 	}
 	
 	
