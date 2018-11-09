@@ -24,6 +24,8 @@ import java.util.*;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
+import com.nimbusds.jose.EncryptionMethod;
+import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.langtag.LangTag;
@@ -64,7 +66,9 @@ import net.minidev.json.JSONObject;
  *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section
  *         2.
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-08), sections 2.1.2 and 3.4.
+ *         Access Tokens (draft-ietf-oauth-mtls-12), sections 2.1.2 and 3.4.
+ *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
+ *         OAuth 2.0 (JARM).
  * </ul>
  */
 public class ClientMetadata {
@@ -97,6 +101,9 @@ public class ClientMetadata {
 		p.add("software_version");
 		p.add("tls_client_certificate_bound_access_tokens");
 		p.add("tls_client_auth_subject_dn");
+		p.add("authorization_signed_response_alg");
+		p.add("authorization_encrypted_response_alg");
+		p.add("authorization_encrypted_response_enc");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -215,6 +222,24 @@ public class ClientMetadata {
 	 * certificate the in mutual TLS authentication.
 	 */
 	private String tlsClientAuthSubjectDN = null;
+	
+	
+	/**
+	 * The JWS algorithm for JWT-encoded authorisation responses.
+	 */
+	private JWSAlgorithm authzJWSAlg;
+	
+	
+	/**
+	 * The JWE algorithm for JWT-encoded authorisation responses.
+	 */
+	private JWEAlgorithm authzJWEAlg;
+	
+	
+	/**
+	 * The encryption method for JWT-encoded authorisation responses.
+	 */
+	private EncryptionMethod authzJWEEnc;
 
 
 	/**
@@ -265,6 +290,9 @@ public class ClientMetadata {
 		softwareVersion = metadata.softwareVersion;
 		tlsClientCertificateBoundAccessTokens = metadata.tlsClientCertificateBoundAccessTokens;
 		tlsClientAuthSubjectDN = metadata.tlsClientAuthSubjectDN;
+		authzJWSAlg = metadata.authzJWSAlg;
+		authzJWEAlg = metadata.authzJWEAlg;
+		authzJWEEnc = metadata.authzJWEEnc;
 		customFields = metadata.customFields;
 	}
 
@@ -1101,7 +1129,8 @@ public class ClientMetadata {
 	
 	/**
 	 * Gets the expected subject distinguished name (DN) of the client
-	 * X.509 certificate in mutual TLS authentication.
+	 * X.509 certificate in mutual TLS authentication. Corresponds to the
+	 * {@code tls_client_auth_subject_dn} client metadata field.
 	 *
 	 * @return The expected subject distinguished name (DN) of the client
 	 *         X.509 certificate, {@code null} if not specified.
@@ -1114,7 +1143,8 @@ public class ClientMetadata {
 	
 	/**
 	 * Sets the expected subject distinguished name (DN) of the client
-	 * X.509 certificate in mutual TLS authentication.
+	 * X.509 certificate in mutual TLS authentication. Corresponds to the
+	 * {@code tls_client_auth_subject_dn} client metadata field.
 	 *
 	 * @param subjectDN The expected subject distinguished name (DN) of the
 	 *                  client X.509 certificate, {@code null} if not
@@ -1123,6 +1153,84 @@ public class ClientMetadata {
 	public void setTLSClientAuthSubjectDN(final String subjectDN) {
 		
 		this.tlsClientAuthSubjectDN = subjectDN;
+	}
+	
+	
+	/**
+	 * Gets the JWS algorithm for JWT-encoded authorisation responses.
+	 * Corresponds to the {@code authorization_signed_response_alg} client
+	 * metadata field.
+	 *
+	 * @return The JWS algorithm, {@code null} if not specified.
+	 */
+	public JWSAlgorithm getAuthorizationJWSAlg() {
+		
+		return authzJWSAlg;
+	}
+	
+	
+	/**
+	 * Sets the JWS algorithm for JWT-encoded authorisation responses.
+	 * Corresponds to the {@code authorization_signed_response_alg} client
+	 * metadata field.
+	 *
+	 * @param authzJWSAlg The JWS algorithm, {@code null} if not specified.
+	 */
+	public void setAuthorizationJWSAlg(final JWSAlgorithm authzJWSAlg) {
+		
+		this.authzJWSAlg = authzJWSAlg;
+	}
+	
+	
+	/**
+	 * Gets the JWE algorithm for JWT-encoded authorisation responses.
+	 * Corresponds to the {@code authorization_encrypted_response_alg}
+	 * client metadata field.
+	 *
+	 * @return The JWE algorithm, {@code null} if not specified.
+	 */
+	public JWEAlgorithm getAuthorizationJWEAlg() {
+		
+		return authzJWEAlg;
+	}
+	
+	
+	/**
+	 * Sets the JWE algorithm for JWT-encoded authorisation responses.
+	 * Corresponds to the {@code authorization_encrypted_response_alg}
+	 * client metadata field.
+	 *
+	 * @param authzJWEAlg The JWE algorithm, {@code null} if not specified.
+	 */
+	public void setAuthorizationJWEAlg(final JWEAlgorithm authzJWEAlg) {
+		
+		this.authzJWEAlg = authzJWEAlg;
+	}
+	
+	
+	/**
+	 * Sets the encryption method for JWT-encoded authorisation responses.
+	 * Corresponds to the {@code authorization_encrypted_response_enc}
+	 * client metadata field.
+	 *
+	 * @return The encryption method, {@code null} if specified.
+	 */
+	public EncryptionMethod getAuthorizationJWEEnc() {
+		
+		return authzJWEEnc;
+	}
+	
+	
+	/**
+	 * Sets the encryption method for JWT-encoded authorisation responses.
+	 * Corresponds to the {@code authorization_encrypted_response_enc}
+	 * client metadata field.
+	 *
+	 * @param authzJWEEnc The encryption method, {@code null} if specified.
+	 */
+	public void setAuthorizationJWEEnc(final EncryptionMethod authzJWEEnc) {
+		
+		this.authzJWEEnc = authzJWEEnc;
 	}
 	
 	
@@ -1189,6 +1297,9 @@ public class ClientMetadata {
 	 *     <li>The client authentication method defaults to
 	 *         "client_secret_basic", unless the grant type is "implicit"
 	 *         only.
+	 *     <li>The encryption method for JWT-encoded authorisation
+	 *         responses defaults to {@code A128CBC-HS256} if a JWE
+	 *         algorithm is set.
 	 * </ul>
 	 */
 	public void applyDefaults() {
@@ -1210,6 +1321,10 @@ public class ClientMetadata {
 			} else {
 				authMethod = ClientAuthenticationMethod.getDefault();
 			}
+		}
+		
+		if (authzJWEAlg != null && authzJWEEnc == null) {
+			authzJWEEnc = EncryptionMethod.A128CBC_HS256;
 		}
 	}
 
@@ -1403,6 +1518,18 @@ public class ClientMetadata {
 		
 		if (tlsClientAuthSubjectDN != null)
 			o.put("tls_client_auth_subject_dn", tlsClientAuthSubjectDN);
+		
+		if (authzJWSAlg != null) {
+			o.put("authorization_signed_response_alg", authzJWSAlg.getName());
+		}
+		
+		if (authzJWEAlg != null) {
+			o.put("authorization_encrypted_response_alg", authzJWEAlg.getName());
+		}
+		
+		if (authzJWEEnc != null) {
+			o.put("authorization_encrypted_response_enc", authzJWEEnc.getName());
+		}
 
 		return o;
 	}
@@ -1656,6 +1783,21 @@ public class ClientMetadata {
 			if (jsonObject.get("tls_client_auth_subject_dn") != null) {
 				metadata.setTLSClientAuthSubjectDN(JSONObjectUtils.getString(jsonObject, "tls_client_auth_subject_dn"));
 				jsonObject.remove("tls_client_auth_subject_dn");
+			}
+			
+			if (jsonObject.get("authorization_signed_response_alg") != null) {
+				metadata.setAuthorizationJWSAlg(JWSAlgorithm.parse(JSONObjectUtils.getString(jsonObject, "authorization_signed_response_alg")));
+				jsonObject.remove("authorization_signed_response_alg");
+			}
+			
+			if (jsonObject.get("authorization_encrypted_response_alg") != null) {
+				metadata.setAuthorizationJWEAlg(JWEAlgorithm.parse(JSONObjectUtils.getString(jsonObject, "authorization_encrypted_response_alg")));
+				jsonObject.remove("authorization_encrypted_response_alg");
+			}
+			
+			if (jsonObject.get("authorization_encrypted_response_enc") != null) {
+				metadata.setAuthorizationJWEEnc(EncryptionMethod.parse(JSONObjectUtils.getString(jsonObject, "authorization_encrypted_response_enc")));
+				jsonObject.remove("authorization_encrypted_response_enc");
 			}
 
 		} catch (ParseException e) {

@@ -22,6 +22,8 @@ import java.net.URI;
 import java.util.*;
 import javax.mail.internet.InternetAddress;
 
+import com.nimbusds.jose.EncryptionMethod;
+import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -67,8 +69,11 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("software_version"));
 		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
 		assertTrue(paramNames.contains("tls_client_auth_subject_dn"));
+		assertTrue(paramNames.contains("authorization_signed_response_alg"));
+		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
+		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 
-		assertEquals(18, ClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(21, ClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -159,6 +164,18 @@ public class ClientMetadataTest extends TestCase {
 		String subjectDN = "cn=123";
 		meta.setTLSClientAuthSubjectDN(subjectDN);
 		
+		JWSAlgorithm authzJWSAlg = JWSAlgorithm.ES512;
+		meta.setAuthorizationJWSAlg(authzJWSAlg);
+		assertEquals(authzJWSAlg, meta.getAuthorizationJWSAlg());
+		
+		JWEAlgorithm authzJWEAlg = JWEAlgorithm.ECDH_ES_A256KW;
+		meta.setAuthorizationJWEAlg(authzJWEAlg);
+		assertEquals(authzJWEAlg, meta.getAuthorizationJWEAlg());
+		
+		EncryptionMethod authzJWEEnc = EncryptionMethod.A256GCM;
+		meta.setAuthorizationJWEEnc(authzJWEEnc);
+		assertEquals(authzJWEEnc, meta.getAuthorizationJWEEnc());
+		
 		// Test getters
 		assertEquals(redirectURIs, meta.getRedirectionURIs());
 		assertEquals(scope, meta.getScope());
@@ -190,6 +207,9 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(meta.getTLSClientCertificateBoundAccessTokens());
 		assertTrue(meta.getMutualTLSSenderConstrainedAccessTokens());
 		assertEquals(subjectDN, meta.getTLSClientAuthSubjectDN());
+		assertEquals(authzJWSAlg, meta.getAuthorizationJWSAlg());
+		assertEquals(authzJWEAlg, meta.getAuthorizationJWEAlg());
+		assertEquals(authzJWEEnc, meta.getAuthorizationJWEEnc());
 		assertTrue(meta.getCustomFields().isEmpty());
 		
 		String json = meta.toJSONObject().toJSONString();
@@ -231,6 +251,9 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(meta.getTLSClientCertificateBoundAccessTokens());
 		assertTrue(meta.getMutualTLSSenderConstrainedAccessTokens());
 		assertEquals(subjectDN, meta.getTLSClientAuthSubjectDN());
+		assertEquals(authzJWSAlg, meta.getAuthorizationJWSAlg());
+		assertEquals(authzJWEAlg, meta.getAuthorizationJWEAlg());
+		assertEquals(authzJWEEnc, meta.getAuthorizationJWEEnc());
 
 		assertTrue(meta.getCustomFields().isEmpty());
 	}
@@ -466,6 +489,15 @@ public class ClientMetadataTest extends TestCase {
 		
 		String subjectDN = "cn=123";
 		meta.setTLSClientAuthSubjectDN(subjectDN);
+		
+		JWSAlgorithm authzJWSAlg = JWSAlgorithm.ES512;
+		meta.setAuthorizationJWSAlg(authzJWSAlg);
+		
+		JWEAlgorithm authzJWEAlg = JWEAlgorithm.ECDH_ES_A256KW;
+		meta.setAuthorizationJWEAlg(authzJWEAlg);
+		
+		EncryptionMethod authzJWEEnc = EncryptionMethod.A256GCM;
+		meta.setAuthorizationJWEEnc(authzJWEEnc);
 
 		// Shallow copy
 		ClientMetadata copy = new ClientMetadata(meta);
@@ -502,6 +534,9 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(copy.getMutualTLSSenderConstrainedAccessTokens());
 		assertEquals(subjectDN, copy.getTLSClientAuthSubjectDN());
 		assertTrue(copy.getCustomFields().isEmpty());
+		assertEquals(authzJWSAlg, copy.getAuthorizationJWSAlg());
+		assertEquals(authzJWEAlg, copy.getAuthorizationJWEAlg());
+		assertEquals(authzJWEEnc, copy.getAuthorizationJWEEnc());
 
 		String json = copy.toJSONObject().toJSONString();
 
@@ -540,6 +575,9 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(copy.getTLSClientCertificateBoundAccessTokens());
 		assertTrue(copy.getMutualTLSSenderConstrainedAccessTokens());
 		assertEquals(subjectDN, copy.getTLSClientAuthSubjectDN());
+		assertEquals(authzJWSAlg, copy.getAuthorizationJWSAlg());
+		assertEquals(authzJWEAlg, copy.getAuthorizationJWEAlg());
+		assertEquals(authzJWEEnc, copy.getAuthorizationJWEEnc());
 
 		assertTrue(copy.getCustomFields().isEmpty());
 	}
@@ -563,6 +601,34 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(grantTypes.contains(GrantType.AUTHORIZATION_CODE));
 		
 		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, meta.getTokenEndpointAuthMethod());
+		
+		// JARM
+		assertNull(meta.getAuthorizationJWSAlg());
+		assertNull(meta.getAuthorizationJWEAlg());
+		assertNull(meta.getAuthorizationJWEEnc());
+	}
+
+
+	public void testApplyDefaults_JARM_implicitJWEEnc()
+		throws Exception {
+		
+		ClientMetadata meta = new ClientMetadata();
+		meta.setAuthorizationJWEAlg(JWEAlgorithm.ECDH_ES);
+		
+		meta.applyDefaults();
+		
+		Set<ResponseType> rts = meta.getResponseTypes();
+		assertTrue(rts.contains(ResponseType.parse("code")));
+		
+		Set<GrantType> grantTypes = meta.getGrantTypes();
+		assertTrue(grantTypes.contains(GrantType.AUTHORIZATION_CODE));
+		
+		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, meta.getTokenEndpointAuthMethod());
+		
+		// JARM
+		assertNull(meta.getAuthorizationJWSAlg());
+		assertEquals(JWEAlgorithm.ECDH_ES, meta.getAuthorizationJWEAlg());
+		assertEquals(EncryptionMethod.A128CBC_HS256, meta.getAuthorizationJWEEnc());
 	}
 
 
@@ -934,5 +1000,37 @@ public class ClientMetadataTest extends TestCase {
 		
 		assertEquals("123", clientMetadata.getCustomField("preferred_client_id"));
 		assertEquals("ahp7Thaeh4iedagohhaeThuhu9ahreiw", clientMetadata.getCustomField("preferred_client_secret"));
+	}
+	
+	
+	public void testJARM()
+		throws ParseException {
+		
+		ClientMetadata clientMetadata = new ClientMetadata();
+		
+		assertNull(clientMetadata.getAuthorizationJWSAlg());
+		assertNull(clientMetadata.getAuthorizationJWEAlg());
+		assertNull(clientMetadata.getAuthorizationJWEEnc());
+		
+		clientMetadata.setAuthorizationJWSAlg(JWSAlgorithm.ES256);
+		assertEquals(JWSAlgorithm.ES256, clientMetadata.getAuthorizationJWSAlg());
+		
+		clientMetadata.setAuthorizationJWEAlg(JWEAlgorithm.ECDH_ES);
+		assertEquals(JWEAlgorithm.ECDH_ES, clientMetadata.getAuthorizationJWEAlg());
+		
+		clientMetadata.setAuthorizationJWEEnc(EncryptionMethod.A256GCM);
+		assertEquals(EncryptionMethod.A256GCM, clientMetadata.getAuthorizationJWEEnc());
+		
+		JSONObject jsonObject = clientMetadata.toJSONObject();
+		
+		assertEquals(JWSAlgorithm.ES256.getName(), jsonObject.get("authorization_signed_response_alg"));
+		assertEquals(JWEAlgorithm.ECDH_ES.getName(), jsonObject.get("authorization_encrypted_response_alg"));
+		assertEquals(EncryptionMethod.A256GCM.getName(), jsonObject.get("authorization_encrypted_response_enc"));
+		
+		clientMetadata = ClientMetadata.parse(jsonObject);
+		
+		assertEquals(JWSAlgorithm.ES256, clientMetadata.getAuthorizationJWSAlg());
+		assertEquals(JWEAlgorithm.ECDH_ES, clientMetadata.getAuthorizationJWEAlg());
+		assertEquals(EncryptionMethod.A256GCM, clientMetadata.getAuthorizationJWEEnc());
 	}
 }
