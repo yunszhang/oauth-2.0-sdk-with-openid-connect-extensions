@@ -796,4 +796,40 @@ public class AuthorizationRequestTest extends TestCase {
 			assertEquals("Invalid \"resource\" parameter: Must be an absolute URI and with no query or fragment: https://rs.example.com/#fragment", e.getErrorObject().getDescription());
 		}
 	}
+	
+	
+	public void testImpliedResponseMode_JARM_JWT() {
+		
+		assertEquals(
+			ResponseMode.QUERY_JWT,
+			new AuthorizationRequest.Builder(new ResponseType(ResponseType.Value.CODE), new ClientID("123"))
+				.responseMode(ResponseMode.JWT)
+				.build()
+				.impliedResponseMode()
+		);
+		
+		assertEquals(
+			ResponseMode.QUERY_JWT,
+			new AuthorizationRequest.Builder(new ResponseType(ResponseType.Value.CODE), new ClientID("123"))
+				.responseMode(ResponseMode.QUERY_JWT)
+				.build()
+				.impliedResponseMode()
+		);
+		
+		assertEquals(
+			ResponseMode.FRAGMENT_JWT,
+			new AuthorizationRequest.Builder(new ResponseType(ResponseType.Value.TOKEN), new ClientID("123"))
+				.responseMode(ResponseMode.JWT)
+				.build()
+				.impliedResponseMode()
+		);
+		
+		assertEquals(
+			ResponseMode.FRAGMENT_JWT,
+			new AuthorizationRequest.Builder(new ResponseType(ResponseType.Value.TOKEN), new ClientID("123"))
+				.responseMode(ResponseMode.FRAGMENT_JWT)
+				.build()
+				.impliedResponseMode()
+		);
+	}
 }
