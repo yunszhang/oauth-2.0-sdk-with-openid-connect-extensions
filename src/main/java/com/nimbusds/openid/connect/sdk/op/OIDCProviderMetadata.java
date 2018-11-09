@@ -55,7 +55,9 @@ import net.minidev.json.JSONObject;
  *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.1 (draft 04).
  *     <li>OAuth 2.0 Authorization Server Metadata (RFC 8414)
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-08)
+ *         Access Tokens (draft-ietf-oauth-mtls-12)
+ *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
+ *         OAuth 2.0 (JARM)
  * </ul>
  */
 public class OIDCProviderMetadata extends AuthorizationServerMetadata {
@@ -1174,6 +1176,11 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 			op.backChannelLogoutSessionSupported = JSONObjectUtils.getBoolean(jsonObject, "backchannel_logout_session_supported");
 		
 		op.setSupportsTLSClientCertificateBoundAccessTokens(as.supportsTLSClientCertificateBoundAccessTokens());
+		
+		// JARM
+		op.setAuthorizationJWSAlgs(as.getAuthorizationJWSAlgs());
+		op.setAuthorizationJWEAlgs(as.getAuthorizationJWEAlgs());
+		op.setAuthorizationJWEEncs(as.getAuthorizationJWEEncs());
 		
 		// Parse custom (not registered) parameters
 		for (Map.Entry<String,?> entry: as.getCustomParameters().entrySet()) {

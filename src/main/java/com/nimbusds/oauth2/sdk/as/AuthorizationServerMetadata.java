@@ -50,7 +50,9 @@ import net.minidev.json.JSONObject;
  * <ul>
  *     <li>OAuth 2.0 Authorization Server Metadata (RFC 8414)
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *  *      Access Tokens (draft-ietf-oauth-mtls-08)
+ *         Access Tokens (draft-ietf-oauth-mtls-12)
+ *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
+ *         OAuth 2.0 (JARM)
  * </ul>
  */
 public class AuthorizationServerMetadata {
@@ -89,6 +91,9 @@ public class AuthorizationServerMetadata {
 		p.add("revocation_endpoint_auth_methods_supported");
 		p.add("revocation_endpoint_auth_signing_alg_values_supported");
 		p.add("tls_client_certificate_bound_access_tokens");
+		p.add("authorization_signing_alg_values_supported");
+		p.add("authorization_encryption_alg_values_supported");
+		p.add("authorization_encryption_enc_values_supported");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 	
@@ -288,6 +293,26 @@ public class AuthorizationServerMetadata {
 	 * not.
 	 */
 	private boolean tlsClientCertificateBoundAccessTokens = false;
+	
+	
+	/**
+	 * The supported JWS algorithms for JWT-encoded authorisation
+	 * responses.
+	 */
+	private List<JWSAlgorithm> authzJWSAlgs;
+	
+	/**
+	 * The supported JWE algorithms for JWT-encoded authorisation
+	 * responses.
+	 */
+	private List<JWEAlgorithm> authzJWEAlgs;
+	
+	
+	/**
+	 * The supported encryption methods for JWT-encoded authorisation
+	 * responses.
+	 */
+	private List<EncryptionMethod> authzJWEEncs;
 	
 	
 	/**
@@ -1141,6 +1166,92 @@ public class AuthorizationServerMetadata {
 	
 	
 	/**
+	 * Gets the supported JWS algorithms for JWT-encoded authorisation
+	 * responses. Corresponds to the
+	 * {@code authorization_signing_alg_values_supported} metadata field.
+	 *
+	 * @return The supported JWS algorithms, {@code null} if not specified.
+	 */
+	public List<JWSAlgorithm> getAuthorizationJWSAlgs() {
+		
+		return authzJWSAlgs;
+	}
+	
+	
+	/**
+	 * Sets the supported JWS algorithms for JWT-encoded authorisation
+	 * responses. Corresponds to the
+	 * {@code authorization_signing_alg_values_supported} metadata field.
+	 *
+	 * @param authzJWSAlgs The supported JWS algorithms, {@code null} if
+	 *                     not specified.
+	 */
+	public void setAuthorizationJWSAlgs(final List<JWSAlgorithm> authzJWSAlgs) {
+		
+		this.authzJWSAlgs = authzJWSAlgs;
+	}
+	
+	
+	/**
+	 * Gets the supported JWE algorithms for JWT-encoded authorisation
+	 * responses. Corresponds to the
+	 * {@code authorization_encryption_alg_values_supported} metadata
+	 * field.
+	 *
+	 * @return The supported JWE algorithms, {@code null} if not specified.
+	 */
+	public List<JWEAlgorithm> getAuthorizationJWEAlgs() {
+		
+		return authzJWEAlgs;
+	}
+	
+	
+	/**
+	 * Sets the supported JWE algorithms for JWT-encoded authorisation
+	 * responses. Corresponds to the
+	 * {@code authorization_encryption_alg_values_supported} metadata
+	 * field.
+	 *
+	 * @param authzJWEAlgs The supported JWE algorithms, {@code null} if
+	 *                     not specified.
+	 */
+	public void setAuthorizationJWEAlgs(final List<JWEAlgorithm> authzJWEAlgs) {
+		
+		this.authzJWEAlgs = authzJWEAlgs;
+	}
+	
+	
+	/**
+	 * Gets the supported encryption methods for JWT-encoded authorisation
+	 * responses. Corresponds to the
+	 * {@code authorization_encryption_enc_values_supported} metadata
+	 * field.
+	 *
+	 * @return The supported encryption methods, {@code null} if not
+	 *         specified.
+	 */
+	public List<EncryptionMethod> getAuthorizationJWEEncs() {
+		
+		return authzJWEEncs;
+	}
+	
+	
+	/**
+	 * Sets the supported encryption methods for JWT-encoded authorisation
+	 * responses. Corresponds to the
+	 * {@code authorization_encryption_enc_values_supported} metadata
+	 * field.
+	 *
+	 * @param authzJWEEncs The supported encryption methods, {@code null}
+	 *                     if not specified.
+	 */
+	public void setAuthorizationJWEEncs(final List<EncryptionMethod> authzJWEEncs) {
+		
+		this.authzJWEEncs = authzJWEEncs;
+	}
+	
+	
+	/**
 	 * Gets the specified custom (not registered) parameter.
 	 *
 	 * @param name The parameter name. Must not be {@code null}.
@@ -1424,6 +1535,37 @@ public class AuthorizationServerMetadata {
 		
 		o.put("tls_client_certificate_bound_access_tokens", tlsClientCertificateBoundAccessTokens);
 		
+		// JARM
+		if (authzJWSAlgs != null) {
+			
+			stringList = new ArrayList<>(authzJWSAlgs.size());
+			
+			for (JWSAlgorithm alg: authzJWSAlgs)
+				stringList.add(alg.getName());
+			
+			o.put("authorization_signing_alg_values_supported", stringList);
+		}
+		
+		if (authzJWEAlgs != null) {
+			
+			stringList = new ArrayList<>(authzJWEAlgs.size());
+			
+			for (JWEAlgorithm alg: authzJWEAlgs)
+				stringList.add(alg.getName());
+			
+			o.put("authorization_encryption_alg_values_supported", stringList);
+		}
+		
+		if (authzJWEEncs != null) {
+			
+			stringList = new ArrayList<>(authzJWEEncs.size());
+			
+			for (EncryptionMethod m: authzJWEEncs)
+				stringList.add(m.getName());
+			
+			o.put("authorization_encryption_enc_values_supported", stringList);
+		}
+		
 		// Append any custom (not registered) parameters
 		o.putAll(customParameters);
 		
@@ -1694,6 +1836,42 @@ public class AuthorizationServerMetadata {
 		
 		if (jsonObject.get("tls_client_certificate_bound_access_tokens") != null)
 			as.tlsClientCertificateBoundAccessTokens = JSONObjectUtils.getBoolean(jsonObject, "tls_client_certificate_bound_access_tokens");
+		
+		// JARM
+		if (jsonObject.get("authorization_signing_alg_values_supported") != null) {
+			
+			as.authzJWSAlgs = new ArrayList<>();
+			
+			for (String v: JSONObjectUtils.getStringArray(jsonObject, "authorization_signing_alg_values_supported")) {
+				
+				if (v != null)
+					as.authzJWSAlgs.add(JWSAlgorithm.parse(v));
+			}
+		}
+		
+		
+		if (jsonObject.get("authorization_encryption_alg_values_supported") != null) {
+			
+			as.authzJWEAlgs = new ArrayList<>();
+			
+			for (String v: JSONObjectUtils.getStringArray(jsonObject, "authorization_encryption_alg_values_supported")) {
+				
+				if (v != null)
+					as.authzJWEAlgs.add(JWEAlgorithm.parse(v));
+			}
+		}
+		
+		
+		if (jsonObject.get("authorization_encryption_enc_values_supported") != null) {
+			
+			as.authzJWEEncs = new ArrayList<>();
+			
+			for (String v: JSONObjectUtils.getStringArray(jsonObject, "authorization_encryption_enc_values_supported")) {
+				
+				if (v != null)
+					as.authzJWEEncs.add(EncryptionMethod.parse(v));
+			}
+		}
 		
 		// Parse custom (not registered) parameters
 		JSONObject customParams = new JSONObject(jsonObject);

@@ -24,11 +24,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import com.nimbusds.jose.EncryptionMethod;
+import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
@@ -39,12 +42,11 @@ public class AuthorizationServerMetadataTest extends TestCase {
 	
 	public void testRegisteredParameters() {
 		
-		Set<String> paramNames = OIDCProviderMetadata.getRegisteredParameterNames();
+		Set<String> paramNames = AuthorizationServerMetadata.getRegisteredParameterNames();
 		
 		assertTrue(paramNames.contains("issuer"));
 		assertTrue(paramNames.contains("authorization_endpoint"));
 		assertTrue(paramNames.contains("token_endpoint"));
-		assertTrue(paramNames.contains("userinfo_endpoint"));
 		assertTrue(paramNames.contains("jwks_uri"));
 		assertTrue(paramNames.contains("registration_endpoint"));
 		assertTrue(paramNames.contains("scopes_supported"));
@@ -59,9 +61,6 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("token_endpoint_auth_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("service_documentation"));
 		assertTrue(paramNames.contains("ui_locales_supported"));
-		assertTrue(paramNames.contains("request_parameter_supported"));
-		assertTrue(paramNames.contains("request_uri_parameter_supported"));
-		assertTrue(paramNames.contains("require_request_uri_registration"));
 		assertTrue(paramNames.contains("op_policy_uri"));
 		assertTrue(paramNames.contains("op_tos_uri"));
 		assertTrue(paramNames.contains("introspection_endpoint"));
@@ -71,8 +70,11 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("revocation_endpoint_auth_methods_supported"));
 		assertTrue(paramNames.contains("revocation_endpoint_auth_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
+		assertTrue(paramNames.contains("authorization_signing_alg_values_supported"));
+		assertTrue(paramNames.contains("authorization_encryption_alg_values_supported"));
+		assertTrue(paramNames.contains("authorization_encryption_enc_values_supported"));
 		
-		assertEquals(49, paramNames.size());
+		assertEquals(29, paramNames.size());
 	}
 	
 	
@@ -222,5 +224,51 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		} catch (IllegalArgumentException e) {
 			assertEquals("The \"none\" algorithm is not accepted", e.getMessage());
 		}
+	}
+	
+	
+	public void testJARM() throws ParseException {
+		
+		AuthorizationServerMetadata as = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
+		as.applyDefaults();
+		
+		assertNull(as.getAuthorizationJWSAlgs());
+		assertNull(as.getAuthorizationJWEAlgs());
+		assertNull(as.getAuthorizationJWEEncs());
+		
+		List<JWSAlgorithm> jwsAlgs = Arrays.asList(JWSAlgorithm.ES256, JWSAlgorithm.ES384, JWSAlgorithm.ES512);
+		as.setAuthorizationJWSAlgs(jwsAlgs);
+		assertEquals(jwsAlgs, as.getAuthorizationJWSAlgs());
+		
+		List<JWEAlgorithm> jweAlgs = Arrays.asList(JWEAlgorithm.ECDH_ES, JWEAlgorithm.ECDH_ES_A128KW);
+		as.setAuthorizationJWEAlgs(jweAlgs);
+		assertEquals(jweAlgs, as.getAuthorizationJWEAlgs());
+		
+		List<EncryptionMethod> jweEncs = Arrays.asList(EncryptionMethod.A128GCM, EncryptionMethod.A256GCM);
+		as.setAuthorizationJWEEncs(jweEncs);
+		assertEquals(jweEncs, as.getAuthorizationJWEEncs());
+		
+		JSONObject jsonObject = as.toJSONObject();
+		
+		assertEquals(
+			Arrays.asList(JWSAlgorithm.ES256.getName(), JWSAlgorithm.ES384.getName(), JWSAlgorithm.ES512.getName()),
+			JSONObjectUtils.getStringList(jsonObject, "authorization_signing_alg_values_supported")
+		);
+		
+		assertEquals(
+			Arrays.asList(JWEAlgorithm.ECDH_ES.getName(), JWEAlgorithm.ECDH_ES_A128KW.getName()),
+			JSONObjectUtils.getStringList(jsonObject, "authorization_encryption_alg_values_supported")
+		);
+		
+		assertEquals(
+			Arrays.asList(EncryptionMethod.A128GCM.getName(), EncryptionMethod.A256GCM.getName()),
+			JSONObjectUtils.getStringList(jsonObject, "authorization_encryption_enc_values_supported")
+		);
+		
+		as = AuthorizationServerMetadata.parse(jsonObject.toJSONString());
+		
+		assertEquals(jwsAlgs, as.getAuthorizationJWSAlgs());
+		assertEquals(jweAlgs, as.getAuthorizationJWEAlgs());
+		assertEquals(jweEncs, as.getAuthorizationJWEEncs());
 	}
 }
