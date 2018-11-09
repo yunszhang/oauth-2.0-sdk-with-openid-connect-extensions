@@ -31,6 +31,8 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  * <ul>
  *     <li>OAuth 2.0 Multiple Response Type Encoding Practices 1.0.
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
+ *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
+ *         OAuth 2.0 (JARM).
  * </ul>
  */
 @Immutable
@@ -63,6 +65,43 @@ public final class ResponseMode extends Identifier {
 	 * method of the form attribute MUST be POST.
 	 */
 	public static final ResponseMode FORM_POST = new ResponseMode("form_post");
+	
+	
+	/**
+	 * The authorisation response parameters are packaged in a JSON Web
+	 * Token (JWT) which is returned as a {@code response} query parameter
+	 * added to the {@code redirect_uri} when redirecting back to the
+	 * client.
+	 */
+	public static final ResponseMode QUERY_JWT = new ResponseMode("query.jwt");
+	
+	
+	/**
+	 * The authorisation response parameters are packaged in a JSON Web
+	 * Token (JWT) which is returned as a {@code response} fragment
+	 * parameter added to the {@code redirect_uri} when redirecting back to
+	 * the client.
+	 */
+	public static final ResponseMode FRAGMENT_JWT = new ResponseMode("fragment.jwt");
+	
+	
+	/**
+	 * The authorisation response parameters are packaged in a JSON Web
+	 * Token (JWT) which is transmitted via the HTTP POST method to the
+	 * client. The action attribute of the form MUST be the client's
+	 * redirection URI. The method of the form attribute MUST be POST.
+	 */
+	public static final ResponseMode FORM_POST_JWT = new ResponseMode("form_post.jwt");
+	
+	
+	/**
+	 * The authorisation response parameters are packaged in a JSON Web
+	 * Token (JWT) which is returned as a {@code response} parameter using
+	 * the redirect encoding ({@link #QUERY_JWT query.jwt},
+	 * {@link #FRAGMENT_JWT fragment.jwt} for the requested
+	 * {@code response_type}.
+	 */
+	public static final ResponseMode JWT = new ResponseMode("jwt");
 
 
 	/**
