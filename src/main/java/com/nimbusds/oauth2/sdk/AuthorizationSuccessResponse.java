@@ -25,17 +25,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
-import net.jcip.annotations.Immutable;
-
-import net.minidev.json.JSONObject;
-
-import com.nimbusds.oauth2.sdk.id.State;
-import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -63,6 +63,8 @@ import com.nimbusds.oauth2.sdk.util.URLUtils;
  *     <li>OAuth 2.0 (RFC 6749), sections 4.1.2 and 4.2.2.
  *     <li>OAuth 2.0 Multiple Response Type Encoding Practices 1.0.
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
+ *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
+ *         OAuth 2.0 (JARM).
  * </ul>
  */
 @Immutable
@@ -104,6 +106,26 @@ public class AuthorizationSuccessResponse
 		this.code = code;
 		this.accessToken = accessToken;
 	}
+	
+	
+	/**
+	 * Creates a new JSON Web Token (JWT) encoded authorisation success
+	 * response.
+	 *
+	 * @param redirectURI The base redirection URI. Must not be
+	 *                    {@code null}.
+	 * @param jwtResponse The JWT-encoded response. Must not be
+	 *                    {@code null}.
+	 * @param rm          The response mode, {@code null} if not specified.
+	 */
+	public AuthorizationSuccessResponse(final URI redirectURI,
+					    final JWT jwtResponse,
+					    final ResponseMode rm) {
+	
+		super(redirectURI, jwtResponse, rm);
+		code = null;
+		accessToken = null;
+	}
 
 
 	@Override
@@ -138,7 +160,10 @@ public class AuthorizationSuccessResponse
 		if (getResponseMode() != null) {
 			return getResponseMode();
 		} else {
-			if (accessToken != null) {
+			if (getJWTResponse() != null) {
+				// JARM
+				return ResponseMode.JWT;
+			} else if (accessToken != null) {
 				return ResponseMode.FRAGMENT;
 			} else {
 				return ResponseMode.QUERY;
@@ -173,6 +198,12 @@ public class AuthorizationSuccessResponse
 	public Map<String,List<String>> toParameters() {
 
 		Map<String,List<String>> params = new HashMap<>();
+		
+		if (getJWTResponse() != null) {
+			// JARM, no other top-level parameters
+			params.put("response", Collections.singletonList(getJWTResponse().serialize()));
+			return params;
+		}
 
 		if (code != null)
 			params.put("code", Collections.singletonList(code.getValue()));
@@ -208,9 +239,20 @@ public class AuthorizationSuccessResponse
 	public static AuthorizationSuccessResponse parse(final URI redirectURI,
 		                                         final Map<String,List<String>> params)
 		throws ParseException {
-	
-		// Parse code parameter
 		
+		// JARM, ignore other top level params
+		if (params.get("response") != null) {
+			JWT jwtResponse;
+			try {
+				jwtResponse = JWTParser.parse(MultivaluedMapUtils.getFirstValue(params, "response"));
+			} catch (java.text.ParseException e) {
+				throw new ParseException("Invalid JWT response: " + e.getMessage(), e);
+			}
+			
+			return new AuthorizationSuccessResponse(redirectURI, jwtResponse, ResponseMode.JWT);
+		}
+		
+		// Parse code parameter
 		AuthorizationCode code = null;
 		
 		if (params.get("code") != null) {
@@ -218,7 +260,6 @@ public class AuthorizationSuccessResponse
 		}
 		
 		// Parse access_token parameters
-		
 		AccessToken accessToken = null;
 		
 		if (params.get("access_token") != null) {

@@ -24,10 +24,13 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.jarm.JARMUtils;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
@@ -43,6 +46,8 @@ import com.nimbusds.oauth2.sdk.util.URLUtils;
  *     <li>OAuth 2.0 (RFC 6749), section 3.1.
  *     <li>OAuth 2.0 Multiple Response Type Encoding Practices 1.0.
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
+ *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
+ *         OAuth 2.0 (JARM).
  * </ul>
  */
 public abstract class AuthorizationResponse implements Response {
@@ -58,6 +63,12 @@ public abstract class AuthorizationResponse implements Response {
 	 * The optional state parameter to be echoed back to the client.
 	 */
 	private final State state;
+	
+	
+	/**
+	 * For a JWT-encoded response.
+	 */
+	private final JWT jwtResponse;
 
 
 	/**
@@ -81,8 +92,38 @@ public abstract class AuthorizationResponse implements Response {
 		}
 
 		this.redirectURI = redirectURI;
+		
+		jwtResponse = null;
 
 		this.state = state;
+
+		this.rm = rm;
+	}
+
+
+	/**
+	 * Creates a new JSON Web Token (JWT) encoded authorisation response.
+	 *
+	 * @param redirectURI The base redirection URI. Must not be
+	 *                    {@code null}.
+	 * @param jwtResponse The JWT response. Must not be {@code null}.
+	 * @param rm          The response mode, {@code null} if not specified.
+	 */
+	protected AuthorizationResponse(final URI redirectURI, final JWT jwtResponse, final ResponseMode rm) {
+
+		if (redirectURI == null) {
+			throw new IllegalArgumentException("The redirection URI must not be null");
+		}
+
+		this.redirectURI = redirectURI;
+
+		if (jwtResponse == null) {
+			throw new IllegalArgumentException("The JWT response must not be null");
+		}
+		
+		this.jwtResponse = jwtResponse;
+		
+		this.state = null;
 
 		this.rm = rm;
 	}
@@ -103,14 +144,28 @@ public abstract class AuthorizationResponse implements Response {
 	/**
 	 * Returns the optional state.
 	 *
-	 * @return The state, {@code null} if not requested.
+	 * @return The state, {@code null} if not requested or if the response
+	 *         is JWT-encoded in which case the state parameter may be
+	 *         included as a JWT claim.
 	 */
 	public State getState() {
 
 		return state;
 	}
-
-
+	
+	
+	/**
+	 * Returns the JSON Web Token (JWT) encoded response.
+	 *
+	 * @return The JWT-encoded response, {@code null} for a regular
+	 *         authorisation response.
+	 */
+	public JWT getJWTResponse() {
+		
+		return jwtResponse;
+	}
+	
+	
 	/**
 	 * Returns the optional explicit response mode.
 	 *
@@ -168,7 +223,7 @@ public abstract class AuthorizationResponse implements Response {
 
 		StringBuilder sb = new StringBuilder(getRedirectionURI().toString());
 
-		if (rm.equals(ResponseMode.QUERY)) {
+		if (ResponseMode.QUERY.equals(rm) || ResponseMode.QUERY_JWT.equals(rm)) {
 			if (StringUtils.isBlank(getRedirectionURI().getRawQuery())) {
 				sb.append('?');
 			} else {
@@ -176,7 +231,7 @@ public abstract class AuthorizationResponse implements Response {
 				// see http://tools.ietf.org/html/rfc6749#section-3.1.2
 				sb.append('&');
 			}
-		} else if (rm.equals(ResponseMode.FRAGMENT)) {
+		} else if (ResponseMode.FRAGMENT.equals(rm) || ResponseMode.FRAGMENT_JWT.equals(rm)) {
 			sb.append('#');
 		} else {
 			throw new SerializeException("The (implied) response mode must be query or fragment");
@@ -303,6 +358,23 @@ public abstract class AuthorizationResponse implements Response {
 
 		if (StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(params, "error"))) {
 			return AuthorizationErrorResponse.parse(redirectURI, params);
+		} else if (StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(params, "response"))) {
+			// JARM, peek into JWT if signed only
+			JWT jwt;
+			try {
+				jwt = JWTParser.parse(MultivaluedMapUtils.getFirstValue(params, "response"));
+			} catch (java.text.ParseException e) {
+				throw new ParseException("Invalid JWT-encoded authorization response: " + e.getMessage(), e);
+			}
+			
+			boolean likelyError = JARMUtils.impliesAuthorizationErrorResponse(jwt);
+			
+			if (likelyError) {
+				return AuthorizationErrorResponse.parse(redirectURI, params);
+			} else {
+				return AuthorizationSuccessResponse.parse(redirectURI, params);
+			}
+			
 		} else {
 			return AuthorizationSuccessResponse.parse(redirectURI, params);
 		}

@@ -22,6 +22,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.State;
@@ -72,6 +74,8 @@ import net.jcip.annotations.Immutable;
  *     <li>OAuth 2.0 (RFC 6749), sections 4.1.2.1 and 4.2.2.1.
  *     <li>OAuth 2.0 Multiple Response Type Encoding Practices 1.0.
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
+ *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
+ *         OAuth 2.0 (JARM).
  * </ul>
  */
 @Immutable
@@ -142,6 +146,25 @@ public class AuthorizationErrorResponse
 	}
 
 
+	/**
+	 * Creates a new JSON Web Token (JWT) encoded authorisation error
+	 * response.
+	 *
+	 * @param redirectURI The base redirection URI. Must not be
+	 *                    {@code null}.
+	 * @param rm          The implied response mode, {@code null} if
+	 *                    unknown.
+	 */
+	public AuthorizationErrorResponse(final URI redirectURI,
+					  final JWT jwt,
+					  final ResponseMode rm) {
+
+		super(redirectURI, jwt, rm);
+
+		error = null;
+	}
+
+
 	@Override
 	public boolean indicatesSuccess() {
 
@@ -168,6 +191,12 @@ public class AuthorizationErrorResponse
 	public Map<String,List<String>> toParameters() {
 
 		Map<String,List<String>> params = new HashMap<>();
+		
+		if (getJWTResponse() != null) {
+			// JARM, no other top-level parameters
+			params.put("response", Collections.singletonList(getJWTResponse().serialize()));
+			return params;
+		}
 
 		params.put("error", Collections.singletonList(error.getCode()));
 
@@ -200,6 +229,18 @@ public class AuthorizationErrorResponse
 	public static AuthorizationErrorResponse parse(final URI redirectURI,
 		                                       final Map<String,List<String>> params)
 		throws ParseException {
+		
+		// JARM, ignore other top level params
+		if (params.get("response") != null) {
+			JWT jwtResponse;
+			try {
+				jwtResponse = JWTParser.parse(MultivaluedMapUtils.getFirstValue(params, "response"));
+			} catch (java.text.ParseException e) {
+				throw new ParseException("Invalid JWT response: " + e.getMessage(), e);
+			}
+			
+			return new AuthorizationErrorResponse(redirectURI, jwtResponse, ResponseMode.JWT);
+		}
 
 		// Parse the error
 		if (StringUtils.isBlank(MultivaluedMapUtils.getFirstValue(params, "error")))

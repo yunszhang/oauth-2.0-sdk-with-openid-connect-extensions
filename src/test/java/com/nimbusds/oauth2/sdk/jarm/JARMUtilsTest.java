@@ -1,0 +1,298 @@
+/*
+ * oauth2-oidc-sdk
+ *
+ * Copyright 2012-2016, Connect2id Ltd and contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
+package com.nimbusds.oauth2.sdk.jarm;
+
+
+import java.net.URI;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.text.ParseException;
+import java.util.Date;
+
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.RSAEncrypter;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jwt.*;
+import com.nimbusds.jwt.util.DateUtils;
+import com.nimbusds.oauth2.sdk.AuthorizationCode;
+import com.nimbusds.oauth2.sdk.AuthorizationErrorResponse;
+import com.nimbusds.oauth2.sdk.AuthorizationSuccessResponse;
+import com.nimbusds.oauth2.sdk.OAuth2Error;
+import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
+import junit.framework.TestCase;
+
+
+public class JARMUtilsTest extends TestCase {
+	
+	
+	private static final RSAPrivateKey RSA_PRIVATE_KEY;
+	
+	
+	private static final RSAPublicKey RSA_PUBLIC_KEY;
+	
+	
+	static {
+		try {
+			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
+			gen.initialize(2048);
+			KeyPair keyPair = gen.generateKeyPair();
+			RSA_PRIVATE_KEY = (RSAPrivateKey) keyPair.getPrivate();
+			RSA_PUBLIC_KEY = (RSAPublicKey) keyPair.getPublic();
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	
+	public void testToJWTClaimsSet_successResponse() throws ParseException {
+		
+		Issuer issuer = new Issuer("https://c2id.com");
+		ClientID clientID = new ClientID("123");
+		Date exp = new Date(); // now
+		AuthorizationSuccessResponse response = new AuthorizationSuccessResponse(
+			URI.create("https://exmaple.com?cb"),
+			new AuthorizationCode(),
+			null,
+			new State(),
+			null
+		);
+		
+		JWTClaimsSet jwtClaimsSet = JARMUtils.toJWTClaimsSet(
+			issuer,
+			clientID,
+			exp,
+			response
+		);
+		
+		assertEquals(issuer.getValue(), jwtClaimsSet.getIssuer());
+		assertEquals(clientID.getValue(), jwtClaimsSet.getAudience().get(0));
+		assertEquals(DateUtils.toSecondsSinceEpoch(exp), DateUtils.toSecondsSinceEpoch(jwtClaimsSet.getExpirationTime()));
+		
+		assertEquals(response.getAuthorizationCode().getValue(), jwtClaimsSet.getStringClaim("code"));
+		assertEquals(response.getState().getValue(), jwtClaimsSet.getStringClaim("state"));
+		
+		assertEquals(5, jwtClaimsSet.getClaims().size());
+	}
+	
+	
+	public void testToJWTClaimsSet_oidcAuthSuccessResponse() throws ParseException {
+		
+		Issuer issuer = new Issuer("https://c2id.com");
+		ClientID clientID = new ClientID("123");
+		Date exp = new Date(); // now
+		AuthenticationSuccessResponse response = new AuthenticationSuccessResponse(
+			URI.create("https://exmaple.com?cb"),
+			new AuthorizationCode(),
+			null,
+			null,
+			new State(),
+			new State(), // session_state
+			null
+		);
+		
+		JWTClaimsSet jwtClaimsSet = JARMUtils.toJWTClaimsSet(
+			issuer,
+			clientID,
+			exp,
+			response
+		);
+		
+		assertEquals(issuer.getValue(), jwtClaimsSet.getIssuer());
+		assertEquals(clientID.getValue(), jwtClaimsSet.getAudience().get(0));
+		assertEquals(DateUtils.toSecondsSinceEpoch(exp), DateUtils.toSecondsSinceEpoch(jwtClaimsSet.getExpirationTime()));
+		
+		assertEquals(response.getAuthorizationCode().getValue(), jwtClaimsSet.getStringClaim("code"));
+		assertEquals(response.getState().getValue(), jwtClaimsSet.getStringClaim("state"));
+		assertEquals(response.getSessionState().getValue(), jwtClaimsSet.getStringClaim("session_state"));
+		
+		assertEquals(6, jwtClaimsSet.getClaims().size());
+	}
+	
+	
+	public void testToJWTClaimsSet_errorResponse() throws ParseException {
+		
+		Issuer issuer = new Issuer("https://c2id.com");
+		ClientID clientID = new ClientID("123");
+		Date exp = new Date(); // now
+		AuthorizationErrorResponse response = new AuthorizationErrorResponse(
+			URI.create("https://exmaple.com?cb"),
+			OAuth2Error.ACCESS_DENIED,
+			new State(),
+			null
+		);
+		
+		JWTClaimsSet jwtClaimsSet = JARMUtils.toJWTClaimsSet(
+			issuer,
+			clientID,
+			exp,
+			response
+		);
+		
+		assertEquals(issuer.getValue(), jwtClaimsSet.getIssuer());
+		assertEquals(clientID.getValue(), jwtClaimsSet.getAudience().get(0));
+		assertEquals(DateUtils.toSecondsSinceEpoch(exp), DateUtils.toSecondsSinceEpoch(jwtClaimsSet.getExpirationTime()));
+		
+		
+		assertEquals(response.getState().getValue(), jwtClaimsSet.getStringClaim("state"));
+		assertEquals(OAuth2Error.ACCESS_DENIED.getCode(), jwtClaimsSet.getStringClaim("error"));
+		assertEquals(OAuth2Error.ACCESS_DENIED.getDescription(), jwtClaimsSet.getStringClaim("error_description"));
+		assertEquals(6, jwtClaimsSet.getClaims().size());
+	}
+	
+	
+	public void testToJWTClaimsSet_issNotNull() {
+		
+		try {
+			JARMUtils.toJWTClaimsSet(
+				null,
+				new ClientID("123"),
+				new Date(),
+				new AuthorizationSuccessResponse(
+					URI.create("https://exmaple.com?cb"),
+					new AuthorizationCode(),
+					null,
+					new State(),
+					null
+				)
+			);
+		} catch (NullPointerException e) {
+			// ok
+		}
+	}
+	
+	
+	public void testToJWTClaimsSet_audNotNull() {
+		
+		try {
+			JARMUtils.toJWTClaimsSet(
+				new Issuer("https://c2id.com"),
+				null,
+				new Date(),
+				new AuthorizationSuccessResponse(
+					URI.create("https://exmaple.com?cb"),
+					new AuthorizationCode(),
+					null,
+					new State(),
+					null
+				)
+			);
+		} catch (NullPointerException e) {
+			// ok
+		}
+	}
+	
+	
+	public void testToJWTClaimsSet_expNotNull() {
+		
+		try {
+			JARMUtils.toJWTClaimsSet(
+				new Issuer("https://c2id.com"),
+				new ClientID("123"),
+				null,
+				new AuthorizationSuccessResponse(
+					URI.create("https://exmaple.com?cb"),
+					new AuthorizationCode(),
+					null,
+					new State(),
+					null
+				)
+			);
+		} catch (IllegalArgumentException e) {
+			assertEquals("The expiration time must not be null", e.getMessage());
+		}
+	}
+	
+	
+	public void testImpliesAuthorizationErrorResponse_positive()
+		throws Exception {
+		
+		AuthorizationErrorResponse response = new AuthorizationErrorResponse(
+			URI.create("https://exmaple.com?cb"),
+			OAuth2Error.ACCESS_DENIED,
+			new State(),
+			null
+		);
+		
+		JWTClaimsSet jwtClaimsSet = JARMUtils.toJWTClaimsSet(new Issuer("https://c2id.com"), new ClientID("123"), new Date(), response);
+		SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), jwtClaimsSet);
+		jwt.sign(new RSASSASigner(RSA_PRIVATE_KEY));
+		
+		assertTrue(JARMUtils.impliesAuthorizationErrorResponse((JWT)jwt));
+	}
+	
+	
+	public void testImpliesAuthorizationErrorResponse_negative()
+		throws Exception {
+		
+		JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder().build(); // simply no "error" claim
+		SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), jwtClaimsSet);
+		jwt.sign(new RSASSASigner(RSA_PRIVATE_KEY));
+		
+		assertFalse(JARMUtils.impliesAuthorizationErrorResponse((JWT)jwt));
+	}
+	
+	
+	public void testImpliesAuthorizationErrorResponse_rejectPlain() {
+		
+		AuthorizationErrorResponse response = new AuthorizationErrorResponse(
+			URI.create("https://exmaple.com?cb"),
+			OAuth2Error.ACCESS_DENIED,
+			new State(),
+			null
+		);
+		
+		JWTClaimsSet jwtClaimsSet = JARMUtils.toJWTClaimsSet(new Issuer("https://c2id.com"), new ClientID("123"), new Date(), response);
+		PlainJWT jwt = new PlainJWT(jwtClaimsSet);
+		
+		try {
+			JARMUtils.impliesAuthorizationErrorResponse((JWT)jwt);
+			fail();
+		} catch (com.nimbusds.oauth2.sdk.ParseException e) {
+			assertEquals("Invalid JWT-encoded authorization response: The JWT must not be plain (unsecured)", e.getMessage());
+		}
+	}
+	
+	
+	public void testImpliesAuthorizationErrorResponse_encryptedJWTAlwaysAssumesSuccessfulResponse()
+		throws Exception {
+		
+		AuthorizationErrorResponse response = new AuthorizationErrorResponse(
+			URI.create("https://exmaple.com?cb"),
+			OAuth2Error.ACCESS_DENIED,
+			new State(),
+			null
+		);
+		
+		JWTClaimsSet jwtClaimsSet = JARMUtils.toJWTClaimsSet(new Issuer("https://c2id.com"), new ClientID("123"), new Date(), response);
+		SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), jwtClaimsSet);
+		signedJWT.sign(new RSASSASigner(RSA_PRIVATE_KEY));
+		
+		JWEObject jweObject = new JWEObject(new JWEHeader(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A128GCM), new Payload(signedJWT));
+		jweObject.encrypt(new RSAEncrypter(RSA_PUBLIC_KEY));
+		
+		JWT jwt = JWTParser.parse(jweObject.serialize());
+		
+		assertFalse(JARMUtils.impliesAuthorizationErrorResponse(jwt));
+	}
+}
