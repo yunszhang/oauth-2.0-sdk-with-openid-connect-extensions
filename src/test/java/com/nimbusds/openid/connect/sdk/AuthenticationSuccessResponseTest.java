@@ -19,6 +19,11 @@ package com.nimbusds.openid.connect.sdk;
 
 
 import java.net.URI;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -27,12 +32,17 @@ import java.util.Map;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.oauth2.sdk.AuthorizationCode;
-import com.nimbusds.oauth2.sdk.ResponseMode;
-import com.nimbusds.oauth2.sdk.ResponseType;
+import com.nimbusds.oauth2.sdk.*;
+import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.jarm.JARMUtils;
+import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import junit.framework.TestCase;
 
@@ -41,17 +51,33 @@ import junit.framework.TestCase;
  * Tests the authentication success response class.
  */
 public class AuthenticationSuccessResponseTest extends TestCase {
+	
+	private static final RSAPrivateKey RSA_PRIVATE_KEY;
+	
+	
+	private static final RSAPublicKey RSA_PUBLIC_KEY;
 
-
+	
 	private static URI REDIRECT_URI;
 
+	
 	static {
 
 		try {
 			REDIRECT_URI = new URI("https://client.com/cb");
 
 		} catch (Exception e) {
-			// ignore
+			throw new RuntimeException(e);
+		}
+		
+		try {
+			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
+			gen.initialize(2048);
+			KeyPair keyPair = gen.generateKeyPair();
+			RSA_PRIVATE_KEY = (RSAPrivateKey) keyPair.getPrivate();
+			RSA_PUBLIC_KEY = (RSAPublicKey) keyPair.getPublic();
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -280,5 +306,103 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		assertEquals(Collections.singletonList(code.getValue()), params.get("code"));
 		assertEquals(Collections.singletonList(state.getValue()), params.get("state"));
 		assertEquals(3, params.size());
+	}
+	
+	
+	public void testJARM_successLifeCycle_query()
+		throws Exception {
+		
+		AuthenticationSuccessResponse successResponse = new AuthenticationSuccessResponse(
+			URI.create("https://example.com/cb"),
+			new AuthorizationCode(),
+			null,
+			null,
+			new State(),
+			null,
+			ResponseMode.QUERY_JWT);
+		
+		JWTClaimsSet jwtClaimsSet = JARMUtils.toJWTClaimsSet(
+			new Issuer("https://c2id.com"),
+			new ClientID("123"),
+			new Date(),
+			successResponse);
+		
+		SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), jwtClaimsSet);
+		signedJWT.sign(new RSASSASigner(RSA_PRIVATE_KEY));
+		
+		JWT jwt = signedJWT;
+		
+		AuthenticationSuccessResponse jwtSuccessResponse = new AuthenticationSuccessResponse(
+			successResponse.getRedirectionURI(),
+			jwt,
+			successResponse.getResponseMode());
+		
+		assertEquals(successResponse.getRedirectionURI(), jwtSuccessResponse.getRedirectionURI());
+		assertEquals(jwt, jwtSuccessResponse.getJWTResponse());
+		assertEquals(successResponse.getResponseMode(), jwtSuccessResponse.getResponseMode());
+		
+		Map<String,List<String>> params = jwtSuccessResponse.toParameters();
+		assertEquals(jwt.serialize(), MultivaluedMapUtils.getFirstValue(params, "response"));
+		assertEquals(1, params.size());
+		
+		URI uri = jwtSuccessResponse.toURI();
+		
+		assertTrue(uri.toString().startsWith(successResponse.getRedirectionURI().toString()));
+		assertEquals("response=" + jwt.serialize(), uri.getQuery());
+		assertNull(uri.getFragment());
+		
+		jwtSuccessResponse = AuthenticationResponseParser.parse(uri).toSuccessResponse();
+		assertEquals(successResponse.getRedirectionURI(), jwtSuccessResponse.getRedirectionURI());
+		assertEquals(jwt.serialize(), jwtSuccessResponse.getJWTResponse().serialize());
+		assertEquals(ResponseMode.JWT, jwtSuccessResponse.getResponseMode());
+	}
+	
+	
+	public void testJARM_successLifeCycle_fragment()
+		throws Exception {
+		
+		AuthenticationSuccessResponse successResponse = new AuthenticationSuccessResponse(
+			URI.create("https://example.com/cb"),
+			new AuthorizationCode(),
+			null,
+			null,
+			new State(),
+			null,
+			ResponseMode.FRAGMENT_JWT);
+		
+		JWTClaimsSet jwtClaimsSet = JARMUtils.toJWTClaimsSet(
+			new Issuer("https://c2id.com"),
+			new ClientID("123"),
+			new Date(),
+			successResponse);
+		
+		SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), jwtClaimsSet);
+		signedJWT.sign(new RSASSASigner(RSA_PRIVATE_KEY));
+		
+		JWT jwt = signedJWT;
+		
+		AuthenticationSuccessResponse jwtSuccessResponse = new AuthenticationSuccessResponse(
+			successResponse.getRedirectionURI(),
+			jwt,
+			successResponse.getResponseMode());
+		
+		assertEquals(successResponse.getRedirectionURI(), jwtSuccessResponse.getRedirectionURI());
+		assertEquals(jwt, jwtSuccessResponse.getJWTResponse());
+		assertEquals(successResponse.getResponseMode(), jwtSuccessResponse.getResponseMode());
+		
+		Map<String,List<String>> params = jwtSuccessResponse.toParameters();
+		assertEquals(jwt.serialize(), MultivaluedMapUtils.getFirstValue(params, "response"));
+		assertEquals(1, params.size());
+		
+		URI uri = jwtSuccessResponse.toURI();
+		
+		assertTrue(uri.toString().startsWith(successResponse.getRedirectionURI().toString()));
+		assertNull(uri.getQuery());
+		assertEquals("response=" + jwt.serialize(), uri.getFragment());
+		
+		jwtSuccessResponse = AuthenticationResponseParser.parse(uri).toSuccessResponse();
+		assertEquals(successResponse.getRedirectionURI(), jwtSuccessResponse.getRedirectionURI());
+		assertEquals(jwt.serialize(), jwtSuccessResponse.getJWTResponse().serialize());
+		assertEquals(ResponseMode.JWT, jwtSuccessResponse.getResponseMode());
 	}
 }

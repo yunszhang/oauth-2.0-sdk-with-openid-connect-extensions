@@ -152,14 +152,16 @@ public class AuthorizationErrorResponse
 	 *
 	 * @param redirectURI The base redirection URI. Must not be
 	 *                    {@code null}.
+	 * @param jwtResponse The JWT-encoded response. Must not be
+	 *                    {@code null}.
 	 * @param rm          The implied response mode, {@code null} if
 	 *                    unknown.
 	 */
 	public AuthorizationErrorResponse(final URI redirectURI,
-					  final JWT jwt,
+					  final JWT jwtResponse,
 					  final ResponseMode rm) {
 
-		super(redirectURI, jwt, rm);
+		super(redirectURI, jwtResponse, rm);
 
 		error = null;
 	}

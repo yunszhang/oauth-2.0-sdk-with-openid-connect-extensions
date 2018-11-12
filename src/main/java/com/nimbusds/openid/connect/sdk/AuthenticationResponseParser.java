@@ -19,11 +19,19 @@ package com.nimbusds.openid.connect.sdk;
 
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
+import com.nimbusds.oauth2.sdk.AuthorizationResponse;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.jarm.JARMUtils;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 
@@ -38,6 +46,8 @@ import com.nimbusds.oauth2.sdk.util.URLUtils;
  *     <li>OAuth 2.0 (RFC 6749), section 3.1.
  *     <li>OAuth 2.0 Multiple Response Type Encoding Practices 1.0.
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
+ *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
+ *         OAuth 2.0 (JARM).
  * </ul>
  */
 public class AuthenticationResponseParser {
@@ -59,11 +69,29 @@ public class AuthenticationResponseParser {
 	public static AuthenticationResponse parse(final URI redirectURI,
 						   final Map<String,List<String>> params)
 		throws ParseException {
-
-		if (params.containsKey("error"))
+		
+		if (StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(params, "error"))) {
 			return AuthenticationErrorResponse.parse(redirectURI, params);
-		else
+		} else if (StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(params, "response"))) {
+			// JARM, peek into JWT if signed only
+			JWT jwt;
+			try {
+				jwt = JWTParser.parse(MultivaluedMapUtils.getFirstValue(params, "response"));
+			} catch (java.text.ParseException e) {
+				throw new ParseException("Invalid JWT-encoded authorization response: " + e.getMessage(), e);
+			}
+			
+			boolean likelyError = JARMUtils.impliesAuthorizationErrorResponse(jwt);
+			
+			if (likelyError) {
+				return AuthenticationErrorResponse.parse(redirectURI, params);
+			} else {
+				return AuthenticationSuccessResponse.parse(redirectURI, params);
+			}
+			
+		} else {
 			return AuthenticationSuccessResponse.parse(redirectURI, params);
+		}
 	}
 
 
@@ -117,24 +145,26 @@ public class AuthenticationResponseParser {
 
 		return parse(URIUtils.getBaseURI(uri), params);
 	}
-
-
+	
+	
 	/**
-	 * Parses an OpenID Connect authentication response.
+	 * Parses an OpenID Connect authentication response from the specified
+	 * initial HTTP 302 redirect response output at the authorisation
+	 * endpoint.
 	 *
-	 * <p>Example HTTP response:
+	 * <p>Example HTTP response (authorisation success):
 	 *
 	 * <pre>
 	 * HTTP/1.1 302 Found
 	 * Location: https://client.example.com/cb?code=SplxlOBeZQQYbYS6WxSbIA&amp;state=xyz
 	 * </pre>
 	 *
-	 * @param httpResponse The HTTP response to parse. Must not be 
+	 * @param httpResponse The HTTP response to parse. Must not be
 	 *                     {@code null}.
 	 *
-	 * @return The OpenID Connect authentication success or error response.
+	 * @return The OpenID Connect authentication response.
 	 *
-	 * @throws ParseException If the HTTP response couldn't be parsed to an 
+	 * @throws ParseException If the HTTP response couldn't be parsed to an
 	 *                        OpenID Connect authentication response.
 	 */
 	public static AuthenticationResponse parse(final HTTPResponse httpResponse)
@@ -147,8 +177,55 @@ public class AuthenticationResponseParser {
 
 		return parse(location);
 	}
-
-
+	
+	
+	/**
+	 * Parses an OpenID Connect authentication response from the specified
+	 * HTTP request at the client redirection (callback) URI. Applies to
+	 * the {@code query}, {@code fragment} and {@code form_post} response
+	 * modes.
+	 *
+	 * <p>Example HTTP request (authorisation success):
+	 *
+	 * <pre>
+	 * GET /cb?code=SplxlOBeZQQYbYS6WxSbIA&amp;state=xyz HTTP/1.1
+	 * Host: client.example.com
+	 * </pre>
+	 *
+	 * @see #parse(HTTPResponse)
+	 *
+	 * @param httpRequest The HTTP request to parse. Must not be
+	 *                    {@code null}.
+	 *
+	 * @return The OpenID Connect authentication response.
+	 *
+	 * @throws ParseException If the HTTP request couldn't be parsed to an
+	 *                        OpenID Connect authentication response.
+	 */
+	public static AuthenticationResponse parse(final HTTPRequest httpRequest)
+		throws ParseException {
+		
+		final URI baseURI;
+		
+		try {
+			baseURI = httpRequest.getURL().toURI();
+			
+		} catch (URISyntaxException e) {
+			throw new ParseException(e.getMessage(), e);
+		}
+		
+		if (httpRequest.getQuery() != null) {
+			// For query string and form_post response mode
+			return parse(baseURI, URLUtils.parseParameters(httpRequest.getQuery()));
+		} else if (httpRequest.getFragment() != null) {
+			// For fragment response mode (never available in actual HTTP request from browser)
+			return parse(baseURI, URLUtils.parseParameters(httpRequest.getFragment()));
+		} else {
+			throw new ParseException("Missing URI fragment, query string or post body");
+		}
+	}
+	
+	
 	/**
 	 * Prevents public instantiation.
 	 */

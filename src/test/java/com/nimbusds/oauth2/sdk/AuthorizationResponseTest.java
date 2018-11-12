@@ -127,7 +127,7 @@ public class AuthorizationResponseTest extends TestCase {
 	}
 	
 	
-	public void testParseJARM_queryExample()
+	public void testJARM_parse_queryExample()
 		throws Exception {
 		
 		URI uri = URI.create("https://client.example.com/cb?" +
@@ -159,7 +159,7 @@ public class AuthorizationResponseTest extends TestCase {
 	}
 	
 	
-	public void testParseJARM_fragmentExample()
+	public void testJARM_parse_fragmentExample()
 		throws Exception {
 		
 		URI uri = URI.create("https://client.example.com/cb#" +
@@ -195,7 +195,7 @@ public class AuthorizationResponseTest extends TestCase {
 	}
 	
 	
-	public void testParseJARM_formPOSTExample()
+	public void testJARM_parse_formPOSTExample()
 		throws Exception {
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://client.example.org/cb"));
@@ -233,7 +233,7 @@ public class AuthorizationResponseTest extends TestCase {
 	}
 	
 	
-	public void testSuccessLifeCycle_query()
+	public void testJARM_successLifeCycle_query()
 		throws Exception {
 		
 		AuthorizationSuccessResponse successResponse = new AuthorizationSuccessResponse(
@@ -280,7 +280,7 @@ public class AuthorizationResponseTest extends TestCase {
 	}
 	
 	
-	public void testSuccessLifeCycle_fragment()
+	public void testJARM_successLifeCycle_fragment()
 		throws Exception {
 		
 		AuthorizationSuccessResponse successResponse = new AuthorizationSuccessResponse(
@@ -327,7 +327,7 @@ public class AuthorizationResponseTest extends TestCase {
 	}
 	
 	
-	public void testErrorLifeCycle_query()
+	public void testJARM_errorLifeCycle_query()
 		throws Exception {
 		
 		AuthorizationErrorResponse errorResponse = new AuthorizationErrorResponse(
@@ -373,7 +373,7 @@ public class AuthorizationResponseTest extends TestCase {
 	}
 	
 	
-	public void testErrorLifeCycle_fragment()
+	public void testJARM_errorLifeCycle_fragment()
 		throws Exception {
 		
 		AuthorizationErrorResponse errorResponse = new AuthorizationErrorResponse(

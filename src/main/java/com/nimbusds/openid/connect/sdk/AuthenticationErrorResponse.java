@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.AuthorizationErrorResponse;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -90,6 +91,8 @@ import net.jcip.annotations.Immutable;
  *     <li>OAuth 2.0 (RFC 6749), sections 4.1.2.1 and 4.2.2.1.
  *     <li>OAuth 2.0 Multiple Response Type Encoding Practices 1.0.
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
+ *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
+ *         OAuth 2.0 (JARM).
  * </ul>
  */
 @Immutable
@@ -152,6 +155,25 @@ public class AuthenticationErrorResponse
 					  
 		super(redirectURI, error, state, rm);
 	}
+
+
+	/**
+	 * Creates a new JSON Web Token (JWT) encoded OpenID Connect
+	 * authentication error response.
+	 *
+	 * @param redirectURI The base redirection URI. Must not be
+	 *                    {@code null}.
+	 * @param jwtResponse The JWT-encoded response. Must not be
+	 *                    {@code null}.
+	 * @param rm          The implied response mode, {@code null} if
+	 *                    unknown.
+	 */
+	public AuthenticationErrorResponse(final URI redirectURI,
+					   final JWT jwtResponse,
+					   final ResponseMode rm) {
+					  
+		super(redirectURI, jwtResponse, rm);
+	}
 	
 	
 	@Override
@@ -189,7 +211,7 @@ public class AuthenticationErrorResponse
 			resp.getRedirectionURI(),
 			resp.getErrorObject(),
 			resp.getState(),
-			null);
+			resp.getResponseMode());
 	}
 
 
@@ -230,7 +252,7 @@ public class AuthenticationErrorResponse
 			resp.getRedirectionURI(),
 			resp.getErrorObject(),
 			resp.getState(),
-			null);
+			resp.getResponseMode());
 	}
 
 
@@ -263,7 +285,7 @@ public class AuthenticationErrorResponse
 			resp.getRedirectionURI(),
 			resp.getErrorObject(),
 			resp.getState(),
-			null);
+			resp.getResponseMode());
 	}
 
 
