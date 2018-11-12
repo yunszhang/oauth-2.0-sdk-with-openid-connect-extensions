@@ -147,12 +147,12 @@ public class AuthorizationErrorResponse
 
 
 	/**
-	 * Creates a new JSON Web Token (JWT) encoded authorisation error
+	 * Creates a new JSON Web Token (JWT) secured authorisation error
 	 * response.
 	 *
 	 * @param redirectURI The base redirection URI. Must not be
 	 *                    {@code null}.
-	 * @param jwtResponse The JWT-encoded response. Must not be
+	 * @param jwtResponse The JWT-secured response. Must not be
 	 *                    {@code null}.
 	 * @param rm          The implied response mode, {@code null} if
 	 *                    unknown.

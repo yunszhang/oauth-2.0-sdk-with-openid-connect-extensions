@@ -66,7 +66,7 @@ public abstract class AuthorizationResponse implements Response {
 	
 	
 	/**
-	 * For a JWT-encoded response.
+	 * For a JWT-secured response.
 	 */
 	private final JWT jwtResponse;
 
@@ -102,7 +102,7 @@ public abstract class AuthorizationResponse implements Response {
 
 
 	/**
-	 * Creates a new JSON Web Token (JWT) encoded authorisation response.
+	 * Creates a new JSON Web Token (JWT) secured authorisation response.
 	 *
 	 * @param redirectURI The base redirection URI. Must not be
 	 *                    {@code null}.
@@ -145,7 +145,7 @@ public abstract class AuthorizationResponse implements Response {
 	 * Returns the optional state.
 	 *
 	 * @return The state, {@code null} if not requested or if the response
-	 *         is JWT-encoded in which case the state parameter may be
+	 *         is JWT-secured in which case the state parameter may be
 	 *         included as a JWT claim.
 	 */
 	public State getState() {
@@ -155,9 +155,9 @@ public abstract class AuthorizationResponse implements Response {
 	
 	
 	/**
-	 * Returns the JSON Web Token (JWT) encoded response.
+	 * Returns the JSON Web Token (JWT) secured response.
 	 *
-	 * @return The JWT-encoded response, {@code null} for a regular
+	 * @return The JWT-secured response, {@code null} for a regular
 	 *         authorisation response.
 	 */
 	public JWT getJWTResponse() {
@@ -364,7 +364,7 @@ public abstract class AuthorizationResponse implements Response {
 			try {
 				jwt = JWTParser.parse(MultivaluedMapUtils.getFirstValue(params, "response"));
 			} catch (java.text.ParseException e) {
-				throw new ParseException("Invalid JWT-encoded authorization response: " + e.getMessage(), e);
+				throw new ParseException("Invalid JWT-secured authorization response: " + e.getMessage(), e);
 			}
 			
 			boolean likelyError = JARMUtils.impliesAuthorizationErrorResponse(jwt);

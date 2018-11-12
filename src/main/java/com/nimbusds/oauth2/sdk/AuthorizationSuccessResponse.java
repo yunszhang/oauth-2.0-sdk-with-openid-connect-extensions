@@ -109,12 +109,12 @@ public class AuthorizationSuccessResponse
 	
 	
 	/**
-	 * Creates a new JSON Web Token (JWT) encoded authorisation success
+	 * Creates a new JSON Web Token (JWT) secured authorisation success
 	 * response.
 	 *
 	 * @param redirectURI The base redirection URI. Must not be
 	 *                    {@code null}.
-	 * @param jwtResponse The JWT-encoded response. Must not be
+	 * @param jwtResponse The JWT-secured response. Must not be
 	 *                    {@code null}.
 	 * @param rm          The response mode, {@code null} if not specified.
 	 */

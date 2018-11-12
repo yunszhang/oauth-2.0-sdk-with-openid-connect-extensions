@@ -127,12 +127,12 @@ public class AuthenticationSuccessResponse
 
 
 	/**
-	 * Creates a new JSON Web Token (JWT) encoded OpenID Connect
+	 * Creates a new JSON Web Token (JWT) secured OpenID Connect
 	 * authentication success response.
 	 *
 	 * @param redirectURI The requested redirection URI. Must not be
 	 *                    {@code null}.
-	 * @param jwtResponse The JWT-encoded response. Must not be
+	 * @param jwtResponse The JWT-secured response. Must not be
 	 *                    {@code null}.
 	 * @param rm          The response mode, {@code null} if not specified.
 	 */

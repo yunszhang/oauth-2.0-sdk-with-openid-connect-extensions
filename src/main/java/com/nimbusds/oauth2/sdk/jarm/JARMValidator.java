@@ -47,7 +47,7 @@ import net.jcip.annotations.ThreadSafe;
 
 
 /**
- * Validator of JSON Web Token (JWT) encoded authorisation responses (JARM).
+ * Validator of JSON Web Token (JWT) secured authorisation responses (JARM).
  *
  * <p>Supports processing of JWT responses with the following protection:
  *
@@ -195,9 +195,9 @@ public class JARMValidator extends AbstractJWTValidator implements ClockSkewAwar
 	
 	
 	/**
-	 * Validates the specified JWT-encoded authorisation response.
+	 * Validates the specified JWT-secured authorisation response.
 	 *
-	 * @param jwtResponse The JWT-encoded authorisation response. Must not
+	 * @param jwtResponse The JWT-secured authorisation response. Must not
 	 *                    be {@code null}.
 	 *
 	 * @return The claims set of the verified JWT.
@@ -222,7 +222,7 @@ public class JARMValidator extends AbstractJWTValidator implements ClockSkewAwar
 	/**
 	 * Verifies the specified signed authorisation response.
 	 *
-	 * @param jwtResponse The JWT-encoded authorisation response. Must not
+	 * @param jwtResponse The JWT-secured authorisation response. Must not
 	 *                    be {@code null}.
 	 *
 	 * @return The claims set of the verified JWT.
@@ -248,7 +248,7 @@ public class JARMValidator extends AbstractJWTValidator implements ClockSkewAwar
 	/**
 	 * Verifies the specified signed and encrypted authorisation response.
 	 *
-	 * @param jwtResponse The JWT-encoded authorisation response. Must not
+	 * @param jwtResponse The JWT-secured authorisation response. Must not
 	 *                    be {@code null}.
 	 *
 	 * @return The claims set of the verified JWT.
@@ -343,7 +343,7 @@ public class JARMValidator extends AbstractJWTValidator implements ClockSkewAwar
 	 * @param clientInfo      The OAuth 2.0 client information. Must not be
 	 *                        {@code null}.
 	 * @param clientJWKSource The client private JWK source, {@code null}
-	 *                        if encrypted JWT-encoded authorisation
+	 *                        if encrypted JWT-secured authorisation
 	 *                        responses are not expected.
 	 *
 	 * @return The JWE key selector.

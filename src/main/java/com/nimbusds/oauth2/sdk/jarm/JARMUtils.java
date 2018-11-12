@@ -76,11 +76,11 @@ public final class JARMUtils {
 	
 	
 	/**
-	 * Returns {@code true} if the specified JWT-encoded authorisation
+	 * Returns {@code true} if the specified JWT-secured authorisation
 	 * response implies an error response. Note that the JWT is not
 	 * validated in any way!
 	 *
-	 * @param jwt The JWT-encoded authorisation response. Must not be
+	 * @param jwt The JWT-secured authorisation response. Must not be
 	 *            {@code null}.
 	 *
 	 * @return {@code true} if an error is implied by the presence of the
@@ -93,7 +93,7 @@ public final class JARMUtils {
 		throws ParseException  {
 		
 		if (jwt instanceof PlainJWT) {
-			throw new ParseException("Invalid JWT-encoded authorization response: The JWT must not be plain (unsecured)");
+			throw new ParseException("Invalid JWT-secured authorization response: The JWT must not be plain (unsecured)");
 		}
 		
 		if (jwt instanceof EncryptedJWT) {
