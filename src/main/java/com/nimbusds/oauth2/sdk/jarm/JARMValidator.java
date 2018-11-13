@@ -213,8 +213,10 @@ public class JARMValidator extends AbstractJWTValidator implements ClockSkewAwar
 			return validate((SignedJWT) jwtResponse);
 		} else if (jwtResponse instanceof EncryptedJWT) {
 			return validate((EncryptedJWT) jwtResponse);
+		} else if (jwtResponse instanceof PlainJWT) {
+			throw new BadJWTException("The JWT must not be plain (unsecured)");
 		} else {
-			throw new JOSEException("Unexpected JWT type: " + jwtResponse.getClass());
+			throw new BadJOSEException("Unexpected JWT type: " + jwtResponse.getClass());
 		}
 	}
 	
