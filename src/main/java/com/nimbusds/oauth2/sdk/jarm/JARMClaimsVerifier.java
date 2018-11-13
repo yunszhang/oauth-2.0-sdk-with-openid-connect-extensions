@@ -163,23 +163,11 @@ public class JARMClaimsVerifier implements JWTClaimsSetVerifier, ClockSkewAware 
 			throw BadJWTExceptions.MISSING_EXP_CLAIM_EXCEPTION;
 		}
 		
-		final Date iat = claimsSet.getIssueTime();
-		
-		if (iat == null) {
-			throw BadJWTExceptions.MISSING_IAT_CLAIM_EXCEPTION;
-		}
-		
-		
 		final Date nowRef = new Date();
 		
 		// Expiration must be after current time, given acceptable clock skew
 		if (! DateUtils.isAfter(exp, nowRef, maxClockSkew)) {
 			throw BadJWTExceptions.EXPIRED_EXCEPTION;
-		}
-		
-		// Issue time must be before current time, given acceptable clock skew
-		if (! DateUtils.isBefore(iat, nowRef, maxClockSkew)) {
-			throw BadJWTExceptions.IAT_CLAIM_AHEAD_EXCEPTION;
 		}
 	}
 }
