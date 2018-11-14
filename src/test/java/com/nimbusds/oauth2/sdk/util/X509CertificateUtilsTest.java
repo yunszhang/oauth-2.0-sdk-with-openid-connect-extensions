@@ -20,10 +20,12 @@ package com.nimbusds.oauth2.sdk.util;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
+import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.oauth2.sdk.http.X509CertificateGenerator;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
@@ -105,5 +107,54 @@ public class X509CertificateUtilsTest extends TestCase {
 		
 		assertFalse(X509CertificateUtils.isSelfIssued(cert));
 		assertTrue(X509CertificateUtils.isSelfSigned(cert));
+	}
+	
+	
+	public void testPublicKeyMatches()
+		throws Exception {
+		
+		X509Certificate cert = X509CertificateGenerator.generateCertificate(
+			new Issuer("123"),
+			new Subject("456"),
+			PUBLIC_KEY,
+			PRIVATE_KEY
+		);
+		
+		assertTrue(X509CertificateUtils.publicKeyMatches(cert, PUBLIC_KEY));
+	}
+	
+	
+	public void testPublicKeyMatches_false()
+		throws Exception {
+		
+		X509Certificate cert = X509CertificateGenerator.generateCertificate(
+			new Issuer("123"),
+			new Subject("456"),
+			PUBLIC_KEY,
+			PRIVATE_KEY
+		);
+		
+		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
+		gen.initialize(2048);
+		KeyPair keyPair = gen.generateKeyPair();
+		PublicKey otherPublicKey = keyPair.getPublic();
+		
+		assertFalse(X509CertificateUtils.publicKeyMatches(cert, otherPublicKey));
+	}
+	
+	
+	public void testPublicKeyMatches_viaJWK()
+		throws Exception {
+		
+		X509Certificate cert = X509CertificateGenerator.generateCertificate(
+			new Issuer("123"),
+			new Subject("456"),
+			PUBLIC_KEY,
+			PRIVATE_KEY
+		);
+		
+		RSAKey rsaJWK = com.nimbusds.jose.jwk.RSAKey.parse(cert);
+		
+		assertTrue(X509CertificateUtils.publicKeyMatches(cert, rsaJWK.toPublicKey()));
 	}
 }

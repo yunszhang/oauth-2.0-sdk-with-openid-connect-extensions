@@ -21,6 +21,7 @@ package com.nimbusds.oauth2.sdk.util;
 import java.security.Principal;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 
 
 /**
@@ -83,8 +84,7 @@ public final class X509CertificateUtils {
 	
 	/**
 	 * Validates the signature of a X.509 certificate with the specified
-	 * public key. Intended for validating self-signed X.509 certificates
-	 * with a pre-registered RSA or EC public key.
+	 * public key.
 	 *
 	 * @param cert   The X.509 certificate. Must not be {@code null}.
 	 * @param pubKey The public key to use for the validation. Must not be
@@ -102,6 +102,25 @@ public final class X509CertificateUtils {
 		}
 		
 		return true;
+	}
+	
+	
+	/**
+	 * Returns {@code true} if the public key of the X.509 certificate
+	 * matches the specified public key.
+	 *
+	 * @param cert   The X.509 certificate. Must not be {@code null}.
+	 * @param pubKey The public key to compare. Must not be {@code null}.
+	 *
+	 * @return {@code true} if the two public keys match, else
+	 *         {@code false}.
+	 */
+	public static boolean publicKeyMatches(final X509Certificate cert,
+					       final PublicKey pubKey) {
+		
+		PublicKey certPubKey = cert.getPublicKey();
+		
+		return Arrays.equals(certPubKey.getEncoded(), pubKey.getEncoded());
 	}
 	
 	
