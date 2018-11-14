@@ -21,6 +21,7 @@ package com.nimbusds.oauth2.sdk.jarm;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -191,6 +192,29 @@ public class JARMValidator extends AbstractJWTValidator implements ClockSkewAwar
 			     final JWEKeySelector jweKeySelector) {
 		
 		super(expectedIssuer, clientID, jwsKeySelector, jweKeySelector);
+	}
+	
+	
+	/**
+	 * Validates the specified JWT-secured authorisation response.
+	 *
+	 * @param jwtResponseString The JWT-secured authorisation response
+	 *                          string. Must not be {@code null}.
+	 *
+	 * @return The claims set of the verified JWT.
+	 *
+	 * @throws BadJOSEException If the JWT is invalid or expired.
+	 * @throws JOSEException    If an internal JOSE exception was
+	 *                          encountered.
+	 */
+	public JWTClaimsSet validate(final String jwtResponseString)
+		throws BadJOSEException, JOSEException {
+		
+		try {
+			return validate(JWTParser.parse(jwtResponseString));
+		} catch (ParseException e) {
+			throw new BadJOSEException("Invalid JWT: " + e.getMessage(), e);
+		}
 	}
 	
 	

@@ -20,16 +20,37 @@ package com.nimbusds.openid.connect.sdk;
 
 import java.net.URI;
 import java.net.URL;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.oauth2.sdk.*;
+import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.oauth2.sdk.AuthorizationCode;
+import com.nimbusds.oauth2.sdk.OAuth2Error;
+import com.nimbusds.oauth2.sdk.ResponseMode;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
-import junit.framework.TestCase;
-
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.jarm.JARMUtils;
+import com.nimbusds.oauth2.sdk.jarm.JARMValidator;
+import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
+import junit.framework.TestCase;
 
 
 /**
@@ -214,5 +235,265 @@ public class AuthenticationResponseParserTest extends TestCase {
 		assertEquals("3600", jwtClaimsSet.getStringClaim("expires_in"));
 		assertEquals("S8NJ7uqk5fY4EjNvP_G_FtyJu6pUsvH9jsYni9dMAJw", jwtClaimsSet.getStringClaim("state"));
 		assertEquals(8, jwtClaimsSet.getClaims().size());
+	}
+	
+	
+	/// JARM Lifecycle Tests ///
+	
+	
+	private static final RSAPrivateKey RSA_PRIVATE_KEY;
+	
+	
+	private static final RSAPublicKey RSA_PUBLIC_KEY;
+	
+	
+	static {
+		try {
+			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
+			gen.initialize(2048);
+			KeyPair keyPair = gen.generateKeyPair();
+			RSA_PRIVATE_KEY = (RSAPrivateKey) keyPair.getPrivate();
+			RSA_PUBLIC_KEY = (RSAPublicKey) keyPair.getPublic();
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	
+	public void testJARM_successLifeCycle_query()
+		throws Exception {
+		
+		AuthenticationSuccessResponse successResponse = new AuthenticationSuccessResponse(
+			URI.create("https://example.com/cb"),
+			new AuthorizationCode(),
+			null,
+			null,
+			new State(),
+			null,
+			ResponseMode.QUERY_JWT);
+		
+		JWTClaimsSet jwtClaimsSet = JARMUtils.toJWTClaimsSet(
+			new Issuer("https://c2id.com"),
+			new ClientID("123"),
+			new Date(),
+			successResponse);
+		
+		SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), jwtClaimsSet);
+		signedJWT.sign(new RSASSASigner(RSA_PRIVATE_KEY));
+		
+		JWT jwt = signedJWT;
+		
+		AuthenticationSuccessResponse jwtSuccessResponse = new AuthenticationSuccessResponse(
+			successResponse.getRedirectionURI(),
+			jwt,
+			successResponse.getResponseMode());
+		
+		assertEquals(successResponse.getRedirectionURI(), jwtSuccessResponse.getRedirectionURI());
+		assertEquals(jwt, jwtSuccessResponse.getJWTResponse());
+		assertEquals(successResponse.getResponseMode(), jwtSuccessResponse.getResponseMode());
+		
+		Map<String,List<String>> params = jwtSuccessResponse.toParameters();
+		assertEquals(jwt.serialize(), MultivaluedMapUtils.getFirstValue(params, "response"));
+		assertEquals(1, params.size());
+		
+		URI uri = jwtSuccessResponse.toURI();
+		
+		assertTrue(uri.toString().startsWith(successResponse.getRedirectionURI().toString()));
+		assertEquals("response=" + jwt.serialize(), uri.getQuery());
+		assertNull(uri.getFragment());
+		
+		jwtSuccessResponse = AuthenticationResponseParser.parse(uri).toSuccessResponse();
+		assertEquals(successResponse.getRedirectionURI(), jwtSuccessResponse.getRedirectionURI());
+		assertEquals(jwt.serialize(), jwtSuccessResponse.getJWTResponse().serialize());
+		assertEquals(ResponseMode.JWT, jwtSuccessResponse.getResponseMode());
+		
+		// Parse with validator now
+		JARMValidator jarmValidator = new JARMValidator(
+			new Issuer("https://c2id.com"),
+			new ClientID("123"),
+			JWSAlgorithm.RS256,
+			new JWKSet(new RSAKey.Builder(RSA_PUBLIC_KEY).build()));
+		
+		AuthenticationSuccessResponse validatedResponse = AuthenticationResponseParser.parse(uri, jarmValidator).toSuccessResponse();
+		
+		assertEquals(successResponse.getAuthorizationCode(), validatedResponse.getAuthorizationCode());
+		assertEquals(successResponse.getState(), validatedResponse.getState());
+	}
+	
+	
+	public void testJARM_successLifeCycle_fragment()
+		throws Exception {
+		
+		AuthenticationSuccessResponse successResponse = new AuthenticationSuccessResponse(
+			URI.create("https://example.com/cb"),
+			null,
+			null,
+			new BearerAccessToken(),
+			new State(),
+			null,
+			ResponseMode.FRAGMENT_JWT);
+		
+		JWTClaimsSet jwtClaimsSet = JARMUtils.toJWTClaimsSet(
+			new Issuer("https://c2id.com"),
+			new ClientID("123"),
+			new Date(),
+			successResponse);
+		
+		SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), jwtClaimsSet);
+		signedJWT.sign(new RSASSASigner(RSA_PRIVATE_KEY));
+		
+		JWT jwt = signedJWT;
+		
+		AuthenticationSuccessResponse jwtSuccessResponse = new AuthenticationSuccessResponse(
+			successResponse.getRedirectionURI(),
+			jwt,
+			successResponse.getResponseMode());
+		
+		assertEquals(successResponse.getRedirectionURI(), jwtSuccessResponse.getRedirectionURI());
+		assertEquals(jwt, jwtSuccessResponse.getJWTResponse());
+		assertEquals(successResponse.getResponseMode(), jwtSuccessResponse.getResponseMode());
+		
+		Map<String,List<String>> params = jwtSuccessResponse.toParameters();
+		assertEquals(jwt.serialize(), MultivaluedMapUtils.getFirstValue(params, "response"));
+		assertEquals(1, params.size());
+		
+		URI uri = jwtSuccessResponse.toURI();
+		
+		assertTrue(uri.toString().startsWith(successResponse.getRedirectionURI().toString()));
+		assertNull(uri.getQuery());
+		assertEquals("response=" + jwt.serialize(), uri.getFragment());
+		
+		jwtSuccessResponse = AuthenticationResponseParser.parse(uri).toSuccessResponse();
+		assertEquals(successResponse.getRedirectionURI(), jwtSuccessResponse.getRedirectionURI());
+		assertEquals(jwt.serialize(), jwtSuccessResponse.getJWTResponse().serialize());
+		assertEquals(ResponseMode.JWT, jwtSuccessResponse.getResponseMode());
+		
+		// Parse with validator now
+		JARMValidator jarmValidator = new JARMValidator(
+			new Issuer("https://c2id.com"),
+			new ClientID("123"),
+			JWSAlgorithm.RS256,
+			new JWKSet(new RSAKey.Builder(RSA_PUBLIC_KEY).build()));
+		
+		AuthenticationSuccessResponse validatedResponse = AuthenticationResponseParser.parse(uri, jarmValidator).toSuccessResponse();
+		
+		assertEquals(successResponse.getAccessToken(), validatedResponse.getAccessToken());
+		assertEquals(successResponse.getState(), validatedResponse.getState());
+	}
+	
+	
+	public void testJARM_errorLifeCycle_query()
+		throws Exception {
+		
+		AuthenticationErrorResponse errorResponse = new AuthenticationErrorResponse(
+			URI.create("https://example.com/cb"),
+			OAuth2Error.ACCESS_DENIED,
+			new State(),
+			ResponseMode.QUERY_JWT);
+		
+		JWTClaimsSet jwtClaimsSet = JARMUtils.toJWTClaimsSet(
+			new Issuer("https://c2id.com"),
+			new ClientID("123"),
+			new Date(),
+			errorResponse);
+		
+		SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), jwtClaimsSet);
+		signedJWT.sign(new RSASSASigner(RSA_PRIVATE_KEY));
+		
+		JWT jwt = signedJWT;
+		
+		AuthenticationErrorResponse jwtErrorResponse = new AuthenticationErrorResponse(
+			errorResponse.getRedirectionURI(),
+			jwt,
+			errorResponse.getResponseMode());
+		
+		assertEquals(errorResponse.getRedirectionURI(), jwtErrorResponse.getRedirectionURI());
+		assertEquals(jwt, jwtErrorResponse.getJWTResponse());
+		assertEquals(errorResponse.getResponseMode(), jwtErrorResponse.getResponseMode());
+		
+		Map<String,List<String>> params = jwtErrorResponse.toParameters();
+		assertEquals(jwt.serialize(), MultivaluedMapUtils.getFirstValue(params, "response"));
+		assertEquals(1, params.size());
+		
+		URI uri = jwtErrorResponse.toURI();
+		
+		assertTrue(uri.toString().startsWith(errorResponse.getRedirectionURI().toString()));
+		assertEquals("response=" + jwt.serialize(), uri.getQuery());
+		assertNull(uri.getFragment());
+		
+		jwtErrorResponse = AuthenticationResponseParser.parse(uri).toErrorResponse();
+		assertEquals(errorResponse.getRedirectionURI(), jwtErrorResponse.getRedirectionURI());
+		assertEquals(jwt.serialize(), jwtErrorResponse.getJWTResponse().serialize());
+		assertEquals(ResponseMode.JWT, jwtErrorResponse.getResponseMode());
+		
+		// Parse with validator now
+		JARMValidator jarmValidator = new JARMValidator(
+			new Issuer("https://c2id.com"),
+			new ClientID("123"),
+			JWSAlgorithm.RS256,
+			new JWKSet(new RSAKey.Builder(RSA_PUBLIC_KEY).build()));
+		
+		AuthenticationErrorResponse validatedResponse = AuthenticationResponseParser.parse(uri, jarmValidator).toErrorResponse();
+		
+		assertEquals(errorResponse.getErrorObject(), validatedResponse.getErrorObject());
+		assertEquals(errorResponse.getState(), validatedResponse.getState());
+	}
+	
+	
+	public void testJARM_errorLifeCycle_fragment()
+		throws Exception {
+		
+		AuthenticationErrorResponse errorResponse = new AuthenticationErrorResponse(
+			URI.create("https://example.com/cb"),
+			OAuth2Error.ACCESS_DENIED,
+			new State(),
+			ResponseMode.FRAGMENT_JWT);
+		
+		JWTClaimsSet jwtClaimsSet = JARMUtils.toJWTClaimsSet(
+			new Issuer("https://c2id.com"),
+			new ClientID("123"),
+			new Date(),
+			errorResponse);
+		
+		SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), jwtClaimsSet);
+		signedJWT.sign(new RSASSASigner(RSA_PRIVATE_KEY));
+		
+		JWT jwt = signedJWT;
+		
+		AuthenticationErrorResponse jwtErrorResponse = new AuthenticationErrorResponse(
+			errorResponse.getRedirectionURI(),
+			jwt,
+			errorResponse.getResponseMode());
+		
+		assertEquals(errorResponse.getRedirectionURI(), jwtErrorResponse.getRedirectionURI());
+		assertEquals(jwt, jwtErrorResponse.getJWTResponse());
+		assertEquals(errorResponse.getResponseMode(), jwtErrorResponse.getResponseMode());
+		
+		Map<String,List<String>> params = jwtErrorResponse.toParameters();
+		assertEquals(jwt.serialize(), MultivaluedMapUtils.getFirstValue(params, "response"));
+		assertEquals(1, params.size());
+		
+		URI uri = jwtErrorResponse.toURI();
+		
+		assertTrue(uri.toString().startsWith(errorResponse.getRedirectionURI().toString()));
+		assertNull(uri.getQuery());
+		assertEquals("response=" + jwt.serialize(), uri.getFragment());
+		
+		jwtErrorResponse = AuthenticationResponseParser.parse(uri).toErrorResponse();
+		assertEquals(errorResponse.getRedirectionURI(), jwtErrorResponse.getRedirectionURI());
+		assertEquals(jwt.serialize(), jwtErrorResponse.getJWTResponse().serialize());
+		assertEquals(ResponseMode.JWT, jwtErrorResponse.getResponseMode());
+		
+		// Parse with validator now
+		JARMValidator jarmValidator = new JARMValidator(
+			new Issuer("https://c2id.com"),
+			new ClientID("123"),
+			JWSAlgorithm.RS256,
+			new JWKSet(new RSAKey.Builder(RSA_PUBLIC_KEY).build()));
+		
+		AuthenticationErrorResponse validatedResponse = AuthenticationResponseParser.parse(uri, jarmValidator).toErrorResponse();
+		
+		assertEquals(errorResponse.getErrorObject(), validatedResponse.getErrorObject());
+		assertEquals(errorResponse.getState(), validatedResponse.getState());
 	}
 }

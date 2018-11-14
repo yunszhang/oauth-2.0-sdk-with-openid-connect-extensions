@@ -19,7 +19,6 @@ package com.nimbusds.openid.connect.sdk;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 
 import com.nimbusds.jwt.JWT;
@@ -30,7 +29,6 @@ import com.nimbusds.oauth2.sdk.ResponseMode;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.State;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
 
 
@@ -189,6 +187,33 @@ public class AuthenticationErrorResponse
 	
 	
 	/**
+	 * Converts the specified general OAuth 2.0 authorisation error
+	 * response instance to an OpenID authentication error instance.
+	 *
+	 * @param errorResponse The OAuth 2.0 authorisation error response.
+	 *                      Must not be {@code null}.
+	 *
+	 * @return The OpenID authentication error instance.
+	 */
+	private static AuthenticationErrorResponse toAuthenticationErrorResponse(final AuthorizationErrorResponse errorResponse) {
+		
+		if (errorResponse.getJWTResponse() != null) {
+			// JARM
+			return new AuthenticationErrorResponse(
+				errorResponse.getRedirectionURI(),
+				errorResponse.getJWTResponse(),
+				errorResponse.getResponseMode());
+		}
+		
+		return new AuthenticationErrorResponse(
+			errorResponse.getRedirectionURI(),
+			errorResponse.getErrorObject(),
+			errorResponse.getState(),
+			errorResponse.getResponseMode());
+	}
+	
+	
+	/**
 	 * Parses an OpenID Connect authentication error response.
 	 *
 	 * @param redirectURI The base redirection URI. Must not be
@@ -202,16 +227,10 @@ public class AuthenticationErrorResponse
 	 *                        OpenID Connect authentication error response.
 	 */
 	public static AuthenticationErrorResponse parse(final URI redirectURI,
-							final Map<String,List<String>> params)
+							final Map<String, List<String>> params)
 		throws ParseException {
 
-		AuthorizationErrorResponse resp = AuthorizationErrorResponse.parse(redirectURI, params);
-
-		return new AuthenticationErrorResponse(
-			resp.getRedirectionURI(),
-			resp.getErrorObject(),
-			resp.getState(),
-			resp.getResponseMode());
+		return toAuthenticationErrorResponse(AuthorizationErrorResponse.parse(redirectURI, params));
 	}
 
 
@@ -246,13 +265,7 @@ public class AuthenticationErrorResponse
 	public static AuthenticationErrorResponse parse(final URI uri)
 		throws ParseException {
 
-		AuthorizationErrorResponse resp = AuthorizationErrorResponse.parse(uri);
-
-		return new AuthenticationErrorResponse(
-			resp.getRedirectionURI(),
-			resp.getErrorObject(),
-			resp.getState(),
-			resp.getResponseMode());
+		return toAuthenticationErrorResponse(AuthorizationErrorResponse.parse(uri));
 	}
 
 
@@ -279,13 +292,7 @@ public class AuthenticationErrorResponse
 	public static AuthenticationErrorResponse parse(final HTTPResponse httpResponse)
 		throws ParseException {
 
-		AuthorizationErrorResponse resp = AuthorizationErrorResponse.parse(httpResponse);
-
-		return new AuthenticationErrorResponse(
-			resp.getRedirectionURI(),
-			resp.getErrorObject(),
-			resp.getState(),
-			resp.getResponseMode());
+		return toAuthenticationErrorResponse(AuthorizationErrorResponse.parse(httpResponse));
 	}
 
 
@@ -315,23 +322,6 @@ public class AuthenticationErrorResponse
 	public static AuthenticationErrorResponse parse(final HTTPRequest httpRequest)
 		throws ParseException {
 
-		final URI baseURI;
-
-		try {
-			baseURI = httpRequest.getURL().toURI();
-
-		} catch (URISyntaxException e) {
-			throw new ParseException(e.getMessage(), e);
-		}
-
-		if (httpRequest.getQuery() != null) {
-			// For query string and form_post response mode
-			return parse(baseURI, URLUtils.parseParameters(httpRequest.getQuery()));
-		} else if (httpRequest.getFragment() != null) {
-			// For fragment response mode (never available in actual HTTP request from browser)
-			return parse(baseURI, URLUtils.parseParameters(httpRequest.getFragment()));
-		} else {
-			throw new ParseException("Missing URI fragment, query string or post body");
-		}
+		return parse(httpRequest.getURI(), parseResponseParameters(httpRequest));
 	}
 }

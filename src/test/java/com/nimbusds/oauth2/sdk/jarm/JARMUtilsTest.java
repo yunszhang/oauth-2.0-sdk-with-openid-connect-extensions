@@ -263,13 +263,13 @@ public class JARMUtilsTest extends TestCase {
 		);
 		
 		JWTClaimsSet jwtClaimsSet = JARMUtils.toJWTClaimsSet(new Issuer("https://c2id.com"), new ClientID("123"), new Date(), response);
-		PlainJWT jwt = new PlainJWT(jwtClaimsSet);
+		JWT jwt = new PlainJWT(jwtClaimsSet);
 		
 		try {
-			JARMUtils.impliesAuthorizationErrorResponse((JWT)jwt);
+			JARMUtils.impliesAuthorizationErrorResponse(jwt);
 			fail();
 		} catch (com.nimbusds.oauth2.sdk.ParseException e) {
-			assertEquals("Invalid JWT-encoded authorization response: The JWT must not be plain (unsecured)", e.getMessage());
+			assertEquals("Invalid JWT-secured authorization response: The JWT must not be plain (unsecured)", e.getMessage());
 		}
 	}
 	

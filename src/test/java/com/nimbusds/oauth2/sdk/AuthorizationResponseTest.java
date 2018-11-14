@@ -32,6 +32,8 @@ import java.util.Map;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
@@ -41,6 +43,7 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.jarm.JARMUtils;
+import com.nimbusds.oauth2.sdk.jarm.JARMValidator;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import junit.framework.TestCase;
@@ -277,6 +280,18 @@ public class AuthorizationResponseTest extends TestCase {
 		assertEquals(successResponse.getRedirectionURI(), jwtSuccessResponse.getRedirectionURI());
 		assertEquals(jwt.serialize(), jwtSuccessResponse.getJWTResponse().serialize());
 		assertEquals(ResponseMode.JWT, jwtSuccessResponse.getResponseMode());
+		
+		// Parse with validator now
+		JARMValidator jarmValidator = new JARMValidator(
+			new Issuer("https://c2id.com"),
+			new ClientID("123"),
+			JWSAlgorithm.RS256,
+			new JWKSet(new RSAKey.Builder(RSA_PUBLIC_KEY).build()));
+		
+		AuthorizationSuccessResponse validatedResponse = AuthorizationResponse.parse(uri, jarmValidator).toSuccessResponse();
+		
+		assertEquals(successResponse.getAuthorizationCode(), validatedResponse.getAuthorizationCode());
+		assertEquals(successResponse.getState(), validatedResponse.getState());
 	}
 	
 	
@@ -324,6 +339,18 @@ public class AuthorizationResponseTest extends TestCase {
 		assertEquals(successResponse.getRedirectionURI(), jwtSuccessResponse.getRedirectionURI());
 		assertEquals(jwt.serialize(), jwtSuccessResponse.getJWTResponse().serialize());
 		assertEquals(ResponseMode.JWT, jwtSuccessResponse.getResponseMode());
+		
+		// Parse with validator now
+		JARMValidator jarmValidator = new JARMValidator(
+			new Issuer("https://c2id.com"),
+			new ClientID("123"),
+			JWSAlgorithm.RS256,
+			new JWKSet(new RSAKey.Builder(RSA_PUBLIC_KEY).build()));
+		
+		AuthorizationSuccessResponse validatedResponse = AuthorizationResponse.parse(uri, jarmValidator).toSuccessResponse();
+		
+		assertEquals(successResponse.getAccessToken(), validatedResponse.getAccessToken());
+		assertEquals(successResponse.getState(), validatedResponse.getState());
 	}
 	
 	
@@ -370,6 +397,18 @@ public class AuthorizationResponseTest extends TestCase {
 		assertEquals(errorResponse.getRedirectionURI(), jwtErrorResponse.getRedirectionURI());
 		assertEquals(jwt.serialize(), jwtErrorResponse.getJWTResponse().serialize());
 		assertEquals(ResponseMode.JWT, jwtErrorResponse.getResponseMode());
+		
+		// Parse with validator now
+		JARMValidator jarmValidator = new JARMValidator(
+			new Issuer("https://c2id.com"),
+			new ClientID("123"),
+			JWSAlgorithm.RS256,
+			new JWKSet(new RSAKey.Builder(RSA_PUBLIC_KEY).build()));
+		
+		AuthorizationErrorResponse validatedResponse = AuthorizationResponse.parse(uri, jarmValidator).toErrorResponse();
+		
+		assertEquals(errorResponse.getErrorObject(), validatedResponse.getErrorObject());
+		assertEquals(errorResponse.getState(), validatedResponse.getState());
 	}
 	
 	
@@ -416,5 +455,17 @@ public class AuthorizationResponseTest extends TestCase {
 		assertEquals(errorResponse.getRedirectionURI(), jwtErrorResponse.getRedirectionURI());
 		assertEquals(jwt.serialize(), jwtErrorResponse.getJWTResponse().serialize());
 		assertEquals(ResponseMode.JWT, jwtErrorResponse.getResponseMode());
+		
+		// Parse with validator now
+		JARMValidator jarmValidator = new JARMValidator(
+			new Issuer("https://c2id.com"),
+			new ClientID("123"),
+			JWSAlgorithm.RS256,
+			new JWKSet(new RSAKey.Builder(RSA_PUBLIC_KEY).build()));
+		
+		AuthorizationErrorResponse validatedResponse = AuthorizationResponse.parse(uri, jarmValidator).toErrorResponse();
+		
+		assertEquals(errorResponse.getErrorObject(), validatedResponse.getErrorObject());
+		assertEquals(errorResponse.getState(), validatedResponse.getState());
 	}
 }

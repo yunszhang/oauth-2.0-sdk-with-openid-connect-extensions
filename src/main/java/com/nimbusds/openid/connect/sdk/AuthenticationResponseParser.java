@@ -19,21 +19,19 @@ package com.nimbusds.openid.connect.sdk;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
-import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.JWTParser;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.AuthorizationResponse;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.jarm.JARMUtils;
+import com.nimbusds.oauth2.sdk.jarm.JARMValidator;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
 
 
 /**
@@ -70,27 +68,62 @@ public class AuthenticationResponseParser {
 						   final Map<String,List<String>> params)
 		throws ParseException {
 		
-		if (StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(params, "error"))) {
-			return AuthenticationErrorResponse.parse(redirectURI, params);
-		} else if (StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(params, "response"))) {
-			// JARM, peek into JWT if signed only
-			JWT jwt;
-			try {
-				jwt = JWTParser.parse(MultivaluedMapUtils.getFirstValue(params, "response"));
-			} catch (java.text.ParseException e) {
-				throw new ParseException("Invalid JWT-encoded authorization response: " + e.getMessage(), e);
+		return parse(redirectURI, params, null);
+	}
+
+
+	/**
+	 * Parses an OpenID Connect authentication response which may be
+	 * JSON Web Token (JWT) secured.
+	 *
+	 * @param redirectURI   The base redirection URI. Must not be
+	 *                      {@code null}.
+	 * @param params        The response parameters to parse. Must not be
+	 *                      {@code null}.
+	 * @param jarmValidator The validator of JSON Web Token (JWT) secured
+	 *                      authorisation responses (JARM), {@code null} if
+	 *                      a plain response is expected.
+	 *
+	 * @return The OpenID Connect authentication success or error response.
+	 *
+	 * @throws ParseException If the parameters couldn't be parsed to an
+	 *                        OpenID Connect authentication response, or if
+	 *                        validation of the JWT response failed.
+	 */
+	public static AuthenticationResponse parse(final URI redirectURI,
+						   final Map<String,List<String>> params,
+						   final JARMValidator jarmValidator)
+		throws ParseException {
+		
+		Map<String,List<String>> workParams = params;
+		
+		String jwtResponseString = MultivaluedMapUtils.getFirstValue(params, "response");
+		
+		if (jarmValidator != null) {
+			if (StringUtils.isBlank(jwtResponseString)) {
+				throw new ParseException("Missing JWT-secured (JARM) authorization response parameter");
 			}
-			
-			boolean likelyError = JARMUtils.impliesAuthorizationErrorResponse(jwt);
-			
+			try {
+				JWTClaimsSet jwtClaimsSet = jarmValidator.validate(jwtResponseString);
+				workParams = JARMUtils.toMultiValuedStringParameters(jwtClaimsSet);
+			} catch (Exception e) {
+				throw new ParseException("Invalid JWT-secured (JARM) authorization response: " + e.getMessage());
+			}
+		}
+		
+		if (StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(workParams, "error"))) {
+			return AuthenticationErrorResponse.parse(redirectURI, workParams);
+		} else if (StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(workParams, "response"))) {
+			// JARM that wasn't validated, peek into JWT if signed only
+			boolean likelyError = JARMUtils.impliesAuthorizationErrorResponse(jwtResponseString);
 			if (likelyError) {
-				return AuthenticationErrorResponse.parse(redirectURI, params);
+				return AuthenticationErrorResponse.parse(redirectURI, workParams);
 			} else {
-				return AuthenticationSuccessResponse.parse(redirectURI, params);
+				return AuthenticationSuccessResponse.parse(redirectURI, workParams);
 			}
 			
 		} else {
-			return AuthenticationSuccessResponse.parse(redirectURI, params);
+			return AuthenticationSuccessResponse.parse(redirectURI, workParams);
 		}
 	}
 
@@ -123,27 +156,44 @@ public class AuthenticationResponseParser {
 	public static AuthenticationResponse parse(final URI uri)
 		throws ParseException {
 
-		String paramString;
+		return parse(URIUtils.getBaseURI(uri), AuthorizationResponse.parseResponseParameters(uri));
+	}
+
+
+	/**
+	 * Parses and validates a JSON Web Token (JWT) secured OpenID Connect
+	 * authentication response.
+	 *
+	 * <p>Use a relative URI if the host, port and path details are not
+	 * known:
+	 *
+	 * <pre>
+	 * URI relUrl = new URI("https:///?response=eyJhbGciOiJSUzI1NiIsI...");
+	 * </pre>
+	 *
+	 * @param uri           The URI to parse. Can be absolute or relative,
+	 *                      with a fragment or query string containing the
+	 *                      authentication response parameters. Must not be
+	 *                      {@code null}.
+	 * @param jarmValidator The validator of JSON Web Token (JWT) secured
+	 *                      authorisation responses (JARM). Must not be
+	 *                      {@code null}.
+	 *
+	 * @return The OpenID Connect authentication success or error response.
+	 *
+	 * @throws ParseException If the redirection URI couldn't be parsed to
+	 *                        an OpenID Connect authentication response or
+	 *                        if validation of the JWT response failed.
+	 */
+	public static AuthenticationResponse parse(final URI uri,
+						   final JARMValidator jarmValidator)
+		throws ParseException {
 		
-		if (uri.getRawQuery() != null) {
-
-			paramString = uri.getRawQuery();
-
-		} else if (uri.getRawFragment() != null) {
-
-			paramString = uri.getRawFragment();
-
-		} else {
-
-			throw new ParseException("Missing authorization response parameters");
+		if (jarmValidator == null) {
+			throw new IllegalArgumentException("The JARM validator must not be null");
 		}
-		
-		Map<String,List<String>> params = URLUtils.parseParameters(paramString);
 
-		if (params == null)
-			throw new ParseException("Missing or invalid authorization response parameters");
-
-		return parse(URIUtils.getBaseURI(uri), params);
+		return parse(URIUtils.getBaseURI(uri), AuthorizationResponse.parseResponseParameters(uri), jarmValidator);
 	}
 	
 	
@@ -180,6 +230,43 @@ public class AuthenticationResponseParser {
 	
 	
 	/**
+	 * Parses and validates a JSON Web Token (JWT) secured OpenID Connect
+	 * authentication response from the specified initial HTTP 302 redirect
+	 * response output at the authorisation endpoint.
+	 *
+	 * <p>Example HTTP response (authorisation success):
+	 *
+	 * <pre>
+	 * HTTP/1.1 302 Found
+	 * Location: https://client.example.com/cb?response=eyJhbGciOiJSUzI1...
+	 * </pre>
+	 *
+	 * @param httpResponse  The HTTP response to parse. Must not be
+	 *                      {@code null}.
+	 * @param jarmValidator The validator of JSON Web Token (JWT) secured
+	 *                      authorisation responses (JARM). Must not be
+	 *                      {@code null}.
+	 *
+	 * @return The OpenID Connect authentication response.
+	 *
+	 * @throws ParseException If the HTTP response couldn't be parsed to an
+	 *                        OpenID Connect authentication response or if
+	 *                        validation of the JWT response failed.
+	 */
+	public static AuthenticationResponse parse(final HTTPResponse httpResponse,
+						   final JARMValidator jarmValidator)
+		throws ParseException {
+
+		URI location = httpResponse.getLocation();
+		
+		if (location == null)
+			throw new ParseException("Missing redirection URI / HTTP Location header");
+
+		return parse(location, jarmValidator);
+	}
+	
+	
+	/**
 	 * Parses an OpenID Connect authentication response from the specified
 	 * HTTP request at the client redirection (callback) URI. Applies to
 	 * the {@code query}, {@code fragment} and {@code form_post} response
@@ -205,24 +292,46 @@ public class AuthenticationResponseParser {
 	public static AuthenticationResponse parse(final HTTPRequest httpRequest)
 		throws ParseException {
 		
-		final URI baseURI;
+		return parse(httpRequest.getURI(), AuthorizationResponse.parseResponseParameters(httpRequest));
+	}
+	
+	
+	/**
+	 * Parses and validates a JSON Web Token (JWT) secured OpenID Connect
+	 * authentication response from the specified HTTP request at the
+	 * client redirection (callback) URI. Applies to the {@code query.jwt},
+	 * {@code fragment.jwt} and {@code form_post.jwt} response modes.
+	 *
+	 * <p>Example HTTP request (authorisation success):
+	 *
+	 * <pre>
+	 * GET /cb?response=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9... HTTP/1.1
+	 * Host: client.example.com
+	 * </pre>
+	 *
+	 * @see #parse(HTTPResponse)
+	 *
+	 * @param httpRequest   The HTTP request to parse. Must not be
+	 *                      {@code null}.
+	 * @param jarmValidator The validator of JSON Web Token (JWT) secured
+	 *                      authorisation responses (JARM). Must not be
+	 *                      {@code null}.
+	 *
+	 * @return The OpenID Connect authentication response.
+	 *
+	 * @throws ParseException If the HTTP request couldn't be parsed to an
+	 *                        OpenID Connect authentication response or if
+	 *                        validation of the JWT response failed.
+	 */
+	public static AuthenticationResponse parse(final HTTPRequest httpRequest,
+						   final JARMValidator jarmValidator)
+		throws ParseException {
 		
-		try {
-			baseURI = httpRequest.getURL().toURI();
-			
-		} catch (URISyntaxException e) {
-			throw new ParseException(e.getMessage(), e);
+		if (jarmValidator == null) {
+			throw new IllegalArgumentException("The JARM validator must not be null");
 		}
 		
-		if (httpRequest.getQuery() != null) {
-			// For query string and form_post response mode
-			return parse(baseURI, URLUtils.parseParameters(httpRequest.getQuery()));
-		} else if (httpRequest.getFragment() != null) {
-			// For fragment response mode (never available in actual HTTP request from browser)
-			return parse(baseURI, URLUtils.parseParameters(httpRequest.getFragment()));
-		} else {
-			throw new ParseException("Missing URI fragment, query string or post body");
-		}
+		return parse(httpRequest.getURI(), AuthorizationResponse.parseResponseParameters(httpRequest), jarmValidator);
 	}
 	
 	

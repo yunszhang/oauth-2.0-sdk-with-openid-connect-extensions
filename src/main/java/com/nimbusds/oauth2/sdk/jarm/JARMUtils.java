@@ -18,8 +18,7 @@
 package com.nimbusds.oauth2.sdk.jarm;
 
 
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 import com.nimbusds.jwt.*;
 import com.nimbusds.oauth2.sdk.AuthorizationResponse;
@@ -76,6 +75,52 @@ public final class JARMUtils {
 	
 	
 	/**
+	 * Returns a multi-valued map representation of the specified JWT
+	 * claims set.
+	 *
+	 * @param jwtClaimsSet The JWT claims set. Must not be {@code null}.
+	 *
+	 * @return The multi-valued map.
+	 */
+	public static Map<String,List<String>> toMultiValuedStringParameters(final JWTClaimsSet jwtClaimsSet) {
+		
+		Map<String,List<String>> params = new HashMap<>();
+		
+		for (Map.Entry<String,Object> en: jwtClaimsSet.getClaims().entrySet()) {
+			params.put(en.getKey(), Collections.singletonList(en.getValue() + ""));
+		}
+		
+		return params;
+	}
+	
+	
+	/**
+	 * Returns {@code true} if the specified JWT-secured authorisation
+	 * response implies an error response. Note that the JWT is not
+	 * validated in any way!
+	 *
+	 * @param jwtString The JWT-secured authorisation response string. Must
+	 *                  not be {@code null}.
+	 *
+	 * @return {@code true} if an error is implied by the presence of the
+	 *         {@code error} claim, else {@code false} (also for encrypted
+	 *         JWTs which payload cannot be inspected without decrypting
+	 *         first).
+	 *
+	 * @throws ParseException If the JWT is invalid or plain (unsecured).
+	 */
+	public static boolean impliesAuthorizationErrorResponse(final String jwtString)
+		throws ParseException  {
+		
+		try {
+			return impliesAuthorizationErrorResponse(JWTParser.parse(jwtString));
+		} catch (java.text.ParseException e) {
+			throw new ParseException("Invalid JWT-secured authorization response: " + e.getMessage(), e);
+		}
+	}
+	
+	
+	/**
 	 * Returns {@code true} if the specified JWT-secured authorisation
 	 * response implies an error response. Note that the JWT is not
 	 * validated in any way!
@@ -84,8 +129,9 @@ public final class JARMUtils {
 	 *            {@code null}.
 	 *
 	 * @return {@code true} if an error is implied by the presence of the
-	 *         {@code error} claim, else {@false} (also for encrypted JWTs
-	 *         which payload cannot be inspected without decrypting first).
+	 *         {@code error} claim, else {@code false} (also for encrypted
+	 *         JWTs which payload cannot be inspected without decrypting
+	 *         first).
 	 *
 	 * @throws ParseException If the JWT is plain (unsecured).
 	 */

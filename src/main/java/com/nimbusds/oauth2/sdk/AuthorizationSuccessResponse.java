@@ -19,7 +19,6 @@ package com.nimbusds.oauth2.sdk;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +32,6 @@ import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
 
@@ -304,22 +302,7 @@ public class AuthorizationSuccessResponse
 	public static AuthorizationSuccessResponse parse(final URI uri)
 		throws ParseException {
 
-		Map<String,List<String>> params;
-
-		if (uri.getRawFragment() != null) {
-
-			params = URLUtils.parseParameters(uri.getRawFragment());
-
-		} else if (uri.getRawQuery() != null) {
-
-			params = URLUtils.parseParameters(uri.getRawQuery());
-
-		} else {
-
-			throw new ParseException("Missing URI fragment or query string");
-		}
-
-		return parse(URIUtils.getBaseURI(uri), params);
+		return parse(URIUtils.getBaseURI(uri), parseResponseParameters(uri));
 	}
 
 
@@ -383,23 +366,6 @@ public class AuthorizationSuccessResponse
 	public static AuthorizationSuccessResponse parse(final HTTPRequest httpRequest)
 		throws ParseException {
 
-		final URI baseURI;
-
-		try {
-			baseURI = httpRequest.getURL().toURI();
-
-		} catch (URISyntaxException e) {
-			throw new ParseException(e.getMessage(), e);
-		}
-
-		if (httpRequest.getQuery() != null) {
-			// For query string and form_post response mode
-			return parse(baseURI, URLUtils.parseParameters(httpRequest.getQuery()));
-		} else if (httpRequest.getFragment() != null) {
-			// For fragment response mode (never available in actual HTTP request from browser)
-			return parse(baseURI, URLUtils.parseParameters(httpRequest.getFragment()));
-		} else {
-			throw new ParseException("Missing URI fragment, query string or post body");
-		}
+		return parse(httpRequest.getURI(), parseResponseParameters(httpRequest));
 	}
 }

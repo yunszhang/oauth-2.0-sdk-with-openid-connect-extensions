@@ -19,9 +19,7 @@ package com.nimbusds.oauth2.sdk.http;
 
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -232,6 +230,22 @@ public class HTTPRequest extends HTTPMessage {
 	public URL getURL() {
 
 		return url;
+	}
+
+
+	/**
+	 * Gets the request URL as URI.
+	 *
+	 * @return The request URL as URI.
+	 */
+	public URI getURI() {
+		
+		try {
+			return url.toURI();
+		} catch (URISyntaxException e) {
+			// Should never happen
+			throw new IllegalStateException(e.getMessage(), e);
+		}
 	}
 	
 	
