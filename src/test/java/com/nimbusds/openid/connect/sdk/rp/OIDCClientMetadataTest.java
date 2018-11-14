@@ -31,6 +31,7 @@ import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.oauth2.sdk.client.RegistrationError;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.SubjectType;
@@ -69,6 +70,9 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("software_version"));
 		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
 		assertTrue(paramNames.contains("tls_client_auth_subject_dn"));
+		assertTrue(paramNames.contains("authorization_signed_response_alg"));
+		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
+		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 
 		// OIDC specifid params
 		assertTrue(paramNames.contains("application_type"));
@@ -94,7 +98,7 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("backchannel_logout_uri"));
 		assertTrue(paramNames.contains("backchannel_logout_session_required"));
 
-		assertEquals(40, OIDCClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(43, OIDCClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -148,8 +152,8 @@ public class OIDCClientMetadataTest extends TestCase {
 		
 		List<InternetAddress> contacts = clientMetadata.getContacts();
 		
-		assertTrue(new InternetAddress("ve7jtb@example.org").equals(contacts.get(0)));
-		assertTrue(new InternetAddress("mary@example.org").equals(contacts.get(1)));
+		assertEquals(new InternetAddress("ve7jtb@example.org"), contacts.get(0));
+		assertEquals(new InternetAddress("mary@example.org"), contacts.get(1));
 		assertEquals(2, contacts.size());
 		
 		Set<URI> requestURIs = clientMetadata.getRequestObjectURIs();
@@ -360,6 +364,29 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertEquals(JWSAlgorithm.RS256, metadata.getIDTokenJWSAlg());
 
 		assertEquals(ApplicationType.WEB, metadata.getApplicationType());
+	}
+	
+	
+	public void testApplyDefaults_JARM_implicitJWEEnc()
+		throws Exception {
+		
+		OIDCClientMetadata metadata = new OIDCClientMetadata();
+		metadata.setAuthorizationJWEAlg(JWEAlgorithm.ECDH_ES);
+		
+		metadata.applyDefaults();
+		
+		Set<ResponseType> rts = metadata.getResponseTypes();
+		assertTrue(rts.contains(ResponseType.parse("code")));
+		
+		Set<GrantType> grantTypes = metadata.getGrantTypes();
+		assertTrue(grantTypes.contains(GrantType.AUTHORIZATION_CODE));
+		
+		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, metadata.getTokenEndpointAuthMethod());
+		
+		// JARM
+		assertNull(metadata.getAuthorizationJWSAlg());
+		assertEquals(JWEAlgorithm.ECDH_ES, metadata.getAuthorizationJWEAlg());
+		assertEquals(EncryptionMethod.A128CBC_HS256, metadata.getAuthorizationJWEEnc());
 	}
 
 
@@ -682,5 +709,37 @@ public class OIDCClientMetadataTest extends TestCase {
 		clientMetadata = OIDCClientMetadata.parse(out);
 		assertEquals(logoutURI, clientMetadata.getBackChannelLogoutURI());
 		assertFalse(clientMetadata.requiresBackChannelLogoutSession());
+	}
+	
+	
+	public void testJARM()
+		throws ParseException {
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		
+		assertNull(clientMetadata.getAuthorizationJWSAlg());
+		assertNull(clientMetadata.getAuthorizationJWEAlg());
+		assertNull(clientMetadata.getAuthorizationJWEEnc());
+		
+		clientMetadata.setAuthorizationJWSAlg(JWSAlgorithm.ES256);
+		assertEquals(JWSAlgorithm.ES256, clientMetadata.getAuthorizationJWSAlg());
+		
+		clientMetadata.setAuthorizationJWEAlg(JWEAlgorithm.ECDH_ES);
+		assertEquals(JWEAlgorithm.ECDH_ES, clientMetadata.getAuthorizationJWEAlg());
+		
+		clientMetadata.setAuthorizationJWEEnc(EncryptionMethod.A256GCM);
+		assertEquals(EncryptionMethod.A256GCM, clientMetadata.getAuthorizationJWEEnc());
+		
+		JSONObject jsonObject = clientMetadata.toJSONObject();
+		
+		assertEquals(JWSAlgorithm.ES256.getName(), jsonObject.get("authorization_signed_response_alg"));
+		assertEquals(JWEAlgorithm.ECDH_ES.getName(), jsonObject.get("authorization_encrypted_response_alg"));
+		assertEquals(EncryptionMethod.A256GCM.getName(), jsonObject.get("authorization_encrypted_response_enc"));
+		
+		clientMetadata = OIDCClientMetadata.parse(jsonObject);
+		
+		assertEquals(JWSAlgorithm.ES256, clientMetadata.getAuthorizationJWSAlg());
+		assertEquals(JWEAlgorithm.ECDH_ES, clientMetadata.getAuthorizationJWEAlg());
+		assertEquals(EncryptionMethod.A256GCM, clientMetadata.getAuthorizationJWEEnc());
 	}
 }

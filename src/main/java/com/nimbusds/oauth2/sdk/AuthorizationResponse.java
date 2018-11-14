@@ -24,10 +24,14 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.jarm.JARMUtils;
+import com.nimbusds.oauth2.sdk.jarm.JARMValidator;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
@@ -43,6 +47,8 @@ import com.nimbusds.oauth2.sdk.util.URLUtils;
  *     <li>OAuth 2.0 (RFC 6749), section 3.1.
  *     <li>OAuth 2.0 Multiple Response Type Encoding Practices 1.0.
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
+ *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
+ *         OAuth 2.0 (JARM).
  * </ul>
  */
 public abstract class AuthorizationResponse implements Response {
@@ -58,6 +64,12 @@ public abstract class AuthorizationResponse implements Response {
 	 * The optional state parameter to be echoed back to the client.
 	 */
 	private final State state;
+	
+	
+	/**
+	 * For a JWT-secured response.
+	 */
+	private final JWT jwtResponse;
 
 
 	/**
@@ -81,8 +93,38 @@ public abstract class AuthorizationResponse implements Response {
 		}
 
 		this.redirectURI = redirectURI;
+		
+		jwtResponse = null;
 
 		this.state = state;
+
+		this.rm = rm;
+	}
+
+
+	/**
+	 * Creates a new JSON Web Token (JWT) secured authorisation response.
+	 *
+	 * @param redirectURI The base redirection URI. Must not be
+	 *                    {@code null}.
+	 * @param jwtResponse The JWT response. Must not be {@code null}.
+	 * @param rm          The response mode, {@code null} if not specified.
+	 */
+	protected AuthorizationResponse(final URI redirectURI, final JWT jwtResponse, final ResponseMode rm) {
+
+		if (redirectURI == null) {
+			throw new IllegalArgumentException("The redirection URI must not be null");
+		}
+
+		this.redirectURI = redirectURI;
+
+		if (jwtResponse == null) {
+			throw new IllegalArgumentException("The JWT response must not be null");
+		}
+		
+		this.jwtResponse = jwtResponse;
+		
+		this.state = null;
 
 		this.rm = rm;
 	}
@@ -103,14 +145,28 @@ public abstract class AuthorizationResponse implements Response {
 	/**
 	 * Returns the optional state.
 	 *
-	 * @return The state, {@code null} if not requested.
+	 * @return The state, {@code null} if not requested or if the response
+	 *         is JWT-secured in which case the state parameter may be
+	 *         included as a JWT claim.
 	 */
 	public State getState() {
 
 		return state;
 	}
-
-
+	
+	
+	/**
+	 * Returns the JSON Web Token (JWT) secured response.
+	 *
+	 * @return The JWT-secured response, {@code null} for a regular
+	 *         authorisation response.
+	 */
+	public JWT getJWTResponse() {
+		
+		return jwtResponse;
+	}
+	
+	
 	/**
 	 * Returns the optional explicit response mode.
 	 *
@@ -168,7 +224,7 @@ public abstract class AuthorizationResponse implements Response {
 
 		StringBuilder sb = new StringBuilder(getRedirectionURI().toString());
 
-		if (rm.equals(ResponseMode.QUERY)) {
+		if (ResponseMode.QUERY.equals(rm) || ResponseMode.QUERY_JWT.equals(rm)) {
 			if (StringUtils.isBlank(getRedirectionURI().getRawQuery())) {
 				sb.append('?');
 			} else {
@@ -176,7 +232,7 @@ public abstract class AuthorizationResponse implements Response {
 				// see http://tools.ietf.org/html/rfc6749#section-3.1.2
 				sb.append('&');
 			}
-		} else if (rm.equals(ResponseMode.FRAGMENT)) {
+		} else if (ResponseMode.FRAGMENT.equals(rm) || ResponseMode.FRAGMENT_JWT.equals(rm)) {
 			sb.append('#');
 		} else {
 			throw new SerializeException("The (implied) response mode must be query or fragment");
@@ -301,10 +357,63 @@ public abstract class AuthorizationResponse implements Response {
 	public static AuthorizationResponse parse(final URI redirectURI, final Map<String,List<String>> params)
 		throws ParseException {
 
-		if (StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(params, "error"))) {
-			return AuthorizationErrorResponse.parse(redirectURI, params);
+		return parse(redirectURI, params, null);
+	}
+
+
+	/**
+	 * Parses an authorisation response which may be JSON Web Token (JWT)
+	 * secured.
+	 *
+	 * @param redirectURI   The base redirection URI. Must not be
+	 *                      {@code null}.
+	 * @param params        The response parameters to parse. Must not be
+	 *                      {@code null}.
+	 * @param jarmValidator The validator of JSON Web Token (JWT) secured
+	 *                      authorisation responses (JARM), {@code null} if
+	 *                      a plain response is expected.
+	 *
+	 * @return The authorisation success or error response.
+	 *
+	 * @throws ParseException If the parameters couldn't be parsed to an
+	 *                        authorisation success or error response, or
+	 *                        if validation of the JWT secured response
+	 *                        failed.
+	 */
+	public static AuthorizationResponse parse(final URI redirectURI,
+						  final Map<String,List<String>> params,
+						  final JARMValidator jarmValidator)
+		throws ParseException {
+		
+		Map<String,List<String>> workParams = params;
+		
+		String jwtResponseString = MultivaluedMapUtils.getFirstValue(params, "response");
+		
+		if (jarmValidator != null) {
+			if (StringUtils.isBlank(jwtResponseString)) {
+				throw new ParseException("Missing JWT-secured (JARM) authorization response parameter");
+			}
+			try {
+				JWTClaimsSet jwtClaimsSet = jarmValidator.validate(jwtResponseString);
+				workParams = JARMUtils.toMultiValuedStringParameters(jwtClaimsSet);
+			} catch (Exception e) {
+				throw new ParseException("Invalid JWT-secured (JARM) authorization response: " + e.getMessage());
+			}
+		}
+
+		if (StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(workParams, "error"))) {
+			return AuthorizationErrorResponse.parse(redirectURI, workParams);
+		} else if (StringUtils.isNotBlank(jwtResponseString)) {
+			// JARM that wasn't validated, peek into JWT if signed only
+			boolean likelyError = JARMUtils.impliesAuthorizationErrorResponse(jwtResponseString);
+			if (likelyError) {
+				return AuthorizationErrorResponse.parse(redirectURI, workParams);
+			} else {
+				return AuthorizationSuccessResponse.parse(redirectURI, workParams);
+			}
+			
 		} else {
-			return AuthorizationSuccessResponse.parse(redirectURI, params);
+			return AuthorizationSuccessResponse.parse(redirectURI, workParams);
 		}
 	}
 
@@ -331,17 +440,43 @@ public abstract class AuthorizationResponse implements Response {
 	public static AuthorizationResponse parse(final URI uri)
 		throws ParseException {
 
-		Map<String,List<String>> params;
+		return parse(URIUtils.getBaseURI(uri), parseResponseParameters(uri));
+	}
 
-		if (uri.getRawFragment() != null) {
-			params = URLUtils.parseParameters(uri.getRawFragment());
-		} else if (uri.getRawQuery() != null) {
-			params = URLUtils.parseParameters(uri.getRawQuery());
-		} else {
-			throw new ParseException("Missing URI fragment or query string");
+
+	/**
+	 * Parses and validates a JSON Web Token (JWT) secured authorisation
+	 * response.
+	 *
+	 * <p>Use a relative URI if the host, port and path details are not
+	 * known:
+	 *
+	 * <pre>
+	 * URI relUrl = new URI("https:///?response=eyJhbGciOiJSUzI1NiIsI...");
+	 * </pre>
+	 *
+	 * @param uri           The URI to parse. Can be absolute or relative,
+	 *                      with a fragment or query string containing the
+	 *                      authorisation response parameters. Must not be
+	 *                      {@code null}.
+	 * @param jarmValidator The validator of JSON Web Token (JWT) secured
+	 *                      authorisation responses (JARM). Must not be
+	 *                      {@code null}.
+	 *
+	 * @return The authorisation success or error response.
+	 *
+	 * @throws ParseException If no authorisation response parameters were
+	 *                        found in the URL of if validation of the JWT
+	 *                        response failed.
+	 */
+	public static AuthorizationResponse parse(final URI uri, final JARMValidator jarmValidator)
+		throws ParseException {
+		
+		if (jarmValidator == null) {
+			throw new IllegalArgumentException("The JARM validator must not be null");
 		}
 
-		return parse(URIUtils.getBaseURI(uri), params);
+		return parse(URIUtils.getBaseURI(uri), parseResponseParameters(uri), jarmValidator);
 	}
 
 
@@ -380,6 +515,46 @@ public abstract class AuthorizationResponse implements Response {
 
 
 	/**
+	 * Parses and validates a JSON Web Token (JWT) secured authorisation
+	 * response from the specified initial HTTP 302 redirect response
+	 * output at the authorisation endpoint.
+	 *
+	 * <p>Example HTTP response (authorisation success):
+	 *
+	 * <pre>
+	 * HTTP/1.1 302 Found
+	 * Location: https://client.example.com/cb?response=eyJhbGciOiJSUzI1...
+	 * </pre>
+	 *
+	 * @see #parse(HTTPRequest)
+	 *
+	 * @param httpResponse  The HTTP response to parse. Must not be
+	 *                      {@code null}.
+	 * @param jarmValidator The validator of JSON Web Token (JWT) secured
+	 *                      authorisation responses (JARM). Must not be
+	 *                      {@code null}.
+	 *
+	 * @return The authorisation response.
+	 *
+	 * @throws ParseException If the HTTP response couldn't be parsed to an
+	 *                        authorisation response or if validation of
+	 *                        the JWT response failed.
+	 */
+	public static AuthorizationResponse parse(final HTTPResponse httpResponse,
+						  final JARMValidator jarmValidator)
+		throws ParseException {
+
+		URI location = httpResponse.getLocation();
+
+		if (location == null) {
+			throw new ParseException("Missing redirection URI / HTTP Location header");
+		}
+
+		return parse(location, jarmValidator);
+	}
+
+
+	/**
 	 * Parses an authorisation response from the specified HTTP request at
 	 * the client redirection (callback) URI. Applies to the {@code query},
 	 * {@code fragment} and {@code form_post} response modes.
@@ -403,22 +578,93 @@ public abstract class AuthorizationResponse implements Response {
 	 */
 	public static AuthorizationResponse parse(final HTTPRequest httpRequest)
 		throws ParseException {
+		
+		return parse(httpRequest.getURI(), parseResponseParameters(httpRequest));
+	}
 
-		final URI baseURI;
 
-		try {
-			baseURI = httpRequest.getURL().toURI();
-
-		} catch (URISyntaxException e) {
-			throw new ParseException(e.getMessage(), e);
+	/**
+	 * Parses and validates a JSON Web Token (JWT) secured authorisation
+	 * response from the specified HTTP request at the client redirection
+	 * (callback) URI. Applies to the {@code query.jwt},
+	 * {@code fragment.jwt} and {@code form_post.jwt} response modes.
+	 *
+	 * <p>Example HTTP request (authorisation success):
+	 *
+	 * <pre>
+	 * GET /cb?response=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9... HTTP/1.1
+	 * Host: client.example.com
+	 * </pre>
+	 *
+	 * @see #parse(HTTPResponse)
+	 *
+	 * @param httpRequest   The HTTP request to parse. Must not be
+	 *                      {@code null}.
+	 * @param jarmValidator The validator of JSON Web Token (JWT) secured
+	 *                      authorisation responses (JARM). Must not be
+	 *                      {@code null}.
+	 *
+	 * @return The authorisation response.
+	 *
+	 * @throws ParseException If the HTTP request couldn't be parsed to an
+	 *                        authorisation response or if validation of
+	 *                        the JWT response failed.
+	 */
+	public static AuthorizationResponse parse(final HTTPRequest httpRequest,
+						  final JARMValidator jarmValidator)
+		throws ParseException {
+		
+		if (jarmValidator == null) {
+			throw new IllegalArgumentException("The JARM validator must not be null");
 		}
 
+		return parse(httpRequest.getURI(), parseResponseParameters(httpRequest), jarmValidator);
+	}
+	
+	
+	/**
+	 * Parses the relevant authorisation response parameters. This method
+	 * is intended for internal SDK usage only.
+	 *
+	 * @param uri The URI to parse its query or fragment parameters. Must
+	 *            not be {@code null}.
+	 *
+	 * @return The authorisation response parameters.
+	 *
+	 * @throws ParseException If parsing failed.
+	 */
+	public static Map<String,List<String>> parseResponseParameters(final URI uri)
+		throws ParseException {
+		
+		if (uri.getRawFragment() != null) {
+			return URLUtils.parseParameters(uri.getRawFragment());
+		} else if (uri.getRawQuery() != null) {
+			return URLUtils.parseParameters(uri.getRawQuery());
+		} else {
+			throw new ParseException("Missing URI fragment or query string");
+		}
+	}
+	
+	
+	/**
+	 * Parses the relevant authorisation response parameters. This method
+	 * is intended for internal SDK usage only.
+	 *
+	 * @param httpRequest The HTTP request. Must not be {@code null}.
+	 *
+	 * @return The authorisation response parameters.
+	 *
+	 * @throws ParseException If parsing failed.
+	 */
+	public static Map<String,List<String>> parseResponseParameters(final HTTPRequest httpRequest)
+		throws ParseException {
+		
 		if (httpRequest.getQuery() != null) {
 			// For query string and form_post response mode
-			return parse(baseURI, URLUtils.parseParameters(httpRequest.getQuery()));
+			return URLUtils.parseParameters(httpRequest.getQuery());
 		} else if (httpRequest.getFragment() != null) {
 			// For fragment response mode (never available in actual HTTP request from browser)
-			return parse(baseURI, URLUtils.parseParameters(httpRequest.getFragment()));
+			return URLUtils.parseParameters(httpRequest.getFragment());
 		} else {
 			throw new ParseException("Missing URI fragment, query string or post body");
 		}

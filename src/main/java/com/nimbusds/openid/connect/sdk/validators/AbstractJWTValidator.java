@@ -28,7 +28,7 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 /**
  * Abstract JSON Web Token (JWT) validator for ID tokens and logout tokens.
  */
-abstract class AbstractJWTValidator implements ClockSkewAware {
+public abstract class AbstractJWTValidator implements ClockSkewAware {
 	
 	
 	/**
@@ -113,7 +113,7 @@ abstract class AbstractJWTValidator implements ClockSkewAware {
 	
 	
 	/**
-	 * Returns the client ID (the expected token audience).
+	 * Returns the client ID (the expected JWT audience).
 	 *
 	 * @return The client ID.
 	 */

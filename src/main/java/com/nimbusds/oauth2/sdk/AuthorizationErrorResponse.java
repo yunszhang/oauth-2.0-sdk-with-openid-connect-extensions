@@ -22,13 +22,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
 
 
@@ -72,6 +73,8 @@ import net.jcip.annotations.Immutable;
  *     <li>OAuth 2.0 (RFC 6749), sections 4.1.2.1 and 4.2.2.1.
  *     <li>OAuth 2.0 Multiple Response Type Encoding Practices 1.0.
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
+ *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
+ *         OAuth 2.0 (JARM).
  * </ul>
  */
 @Immutable
@@ -142,6 +145,27 @@ public class AuthorizationErrorResponse
 	}
 
 
+	/**
+	 * Creates a new JSON Web Token (JWT) secured authorisation error
+	 * response.
+	 *
+	 * @param redirectURI The base redirection URI. Must not be
+	 *                    {@code null}.
+	 * @param jwtResponse The JWT-secured response. Must not be
+	 *                    {@code null}.
+	 * @param rm          The implied response mode, {@code null} if
+	 *                    unknown.
+	 */
+	public AuthorizationErrorResponse(final URI redirectURI,
+					  final JWT jwtResponse,
+					  final ResponseMode rm) {
+
+		super(redirectURI, jwtResponse, rm);
+
+		error = null;
+	}
+
+
 	@Override
 	public boolean indicatesSuccess() {
 
@@ -168,6 +192,12 @@ public class AuthorizationErrorResponse
 	public Map<String,List<String>> toParameters() {
 
 		Map<String,List<String>> params = new HashMap<>();
+		
+		if (getJWTResponse() != null) {
+			// JARM, no other top-level parameters
+			params.put("response", Collections.singletonList(getJWTResponse().serialize()));
+			return params;
+		}
 
 		params.put("error", Collections.singletonList(error.getCode()));
 
@@ -200,6 +230,18 @@ public class AuthorizationErrorResponse
 	public static AuthorizationErrorResponse parse(final URI redirectURI,
 		                                       final Map<String,List<String>> params)
 		throws ParseException {
+		
+		// JARM, ignore other top level params
+		if (params.get("response") != null) {
+			JWT jwtResponse;
+			try {
+				jwtResponse = JWTParser.parse(MultivaluedMapUtils.getFirstValue(params, "response"));
+			} catch (java.text.ParseException e) {
+				throw new ParseException("Invalid JWT response: " + e.getMessage(), e);
+			}
+			
+			return new AuthorizationErrorResponse(redirectURI, jwtResponse, ResponseMode.JWT);
+		}
 
 		// Parse the error
 		if (StringUtils.isBlank(MultivaluedMapUtils.getFirstValue(params, "error")))
@@ -266,23 +308,7 @@ public class AuthorizationErrorResponse
 	public static AuthorizationErrorResponse parse(final URI uri)
 		throws ParseException {
 		
-		Map<String,List<String>> params;
-
-		if (uri.getRawFragment() != null) {
-
-			params = URLUtils.parseParameters(uri.getRawFragment());
-
-		} else if (uri.getRawQuery() != null) {
-
-			params = URLUtils.parseParameters(uri.getRawQuery());
-
-		} else {
-
-			throw new ParseException("Missing URI fragment or query string");
-		}
-
-		
-		return parse(URIUtils.getBaseURI(uri), params);
+		return parse(URIUtils.getBaseURI(uri), parseResponseParameters(uri));
 	}
 	
 	
@@ -346,23 +372,6 @@ public class AuthorizationErrorResponse
 	public static AuthorizationErrorResponse parse(final HTTPRequest httpRequest)
 		throws ParseException {
 
-		final URI baseURI;
-
-		try {
-			baseURI = httpRequest.getURL().toURI();
-
-		} catch (URISyntaxException e) {
-			throw new ParseException(e.getMessage(), e);
-		}
-
-		if (httpRequest.getQuery() != null) {
-			// For query string and form_post response mode
-			return parse(baseURI, URLUtils.parseParameters(httpRequest.getQuery()));
-		} else if (httpRequest.getFragment() != null) {
-			// For fragment response mode (never available in actual HTTP request from browser)
-			return parse(baseURI, URLUtils.parseParameters(httpRequest.getFragment()));
-		} else {
-			throw new ParseException("Missing URI fragment, query string or post body");
-		}
+		return parse(httpRequest.getURI(), parseResponseParameters(httpRequest));
 	}
 }

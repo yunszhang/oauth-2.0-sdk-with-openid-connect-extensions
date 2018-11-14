@@ -44,9 +44,6 @@ import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
 
-/**
- * Tests the OIDC provider metadata class.
- */
 public class OIDCProviderMetadataTest extends TestCase {
 
 
@@ -103,8 +100,11 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("backchannel_logout_supported"));
 		assertTrue(paramNames.contains("backchannel_logout_session_supported"));
 		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
+		assertTrue(paramNames.contains("authorization_signing_alg_values_supported"));
+		assertTrue(paramNames.contains("authorization_encryption_alg_values_supported"));
+		assertTrue(paramNames.contains("authorization_encryption_enc_values_supported"));
 
-		assertEquals(49, paramNames.size());
+		assertEquals(52, paramNames.size());
 	}
 
 
@@ -329,6 +329,10 @@ public class OIDCProviderMetadataTest extends TestCase {
 		
 		assertFalse(op.supportsTLSClientCertificateBoundAccessTokens());
 		assertFalse(op.supportsMutualTLSSenderConstrainedAccessTokens());
+		
+		assertNull(op.getAuthorizationJWSAlgs());
+		assertNull(op.getAuthorizationJWEAlgs());
+		assertNull(op.getAuthorizationJWEEncs());
 
 		assertTrue(op.getCustomParameters().isEmpty());
 	}
@@ -550,6 +554,18 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(meta.supportsTLSClientCertificateBoundAccessTokens());
 		assertTrue(meta.supportsMutualTLSSenderConstrainedAccessTokens());
 		
+		List<JWSAlgorithm> authzJWSAlgs = Collections.singletonList(JWSAlgorithm.ES256);
+		meta.setAuthorizationJWSAlgs(authzJWSAlgs);
+		assertEquals(authzJWSAlgs, meta.getAuthorizationJWSAlgs());
+		
+		List<JWEAlgorithm> authzJWEAlgs = Collections.singletonList(JWEAlgorithm.ECDH_ES);
+		meta.setAuthorizationJWEAlgs(authzJWEAlgs);
+		assertEquals(authzJWEAlgs, meta.getAuthorizationJWEAlgs());
+		
+		List<EncryptionMethod> authzJWEEncs= Collections.singletonList(EncryptionMethod.A256GCM);
+		meta.setAuthorizationJWEEncs(authzJWEEncs);
+		assertEquals(authzJWEEncs, meta.getAuthorizationJWEEncs());
+		
 		meta.setCustomParameter("x-custom", "xyz");
 
 		assertEquals(1, meta.getCustomParameters().size());
@@ -651,6 +667,10 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(meta.supportsBackChannelLogoutSession());
 		
 		assertTrue(meta.supportsTLSClientCertificateBoundAccessTokens());
+		
+		assertEquals(authzJWSAlgs, meta.getAuthorizationJWSAlgs());
+		assertEquals(authzJWEAlgs, meta.getAuthorizationJWEAlgs());
+		assertEquals(authzJWEEncs, meta.getAuthorizationJWEEncs());
 		
 		assertEquals(1, meta.getCustomParameters().size());
 		assertEquals("xyz", meta.getCustomParameter("x-custom"));
@@ -839,20 +859,20 @@ public class OIDCProviderMetadataTest extends TestCase {
 		
 		OIDCProviderMetadata opMetadata = OIDCProviderMetadata.parse(jsonObject.toJSONString());
 		
-		assertTrue(JWSAlgorithm.RS256 == opMetadata.getTokenEndpointJWSAlgs().get(0));
+		assertSame(JWSAlgorithm.RS256, opMetadata.getTokenEndpointJWSAlgs().get(0));
 		
-		assertTrue(JWSAlgorithm.RS256 == opMetadata.getRequestObjectJWSAlgs().get(0));
-		assertTrue(JWEAlgorithm.RSA_OAEP == opMetadata.getRequestObjectJWEAlgs().get(0));
-		assertTrue(EncryptionMethod.A128GCM == opMetadata.getRequestObjectJWEEncs().get(0));
+		assertSame(JWSAlgorithm.RS256, opMetadata.getRequestObjectJWSAlgs().get(0));
+		assertSame(JWEAlgorithm.RSA_OAEP, opMetadata.getRequestObjectJWEAlgs().get(0));
+		assertSame(EncryptionMethod.A128GCM, opMetadata.getRequestObjectJWEEncs().get(0));
 		
 		
-		assertTrue(JWSAlgorithm.RS256 == opMetadata.getIDTokenJWSAlgs().get(0));
-		assertTrue(JWEAlgorithm.RSA_OAEP == opMetadata.getIDTokenJWEAlgs().get(0));
-		assertTrue(EncryptionMethod.A128GCM == opMetadata.getIDTokenJWEEncs().get(0));
+		assertSame(JWSAlgorithm.RS256, opMetadata.getIDTokenJWSAlgs().get(0));
+		assertSame(JWEAlgorithm.RSA_OAEP, opMetadata.getIDTokenJWEAlgs().get(0));
+		assertSame(EncryptionMethod.A128GCM, opMetadata.getIDTokenJWEEncs().get(0));
 		
-		assertTrue(JWSAlgorithm.RS256 == opMetadata.getUserInfoJWSAlgs().get(0));
-		assertTrue(JWEAlgorithm.RSA_OAEP == opMetadata.getUserInfoJWEAlgs().get(0));
-		assertTrue(EncryptionMethod.A128GCM == opMetadata.getUserInfoJWEEncs().get(0));
+		assertSame(JWSAlgorithm.RS256, opMetadata.getUserInfoJWSAlgs().get(0));
+		assertSame(JWEAlgorithm.RSA_OAEP, opMetadata.getUserInfoJWEAlgs().get(0));
+		assertSame(EncryptionMethod.A128GCM, opMetadata.getUserInfoJWEEncs().get(0));
 	}
 	
 	

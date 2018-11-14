@@ -121,7 +121,7 @@ This SDK version implements the following standards and drafts:
     * OAuth 2.0 Authorization Server Metadata (RFC 8414)
 
     * OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound Access
-      Tokens (draft-ietf-oauth-mtls-11)
+      Tokens (draft-ietf-oauth-mtls-12)
 
     * Resource Indicators for OAuth 2.0
       (draft-ietf-oauth-resource-indicators-00)
@@ -143,11 +143,14 @@ This SDK version implements the following standards and drafts:
 
 	* OAuth 2.0 Multiple Response Type Encoding Practices 1.0 (2014-02-25)
 
-	* Financial Services – Financial API - Part 1: Read Only API Security
-	  Profile (2017-02-02)
+    * Financial Services – Financial API - Part 1: Read Only API Security
+      Profile (2018-10-17)
 
-	* Financial Services – Financial API - Part 2: Read and Write API Security
-	  Profile (2017-07-17).
+    * Financial Services – Financial API - Part 2: Read and Write API Security
+      Profile (2018-10-17)
+
+    * Financial-grade API: JWT Secured Authorization Response Mode for OAuth
+      2.0 (JARM) (2018-10-17)
 
 
 This SDK is provided under the terms of the Apache 2.0 licence.
@@ -156,4 +159,4 @@ This SDK is provided under the terms of the Apache 2.0 licence.
 Questions or comments? Email support@connect2id.com
 
 
-2018-09-02
+2018-11-14

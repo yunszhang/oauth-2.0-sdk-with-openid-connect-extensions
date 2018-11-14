@@ -47,7 +47,12 @@ import net.minidev.json.JSONObject;
  *     <li>OpenID Connect Session Management 1.0, section 5.1.1 (draft 28).
  *     <li>OpenID Connect Front-Channel Logout 1.0, section 2 (draft 02).
  *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.2 (draft 04).
- *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section 2.
+ *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section
+ *         2.
+ *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
+ *         Access Tokens (draft-ietf-oauth-mtls-12), sections 2.1.2 and 3.4.
+ *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
+ *         OAuth 2.0 (JARM)
  * </ul>
  */
 public class OIDCClientMetadata extends ClientMetadata {

@@ -1001,6 +1001,21 @@ version 6.1.1 (2018-10-29)
       in 6.0 (iss #252).
 
 version 6.2 (2018-11-14)
+    * Adds support for Financial-grade API: JWT Secured Authorization Response
+      Mode for OAuth 2.0 (JARM), version 2018-11-17. Adds new "query.jwt",
+      "fragment.jwt", "form_post.jwt" and "jwt" response_mode constants to the
+      ResponseMode class. Extends the AuthorizationServerMetadata classes to
+      support advertising of JARM support. Extends the ClientMetadata classes
+      to enable registration of JARM parameters. Updates the OAuth 2.0
+      AuthorisationResponse classes to support the new "response" parameter for
+      JWT-secured responses and their parsing, together with validation. Adds
+      new JARMValidator class for validating received OAuth 2.0 authorisation
+      responses that are JWT-secured. Adds a new JWTUtils utility class.
+    * Adds new static AuthenticationResponseParser.parse(HTTPRequest) method
+      for parsing OpenID Connect authentication responses from the a HTTP
+      request received at the client redirection (callback) URI. Applies to the
+      query, fragment and form_post response modes.
+    * Adds new HTTPRequest.getURI method.
     * Removes the self-signed certificate check from the
       ClientAuthenticationVerifier for self_signed_tls_client_auth to enable
       Certificate Authority (CA) signed certificates with registered public key

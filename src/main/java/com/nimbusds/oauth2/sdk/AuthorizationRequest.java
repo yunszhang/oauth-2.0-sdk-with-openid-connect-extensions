@@ -63,6 +63,8 @@ import net.jcip.annotations.Immutable;
  *         (draft-ietf-oauth-resource-indicators-00)
  *     <li>OAuth 2.0 Incremental Authorization
  *         (draft-ietf-oauth-incremental-authz-00)
+ *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
+ *         OAuth 2.0 (JARM)
  * </ul>
  */
 @Immutable
@@ -690,7 +692,18 @@ public class AuthorizationRequest extends AbstractRequest {
 	public ResponseMode impliedResponseMode() {
 
 		if (rm != null) {
+			
+			if (ResponseMode.JWT.equals(rm)) {
+				// https://openid.net//specs/openid-financial-api-jarm.html#response-mode-jwt
+				if (rt.impliesImplicitFlow() || rt.impliesHybridFlow()) {
+					return ResponseMode.FRAGMENT_JWT;
+				} else {
+					return ResponseMode.QUERY_JWT;
+				}
+			}
+			
 			return rm;
+			
 		} else if (rt.impliesImplicitFlow() || rt.impliesHybridFlow()) {
 			return ResponseMode.FRAGMENT;
 		} else {

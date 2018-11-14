@@ -19,7 +19,6 @@ package com.nimbusds.openid.connect.sdk;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,6 @@ import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
 
 
@@ -71,6 +69,8 @@ import net.jcip.annotations.Immutable;
  *     <li>OAuth 2.0 (RFC 6749), section 3.1.
  *     <li>OAuth 2.0 Multiple Response Type Encoding Practices 1.0.
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
+ *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
+ *         OAuth 2.0 (JARM).
  * </ul>
  */
 @Immutable
@@ -122,6 +122,26 @@ public class AuthenticationSuccessResponse
 
 		this.sessionState = sessionState;
 	}
+
+
+	/**
+	 * Creates a new JSON Web Token (JWT) secured OpenID Connect
+	 * authentication success response.
+	 *
+	 * @param redirectURI The requested redirection URI. Must not be
+	 *                    {@code null}.
+	 * @param jwtResponse The JWT-secured response. Must not be
+	 *                    {@code null}.
+	 * @param rm          The response mode, {@code null} if not specified.
+	 */
+	public AuthenticationSuccessResponse(final URI redirectURI,
+					     final JWT jwtResponse,
+					     final ResponseMode rm) {
+
+		super(redirectURI, jwtResponse, rm);
+		idToken = null;
+		sessionState = null;
+	}
 	
 	
 	@Override
@@ -140,18 +160,21 @@ public class AuthenticationSuccessResponse
 		if (getAccessToken() != null) {
 			rt.add(ResponseType.Value.TOKEN);
 		}
-			
+		
 		return rt;
 	}
 
 
 	@Override
 	public ResponseMode impliedResponseMode() {
-
+		
 		if (getResponseMode() != null) {
 			return getResponseMode();
 		} else {
-			if (getAccessToken() != null || getIDToken() != null) {
+			if (getJWTResponse() != null) {
+				// JARM
+				return ResponseMode.JWT;
+			} else if (getAccessToken() != null || getIDToken() != null) {
 				return ResponseMode.FRAGMENT;
 			} else {
 				return ResponseMode.QUERY;
@@ -188,6 +211,11 @@ public class AuthenticationSuccessResponse
 	public Map<String,List<String>> toParameters() {
 	
 		Map<String,List<String>> params = super.toParameters();
+		
+		if (getJWTResponse() != null) {
+			// JARM, no other top-level parameters
+			return params;
+		}
 
 		if (idToken != null) {
 
@@ -195,9 +223,7 @@ public class AuthenticationSuccessResponse
 				params.put("id_token", Collections.singletonList(idToken.serialize()));
 				
 			} catch (IllegalStateException e) {
-			
 				throw new SerializeException("Couldn't serialize ID token: " + e.getMessage(), e);
-			
 			}
 		}
 
@@ -241,6 +267,11 @@ public class AuthenticationSuccessResponse
 		throws ParseException {
 
 		AuthorizationSuccessResponse asr = AuthorizationSuccessResponse.parse(redirectURI, params);
+		
+		// JARM, ignore other top level params
+		if (asr.getJWTResponse() != null) {
+			return new AuthenticationSuccessResponse(redirectURI, asr.getJWTResponse(), asr.getResponseMode());
+		}
 
 		// Parse id_token parameter
 		String idTokenString = MultivaluedMapUtils.getFirstValue(params, "id_token");
@@ -304,22 +335,7 @@ public class AuthenticationSuccessResponse
 	public static AuthenticationSuccessResponse parse(final URI uri)
 		throws ParseException {
 
-		Map<String,List<String>> params;
-
-		if (uri.getRawFragment() != null) {
-
-			params = URLUtils.parseParameters(uri.getRawFragment());
-
-		} else if (uri.getRawQuery() != null) {
-
-			params = URLUtils.parseParameters(uri.getRawQuery());
-
-		} else {
-
-			throw new ParseException("Missing URI fragment or query string");
-		}
-
-		return parse(URIUtils.getBaseURI(uri), params);
+		return parse(URIUtils.getBaseURI(uri), parseResponseParameters(uri));
 	}
 
 
@@ -385,23 +401,6 @@ public class AuthenticationSuccessResponse
 	public static AuthenticationSuccessResponse parse(final HTTPRequest httpRequest)
 		throws ParseException {
 
-		final URI baseURI;
-
-		try {
-			baseURI = httpRequest.getURL().toURI();
-
-		} catch (URISyntaxException e) {
-			throw new ParseException(e.getMessage(), e);
-		}
-
-		if (httpRequest.getQuery() != null) {
-			// For query string and form_post response mode
-			return parse(baseURI, URLUtils.parseParameters(httpRequest.getQuery()));
-		} else if (httpRequest.getFragment() != null) {
-			// For fragment response mode (never available in actual HTTP request from browser)
-			return parse(baseURI, URLUtils.parseParameters(httpRequest.getFragment()));
-		} else {
-			throw new ParseException("Missing URI fragment, query string or post body");
-		}
+		return parse(httpRequest.getURI(), parseResponseParameters(httpRequest));
 	}
 }

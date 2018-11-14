@@ -18,6 +18,8 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import static org.junit.Assert.assertNotEquals;
+
 import junit.framework.TestCase;
 
 
@@ -32,6 +34,10 @@ public class ResponseModeTest extends TestCase {
 		assertEquals("query", ResponseMode.QUERY.getValue());
 		assertEquals("fragment", ResponseMode.FRAGMENT.getValue());
 		assertEquals("form_post", ResponseMode.FORM_POST.getValue());
+		assertEquals("query.jwt", ResponseMode.QUERY_JWT.getValue());
+		assertEquals("fragment.jwt", ResponseMode.FRAGMENT_JWT.getValue());
+		assertEquals("form_post.jwt", ResponseMode.FORM_POST_JWT.getValue());
+		assertEquals("jwt", ResponseMode.JWT.getValue());
 	}
 
 
@@ -43,13 +49,13 @@ public class ResponseModeTest extends TestCase {
 
 
 	public void testEquality() {
-
-		assertTrue(new ResponseMode("query").equals(new ResponseMode("query")));
+		
+		assertEquals(new ResponseMode("query"), new ResponseMode("query"));
 	}
 
 
 	public void testInequality() {
-
-		assertFalse(new ResponseMode("fragment").equals(new ResponseMode("query")));
+		
+		assertNotEquals(new ResponseMode("fragment"), new ResponseMode("query"));
 	}
 }

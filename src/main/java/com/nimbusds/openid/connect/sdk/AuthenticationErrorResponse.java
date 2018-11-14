@@ -19,9 +19,9 @@ package com.nimbusds.openid.connect.sdk;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.AuthorizationErrorResponse;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -29,7 +29,6 @@ import com.nimbusds.oauth2.sdk.ResponseMode;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.State;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
 import net.jcip.annotations.Immutable;
 
 
@@ -90,6 +89,8 @@ import net.jcip.annotations.Immutable;
  *     <li>OAuth 2.0 (RFC 6749), sections 4.1.2.1 and 4.2.2.1.
  *     <li>OAuth 2.0 Multiple Response Type Encoding Practices 1.0.
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
+ *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
+ *         OAuth 2.0 (JARM).
  * </ul>
  */
 @Immutable
@@ -152,6 +153,25 @@ public class AuthenticationErrorResponse
 					  
 		super(redirectURI, error, state, rm);
 	}
+
+
+	/**
+	 * Creates a new JSON Web Token (JWT) secured OpenID Connect
+	 * authentication error response.
+	 *
+	 * @param redirectURI The base redirection URI. Must not be
+	 *                    {@code null}.
+	 * @param jwtResponse The JWT-secured response. Must not be
+	 *                    {@code null}.
+	 * @param rm          The implied response mode, {@code null} if
+	 *                    unknown.
+	 */
+	public AuthenticationErrorResponse(final URI redirectURI,
+					   final JWT jwtResponse,
+					   final ResponseMode rm) {
+					  
+		super(redirectURI, jwtResponse, rm);
+	}
 	
 	
 	@Override
@@ -163,6 +183,33 @@ public class AuthenticationErrorResponse
 	@Override
 	public AuthenticationErrorResponse toErrorResponse() {
 		return this;
+	}
+	
+	
+	/**
+	 * Converts the specified general OAuth 2.0 authorisation error
+	 * response instance to an OpenID authentication error instance.
+	 *
+	 * @param errorResponse The OAuth 2.0 authorisation error response.
+	 *                      Must not be {@code null}.
+	 *
+	 * @return The OpenID authentication error instance.
+	 */
+	private static AuthenticationErrorResponse toAuthenticationErrorResponse(final AuthorizationErrorResponse errorResponse) {
+		
+		if (errorResponse.getJWTResponse() != null) {
+			// JARM
+			return new AuthenticationErrorResponse(
+				errorResponse.getRedirectionURI(),
+				errorResponse.getJWTResponse(),
+				errorResponse.getResponseMode());
+		}
+		
+		return new AuthenticationErrorResponse(
+			errorResponse.getRedirectionURI(),
+			errorResponse.getErrorObject(),
+			errorResponse.getState(),
+			errorResponse.getResponseMode());
 	}
 	
 	
@@ -180,16 +227,10 @@ public class AuthenticationErrorResponse
 	 *                        OpenID Connect authentication error response.
 	 */
 	public static AuthenticationErrorResponse parse(final URI redirectURI,
-							final Map<String,List<String>> params)
+							final Map<String, List<String>> params)
 		throws ParseException {
 
-		AuthorizationErrorResponse resp = AuthorizationErrorResponse.parse(redirectURI, params);
-
-		return new AuthenticationErrorResponse(
-			resp.getRedirectionURI(),
-			resp.getErrorObject(),
-			resp.getState(),
-			null);
+		return toAuthenticationErrorResponse(AuthorizationErrorResponse.parse(redirectURI, params));
 	}
 
 
@@ -224,13 +265,7 @@ public class AuthenticationErrorResponse
 	public static AuthenticationErrorResponse parse(final URI uri)
 		throws ParseException {
 
-		AuthorizationErrorResponse resp = AuthorizationErrorResponse.parse(uri);
-
-		return new AuthenticationErrorResponse(
-			resp.getRedirectionURI(),
-			resp.getErrorObject(),
-			resp.getState(),
-			null);
+		return toAuthenticationErrorResponse(AuthorizationErrorResponse.parse(uri));
 	}
 
 
@@ -257,13 +292,7 @@ public class AuthenticationErrorResponse
 	public static AuthenticationErrorResponse parse(final HTTPResponse httpResponse)
 		throws ParseException {
 
-		AuthorizationErrorResponse resp = AuthorizationErrorResponse.parse(httpResponse);
-
-		return new AuthenticationErrorResponse(
-			resp.getRedirectionURI(),
-			resp.getErrorObject(),
-			resp.getState(),
-			null);
+		return toAuthenticationErrorResponse(AuthorizationErrorResponse.parse(httpResponse));
 	}
 
 
@@ -293,23 +322,6 @@ public class AuthenticationErrorResponse
 	public static AuthenticationErrorResponse parse(final HTTPRequest httpRequest)
 		throws ParseException {
 
-		final URI baseURI;
-
-		try {
-			baseURI = httpRequest.getURL().toURI();
-
-		} catch (URISyntaxException e) {
-			throw new ParseException(e.getMessage(), e);
-		}
-
-		if (httpRequest.getQuery() != null) {
-			// For query string and form_post response mode
-			return parse(baseURI, URLUtils.parseParameters(httpRequest.getQuery()));
-		} else if (httpRequest.getFragment() != null) {
-			// For fragment response mode (never available in actual HTTP request from browser)
-			return parse(baseURI, URLUtils.parseParameters(httpRequest.getFragment()));
-		} else {
-			throw new ParseException("Missing URI fragment, query string or post body");
-		}
+		return parse(httpRequest.getURI(), parseResponseParameters(httpRequest));
 	}
 }
