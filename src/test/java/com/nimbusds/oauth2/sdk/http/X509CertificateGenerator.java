@@ -43,7 +43,7 @@ public class X509CertificateGenerator {
 							  final Subject subject,
 							  final RSAPublicKey rsaPublicKey,
 							  final RSAPrivateKey rsaPrivateKey)
-		throws NoSuchAlgorithmException, IOException, OperatorCreationException, KeyStoreException {
+		throws IOException, OperatorCreationException {
 		
 		X500Name certIssuer = new X500Name("cn=" + issuer);
 		BigInteger serialNumber = new BigInteger(64, new SecureRandom());
@@ -69,7 +69,7 @@ public class X509CertificateGenerator {
 	public static X509Certificate generateSelfSignedCertificate(final Issuer issuer,
 								    final RSAPublicKey rsaPublicKey,
 								    final RSAPrivateKey rsaPrivateKey)
-		throws NoSuchAlgorithmException, IOException, OperatorCreationException, KeyStoreException {
+		throws IOException, OperatorCreationException {
 		
 		return generateCertificate(issuer, new Subject(issuer.getValue()), rsaPublicKey, rsaPrivateKey);
 	}
