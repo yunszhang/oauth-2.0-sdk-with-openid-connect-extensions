@@ -38,10 +38,8 @@ import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.auth.*;
 import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.oauth2.sdk.http.X509CertificateGenerator;
-import com.nimbusds.oauth2.sdk.id.Audience;
-import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.oauth2.sdk.id.Issuer;
-import com.nimbusds.oauth2.sdk.id.JWTID;
+import com.nimbusds.oauth2.sdk.id.*;
+import com.nimbusds.oauth2.sdk.util.X509CertificateUtils;
 import junit.framework.TestCase;
 
 
@@ -457,6 +455,36 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 	}
 	
 	
+	public void testPubKeyTLSClientAuth_signedByCA_ok()
+		throws Exception {
+		
+		// Generate CA key pair
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+		keyPairGenerator.initialize(2048);
+		KeyPair keyPair = keyPairGenerator.generateKeyPair();
+		
+		RSAPublicKey caRSAPublicKey = (RSAPublicKey)keyPair.getPublic();
+		RSAPrivateKey caRSAPrivateKey = (RSAPrivateKey)keyPair.getPrivate();
+		
+		X509Certificate clientCert = X509CertificateGenerator.generateCertificate(
+			new Issuer("o=c2id"),
+			new Subject(VALID_CLIENT_ID.getValue()),
+			VALID_RSA_KEY_PAIR_1.toRSAPublicKey(), // client public key
+			caRSAPrivateKey // CA private key
+		);
+		
+		assertTrue(X509CertificateUtils.hasValidSignature(clientCert, caRSAPublicKey));
+		assertTrue(X509CertificateUtils.publicKeyMatches(clientCert, VALID_RSA_KEY_PAIR_1.toRSAPublicKey()));
+		
+		ClientAuthentication clientAuthentication = new SelfSignedTLSClientAuthentication(
+			VALID_CLIENT_ID,
+			clientCert
+		);
+		
+		createBasicVerifier().verify(clientAuthentication, null, null);
+	}
+	
+	
 	public void testPubKeyTLSClientAuth_okWithReload()
 		throws Exception {
 		
@@ -465,6 +493,36 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			VALID_RSA_KEY_PAIR_2.toRSAPublicKey(),
 			VALID_RSA_KEY_PAIR_2.toRSAPrivateKey()
 		);
+		
+		ClientAuthentication clientAuthentication = new SelfSignedTLSClientAuthentication(
+			VALID_CLIENT_ID,
+			clientCert
+		);
+		
+		createBasicVerifier().verify(clientAuthentication, Collections.singleton(Hint.CLIENT_HAS_REMOTE_JWK_SET), null);
+	}
+	
+	
+	public void testPubKeyTLSClientAuth_signedByCA_okWithReload()
+		throws Exception {
+		
+		// Generate CA key pair
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+		keyPairGenerator.initialize(2048);
+		KeyPair keyPair = keyPairGenerator.generateKeyPair();
+		
+		RSAPublicKey caRSAPublicKey = (RSAPublicKey)keyPair.getPublic();
+		RSAPrivateKey caRSAPrivateKey = (RSAPrivateKey)keyPair.getPrivate();
+		
+		X509Certificate clientCert = X509CertificateGenerator.generateCertificate(
+			new Issuer("o=c2id"),
+			new Subject(VALID_CLIENT_ID.getValue()),
+			VALID_RSA_KEY_PAIR_1.toRSAPublicKey(), // client public key
+			caRSAPrivateKey // CA private key
+		);
+		
+		assertTrue(X509CertificateUtils.hasValidSignature(clientCert, caRSAPublicKey));
+		assertTrue(X509CertificateUtils.publicKeyMatches(clientCert, VALID_RSA_KEY_PAIR_1.toRSAPublicKey()));
 		
 		ClientAuthentication clientAuthentication = new SelfSignedTLSClientAuthentication(
 			VALID_CLIENT_ID,
@@ -495,6 +553,41 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 			assertEquals("Couldn't validate client X.509 certificate signature: No matching registered client JWK found", e.getMessage());
 		}
 	}
+	
+	public void testPubKeyTLSClientAuth_signedByCA_badSignature()
+		throws Exception {
+		
+		// Generate CA key pair
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+		keyPairGenerator.initialize(2048);
+		KeyPair keyPair = keyPairGenerator.generateKeyPair();
+		
+		RSAPublicKey caRSAPublicKey = (RSAPublicKey)keyPair.getPublic();
+		RSAPrivateKey caRSAPrivateKey = (RSAPrivateKey)keyPair.getPrivate();
+		
+		X509Certificate clientCert = X509CertificateGenerator.generateCertificate(
+			new Issuer("o=c2id"),
+			new Subject(VALID_CLIENT_ID.getValue()),
+			INVALID_RSA_KEY_PAIR.toRSAPublicKey(), // client public key that isn't registered
+			caRSAPrivateKey // CA private key
+		);
+		
+		assertTrue(X509CertificateUtils.hasValidSignature(clientCert, caRSAPublicKey));
+		assertTrue(X509CertificateUtils.publicKeyMatches(clientCert, INVALID_RSA_KEY_PAIR.toRSAPublicKey()));
+		
+		ClientAuthentication clientAuthentication = new SelfSignedTLSClientAuthentication(
+			VALID_CLIENT_ID,
+			clientCert
+		);
+		
+		try {
+			createBasicVerifier().verify(clientAuthentication, null, null);
+			fail();
+		} catch (InvalidClientException e) {
+			assertEquals("Couldn't validate client X.509 certificate signature: No matching registered client JWK found", e.getMessage());
+		}
+	}
+	
 	
 	public void testPubKeyTLSClientAuth_missingCertificate()
 		throws Exception {

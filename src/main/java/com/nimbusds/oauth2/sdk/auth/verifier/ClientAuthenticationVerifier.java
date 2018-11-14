@@ -48,7 +48,7 @@ import net.jcip.annotations.ThreadSafe;
  *     <li>JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and
  *         Authorization Grants (RFC 7523).
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-08), section 2.
+ *         Access Tokens (draft-ietf-oauth-mtls-12), section 2.
  * </ul>
  */
 @ThreadSafe
@@ -333,7 +333,7 @@ public class ClientAuthenticationVerifier<T> {
 					continue; // skip
 				}
 				
-				boolean valid = X509CertificateUtils.hasValidSignature(clientCert, candidate);
+				boolean valid = X509CertificateUtils.publicKeyMatches(clientCert, candidate);
 				
 				if (valid) {
 					return; // success
@@ -361,7 +361,7 @@ public class ClientAuthenticationVerifier<T> {
 						continue; // skip
 					}
 					
-					boolean valid = X509CertificateUtils.hasValidSignature(clientCert, candidate);
+					boolean valid = X509CertificateUtils.publicKeyMatches(clientCert, candidate);
 					
 					if (valid) {
 						return; // success

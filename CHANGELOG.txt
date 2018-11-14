@@ -1001,5 +1001,10 @@ version 6.1.1 (2018-10-29)
       in 6.0 (iss #252).
 
 version 6.2 (2018-11-14)
+    * Removes the self-signed certificate check from the
+      ClientAuthenticationVerifier for self_signed_tls_client_auth to enable
+      Certificate Authority (CA) signed certificates with registered public key
+      (JWK) to pass. Previously only strictly self-signed certificates were
+      accepted.
     * Adds X509CertificateUtils.publicKeyMatches(X509Certificate,PublicKey)
       method.
