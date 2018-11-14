@@ -1175,8 +1175,14 @@ public class ClientMetadata {
 	 * metadata field.
 	 *
 	 * @param authzJWSAlg The JWS algorithm, {@code null} if not specified.
+	 *                    Must not be {@code "none"}.
 	 */
 	public void setAuthorizationJWSAlg(final JWSAlgorithm authzJWSAlg) {
+		
+		if (new JWSAlgorithm("none").equals(authzJWSAlg)) {
+			// Prevent passing none as JWS alg
+			throw new IllegalArgumentException("The JWS algorithm must not be \"none\"");
+		}
 		
 		this.authzJWSAlg = authzJWSAlg;
 	}

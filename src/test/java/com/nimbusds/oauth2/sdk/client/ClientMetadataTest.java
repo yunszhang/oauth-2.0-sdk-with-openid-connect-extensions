@@ -1033,4 +1033,17 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(JWEAlgorithm.ECDH_ES, clientMetadata.getAuthorizationJWEAlg());
 		assertEquals(EncryptionMethod.A256GCM, clientMetadata.getAuthorizationJWEEnc());
 	}
+	
+	
+	public void testJARM_rejectNoneJWSAlg() {
+		
+		ClientMetadata clientMetadata = new ClientMetadata();
+		
+		try {
+			clientMetadata.setAuthorizationJWSAlg(new JWSAlgorithm("none"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The JWS algorithm must not be \"none\"", e.getMessage());
+		}
+	}
 }
