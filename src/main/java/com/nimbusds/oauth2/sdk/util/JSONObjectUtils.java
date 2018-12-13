@@ -474,12 +474,35 @@ public final class JSONObjectUtils {
 
 			} catch (Exception e) {
 
-				throw new ParseException("JSON object member wit key \"" + key + "\" is not an array of strings");
+				throw new ParseException("JSON object member with key \"" + key + "\" is not an array of strings");
 			}
 
 		}
 
 		return set;
+	}
+
+
+	/**
+	 * Gets a string array member of a JSON object as a string set.
+	 *
+	 * @param o   The JSON object. Must not be {@code null}.
+	 * @param key The JSON object member key. Must not be {@code null}.
+	 * @param def The default value to return if the key is not present.
+	 *            May be {@code null}.
+	 *
+	 * @return The member value.
+	 *
+	 * @throws ParseException If the value is not of the expected type.
+	 */
+	public static Set<String> getStringSet(final JSONObject o, final String key, final Set<String> def)
+		throws ParseException {
+
+		if (containsKey(o, key)) {
+			return getStringSet(o, key);
+		}
+		
+		return def;
 	}
 	
 	
@@ -498,6 +521,29 @@ public final class JSONObjectUtils {
 		throws ParseException {
 		
 		return getGeneric(o, key, JSONObject.class);
+	}
+	
+	
+	/**
+	 * Gets a JSON object member of a JSON object.
+	 *
+	 * @param o   The JSON object. Must not be {@code null}.
+	 * @param key The JSON object member key. Must not be {@code null}.
+	 * @param def The default value to return if the key is not present.
+	 *            May be {@code null}.
+	 *
+	 * @return The member value.
+	 *
+	 * @throws ParseException If the value is not of the expected type.
+	 */
+	public static JSONObject getJSONObject(final JSONObject o, final String key, final JSONObject def)
+		throws ParseException {
+		
+		if (containsKey(o, key)) {
+			return getJSONObject(o, key);
+		}
+		
+		return def;
 	}
 	
 

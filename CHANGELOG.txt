@@ -1023,3 +1023,7 @@ version 6.2 (2018-11-14)
       accepted.
     * Adds X509CertificateUtils.publicKeyMatches(X509Certificate,PublicKey)
       method.
+
+version 6.3 (2018-12-12)
+    * Adds new JSONObjectUtils.getJSONObject method accepting default values.
+    * Adds new JSONObjectUtils.getStringSet method accepting default values.
