@@ -1027,3 +1027,17 @@ version 6.2 (2018-11-14)
 version 6.3 (2018-12-12)
     * Adds new JSONObjectUtils.getJSONObject method accepting default values.
     * Adds new JSONObjectUtils.getStringSet method accepting default values.
+
+version 6.4 (2018-12-15)
+    * Adds new JSONObjectUtils.getBoolean method accepting default values.
+    * Adds new JSONObjectUtils.getInt method accepting default values.
+    * Adds new JSONObjectUtils.getLong method accepting default values.
+    * Adds new JSONObjectUtils.getFloat method accepting default values.
+    * Adds new JSONObjectUtils.getDouble method accepting default values.
+    * Adds new JSONObjectUtils.getNumber method accepting default values.
+    * Adds new JSONObjectUtils.getString method accepting default values.
+    * Adds new JSONObjectUtils.getEnum method accepting default values.
+    * Adds new JSONObjectUtils.getURI method accepting default values.
+    * Adds new JSONObjectUtils.getList method accepting default values.
+    * Adds new JSONObjectUtils.getStringArray method accepting default values.
+    * Adds new JSONObjectUtils.getStringList method accepting default values.

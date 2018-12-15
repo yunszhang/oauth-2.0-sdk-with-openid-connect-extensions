@@ -18,19 +18,16 @@
 package com.nimbusds.oauth2.sdk.util;
 
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.net.URI;
+import java.util.*;
 
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.client.ClientType;
 import junit.framework.TestCase;
-
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
-
-import com.nimbusds.oauth2.sdk.client.ClientType;
-import com.nimbusds.oauth2.sdk.ParseException;
+import org.junit.Assert;
 
 
 /**
@@ -273,13 +270,227 @@ public class JSONObjectUtilsTest extends TestCase {
 	}
 	
 	
+	public void testGetBoolean_defaultValue()
+		throws ParseException {
+		
+		JSONObject o = new JSONObject();
+		
+		boolean def = false;
+		assertEquals(def, JSONObjectUtils.getBoolean(o, "key", def));
+		
+		boolean value = true;
+		o.put("key", value);
+		assertEquals(value, JSONObjectUtils.getBoolean(o, "key", def));
+	}
+	
+	
+	public void testGetInt_defaultValue()
+		throws ParseException {
+		
+		JSONObject o = new JSONObject();
+		
+		int def = 0;
+		assertEquals(def, JSONObjectUtils.getInt(o, "key", def));
+		
+		int value = 10;
+		o.put("key", value);
+		assertEquals(value, JSONObjectUtils.getInt(o, "key", def));
+	}
+	
+	
+	public void testGetLong_defaultValue()
+		throws ParseException {
+		
+		JSONObject o = new JSONObject();
+		
+		long def = 0;
+		assertEquals(def, JSONObjectUtils.getLong(o, "key", def));
+		
+		long value = 10;
+		o.put("key", value);
+		assertEquals(value, JSONObjectUtils.getLong(o, "key", def));
+	}
+	
+	
+	public void testGetFloat_defaultValue()
+		throws ParseException {
+		
+		JSONObject o = new JSONObject();
+		
+		float def = 0.0f;
+		assertEquals(def, JSONObjectUtils.getFloat(o, "key", def));
+		
+		float value = 10.0f;
+		o.put("key", value);
+		assertEquals(value, JSONObjectUtils.getFloat(o, "key", def));
+	}
+	
+	
+	public void testGetDouble_defaultValue()
+		throws ParseException {
+		
+		JSONObject o = new JSONObject();
+		
+		double def = 0.0d;
+		assertEquals(def, JSONObjectUtils.getDouble(o, "key", def));
+		
+		double value = 10.0d;
+		o.put("key", value);
+		assertEquals(value, JSONObjectUtils.getDouble(o, "key", def));
+	}
+	
+	
+	public void testGetNumber_defaultValue()
+		throws ParseException {
+		
+		JSONObject o = new JSONObject();
+		assertNull(JSONObjectUtils.getNumber(o, "key", null));
+		
+		Number def = 0L;
+		assertEquals(def, JSONObjectUtils.getNumber(o, "key", def));
+		
+		Number value = 10L;
+		o.put("key", value);
+		assertEquals(value, JSONObjectUtils.getNumber(o, "key", null));
+		
+		assertEquals(value, JSONObjectUtils.getNumber(o, "key", def));
+	}
+	
+	
+	public void testGetString_defaultValue()
+		throws ParseException {
+		
+		JSONObject o = new JSONObject();
+		assertNull(JSONObjectUtils.getString(o, "key", null));
+		
+		String def = "";
+		assertEquals(def, JSONObjectUtils.getString(o, "key", def));
+		
+		String value = "test";
+		o.put("key", value);
+		assertEquals(value, JSONObjectUtils.getString(o, "key", null));
+		
+		assertEquals(value, JSONObjectUtils.getString(o, "key", def));
+	}
+	
+	
+	public void testGetEnum_defaultValue()
+		throws ParseException {
+		
+		JSONObject o = new JSONObject();
+		assertNull(JSONObjectUtils.getEnum(o, "key", ClientType.class, null));
+		
+		ClientType def = null;
+		assertEquals(def, JSONObjectUtils.getEnum(o, "key", ClientType.class, def));
+		
+		ClientType value = ClientType.CONFIDENTIAL;
+		o.put("key", value.toString());
+		assertEquals(value, JSONObjectUtils.getEnum(o, "key", ClientType.class, null));
+		
+		assertEquals(value, JSONObjectUtils.getEnum(o, "key", ClientType.class, def));
+	}
+	
+	
+	public void testGetURI_defaultValue()
+		throws ParseException {
+		
+		JSONObject o = new JSONObject();
+		assertNull(JSONObjectUtils.getURI(o, "key", null));
+		
+		URI def = URI.create("https://c2id.com");
+		assertEquals(def, JSONObjectUtils.getURI(o, "key", def));
+		
+		URI value = URI.create("https://example.com");
+		o.put("key", value.toString());
+		assertEquals(value, JSONObjectUtils.getURI(o, "key", null));
+		
+		assertEquals(value, JSONObjectUtils.getURI(o, "key", def));
+	}
+	
+	
+	public void testGetStringArray_defaultValue()
+		throws ParseException {
+		
+		JSONObject o = new JSONObject();
+		assertNull(JSONObjectUtils.getStringArray(o, "key", null));
+		
+		String[] def = {};
+		Assert.assertArrayEquals(def, JSONObjectUtils.getStringArray(o, "key", def));
+		
+		JSONArray value = new JSONArray();
+		value.add("a");
+		value.add("b");
+		o.put("key", value);
+		Assert.assertArrayEquals(new String[]{"a", "b"}, JSONObjectUtils.getStringArray(o, "key", null));
+		
+		Assert.assertArrayEquals(new String[]{"a", "b"}, JSONObjectUtils.getStringArray(o, "key", def));
+	}
+	
+	
+	public void testGetJSONArray_defaultValue()
+		throws ParseException {
+		
+		JSONObject o = new JSONObject();
+		assertNull(JSONObjectUtils.getJSONArray(o, "key", null));
+		
+		JSONArray def = new JSONArray();
+		assertEquals(def, JSONObjectUtils.getJSONArray(o, "key", def));
+		
+		JSONArray value = new JSONArray();
+		value.add("a");
+		value.add("b");
+		o.put("key", value);
+		assertEquals(value, JSONObjectUtils.getJSONArray(o, "key", null));
+		
+		assertEquals(value, JSONObjectUtils.getJSONArray(o, "key", def));
+	}
+	
+	
+	public void testGetList_defaultValue()
+		throws ParseException {
+		
+		JSONObject o = new JSONObject();
+		assertNull(JSONObjectUtils.getList(o, "key", null));
+		
+		List<Object> def = Collections.emptyList();
+		assertEquals(def, JSONObjectUtils.getList(o, "key", def));
+		
+		JSONArray value = new JSONArray();
+		value.add("a");
+		value.add("b");
+		o.put("key", value);
+		assertEquals(Arrays.asList("a", "b"), JSONObjectUtils.getList(o, "key", null));
+		
+		assertEquals(Arrays.asList("a", "b"), JSONObjectUtils.getList(o, "key", def));
+	}
+	
+	
+	public void testGetStringList_defaultValue()
+		throws ParseException {
+		
+		JSONObject o = new JSONObject();
+		assertNull(JSONObjectUtils.getStringList(o, "key", null));
+		
+		List<String> def = Collections.emptyList();
+		assertEquals(def, JSONObjectUtils.getStringList(o, "key", def));
+		
+		JSONArray value = new JSONArray();
+		value.add("a");
+		value.add("b");
+		o.put("key", value);
+		assertEquals(Arrays.asList("a", "b"), JSONObjectUtils.getStringList(o, "key", null));
+		
+		assertEquals(Arrays.asList("a", "b"), JSONObjectUtils.getStringList(o, "key", def));
+	}
+	
+	
 	public void testGetStringSet_defaultValue()
 		throws ParseException {
 		
 		JSONObject o = new JSONObject();
 		assertNull(JSONObjectUtils.getStringSet(o, "key", null));
 		
-		Set<String> def = new HashSet<>();
+		Set<String> def = Collections.emptySet();
 		assertEquals(def, JSONObjectUtils.getStringSet(o, "key", def));
 		
 		JSONArray value = new JSONArray();

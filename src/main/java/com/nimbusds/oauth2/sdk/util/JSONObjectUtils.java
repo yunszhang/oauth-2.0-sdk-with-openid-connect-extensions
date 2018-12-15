@@ -152,6 +152,29 @@ public final class JSONObjectUtils {
 		
 		return getGeneric(o, key, Boolean.class);
 	}
+
+
+	/**
+	 * Gets a boolean member of a JSON object.
+	 *
+	 * @param o   The JSON object. Must not be {@code null}.
+	 * @param key The JSON object member key. Must not be {@code null}.
+	 * @param def The default value to return if the key is not present.
+	 *            May be {@code null}.
+	 *
+	 * @return The member value.
+	 *
+	 * @throws ParseException If the value is not of the expected type.
+	 */
+	public static boolean getBoolean(final JSONObject o, final String key, final boolean def)
+		throws ParseException {
+		
+		if (containsKey(o, key)) {
+			return getBoolean(o, key);
+		}
+		
+		return def;
+	}
 	
 	
 	/**
@@ -169,6 +192,28 @@ public final class JSONObjectUtils {
 		throws ParseException {
 		
 		return getGeneric(o, key, Number.class).intValue();	
+	}
+	
+	
+	/**
+	 * Gets an number member of a JSON object as {@code int}.
+	 *
+	 * @param o   The JSON object. Must not be {@code null}.
+	 * @param key The JSON object member key. Must not be {@code null}.
+	 * @param def The default value to return if the key is not present.
+	 *
+	 * @return The member value.
+	 *
+	 * @throws ParseException If the value is not of the expected type.
+	 */
+	public static int getInt(final JSONObject o, final String key, final int def)
+		throws ParseException {
+		
+		if (containsKey(o, key)) {
+			return getInt(o, key);
+		}
+		
+		return def;
 	}
 	
 	
@@ -191,6 +236,28 @@ public final class JSONObjectUtils {
 	
 	
 	/**
+	 * Gets a number member of a JSON object as {@code long}.
+	 *
+	 * @param o   The JSON object. Must not be {@code null}.
+	 * @param key The JSON object member key. Must not be {@code null}.
+	 * @param def The default value to return if the key is not present.
+	 *
+	 * @return The member value.
+	 *
+	 * @throws ParseException If the value is not of the expected type.
+	 */
+	public static long getLong(final JSONObject o, final String key, final long def)
+		throws ParseException {
+		
+		if (containsKey(o, key)) {
+			return getLong(o, key);
+		}
+		
+		return def;
+	}
+	
+	
+	/**
 	 * Gets a number member of a JSON object {@code float}.
 	 *
 	 * @param o   The JSON object. Must not be {@code null}.
@@ -205,6 +272,28 @@ public final class JSONObjectUtils {
 		throws ParseException {
 		
 		return getGeneric(o, key, Number.class).floatValue();
+	}
+	
+	
+	/**
+	 * Gets a number member of a JSON object {@code float}.
+	 *
+	 * @param o   The JSON object. Must not be {@code null}.
+	 * @param key The JSON object member key. Must not be {@code null}.
+	 * @param def The default value to return if the key is not present.
+	 *
+	 * @return The member value.
+	 *
+	 * @throws ParseException If the value is not of the expected type.
+	 */
+	public static float getFloat(final JSONObject o, final String key, final float def)
+		throws ParseException {
+		
+		if (containsKey(o, key)) {
+			return getFloat(o, key);
+		}
+		
+		return def;
 	}
 	
 	
@@ -224,6 +313,28 @@ public final class JSONObjectUtils {
 		
 		return getGeneric(o, key, Number.class).doubleValue();
 	}
+	
+	
+	/**
+	 * Gets a number member of a JSON object as {@code double}.
+	 *
+	 * @param o   The JSON object. Must not be {@code null}.
+	 * @param key The JSON object member key. Must not be {@code null}.
+	 * @param def The default value to return if the key is not present.
+	 *
+	 * @return The member value.
+	 *
+	 * @throws ParseException If the value is not of the expected type.
+	 */
+	public static double getDouble(final JSONObject o, final String key, final double def)
+		throws ParseException {
+		
+		if (containsKey(o, key)) {
+			return getDouble(o, key);
+		}
+		
+		return def;
+	}
 
 
 	/**
@@ -242,6 +353,29 @@ public final class JSONObjectUtils {
 
 		return getGeneric(o, key, Number.class);
 	}
+
+
+	/**
+	 * Gets a number member of a JSON object as {@code java.lang.Number}.
+	 *
+	 * @param o   The JSON object. Must not be {@code null}.
+	 * @param key The JSON object member key. Must not be {@code null}.
+	 * @param def The default value to return if the key is not present.
+	 *            May be {@code null}.
+	 *
+	 * @return The member value.
+	 *
+	 * @throws ParseException If the value is not of the expected type.
+	 */
+	public static Number getNumber(final JSONObject o, final String key, final Number def)
+		throws ParseException {
+
+		if (containsKey(o, key)) {
+			return getNumber(o, key);
+		}
+		
+		return def;
+	}
 	
 	
 	/**
@@ -259,6 +393,29 @@ public final class JSONObjectUtils {
 		throws ParseException {
 		
 		return getGeneric(o, key, String.class);
+	}
+	
+	
+	/**
+	 * Gets a string member of a JSON object.
+	 *
+	 * @param o   The JSON object. Must not be {@code null}.
+	 * @param key The JSON object member key. Must not be {@code null}.
+	 * @param def The default value to return if the key is not present.
+	 *            May be {@code null}.
+	 *
+	 * @return The member value.
+	 *
+	 * @throws ParseException If the value is not of the expected type.
+	 */
+	public static String getString(final JSONObject o, final String key, final String def)
+		throws ParseException {
+		
+		if (containsKey(o, key)) {
+			return getString(o, key);
+		}
+		
+		return def;
 	}
 
 
@@ -293,6 +450,34 @@ public final class JSONObjectUtils {
 
 
 	/**
+	 * Gets a string member of a JSON object as an enumerated object.
+	 *
+	 * @param o         The JSON object. Must not be {@code null}.
+	 * @param key       The JSON object member key. Must not be
+	 *                  {@code null}.
+	 * @param enumClass The enumeration class. Must not be {@code null}.
+	 * @param def       The default value to return if the key is not
+	 *                  present. May be {@code null}.
+	 *
+	 * @return The member value.
+	 *
+	 * @throws ParseException If the value is not of the expected type.
+	 */
+	public static <T extends Enum<T>> T getEnum(final JSONObject o,
+		                                    final String key,
+		                                    final Class<T> enumClass,
+						    final T def)
+		throws ParseException {
+
+		if (containsKey(o, key)) {
+			return getEnum(o, key, enumClass);
+		}
+		
+		return def;
+	}
+
+
+	/**
 	 * Gets a string member of a JSON object as {@code java.net.URI}.
 	 *
 	 * @param o   The JSON object. Must not be {@code null}.
@@ -313,6 +498,29 @@ public final class JSONObjectUtils {
 
 			throw new ParseException(e.getMessage(), e);
 		}
+	}
+
+
+	/**
+	 * Gets a string member of a JSON object as {@code java.net.URI}.
+	 *
+	 * @param o   The JSON object. Must not be {@code null}.
+	 * @param key The JSON object member key. Must not be {@code null}.
+	 * @param def The default value to return if the key is not present.
+	 *            May be {@code null}.
+	 *
+	 * @return The member value.
+	 *
+	 * @throws ParseException If the value is not of the expected type.
+	 */
+	public static URI getURI(final JSONObject o, final String key, final URI def)
+		throws ParseException {
+
+		if (containsKey(o, key)) {
+			return getURI(o, key);
+		}
+		
+		return def;
 	}
 	
 	
@@ -384,6 +592,29 @@ public final class JSONObjectUtils {
 		
 		return getGeneric(o, key, JSONArray.class);
 	}
+	
+	
+	/**
+	 * Gets a JSON array member of a JSON object.
+	 *
+	 * @param o   The JSON object. Must not be {@code null}.
+	 * @param key The JSON object member key. Must not be {@code null}.
+	 * @param def The default value to return if the key is not present.
+	 *            May be {@code null}.
+	 *
+	 * @return The member value.
+	 *
+	 * @throws ParseException If the value is not of the expected type.
+	 */
+	public static JSONArray getJSONArray(final JSONObject o, final String key, final JSONArray def)
+		throws ParseException {
+		
+		if (containsKey(o, key)) {
+			return getJSONArray(o, key);
+		}
+		
+		return def;
+	}
 
 
 	/**
@@ -402,6 +633,30 @@ public final class JSONObjectUtils {
 		throws ParseException {
 		
 		return getGeneric(o, key, List.class);
+	}
+
+
+	/**
+	 * Gets a list member of a JSON object.
+	 *
+	 * @param o   The JSON object. Must not be {@code null}.
+	 * @param key The JSON object member key. Must not be {@code null}.
+	 * @param def The default value to return if the key is not present.
+	 *            May be {@code null}.
+	 *
+	 * @return The member value.
+	 *
+	 * @throws ParseException If the value is not of the expected type.
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<Object> getList(final JSONObject o, final String key, final List<Object> def)
+		throws ParseException {
+		
+		if (containsKey(o, key)) {
+			return getList(o, key);
+		}
+		
+		return def;
 	}
 
 
@@ -432,6 +687,29 @@ public final class JSONObjectUtils {
 
 
 	/**
+	 * Gets a string array member of a JSON object.
+	 *
+	 * @param o   The JSON object. Must not be {@code null}.
+	 * @param key The JSON object member key. Must not be {@code null}.
+	 * @param def The default value to return if the key is not present.
+	 *            May be {@code null}.
+	 *
+	 * @return The member value.
+	 *
+	 * @throws ParseException If the value is not of the expected type.
+	 */
+	public static String[] getStringArray(final JSONObject o, final String key, final String[] def)
+		throws ParseException {
+
+		if (containsKey(o, key)) {
+			return getStringArray(o, key);
+		}
+		
+		return def;
+	}
+
+
+	/**
 	 * Gets a string list member of a JSON object.
 	 *
 	 * @param o   The JSON object. Must not be {@code null}.
@@ -446,6 +724,29 @@ public final class JSONObjectUtils {
 		throws ParseException {
 
 		return Arrays.asList(getStringArray(o, key));
+	}
+
+
+	/**
+	 * Gets a string list member of a JSON object.
+	 *
+	 * @param o   The JSON object. Must not be {@code null}.
+	 * @param key The JSON object member key. Must not be {@code null}.
+	 * @param def The default value to return if the key is not present.
+	 *            May be {@code null}.
+	 *
+	 * @return The member value.
+	 *
+	 * @throws ParseException If the value is not of the expected type.
+	 */
+	public static List<String> getStringList(final JSONObject o, final String key, final List<String> def)
+		throws ParseException {
+
+		if (containsKey(o, key)) {
+			return getStringList(o, key);
+		}
+		
+		return def;
 	}
 
 
