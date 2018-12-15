@@ -1041,3 +1041,7 @@ version 6.4 (2018-12-15)
     * Adds new JSONObjectUtils.getList method accepting default values.
     * Adds new JSONObjectUtils.getStringArray method accepting default values.
     * Adds new JSONObjectUtils.getStringList method accepting default values.
+
+version 6.5 (2018-12-15)
+    * Updates the JSONObjectUtils.getXXX with default value to return the
+      default value also when a key is found, but its value is null.

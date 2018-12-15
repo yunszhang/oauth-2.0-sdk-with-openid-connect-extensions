@@ -159,8 +159,8 @@ public final class JSONObjectUtils {
 	 *
 	 * @param o   The JSON object. Must not be {@code null}.
 	 * @param key The JSON object member key. Must not be {@code null}.
-	 * @param def The default value to return if the key is not present.
-	 *            May be {@code null}.
+	 * @param def The default value to return if the key is not present or.
+	 *            the value is {@code null}. May be {@code null}.
 	 *
 	 * @return The member value.
 	 *
@@ -169,7 +169,7 @@ public final class JSONObjectUtils {
 	public static boolean getBoolean(final JSONObject o, final String key, final boolean def)
 		throws ParseException {
 		
-		if (containsKey(o, key)) {
+		if (o.get(key) != null) {
 			return getBoolean(o, key);
 		}
 		
@@ -200,7 +200,8 @@ public final class JSONObjectUtils {
 	 *
 	 * @param o   The JSON object. Must not be {@code null}.
 	 * @param key The JSON object member key. Must not be {@code null}.
-	 * @param def The default value to return if the key is not present.
+	 * @param def The default value to return if the key is not present or
+	 *            the value is {@code null}.
 	 *
 	 * @return The member value.
 	 *
@@ -209,7 +210,7 @@ public final class JSONObjectUtils {
 	public static int getInt(final JSONObject o, final String key, final int def)
 		throws ParseException {
 		
-		if (containsKey(o, key)) {
+		if (o.get(key) != null) {
 			return getInt(o, key);
 		}
 		
@@ -240,7 +241,8 @@ public final class JSONObjectUtils {
 	 *
 	 * @param o   The JSON object. Must not be {@code null}.
 	 * @param key The JSON object member key. Must not be {@code null}.
-	 * @param def The default value to return if the key is not present.
+	 * @param def The default value to return if the key is not present or
+	 *            the value is {@code null}.
 	 *
 	 * @return The member value.
 	 *
@@ -249,7 +251,7 @@ public final class JSONObjectUtils {
 	public static long getLong(final JSONObject o, final String key, final long def)
 		throws ParseException {
 		
-		if (containsKey(o, key)) {
+		if (o.get(key) != null) {
 			return getLong(o, key);
 		}
 		
@@ -280,7 +282,8 @@ public final class JSONObjectUtils {
 	 *
 	 * @param o   The JSON object. Must not be {@code null}.
 	 * @param key The JSON object member key. Must not be {@code null}.
-	 * @param def The default value to return if the key is not present.
+	 * @param def The default value to return if the key is not present or
+	 *            the value is {@code null}.
 	 *
 	 * @return The member value.
 	 *
@@ -289,7 +292,7 @@ public final class JSONObjectUtils {
 	public static float getFloat(final JSONObject o, final String key, final float def)
 		throws ParseException {
 		
-		if (containsKey(o, key)) {
+		if (o.get(key) != null) {
 			return getFloat(o, key);
 		}
 		
@@ -320,7 +323,8 @@ public final class JSONObjectUtils {
 	 *
 	 * @param o   The JSON object. Must not be {@code null}.
 	 * @param key The JSON object member key. Must not be {@code null}.
-	 * @param def The default value to return if the key is not present.
+	 * @param def The default value to return if the key is not present or
+	 *            the value is {@code null}.
 	 *
 	 * @return The member value.
 	 *
@@ -329,7 +333,7 @@ public final class JSONObjectUtils {
 	public static double getDouble(final JSONObject o, final String key, final double def)
 		throws ParseException {
 		
-		if (containsKey(o, key)) {
+		if (o.get(key) != null) {
 			return getDouble(o, key);
 		}
 		
@@ -360,8 +364,8 @@ public final class JSONObjectUtils {
 	 *
 	 * @param o   The JSON object. Must not be {@code null}.
 	 * @param key The JSON object member key. Must not be {@code null}.
-	 * @param def The default value to return if the key is not present.
-	 *            May be {@code null}.
+	 * @param def The default value to return if the key is not present or
+	 *            the value is {@code null}. May be {@code null}.
 	 *
 	 * @return The member value.
 	 *
@@ -370,7 +374,7 @@ public final class JSONObjectUtils {
 	public static Number getNumber(final JSONObject o, final String key, final Number def)
 		throws ParseException {
 
-		if (containsKey(o, key)) {
+		if (o.get(key) != null) {
 			return getNumber(o, key);
 		}
 		
@@ -401,8 +405,8 @@ public final class JSONObjectUtils {
 	 *
 	 * @param o   The JSON object. Must not be {@code null}.
 	 * @param key The JSON object member key. Must not be {@code null}.
-	 * @param def The default value to return if the key is not present.
-	 *            May be {@code null}.
+	 * @param def The default value to return if the key is not present or
+	 *            the value is {@code null}. May be {@code null}.
 	 *
 	 * @return The member value.
 	 *
@@ -411,7 +415,7 @@ public final class JSONObjectUtils {
 	public static String getString(final JSONObject o, final String key, final String def)
 		throws ParseException {
 		
-		if (containsKey(o, key)) {
+		if (o.get(key) != null) {
 			return getString(o, key);
 		}
 		
@@ -457,7 +461,8 @@ public final class JSONObjectUtils {
 	 *                  {@code null}.
 	 * @param enumClass The enumeration class. Must not be {@code null}.
 	 * @param def       The default value to return if the key is not
-	 *                  present. May be {@code null}.
+	 *                  present or the value is {@code null}. May be
+	 *                  {@code null}.
 	 *
 	 * @return The member value.
 	 *
@@ -469,7 +474,7 @@ public final class JSONObjectUtils {
 						    final T def)
 		throws ParseException {
 
-		if (containsKey(o, key)) {
+		if (o.get(key) != null) {
 			return getEnum(o, key, enumClass);
 		}
 		
@@ -506,8 +511,8 @@ public final class JSONObjectUtils {
 	 *
 	 * @param o   The JSON object. Must not be {@code null}.
 	 * @param key The JSON object member key. Must not be {@code null}.
-	 * @param def The default value to return if the key is not present.
-	 *            May be {@code null}.
+	 * @param def The default value to return if the key is not present or
+	 *            the value is {@code null}. May be {@code null}.
 	 *
 	 * @return The member value.
 	 *
@@ -516,7 +521,7 @@ public final class JSONObjectUtils {
 	public static URI getURI(final JSONObject o, final String key, final URI def)
 		throws ParseException {
 
-		if (containsKey(o, key)) {
+		if (o.get(key) != null) {
 			return getURI(o, key);
 		}
 		
@@ -599,8 +604,8 @@ public final class JSONObjectUtils {
 	 *
 	 * @param o   The JSON object. Must not be {@code null}.
 	 * @param key The JSON object member key. Must not be {@code null}.
-	 * @param def The default value to return if the key is not present.
-	 *            May be {@code null}.
+	 * @param def The default value to return if the key is not present or
+	 *            the value is {@code null}. May be {@code null}.
 	 *
 	 * @return The member value.
 	 *
@@ -609,7 +614,7 @@ public final class JSONObjectUtils {
 	public static JSONArray getJSONArray(final JSONObject o, final String key, final JSONArray def)
 		throws ParseException {
 		
-		if (containsKey(o, key)) {
+		if (o.get(key) != null) {
 			return getJSONArray(o, key);
 		}
 		
@@ -641,8 +646,8 @@ public final class JSONObjectUtils {
 	 *
 	 * @param o   The JSON object. Must not be {@code null}.
 	 * @param key The JSON object member key. Must not be {@code null}.
-	 * @param def The default value to return if the key is not present.
-	 *            May be {@code null}.
+	 * @param def The default value to return if the key is not present or
+	 *            the value is {@code null}. May be {@code null}.
 	 *
 	 * @return The member value.
 	 *
@@ -652,7 +657,7 @@ public final class JSONObjectUtils {
 	public static List<Object> getList(final JSONObject o, final String key, final List<Object> def)
 		throws ParseException {
 		
-		if (containsKey(o, key)) {
+		if (o.get(key) != null) {
 			return getList(o, key);
 		}
 		
@@ -691,8 +696,8 @@ public final class JSONObjectUtils {
 	 *
 	 * @param o   The JSON object. Must not be {@code null}.
 	 * @param key The JSON object member key. Must not be {@code null}.
-	 * @param def The default value to return if the key is not present.
-	 *            May be {@code null}.
+	 * @param def The default value to return if the key is not present or
+	 *            the value is {@code null}. May be {@code null}.
 	 *
 	 * @return The member value.
 	 *
@@ -701,7 +706,7 @@ public final class JSONObjectUtils {
 	public static String[] getStringArray(final JSONObject o, final String key, final String[] def)
 		throws ParseException {
 
-		if (containsKey(o, key)) {
+		if (o.get(key) != null) {
 			return getStringArray(o, key);
 		}
 		
@@ -732,8 +737,8 @@ public final class JSONObjectUtils {
 	 *
 	 * @param o   The JSON object. Must not be {@code null}.
 	 * @param key The JSON object member key. Must not be {@code null}.
-	 * @param def The default value to return if the key is not present.
-	 *            May be {@code null}.
+	 * @param def The default value to return if the key is not present or
+	 *            the value is {@code null}. May be {@code null}.
 	 *
 	 * @return The member value.
 	 *
@@ -742,7 +747,7 @@ public final class JSONObjectUtils {
 	public static List<String> getStringList(final JSONObject o, final String key, final List<String> def)
 		throws ParseException {
 
-		if (containsKey(o, key)) {
+		if (o.get(key) != null) {
 			return getStringList(o, key);
 		}
 		
@@ -789,8 +794,8 @@ public final class JSONObjectUtils {
 	 *
 	 * @param o   The JSON object. Must not be {@code null}.
 	 * @param key The JSON object member key. Must not be {@code null}.
-	 * @param def The default value to return if the key is not present.
-	 *            May be {@code null}.
+	 * @param def The default value to return if the key is not present or
+	 *            the value is {@code null}. May be {@code null}.
 	 *
 	 * @return The member value.
 	 *
@@ -799,7 +804,7 @@ public final class JSONObjectUtils {
 	public static Set<String> getStringSet(final JSONObject o, final String key, final Set<String> def)
 		throws ParseException {
 
-		if (containsKey(o, key)) {
+		if (o.get(key) != null) {
 			return getStringSet(o, key);
 		}
 		
@@ -830,8 +835,8 @@ public final class JSONObjectUtils {
 	 *
 	 * @param o   The JSON object. Must not be {@code null}.
 	 * @param key The JSON object member key. Must not be {@code null}.
-	 * @param def The default value to return if the key is not present.
-	 *            May be {@code null}.
+	 * @param def The default value to return if the key is not present or
+	 *            the value is {@code null}. May be {@code null}.
 	 *
 	 * @return The member value.
 	 *
@@ -840,7 +845,7 @@ public final class JSONObjectUtils {
 	public static JSONObject getJSONObject(final JSONObject o, final String key, final JSONObject def)
 		throws ParseException {
 		
-		if (containsKey(o, key)) {
+		if (o.get(key) != null) {
 			return getJSONObject(o, key);
 		}
 		

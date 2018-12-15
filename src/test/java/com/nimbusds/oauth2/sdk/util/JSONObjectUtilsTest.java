@@ -278,6 +278,9 @@ public class JSONObjectUtilsTest extends TestCase {
 		boolean def = false;
 		assertEquals(def, JSONObjectUtils.getBoolean(o, "key", def));
 		
+		o.put("value", null);
+		assertEquals(false, JSONObjectUtils.getBoolean(o, "key", def));
+		
 		boolean value = true;
 		o.put("key", value);
 		assertEquals(value, JSONObjectUtils.getBoolean(o, "key", def));
@@ -290,6 +293,9 @@ public class JSONObjectUtilsTest extends TestCase {
 		JSONObject o = new JSONObject();
 		
 		int def = 0;
+		assertEquals(def, JSONObjectUtils.getInt(o, "key", def));
+		
+		o.put("key", null);
 		assertEquals(def, JSONObjectUtils.getInt(o, "key", def));
 		
 		int value = 10;
@@ -306,6 +312,9 @@ public class JSONObjectUtilsTest extends TestCase {
 		long def = 0;
 		assertEquals(def, JSONObjectUtils.getLong(o, "key", def));
 		
+		o.put("key", null);
+		assertEquals(def, JSONObjectUtils.getLong(o, "key", def));
+		
 		long value = 10;
 		o.put("key", value);
 		assertEquals(value, JSONObjectUtils.getLong(o, "key", def));
@@ -318,6 +327,9 @@ public class JSONObjectUtilsTest extends TestCase {
 		JSONObject o = new JSONObject();
 		
 		float def = 0.0f;
+		assertEquals(def, JSONObjectUtils.getFloat(o, "key", def));
+		
+		o.put("key", null);
 		assertEquals(def, JSONObjectUtils.getFloat(o, "key", def));
 		
 		float value = 10.0f;
@@ -334,6 +346,9 @@ public class JSONObjectUtilsTest extends TestCase {
 		double def = 0.0d;
 		assertEquals(def, JSONObjectUtils.getDouble(o, "key", def));
 		
+		o.put("key", null);
+		assertEquals(def, JSONObjectUtils.getDouble(o, "key", def));
+		
 		double value = 10.0d;
 		o.put("key", value);
 		assertEquals(value, JSONObjectUtils.getDouble(o, "key", def));
@@ -347,6 +362,9 @@ public class JSONObjectUtilsTest extends TestCase {
 		assertNull(JSONObjectUtils.getNumber(o, "key", null));
 		
 		Number def = 0L;
+		assertEquals(def, JSONObjectUtils.getNumber(o, "key", def));
+		
+		o.put("key", null);
 		assertEquals(def, JSONObjectUtils.getNumber(o, "key", def));
 		
 		Number value = 10L;
@@ -366,6 +384,9 @@ public class JSONObjectUtilsTest extends TestCase {
 		String def = "";
 		assertEquals(def, JSONObjectUtils.getString(o, "key", def));
 		
+		o.put("key", null);
+		assertEquals(def, JSONObjectUtils.getString(o, "key", def));
+		
 		String value = "test";
 		o.put("key", value);
 		assertEquals(value, JSONObjectUtils.getString(o, "key", null));
@@ -381,6 +402,9 @@ public class JSONObjectUtilsTest extends TestCase {
 		assertNull(JSONObjectUtils.getEnum(o, "key", ClientType.class, null));
 		
 		ClientType def = null;
+		assertEquals(def, JSONObjectUtils.getEnum(o, "key", ClientType.class, def));
+		
+		o.put("key", null);
 		assertEquals(def, JSONObjectUtils.getEnum(o, "key", ClientType.class, def));
 		
 		ClientType value = ClientType.CONFIDENTIAL;
@@ -400,6 +424,9 @@ public class JSONObjectUtilsTest extends TestCase {
 		URI def = URI.create("https://c2id.com");
 		assertEquals(def, JSONObjectUtils.getURI(o, "key", def));
 		
+		o.put("key", null);
+		assertEquals(def, JSONObjectUtils.getURI(o, "key", def));
+		
 		URI value = URI.create("https://example.com");
 		o.put("key", value.toString());
 		assertEquals(value, JSONObjectUtils.getURI(o, "key", null));
@@ -415,6 +442,9 @@ public class JSONObjectUtilsTest extends TestCase {
 		assertNull(JSONObjectUtils.getStringArray(o, "key", null));
 		
 		String[] def = {};
+		Assert.assertArrayEquals(def, JSONObjectUtils.getStringArray(o, "key", def));
+		
+		o.put("key", null);
 		Assert.assertArrayEquals(def, JSONObjectUtils.getStringArray(o, "key", def));
 		
 		JSONArray value = new JSONArray();
@@ -436,6 +466,9 @@ public class JSONObjectUtilsTest extends TestCase {
 		JSONArray def = new JSONArray();
 		assertEquals(def, JSONObjectUtils.getJSONArray(o, "key", def));
 		
+		o.put("key", null);
+		assertEquals(def, JSONObjectUtils.getJSONArray(o, "key", def));
+		
 		JSONArray value = new JSONArray();
 		value.add("a");
 		value.add("b");
@@ -453,6 +486,9 @@ public class JSONObjectUtilsTest extends TestCase {
 		assertNull(JSONObjectUtils.getList(o, "key", null));
 		
 		List<Object> def = Collections.emptyList();
+		assertEquals(def, JSONObjectUtils.getList(o, "key", def));
+		
+		o.put("key", null);
 		assertEquals(def, JSONObjectUtils.getList(o, "key", def));
 		
 		JSONArray value = new JSONArray();
@@ -474,6 +510,9 @@ public class JSONObjectUtilsTest extends TestCase {
 		List<String> def = Collections.emptyList();
 		assertEquals(def, JSONObjectUtils.getStringList(o, "key", def));
 		
+		o.put("key", null);
+		assertEquals(def, JSONObjectUtils.getStringList(o, "key", def));
+		
 		JSONArray value = new JSONArray();
 		value.add("a");
 		value.add("b");
@@ -493,6 +532,9 @@ public class JSONObjectUtilsTest extends TestCase {
 		Set<String> def = Collections.emptySet();
 		assertEquals(def, JSONObjectUtils.getStringSet(o, "key", def));
 		
+		o.put("key", null);
+		assertEquals(def, JSONObjectUtils.getStringSet(o, "key", def));
+		
 		JSONArray value = new JSONArray();
 		value.add("a");
 		value.add("b");
@@ -510,6 +552,9 @@ public class JSONObjectUtilsTest extends TestCase {
 		assertNull(JSONObjectUtils.getJSONObject(o, "key", null));
 		
 		JSONObject def = new JSONObject();
+		assertEquals(def, JSONObjectUtils.getJSONObject(o, "key", def));
+		
+		o.put("key", null);
 		assertEquals(def, JSONObjectUtils.getJSONObject(o, "key", def));
 		
 		JSONObject value = new JSONObject();
