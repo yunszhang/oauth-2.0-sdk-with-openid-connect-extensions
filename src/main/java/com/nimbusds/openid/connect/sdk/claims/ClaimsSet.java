@@ -221,7 +221,7 @@ public abstract class ClaimsSet {
 	public String getStringClaim(final String name) {
 
 		try {
-			return JSONObjectUtils.getString(claims, name);
+			return JSONObjectUtils.getString(claims, name, null);
 		} catch (ParseException e) {
 			return null;
 		}
@@ -325,7 +325,7 @@ public abstract class ClaimsSet {
 	public URI getURIClaim(final String name) {
 
 		try {
-			return JSONObjectUtils.getURI(claims, name);
+			return JSONObjectUtils.getURI(claims, name, null);
 		} catch (ParseException e) {
 			return null;
 		}

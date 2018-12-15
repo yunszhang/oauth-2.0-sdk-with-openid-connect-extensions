@@ -214,29 +214,13 @@ public class TokenErrorResponse extends TokenResponse implements ErrorResponse {
 		try {
 			// Parse code
 			String code = JSONObjectUtils.getString(jsonObject, "error");
-
-			// Parse description
-			String description = null;
-
-			if (jsonObject.containsKey("error_description"))
-				description = JSONObjectUtils.getString(jsonObject, "error_description");
-
-			// Parse URI
-			URI uri = null;
-
-			if (jsonObject.containsKey("error_uri"))
-				uri = new URI(JSONObjectUtils.getString(jsonObject, "error_uri"));
-
+			String description = JSONObjectUtils.getString(jsonObject, "error_description", null);
+			URI uri = JSONObjectUtils.getURI(jsonObject, "error_uri", null);
 
 			error = new ErrorObject(code, description, HTTPResponse.SC_BAD_REQUEST, uri);
 			
 		} catch (ParseException e) {
-		
 			throw new ParseException("Missing or invalid token error response parameter: " + e.getMessage(), e);
-			
-		} catch (URISyntaxException e) {
-		
-			throw new ParseException("Invalid error URI: " + e.getMessage(), e);
 		}
 		
 		return new TokenErrorResponse(error);

@@ -1210,9 +1210,11 @@ public class OIDCClientMetadata extends ClientMetadata {
 			if (jsonObject.get("frontchannel_logout_uri") != null) {
 				
 				metadata.setFrontChannelLogoutURI(JSONObjectUtils.getURI(jsonObject, "frontchannel_logout_uri"));
+				oidcFields.remove("frontchannel_logout_uri");
 			
 				if (jsonObject.get("frontchannel_logout_session_required") != null) {
 					metadata.requiresFrontChannelLogoutSession(JSONObjectUtils.getBoolean(jsonObject, "frontchannel_logout_session_required"));
+					oidcFields.remove("frontchannel_logout_session_required");
 				}
 			}
 			
@@ -1220,9 +1222,11 @@ public class OIDCClientMetadata extends ClientMetadata {
 			if (jsonObject.get("backchannel_logout_uri") != null) {
 				
 				metadata.setBackChannelLogoutURI(JSONObjectUtils.getURI(jsonObject, "backchannel_logout_uri"));
+				oidcFields.remove("backchannel_logout_uri");
 				
 				if (jsonObject.get("backchannel_logout_session_required") != null) {
 					metadata.requiresBackChannelLogoutSession(JSONObjectUtils.getBoolean(jsonObject, "backchannel_logout_session_required"));
+					oidcFields.remove("backchannel_logout_session_required");
 				}
 			}
 			

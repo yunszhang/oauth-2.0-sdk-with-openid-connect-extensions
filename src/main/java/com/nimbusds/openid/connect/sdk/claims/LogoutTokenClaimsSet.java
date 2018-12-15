@@ -193,7 +193,7 @@ public class LogoutTokenClaimsSet extends CommonClaimsSet {
 		
 		JSONObject events = getClaim(EVENTS_CLAIM_NAME, JSONObject.class);
 		
-		if (JSONObjectUtils.getJSONObject(events, EVENT_TYPE) == null) {
+		if (JSONObjectUtils.getJSONObject(events, EVENT_TYPE, null) == null) {
 			throw new ParseException("Missing event type " + EVENT_TYPE);
 		}
 		

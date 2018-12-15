@@ -117,8 +117,8 @@ public class LogoutTokenClaimsVerifier implements JWTClaimsSetVerifier {
 				throw new BadJWTException("Missing JWT events (events) claim");
 			}
 			
-			if (JSONObjectUtils.getJSONObject(events, LogoutTokenClaimsSet.EVENT_TYPE) == null) {
-				throw new BadJWTException("Invalid event type, required " + LogoutTokenClaimsSet.EVENT_TYPE);
+			if (JSONObjectUtils.getJSONObject(events, LogoutTokenClaimsSet.EVENT_TYPE, null) == null) {
+				throw new BadJWTException("Missing event type, required " + LogoutTokenClaimsSet.EVENT_TYPE);
 			}
 			
 		} catch (java.text.ParseException | ParseException e) {

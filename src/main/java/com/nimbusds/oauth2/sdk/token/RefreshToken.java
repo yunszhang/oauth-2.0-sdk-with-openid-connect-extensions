@@ -111,11 +111,9 @@ public final class RefreshToken extends Token {
 	public static RefreshToken parse(final JSONObject jsonObject)
 		throws ParseException {
 
-		// Parse value
-		if (! jsonObject.containsKey("refresh_token"))
-			return null;
-
-		String value = JSONObjectUtils.getString(jsonObject, "refresh_token");
+		String value = JSONObjectUtils.getString(jsonObject, "refresh_token", null);
+		
+		if (value == null) return null;
 
 		return new RefreshToken(value);
 	}

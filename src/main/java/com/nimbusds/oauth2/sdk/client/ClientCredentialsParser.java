@@ -21,13 +21,12 @@ package com.nimbusds.oauth2.sdk.client;
 import java.net.URI;
 import java.util.Date;
 
-import net.minidev.json.JSONObject;
-
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -121,12 +120,7 @@ public class ClientCredentialsParser {
 	public static URI parseRegistrationURI(final JSONObject jsonObject)
 		throws ParseException {
 
-		if (jsonObject.containsKey("registration_client_uri")) {
-
-			return JSONObjectUtils.getURI(jsonObject, "registration_client_uri");
-		} else {
-			return null;
-		}
+		return JSONObjectUtils.getURI(jsonObject, "registration_client_uri", null);
 	}
 
 

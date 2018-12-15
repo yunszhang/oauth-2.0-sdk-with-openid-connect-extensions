@@ -20,12 +20,10 @@ package com.nimbusds.oauth2.sdk;
 
 import java.net.URI;
 
-import net.jcip.annotations.Immutable;
-
-import net.minidev.json.JSONObject;
-
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -314,17 +312,9 @@ public class ErrorObject {
 		URI uri = null;
 
 		try {
-			if (jsonObject.containsKey("error")) {
-				code = JSONObjectUtils.getString(jsonObject, "error");
-			}
-
-			if (jsonObject.containsKey("error_description")) {
-				description = JSONObjectUtils.getString(jsonObject, "error_description");
-			}
-
-			if (jsonObject.containsKey("error_uri")) {
-				uri = JSONObjectUtils.getURI(jsonObject, "error_uri");
-			}
+			code = JSONObjectUtils.getString(jsonObject, "error", null);
+			description = JSONObjectUtils.getString(jsonObject, "error_description", null);
+			uri = JSONObjectUtils.getURI(jsonObject, "error_uri", null);
 		} catch (ParseException e) {
 			// ignore and continue
 		}

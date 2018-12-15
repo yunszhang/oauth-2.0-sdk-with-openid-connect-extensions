@@ -432,7 +432,7 @@ public class LogoutTokenValidatorTest extends TestCase {
 			validator.validate(jwt);
 			fail();
 		} catch (BadJWTException e) {
-			assertEquals("Invalid JWT events (events) claim", e.getMessage());
+			assertEquals("Missing event type, required http://schemas.openid.net/event/backchannel-logout", e.getMessage());
 		}
 	}
 	

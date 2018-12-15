@@ -1274,7 +1274,7 @@ public class AuthorizationServerMetadata {
 	public URI getCustomURIParameter(final String name) {
 		
 		try {
-			return JSONObjectUtils.getURI(customParameters, name);
+			return JSONObjectUtils.getURI(customParameters, name, null);
 		} catch (ParseException e) {
 			return null;
 		}
@@ -1607,23 +1607,12 @@ public class AuthorizationServerMetadata {
 		}
 		
 		// Endpoints
-		if (jsonObject.get("authorization_endpoint") != null)
-			as.authzEndpoint = JSONObjectUtils.getURI(jsonObject, "authorization_endpoint");
-		
-		if (jsonObject.get("token_endpoint") != null)
-			as.tokenEndpoint = JSONObjectUtils.getURI(jsonObject, "token_endpoint");
-		
-		if (jsonObject.get("registration_endpoint") != null)
-			as.regEndpoint = JSONObjectUtils.getURI(jsonObject, "registration_endpoint");
-		
-		if (jsonObject.get("jwks_uri") != null)
-			as.jwkSetURI = JSONObjectUtils.getURI(jsonObject, "jwks_uri");
-		
-		if (jsonObject.get("introspection_endpoint") != null)
-			as.introspectionEndpoint = JSONObjectUtils.getURI(jsonObject, "introspection_endpoint");
-		
-		if (jsonObject.get("revocation_endpoint") != null)
-			as.revocationEndpoint = JSONObjectUtils.getURI(jsonObject, "revocation_endpoint");
+		as.authzEndpoint = JSONObjectUtils.getURI(jsonObject, "authorization_endpoint", null);
+		as.tokenEndpoint = JSONObjectUtils.getURI(jsonObject, "token_endpoint", null);
+		as.regEndpoint = JSONObjectUtils.getURI(jsonObject, "registration_endpoint", null);
+		as.jwkSetURI = JSONObjectUtils.getURI(jsonObject, "jwks_uri", null);
+		as.introspectionEndpoint = JSONObjectUtils.getURI(jsonObject, "introspection_endpoint", null);
+		as.revocationEndpoint = JSONObjectUtils.getURI(jsonObject, "revocation_endpoint", null);
 		
 		// AS capabilities
 		if (jsonObject.get("scopes_supported") != null) {

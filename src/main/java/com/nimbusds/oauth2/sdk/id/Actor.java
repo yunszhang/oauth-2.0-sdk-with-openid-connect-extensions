@@ -279,10 +279,10 @@ public final class Actor implements Serializable, Comparable<Actor>, JSONAware {
 	public static Actor parseTopLevel(final JSONObject jsonObject)
 		throws ParseException {
 
-		if (! jsonObject.containsKey("act")) {
-			return null;
-		}
+		JSONObject actSpec = JSONObjectUtils.getJSONObject(jsonObject, "act", null);
+		
+		if (actSpec == null) return null;
 
-		return parse(JSONObjectUtils.getJSONObject(jsonObject, "act"));
+		return parse(actSpec);
 	}
 }

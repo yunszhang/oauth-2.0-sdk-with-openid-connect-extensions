@@ -42,7 +42,7 @@ import net.minidev.json.JSONObject;
  * <ul>
  *     <li>OAuth 2.0 Token Introspection (RFC 7662).
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-08).
+ *         Access Tokens (draft-ietf-oauth-mtls-12).
  * </ul>
  */
 @Immutable
@@ -365,7 +365,7 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 	public boolean isActive() {
 
 		try {
-			return JSONObjectUtils.getBoolean(params, "active");
+			return JSONObjectUtils.getBoolean(params, "active", false);
 		} catch (ParseException e) {
 			return false; // always false on error
 		}
@@ -413,7 +413,7 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 	public String getUsername() {
 
 		try {
-			return JSONObjectUtils.getString(params, "username");
+			return JSONObjectUtils.getString(params, "username", null);
 		} catch (ParseException e) {
 			return null;
 		}
@@ -564,8 +564,16 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 	public Base64URL getX509CertificateSHA256Thumbprint() {
 	
 		try {
-			JSONObject cnf = JSONObjectUtils.getJSONObject(params, "cnf");
-			return new Base64URL(JSONObjectUtils.getString(cnf, "x5t#S256"));
+			JSONObject cnf = JSONObjectUtils.getJSONObject(params, "cnf", null);
+			
+			if (cnf == null) return null;
+			
+			String x5t = JSONObjectUtils.getString(cnf, "x5t#S256", null);
+			
+			if (x5t == null) return null;
+			
+			return new Base64URL(x5t);
+			
 		} catch (ParseException e) {
 			return null;
 		}
@@ -597,7 +605,7 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 	public String getStringParameter(final String name) {
 		
 		try {
-			return JSONObjectUtils.getString(params, name);
+			return JSONObjectUtils.getString(params, name, null);
 		} catch (ParseException e) {
 			return null;
 		}
@@ -632,7 +640,7 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 	public Number getNumberParameter(final String name) {
 		
 		try {
-			return JSONObjectUtils.getNumber(params, name);
+			return JSONObjectUtils.getNumber(params, name, null);
 		} catch (ParseException e) {
 			return null;
 		}
@@ -650,7 +658,7 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 	public List<String> getStringListParameter(final String name) {
 		
 		try {
-			return JSONObjectUtils.getStringList(params, name);
+			return JSONObjectUtils.getStringList(params, name, null);
 		} catch (ParseException e) {
 			return null;
 		}
@@ -668,7 +676,7 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 	public JSONObject getJSONObjectParameter(final String name) {
 		
 		try {
-			return JSONObjectUtils.getJSONObject(params, name);
+			return JSONObjectUtils.getJSONObject(params, name, null);
 		} catch (ParseException e) {
 			return null;
 		}
