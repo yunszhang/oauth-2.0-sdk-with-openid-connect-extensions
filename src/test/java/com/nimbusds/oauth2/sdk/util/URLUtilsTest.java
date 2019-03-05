@@ -21,10 +21,7 @@ package com.nimbusds.oauth2.sdk.util;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import junit.framework.TestCase;
 
@@ -106,6 +103,19 @@ public class URLUtilsTest extends TestCase {
 		String query = URLUtils.serializeParameters(null);
 		
 		assertTrue(query.isEmpty());
+	}
+	
+	
+	public void testSerializeParameters_multiValued() {
+		
+		Map<String,List<String>> params = new LinkedHashMap<>();
+		
+		params.put("key-1", Collections.singletonList("val-1"));
+		params.put("key-2", Arrays.asList("val-2a", "val-2b"));
+		
+		String query = URLUtils.serializeParameters(params);
+		
+		assertEquals("key-1=val-1&key-2=val-2a&key-2=val-2b", query);
 	}
 	
 	
