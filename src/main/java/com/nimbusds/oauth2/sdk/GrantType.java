@@ -84,6 +84,14 @@ public final class GrantType extends Identifier {
 
 
 	/**
+	 * Device Code, as defined in OAuth 2.0 Device Flow for
+	 * Browserless and Input Constrained Devices. Explicit client
+	 * authentication is optional.
+	 */
+	public static final GrantType DEVICE_CODE = new GrantType("urn:ietf:params:oauth:grant-type:device_code", false, false, Collections.singleton("device_code"));
+
+
+	/**
 	 * The client authentication requirement for this grant type.
 	 */
 	private final boolean requiresClientAuth;
@@ -234,6 +242,10 @@ public final class GrantType extends Identifier {
 		} else if (grantType.equals(GrantType.SAML2_BEARER)) {
 
 			return GrantType.SAML2_BEARER;
+
+		} else if (grantType.equals(GrantType.DEVICE_CODE)) {
+
+			return GrantType.DEVICE_CODE;
 
 		} else {
 
