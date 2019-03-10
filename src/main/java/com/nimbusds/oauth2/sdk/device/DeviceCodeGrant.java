@@ -17,11 +17,13 @@
 
 package com.nimbusds.oauth2.sdk.device;
 
+import java.util.Base64.Decoder;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.OAuth2Error;
@@ -137,5 +139,25 @@ public class DeviceCodeGrant extends AuthorizationGrant {
 		DeviceCode deviceCode = new DeviceCode(deviceCodeString);
 
 		return new DeviceCodeGrant(deviceCode);
+	}
+
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (!(o instanceof DeviceCodeGrant))
+			return false;
+
+		DeviceCodeGrant deviceCodeGrant = (DeviceCodeGrant) o;
+		return deviceCode.equals(deviceCodeGrant.deviceCode);
+	}
+
+
+	@Override
+	public int hashCode() {
+
+		return deviceCode.hashCode();
 	}
 }
