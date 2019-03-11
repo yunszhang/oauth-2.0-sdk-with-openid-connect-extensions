@@ -37,7 +37,7 @@ public class UserCodeTest extends TestCase {
 		assertEquals(value, code.getValue());
 		assertEquals(value, code.toString());
 		assertEquals(code.getCharset(), UserCode.LETTER_CHAR_SET);
-		assertEquals("ABC", code.getStrippedValue(), code.getCharset());
+		assertEquals("BC", code.getStrippedValue());
 	}
 
 
@@ -50,7 +50,7 @@ public class UserCodeTest extends TestCase {
 		assertEquals(value, code.getValue());
 		assertEquals(value, code.toString());
 		assertEquals(code.getCharset(), UserCode.DIGIT_CHAR_SET);
-		assertEquals("12345678", code.getStrippedValue(), code.getCharset());
+		assertEquals("12345678", code.getStrippedValue());
 	}
 
 

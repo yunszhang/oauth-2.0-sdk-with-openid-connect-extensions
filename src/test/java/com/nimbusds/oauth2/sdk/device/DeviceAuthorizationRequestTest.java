@@ -27,6 +27,11 @@ import java.util.Map;
 import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
+import com.nimbusds.oauth2.sdk.auth.ClientSecretPost;
+import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -115,6 +120,47 @@ public class DeviceAuthorizationRequestTest extends TestCase {
 	}
 
 
+	public void testClientAuth() throws Exception {
+
+		URI uri = new URI("https://c2id.com/devauthz/");
+
+		ClientSecretBasic clientAuth = new ClientSecretBasic(new ClientID("123456"), new Secret("secret"));
+		Scope scope = Scope.parse("read write");
+
+		Map<String, List<String>> customParams = new HashMap<>();
+		customParams.put("q", Collections.singletonList("abc"));
+		customParams.put("r", Collections.singletonList("xyz"));
+
+		DeviceAuthorizationRequest req = new DeviceAuthorizationRequest(uri, clientAuth, scope, customParams);
+
+		assertEquals(uri, req.getEndpointURI());
+		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, req.getClientAuthentication().getMethod());
+		assertEquals(clientAuth.getClientID(), req.getClientAuthentication().getClientID());
+		assertEquals(clientAuth.getClientSecret(),
+		                ((ClientSecretBasic) req.getClientAuthentication()).getClientSecret());
+		assertEquals(scope, req.getScope());
+
+		HTTPRequest httpReq = req.toHTTPRequest();
+		Map<String, List<String>> params = httpReq.getQueryParameters();
+		assertEquals(HTTPRequest.Method.POST, httpReq.getMethod());
+		assertEquals(3, params.size());
+
+		req = DeviceAuthorizationRequest.parse(httpReq);
+
+		assertEquals(uri, req.getEndpointURI());
+		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, req.getClientAuthentication().getMethod());
+		assertEquals(clientAuth.getClientID(), req.getClientAuthentication().getClientID());
+		assertEquals(clientAuth.getClientSecret(),
+		                ((ClientSecretBasic) req.getClientAuthentication()).getClientSecret());
+		assertEquals(scope, req.getScope());
+		assertEquals(Collections.singletonList("abc"), req.getCustomParameter("q"));
+		assertEquals(Collections.singletonList("xyz"), req.getCustomParameter("r"));
+		assertEquals(Collections.singletonList("abc"), req.getCustomParameters().get("q"));
+		assertEquals(Collections.singletonList("xyz"), req.getCustomParameters().get("r"));
+		assertEquals(2, req.getCustomParameters().size());
+	}
+
+
 	public void testBuilderMinimal() {
 
 		DeviceAuthorizationRequest request = new DeviceAuthorizationRequest.Builder(new ClientID("123"))
@@ -147,6 +193,29 @@ public class DeviceAuthorizationRequestTest extends TestCase {
 		                .build();
 
 		assertEquals(new ClientID("123"), request.getClientID());
+		assertEquals("https://c2id.com/devauthz", request.getEndpointURI().toString());
+		assertEquals(new Scope("openid", "email"), request.getScope());
+		assertEquals(Collections.singletonList("100"), request.getCustomParameter("x"));
+		assertEquals(Collections.singletonList("200"), request.getCustomParameter("y"));
+		assertEquals(Collections.singletonList("300"), request.getCustomParameter("z"));
+		assertEquals(Collections.singletonList("100"), request.getCustomParameters().get("x"));
+		assertEquals(Collections.singletonList("200"), request.getCustomParameters().get("y"));
+		assertEquals(Collections.singletonList("300"), request.getCustomParameters().get("z"));
+		assertEquals(3, request.getCustomParameters().size());
+	}
+
+
+	public void testBuilderFullAuth() throws Exception {
+
+		DeviceAuthorizationRequest request = new DeviceAuthorizationRequest.Builder(
+		                new ClientSecretPost(new ClientID("123"), new Secret("secret")))
+		                                .endpointURI(new URI("https://c2id.com/devauthz"))
+		                                .scope(new Scope("openid", "email")).customParameter("x", "100")
+		                                .customParameter("y", "200").customParameter("z", "300").build();
+
+		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_POST,
+		                request.getClientAuthentication().getMethod());
+		assertEquals(new ClientID("123"), request.getClientAuthentication().getClientID());
 		assertEquals("https://c2id.com/devauthz", request.getEndpointURI().toString());
 		assertEquals(new Scope("openid", "email"), request.getScope());
 		assertEquals(Collections.singletonList("100"), request.getCustomParameter("x"));

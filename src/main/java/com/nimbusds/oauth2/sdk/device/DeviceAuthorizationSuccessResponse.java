@@ -168,7 +168,8 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 	 *                                authorization server that includes the
 	 *                                user_code. Can be {@code null}.
 	 * @param lifetime                The lifetime in seconds of the "device_code"
-	 *                                and "user_code". Must not be {@code null}.
+	 *                                and "user_code". Must be greater than
+	 *                                {@code 0}.
 	 * @param interval                The minimum amount of time in seconds that the
 	 *                                client SHOULD wait between polling requests to
 	 *                                the token endpoint.
@@ -199,6 +200,10 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 		this.verificationUri = verificationUri;
 
 		this.verificationUriComplete = verificationUriComplete;
+
+		if (lifetime <= 0)
+			throw new IllegalArgumentException("The lifetime must be greater than 0");
+
 		this.lifetime = lifetime;
 		this.interval = interval;
 		this.customParams = customParams;

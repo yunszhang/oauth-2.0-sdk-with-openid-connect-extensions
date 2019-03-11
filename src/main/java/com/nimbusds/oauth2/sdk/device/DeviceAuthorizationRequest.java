@@ -26,15 +26,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.nimbusds.oauth2.sdk.AbstractRequest;
+import com.nimbusds.oauth2.sdk.AbstractOptionallyIdentifiedRequest;
 import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.SerializeException;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -73,7 +75,7 @@ import net.jcip.annotations.Immutable;
  * </ul>
  */
 @Immutable
-public class DeviceAuthorizationRequest extends AbstractRequest {
+public class DeviceAuthorizationRequest extends AbstractOptionallyIdentifiedRequest {
 
 	/**
 	 * The registered parameter names.
@@ -88,12 +90,6 @@ public class DeviceAuthorizationRequest extends AbstractRequest {
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
-
-
-	/**
-	 * The client identifier (required).
-	 */
-	private final ClientID clientID;
 
 
 	/**
@@ -120,7 +116,13 @@ public class DeviceAuthorizationRequest extends AbstractRequest {
 
 
 		/**
-		 * The client identifier (required).
+		 * The client authentication (optional).
+		 */
+		private final ClientAuthentication clientAuth;
+
+
+		/**
+		 * The client identifier (required if not authenticated).
 		 */
 		private final ClientID clientID;
 
@@ -149,6 +151,23 @@ public class DeviceAuthorizationRequest extends AbstractRequest {
 				throw new IllegalArgumentException("The client ID must not be null");
 
 			this.clientID = clientID;
+			this.clientAuth = null;
+		}
+
+
+		/**
+		 * Creates a new devize authorization request builder for an authenticated
+		 * request.
+		 *
+		 * @param clientAuthn The client authentication. Must not be {@code null}.
+		 */
+		public Builder(final ClientAuthentication clientAuth) {
+
+			if (clientAuth == null)
+				throw new IllegalArgumentException("The client authentication must not be null");
+
+			this.clientID = null;
+			this.clientAuth = clientAuth;
 		}
 
 
@@ -161,6 +180,7 @@ public class DeviceAuthorizationRequest extends AbstractRequest {
 		public Builder(final DeviceAuthorizationRequest request) {
 
 			uri = request.getEndpointURI();
+			clientAuth = request.getClientAuthentication();
 			scope = request.scope;
 			clientID = request.getClientID();
 			customParams.putAll(request.getCustomParameters());
@@ -224,7 +244,11 @@ public class DeviceAuthorizationRequest extends AbstractRequest {
 		public DeviceAuthorizationRequest build() {
 
 			try {
-				return new DeviceAuthorizationRequest(uri, clientID, scope, customParams);
+				if (clientAuth == null) {
+					return new DeviceAuthorizationRequest(uri, clientID, scope, customParams);
+				} else {
+					return new DeviceAuthorizationRequest(uri, clientAuth, scope, customParams);
+				}
 			} catch (IllegalArgumentException e) {
 				throw new IllegalStateException(e.getMessage(), e);
 			}
@@ -282,12 +306,42 @@ public class DeviceAuthorizationRequest extends AbstractRequest {
 	                                  final Scope scope,
 	                                  final Map<String, List<String>> customParams) {
 
-		super(uri);
+		super(uri, clientID);
 
 		if (clientID == null)
 			throw new IllegalArgumentException("The client ID must not be null");
 
-		this.clientID = clientID;
+		this.scope = scope;
+
+		if (MapUtils.isNotEmpty(customParams)) {
+			this.customParams = Collections.unmodifiableMap(customParams);
+		} else {
+			this.customParams = Collections.emptyMap();
+		}
+	}
+
+
+	/**
+	 * Creates a new authenticated device authorization request with extension and
+	 * custom parameters.
+	 *
+	 * @param uri          The URI of the device authorization endpoint. May be
+	 *                     {@code null} if the {@link #toHTTPRequest} method will
+	 *                     not be used.
+	 * @param clientAuth   The client authentication. Must not be {@code null}.
+	 * @param scope        The request scope. Corresponds to the optional
+	 *                     {@code scope} parameter. {@code null} if not specified.
+	 * @param customParams Custom parameters, empty map or {@code null} if none.
+	 */
+	public DeviceAuthorizationRequest(final URI uri,
+	                                  final ClientAuthentication clientAuth,
+	                                  final Scope scope,
+	                                  final Map<String, List<String>> customParams) {
+
+		super(uri, clientAuth);
+
+		if (clientAuth == null)
+			throw new IllegalArgumentException("The client authentication must not be null");
 
 		this.scope = scope;
 
@@ -309,17 +363,6 @@ public class DeviceAuthorizationRequest extends AbstractRequest {
 	public static Set<String> getRegisteredParameterNames() {
 
 		return REGISTERED_PARAMETER_NAMES;
-	}
-
-
-	/**
-	 * Gets the client identifier. Corresponds to the {@code client_id} parameter.
-	 *
-	 * @return The client identifier.
-	 */
-	public ClientID getClientID() {
-
-		return clientID;
 	}
 
 
@@ -360,37 +403,6 @@ public class DeviceAuthorizationRequest extends AbstractRequest {
 
 
 	/**
-	 * Returns the URI query parameters for this device authorization request. Query
-	 * parameters which are part of the device authorization endpoint are not
-	 * included.
-	 *
-	 * <p>
-	 * Example parameters:
-	 *
-	 * <pre>
-	 * client_id     = s6BhdRkqt3
-	 * scope         = profile
-	 * </pre>
-	 * 
-	 * @return The parameters.
-	 */
-	public Map<String, List<String>> toParameters() {
-
-		Map<String, List<String>> params = new LinkedHashMap<>();
-
-		// Put custom params first, so they may be overwritten by std params
-		params.putAll(customParams);
-
-		params.put("client_id", Collections.singletonList(clientID.getValue()));
-
-		if (scope != null)
-			params.put("scope", Collections.singletonList(scope.toString()));
-
-		return params;
-	}
-
-
-	/**
 	 * Returns the matching HTTP request.
 	 *
 	 * @return The HTTP request.
@@ -413,7 +425,26 @@ public class DeviceAuthorizationRequest extends AbstractRequest {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, endpointURL);
 		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
-		httpRequest.setQuery(URLUtils.serializeParameters(toParameters()));
+
+		if (getClientAuthentication() != null) {
+			getClientAuthentication().applyTo(httpRequest);
+		}
+
+		Map<String, List<String>> params = httpRequest.getQueryParameters();
+
+		if (scope != null && !scope.isEmpty()) {
+			params.put("scope", Collections.singletonList(scope.toString()));
+		}
+
+		if (getClientID() != null) {
+			params.put("client_id", Collections.singletonList(getClientID().getValue()));
+		}
+
+		if (!getCustomParameters().isEmpty()) {
+			params.putAll(getCustomParameters());
+		}
+
+		httpRequest.setQuery(URLUtils.serializeParameters(params));
 		return httpRequest;
 	}
 
@@ -455,18 +486,36 @@ public class DeviceAuthorizationRequest extends AbstractRequest {
 		httpRequest.ensureMethod(HTTPRequest.Method.POST);
 		httpRequest.ensureContentType(CommonContentTypes.APPLICATION_URLENCODED);
 
+		// Parse client authentication, if any
+		ClientAuthentication clientAuth;
+
+		try {
+			clientAuth = ClientAuthentication.parse(httpRequest);
+		} catch (ParseException e) {
+			throw new ParseException(e.getMessage(),
+			                OAuth2Error.INVALID_REQUEST.appendDescription(": " + e.getMessage()));
+		}
+
 		// No fragment! May use query component!
 		Map<String, List<String>> params = httpRequest.getQueryParameters();
 
-		// Parse mandatory client ID first
-		String v = MultivaluedMapUtils.getFirstValue(params, "client_id");
+		ClientID clientID;
+		String v;
 
-		if (StringUtils.isBlank(v)) {
-			String msg = "Missing \"client_id\" parameter";
-			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
+		if (clientAuth == null) {
+			// Parse mandatory client ID for unauthenticated requests
+			v = MultivaluedMapUtils.getFirstValue(params, "client_id");
+
+			if (StringUtils.isBlank(v)) {
+				String msg = "Missing \"client_id\" parameter";
+				throw new ParseException(msg,
+				                OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
+			}
+
+			clientID = new ClientID(v);
+		} else {
+			clientID = null;
 		}
-
-		ClientID clientID = new ClientID(v);
 
 		// Parse optional scope
 		v = MultivaluedMapUtils.getFirstValue(params, "scope");
@@ -490,6 +539,10 @@ public class DeviceAuthorizationRequest extends AbstractRequest {
 			}
 		}
 
-		return new DeviceAuthorizationRequest(uri, clientID, scope, customParams);
+		if (clientAuth == null) {
+			return new DeviceAuthorizationRequest(uri, clientID, scope, customParams);
+		} else {
+			return new DeviceAuthorizationRequest(uri, clientAuth, scope, customParams);
+		}
 	}
 }

@@ -18,12 +18,16 @@
 package com.nimbusds.oauth2.sdk.device;
 
 import java.net.URI;
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.nimbusds.oauth2.sdk.OAuth2Error;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -147,6 +151,124 @@ public class DeviceAuthorizationResponseTest extends TestCase {
 		assertEquals("200", resp.getCustomParameters().get("y"));
 		assertEquals("300", resp.getCustomParameters().get("z"));
 		assertEquals(3, resp.getCustomParameters().size());
+	}
+
+
+	public void testConstructParseExceptionMissingDeviceCode() throws Exception {
+
+		DeviceCode deviceCode = null;
+		UserCode userCode = new UserCode();
+		URI verificationUri = new URI("https://c2id.com/devauthz/");
+		long lifetime = 3600;
+
+		try {
+			new DeviceAuthorizationSuccessResponse(deviceCode, userCode, verificationUri, lifetime);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The device_code must not be null", e.getMessage());
+		}
+
+		JSONObject o = new JSONObject();
+		o.put("user_code", userCode.getValue());
+		o.put("verification_uri", verificationUri.toString());
+		o.put("expires_in", lifetime);
+
+		HTTPResponse httpResponse = new HTTPResponse(200);
+		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.setCacheControl("no-store");
+		httpResponse.setPragma("no-cache");
+		httpResponse.setContent(o.toString());
+
+		try {
+			DeviceAuthorizationSuccessResponse.parse(httpResponse);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing JSON object member with key \"device_code\"", e.getMessage());
+		}
+	}
+
+
+	public void testConstructParseExceptionMissingUserCode() throws Exception {
+
+		DeviceCode deviceCode = new DeviceCode();
+		UserCode userCode = null;
+		URI verificationUri = new URI("https://c2id.com/devauthz/");
+		long lifetime = 3600;
+
+		try {
+			new DeviceAuthorizationSuccessResponse(deviceCode, userCode, verificationUri, lifetime);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The user_code must not be null", e.getMessage());
+		}
+
+		JSONObject o = new JSONObject();
+		o.put("device_code", deviceCode.getValue());
+		o.put("verification_uri", verificationUri.toString());
+		o.put("expires_in", lifetime);
+
+		HTTPResponse httpResponse = new HTTPResponse(200);
+		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.setCacheControl("no-store");
+		httpResponse.setPragma("no-cache");
+		httpResponse.setContent(o.toString());
+
+		try {
+			DeviceAuthorizationSuccessResponse.parse(httpResponse);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing JSON object member with key \"user_code\"", e.getMessage());
+		}
+	}
+
+
+	public void testConstructParseExceptionMissingVerificationUri() throws Exception {
+
+		DeviceCode deviceCode = new DeviceCode();
+		UserCode userCode = new UserCode();
+		URI verificationUri = null;
+		long lifetime = 3600;
+
+		try {
+			new DeviceAuthorizationSuccessResponse(deviceCode, userCode, verificationUri, lifetime);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The verification_uri must not be null", e.getMessage());
+		}
+
+		JSONObject o = new JSONObject();
+		o.put("device_code", deviceCode.getValue());
+		o.put("user_code", userCode.getValue());
+		o.put("expires_in", lifetime);
+
+		HTTPResponse httpResponse = new HTTPResponse(200);
+		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.setCacheControl("no-store");
+		httpResponse.setPragma("no-cache");
+		httpResponse.setContent(o.toString());
+
+		try {
+			DeviceAuthorizationSuccessResponse.parse(httpResponse);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing JSON object member with key \"verification_uri\"", e.getMessage());
+		}
+	}
+
+
+	public void testConstructExceptionLifetime0() throws Exception {
+
+		DeviceCode deviceCode = new DeviceCode();
+		UserCode userCode = new UserCode();
+		URI verificationUri = new URI("https://c2id.com/devauthz/");
+		long lifetime = 0;
+
+		try {
+			new DeviceAuthorizationSuccessResponse(deviceCode, userCode, verificationUri, lifetime);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The lifetime must be greater than 0", e.getMessage());
+		}
 	}
 
 
