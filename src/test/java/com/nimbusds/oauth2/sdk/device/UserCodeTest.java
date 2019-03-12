@@ -19,10 +19,6 @@ package com.nimbusds.oauth2.sdk.device;
 
 import junit.framework.TestCase;
 
-import org.eclipse.jetty.server.Authentication.User;
-
-import com.nimbusds.jose.util.Base64;
-
 /**
  * Tests generation and comparison of user codes
  */
