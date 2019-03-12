@@ -21,17 +21,16 @@ import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 
 /**
- * OAuth 2.0 Device Flow specific errors.
+ * OAuth 2.0 Device Authorization Grant specific errors.
  *
  * <p>
  * Related specifications:
  *
  * <ul>
- * <li>OAuth 2.0 Device Flow for Browserless and Input Constrained Devices
- * (draft-ietf-oauth-device-flow-14)
+ * <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
  * </ul>
  */
-public final class DeviceFlowError {
+public final class DeviceAuthorizationGrantError {
 
 	/**
 	 * The authorization request is still pending as the end user hasn't yet
@@ -68,7 +67,7 @@ public final class DeviceFlowError {
 	/**
 	 * Prevents public instantiation.
 	 */
-	private DeviceFlowError() {
+	private DeviceAuthorizationGrantError() {
 
 	}
 }

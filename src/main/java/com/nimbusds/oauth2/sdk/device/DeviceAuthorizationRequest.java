@@ -68,8 +68,7 @@ import net.jcip.annotations.Immutable;
  * Related specifications:
  *
  * <ul>
- * <li>OAuth 2.0 Device Flow for Browserless and Input Constrained Devices
- * (draft-ietf-oauth-device-flow-14)
+ * <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
  * </ul>
  */
 @Immutable

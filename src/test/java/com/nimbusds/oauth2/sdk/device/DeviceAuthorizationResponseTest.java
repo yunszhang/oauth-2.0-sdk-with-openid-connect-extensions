@@ -265,12 +265,12 @@ public class DeviceAuthorizationResponseTest extends TestCase {
 	public void testToErrorResponse() throws Exception {
 
 		DeviceAuthorizationErrorResponse response = new DeviceAuthorizationErrorResponse(
-		                DeviceFlowError.AUTHORIZATION_PENDING);
+		                DeviceAuthorizationGrantError.AUTHORIZATION_PENDING);
 
 		HTTPResponse httpResponse = response.toHTTPResponse();
 
 		response = DeviceAuthorizationResponse.parse(httpResponse).toErrorResponse();
 
-		assertEquals(DeviceFlowError.AUTHORIZATION_PENDING, response.getErrorObject());
+		assertEquals(DeviceAuthorizationGrantError.AUTHORIZATION_PENDING, response.getErrorObject());
 	}
 }

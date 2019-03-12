@@ -60,8 +60,8 @@ import net.minidev.json.JSONObject;
  * Related specifications:
  *
  * <ul>
- * <li>OAuth 2.0 Device Flow for Browserless and Input Constrained Devices
- * (draft-ietf-oauth-device-flow-14) sections 3.2.
+ * <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
+ * sections 3.2.
  * </ul>
  */
 @Immutable
