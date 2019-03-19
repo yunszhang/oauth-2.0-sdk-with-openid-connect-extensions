@@ -17,12 +17,12 @@
 
 package com.nimbusds.oauth2.sdk.device;
 
+
 import java.net.URI;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SuccessResponse;
@@ -30,8 +30,6 @@ import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
-import net.jcip.annotations.Immutable;
-import net.minidev.json.JSONObject;
 
 /**
  * A device authorization response from the device authorization endpoint.
@@ -46,13 +44,12 @@ import net.minidev.json.JSONObject;
  * Pragma: no-cache
  *
  * {
- *       "device_code": "GmRhmhcxhwAzkoEqiMEg_DnyEysNkuNhszIySk9eS",
- *       "user_code": "WDJB-MJHT",
- *       "verification_uri": "https://example.com/device",
- *       "verification_uri_complete":
- *           "https://example.com/device?user_code=WDJB-MJHT",
- *       "expires_in": 1800,
- *       "interval": 5
+ *   "device_code"               : "GmRhmhcxhwAzkoEqiMEg_DnyEysNkuNhszIySk9eS",
+ *   "user_code"                 : "WDJB-MJHT",
+ *   "verification_uri"          : "https://example.com/device",
+ *   "verification_uri_complete" : "https://example.com/device?user_code=WDJB-MJHT",
+ *   "expires_in"                : 1800,
+ *   "interval"                  : 5
  * }
  * </pre>
  *
@@ -60,12 +57,14 @@ import net.minidev.json.JSONObject;
  * Related specifications:
  *
  * <ul>
- * <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
- * sections 3.2.
+ *     <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
+ *         section 3.2.
  * </ul>
  */
 @Immutable
 public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationResponse implements SuccessResponse {
+	
+	
 	/**
 	 * The registered parameter names.
 	 */
@@ -98,9 +97,9 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 
 
 	/**
-	 * The end-user verification URI on the authorization server. The URI should be
-	 * short and easy to remember as end users will be asked to manually type it
-	 * into their user-agent.
+	 * The end-user verification URI on the authorization server. The URI
+	 * should be and easy to remember as end-users will be asked to
+	 * manually type it into their user-agent.
 	 */
 	private final URI verificationUri;
 
@@ -109,7 +108,6 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 	 * Optional. A verification URI that includes the "user_code" (or other
 	 * information with the same function as the "user_code"), designed for
 	 * non-textual transmission.
-	 * 
 	 */
 	private final URI verificationUriComplete;
 
@@ -121,9 +119,9 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 
 
 	/**
-	 * Optional. The minimum amount of time in seconds that the client SHOULD wait
-	 * between polling requests to the token endpoint. If no value is provided,
-	 * clients MUST use 5 as the default.
+	 * Optional. The minimum amount of time in seconds that the client
+	 * SHOULD wait between polling requests to the token endpoint. If no
+	 * value is provided, clients MUST use 5 as the default.
 	 */
 	private final long interval;
 
@@ -139,11 +137,13 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 	 *
 	 * @param deviceCode      The device verification code. Must not be
 	 *                        {@code null}.
-	 * @param userCode        The user verification code. Must not be {@code null}.
-	 * @param verificationUri The end-user verification URI on the authorization
-	 *                        server. Must not be {@code null}.
-	 * @param lifetime        The lifetime in seconds of the "device_code" and
-	 *                        "user_code". Must not be {@code null}.
+	 * @param userCode        The user verification code. Must not be
+	 *                        {@code null}.
+	 * @param verificationUri The end-user verification URI on the
+	 *                        authorization server. Must not be
+	 *                        {@code null}.
+	 * @param lifetime        The lifetime in seconds of the "device_code"
+	 *                        and "user_code".
 	 */
 	public DeviceAuthorizationSuccessResponse(final DeviceCode deviceCode,
 	                                          final UserCode userCode,
@@ -157,24 +157,25 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 	/**
 	 * Creates a new device authorization success response.
 	 *
-	 * @param deviceCode              The device verification code. Must not be
-	 *                                {@code null}.
-	 * @param userCode                The user verification code. Must not be
-	 *                                {@code null}.
+	 * @param deviceCode              The device verification code. Must
+	 *                                not be {@code null}.
+	 * @param userCode                The user verification code. Must not
+	 *                                be {@code null}.
 	 * @param verificationUri         The end-user verification URI on the
 	 *                                authorization server. Must not be
 	 *                                {@code null}.
 	 * @param verificationUriComplete The end-user verification URI on the
-	 *                                authorization server that includes the
-	 *                                user_code. Can be {@code null}.
-	 * @param lifetime                The lifetime in seconds of the "device_code"
-	 *                                and "user_code". Must be greater than
-	 *                                {@code 0}.
-	 * @param interval                The minimum amount of time in seconds that the
-	 *                                client SHOULD wait between polling requests to
-	 *                                the token endpoint.
-	 * @param customParams            Optional custom parameters, {@code null} if
-	 *                                none.
+	 *                                authorization server that includes
+	 *                                the user_code. Can be {@code null}.
+	 * @param lifetime                The lifetime in seconds of the
+	 *                                "device_code" and "user_code". Must
+	 *                                be greater than {@code 0}.
+	 * @param interval                The minimum amount of time in seconds
+	 *                                that the client SHOULD wait between
+	 *                                polling requests to the token
+	 *                                endpoint.
+	 * @param customParams            Optional custom parameters,
+	 *                                {@code null} if none.
 	 */
 	public DeviceAuthorizationSuccessResponse(final DeviceCode deviceCode,
 	                                          final UserCode userCode,
@@ -211,11 +212,11 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 
 
 	/**
-	 * Returns the registered (standard) OAuth 2.0 device authorization response
-	 * parameter names.
+	 * Returns the registered (standard) OAuth 2.0 device authorization
+	 * response parameter names.
 	 *
-	 * @return The registered OAuth 2.0 device authorization response parameter
-	 *         names, as a unmodifiable set.
+	 * @return The registered OAuth 2.0 device authorization response
+	 *         parameter names, as a unmodifiable set.
 	 */
 	public static Set<String> getRegisteredParameterNames() {
 
@@ -266,8 +267,8 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 	/**
 	 * Returns the end-user verification URI that includes the user_code.
 	 * 
-	 * @return The end-user verification URI that includes the user_code, or
-	 *         {@code null} if not specified.
+	 * @return The end-user verification URI that includes the user_code,
+	 *         or {@code null} if not specified.
 	 */
 	public URI getVerificationUriComplete() {
 
@@ -287,11 +288,11 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 
 
 	/**
-	 * Returns the minimum amount of time in seconds that the client SHOULD wait
-	 * between polling requests to the token endpoint.
+	 * Returns the minimum amount of time in seconds that the client SHOULD
+	 * wait between polling requests to the token endpoint.
 	 * 
-	 * @return The minimum amount of time in seconds that the client SHOULD wait
-	 *         between polling requests to the token endpoint.
+	 * @return The minimum amount of time in seconds that the client SHOULD
+	 *         wait between polling requests to the token endpoint.
 	 */
 	public long getInterval() {
 
@@ -302,7 +303,8 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 	/**
 	 * Returns the custom parameters.
 	 *
-	 * @return The custom parameters, as a unmodifiable map, empty map if none.
+	 * @return The custom parameters, as a unmodifiable map, empty map if
+	 *         none.
 	 */
 	public Map<String, Object> getCustomParameters() {
 
@@ -314,20 +316,20 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 
 
 	/**
-	 * Returns a JSON object representation of this device authorization response.
+	 * Returns a JSON object representation of this device authorization
+	 * response.
 	 *
 	 * <p>
 	 * Example JSON object:
 	 *
 	 * <pre>
 	 * {
-	 *       "device_code": "GmRhmhcxhwAzkoEqiMEg_DnyEysNkuNhszIySk9eS",
-	 *       "user_code": "WDJB-MJHT",
-	 *       "verification_uri": "https://example.com/device",
-	 *       "verification_uri_complete":
-	 *           "https://example.com/device?user_code=WDJB-MJHT",
-	 *       "expires_in": 1800,
-	 *       "interval": 5
+	 *   "device_code"               : "GmRhmhcxhwAzkoEqiMEg_DnyEysNkuNhszIySk9eS",
+	 *   "user_code"                 : "WDJB-MJHT",
+	 *   "verification_uri"          : "https://example.com/device",
+	 *   "verification_uri_complete" : "https://example.com/device?user_code=WDJB-MJHT",
+	 *   "expires_in"                : 1800,
+	 *   "interval"                  : 5
 	 * }
 	 * </pre>
 	 *
@@ -371,14 +373,15 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 
 
 	/**
-	 * Parses an device authorization response from the specified JSON object.
+	 * Parses an device authorization response from the specified JSON
+	 * object.
 	 *
 	 * @param jsonObject The JSON object to parse. Must not be {@code null}.
 	 *
 	 * @return The device authorization response.
 	 *
-	 * @throws ParseException If the JSON object couldn't be parsed to a device
-	 *                        authorization response.
+	 * @throws ParseException If the JSON object couldn't be parsed to a
+	 *                        device authorization response.
 	 */
 	public static DeviceAuthorizationSuccessResponse parse(final JSONObject jsonObject) throws ParseException {
 
@@ -445,14 +448,15 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 
 
 	/**
-	 * Parses an device authorization response from the specified HTTP response.
+	 * Parses an device authorization response from the specified HTTP
+	 * response.
 	 *
 	 * @param httpResponse The HTTP response. Must not be {@code null}.
 	 *
 	 * @return The device authorization response.
 	 *
-	 * @throws ParseException If the HTTP response couldn't be parsed to a device
-	 *                        authorization response.
+	 * @throws ParseException If the HTTP response couldn't be parsed to a
+	 *                        device authorization response.
 	 */
 	public static DeviceAuthorizationSuccessResponse parse(final HTTPResponse httpResponse) throws ParseException {
 

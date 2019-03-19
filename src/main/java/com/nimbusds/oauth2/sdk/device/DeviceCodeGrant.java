@@ -17,10 +17,13 @@
 
 package com.nimbusds.oauth2.sdk.device;
 
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import net.jcip.annotations.Immutable;
 
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.GrantType;
@@ -28,7 +31,6 @@ import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 
-import net.jcip.annotations.Immutable;
 
 /**
  * Device code grant for the OAuth 2.0 Device Authorization Grant.
@@ -37,12 +39,13 @@ import net.jcip.annotations.Immutable;
  * Related specifications:
  *
  * <ul>
- * <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
+ *     <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
  * </ul>
  */
 @Immutable
 public class DeviceCodeGrant extends AuthorizationGrant {
 
+	
 	/**
 	 * The grant type.
 	 */
@@ -93,10 +96,10 @@ public class DeviceCodeGrant extends AuthorizationGrant {
 
 
 	/**
-	 * Parses a device code grant from the specified request body parameters.
+	 * Parses a device code grant from the specified request body
+	 * parameters.
 	 *
-	 * <p>
-	 * Example:
+	 * <p>Example:
 	 *
 	 * <pre>
 	 * grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Adevice_code

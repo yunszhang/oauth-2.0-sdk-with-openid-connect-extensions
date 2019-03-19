@@ -17,10 +17,14 @@
 
 package com.nimbusds.oauth2.sdk.device;
 
+
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ErrorResponse;
@@ -30,23 +34,19 @@ import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
-import net.jcip.annotations.Immutable;
-import net.minidev.json.JSONObject;
 
 /**
  * OAuth 2.0 device authorization error response.
  *
- * <p>
- * Standard authorization errors:
+ * <p>Standard authorization errors:
  *
  * <ul>
- * <li>{@link OAuth2Error#INVALID_REQUEST}
- * <li>{@link OAuth2Error#INVALID_CLIENT}
- * <li>{@link OAuth2Error#INVALID_SCOPE}
+ *     <li>{@link OAuth2Error#INVALID_REQUEST}
+ *     <li>{@link OAuth2Error#INVALID_CLIENT}
+ *     <li>{@link OAuth2Error#INVALID_SCOPE}
  * </ul>
  *
- * <p>
- * Example HTTP response:
+ * <p>Example HTTP response:
  *
  * <pre>
  * HTTP/1.1 400 Bad Request
@@ -55,20 +55,20 @@ import net.minidev.json.JSONObject;
  * Pragma: no-cache
  * 
  * {
- *  "error": "invalid_request"
+ *  "error" : "invalid_request"
  * }
  * </pre>
  *
- * <p>
- * Related specifications:
+ * <p>Related specifications:
  *
  * <ul>
- * <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
+ *     <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
  * </ul>
  */
 @Immutable
 public class DeviceAuthorizationErrorResponse extends DeviceAuthorizationResponse implements ErrorResponse {
 
+	
 	/**
 	 * The standard OAuth 2.0 errors for a device authorization error response.
 	 */
@@ -84,7 +84,8 @@ public class DeviceAuthorizationErrorResponse extends DeviceAuthorizationRespons
 
 
 	/**
-	 * Gets the standard OAuth 2.0 errors for a device authorization error response.
+	 * Gets the standard OAuth 2.0 errors for a device authorization error
+	 * response.
 	 *
 	 * @return The standard errors, as a read-only set.
 	 */
@@ -101,8 +102,8 @@ public class DeviceAuthorizationErrorResponse extends DeviceAuthorizationRespons
 
 
 	/**
-	 * Creates a new OAuth 2.0 device authorization error response. No OAuth 2.0
-	 * error is specified.
+	 * Creates a new OAuth 2.0 device authorization error response. No
+	 * OAuth 2.0 error is specified.
 	 */
 	protected DeviceAuthorizationErrorResponse() {
 
@@ -113,9 +114,9 @@ public class DeviceAuthorizationErrorResponse extends DeviceAuthorizationRespons
 	/**
 	 * Creates a new OAuth 2.0 device authorization error response.
 	 *
-	 * @param error The error. Should match one of the {@link #getStandardErrors
-	 *              standard errors} for a token error response. Must not be
-	 *              {@code null}.
+	 * @param error The error. Should match one of the
+	 *              {@link #getStandardErrors standard errors} for a token
+	 *              error response. Must not be {@code null}.
 	 */
 	public DeviceAuthorizationErrorResponse(final ErrorObject error) {
 
@@ -187,16 +188,17 @@ public class DeviceAuthorizationErrorResponse extends DeviceAuthorizationRespons
 
 
 	/**
-	 * Parses an OAuth 2.0 device authorization response from the specified JSON
-	 * object.
+	 * Parses an OAuth 2.0 device authorization response from the specified
+	 * JSON object.
 	 *
-	 * @param jsonObject The JSON object to parse. Its status code must not be 200
-	 *                   (OK). Must not be {@code null}.
+	 * @param jsonObject The JSON object to parse. Its status code must not
+	 *                   be 200 (OK). Must not be {@code null}.
 	 *
 	 * @return The token error response.
 	 *
-	 * @throws ParseException If the JSON object couldn't be parsed to an OAuth 2.0
-	 *                        device authorization error response.
+	 * @throws ParseException If the JSON object couldn't be parsed to an
+	 *                        OAuth 2.0 device authorization error
+	 *                        response.
 	 */
 	public static DeviceAuthorizationErrorResponse parse(final JSONObject jsonObject) throws ParseException {
 
@@ -224,16 +226,17 @@ public class DeviceAuthorizationErrorResponse extends DeviceAuthorizationRespons
 
 
 	/**
-	 * Parses an OAuth 2.0 device authorization error response from the specified
-	 * HTTP response.
+	 * Parses an OAuth 2.0 device authorization error response from the
+	 * specified HTTP response.
 	 *
-	 * @param httpResponse The HTTP response to parse. Its status code must not be
-	 *                     200 (OK). Must not be {@code null}.
+	 * @param httpResponse The HTTP response to parse. Its status code must
+	 *                     not be 200 (OK). Must not be {@code null}.
 	 *
 	 * @return The device authorization error response.
 	 *
-	 * @throws ParseException If the HTTP response couldn't be parsed to an OAuth
-	 *                        2.0 device authorization error response.
+	 * @throws ParseException If the HTTP response couldn't be parsed to an
+	 *                        OAuth 2.0 device authorization error
+	 *                        response.
 	 */
 	public static DeviceAuthorizationErrorResponse parse(final HTTPResponse httpResponse) throws ParseException {
 

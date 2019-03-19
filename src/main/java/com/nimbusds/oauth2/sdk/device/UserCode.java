@@ -17,24 +17,26 @@
 
 package com.nimbusds.oauth2.sdk.device;
 
+
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.oauth2.sdk.id.Identifier;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 
+
 /**
  * User code.
  *
- * <p>
- * Related specifications:
+ * <p>Related specifications:
  *
  * <ul>
- * <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
+ *     <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
  * </ul>
  */
 @Immutable
 public final class UserCode extends Identifier {
 
+	
 	public static final String LETTER_CHAR_SET = "BCDFGHJKLMNPQRSTVWXZ";
 
 
@@ -42,8 +44,8 @@ public final class UserCode extends Identifier {
 
 
 	/**
-	 * The characterset used by the identifier. The identifier can only contain
-	 * characters from this set.
+	 * The character set used by the identifier. The identifier can only
+	 * contain characters from this set.
 	 */
 	private final String charset;
 
@@ -51,10 +53,11 @@ public final class UserCode extends Identifier {
 	/**
 	 * Creates a new user code with the specified value.
 	 *
-	 * @param value The code value. Must not be {@code null} or empty string.
-	 * @param value The characterset used by the identifier. The identifier can only
-	 *              contain characters from this set. If {@code null}, all
-	 *              characters are allowed.
+	 * @param value   The code value. Must not be {@code null} or empty
+	 *                string.
+	 * @param charset The character set used by the identifier. The
+	 *                identifier can only contain characters from this set.
+	 *                If {@code null}, all characters are allowed.
 	 */
 	public UserCode(final String value, final String charset) {
 
@@ -68,7 +71,8 @@ public final class UserCode extends Identifier {
 	 * Creates a new user code with the specified value and the
 	 * {@code LETTER_CHAR_SET}.
 	 *
-	 * @param value The code value. Must not be {@code null} or empty string.
+	 * @param value The code value. Must not be {@code null} or empty
+	 *              string.
 	 */
 	public UserCode(final String value) {
 
@@ -77,8 +81,9 @@ public final class UserCode extends Identifier {
 
 
 	/**
-	 * Creates a new user code with a randomly generated value with 8 characters
-	 * from {@code LETTER_CHAR_SET}, in the form {@code WDJB-MJHT}.
+	 * Creates a new user code with a randomly generated value with 8
+	 * characters from {@code LETTER_CHAR_SET}, in the form
+	 * {@code WDJB-MJHT}.
 	 */
 	public UserCode() {
 
@@ -87,8 +92,8 @@ public final class UserCode extends Identifier {
 
 
 	/**
-	 * Creates a new user code with a randomly generated value from the specified
-	 * charset and length. A dash is added every 4 characters.
+	 * Creates a new user code with a randomly generated value from the
+	 * specified charset and length. A dash is added every 4 characters.
 	 */
 	public UserCode(final String charset, final int length) {
 
@@ -97,13 +102,13 @@ public final class UserCode extends Identifier {
 
 
 	/**
-	 * Creates a new user code with a randomly generated value from the specified
-	 * charset and length. A dash is added every 4 characters.
+	 * Creates a new user code with a randomly generated value from the
+	 * specified charset and length. A dash is added every 4 characters.
 	 * 
-	 * @param charset The characterset used by the identifier. The identifier can
-	 *                only contain characters from this set. Must not be
-	 *                {@code null} or empty string.
-	 * @param
+	 * @param charset The character set used by the identifier. The
+	 *                identifier can only contain characters from this set.
+	 *                Must not be {@code null} or empty string.
+	 * @param length  The length of the value to generate.
 	 */
 	private static String generateValue(final String charset, final int length) {
 
@@ -169,12 +174,13 @@ public final class UserCode extends Identifier {
 
 
 	/**
-	 * Removes all characters from {@code value} that are not in {@code charset}.
+	 * Removes all characters from {@code value} that are not in
+	 * {@code charset}.
 	 * 
 	 * @param value   The code value.
-	 * @param charset The allowed characters in {@code value}. If {@code null}, all
-	 *                characters are retained.
-	 * @return {@code value} with all invalid characters removed.
+	 * @param charset The allowed characters in {@code value}. If
+	 *                {@code null} all characters are retained.
+	 * @return The {@code value} with all invalid characters removed.
 	 */
 	public static String stripNonCharSet(final String value, final String charset) {
 

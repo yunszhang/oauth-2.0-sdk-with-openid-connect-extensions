@@ -17,11 +17,13 @@
 
 package com.nimbusds.oauth2.sdk.device;
 
+
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Response;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 
-import net.minidev.json.JSONObject;
 
 /**
  * Token endpoint response. This is the base abstract class for device
@@ -31,11 +33,12 @@ import net.minidev.json.JSONObject;
  * Related specifications:
  *
  * <ul>
- * <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
+ *     <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
  * </ul>
  */
 public abstract class DeviceAuthorizationResponse implements Response {
 
+	
 	/**
 	 * Casts this response to an authorization success response.
 	 *
@@ -59,14 +62,16 @@ public abstract class DeviceAuthorizationResponse implements Response {
 
 
 	/**
-	 * Parses a device authorization response from the specified JSON object.
+	 * Parses a device authorization response from the specified JSON
+	 * object.
 	 *
-	 * @param jsonObject The JSON object to parse. Must not be {@code null}.
+	 * @param jsonObject The JSON object to parse. Must not be
+	 *                   {@code null}.
 	 *
 	 * @return The device authorization success or error response.
 	 *
-	 * @throws ParseException If the JSON object couldn't be parsed to a device
-	 *                        authorization response.
+	 * @throws ParseException If the JSON object couldn't be parsed to a
+	 *                        device authorization response.
 	 */
 	public static DeviceAuthorizationResponse parse(final JSONObject jsonObject) throws ParseException {
 
@@ -78,14 +83,15 @@ public abstract class DeviceAuthorizationResponse implements Response {
 
 
 	/**
-	 * Parses a device authorization response from the specified HTTP response.
+	 * Parses a device authorization response from the specified HTTP
+	 * response.
 	 *
 	 * @param httpResponse The HTTP response. Must not be {@code null}.
 	 *
 	 * @return The device authorization sucess or error response.
 	 *
-	 * @throws ParseException If the HTTP response couldn't be parsed to a device
-	 *                        authorization response.
+	 * @throws ParseException If the HTTP response couldn't be parsed to a
+	 *                        device authorization response.
 	 */
 	public static DeviceAuthorizationResponse parse(final HTTPResponse httpResponse) throws ParseException {
 

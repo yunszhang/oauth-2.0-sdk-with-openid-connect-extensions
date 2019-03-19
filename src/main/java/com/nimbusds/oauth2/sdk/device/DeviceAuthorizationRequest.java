@@ -17,23 +17,16 @@
 
 package com.nimbusds.oauth2.sdk.device;
 
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import com.nimbusds.oauth2.sdk.AbstractOptionallyIdentifiedRequest;
-import com.nimbusds.oauth2.sdk.OAuth2Error;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.Scope;
-import com.nimbusds.oauth2.sdk.SerializeException;
+import net.jcip.annotations.Immutable;
+
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
@@ -43,18 +36,16 @@ import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 
-import net.jcip.annotations.Immutable;
 
 /**
  * Device authorisation request. Used to start the authorization flow for
- * browserless and input constraint devices. Supports custom request parameters.
+ * browserless and input constraint devices. Supports custom request
+ * parameters.
  *
- * <p>
- * Extending classes may define additional request parameters as well as enforce
- * tighter requirements on the base parameters.
+ * <p>Extending classes may define additional request parameters as well as
+ * enforce tighter requirements on the base parameters.
  *
- * <p>
- * Example HTTP request:
+ * <p>Example HTTP request:
  *
  * <pre>
  * POST /device_authorization HTTP/1.1
@@ -64,16 +55,16 @@ import net.jcip.annotations.Immutable;
  * client_id=459691054427
  * </pre>
  *
- * <p>
- * Related specifications:
+ * <p>Related specifications:
  *
  * <ul>
- * <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
+ *     <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
  * </ul>
  */
 @Immutable
 public class DeviceAuthorizationRequest extends AbstractOptionallyIdentifiedRequest {
 
+	
 	/**
 	 * The registered parameter names.
 	 */
@@ -153,10 +144,11 @@ public class DeviceAuthorizationRequest extends AbstractOptionallyIdentifiedRequ
 
 
 		/**
-		 * Creates a new devize authorization request builder for an authenticated
-		 * request.
+		 * Creates a new device authorization request builder for an
+		 * authenticated request.
 		 *
-		 * @param clientAuthn The client authentication. Must not be {@code null}.
+		 * @param clientAuth The client authentication. Must not be
+		 *                   {@code null}.
 		 */
 		public Builder(final ClientAuthentication clientAuth) {
 
@@ -169,10 +161,11 @@ public class DeviceAuthorizationRequest extends AbstractOptionallyIdentifiedRequ
 
 
 		/**
-		 * Creates a new device authorization request builder from the specified
-		 * request.
+		 * Creates a new device authorization request builder from the
+		 * specified request.
 		 *
-		 * @param request The device authorization request. Must not be {@code null}.
+		 * @param request The device authorization request. Must not be
+		 *                {@code null}.
 		 */
 		public Builder(final DeviceAuthorizationRequest request) {
 
@@ -185,7 +178,8 @@ public class DeviceAuthorizationRequest extends AbstractOptionallyIdentifiedRequ
 
 
 		/**
-		 * Sets the scope. Corresponds to the optional {@code scope} parameter.
+		 * Sets the scope. Corresponds to the optional {@code scope}
+		 * parameter.
 		 *
 		 * @param scope The scope, {@code null} if not specified.
 		 *
@@ -202,7 +196,8 @@ public class DeviceAuthorizationRequest extends AbstractOptionallyIdentifiedRequ
 		 * Sets a custom parameter.
 		 *
 		 * @param name   The parameter name. Must not be {@code null}.
-		 * @param values The parameter values, {@code null} if not specified.
+		 * @param values The parameter values, {@code null} if not
+		 *               specified.
 		 *
 		 * @return This builder.
 		 */
@@ -219,8 +214,8 @@ public class DeviceAuthorizationRequest extends AbstractOptionallyIdentifiedRequ
 
 
 		/**
-		 * Sets the URI of the endpoint (HTTP or HTTPS) for which the request is
-		 * intended.
+		 * Sets the URI of the endpoint (HTTP or HTTPS) for which the
+		 * request is intended.
 		 *
 		 * @param uri The endpoint URI, {@code null} if not specified.
 		 *
@@ -257,10 +252,11 @@ public class DeviceAuthorizationRequest extends AbstractOptionallyIdentifiedRequ
 	 * Creates a new minimal device authorization request.
 	 *
 	 * @param uri      The URI of the device authorization endpoint. May be
-	 *                 {@code null} if the {@link #toHTTPRequest} method will not be
-	 *                 used.
-	 * @param clientID The client identifier. Corresponds to the {@code client_id}
-	 *                 parameter. Must not be {@code null}.
+	 *                 {@code null} if the {@link #toHTTPRequest} method
+	 *                 will not be used.
+	 * @param clientID The client identifier. Corresponds to the
+	 *                 {@code client_id} parameter. Must not be
+	 *                 {@code null}.
 	 */
 	public DeviceAuthorizationRequest(final URI uri, final ClientID clientID) {
 
@@ -272,12 +268,13 @@ public class DeviceAuthorizationRequest extends AbstractOptionallyIdentifiedRequ
 	 * Creates a new device authorization request.
 	 *
 	 * @param uri      The URI of the device authorization endpoint. May be
-	 *                 {@code null} if the {@link #toHTTPRequest} method will not be
-	 *                 used.
-	 * @param clientID The client identifier. Corresponds to the {@code client_id}
-	 *                 parameter. Must not be {@code null}.
-	 * @param scope    The request scope. Corresponds to the optional {@code scope}
-	 *                 parameter. {@code null} if not specified.
+	 *                 {@code null} if the {@link #toHTTPRequest} method
+	 *                 will not be used.
+	 * @param clientID The client identifier. Corresponds to the
+	 *                 {@code client_id} parameter. Must not be {@code null}.
+	 * @param scope    The request scope. Corresponds to the optional
+	 *                 {@code scope} parameter. {@code null} if not
+	 *                 specified.
 	 */
 	public DeviceAuthorizationRequest(final URI uri, final ClientID clientID, final Scope scope) {
 
@@ -289,14 +286,17 @@ public class DeviceAuthorizationRequest extends AbstractOptionallyIdentifiedRequ
 	 * Creates a new device authorization request with extension and custom
 	 * parameters.
 	 *
-	 * @param uri          The URI of the device authorization endpoint. May be
-	 *                     {@code null} if the {@link #toHTTPRequest} method will
-	 *                     not be used.
+	 * @param uri          The URI of the device authorization endpoint.
+	 *                     May be {@code null} if the {@link #toHTTPRequest}
+	 *                     method will not be used.
 	 * @param clientID     The client identifier. Corresponds to the
-	 *                     {@code client_id} parameter. Must not be {@code null}.
+	 *                     {@code client_id} parameter. Must not be
+	 *                     {@code null}.
 	 * @param scope        The request scope. Corresponds to the optional
-	 *                     {@code scope} parameter. {@code null} if not specified.
-	 * @param customParams Custom parameters, empty map or {@code null} if none.
+	 *                     {@code scope} parameter. {@code null} if not
+	 *                     specified.
+	 * @param customParams Custom parameters, empty map or {@code null} if
+	 *                     none.
 	 */
 	public DeviceAuthorizationRequest(final URI uri,
 	                                  final ClientID clientID,
@@ -319,16 +319,19 @@ public class DeviceAuthorizationRequest extends AbstractOptionallyIdentifiedRequ
 
 
 	/**
-	 * Creates a new authenticated device authorization request with extension and
-	 * custom parameters.
+	 * Creates a new authenticated device authorization request with
+	 * extension and custom parameters.
 	 *
-	 * @param uri          The URI of the device authorization endpoint. May be
-	 *                     {@code null} if the {@link #toHTTPRequest} method will
-	 *                     not be used.
-	 * @param clientAuth   The client authentication. Must not be {@code null}.
+	 * @param uri          The URI of the device authorization endpoint.
+	 *                     May be {@code null} if the {@link #toHTTPRequest}
+	 *                     method will not be used.
+	 * @param clientAuth   The client authentication. Must not be
+	 *                     {@code null}.
 	 * @param scope        The request scope. Corresponds to the optional
-	 *                     {@code scope} parameter. {@code null} if not specified.
-	 * @param customParams Custom parameters, empty map or {@code null} if none.
+	 *                     {@code scope} parameter. {@code null} if not
+	 *                     specified.
+	 * @param customParams Custom parameters, empty map or {@code null} if
+	 *                     none.
 	 */
 	public DeviceAuthorizationRequest(final URI uri,
 	                                  final ClientAuthentication clientAuth,
@@ -351,11 +354,11 @@ public class DeviceAuthorizationRequest extends AbstractOptionallyIdentifiedRequ
 
 
 	/**
-	 * Returns the registered (standard) OAuth 2.0 device authorization request
-	 * parameter names.
+	 * Returns the registered (standard) OAuth 2.0 device authorization
+	 * request parameter names.
 	 *
-	 * @return The registered OAuth 2.0 device authorization request parameter
-	 *         names, as a unmodifiable set.
+	 * @return The registered OAuth 2.0 device authorization request
+	 *         parameter names, as a unmodifiable set.
 	 */
 	public static Set<String> getRegisteredParameterNames() {
 
@@ -377,8 +380,8 @@ public class DeviceAuthorizationRequest extends AbstractOptionallyIdentifiedRequ
 	/**
 	 * Returns the additional custom parameters.
 	 *
-	 * @return The additional custom parameters as a unmodifiable map, empty map if
-	 *         none.
+	 * @return The additional custom parameters as a unmodifiable map,
+	 *         empty map if none.
 	 */
 	public Map<String, List<String>> getCustomParameters() {
 
@@ -447,25 +450,25 @@ public class DeviceAuthorizationRequest extends AbstractOptionallyIdentifiedRequ
 
 
 	/**
-	 * Parses an device authorization request from the specified HTTP request.
+	 * Parses an device authorization request from the specified HTTP
+	 * request.
 	 *
-	 * <p>
-	 * Example HTTP request (GET):
+	 * <p>Example HTTP request (GET):
 	 *
 	 * <pre>
-	* POST /device_authorization HTTP/1.1
-	* Host: server.example.com
-	* Content-Type: application/x-www-form-urlencoded
-	*
-	* client_id=459691054427
+	 * POST /device_authorization HTTP/1.1
+	 * Host: server.example.com
+	 * Content-Type: application/x-www-form-urlencoded
+	 *
+	 * client_id=459691054427
 	 * </pre>
 	 *
 	 * @param httpRequest The HTTP request. Must not be {@code null}.
 	 *
 	 * @return The device authorization request.
 	 *
-	 * @throws ParseException If the HTTP request couldn't be parsed to an device
-	 *                        authorization request.
+	 * @throws ParseException If the HTTP request couldn't be parsed to an
+	 *                        device authorization request.
 	 */
 	public static DeviceAuthorizationRequest parse(final HTTPRequest httpRequest) throws ParseException {
 

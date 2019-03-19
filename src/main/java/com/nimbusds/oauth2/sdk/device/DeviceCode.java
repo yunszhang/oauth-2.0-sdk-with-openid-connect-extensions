@@ -17,27 +17,30 @@
 
 package com.nimbusds.oauth2.sdk.device;
 
+
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.oauth2.sdk.id.Identifier;
 
+
 /**
  * Device code.
  *
- * <p>
- * Related specifications:
+ * <p>Related specifications:
  *
  * <ul>
- * <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
+ *     <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
  * </ul>
  */
 @Immutable
 public final class DeviceCode extends Identifier {
 
+	
 	/**
 	 * Creates a new device code with the specified value.
 	 *
-	 * @param value The code value. Must not be {@code null} or empty string.
+	 * @param value The code value. Must not be {@code null} or empty
+	 *              string.
 	 */
 	public DeviceCode(final String value) {
 
@@ -46,11 +49,11 @@ public final class DeviceCode extends Identifier {
 
 
 	/**
-	 * Creates a new device code with a randomly generated value of the specified
-	 * byte length, Base64URL-encoded.
+	 * Creates a new device code with a randomly generated value of the
+	 * specified byte length, Base64URL-encoded.
 	 *
-	 * @param byteLength The byte length of the value to generate. Must be greater
-	 *                   than one.
+	 * @param byteLength The byte length of the value to generate. Must be
+	 *                   greater than one.
 	 */
 	public DeviceCode(final int byteLength) {
 
@@ -59,8 +62,8 @@ public final class DeviceCode extends Identifier {
 
 
 	/**
-	 * Creates a new device code with a randomly generated 256-bit (32-byte) value,
-	 * Base64URL-encoded.
+	 * Creates a new device code with a randomly generated 256-bit (32-byte)
+	 * value, Base64URL-encoded.
 	 */
 	public DeviceCode() {
 
