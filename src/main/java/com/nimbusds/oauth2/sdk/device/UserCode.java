@@ -143,7 +143,7 @@ public final class UserCode extends Identifier {
 	 */
 	public String getStrippedValue() {
 
-		return stripNonCharSet(getValue(), getCharset());
+		return stripIllegalChars(getValue(), getCharset());
 	}
 
 
@@ -182,7 +182,7 @@ public final class UserCode extends Identifier {
 	 *                {@code null} all characters are retained.
 	 * @return The {@code value} with all invalid characters removed.
 	 */
-	public static String stripNonCharSet(final String value, final String charset) {
+	public static String stripIllegalChars(final String value, final String charset) {
 
 		if (charset == null)
 			return value.toUpperCase();
