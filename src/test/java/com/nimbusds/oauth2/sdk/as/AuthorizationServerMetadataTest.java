@@ -73,8 +73,9 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("authorization_encryption_alg_values_supported"));
 		assertTrue(paramNames.contains("authorization_encryption_enc_values_supported"));
+		assertTrue(paramNames.contains("device_authorization_endpoint"));
 		
-		assertEquals(29, paramNames.size());
+		assertEquals(30, paramNames.size());
 	}
 	
 	

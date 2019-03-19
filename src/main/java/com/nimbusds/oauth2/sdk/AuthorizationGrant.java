@@ -21,6 +21,7 @@ package com.nimbusds.oauth2.sdk;
 import java.util.List;
 import java.util.Map;
 
+import com.nimbusds.oauth2.sdk.device.DeviceCodeGrant;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 
 
@@ -36,6 +37,7 @@ import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
  *     <li>{@link GrantType#REFRESH_TOKEN Refresh token}
  *     <li>{@link GrantType#JWT_BEARER}
  *     <li>{@link GrantType#SAML2_BEARER}
+ *     <li>{@link GrantType#DEVICE_CODE}
  * </ul>
  *
  * <p>Related specifications:
@@ -140,6 +142,10 @@ public abstract class AuthorizationGrant {
 		} else if (grantType.equals(GrantType.SAML2_BEARER)) {
 
 			return SAML2BearerGrant.parse(params);
+
+		} else if (grantType.equals(GrantType.DEVICE_CODE)) {
+
+			return DeviceCodeGrant.parse(params);
 
 		} else {
 

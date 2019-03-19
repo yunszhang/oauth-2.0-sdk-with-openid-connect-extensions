@@ -46,7 +46,7 @@ public class Identifier implements Serializable, Comparable<Identifier>, JSONAwa
 	/**
 	 * The secure random generator.
 	 */
-	private static final SecureRandom secureRandom = new SecureRandom();
+	protected static final SecureRandom secureRandom = new SecureRandom();
 
 
 	/**
