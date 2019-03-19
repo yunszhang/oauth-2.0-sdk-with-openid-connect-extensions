@@ -32,6 +32,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
 import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.device.DeviceCodeGrant;
 
 
 /**
@@ -133,5 +134,19 @@ public class AuthorizationGrantTest extends TestCase {
 		assertEquals(GrantType.SAML2_BEARER, grant.getType());
 		assertEquals("abc", grant.getAssertion());
 		assertEquals("abc", grant.getSAML2Assertion().toString());
+	}
+
+	
+	public void testParseDeviceCode()
+		throws Exception {
+
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList(GrantType.DEVICE_CODE.getValue()));
+		params.put("device_code", Collections.singletonList("abc"));
+
+		DeviceCodeGrant grant = (DeviceCodeGrant)AuthorizationGrant.parse(params);
+
+		assertEquals(GrantType.DEVICE_CODE, grant.getType());
+		assertEquals("abc", grant.getDeviceCode().getValue());
 	}
 }

@@ -53,6 +53,8 @@ import net.minidev.json.JSONObject;
  *         Access Tokens (draft-ietf-oauth-mtls-12)
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
+ *     <li>OAuth 2.0 Device Flow for Browserless and Input Constrained Devices
+ *         (draft-ietf-oauth-device-flow-14)
  * </ul>
  */
 public class AuthorizationServerMetadata {
@@ -94,6 +96,7 @@ public class AuthorizationServerMetadata {
 		p.add("authorization_signing_alg_values_supported");
 		p.add("authorization_encryption_alg_values_supported");
 		p.add("authorization_encryption_enc_values_supported");
+		p.add("device_authorization_endpoint");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 	
@@ -319,6 +322,12 @@ public class AuthorizationServerMetadata {
 	 * Custom (not-registered) parameters.
 	 */
 	private final JSONObject customParameters = new JSONObject();
+	
+	
+	/**
+	 * The device authorization endpoint.
+	 */
+	private URI deviceAuthzEndpoint;
 	
 	
 	/**
@@ -1252,6 +1261,32 @@ public class AuthorizationServerMetadata {
 	
 	
 	/**
+	 * Gets the device authorization endpoint URI. Corresponds the
+	 * {@code device_authorization_endpoint} metadata field.
+	 *
+	 * @return The device authorization endpoint URI, {@code null} if not
+	 *         specified.
+	 */
+	public URI getDeviceAuthorizationEndpointURI() {
+		
+		return deviceAuthzEndpoint;
+	}
+	
+	
+	/**
+	 * Sets the device authorization endpoint URI. Corresponds the
+	 * {@code device_authorization_endpoint} metadata field.
+	 *
+	 * @param authzEndpoint The device authorization endpoint URI,
+	 *                      {@code null} if not specified.
+	 */
+	public void setDeviceAuthorizationEndpointURI(final URI deviceAuthzEndpoint) {
+		
+		this.deviceAuthzEndpoint = deviceAuthzEndpoint;
+	}
+	
+	
+	/**
 	 * Gets the specified custom (not registered) parameter.
 	 *
 	 * @param name The parameter name. Must not be {@code null}.
@@ -1565,6 +1600,9 @@ public class AuthorizationServerMetadata {
 			
 			o.put("authorization_encryption_enc_values_supported", stringList);
 		}
+
+		if (deviceAuthzEndpoint != null)
+			o.put("device_authorization_endpoint", deviceAuthzEndpoint.toString());
 		
 		// Append any custom (not registered) parameters
 		o.putAll(customParameters);
@@ -1613,6 +1651,7 @@ public class AuthorizationServerMetadata {
 		as.jwkSetURI = JSONObjectUtils.getURI(jsonObject, "jwks_uri", null);
 		as.introspectionEndpoint = JSONObjectUtils.getURI(jsonObject, "introspection_endpoint", null);
 		as.revocationEndpoint = JSONObjectUtils.getURI(jsonObject, "revocation_endpoint", null);
+		as.deviceAuthzEndpoint = JSONObjectUtils.getURI(jsonObject, "device_authorization_endpoint", null);
 		
 		// AS capabilities
 		if (jsonObject.get("scopes_supported") != null) {
