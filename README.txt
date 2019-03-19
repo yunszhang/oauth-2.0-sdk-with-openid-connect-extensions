@@ -1,6 +1,6 @@
 Nimbus OAuth 2.0 SDK with OpenID Connect extensions
 
-Copyright (c) Connect2id Ltd., 2012 - 2018
+Copyright (c) Connect2id Ltd., 2012 - 2019
 
 
 README
@@ -129,6 +129,8 @@ This SDK version implements the following standards and drafts:
     * OAuth 2.0 Incremental Authorization
       (draft-ietf-oauth-incremental-authz-00)
 
+    * OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
+
 	* OpenID Connect Core 1.0 (2014-02-25)
 
 	* OpenID Connect Discovery 1.0 (2014-02-25)
@@ -159,4 +161,4 @@ This SDK is provided under the terms of the Apache 2.0 licence.
 Questions or comments? Email support@connect2id.com
 
 
-2018-11-14
+2019-03-19
