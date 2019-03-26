@@ -101,7 +101,7 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 	 * should be and easy to remember as end-users will be asked to
 	 * manually type it into their user-agent.
 	 */
-	private final URI verificationUri;
+	private final URI verificationURI;
 
 
 	/**
@@ -109,7 +109,7 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 	 * information with the same function as the "user_code"), designed for
 	 * non-textual transmission.
 	 */
-	private final URI verificationUriComplete;
+	private final URI verificationURIComplete;
 
 
 	/**
@@ -139,7 +139,7 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 	 *                        {@code null}.
 	 * @param userCode        The user verification code. Must not be
 	 *                        {@code null}.
-	 * @param verificationUri The end-user verification URI on the
+	 * @param verificationURI The end-user verification URI on the
 	 *                        authorization server. Must not be
 	 *                        {@code null}.
 	 * @param lifetime        The lifetime in seconds of the "device_code"
@@ -147,10 +147,10 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 	 */
 	public DeviceAuthorizationSuccessResponse(final DeviceCode deviceCode,
 	                                          final UserCode userCode,
-	                                          final URI verificationUri,
+	                                          final URI verificationURI,
 	                                          final long lifetime) {
 
-		this(deviceCode, userCode, verificationUri, null, lifetime, 5, null);
+		this(deviceCode, userCode, verificationURI, null, lifetime, 5, null);
 	}
 
 
@@ -161,10 +161,10 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 	 *                                not be {@code null}.
 	 * @param userCode                The user verification code. Must not
 	 *                                be {@code null}.
-	 * @param verificationUri         The end-user verification URI on the
+	 * @param verificationURI         The end-user verification URI on the
 	 *                                authorization server. Must not be
 	 *                                {@code null}.
-	 * @param verificationUriComplete The end-user verification URI on the
+	 * @param verificationURIComplete The end-user verification URI on the
 	 *                                authorization server that includes
 	 *                                the user_code. Can be {@code null}.
 	 * @param lifetime                The lifetime in seconds of the
@@ -179,8 +179,8 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 	 */
 	public DeviceAuthorizationSuccessResponse(final DeviceCode deviceCode,
 	                                          final UserCode userCode,
-	                                          final URI verificationUri,
-	                                          final URI verificationUriComplete,
+	                                          final URI verificationURI,
+	                                          final URI verificationURIComplete,
 	                                          final long lifetime,
 	                                          final long interval,
 	                                          final Map<String, Object> customParams) {
@@ -195,12 +195,12 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 
 		this.userCode = userCode;
 
-		if (verificationUri == null)
+		if (verificationURI == null)
 			throw new IllegalArgumentException("The verification_uri must not be null");
 
-		this.verificationUri = verificationUri;
+		this.verificationURI = verificationURI;
 
-		this.verificationUriComplete = verificationUriComplete;
+		this.verificationURIComplete = verificationURIComplete;
 
 		if (lifetime <= 0)
 			throw new IllegalArgumentException("The lifetime must be greater than 0");
@@ -258,9 +258,19 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 	 * 
 	 * @return The end-user verification URI on the authorization server.
 	 */
+	public URI getVerificationURI() {
+
+		return verificationURI;
+	}
+
+
+	/**
+	 * @see #getVerificationURI()
+	 */
+	@Deprecated
 	public URI getVerificationUri() {
 
-		return verificationUri;
+		return getVerificationURI();
 	}
 
 
@@ -270,9 +280,19 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 	 * @return The end-user verification URI that includes the user_code,
 	 *         or {@code null} if not specified.
 	 */
+	public URI getVerificationURIComplete() {
+
+		return verificationURIComplete;
+	}
+
+
+	/**
+	 * @see #getVerificationURIComplete()
+	 */
+	@Deprecated
 	public URI getVerificationUriComplete() {
 
-		return verificationUriComplete;
+		return getVerificationURIComplete();
 	}
 
 
@@ -340,10 +360,10 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 		JSONObject o = new JSONObject();
 		o.put("device_code", getDeviceCode());
 		o.put("user_code", getUserCode());
-		o.put("verification_uri", getVerificationUri().toString());
+		o.put("verification_uri", getVerificationURI().toString());
 
-		if (getVerificationUriComplete() != null)
-			o.put("verification_uri_complete", getVerificationUriComplete().toString());
+		if (getVerificationURIComplete() != null)
+			o.put("verification_uri_complete", getVerificationURIComplete().toString());
 
 		o.put("expires_in", getLifetime());
 
@@ -387,8 +407,8 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 
 		DeviceCode deviceCode = new DeviceCode(JSONObjectUtils.getString(jsonObject, "device_code"));
 		UserCode userCode = new UserCode(JSONObjectUtils.getString(jsonObject, "user_code"));
-		URI verificationUri = JSONObjectUtils.getURI(jsonObject, "verification_uri");
-		URI verificationUriComplete = JSONObjectUtils.getURI(jsonObject, "verification_uri_complete", null);
+		URI verificationURI = JSONObjectUtils.getURI(jsonObject, "verification_uri");
+		URI verificationURIComplete = JSONObjectUtils.getURI(jsonObject, "verification_uri_complete", null);
 
 		// Parse lifetime
 		long lifetime;
@@ -442,8 +462,8 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 			}
 		}
 
-		return new DeviceAuthorizationSuccessResponse(deviceCode, userCode, verificationUri,
-		                verificationUriComplete, lifetime, interval, customParams);
+		return new DeviceAuthorizationSuccessResponse(deviceCode, userCode, verificationURI,
+		                verificationURIComplete, lifetime, interval, customParams);
 	}
 
 

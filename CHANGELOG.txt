@@ -1049,3 +1049,6 @@ version 6.5 (2018-12-15)
 version 6.6 (2019-03-19)
     * Adds new com.nimbusds.oauth2.sdk.device package implementing the OAuth
       2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15).
+
+version 6.6.1 (2019-03-26)
+    * Method naming convention fixes in DeviceAuthorizationSuccessResponse.
