@@ -20,6 +20,9 @@ package com.nimbusds.openid.connect.sdk.claims;
 
 import java.util.*;
 
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -29,8 +32,6 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.Nonce;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -646,6 +647,29 @@ public class IDTokenClaimsSet extends CommonClaimsSet {
 
 
 	/**
+	 * Parses an ID token claims set from the specified JSON object.
+	 *
+	 * @param jsonObject The JSON object to parse. Must not be
+	 *                   {@code null}.
+	 *
+	 * @return The ID token claims set.
+	 *
+	 * @throws ParseException If parsing failed.
+	 */
+	public static IDTokenClaimsSet parse(final JSONObject jsonObject)
+		throws ParseException {
+
+		try {
+			return new IDTokenClaimsSet(jsonObject);
+
+		} catch (IllegalArgumentException e) {
+			
+			throw new ParseException(e.getMessage(), e);
+		}
+	}
+
+
+	/**
 	 * Parses an ID token claims set from the specified JSON object string.
 	 *
 	 * @param json The JSON object string to parse. Must not be
@@ -658,14 +682,6 @@ public class IDTokenClaimsSet extends CommonClaimsSet {
 	public static IDTokenClaimsSet parse(final String json)
 		throws ParseException {
 
-		JSONObject jsonObject = JSONObjectUtils.parse(json);
-
-		try {
-			return new IDTokenClaimsSet(jsonObject);
-
-		} catch (IllegalArgumentException e) {
-
-			throw new ParseException(e.getMessage(), e);
-		}
+		return parse(JSONObjectUtils.parse(json));
 	}
 }
