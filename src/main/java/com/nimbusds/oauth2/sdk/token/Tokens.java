@@ -25,6 +25,7 @@ import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 
 
 /**
@@ -140,6 +141,17 @@ public class Tokens {
 			o.putAll(refreshToken.toJSONObject());
 
 		return o;
+	}
+	
+	
+	/**
+	 * Casts to OpenID Connect tokens.
+	 *
+	 * @return The OpenID Connect tokens (including an ID token).
+	 */
+	public OIDCTokens toOIDCTokens() {
+		
+		return (OIDCTokens)this;
 	}
 
 

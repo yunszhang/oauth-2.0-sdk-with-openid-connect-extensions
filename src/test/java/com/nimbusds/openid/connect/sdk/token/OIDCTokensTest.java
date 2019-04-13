@@ -22,10 +22,8 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
-import com.nimbusds.oauth2.sdk.token.AccessToken;
-import com.nimbusds.oauth2.sdk.token.AccessTokenType;
-import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
-import com.nimbusds.oauth2.sdk.token.RefreshToken;
+import com.nimbusds.oauth2.sdk.token.*;
+
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
@@ -305,5 +303,18 @@ public class OIDCTokensTest extends TestCase {
 		assertEquals("abc123", oidcTokens.getAccessToken().getValue());
 		assertEquals(60L, oidcTokens.getAccessToken().getLifetime());
 		assertEquals(AccessTokenType.BEARER, oidcTokens.getAccessToken().getType());
+	}
+	
+	
+	public void testCastFromTokens() {
+		
+		AccessToken accessToken = new BearerAccessToken(60L, Scope.parse("openid email"));
+		RefreshToken refreshToken = new RefreshToken();
+		
+		Tokens tokens = new OIDCTokens(ID_TOKEN, accessToken, refreshToken);
+		
+		OIDCTokens oidcTokens = tokens.toOIDCTokens();
+		
+		assertEquals(tokens, oidcTokens);
 	}
 }
