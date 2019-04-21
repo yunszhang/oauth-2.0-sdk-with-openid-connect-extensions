@@ -25,6 +25,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
@@ -39,7 +41,6 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.OrderedJSONObject;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -53,6 +54,7 @@ import net.minidev.json.JSONObject;
  *         Access Tokens (draft-ietf-oauth-mtls-12)
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
+ *     <li>Financial-grade API - Part 2: Read and Write API Security Profile
  *     <li>OAuth 2.0 Device Flow for Browserless and Input Constrained Devices
  *         (draft-ietf-oauth-device-flow-14)
  * </ul>
@@ -97,6 +99,7 @@ public class AuthorizationServerMetadata {
 		p.add("authorization_encryption_alg_values_supported");
 		p.add("authorization_encryption_enc_values_supported");
 		p.add("device_authorization_endpoint");
+		p.add("request_object_endpoint");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 	
@@ -228,6 +231,12 @@ public class AuthorizationServerMetadata {
 	
 	
 	/**
+	 * The request object endpoint.
+	 */
+	private URI requestObjectEndpoint;
+	
+	
+	/**
 	 * The supported JWS algorithms for request objects.
 	 */
 	private List<JWSAlgorithm> requestObjectJWSAlgs;
@@ -297,12 +306,12 @@ public class AuthorizationServerMetadata {
 	 */
 	private boolean tlsClientCertificateBoundAccessTokens = false;
 	
-	
 	/**
 	 * The supported JWS algorithms for JWT-encoded authorisation
 	 * responses.
 	 */
 	private List<JWSAlgorithm> authzJWSAlgs;
+	
 	
 	/**
 	 * The supported JWE algorithms for JWT-encoded authorisation
@@ -842,6 +851,31 @@ public class AuthorizationServerMetadata {
 	
 	
 	/**
+	 * Gets the request object endpoint. Corresponds to the
+	 * {@code request_object_endpoint} metadata field.
+	 *
+	 * @return The request object endpoint, {@code null} if not specified.
+	 */
+	public URI getRequestObjectEndpoint() {
+		
+		return requestObjectEndpoint;
+	}
+	
+	
+	/**
+	 * Sets the request object endpoint. Corresponds to the
+	 * {@code request_object_endpoint} metadata field.
+	 *
+	 * @param requestObjectEndpoint The request object endpoint,
+	 *                              {@code null} if not specified.
+	 */
+	public void setRequestObjectEndpoint(final URI requestObjectEndpoint) {
+		
+		this.requestObjectEndpoint = requestObjectEndpoint;
+	}
+	
+	
+	/**
 	 * Gets the supported JWS algorithms for request objects. Corresponds
 	 * to the {@code request_object_signing_alg_values_supported} metadata
 	 * field.
@@ -1277,8 +1311,8 @@ public class AuthorizationServerMetadata {
 	 * Sets the device authorization endpoint URI. Corresponds the
 	 * {@code device_authorization_endpoint} metadata field.
 	 *
-	 * @param authzEndpoint The device authorization endpoint URI,
-	 *                      {@code null} if not specified.
+	 * @param deviceAuthzEndpoint The device authorization endpoint URI,
+	 *                            {@code null} if not specified.
 	 */
 	public void setDeviceAuthorizationEndpointURI(final URI deviceAuthzEndpoint) {
 		
@@ -1503,6 +1537,10 @@ public class AuthorizationServerMetadata {
 				stringList.add(m.getValue());
 			
 			o.put("revocation_endpoint_auth_methods_supported", stringList);
+		}
+		
+		if (requestObjectEndpoint != null) {
+			o.put("request_object_endpoint", requestObjectEndpoint.toString());
 		}
 		
 		if (revocationEndpointJWSAlgs != null) {
@@ -1786,6 +1824,7 @@ public class AuthorizationServerMetadata {
 		
 		
 		// Request object
+		as.requestObjectEndpoint = JSONObjectUtils.getURI(jsonObject, "request_object_endpoint", null);
 		
 		if (jsonObject.get("request_object_signing_alg_values_supported") != null) {
 			

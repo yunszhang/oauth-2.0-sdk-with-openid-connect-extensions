@@ -70,6 +70,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("userinfo_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("userinfo_encryption_alg_values_supported"));
 		assertTrue(paramNames.contains("userinfo_encryption_enc_values_supported"));
+		assertTrue(paramNames.contains("request_object_endpoint"));
 		assertTrue(paramNames.contains("request_object_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("request_object_encryption_alg_values_supported"));
 		assertTrue(paramNames.contains("request_object_encryption_enc_values_supported"));
@@ -105,7 +106,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_encryption_enc_values_supported"));
 		assertTrue(paramNames.contains("device_authorization_endpoint"));
 
-		assertEquals(53, paramNames.size());
+		assertEquals(54, paramNames.size());
 	}
 
 
@@ -436,6 +437,9 @@ public class OIDCProviderMetadataTest extends TestCase {
 		meta.setRevocationEndpointJWSAlgs(Collections.singletonList(JWSAlgorithm.RS256));
 		assertEquals(Collections.singletonList(JWSAlgorithm.RS256), meta.getRevocationEndpointJWSAlgs());
 
+		meta.setRequestObjectEndpoint(new URI("https://c2id.com/requests"));
+		assertEquals(new URI("https://c2id.com/requests"), meta.getRequestObjectEndpoint());
+		
 		List<JWSAlgorithm> requestObjectJWSAlgs = new LinkedList<>();
 		requestObjectJWSAlgs.add(JWSAlgorithm.HS256);
 		meta.setRequestObjectJWSAlgs(requestObjectJWSAlgs);
@@ -617,7 +621,9 @@ public class OIDCProviderMetadataTest extends TestCase {
 		
 		assertEquals(Collections.singletonList(ClientAuthenticationMethod.PRIVATE_KEY_JWT), meta.getRevocationEndpointAuthMethods());
 		assertEquals(Collections.singletonList(JWSAlgorithm.RS256), meta.getRevocationEndpointJWSAlgs());
-
+		
+		assertEquals(new URI("https://c2id.com/requests"), meta.getRequestObjectEndpoint());
+		
 		assertEquals(JWSAlgorithm.HS256, meta.getRequestObjectJWSAlgs().get(0));
 
 		assertEquals(JWEAlgorithm.A128KW, meta.getRequestObjectJWEAlgs().get(0));

@@ -1059,3 +1059,8 @@ version 6.7 (2019-03-12)
 
 version 6.8 (2019-03-13)
     * Adds new Tokens.toOIDCTokens() method.
+
+version 6.9 (2019-04-21)
+    * Adds support for the request_object_endpoint Authorisation Server
+      metadata parameter, defined in Financial-grade API - Part 2: Read and
+      Write API Security Profile, section 7.
