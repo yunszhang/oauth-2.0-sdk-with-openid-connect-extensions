@@ -297,4 +297,17 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		
 		assertEquals(endpoint, as.getRequestObjectEndpoint());
 	}
+	
+	
+	public void testRequestURIParamSupported_defaultFalse() throws ParseException {
+		
+		AuthorizationServerMetadata as = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
+		assertFalse(as.supportsRequestURIParam());
+		
+		as.applyDefaults();
+		assertFalse(as.supportsRequestURIParam());
+		
+		JSONObject jsonObject = as.toJSONObject();
+		assertFalse(JSONObjectUtils.getBoolean(jsonObject, "request_uri_parameter_supported"));
+	}
 }

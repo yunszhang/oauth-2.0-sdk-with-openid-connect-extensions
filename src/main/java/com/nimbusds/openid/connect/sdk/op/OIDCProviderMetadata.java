@@ -247,6 +247,9 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 			throw new IllegalArgumentException("The public JWK set URI must not be null");
 
 		setJWKSetURI(jwkSetURI);
+		
+		// Default OpenID Connect setting is supported
+		setSupportsRequestParam(true);
 	}
 
 
@@ -978,6 +981,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		op.setRegistrationEndpointURI(as.getRegistrationEndpointURI());
 		op.setIntrospectionEndpointURI(as.getIntrospectionEndpointURI());
 		op.setRevocationEndpointURI(as.getRevocationEndpointURI());
+		op.setRequestObjectEndpoint(as.getRequestObjectEndpoint());
 		op.userInfoEndpoint = JSONObjectUtils.getURI(jsonObject, "userinfo_endpoint", null);
 		op.checkSessionIframe = JSONObjectUtils.getURI(jsonObject, "check_session_iframe", null);
 		op.endSessionEndpoint = JSONObjectUtils.getURI(jsonObject, "end_session_endpoint", null);

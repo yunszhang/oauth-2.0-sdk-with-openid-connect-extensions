@@ -1064,3 +1064,7 @@ version 6.9 (2019-04-21)
     * Adds support for the request_object_endpoint Authorisation Server
       metadata parameter, defined in Financial-grade API - Part 2: Read and
       Write API Security Profile, section 7.
+    * The default value for the Authorisation Server metadata field
+      request_uri_parameter_supported must be false (whereas it's true for
+      OpenID Provider metadata) (iss #264).
+

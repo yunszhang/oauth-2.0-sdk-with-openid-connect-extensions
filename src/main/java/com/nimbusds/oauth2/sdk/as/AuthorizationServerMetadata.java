@@ -265,7 +265,7 @@ public class AuthorizationServerMetadata {
 	 * If {@code true} the {@code request_uri} parameter is supported, else
 	 * not.
 	 */
-	private boolean requestURIParamSupported = true;
+	private boolean requestURIParamSupported = false;
 	
 	
 	/**
