@@ -60,7 +60,7 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  * </ul>
  */
 @Immutable
-public final class RequestObjectPOSTSuccessResponse implements SuccessResponse {
+public final class RequestObjectPOSTSuccessResponse extends RequestObjectPOSTResponse implements SuccessResponse {
 	
 	
 	/**
@@ -221,7 +221,7 @@ public final class RequestObjectPOSTSuccessResponse implements SuccessResponse {
 	
 	
 	/**
-	 * Parses an request object POST success response from the specified
+	 * Parses a request object POST success response from the specified
 	 * HTTP response.
 	 *
 	 * @param httpResponse The HTTP response. Must not be {@code null}.

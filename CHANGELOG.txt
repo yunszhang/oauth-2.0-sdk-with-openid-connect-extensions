@@ -1061,10 +1061,10 @@ version 6.8 (2019-03-13)
     * Adds new Tokens.toOIDCTokens() method.
 
 version 6.9 (2019-04-23)
-    * Adds RequestObjectPOSTRequest and RequestObjectPOSTSuccessResponse for
-      representing POST requests and responses for the request object endpoint,
-      as specified in Financial-grade API - Part 2: Read and Write API Security
-      Profile, section 7.
+    * Adds RequestObjectPOSTRequest, RequestObjectPOSTResponse,
+      RequestObjectPOSTSuccessResponse and RequestObjectPOSTErrorResponse for
+      dealing with the request object endpoint, as specified in Financial-grade
+      API - Part 2: Read and Write API Security Profile, section 7.
     * Adds support for the request_object_endpoint parameter in
       AuthorizationServerMetadata, as defined in Financial-grade API - Part 2:
       Read and Write API Security Profile, section 7.
