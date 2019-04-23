@@ -48,7 +48,7 @@ import com.nimbusds.oauth2.sdk.id.State;
 public class RequestObjectPOSTRequestTest extends TestCase {
 	
 	
-	private static JWT createRequestJWT() throws JOSEException, ParseException {
+	private static JWT createRequestJWT() throws JOSEException {
 		
 		RSAKey rsaJWK = new RSAKeyGenerator(2048)
 			.keyID("s1")
@@ -81,7 +81,7 @@ public class RequestObjectPOSTRequestTest extends TestCase {
 		
 		HTTPRequest httpRequest = postRequest.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(CommonContentTypes.APPLICATION_JOSE.toString(), httpRequest.getContentType().toString());
+		assertEquals(CommonContentTypes.APPLICATION_JWT.toString(), httpRequest.getContentType().toString());
 		assertEquals(jwt.serialize(), httpRequest.getQuery());
 		
 		postRequest = RequestObjectPOSTRequest.parse(httpRequest);

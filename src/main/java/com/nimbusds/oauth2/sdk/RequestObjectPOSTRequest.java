@@ -196,7 +196,7 @@ public final class RequestObjectPOSTRequest extends AbstractOptionallyAuthentica
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, url);
 		
 		if (getRequestObject() != null) {
-			httpRequest.setContentType(CommonContentTypes.APPLICATION_JOSE);
+			httpRequest.setContentType(CommonContentTypes.APPLICATION_JWT);
 			httpRequest.setQuery(getRequestObject().serialize());
 		} else if (getRequestJSONObject() != null) {
 			httpRequest.setContentType(CommonContentTypes.APPLICATION_JSON);
