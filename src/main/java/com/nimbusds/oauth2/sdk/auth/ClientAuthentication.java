@@ -152,7 +152,7 @@ public abstract class ClientAuthentication {
 		
 		// PKI bound client TLS?
 		if (StringUtils.isNotBlank(httpRequest.getClientX509CertificateSubjectDN())) {
-			return TLSClientAuthentication.parse(httpRequest);
+			return PKITLSClientAuthentication.parse(httpRequest);
 		}
 		
 		return null; // no auth

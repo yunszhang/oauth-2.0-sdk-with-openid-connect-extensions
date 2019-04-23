@@ -1719,4 +1719,78 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(Collections.singletonList("https://example.com/cb"), finalParameters.get("redirect_uri"));
 		assertEquals(5, finalParameters.size());
 	}
+	
+	
+	public void testToJWTClaimsSet() throws java.text.ParseException {
+		
+		AuthenticationRequest ar = new AuthenticationRequest.Builder(
+			new ResponseType(ResponseType.Value.CODE),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.state(new State())
+			.build();
+		
+		JWTClaimsSet jwtClaimsSet = ar.toJWTClaimsSet();
+		
+		assertEquals(ar.getResponseType().toString(), jwtClaimsSet.getStringClaim("response_type"));
+		assertEquals(ar.getClientID().toString(), jwtClaimsSet.getStringClaim("client_id"));
+		assertEquals(ar.getScope().toString(), jwtClaimsSet.getStringClaim("scope"));
+		assertEquals(ar.getRedirectionURI().toString(), jwtClaimsSet.getStringClaim("redirect_uri"));
+		assertEquals(ar.getState().toString(), jwtClaimsSet.getStringClaim("state"));
+		
+		assertEquals(5, jwtClaimsSet.getClaims().size());
+	}
+	
+	
+	public void testToJWTClaimsSet_withMaxAge() throws java.text.ParseException {
+		
+		AuthenticationRequest ar = new AuthenticationRequest.Builder(
+			new ResponseType(ResponseType.Value.CODE),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.state(new State())
+			.maxAge(3600)
+			.build();
+		
+		JWTClaimsSet jwtClaimsSet = ar.toJWTClaimsSet();
+		
+		assertEquals(ar.getResponseType().toString(), jwtClaimsSet.getStringClaim("response_type"));
+		assertEquals(ar.getClientID().toString(), jwtClaimsSet.getStringClaim("client_id"));
+		assertEquals(ar.getScope().toString(), jwtClaimsSet.getStringClaim("scope"));
+		assertEquals(ar.getRedirectionURI().toString(), jwtClaimsSet.getStringClaim("redirect_uri"));
+		assertEquals(ar.getState().toString(), jwtClaimsSet.getStringClaim("state"));
+		assertEquals(ar.getMaxAge(), jwtClaimsSet.getIntegerClaim("max_age").intValue());
+		
+		assertEquals(6, jwtClaimsSet.getClaims().size());
+	}
+	
+	
+	public void testToJWTClaimsSet_withMaxAge_withMultipleResourceParams() throws java.text.ParseException {
+		
+		AuthenticationRequest ar = new AuthenticationRequest.Builder(
+			new ResponseType(ResponseType.Value.CODE),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.state(new State())
+			.maxAge(3600)
+			.resources(URI.create("https://one.rs.com"), URI.create("https://two.rs.com"))
+			.build();
+		
+		JWTClaimsSet jwtClaimsSet = ar.toJWTClaimsSet();
+		
+		assertEquals(ar.getResponseType().toString(), jwtClaimsSet.getStringClaim("response_type"));
+		assertEquals(ar.getClientID().toString(), jwtClaimsSet.getStringClaim("client_id"));
+		assertEquals(ar.getScope().toString(), jwtClaimsSet.getStringClaim("scope"));
+		assertEquals(ar.getRedirectionURI().toString(), jwtClaimsSet.getStringClaim("redirect_uri"));
+		assertEquals(ar.getState().toString(), jwtClaimsSet.getStringClaim("state"));
+		assertEquals(ar.getMaxAge(), jwtClaimsSet.getIntegerClaim("max_age").intValue());
+		assertEquals(ar.getResources().get(0).toString(), jwtClaimsSet.getStringListClaim("resource").get(0));
+		assertEquals(ar.getResources().get(1).toString(), jwtClaimsSet.getStringListClaim("resource").get(1));
+		assertEquals(ar.getResources().size(), jwtClaimsSet.getStringListClaim("resource").size());
+		
+		assertEquals(7, jwtClaimsSet.getClaims().size());
+	}
 }

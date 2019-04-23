@@ -22,7 +22,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
@@ -35,8 +39,6 @@ import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.util.*;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
-import net.jcip.annotations.Immutable;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -1282,8 +1284,29 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 		return params;
 	}
-
-
+	
+	
+	@Override
+	public JWTClaimsSet toJWTClaimsSet() {
+		
+		JWTClaimsSet jwtClaimsSet = super.toJWTClaimsSet();
+		
+		if (jwtClaimsSet.getClaim("max_age") != null) {
+			// Convert max_age to number in JSON object
+			try {
+				String maxAgeString = jwtClaimsSet.getStringClaim("max_age");
+				JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder(jwtClaimsSet);
+				builder.claim("max_age", Integer.parseInt(maxAgeString));
+				return builder.build();
+			} catch (java.text.ParseException e) {
+				throw new SerializeException(e.getMessage());
+			}
+		}
+		
+		return jwtClaimsSet;
+	}
+	
+	
 	/**
 	 * Parses an OpenID Connect authentication request from the specified
 	 * URI query parameters.

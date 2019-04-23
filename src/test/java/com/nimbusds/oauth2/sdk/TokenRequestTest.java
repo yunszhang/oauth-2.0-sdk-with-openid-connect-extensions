@@ -185,7 +185,7 @@ public class TokenRequestTest extends TestCase {
 		throws Exception {
 
 		URI uri = new URI("https://c2id.com/token");
-		ClientAuthentication clientAuth = new TLSClientAuthentication(new ClientID("123"), (SSLSocketFactory) null);
+		ClientAuthentication clientAuth = new PKITLSClientAuthentication(new ClientID("123"), (SSLSocketFactory) null);
 		AuthorizationCodeGrant grant = new AuthorizationCodeGrant(new AuthorizationCode("abc"), null);
 
 		TokenRequest request = new TokenRequest(uri, clientAuth, grant);

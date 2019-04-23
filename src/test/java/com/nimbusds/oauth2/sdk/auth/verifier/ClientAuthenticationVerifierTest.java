@@ -608,7 +608,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 	public void testTLSClientAuth_ok()
 		throws Exception {
 		
-		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
+		ClientAuthentication clientAuthentication = new PKITLSClientAuthentication(
 			VALID_CLIENT_ID,
 			VALID_SUBJECT_DN
 		);
@@ -620,7 +620,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 	public void testTLSClientAuth_badSubjectDN()
 		throws Exception {
 		
-		ClientAuthentication clientAuthentication = new TLSClientAuthentication(
+		ClientAuthentication clientAuthentication = new PKITLSClientAuthentication(
 			VALID_CLIENT_ID,
 			"cn=invalid-subject"
 		);

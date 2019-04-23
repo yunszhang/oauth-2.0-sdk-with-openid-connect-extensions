@@ -18,47 +18,39 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.mail.internet.ContentType;
 import javax.net.ssl.SSLSocketFactory;
 
-import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.SerializeException;
+import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
-import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
-import net.jcip.annotations.Immutable;
 
 
 /**
- * PKI mutual TLS client authentication at the Token endpoint. The client
- * certificate is PKI bound, as opposed to
- * {@link SelfSignedTLSClientAuthentication self_signed_tls_client_auth} which
- * relies on a self-signed certificate. Implements
- * {@link ClientAuthenticationMethod#TLS_CLIENT_AUTH}.
- *
- * <p>Related specifications:
- *
- * <ul>
- *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-08), section 2.1.
- * </ul>
+ * The base abstract class for mutual TLS client authentication at the Token
+ * endpoint.
  */
-@Immutable
-public class TLSClientAuthentication extends AbstractTLSClientAuthentication {
+public abstract class TLSClientAuthentication extends ClientAuthentication {
 	
 	
 	/**
-	 * The client X.509 certificate subject DN.
+	 * The SSL socket factory for an outgoing HTTPS request, {@code null}
+	 * to use the default one.
 	 */
-	private final String certSubjectDN;
+	private final SSLSocketFactory sslSocketFactory;
 	
 	
 	/**
-	 * Creates a new PKI mutual TLS client authentication. This constructor
-	 * is intended for an outgoing token request.
+	 * Creates a new abstract mutual TLS client authentication. This
+	 * constructor is intended for an outgoing token request.
 	 *
+	 * @param method           The client authentication method. Must not
+	 *                         be {@code null}.
 	 * @param clientID         The client identifier. Must not be
 	 *                         {@code null}.
 	 * @param sslSocketFactory The SSL socket factory to use for the
@@ -66,84 +58,70 @@ public class TLSClientAuthentication extends AbstractTLSClientAuthentication {
 	 *                         client certificate(s), {@code null} to use
 	 *                         the default one.
 	 */
-	public TLSClientAuthentication(final ClientID clientID,
-				       final SSLSocketFactory sslSocketFactory) {
+	protected TLSClientAuthentication(final ClientAuthenticationMethod method,
+					  final ClientID clientID,
+					  final SSLSocketFactory sslSocketFactory) {
 		
-		super(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientID, sslSocketFactory);
-		certSubjectDN = null;
+		super(method, clientID);
+		this.sslSocketFactory = sslSocketFactory;
 	}
 	
 	
 	/**
-	 * Creates a new PKI mutual TLS client authentication. This constructor
-	 * is intended for a received token request.
+	 * Creates a new abstract mutual TLS client authentication. This
+	 * constructor is intended for a received token request.
 	 *
-	 * @param clientID      The client identifier. Must not be
-	 *                      {@code null}.
-	 * @param certSubjectDN The subject DN of the received validated client
-	 *                      X.509 certificate. Must not be {@code null}.
+	 * @param method   The client authentication method. Must not be
+	 *                 {@code null}.
+	 * @param clientID The client identifier. Must not be {@code null}.
 	 */
-	public TLSClientAuthentication(final ClientID clientID,
-				       final String certSubjectDN) {
-		
-		super(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientID);
-		
-		if (certSubjectDN == null) {
-			throw new IllegalArgumentException("The X.509 client certificate subject DN must not be null");
-		}
-		this.certSubjectDN = certSubjectDN;
+	protected TLSClientAuthentication(final ClientAuthenticationMethod method,
+					  final ClientID clientID) {
+		super(method, clientID);
+		sslSocketFactory = null;
 	}
 	
 	
 	/**
-	 * Gets the subject DN of the received validated client X.509
-	 * certificate.
+	 * Returns the SSL socket factory to use for an outgoing HTTPS request
+	 * and to present the client certificate(s).
 	 *
-	 * @return The subject DN.
+	 * @return The SSL socket factory, {@code null} to use the default one.
 	 */
-	public String getClientX509CertificateSubjectDN() {
+	public SSLSocketFactory getSSLSocketFactory() {
 		
-		return certSubjectDN;
+		return sslSocketFactory;
 	}
 	
 	
-	/**
-	 * Parses a PKI mutual TLS client authentication from the specified
-	 * HTTP request.
-	 *
-	 * @param httpRequest The HTTP request to parse. Must not be
-	 *                    {@code null} and must include a validated client
-	 *                    X.509 certificate.
-	 *
-	 * @return The PKI mutual TLS client authentication.
-	 *
-	 * @throws ParseException If the {@code client_id} or client X.509
-	 *                        certificate is missing.
-	 */
-	public static TLSClientAuthentication parse(final HTTPRequest httpRequest)
-		throws ParseException {
+	@Override
+	public void applyTo(final HTTPRequest httpRequest) {
 		
-		String query = httpRequest.getQuery();
+		if (httpRequest.getMethod() != HTTPRequest.Method.POST)
+			throw new SerializeException("The HTTP request method must be POST");
 		
-		if (query == null) {
-			throw new ParseException("Missing HTTP POST request entity body");
+		ContentType ct = httpRequest.getContentType();
+		
+		if (ct == null)
+			throw new SerializeException("Missing HTTP Content-Type header");
+		
+		if (ct.match(CommonContentTypes.APPLICATION_JSON)) {
+			
+			// Possibly request object POST request, nothing to set
+			
+		} else if (ct.match(CommonContentTypes.APPLICATION_URLENCODED)) {
+			
+			// Token or similar request
+			Map<String,List<String>> params = httpRequest.getQueryParameters();
+			params.put("client_id", Collections.singletonList(getClientID().getValue()));
+			String queryString = URLUtils.serializeParameters(params);
+			httpRequest.setQuery(queryString);
+			
+		} else {
+			throw new SerializeException("The HTTP Content-Type header must be " + CommonContentTypes.APPLICATION_URLENCODED);
 		}
 		
-		Map<String,List<String>> params = URLUtils.parseParameters(query);
-		
-		String clientIDString = MultivaluedMapUtils.getFirstValue(params, "client_id");
-		
-		if (StringUtils.isBlank(clientIDString)) {
-			throw new ParseException("Missing client_id parameter");
-		}
-		
-		if (httpRequest.getClientX509CertificateSubjectDN() == null) {
-			throw new ParseException("Missing client X.509 certificate subject DN");
-		}
-		
-		return new TLSClientAuthentication(
-			new ClientID(clientIDString),
-			httpRequest.getClientX509CertificateSubjectDN()
-		);
+		// If set for an outgoing request
+		httpRequest.setSSLSocketFactory(sslSocketFactory);
 	}
 }

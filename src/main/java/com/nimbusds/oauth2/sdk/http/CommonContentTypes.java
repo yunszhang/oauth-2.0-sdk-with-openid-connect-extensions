@@ -49,6 +49,12 @@ public final class CommonContentTypes {
 	
 	
 	/**
+	 * Content type {@code application/jose}.
+	 */
+	public static final ContentType APPLICATION_JOSE = new ContentType("application", "jose", PARAM_LIST);
+	
+	
+	/**
 	 * Content type {@code application/jwt}.
 	 */
 	public static final ContentType APPLICATION_JWT = new ContentType("application", "jwt", PARAM_LIST);

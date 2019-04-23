@@ -84,7 +84,7 @@ public class ClientAuthenticationTest extends TestCase {
 		httpRequest.setQuery("client_id=123");
 		httpRequest.setClientX509CertificateSubjectDN("cn=client-123");
 		
-		TLSClientAuthentication clientAuth = (TLSClientAuthentication) ClientAuthentication.parse(httpRequest);
+		PKITLSClientAuthentication clientAuth = (PKITLSClientAuthentication) ClientAuthentication.parse(httpRequest);
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals("cn=client-123", clientAuth.getClientX509CertificateSubjectDN());

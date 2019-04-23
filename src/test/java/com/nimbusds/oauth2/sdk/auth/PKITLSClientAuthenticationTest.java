@@ -28,13 +28,13 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import junit.framework.TestCase;
 
 
-public class TLSClientAuthenticationTest extends TestCase {
+public class PKITLSClientAuthenticationTest extends TestCase {
 	
 	
 	public void testSSLSocketFactoryConstructor_defaultSSL()
 		throws Exception {
 		
-		TLSClientAuthentication clientAuth = new TLSClientAuthentication(
+		PKITLSClientAuthentication clientAuth = new PKITLSClientAuthentication(
 			new ClientID("123"),
 			(SSLSocketFactory) null);
 		
@@ -61,7 +61,7 @@ public class TLSClientAuthenticationTest extends TestCase {
 		
 		SSLSocketFactory sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 		
-		TLSClientAuthentication clientAuth = new TLSClientAuthentication(
+		PKITLSClientAuthentication clientAuth = new PKITLSClientAuthentication(
 			new ClientID("123"),
 			sslSocketFactory);
 		
@@ -86,7 +86,7 @@ public class TLSClientAuthenticationTest extends TestCase {
 	public void testValidatedCertificateConstructor()
 		throws Exception {
 		
-		TLSClientAuthentication clientAuth = new TLSClientAuthentication(
+		PKITLSClientAuthentication clientAuth = new PKITLSClientAuthentication(
 			new ClientID("123"),
 			"cn=client-123");
 		
@@ -113,7 +113,7 @@ public class TLSClientAuthenticationTest extends TestCase {
 	public void testCertificateConstructor_certRootOmitted()
 		throws Exception {
 		
-		TLSClientAuthentication clientAuth = new TLSClientAuthentication(
+		PKITLSClientAuthentication clientAuth = new PKITLSClientAuthentication(
 			new ClientID("123"),
 			"cn=client-123");
 		
@@ -143,7 +143,7 @@ public class TLSClientAuthenticationTest extends TestCase {
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
 		
 		try {
-			TLSClientAuthentication.parse(httpRequest);
+			PKITLSClientAuthentication.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Missing HTTP POST request entity body", e.getMessage());
@@ -159,7 +159,7 @@ public class TLSClientAuthenticationTest extends TestCase {
 		httpRequest.setQuery("a=b");
 		
 		try {
-			TLSClientAuthentication.parse(httpRequest);
+			PKITLSClientAuthentication.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Missing client_id parameter", e.getMessage());
@@ -175,7 +175,7 @@ public class TLSClientAuthenticationTest extends TestCase {
 		httpRequest.setQuery("client_id=");
 		
 		try {
-			TLSClientAuthentication.parse(httpRequest);
+			PKITLSClientAuthentication.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Missing client_id parameter", e.getMessage());
@@ -191,7 +191,7 @@ public class TLSClientAuthenticationTest extends TestCase {
 		httpRequest.setQuery("client_id=123");
 		
 		try {
-			TLSClientAuthentication.parse(httpRequest);
+			PKITLSClientAuthentication.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Missing client X.509 certificate subject DN", e.getMessage());
@@ -207,7 +207,7 @@ public class TLSClientAuthenticationTest extends TestCase {
 		httpRequest.setQuery("client_id=123");
 		httpRequest.setClientX509CertificateSubjectDN("cn=client-123");
 		
-		TLSClientAuthentication clientAuth = TLSClientAuthentication.parse(httpRequest);
+		PKITLSClientAuthentication clientAuth = PKITLSClientAuthentication.parse(httpRequest);
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals("cn=client-123", clientAuth.getClientX509CertificateSubjectDN());

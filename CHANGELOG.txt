@@ -1060,11 +1060,20 @@ version 6.7 (2019-03-12)
 version 6.8 (2019-03-13)
     * Adds new Tokens.toOIDCTokens() method.
 
-version 6.9 (2019-04-21)
-    * Adds support for the request_object_endpoint Authorisation Server
-      metadata parameter, defined in Financial-grade API - Part 2: Read and
-      Write API Security Profile, section 7.
-    * The default value for the Authorisation Server metadata field
+version 6.9 (2019-04-23)
+    * Adds RequestObjectPOSTRequest for representing POST requests to the
+      request object endpoint, as specified in Financial-grade API - Part 2:
+      Read and Write API Security Profile, section 7.
+    * Adds support for the request_object_endpoint parameter in
+      AuthorizationServerMetadata, as defined in Financial-grade API - Part 2:
+      Read and Write API Security Profile, section 7.
+    * The default value for the AuthorizationServerMetadata field
       request_uri_parameter_supported must be false (whereas it's true for
-      OpenID Provider metadata) (iss #264).
+      OIDCProviderMetadata) (iss #264).
+    * Adds new AuthorizationRequest.toJWTClaimsSet() method for returning a
+      JSON Web Token (JWT) claims set representation for an OAuth 2.0
+      authorisation / OpenID authentication request. Intended for creating
+      request objects.
+    * Renames TLSClientAuthentication to PKITLSClientAuthentication and
+      AbstractTLSClientAuthentication to TLSClientAuthentication.
 

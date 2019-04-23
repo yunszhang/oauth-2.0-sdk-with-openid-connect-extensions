@@ -23,6 +23,9 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.util.*;
 
+import junit.framework.TestCase;
+
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
@@ -30,7 +33,6 @@ import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
-import junit.framework.TestCase;
 
 
 public class AuthorizationRequestTest extends TestCase {
@@ -831,5 +833,49 @@ public class AuthorizationRequestTest extends TestCase {
 				.build()
 				.impliedResponseMode()
 		);
+	}
+	
+	
+	public void testToJWTClaimsSet() throws java.text.ParseException {
+		
+		AuthorizationRequest ar = new AuthorizationRequest.Builder(
+			new ResponseType(ResponseType.Value.CODE),
+			new ClientID("123"))
+			.redirectionURI(URI.create("https://example.com/cb"))
+			.state(new State())
+			.build();
+		
+		JWTClaimsSet jwtClaimsSet = ar.toJWTClaimsSet();
+		
+		assertEquals(ar.getResponseType().toString(), jwtClaimsSet.getStringClaim("response_type"));
+		assertEquals(ar.getClientID().toString(), jwtClaimsSet.getStringClaim("client_id"));
+		assertEquals(ar.getRedirectionURI().toString(), jwtClaimsSet.getStringClaim("redirect_uri"));
+		assertEquals(ar.getState().toString(), jwtClaimsSet.getStringClaim("state"));
+		
+		assertEquals(4, jwtClaimsSet.getClaims().size());
+	}
+	
+	
+	public void testToJWTClaimsSet_multipleResourceParams() throws java.text.ParseException {
+		
+		AuthorizationRequest ar = new AuthorizationRequest.Builder(
+			new ResponseType(ResponseType.Value.CODE),
+			new ClientID("123"))
+			.redirectionURI(URI.create("https://example.com/cb"))
+			.state(new State())
+			.resources(URI.create("https://one.rs.com"), URI.create("https://two.rs.com"))
+			.build();
+		
+		JWTClaimsSet jwtClaimsSet = ar.toJWTClaimsSet();
+		
+		assertEquals(ar.getResponseType().toString(), jwtClaimsSet.getStringClaim("response_type"));
+		assertEquals(ar.getClientID().toString(), jwtClaimsSet.getStringClaim("client_id"));
+		assertEquals(ar.getRedirectionURI().toString(), jwtClaimsSet.getStringClaim("redirect_uri"));
+		assertEquals(ar.getState().toString(), jwtClaimsSet.getStringClaim("state"));
+		assertEquals(ar.getResources().get(0).toString(), jwtClaimsSet.getStringListClaim("resource").get(0));
+		assertEquals(ar.getResources().get(1).toString(), jwtClaimsSet.getStringListClaim("resource").get(1));
+		assertEquals(ar.getResources().size(), jwtClaimsSet.getStringListClaim("resource").size());
+		
+		assertEquals(5, jwtClaimsSet.getClaims().size());
 	}
 }

@@ -371,13 +371,13 @@ public class ClientAuthenticationVerifier<T> {
 			
 			throw InvalidClientException.BAD_SELF_SIGNED_CLIENT_CERTIFICATE;
 			
-		} else if (clientAuth instanceof TLSClientAuthentication) {
+		} else if (clientAuth instanceof PKITLSClientAuthentication) {
 			
 			if (certBindingVerifier == null) {
 				throw new InvalidClientException("Mutual TLS client Authentication (tls_client_auth) not supported");
 			}
 			
-			TLSClientAuthentication tlsClientAuth = (TLSClientAuthentication) clientAuth;
+			PKITLSClientAuthentication tlsClientAuth = (PKITLSClientAuthentication) clientAuth;
 			
 			certBindingVerifier.verifyCertificateBinding(
 				clientAuth.getClientID(),

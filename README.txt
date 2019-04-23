@@ -121,7 +121,7 @@ This SDK version implements the following standards and drafts:
     * OAuth 2.0 Authorization Server Metadata (RFC 8414)
 
     * OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound Access
-      Tokens (draft-ietf-oauth-mtls-12)
+      Tokens (draft-ietf-oauth-mtls-14)
 
     * Resource Indicators for OAuth 2.0
       (draft-ietf-oauth-resource-indicators-00)
@@ -161,4 +161,4 @@ This SDK is provided under the terms of the Apache 2.0 licence.
 Questions or comments? Email support@connect2id.com
 
 
-2019-03-19
+2019-04-23

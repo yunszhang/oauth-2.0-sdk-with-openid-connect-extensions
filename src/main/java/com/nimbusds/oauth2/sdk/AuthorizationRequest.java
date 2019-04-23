@@ -24,6 +24,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
+import net.jcip.annotations.Immutable;
+
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
@@ -31,7 +34,6 @@ import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.util.*;
-import net.jcip.annotations.Immutable;
 
 
 /**
@@ -891,6 +893,18 @@ public class AuthorizationRequest extends AbstractRequest {
 		}
 
 		return params;
+	}
+	
+	
+	/**
+	 * Returns the parameters for this authorisation request as a JSON Web
+	 * Token (JWT) claims set. Intended for creating a request object.
+	 *
+	 * @return The parameters as JWT claim set.
+	 */
+	public JWTClaimsSet toJWTClaimsSet() {
+		
+		return JWTClaimsSetUtils.toJWTClaimsSet(toParameters());
 	}
 	
 	

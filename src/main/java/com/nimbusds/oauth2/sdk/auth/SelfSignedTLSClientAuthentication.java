@@ -35,18 +35,19 @@ import net.jcip.annotations.Immutable;
 /**
  * Self-signed certificate mutual TLS client authentication at the Token
  * endpoint. The client certificate is self-signed, as opposed to
- * {@link TLSClientAuthentication tls_client_auth} which relies on PKI binding.
- * Implements {@link ClientAuthenticationMethod#SELF_SIGNED_TLS_CLIENT_AUTH}.
+ * {@link PKITLSClientAuthentication tls_client_auth} which relies on PKI
+ * binding. Implements
+ * {@link ClientAuthenticationMethod#SELF_SIGNED_TLS_CLIENT_AUTH}.
  *
  * <p>Related specifications:
  *
  * <ul>
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-08), section 2.2.
+ *         Access Tokens (draft-ietf-oauth-mtls-14), section 2.2.
  * </ul>
  */
 @Immutable
-public class SelfSignedTLSClientAuthentication extends AbstractTLSClientAuthentication {
+public class SelfSignedTLSClientAuthentication extends TLSClientAuthentication {
 	
 	
 	/**
