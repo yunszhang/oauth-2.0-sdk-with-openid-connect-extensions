@@ -1272,14 +1272,22 @@ public class AuthorizationRequest extends AbstractRequest {
 	public static AuthorizationRequest parse(final URI uri, final Map<String,List<String>> params)
 		throws ParseException {
 		
-		// Parse client_id, redirect_uri and state first, needed if a
-		// parse exception gets thrown later
+		// Parse response_mode, response_type, client_id, redirect_uri and state first,
+		// needed if parsing results in a error response
 		ClientID clientID = null;
 		URI redirectURI = null;
-		State state;
+		State state = State.parse(MultivaluedMapUtils.getFirstValue(params, "state"));
+		ResponseMode rm = null;
+		ResponseType rt = null;
+		
+		// Optional response_mode
+		String v = MultivaluedMapUtils.getFirstValue(params, "response_mode");
+		if (StringUtils.isNotBlank(v)) {
+			rm = new ResponseMode(v);
+		}
 		
 		// Mandatory client_id, unless in JAR
-		String v = MultivaluedMapUtils.getFirstValue(params, "client_id");
+		v = MultivaluedMapUtils.getFirstValue(params, "client_id");
 		if (StringUtils.isNotBlank(v))
 			clientID = new ClientID(v);
 		
@@ -1291,14 +1299,22 @@ public class AuthorizationRequest extends AbstractRequest {
 			} catch (URISyntaxException e) {
 				// No automatic redirection https://tools.ietf.org/html/rfc6749#section-4.1.2.1
 				String msg = "Invalid \"redirect_uri\" parameter: " + e.getMessage();
-				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-					clientID, null, null, null, e);
+				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 			}
 		}
 		
-		// Optional state
-		state = State.parse(MultivaluedMapUtils.getFirstValue(params, "state"));
-		
+		// Mandatory response_type, unless in JAR
+		v = MultivaluedMapUtils.getFirstValue(params, "response_type");
+		if (StringUtils.isNotBlank(v)) {
+			try {
+				rt = ResponseType.parse(v);
+			} catch (ParseException e) {
+				// Only cause
+				String msg = "Invalid \"response_type\" parameter";
+				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
+					clientID, redirectURI, rm, state, e);
+			}
+		}
 		
 		// Check for a JAR in request or request_uri parameters
 		v = MultivaluedMapUtils.getFirstValue(params, "request_uri");
@@ -1309,7 +1325,7 @@ public class AuthorizationRequest extends AbstractRequest {
 			} catch (URISyntaxException e) {
 				String msg = "Invalid \"request_uri\" parameter: " + e.getMessage();
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-					clientID, redirectURI, null, state, e);
+					clientID, redirectURI, ResponseMode.resolve(rm, rt), state, e);
 			}
 		}
 		
@@ -1323,7 +1339,7 @@ public class AuthorizationRequest extends AbstractRequest {
 			if (requestURI != null) {
 				String msg = "Invalid request: Found mutually exclusive \"request\" and \"request_uri\" parameters";
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-					clientID, redirectURI, null, state, null);
+					clientID, redirectURI, ResponseMode.resolve(rm, rt), state, null);
 			}
 			
 			try {
@@ -1332,7 +1348,7 @@ public class AuthorizationRequest extends AbstractRequest {
 			} catch (java.text.ParseException e) {
 				String msg = "Invalid \"request_object\" parameter: " + e.getMessage();
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-					clientID, redirectURI, null, state, e);
+					clientID, redirectURI, ResponseMode.resolve(rm, rt), state, e);
 			}
 		}
 
@@ -1344,33 +1360,10 @@ public class AuthorizationRequest extends AbstractRequest {
 		}
 
 		// Response type mandatory, unless in JAR
-		ResponseType rt = null;
-		v = MultivaluedMapUtils.getFirstValue(params, "response_type");
-		if (StringUtils.isNotBlank(v)) {
-			try {
-				rt = ResponseType.parse(v);
-			} catch (ParseException e) {
-				// Only cause
-				String msg = "Invalid \"response_type\" parameter";
-				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-					clientID, redirectURI, null, state, e);
-			}
-		}
-		
 		if (rt == null && requestObject == null && requestURI == null) {
 			String msg = "Missing \"response_type\" parameter";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-				clientID, redirectURI, null, state, null);
-		}
-
-
-		// Parse the optional response mode
-		v = MultivaluedMapUtils.getFirstValue(params, "response_mode");
-
-		ResponseMode rm = null;
-
-		if (StringUtils.isNotBlank(v)) {
-			rm = new ResponseMode(v);
+				clientID, redirectURI, ResponseMode.resolve(rm, null), state, null);
 		}
 
 
@@ -1420,12 +1413,12 @@ public class AuthorizationRequest extends AbstractRequest {
 					resourceURI = new URI(uriValue);
 				} catch (URISyntaxException e) {
 					throw new ParseException(errMsg, OAuth2Error.INVALID_RESOURCE.setDescription(errMsg),
-						clientID, redirectURI, null, state, e);
+						clientID, redirectURI, ResponseMode.resolve(rm, rt), state, e);
 				}
 				
 				if (! ResourceUtils.isValidResourceURI(resourceURI)) {
 					throw new ParseException(errMsg, OAuth2Error.INVALID_RESOURCE.setDescription(errMsg),
-						clientID, redirectURI, null, state, null);
+						clientID, redirectURI, ResponseMode.resolve(rm, rt), state, null);
 				}
 				
 				resources.add(resourceURI);

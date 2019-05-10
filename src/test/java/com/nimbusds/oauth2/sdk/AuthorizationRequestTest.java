@@ -1404,6 +1404,7 @@ public class AuthorizationRequestTest extends TestCase {
 			assertEquals("Invalid request: Missing \"response_type\" parameter", e.getErrorObject().getDescription());
 			assertEquals(clientID, e.getClientID());
 			assertEquals(redirectionURI, e.getRedirectionURI());
+			assertEquals("implied", ResponseMode.QUERY, e.getResponseMode());
 			assertEquals(e.getState(), e.getState());
 		}
 	}
@@ -1428,6 +1429,7 @@ public class AuthorizationRequestTest extends TestCase {
 			assertEquals("Invalid request: Missing \"client_id\" parameter", e.getErrorObject().getDescription());
 			assertNull(e.getClientID());
 			assertNull(e.getRedirectionURI());
+			assertNull(e.getResponseMode());
 			assertNull(e.getState());
 		}
 	}
@@ -1456,6 +1458,7 @@ public class AuthorizationRequestTest extends TestCase {
 			assertEquals("Invalid request: Missing \"client_id\" parameter", e.getErrorObject().getDescription());
 			assertNull(e.getClientID());
 			assertNull(e.getRedirectionURI());
+			assertNull(e.getResponseMode());
 			assertNull(e.getState());
 		}
 	}
