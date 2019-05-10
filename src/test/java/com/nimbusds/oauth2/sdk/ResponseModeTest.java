@@ -58,4 +58,82 @@ public class ResponseModeTest extends TestCase {
 		
 		assertNotEquals(new ResponseMode("fragment"), new ResponseMode("query"));
 	}
+	
+	
+	public void testResolve_explicit() {
+		
+		assertEquals(ResponseMode.QUERY, ResponseMode.resolve(ResponseMode.QUERY, new ResponseType("code")));
+		assertEquals(ResponseMode.QUERY, ResponseMode.resolve(ResponseMode.QUERY, new ResponseType("code", "token")));
+		assertEquals(ResponseMode.QUERY, ResponseMode.resolve(ResponseMode.QUERY, new ResponseType("code", "token", "id_token")));
+		assertEquals(ResponseMode.QUERY, ResponseMode.resolve(ResponseMode.QUERY, new ResponseType("code", "id_token")));
+		assertEquals(ResponseMode.QUERY, ResponseMode.resolve(ResponseMode.QUERY, new ResponseType("token", "id_token")));
+		assertEquals(ResponseMode.QUERY, ResponseMode.resolve(ResponseMode.QUERY, new ResponseType("id_token")));
+		assertEquals(ResponseMode.QUERY, ResponseMode.resolve(ResponseMode.QUERY, new ResponseType("token")));
+		
+		assertEquals(ResponseMode.FRAGMENT, ResponseMode.resolve(ResponseMode.FRAGMENT, new ResponseType("code")));
+		assertEquals(ResponseMode.FRAGMENT, ResponseMode.resolve(ResponseMode.FRAGMENT, new ResponseType("code", "token")));
+		assertEquals(ResponseMode.FRAGMENT, ResponseMode.resolve(ResponseMode.FRAGMENT, new ResponseType("code", "token", "id_token")));
+		assertEquals(ResponseMode.FRAGMENT, ResponseMode.resolve(ResponseMode.FRAGMENT, new ResponseType("code", "id_token")));
+		assertEquals(ResponseMode.FRAGMENT, ResponseMode.resolve(ResponseMode.FRAGMENT, new ResponseType("token", "id_token")));
+		assertEquals(ResponseMode.FRAGMENT, ResponseMode.resolve(ResponseMode.FRAGMENT, new ResponseType("id_token")));
+		assertEquals(ResponseMode.FRAGMENT, ResponseMode.resolve(ResponseMode.FRAGMENT, new ResponseType("token")));
+		
+		assertEquals(ResponseMode.FORM_POST, ResponseMode.resolve(ResponseMode.FORM_POST, new ResponseType("code")));
+		assertEquals(ResponseMode.FORM_POST, ResponseMode.resolve(ResponseMode.FORM_POST, new ResponseType("code", "token")));
+		assertEquals(ResponseMode.FORM_POST, ResponseMode.resolve(ResponseMode.FORM_POST, new ResponseType("code", "token", "id_token")));
+		assertEquals(ResponseMode.FORM_POST, ResponseMode.resolve(ResponseMode.FORM_POST, new ResponseType("code", "id_token")));
+		assertEquals(ResponseMode.FORM_POST, ResponseMode.resolve(ResponseMode.FORM_POST, new ResponseType("token", "id_token")));
+		assertEquals(ResponseMode.FORM_POST, ResponseMode.resolve(ResponseMode.FORM_POST, new ResponseType("id_token")));
+		assertEquals(ResponseMode.FORM_POST, ResponseMode.resolve(ResponseMode.FORM_POST, new ResponseType("token")));
+		
+		assertEquals(ResponseMode.QUERY_JWT, ResponseMode.resolve(ResponseMode.QUERY_JWT, new ResponseType("code")));
+		assertEquals(ResponseMode.QUERY_JWT, ResponseMode.resolve(ResponseMode.QUERY_JWT, new ResponseType("code", "token")));
+		assertEquals(ResponseMode.QUERY_JWT, ResponseMode.resolve(ResponseMode.QUERY_JWT, new ResponseType("code", "token", "id_token")));
+		assertEquals(ResponseMode.QUERY_JWT, ResponseMode.resolve(ResponseMode.QUERY_JWT, new ResponseType("code", "id_token")));
+		assertEquals(ResponseMode.QUERY_JWT, ResponseMode.resolve(ResponseMode.QUERY_JWT, new ResponseType("token", "id_token")));
+		assertEquals(ResponseMode.QUERY_JWT, ResponseMode.resolve(ResponseMode.QUERY_JWT, new ResponseType("id_token")));
+		assertEquals(ResponseMode.QUERY_JWT, ResponseMode.resolve(ResponseMode.QUERY_JWT, new ResponseType("token")));
+		
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolve(ResponseMode.FRAGMENT_JWT, new ResponseType("code")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolve(ResponseMode.FRAGMENT_JWT, new ResponseType("code", "token")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolve(ResponseMode.FRAGMENT_JWT, new ResponseType("code", "token", "id_token")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolve(ResponseMode.FRAGMENT_JWT, new ResponseType("code", "id_token")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolve(ResponseMode.FRAGMENT_JWT, new ResponseType("token", "id_token")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolve(ResponseMode.FRAGMENT_JWT, new ResponseType("id_token")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolve(ResponseMode.FRAGMENT_JWT, new ResponseType("token")));
+		
+		assertEquals(ResponseMode.FORM_POST_JWT, ResponseMode.resolve(ResponseMode.FORM_POST_JWT, new ResponseType("code")));
+		assertEquals(ResponseMode.FORM_POST_JWT, ResponseMode.resolve(ResponseMode.FORM_POST_JWT, new ResponseType("code", "token")));
+		assertEquals(ResponseMode.FORM_POST_JWT, ResponseMode.resolve(ResponseMode.FORM_POST_JWT, new ResponseType("code", "token", "id_token")));
+		assertEquals(ResponseMode.FORM_POST_JWT, ResponseMode.resolve(ResponseMode.FORM_POST_JWT, new ResponseType("code", "id_token")));
+		assertEquals(ResponseMode.FORM_POST_JWT, ResponseMode.resolve(ResponseMode.FORM_POST_JWT, new ResponseType("token", "id_token")));
+		assertEquals(ResponseMode.FORM_POST_JWT, ResponseMode.resolve(ResponseMode.FORM_POST_JWT, new ResponseType("id_token")));
+		assertEquals(ResponseMode.FORM_POST_JWT, ResponseMode.resolve(ResponseMode.FORM_POST_JWT, new ResponseType("token")));
+	}
+	
+	
+	public void testResolve_fromBaseJWTMode() {
+		
+		assertEquals(ResponseMode.QUERY_JWT, ResponseMode.resolve(ResponseMode.JWT, new ResponseType("code")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolve(ResponseMode.JWT, new ResponseType("code", "token")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolve(ResponseMode.JWT, new ResponseType("code", "token", "id_token")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolve(ResponseMode.JWT, new ResponseType("code", "id_token")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolve(ResponseMode.JWT, new ResponseType("token", "id_token")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolve(ResponseMode.JWT, new ResponseType("id_token")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolve(ResponseMode.JWT, new ResponseType("token")));
+		assertEquals(ResponseMode.QUERY_JWT, ResponseMode.resolve(ResponseMode.JWT, null));
+	}
+	
+	
+	public void testResolve_fromResponseType() {
+		
+		assertEquals(ResponseMode.QUERY, ResponseMode.resolve(null, new ResponseType("code")));
+		assertEquals(ResponseMode.FRAGMENT, ResponseMode.resolve(null, new ResponseType("code", "token")));
+		assertEquals(ResponseMode.FRAGMENT, ResponseMode.resolve(null, new ResponseType("code", "token", "id_token")));
+		assertEquals(ResponseMode.FRAGMENT, ResponseMode.resolve(null, new ResponseType("code", "id_token")));
+		assertEquals(ResponseMode.FRAGMENT, ResponseMode.resolve(null, new ResponseType("token", "id_token")));
+		assertEquals(ResponseMode.FRAGMENT, ResponseMode.resolve(null, new ResponseType("id_token")));
+		assertEquals(ResponseMode.FRAGMENT, ResponseMode.resolve(null, new ResponseType("token")));
+		assertEquals(ResponseMode.QUERY, ResponseMode.resolve(null, null));
+	}
 }

@@ -102,6 +102,40 @@ public final class ResponseMode extends Identifier {
 	 * {@code response_type}.
 	 */
 	public static final ResponseMode JWT = new ResponseMode("jwt");
+	
+	
+	/**
+	 * Resolves the requested response mode.
+	 *
+	 * @param rm The explicitly requested response mode
+	 *           ({@code response_mode}), {@code null} if not specified.
+	 * @param rt The response type ({@code response_type}), {@code null} if
+	 *           not known.
+	 *
+	 * @return The resolved response mode.
+	 */
+	public static ResponseMode resolve(final ResponseMode rm, final ResponseType rt) {
+		
+		if (rm != null) {
+			// Explicitly requested response_mode
+			if (ResponseMode.JWT.equals(rm)) {
+				// https://openid.net//specs/openid-financial-api-jarm.html#response-mode-jwt
+				if (rt != null && (rt.impliesImplicitFlow() || rt.impliesHybridFlow())) {
+					return ResponseMode.FRAGMENT_JWT;
+				} else {
+					return ResponseMode.QUERY_JWT;
+				}
+			}
+			
+			return rm;
+			
+		} else if (rt != null && (rt.impliesImplicitFlow() || rt.impliesHybridFlow())) {
+			return ResponseMode.FRAGMENT;
+		} else {
+			// assume query in all other cases
+			return ResponseMode.QUERY;
+		}
+	}
 
 
 	/**

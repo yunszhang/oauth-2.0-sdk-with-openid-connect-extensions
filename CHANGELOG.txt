@@ -1078,6 +1078,10 @@ version 6.9 (2019-04-23)
     * Renames TLSClientAuthentication to PKITLSClientAuthentication and
       AbstractTLSClientAuthentication to TLSClientAuthentication.
 
-version 6.10 (2019-05-09)
+version 6.10 (2019-05-10)
     * Adds support for The OAuth 2.0 Authorization Framework: JWT Secured
       Authorization Request (JAR) (draft-ietf-oauth-jwsreq-17)
+    * Adds new static ResponseMode.resolve method with heuristics to determine
+      the requested response mode based on the response_mode and response_type
+      parameters.
+

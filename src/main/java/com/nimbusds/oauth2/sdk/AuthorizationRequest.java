@@ -852,24 +852,7 @@ public class AuthorizationRequest extends AbstractRequest {
 	 */
 	public ResponseMode impliedResponseMode() {
 		
-		if (rm != null) {
-			
-			if (ResponseMode.JWT.equals(rm)) {
-				// https://openid.net//specs/openid-financial-api-jarm.html#response-mode-jwt
-				if (rt.impliesImplicitFlow() || rt.impliesHybridFlow()) {
-					return ResponseMode.FRAGMENT_JWT;
-				} else {
-					return ResponseMode.QUERY_JWT;
-				}
-			}
-			
-			return rm;
-			
-		} else if (rt != null && (rt.impliesImplicitFlow() || rt.impliesHybridFlow())) {
-			return ResponseMode.FRAGMENT;
-		} else {
-			return ResponseMode.QUERY;
-		}
+		return ResponseMode.resolve(rm, rt);
 	}
 
 
