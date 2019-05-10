@@ -55,6 +55,9 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("grant_types_supported"));
 		assertTrue(paramNames.contains("code_challenge_methods_supported"));
 		assertTrue(paramNames.contains("request_object_endpoint"));
+		assertTrue(paramNames.contains("request_parameter_supported"));
+		assertTrue(paramNames.contains("require_request_uri_registration"));
+		assertTrue(paramNames.contains("request_object_endpoint"));
 		assertTrue(paramNames.contains("request_object_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("request_object_encryption_alg_values_supported"));
 		assertTrue(paramNames.contains("request_object_encryption_enc_values_supported"));
@@ -76,7 +79,7 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_encryption_enc_values_supported"));
 		assertTrue(paramNames.contains("device_authorization_endpoint"));
 		
-		assertEquals(31, paramNames.size());
+		assertEquals(34, paramNames.size());
 	}
 	
 	

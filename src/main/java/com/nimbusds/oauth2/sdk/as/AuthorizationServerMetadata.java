@@ -81,6 +81,9 @@ public class AuthorizationServerMetadata {
 		p.add("code_challenge_methods_supported");
 		p.add("token_endpoint_auth_methods_supported");
 		p.add("token_endpoint_auth_signing_alg_values_supported");
+		p.add("request_parameter_supported");
+		p.add("request_uri_parameter_supported");
+		p.add("require_request_uri_registration");
 		p.add("request_object_signing_alg_values_supported");
 		p.add("request_object_encryption_alg_values_supported");
 		p.add("request_object_encryption_enc_values_supported");

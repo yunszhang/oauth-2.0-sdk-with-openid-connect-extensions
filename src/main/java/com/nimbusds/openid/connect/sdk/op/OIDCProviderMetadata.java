@@ -87,9 +87,6 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		p.add("claims_supported");
 		p.add("claims_locales_supported");
 		p.add("claims_parameter_supported");
-		p.add("request_parameter_supported");
-		p.add("request_uri_parameter_supported");
-		p.add("require_request_uri_registration");
 		p.add("backchannel_logout_supported");
 		p.add("backchannel_logout_session_supported");
 		p.add("frontchannel_logout_supported");
