@@ -26,25 +26,26 @@ import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.util.*;
 
+import junit.framework.TestCase;
+
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jose.util.Base64URL;
-import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.JWTParser;
-import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.*;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagUtils;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
-import junit.framework.TestCase;
 
 
 public class AuthenticationRequestTest extends TestCase {
@@ -1792,5 +1793,240 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(ar.getResources().size(), jwtClaimsSet.getStringListClaim("resource").size());
 		
 		assertEquals(7, jwtClaimsSet.getClaims().size());
+	}
+	
+	
+	public void testBuilder_requestURI_minimal() throws ParseException {
+		
+		URI endpointURI = URI.create("https://c2id.com/login");
+		URI requestURI = URI.create("urn:requests:ahy4ohgo");
+		
+		AuthenticationRequest ar = new AuthenticationRequest.Builder(requestURI)
+			.endpointURI(endpointURI)
+			.build();
+		
+		assertEquals(endpointURI, ar.getEndpointURI());
+		assertEquals(requestURI, ar.getRequestURI());
+		
+		assertTrue(ar.specifiesRequestObject());
+		
+		assertEquals("https://c2id.com/login?request_uri=urn%3Arequests%3Aahy4ohgo", ar.toURI().toString());
+		
+		ar = AuthenticationRequest.parse(ar.toURI());
+		
+		assertEquals(endpointURI, ar.getEndpointURI());
+		assertEquals(requestURI, ar.getRequestURI());
+	}
+	
+	
+	public void testBuilder_requestURI_coreTopLevelParams() {
+		
+		URI requestURI = URI.create("urn:requests:ahy4ohgo");
+		ResponseType rt = new ResponseType("code");
+		Scope scope = new Scope("openid");
+		ClientID clientID = new ClientID("123");
+		URI redirectURI = URI.create("https://example.com/cb");
+		
+		AuthenticationRequest ar = new AuthenticationRequest.Builder(requestURI)
+			.responseType(rt)
+			.scope(scope)
+			.clientID(clientID)
+			.redirectionURI(redirectURI)
+			.build();
+		
+		assertEquals(requestURI, ar.getRequestURI());
+		assertTrue(ar.specifiesRequestObject());
+		
+		assertEquals(rt, ar.getResponseType());
+		assertEquals(scope, ar.getScope());
+		assertEquals(clientID, ar.getClientID());
+		assertEquals(redirectURI, ar.getRedirectionURI());
+		
+		try {
+			new AuthenticationRequest.Builder(requestURI).responseType(null);
+			fail("Core response_type when set not null");
+		} catch (IllegalArgumentException e) {
+			assertEquals("The response type must not be null", e.getMessage());
+		}
+		
+		try {
+			new AuthenticationRequest.Builder(requestURI).scope(null);
+			fail("Core scope when set not null");
+		} catch (IllegalArgumentException e) {
+			assertEquals("The scope must not be null", e.getMessage());
+		}
+		
+		try {
+			new AuthenticationRequest.Builder(requestURI).scope(new Scope("email"));
+			fail("Core scope when set must contain openid");
+		} catch (IllegalArgumentException e) {
+			assertEquals("The scope must include an \"openid\" value", e.getMessage());
+		}
+		
+		try {
+			new AuthenticationRequest.Builder(requestURI).clientID(null);
+			fail("Core client ID when set not null");
+		} catch (IllegalArgumentException e) {
+			assertEquals("The client ID must not be null", e.getMessage());
+		}
+		
+		try {
+			new AuthenticationRequest.Builder(requestURI).redirectionURI(null);
+			fail("Core redirection URI when set not null");
+		} catch (IllegalArgumentException e) {
+			assertEquals("The redirection URI must not be null", e.getMessage());
+		}
+	}
+	
+	
+	public void testBuilder_requestObject_minimal() throws ParseException {
+		
+		URI endpointURI = URI.create("https://c2id.com/login");
+		ResponseType rt = new ResponseType("code");
+		Scope scope = new Scope("openid");
+		ClientID clientID = new ClientID("123");
+		URI redirectURI = URI.create("https://example.com/cb");
+		
+		AuthenticationRequest ar = new AuthenticationRequest.Builder(rt, scope, clientID, redirectURI)
+			.endpointURI(endpointURI)
+			.build();
+		
+		JWT requestObject = new PlainJWT(ar.toJWTClaimsSet());
+		
+		ar = new AuthenticationRequest.Builder(requestObject)
+			.endpointURI(endpointURI)
+			.build();
+		
+		assertEquals(endpointURI, ar.getEndpointURI());
+		assertEquals(requestObject, ar.getRequestObject());
+		
+		assertEquals("https://c2id.com/login?request=eyJhbGciOiJub25lIn0.eyJzY29wZSI6Im9wZW5pZCIsInJlc3BvbnNlX3R5cGUiOiJjb2RlIiwicmVkaXJlY3RfdXJpIjoiaHR0cHM6XC9cL2V4YW1wbGUuY29tXC9jYiIsImNsaWVudF9pZCI6IjEyMyJ9.", ar.toURI().toString());
+		
+		ar = AuthenticationRequest.parse(ar.toURI());
+		
+		assertEquals(endpointURI, ar.getEndpointURI());
+		assertEquals(requestObject.serialize(), ar.getRequestObject().serialize());
+	}
+	
+	
+	public void testBuilder_requestObject_minimalTopLevelParams() throws ParseException {
+		
+		URI endpointURI = URI.create("https://c2id.com/login");
+		ResponseType rt = new ResponseType("code");
+		Scope scope = new Scope("openid");
+		ClientID clientID = new ClientID("123");
+		URI redirectURI = URI.create("https://example.com/cb");
+		
+		AuthenticationRequest ar = new AuthenticationRequest.Builder(rt, scope, clientID, redirectURI)
+			.endpointURI(endpointURI)
+			.build();
+		
+		JWT requestObject = new PlainJWT(ar.toJWTClaimsSet());
+		
+		ar = new AuthenticationRequest.Builder(requestObject)
+			.endpointURI(endpointURI)
+			.build();
+		
+		assertEquals(endpointURI, ar.getEndpointURI());
+		assertEquals(requestObject, ar.getRequestObject());
+		
+		assertEquals("https://c2id.com/login?request=eyJhbGciOiJub25lIn0.eyJzY29wZSI6Im9wZW5pZCIsInJlc3BvbnNlX3R5cGUiOiJjb2RlIiwicmVkaXJlY3RfdXJpIjoiaHR0cHM6XC9cL2V4YW1wbGUuY29tXC9jYiIsImNsaWVudF9pZCI6IjEyMyJ9.", ar.toURI().toString());
+		
+		ar = AuthenticationRequest.parse(ar.toURI());
+		
+		assertEquals(endpointURI, ar.getEndpointURI());
+		assertEquals(requestObject.serialize(), ar.getRequestObject().serialize());
+	}
+	
+	
+	public void testRequestObject_hybridFlow_formPost() throws Exception {
+		
+		Issuer op = new Issuer("https://c2id.com");
+		ClientID clientID = new ClientID("kgt26u4ulfdxm");
+		ResponseType rt = new ResponseType("id_token", "token");
+		Scope scope = new Scope("openid");
+		URI redirectURI = URI.create("https://example.com/cb");
+		ResponseMode rm = ResponseMode.FORM_POST;
+		State state = new State();
+		Nonce nonce = new Nonce();
+		
+		AuthenticationRequest securedRequest = new AuthenticationRequest.Builder(rt, scope, clientID, redirectURI)
+			.responseMode(rm)
+			.state(state)
+			.nonce(nonce)
+			.build();
+		
+		Date exp = new Date((new Date().getTime() / 1000 * 1000) + 60_000L);
+		JWTClaimsSet jarClaims = new JWTClaimsSet.Builder(securedRequest.toJWTClaimsSet())
+			.expirationTime(exp)
+			.audience(op.getValue())
+			.build();
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.algorithm(JWSAlgorithm.RS256)
+			.keyID("IzTEeEuALnxGiWD_5caM1GHX0Cs")
+			.generate();
+		SignedJWT jar = new SignedJWT(new JWSHeader.Builder((JWSAlgorithm) rsaJWK.getAlgorithm()).keyID(rsaJWK.getKeyID()).build(), jarClaims);
+		jar.sign(new RSASSASigner(rsaJWK));
+		
+		AuthenticationRequest jarRequest = new AuthenticationRequest.Builder(jar).build();
+		
+		Map<String,List<String>> params = jarRequest.toParameters();
+		
+		// Selected top level params
+		params.put("scope", Collections.singletonList(scope.toString()));
+		params.put("response_type", Collections.singletonList(rt.toString()));
+		params.put("client_id", Collections.singletonList(clientID.getValue()));
+		
+		AuthenticationRequest ar = AuthenticationRequest.parse(params);
+		
+		assertEquals(jar.serialize(), ar.getRequestObject().serialize());
+		assertEquals(clientID, ar.getClientID());
+		assertEquals(scope, ar.getScope());
+		assertEquals(rt, ar.getResponseType());
+		assertEquals(4, ar.toParameters().size());
+	}
+	
+	
+	public void testBuilder_nullResponseType() {
+		
+		try {
+			new AuthenticationRequest.Builder(null, new Scope("openid"), new ClientID("123"), URI.create("https://example.com/cb"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The response type must not be null", e.getMessage());
+		}
+	}
+	
+	
+	public void testBuilder_nullScope() {
+		
+		try {
+			new AuthenticationRequest.Builder(new ResponseType("code"), null, new ClientID("123"), URI.create("https://example.com/cb"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The scope must not be null", e.getMessage());
+		}
+	}
+	
+	
+	public void testBuilder_missingOpenIDScopeValue() {
+		
+		try {
+			new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("email"), new ClientID("123"), URI.create("https://example.com/cb"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The scope must include an \"openid\" value", e.getMessage());
+		}
+	}
+	
+	
+	public void testBuilder_nullClientID() {
+		
+		try {
+			new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), null, URI.create("https://example.com/cb"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The client ID must not be null", e.getMessage());
+		}
 	}
 }

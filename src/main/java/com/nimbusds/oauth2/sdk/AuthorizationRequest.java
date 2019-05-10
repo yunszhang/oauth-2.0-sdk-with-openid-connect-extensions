@@ -26,7 +26,9 @@ import java.util.*;
 
 import net.jcip.annotations.Immutable;
 
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
@@ -65,6 +67,8 @@ import com.nimbusds.oauth2.sdk.util.*;
  *         (draft-ietf-oauth-resource-indicators-00)
  *     <li>OAuth 2.0 Incremental Authorization
  *         (draft-ietf-oauth-incremental-authz-00)
+ *     <li>The OAuth 2.0 Authorization Framework: JWT Secured Authorization
+ *         Request (JAR) draft-ietf-oauth-jwsreq-17
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
  * </ul>
@@ -92,19 +96,21 @@ public class AuthorizationRequest extends AbstractRequest {
 		p.add("code_challenge_method");
 		p.add("resource");
 		p.add("include_granted_scopes");
+		p.add("request_uri");
+		p.add("request");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 
 
 	/**
-	 * The response type (required).
+	 * The response type (required unless in JAR).
 	 */
 	private final ResponseType rt;
 
 
 	/**
-	 * The client identifier (required).
+	 * The client identifier (required unless in JAR).
 	 */
 	private final ClientID clientID;
 
@@ -156,6 +162,18 @@ public class AuthorizationRequest extends AbstractRequest {
 	 * Indicates incremental authorisation (optional).
 	 */
 	private final boolean includeGrantedScopes;
+	
+	
+	/**
+	 * Request object (optional).
+	 */
+	private final JWT requestObject;
+	
+	
+	/**
+	 * Request object URI (optional).
+	 */
+	private final URI requestURI;
 
 
 	/**
@@ -177,15 +195,15 @@ public class AuthorizationRequest extends AbstractRequest {
 
 
 		/**
-		 * The response type (required).
+		 * The response type (required unless in JAR).
 		 */
-		private final ResponseType rt;
+		private ResponseType rt;
 
 
 		/**
-		 * The client identifier (required).
+		 * The client identifier (required unless in JAR).
 		 */
-		private final ClientID clientID;
+		private ClientID clientID;
 
 
 		/**
@@ -236,6 +254,18 @@ public class AuthorizationRequest extends AbstractRequest {
 		 * The resource URI(s) (optional).
 		 */
 		private List<URI> resources;
+		
+		
+		/**
+		 * Request object (optional).
+		 */
+		private JWT requestObject;
+		
+		
+		/**
+		 * Request object URI (optional).
+		 */
+		private URI requestURI;
 
 
 		/**
@@ -270,6 +300,36 @@ public class AuthorizationRequest extends AbstractRequest {
 		
 		
 		/**
+		 * Creates a new JWT secured authorisation request builder.
+		 *
+		 * @param requestObject The request object. Must not be
+		 *                      {@code null}.
+		 */
+		public Builder(final JWT requestObject) {
+			
+			if (requestObject == null)
+				throw new IllegalArgumentException("The request object must not be null");
+			
+			this.requestObject = requestObject;
+		}
+		
+		
+		/**
+		 * Creates a new JWT secured authorisation request builder.
+		 *
+		 * @param requestURI The request object URI. Must not be
+		 *                   {@code null}.
+		 */
+		public Builder(final URI requestURI) {
+			
+			if (requestURI == null)
+				throw new IllegalArgumentException("The request URI must not be null");
+			
+			this.requestURI = requestURI;
+		}
+		
+		
+		/**
 		 * Creates a new authorisation request builder from the
 		 * specified request.
 		 *
@@ -289,7 +349,46 @@ public class AuthorizationRequest extends AbstractRequest {
 			codeChallengeMethod = request.getCodeChallengeMethod();
 			resources = request.getResources();
 			includeGrantedScopes = request.includeGrantedScopes();
+			requestObject = request.requestObject;
+			requestURI = request.requestURI;
 			customParams.putAll(request.getCustomParameters());
+		}
+		
+		
+		/**
+		 * Sets the response type. Corresponds to the
+		 * {@code response_type} parameter.
+		 *
+		 * @param rt The response type. Must not be {@code null}.
+		 *
+		 * @return This builder.
+		 */
+		public Builder responseType(final ResponseType rt) {
+			
+			if (rt == null)
+				throw new IllegalArgumentException("The response type must not be null");
+			
+			this.rt = rt;
+			return this;
+		}
+		
+		
+		/**
+		 * Sets the client identifier. Corresponds to the
+		 * {@code client_id} parameter.
+		 *
+		 * @param clientID The client identifier. Must not be
+		 *                 {@code null}.
+		 *
+		 * @return This builder.
+		 */
+		public Builder clientID(final ClientID clientID) {
+			
+			if (clientID == null)
+				throw new IllegalArgumentException("The client ID must not be null");
+			
+			this.clientID = clientID;
+			return this;
 		}
 
 
@@ -440,6 +539,40 @@ public class AuthorizationRequest extends AbstractRequest {
 		
 		
 		/**
+		 * Sets the request object. Corresponds to the optional
+		 * {@code request} parameter. Must not be specified together
+		 * with a request object URI.
+		 *
+		 * @param requestObject The request object, {@code null} if not
+		 *                      specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder requestObject(final JWT requestObject) {
+			
+			this.requestObject = requestObject;
+			return this;
+		}
+		
+		
+		/**
+		 * Sets the request object URI. Corresponds to the optional
+		 * {@code request_uri} parameter. Must not be specified
+		 * together with a request object.
+		 *
+		 * @param requestURI The request object URI, {@code null} if
+		 *                   not specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder requestURI(final URI requestURI) {
+			
+			this.requestURI = requestURI;
+			return this;
+		}
+		
+		
+		/**
 		 * Sets a custom parameter.
 		 *
 		 * @param name   The parameter name. Must not be {@code null}.
@@ -483,7 +616,10 @@ public class AuthorizationRequest extends AbstractRequest {
 		public AuthorizationRequest build() {
 
 			try {
-				return new AuthorizationRequest(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, resources, includeGrantedScopes, customParams);
+				return new AuthorizationRequest(uri, rt, rm, clientID, redirectURI, scope, state,
+					codeChallenge, codeChallengeMethod, resources, includeGrantedScopes,
+					requestObject, requestURI,
+					customParams);
 			} catch (IllegalArgumentException e) {
 				throw new IllegalStateException(e.getMessage(), e);
 			}
@@ -508,7 +644,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		                    final ResponseType rt,
 	                            final ClientID clientID) {
 
-		this(uri, rt, null, clientID, null, null, null, null, null, null, false, null);
+		this(uri, rt, null, clientID, null, null, null, null, null, null, false, null, null, null);
 	}
 
 
@@ -548,7 +684,7 @@ public class AuthorizationRequest extends AbstractRequest {
 	                            final Scope scope,
 				    final State state) {
 
-		this(uri, rt, rm, clientID, redirectURI, scope, state, null, null, null, false, null);
+		this(uri, rt, rm, clientID, redirectURI, scope, state, null, null, null, false, null, null, null);
 	}
 
 
@@ -562,7 +698,8 @@ public class AuthorizationRequest extends AbstractRequest {
 	 *                             be used.
 	 * @param rt                   The response type. Corresponds to the
 	 *                             {@code response_type} parameter. Must
-	 *                             not be {@code null}.
+	 *                             not be {@code null}, unless a request a
+	 *                             request object or URI is specified.
 	 * @param rm                   The response mode. Corresponds to the
 	 *                             optional {@code response_mode}
 	 *                             parameter. Use of this parameter is not
@@ -571,7 +708,8 @@ public class AuthorizationRequest extends AbstractRequest {
 	 *                             form_post).
 	 * @param clientID             The client identifier. Corresponds to
 	 *                             the {@code client_id} parameter. Must
-	 *                             not be {@code null}.
+	 *                             not be {@code null}, unless a request
+	 *                             object or URI is specified.
 	 * @param redirectURI          The redirection URI. Corresponds to the
 	 *                             optional {@code redirect_uri} parameter.
 	 *                             {@code null} if not specified.
@@ -589,6 +727,16 @@ public class AuthorizationRequest extends AbstractRequest {
 	 *                             specified.
 	 * @param includeGrantedScopes {@code true} to request incremental
 	 *                             authorisation.
+	 * @param requestObject        The request object. Corresponds to the
+	 *                             optional {@code request} parameter. Must
+	 *                             not be specified together with a request
+	 *                             object URI. {@code null} if not
+	 *                             specified.
+	 * @param requestURI           The request object URI. Corresponds to
+	 *                             the optional {@code request_uri}
+	 *                             parameter. Must not be specified
+	 *                             together with a request object.
+	 *                             {@code null} if not specified.
 	 * @param customParams         Custom parameters, empty map or
 	 *                             {@code null} if none.
 	 */
@@ -603,11 +751,13 @@ public class AuthorizationRequest extends AbstractRequest {
 				    final CodeChallengeMethod codeChallengeMethod,
 				    final List<URI> resources,
 				    final boolean includeGrantedScopes,
+				    final JWT requestObject,
+				    final URI requestURI,
 				    final Map<String,List<String>> customParams) {
 
 		super(uri);
 
-		if (rt == null)
+		if (rt == null && requestObject == null && requestURI == null)
 			throw new IllegalArgumentException("The response type must not be null");
 
 		this.rt = rt;
@@ -615,7 +765,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		this.rm = rm;
 
 
-		if (clientID == null)
+		if (clientID == null && requestObject == null && requestURI == null)
 			throw new IllegalArgumentException("The client ID must not be null");
 
 		this.clientID = clientID;
@@ -638,6 +788,12 @@ public class AuthorizationRequest extends AbstractRequest {
 		this.resources = resources;
 		
 		this.includeGrantedScopes = includeGrantedScopes;
+		
+		if (requestObject != null && requestURI != null)
+			throw new IllegalArgumentException("Either a request object or a request URI must be specified, but not both");
+		
+		this.requestObject = requestObject;
+		this.requestURI = requestURI;
 
 		if (MapUtils.isNotEmpty(customParams)) {
 			this.customParams = Collections.unmodifiableMap(customParams);
@@ -664,7 +820,10 @@ public class AuthorizationRequest extends AbstractRequest {
 	 * Gets the response type. Corresponds to the {@code response_type}
 	 * parameter.
 	 *
-	 * @return The response type.
+	 * @return The response type, may be {@code null} for a
+	 *         {@link #specifiesRequestObject() JWT secured authorisation
+	 *         request} with a {@link #getRequestObject() request} or
+	 *         {@link #getRequestURI() request_uri} parameter.
 	 */
 	public ResponseType getResponseType() {
 	
@@ -692,7 +851,7 @@ public class AuthorizationRequest extends AbstractRequest {
 	 * @return The implied response mode.
 	 */
 	public ResponseMode impliedResponseMode() {
-
+		
 		if (rm != null) {
 			
 			if (ResponseMode.JWT.equals(rm)) {
@@ -706,7 +865,7 @@ public class AuthorizationRequest extends AbstractRequest {
 			
 			return rm;
 			
-		} else if (rt.impliesImplicitFlow() || rt.impliesHybridFlow()) {
+		} else if (rt != null && (rt.impliesImplicitFlow() || rt.impliesHybridFlow())) {
 			return ResponseMode.FRAGMENT;
 		} else {
 			return ResponseMode.QUERY;
@@ -718,7 +877,10 @@ public class AuthorizationRequest extends AbstractRequest {
 	 * Gets the client identifier. Corresponds to the {@code client_id} 
 	 * parameter.
 	 *
-	 * @return The client identifier.
+	 * @return The client identifier, may be {@code null} for a
+	 *         {@link #specifiesRequestObject() JWT secured authorisation
+	 *         request} with a {@link #getRequestObject() request} or
+	 *         {@link #getRequestURI() request_uri} parameter.
 	 */
 	public ClientID getClientID() {
 	
@@ -807,6 +969,44 @@ public class AuthorizationRequest extends AbstractRequest {
 	
 	
 	/**
+	 * Gets the request object. Corresponds to the optional {@code request}
+	 * parameter.
+	 *
+	 * @return The request object, {@code null} if not specified.
+	 */
+	public JWT getRequestObject() {
+		
+		return requestObject;
+	}
+	
+	
+	/**
+	 * Gets the request object URI. Corresponds to the optional
+	 * {@code request_uri} parameter.
+	 *
+	 * @return The request object URI, {@code null} if not specified.
+	 */
+	public URI getRequestURI() {
+		
+		return requestURI;
+	}
+	
+	
+	/**
+	 * Returns {@code true} if this is a JWT secured authentication
+	 * request.
+	 *
+	 * @return {@code true} if a request object via a {@code request} or
+	 *         {@code request_uri} parameter is specified, else
+	 *         {@code false}.
+	 */
+	public boolean specifiesRequestObject() {
+		
+		return requestObject != null || requestURI != null;
+	}
+	
+	
+	/**
 	 * Returns the additional custom parameters.
 	 *
 	 * @return The additional custom parameters as a unmodifiable map,
@@ -848,18 +1048,18 @@ public class AuthorizationRequest extends AbstractRequest {
 	 * @return The parameters.
 	 */
 	public Map<String,List<String>> toParameters() {
-
-		Map<String,List<String>> params = new LinkedHashMap<>();
-
-		// Put custom params first, so they may be overwritten by std params
-		params.putAll(customParams);
 		
-		params.put("response_type", Collections.singletonList(rt.toString()));
-		params.put("client_id", Collections.singletonList(clientID.getValue()));
+		// Put custom params first, so they may be overwritten by std params
+		Map<String, List<String>> params = new LinkedHashMap<>(customParams);
+		
+		if (rt != null)
+			params.put("response_type", Collections.singletonList(rt.toString()));
+		
+		if (clientID != null)
+			params.put("client_id", Collections.singletonList(clientID.getValue()));
 
-		if (rm != null) {
+		if (rm != null)
 			params.put("response_mode", Collections.singletonList(rm.getValue()));
-		}
 
 		if (redirectURI != null)
 			params.put("redirect_uri", Collections.singletonList(redirectURI.toString()));
@@ -878,9 +1078,8 @@ public class AuthorizationRequest extends AbstractRequest {
 			}
 		}
 		
-		if (includeGrantedScopes) {
+		if (includeGrantedScopes)
 			params.put("include_granted_scopes", Collections.singletonList("true"));
-		}
 		
 		if (resources != null) {
 			List<String> resourceValues = new LinkedList<>();
@@ -891,6 +1090,18 @@ public class AuthorizationRequest extends AbstractRequest {
 			}
 			params.put("resource", resourceValues);
 		}
+		
+		if (requestObject != null) {
+			try {
+				params.put("request", Collections.singletonList(requestObject.serialize()));
+				
+			} catch (IllegalStateException e) {
+				throw new SerializeException("Couldn't serialize request object to JWT: " + e.getMessage(), e);
+			}
+		}
+		
+		if (requestURI != null)
+			params.put("request_uri", Collections.singletonList(requestURI.toString()));
 
 		return params;
 	}
@@ -903,6 +1114,10 @@ public class AuthorizationRequest extends AbstractRequest {
 	 * @return The parameters as JWT claim set.
 	 */
 	public JWTClaimsSet toJWTClaimsSet() {
+		
+		if (specifiesRequestObject()) {
+			throw new IllegalStateException("Cannot create nested JWT secured authorization request");
+		}
 		
 		return JWTClaimsSetUtils.toJWTClaimsSet(toParameters());
 	}
@@ -1073,53 +1288,96 @@ public class AuthorizationRequest extends AbstractRequest {
 	 */
 	public static AuthorizationRequest parse(final URI uri, final Map<String,List<String>> params)
 		throws ParseException {
-
-		// Parse mandatory client ID first
+		
+		// Parse client_id, redirect_uri and state first, needed if a
+		// parse exception gets thrown later
+		ClientID clientID = null;
+		URI redirectURI = null;
+		State state;
+		
+		// Mandatory client_id, unless in JAR
 		String v = MultivaluedMapUtils.getFirstValue(params, "client_id");
+		if (StringUtils.isNotBlank(v))
+			clientID = new ClientID(v);
+		
+		// Optional redirect_uri
+		v = MultivaluedMapUtils.getFirstValue(params, "redirect_uri");
+		if (StringUtils.isNotBlank(v)) {
+			try {
+				redirectURI = new URI(v);
+			} catch (URISyntaxException e) {
+				// No automatic redirection https://tools.ietf.org/html/rfc6749#section-4.1.2.1
+				String msg = "Invalid \"redirect_uri\" parameter: " + e.getMessage();
+				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
+					clientID, null, null, null, e);
+			}
+		}
+		
+		// Optional state
+		state = State.parse(MultivaluedMapUtils.getFirstValue(params, "state"));
+		
+		
+		// Check for a JAR in request or request_uri parameters
+		v = MultivaluedMapUtils.getFirstValue(params, "request_uri");
+		URI requestURI = null;
+		if (StringUtils.isNotBlank(v)) {
+			try {
+				requestURI = new URI(v);
+			} catch (URISyntaxException e) {
+				String msg = "Invalid \"request_uri\" parameter: " + e.getMessage();
+				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
+					clientID, redirectURI, null, state, e);
+			}
+		}
+		
+		v = MultivaluedMapUtils.getFirstValue(params, "request");
+		
+		JWT requestObject = null;
+		
+		if (StringUtils.isNotBlank(v)) {
+			
+			// request_object and request_uri must not be present at the same time
+			if (requestURI != null) {
+				String msg = "Invalid request: Found mutually exclusive \"request\" and \"request_uri\" parameters";
+				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
+					clientID, redirectURI, null, state, null);
+			}
+			
+			try {
+				requestObject = JWTParser.parse(v);
+				
+			} catch (java.text.ParseException e) {
+				String msg = "Invalid \"request_object\" parameter: " + e.getMessage();
+				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
+					clientID, redirectURI, null, state, e);
+			}
+		}
 
-		if (StringUtils.isBlank(v)) {
+		// Client ID mandatory, unless in JAR
+		if (clientID == null && requestObject == null && requestURI == null) {
+			// No automatic redirection https://tools.ietf.org/html/rfc6749#section-4.1.2.1
 			String msg = "Missing \"client_id\" parameter";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 		}
 
-		ClientID clientID = new ClientID(v);
-
-
-		// Parse optional redirection URI second
-		v = MultivaluedMapUtils.getFirstValue(params, "redirect_uri");
-
-		URI redirectURI = null;
-
+		// Response type mandatory, unless in JAR
+		ResponseType rt = null;
+		v = MultivaluedMapUtils.getFirstValue(params, "response_type");
 		if (StringUtils.isNotBlank(v)) {
-
 			try {
-				redirectURI = new URI(v);
-
-			} catch (URISyntaxException e) {
-				String msg = "Invalid \"redirect_uri\" parameter: " + e.getMessage();
+				rt = ResponseType.parse(v);
+			} catch (ParseException e) {
+				// Only cause
+				String msg = "Invalid \"response_type\" parameter";
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-					                 clientID, null, null, null, e);
+					clientID, redirectURI, null, state, e);
 			}
 		}
-
-
-		// Parse optional state third
-		State state = State.parse(MultivaluedMapUtils.getFirstValue(params, "state"));
-
-
-		// Parse mandatory response type
-		v = MultivaluedMapUtils.getFirstValue(params, "response_type");
-
-		ResponseType rt;
-
-		try {
-			rt = ResponseType.parse(v);
-
-		} catch (ParseException e) {
-			// Only cause
+		
+		if (rt == null && requestObject == null && requestURI == null) {
 			String msg = "Missing \"response_type\" parameter";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-				                 clientID, redirectURI, null, state, e);
+				clientID, redirectURI, null, state, null);
 		}
 
 
@@ -1212,7 +1470,10 @@ public class AuthorizationRequest extends AbstractRequest {
 		}
 
 
-		return new AuthorizationRequest(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, resources, includeGrantedScopes, customParams);
+		return new AuthorizationRequest(uri, rt, rm, clientID, redirectURI, scope, state,
+			codeChallenge, codeChallengeMethod, resources, includeGrantedScopes,
+			requestObject, requestURI,
+			customParams);
 	}
 
 

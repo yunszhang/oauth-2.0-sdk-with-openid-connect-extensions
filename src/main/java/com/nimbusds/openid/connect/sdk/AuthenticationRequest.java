@@ -65,6 +65,10 @@ import com.nimbusds.openid.connect.sdk.claims.ACR;
  *     <li>Proof Key for Code Exchange by OAuth Public Clients (RFC 7636).
  *     <li>Resource Indicators for OAuth 2.0
  *         (draft-ietf-oauth-resource-indicators-00)
+ *     <li>The OAuth 2.0 Authorization Framework: JWT Secured Authorization
+ *         Request (JAR) draft-ietf-oauth-jwsreq-17
+ *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
+ *         OAuth 2.0 (JARM)
  * </ul>
  */
 @Immutable
@@ -91,15 +95,14 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		p.add("login_hint");
 		p.add("acr_values");
 		p.add("claims");
-		p.add("request_uri");
-		p.add("request");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 	
 	
 	/**
-	 * The nonce (required for implicit flow, optional for code flow).
+	 * The nonce (required for implicit flow (unless in JAR), optional for
+	 * code flow).
 	 */
 	private final Nonce nonce;
 	
@@ -163,18 +166,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 	 * Individual claims to be returned (optional).
 	 */
 	private final ClaimsRequest claims;
-	
-	
-	/**
-	 * Request object (optional).
-	 */
-	private final JWT requestObject;
-	
-	
-	/**
-	 * Request object URI (optional).
-	 */
-	private final URI requestURI;
 
 
 	/**
@@ -190,28 +181,28 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 
 		/**
-		 * The response type (required).
+		 * The response type (required unless in JAR).
 		 */
-		private final ResponseType rt;
+		private ResponseType rt;
 
 
 		/**
-		 * The client identifier (required).
+		 * The client identifier (required unless in JAR).
 		 */
-		private final ClientID clientID;
+		private ClientID clientID;
 
 
 		/**
 		 * The redirection URI where the response will be sent
-		 * (required).
+		 * (required unless in JAR).
 		 */
-		private final URI redirectURI;
+		private URI redirectURI;
 
 
 		/**
-		 * The scope (required).
+		 * The scope (required unless in JAR).
 		 */
-		private final Scope scope;
+		private Scope scope;
 
 
 		/**
@@ -222,8 +213,8 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 
 		/**
-		 * The nonce (required for implicit flow, optional for code
-		 * flow).
+		 * The nonce (required for implicit flow (unless in JAR),
+		 * optional for code flow).
 		 */
 		private Nonce nonce;
 
@@ -386,6 +377,38 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			// Check presence at build time
 			this.redirectURI = redirectURI;
 		}
+
+
+		/**
+		 * Creates a new JWT secured OpenID Connect authentication
+		 * request builder.
+		 *
+		 * @param requestObject The request object. Must not be
+		 *                      {@code null}.
+		 */
+		public Builder(final JWT requestObject) {
+			
+			if (requestObject == null)
+				throw new IllegalArgumentException("The request object must not be null");
+
+			this.requestObject = requestObject;
+		}
+
+
+		/**
+		 * Creates a new JWT secured OpenID Connect authentication
+		 * request builder.
+		 *
+		 * @param requestURI The request object URI. Must not be
+		 *                   {@code null}.
+		 */
+		public Builder(final URI requestURI) {
+			
+			if (requestURI == null)
+				throw new IllegalArgumentException("The request URI must not be null");
+
+			this.requestURI = requestURI;
+		}
 		
 		
 		/**
@@ -421,6 +444,82 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			resources = request.getResources();
 			includeGrantedScopes = request.includeGrantedScopes();
 			customParams.putAll(request.getCustomParameters());
+		}
+		
+		
+		/**
+		 * Sets the response type. Corresponds to the
+		 * {@code response_type} parameter.
+		 *
+		 * @param rt The response type. Must not be {@code null}.
+		 *
+		 * @return This builder.
+		 */
+		public Builder responseType(final ResponseType rt) {
+			
+			if (rt == null)
+				throw new IllegalArgumentException("The response type must not be null");
+			
+			this.rt = rt;
+			return this;
+		}
+		
+		
+		/**
+		 * Sets the scope. Corresponds to the {@code scope} parameter.
+		 *
+		 * @param scope The scope. Must not be {@code null}.
+		 *
+		 * @return This builder.
+		 */
+		public Builder scope(final Scope scope) {
+			
+			if (scope == null)
+				throw new IllegalArgumentException("The scope must not be null");
+			
+			if (! scope.contains(OIDCScopeValue.OPENID))
+				throw new IllegalArgumentException("The scope must include an \"openid\" value");
+			
+			this.scope = scope;
+			return this;
+		}
+		
+		
+		/**
+		 * Sets the client identifier. Corresponds to the
+		 * {@code client_id} parameter.
+		 *
+		 * @param clientID The client identifier. Must not be
+		 *                 {@code null}.
+		 *
+		 * @return This builder.
+		 */
+		public Builder clientID(final ClientID clientID) {
+			
+			if (clientID == null)
+				throw new IllegalArgumentException("The client ID must not be null");
+			
+			this.clientID = clientID;
+			return this;
+		}
+		
+		
+		/**
+		 * Sets the redirection URI. Corresponds to the
+		 * {@code redirection_uri} parameter.
+		 *
+		 * @param redirectURI The redirection URI. Must not be
+		 *                    {@code null}.
+		 *
+		 * @return This builder.
+		 */
+		public Builder redirectionURI(final URI redirectURI) {
+			
+			if (redirectURI == null)
+				throw new IllegalArgumentException("The redirection URI must not be null");
+			
+			this.redirectURI = redirectURI;
+			return this;
 		}
 
 
@@ -959,24 +1058,27 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				     final boolean includeGrantedScopes,
 				     final Map<String,List<String>> customParams) {
 
-		super(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, resources, includeGrantedScopes, customParams);
+		super(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, resources, includeGrantedScopes, requestObject, requestURI, customParams);
 		
-		// Redirect URI required unless set in request_object / request_uri
-		if (redirectURI == null && requestObject == null && requestURI == null)
-			throw new IllegalArgumentException("The redirection URI must not be null");
-		
-		OIDCResponseTypeValidator.validate(rt);
-
-		if (scope == null)
-			throw new IllegalArgumentException("The scope must not be null");
-
-		if (! scope.contains(OIDCScopeValue.OPENID))
-			throw new IllegalArgumentException("The scope must include an \"openid\" token");
-		
-		
-		// Nonce required in the implicit and hybrid flows
-		if (nonce == null && (rt.impliesImplicitFlow() || rt.impliesHybridFlow()))
-			throw new IllegalArgumentException("Nonce is required in implicit / hybrid protocol flow");
+		if (! specifiesRequestObject()) {
+			
+			// Check parameters required by OpenID Connect if no JAR
+			
+			if (redirectURI == null)
+				throw new IllegalArgumentException("The redirection URI must not be null");
+			
+			OIDCResponseTypeValidator.validate(rt);
+			
+			if (scope == null)
+				throw new IllegalArgumentException("The scope must not be null");
+			
+			if (!scope.contains(OIDCScopeValue.OPENID))
+				throw new IllegalArgumentException("The scope must include an \"openid\" value");
+			
+			// Nonce required in the implicit and hybrid flows
+			if (nonce == null && (rt.impliesImplicitFlow() || rt.impliesHybridFlow()))
+				throw new IllegalArgumentException("Nonce is required in implicit / hybrid protocol flow");
+		}
 		
 		this.nonce = nonce;
 		
@@ -1004,12 +1106,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			this.acrValues = null;
 
 		this.claims = claims;
-
-		if (requestObject != null && requestURI != null)
-			throw new IllegalArgumentException("Either a request object or a request URI must be specified, but not both");
-
-		this.requestObject = requestObject;
-		this.requestURI = requestURI;
 	}
 
 
@@ -1148,44 +1244,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 		return claims;
 	}
-	
-	
-	/**
-	 * Gets the request object. Corresponds to the optional {@code request} 
-	 * parameter.
-	 *
-	 * @return The request object, {@code null} if not specified.
-	 */
-	public JWT getRequestObject() {
-	
-		return requestObject;
-	}
-	
-	
-	/**
-	 * Gets the request object URI. Corresponds to the optional
-	 * {@code request_uri} parameter.
-	 *
-	 * @return The request object URI, {@code null} if not specified.
-	 */
-	public URI getRequestURI() {
-	
-		return requestURI;
-	}
-	
-	
-	/**
-	 * Returns {@code true} if this authentication request specifies an
-	 * OpenID Connect request object (directly through the {@code request} 
-	 * parameter or by reference through the {@code request_uri} parameter).
-	 *
-	 * @return {@code true} if a request object is specified, else 
-	 *         {@code false}.
-	 */
-	public boolean specifiesRequestObject() {
-	
-		return requestObject != null || requestURI != null;
-	}
 
 
 	@Override
@@ -1267,20 +1325,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 		if (claims != null)
 			params.put("claims", Collections.singletonList(claims.toJSONObject().toString()));
-		
-		if (requestObject != null) {
-		
-			try {
-				params.put("request", Collections.singletonList(requestObject.serialize()));
-				
-			} catch (IllegalStateException e) {
-			
-				throw new SerializeException("Couldn't serialize request object to JWT: " + e.getMessage(), e);
-			}
-		}
-		
-		if (requestURI != null)
-			params.put("request_uri", Collections.singletonList(requestURI.toString()));
 
 		return params;
 	}
@@ -1367,49 +1411,49 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		// Parse and validate the core OAuth 2.0 autz request params in 
 		// the context of OIDC
 		AuthorizationRequest ar = AuthorizationRequest.parse(uri, params);
-
-		ClientID clientID = ar.getClientID();
-		State state = ar.getState();
-		ResponseMode rm = ar.getResponseMode();
-
-		// Required in OIDC, check later after optional request_object / request_uri is parsed
-		URI redirectURI = ar.getRedirectionURI();
-
-		ResponseType rt = ar.getResponseType();
 		
-		try {
-			OIDCResponseTypeValidator.validate(rt);
-			
-		} catch (IllegalArgumentException e) {
-			String msg = "Unsupported \"response_type\" parameter: " + e.getMessage();
-			throw new ParseException(msg, OAuth2Error.UNSUPPORTED_RESPONSE_TYPE.appendDescription(": " + msg),
-					         clientID, redirectURI, ar.impliedResponseMode(), state);
-		}
-		
-		// Required in OIDC, must include "openid" parameter
-		Scope scope = ar.getScope();
-
-		if (scope == null) {
-			String msg = "Missing \"scope\" parameter";
-			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-				                 clientID, redirectURI, ar.impliedResponseMode(), state);
-		}
-
-		if (! scope.contains(OIDCScopeValue.OPENID)) {
-			String msg = "The scope must include an \"openid\" value";
-			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-				                 clientID, redirectURI, ar.impliedResponseMode(), state);
-		}
-
-
-		// Parse the remaining OIDC parameters
 		Nonce nonce = Nonce.parse(MultivaluedMapUtils.getFirstValue(params, "nonce"));
 		
-		// Nonce required in the implicit and hybrid flows
-		if (nonce == null && (rt.impliesImplicitFlow() || rt.impliesHybridFlow())) {
-			String msg = "Missing \"nonce\" parameter: Required in the implicit and hybrid flows";
+		if (! ar.specifiesRequestObject()) {
+			
+			// Required params if no JAR is present
+			
+			if (ar.getRedirectionURI() == null) {
+				String msg = "Missing \"redirect_uri\" parameter";
+				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
+					ar.getClientID(), null, ar.impliedResponseMode(), ar.getState());
+			}
+			
+			if (ar.getScope() == null) {
+				String msg = "Missing \"scope\" parameter";
+				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
+					ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState());
+			}
+			
+			// Nonce required in the implicit and hybrid flows
+			if (nonce == null && (ar.getResponseType().impliesImplicitFlow() || ar.getResponseType().impliesHybridFlow())) {
+				String msg = "Missing \"nonce\" parameter: Required in the implicit and hybrid flows";
+				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
+					ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState());
+			}
+		}
+		
+		// Check if present (not in JAR)
+		if (ar.getResponseType() != null) {
+			try {
+				OIDCResponseTypeValidator.validate(ar.getResponseType());
+			} catch (IllegalArgumentException e) {
+				String msg = "Unsupported \"response_type\" parameter: " + e.getMessage();
+				throw new ParseException(msg, OAuth2Error.UNSUPPORTED_RESPONSE_TYPE.appendDescription(": " + msg),
+					ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState());
+			}
+		}
+		
+		// Check if present (not in JAR)
+		if (ar.getScope() != null && ! ar.getScope().contains(OIDCScopeValue.OPENID)) {
+			String msg = "The scope must include an \"openid\" value";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-				                 clientID, redirectURI, ar.impliedResponseMode(), state);
+				                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState());
 		}
 		
 		Display display = null;
@@ -1421,7 +1465,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			} catch (ParseException e) {
 				String msg = "Invalid \"display\" parameter: " + e.getMessage();
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-					clientID, redirectURI, ar.impliedResponseMode(), state, e);
+					ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
 			}
 		}
 		
@@ -1434,7 +1478,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		} catch (ParseException e) {
 			String msg = "Invalid \"prompt\" parameter: " + e.getMessage();
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-				                 clientID, redirectURI, ar.impliedResponseMode(), state, e);
+				                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
 		}
 
 
@@ -1450,7 +1494,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			} catch (NumberFormatException e) {
 				String msg = "Invalid \"max_age\" parameter: " + v;
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-					                 clientID, redirectURI, ar.impliedResponseMode(), state, e);
+					                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
 			}
 		}
 
@@ -1473,7 +1517,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				} catch (LangTagException e) {
 					String msg = "Invalid \"ui_locales\" parameter: " + e.getMessage();
 					throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-						                 clientID, redirectURI, ar.impliedResponseMode(), state, e);
+						                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
 				}
 			}
 		}
@@ -1497,7 +1541,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				} catch (LangTagException e) {
 					String msg = "Invalid \"claims_locales\" parameter: " + e.getMessage();
 					throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-						                 clientID, redirectURI, ar.impliedResponseMode(), state, e);
+						                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
 				}
 			}
 		}
@@ -1515,7 +1559,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			} catch (java.text.ParseException e) {
 				String msg = "Invalid \"id_token_hint\" parameter: " + e.getMessage();
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-					                 clientID, redirectURI, ar.impliedResponseMode(), state, e);
+					                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
 			}
 		}
 
@@ -1553,59 +1597,11 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			} catch (ParseException e) {
 				String msg = "Invalid \"claims\" parameter: " + e.getMessage();
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-					                 clientID, redirectURI, ar.impliedResponseMode(), state, e);
+					                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
 			}
 
 			// Parse exceptions silently ignored
 			claims = ClaimsRequest.parse(jsonObject);
-		}
-		
-		
-		v = MultivaluedMapUtils.getFirstValue(params, "request_uri");
-		
-		URI requestURI = null;
-		
-		if (StringUtils.isNotBlank(v)) {
-
-			try {
-				requestURI = new URI(v);
-		
-			} catch (URISyntaxException e) {
-				String msg = "Invalid \"request_uri\" parameter: " + e.getMessage();
-				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-					                 clientID, redirectURI, ar.impliedResponseMode(), state, e);
-			}
-		}
-
-		v = MultivaluedMapUtils.getFirstValue(params, "request");
-
-		JWT requestObject = null;
-
-		if (StringUtils.isNotBlank(v)) {
-
-			// request_object and request_uri must not be defined at the same time
-			if (requestURI != null) {
-				String msg = "Invalid request: Found mutually exclusive \"request\" and \"request_uri\" parameters";
-				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-					                 clientID, redirectURI, ar.impliedResponseMode(), state, null);
-			}
-
-			try {
-				requestObject = JWTParser.parse(v);
-				
-			} catch (java.text.ParseException e) {
-				String msg = "Invalid \"request_object\" parameter: " + e.getMessage();
-				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-					                 clientID, redirectURI, ar.impliedResponseMode(), state, e);
-			}
-		}
-
-
-		// Redirect URI required unless request_object / request_uri present
-		if (redirectURI == null && requestObject == null && requestURI == null) {
-			String msg = "Missing \"redirect_uri\" parameter";
-			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-				clientID, null, ar.impliedResponseMode(), state);
 		}
 
 		// Parse additional custom parameters
@@ -1624,9 +1620,10 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 
 		return new AuthenticationRequest(
-			uri, rt, rm, scope, clientID, redirectURI, state, nonce,
+			uri, ar.getResponseType(), ar.getResponseMode(), ar.getScope(), ar.getClientID(), ar.getRedirectionURI(), ar.getState(), nonce,
 			display, prompt, maxAge, uiLocales, claimsLocales,
-			idTokenHint, loginHint, acrValues, claims, requestObject, requestURI,
+			idTokenHint, loginHint, acrValues, claims,
+			ar.getRequestObject(), ar.getRequestURI(),
 			ar.getCodeChallenge(), ar.getCodeChallengeMethod(),
 			ar.getResources(),
 			ar.includeGrantedScopes(),

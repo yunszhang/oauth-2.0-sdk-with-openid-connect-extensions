@@ -25,7 +25,9 @@ import java.util.*;
 
 import junit.framework.TestCase;
 
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
@@ -50,7 +52,9 @@ public class AuthorizationRequestTest extends TestCase {
 		assertTrue(AuthorizationRequest.getRegisteredParameterNames().contains("code_challenge_method"));
 		assertTrue(AuthorizationRequest.getRegisteredParameterNames().contains("resource"));
 		assertTrue(AuthorizationRequest.getRegisteredParameterNames().contains("include_granted_scopes"));
-		assertEquals(10, AuthorizationRequest.getRegisteredParameterNames().size());
+		assertTrue(AuthorizationRequest.getRegisteredParameterNames().contains("request"));
+		assertTrue(AuthorizationRequest.getRegisteredParameterNames().contains("request_uri"));
+		assertEquals(12, AuthorizationRequest.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -212,7 +216,7 @@ public class AuthorizationRequestTest extends TestCase {
 		customParams.put("z", Collections.singletonList("300"));
 
 
-		AuthorizationRequest req = new AuthorizationRequest(uri, rts, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, resources, true, customParams);
+		AuthorizationRequest req = new AuthorizationRequest(uri, rts, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, resources, true, null, null, customParams);
 
 		assertEquals(uri, req.getEndpointURI());
 		assertEquals(rts, req.getResponseType());
@@ -293,7 +297,7 @@ public class AuthorizationRequestTest extends TestCase {
 		
 		List<URI> resources = Collections.singletonList(URI.create("https://rs1.com"));
 
-		AuthorizationRequest req = new AuthorizationRequest(uri, rts, null, clientID, redirectURI, scope, state, codeChallenge, null, resources, false, null);
+		AuthorizationRequest req = new AuthorizationRequest(uri, rts, null, clientID, redirectURI, scope, state, codeChallenge, null, resources, false, null, null, null);
 
 		assertEquals(uri, req.getEndpointURI());
 		assertEquals(rts, req.getResponseType());
@@ -644,6 +648,8 @@ public class AuthorizationRequestTest extends TestCase {
 			CodeChallengeMethod.S256,
 			Collections.singletonList(URI.create("https://rs1.com")),
 			true,
+			null,
+			null,
 			customParams);
 		
 		AuthorizationRequest out = new AuthorizationRequest.Builder(in).build();
@@ -877,5 +883,580 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(ar.getResources().size(), jwtClaimsSet.getStringListClaim("resource").size());
 		
 		assertEquals(5, jwtClaimsSet.getClaims().size());
+	}
+	
+	
+	public void testJAR_requestURI_only()
+		throws ParseException {
+		
+		URI endpointURI = URI.create("https://c2id.com/login");
+		URI requestURI = URI.create("urn:requests:ahy4ohgo");
+		
+		AuthorizationRequest ar = new AuthorizationRequest.Builder(requestURI)
+			.endpointURI(endpointURI)
+			.build();
+		
+		assertNull(ar.getResponseType());
+		assertNull(ar.getClientID());
+		assertNull(ar.getRedirectionURI());
+		assertNull(ar.getScope());
+		assertNull(ar.getState());
+		assertNull(ar.getResponseMode());
+		assertEquals(ResponseMode.QUERY, ar.impliedResponseMode());
+		assertNull(ar.getResources());
+		assertFalse(ar.includeGrantedScopes());
+		assertNull(ar.getCustomParameter("custom-param"));
+		assertTrue(ar.getCustomParameters().isEmpty());
+		
+		assertEquals(endpointURI, ar.getEndpointURI());
+		assertEquals(requestURI, ar.getRequestURI());
+		assertNull(ar.getRequestObject());
+		assertTrue(ar.specifiesRequestObject());
+		
+		assertEquals("request_uri=urn%3Arequests%3Aahy4ohgo", ar.toQueryString());
+		assertEquals("https://c2id.com/login?request_uri=urn%3Arequests%3Aahy4ohgo", ar.toURI().toString());
+		
+		ar = AuthorizationRequest.parse(ar.toURI());
+		
+		assertNull(ar.getResponseType());
+		assertNull(ar.getClientID());
+		assertNull(ar.getRedirectionURI());
+		assertNull(ar.getScope());
+		assertNull(ar.getState());
+		assertNull(ar.getResponseMode());
+		assertEquals(ResponseMode.QUERY, ar.impliedResponseMode());
+		assertNull(ar.getResources());
+		assertFalse(ar.includeGrantedScopes());
+		assertNull(ar.getCustomParameter("custom-param"));
+		assertTrue(ar.getCustomParameters().isEmpty());
+		
+		assertEquals(endpointURI, ar.getEndpointURI());
+		assertEquals(requestURI, ar.getRequestURI());
+		assertNull(ar.getRequestObject());
+		assertTrue(ar.specifiesRequestObject());
+	}
+	
+	
+	public void testBuilder_requestURI_coreTopLevelParams() {
+		
+		URI requestURI = URI.create("urn:requests:ahy4ohgo");
+		ResponseType rt = new ResponseType("code");
+		ClientID clientID = new ClientID("123");
+		
+		AuthorizationRequest ar = new AuthorizationRequest.Builder(requestURI)
+			.responseType(rt)
+			.clientID(clientID)
+			.build();
+		
+		assertEquals(requestURI, ar.getRequestURI());
+		assertEquals(rt, ar.getResponseType());
+		assertEquals(clientID, ar.getClientID());
+		
+		try {
+			new AuthorizationRequest.Builder(requestURI).responseType(null);
+			fail("Core response_type when set not null");
+		} catch (IllegalArgumentException e) {
+			assertEquals("The response type must not be null", e.getMessage());
+		}
+		
+		try {
+			new AuthorizationRequest.Builder(requestURI).clientID(null);
+			fail("Core client_id when set not null");
+		} catch (IllegalArgumentException e) {
+			assertEquals("The client ID must not be null", e.getMessage());
+		}
+	}
+	
+	
+	public void testJAR_requestURI_requiredTopLevelParams()
+		throws ParseException {
+		
+		URI endpointURI = URI.create("https://c2id.com/login");
+		ResponseType rt = new ResponseType("code");
+		ClientID clientID = new ClientID("123");
+		URI requestURI = URI.create("urn:requests:ahy4ohgo");
+		
+		AuthorizationRequest ar = new AuthorizationRequest.Builder(rt, clientID)
+			.requestURI(requestURI)
+			.endpointURI(endpointURI)
+			.build();
+		
+		assertEquals(rt, ar.getResponseType());
+		assertEquals(clientID, ar.getClientID());
+		assertNull(ar.getRedirectionURI());
+		assertNull(ar.getScope());
+		assertNull(ar.getState());
+		assertNull(ar.getResponseMode());
+		assertEquals(ResponseMode.QUERY, ar.impliedResponseMode());
+		assertNull(ar.getResources());
+		assertFalse(ar.includeGrantedScopes());
+		assertNull(ar.getCustomParameter("custom-param"));
+		assertTrue(ar.getCustomParameters().isEmpty());
+		
+		assertEquals(endpointURI, ar.getEndpointURI());
+		assertEquals(requestURI, ar.getRequestURI());
+		assertNull(ar.getRequestObject());
+		assertTrue(ar.specifiesRequestObject());
+		
+		ar = AuthorizationRequest.parse(ar.toURI());
+		
+		assertEquals(rt, ar.getResponseType());
+		assertEquals(clientID, ar.getClientID());
+		assertNull(ar.getRedirectionURI());
+		assertNull(ar.getScope());
+		assertNull(ar.getState());
+		assertNull(ar.getResponseMode());
+		assertEquals(ResponseMode.QUERY, ar.impliedResponseMode());
+		assertNull(ar.getResources());
+		assertFalse(ar.includeGrantedScopes());
+		assertNull(ar.getCustomParameter("custom-param"));
+		assertTrue(ar.getCustomParameters().isEmpty());
+		
+		assertEquals(endpointURI, ar.getEndpointURI());
+		assertEquals(requestURI, ar.getRequestURI());
+		assertNull(ar.getRequestObject());
+		assertTrue(ar.specifiesRequestObject());
+	}
+	
+	
+	public void testJAR_requestObject_only()
+		throws ParseException {
+		
+		URI endpointURI = URI.create("https://c2id.com/login");
+		ResponseType rt = new ResponseType("code");
+		ClientID clientID = new ClientID("123");
+		
+		AuthorizationRequest jar = new AuthorizationRequest.Builder(rt, clientID)
+			.build();
+		
+		JWTClaimsSet jwtClaimsSet = jar.toJWTClaimsSet();
+		
+		JWT requestObject = new PlainJWT(jwtClaimsSet);
+		
+		AuthorizationRequest ar = new AuthorizationRequest.Builder(requestObject)
+			.endpointURI(endpointURI)
+			.build();
+		
+		assertNull(ar.getResponseType());
+		assertNull(ar.getClientID());
+		assertNull(ar.getRedirectionURI());
+		assertNull(ar.getScope());
+		assertNull(ar.getState());
+		assertNull(ar.getResponseMode());
+		assertEquals(ResponseMode.QUERY, ar.impliedResponseMode());
+		assertNull(ar.getResources());
+		assertFalse(ar.includeGrantedScopes());
+		assertNull(ar.getCustomParameter("custom-param"));
+		assertTrue(ar.getCustomParameters().isEmpty());
+		
+		assertEquals(endpointURI, ar.getEndpointURI());
+		assertNull(ar.getRequestURI());
+		assertEquals(requestObject, ar.getRequestObject());
+		assertTrue(ar.specifiesRequestObject());
+		
+		assertEquals("request=eyJhbGciOiJub25lIn0.eyJyZXNwb25zZV90eXBlIjoiY29kZSIsImNsaWVudF9pZCI6IjEyMyJ9.", ar.toQueryString());
+		assertEquals("https://c2id.com/login?request=eyJhbGciOiJub25lIn0.eyJyZXNwb25zZV90eXBlIjoiY29kZSIsImNsaWVudF9pZCI6IjEyMyJ9.", ar.toURI().toString());
+		
+		ar = AuthorizationRequest.parse(ar.toURI());
+		
+		assertNull(ar.getResponseType());
+		assertNull(ar.getClientID());
+		assertNull(ar.getRedirectionURI());
+		assertNull(ar.getScope());
+		assertNull(ar.getState());
+		assertNull(ar.getResponseMode());
+		assertEquals(ResponseMode.QUERY, ar.impliedResponseMode());
+		assertNull(ar.getResources());
+		assertFalse(ar.includeGrantedScopes());
+		assertNull(ar.getCustomParameter("custom-param"));
+		assertTrue(ar.getCustomParameters().isEmpty());
+		
+		assertEquals(endpointURI, ar.getEndpointURI());
+		assertNull(ar.getRequestURI());
+		assertEquals(requestObject.serialize(), ar.getRequestObject().serialize());
+		assertTrue(ar.specifiesRequestObject());
+	}
+	
+	
+	public void testJAR_requestObject_requiredTopLevelParams()
+		throws ParseException {
+		
+		URI endpointURI = URI.create("https://c2id.com/login");
+		ResponseType rt = new ResponseType("code");
+		ClientID clientID = new ClientID("123");
+		
+		AuthorizationRequest jar = new AuthorizationRequest.Builder(rt, clientID)
+			.build();
+		
+		JWTClaimsSet jwtClaimsSet = jar.toJWTClaimsSet();
+		
+		JWT requestObject = new PlainJWT(jwtClaimsSet);
+		
+		AuthorizationRequest ar = new AuthorizationRequest.Builder(rt, clientID)
+			.requestObject(requestObject)
+			.endpointURI(endpointURI)
+			.build();
+		
+		assertEquals(rt, ar.getResponseType());
+		assertEquals(clientID, ar.getClientID());
+		assertNull(ar.getRedirectionURI());
+		assertNull(ar.getScope());
+		assertNull(ar.getState());
+		assertNull(ar.getResponseMode());
+		assertEquals(ResponseMode.QUERY, ar.impliedResponseMode());
+		assertNull(ar.getResources());
+		assertFalse(ar.includeGrantedScopes());
+		assertNull(ar.getCustomParameter("custom-param"));
+		assertTrue(ar.getCustomParameters().isEmpty());
+		
+		assertEquals(endpointURI, ar.getEndpointURI());
+		assertNull(ar.getRequestURI());
+		assertEquals(requestObject, ar.getRequestObject());
+		assertTrue(ar.specifiesRequestObject());
+		
+		ar = AuthorizationRequest.parse(ar.toURI());
+		
+		assertEquals(rt, ar.getResponseType());
+		assertEquals(clientID, ar.getClientID());
+		assertNull(ar.getRedirectionURI());
+		assertNull(ar.getScope());
+		assertNull(ar.getState());
+		assertNull(ar.getResponseMode());
+		assertEquals(ResponseMode.QUERY, ar.impliedResponseMode());
+		assertNull(ar.getResources());
+		assertFalse(ar.includeGrantedScopes());
+		assertNull(ar.getCustomParameter("custom-param"));
+		assertTrue(ar.getCustomParameters().isEmpty());
+		
+		assertEquals(endpointURI, ar.getEndpointURI());
+		assertNull(ar.getRequestURI());
+		assertEquals(requestObject.serialize(), ar.getRequestObject().serialize());
+		assertTrue(ar.specifiesRequestObject());
+	}
+	
+	
+	public void testBuilder_nullRequestObject() {
+		
+		try {
+			new AuthorizationRequest.Builder((JWT)null);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The request object must not be null", e.getMessage());
+		}
+	}
+	
+	
+	public void testBuilder_nullRequestURI() {
+		
+		try {
+			new AuthorizationRequest.Builder((URI)null);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The request URI must not be null", e.getMessage());
+		}
+	}
+	
+	
+	public void testBuilder_copyConstructor_requestObject() {
+		
+		URI endpointURI = URI.create("https://c2id.com/login");
+		ResponseType rt = new ResponseType("code");
+		ClientID clientID = new ClientID("123");
+		
+		AuthorizationRequest jar = new AuthorizationRequest.Builder(rt, clientID)
+			.build();
+		
+		JWTClaimsSet jwtClaimsSet = jar.toJWTClaimsSet();
+		
+		JWT requestObject = new PlainJWT(jwtClaimsSet);
+		
+		AuthorizationRequest ar = new AuthorizationRequest.Builder(requestObject)
+			.endpointURI(endpointURI)
+			.build();
+		
+		ar = new AuthorizationRequest.Builder(ar)
+			.build();
+		
+		assertNull(ar.getResponseType());
+		assertNull(ar.getClientID());
+		assertNull(ar.getRedirectionURI());
+		assertNull(ar.getScope());
+		assertNull(ar.getState());
+		assertNull(ar.getResponseMode());
+		assertEquals(ResponseMode.QUERY, ar.impliedResponseMode());
+		assertNull(ar.getResources());
+		assertFalse(ar.includeGrantedScopes());
+		assertNull(ar.getCustomParameter("custom-param"));
+		assertTrue(ar.getCustomParameters().isEmpty());
+		
+		assertEquals(endpointURI, ar.getEndpointURI());
+		assertNull(ar.getRequestURI());
+		assertEquals(requestObject, ar.getRequestObject());
+		assertTrue(ar.specifiesRequestObject());
+	}
+	
+	
+	public void testBuilder_copyConstructor_requestURI() {
+		
+		URI endpointURI = URI.create("https://c2id.com/login");
+		ResponseType rt = new ResponseType("code");
+		ClientID clientID = new ClientID("123");
+		URI requestURI = URI.create("urn:requests:ahy4ohgo");
+		
+		AuthorizationRequest ar = new AuthorizationRequest.Builder(rt, clientID)
+			.requestURI(requestURI)
+			.endpointURI(endpointURI)
+			.build();
+		
+		ar = new AuthorizationRequest.Builder(ar)
+			.build();
+		
+		assertEquals(rt, ar.getResponseType());
+		assertEquals(clientID, ar.getClientID());
+		assertNull(ar.getRedirectionURI());
+		assertNull(ar.getScope());
+		assertNull(ar.getState());
+		assertNull(ar.getResponseMode());
+		assertEquals(ResponseMode.QUERY, ar.impliedResponseMode());
+		assertNull(ar.getResources());
+		assertFalse(ar.includeGrantedScopes());
+		assertNull(ar.getCustomParameter("custom-param"));
+		assertTrue(ar.getCustomParameters().isEmpty());
+		
+		assertEquals(endpointURI, ar.getEndpointURI());
+		assertEquals(requestURI, ar.getRequestURI());
+		assertNull(ar.getRequestObject());
+		assertTrue(ar.specifiesRequestObject());
+	}
+	
+	
+	public void testBuilder_reject_requestObjectWithRequestURI() {
+		
+		URI endpointURI = URI.create("https://c2id.com/login");
+		ResponseType rt = new ResponseType("code");
+		ClientID clientID = new ClientID("123");
+		
+		AuthorizationRequest jar = new AuthorizationRequest.Builder(rt, clientID)
+			.build();
+		
+		JWTClaimsSet jwtClaimsSet = jar.toJWTClaimsSet();
+		
+		JWT requestObject = new PlainJWT(jwtClaimsSet);
+		
+		try {
+			new AuthorizationRequest.Builder(requestObject)
+				.endpointURI(endpointURI)
+				.requestURI(URI.create("urn:requests:uogo3ora"))
+				.build();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Either a request object or a request URI must be specified, but not both", e.getMessage());
+			assertTrue(e.getCause() instanceof IllegalArgumentException);
+			assertEquals("Either a request object or a request URI must be specified, but not both", e.getCause().getMessage());
+		}
+	}
+	
+	
+	public void test_toJWTClaimsSet_rejectIfNestedRequestObject() {
+		
+		URI endpointURI = URI.create("https://c2id.com/login");
+		ResponseType rt = new ResponseType("code");
+		ClientID clientID = new ClientID("123");
+		
+		AuthorizationRequest jar = new AuthorizationRequest.Builder(rt, clientID)
+			.build();
+		
+		JWTClaimsSet jwtClaimsSet = jar.toJWTClaimsSet();
+		
+		JWT requestObject = new PlainJWT(jwtClaimsSet);
+		
+		AuthorizationRequest ar = new AuthorizationRequest.Builder(requestObject)
+			.endpointURI(endpointURI)
+			.build();
+		
+		try {
+			ar.toJWTClaimsSet();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Cannot create nested JWT secured authorization request", e.getMessage());
+		}
+	}
+	
+	
+	public void test_toJWTClaimsSet_rejectIfNestedRequestURI() {
+		
+		URI endpointURI = URI.create("https://c2id.com/login");
+		URI requestURI = URI.create("urn:requests:uogo3ora");
+		
+		AuthorizationRequest ar = new AuthorizationRequest.Builder(requestURI)
+			.endpointURI(endpointURI)
+			.build();
+		
+		try {
+			ar.toJWTClaimsSet();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Cannot create nested JWT secured authorization request", e.getMessage());
+		}
+	}
+	
+	
+	public void testParseInvalidRequestURI() {
+		
+		try {
+			AuthorizationRequest.parse(URI.create("https://c2id.com/login?request_uri=%3A"));
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid \"request_uri\" parameter: Expected scheme name at index 0: :", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
+		}
+	}
+	
+	
+	public void testParseInvalidRequestObject() {
+		
+		try {
+			AuthorizationRequest.parse(URI.create("https://c2id.com/login?request=abc"));
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid \"request_object\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
+		}
+	}
+	
+	
+	public void testParseInvalidRequestURI_redirectionInfo() {
+		
+		ResponseType rt = new ResponseType("code");
+		ClientID clientID = new ClientID("123");
+		URI redirectionURI = URI.create("https://example.com/cb");
+		State state = new State();
+		
+		Map<String,List<String>> params = new AuthorizationRequest.Builder(rt, clientID)
+			.redirectionURI(redirectionURI)
+			.state(state)
+			.build()
+			.toParameters();
+		params.put("request_uri", Collections.singletonList(":"));
+		
+		try {
+			AuthorizationRequest.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid \"request_uri\" parameter: Expected scheme name at index 0: :", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
+			assertEquals("Invalid request: Invalid \"request_uri\" parameter: Expected scheme name at index 0: :", e.getErrorObject().getDescription());
+			assertEquals(clientID, e.getClientID());
+			assertEquals(redirectionURI, e.getRedirectionURI());
+			assertEquals(state, e.getState());
+		}
+	}
+	
+	
+	public void testParseInvalidRequestObject_redirectionInfo() {
+		
+		ResponseType rt = new ResponseType("code");
+		ClientID clientID = new ClientID("123");
+		URI redirectionURI = URI.create("https://example.com/cb");
+		State state = new State();
+		
+		Map<String,List<String>> params = new AuthorizationRequest.Builder(rt, clientID)
+			.redirectionURI(redirectionURI)
+			.state(state)
+			.build()
+			.toParameters();
+		params.put("request", Collections.singletonList("abc"));
+		
+		try {
+			AuthorizationRequest.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid \"request_object\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
+			assertEquals("Invalid request: Invalid \"request_object\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getErrorObject().getDescription());
+			assertEquals(clientID, e.getClientID());
+			assertEquals(redirectionURI, e.getRedirectionURI());
+			assertEquals(state, e.getState());
+		}
+	}
+	
+	
+	public void testParse_missingResponseType() {
+		
+		ResponseType rt = new ResponseType("code");
+		ClientID clientID = new ClientID("123");
+		URI redirectionURI = URI.create("https://example.com/cb");
+		State state = new State();
+		
+		Map<String,List<String>> params = new AuthorizationRequest.Builder(rt, clientID)
+			.redirectionURI(redirectionURI)
+			.state(state)
+			.build()
+			.toParameters();
+		params.remove("response_type");
+		
+		try {
+			AuthorizationRequest.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing \"response_type\" parameter", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
+			assertEquals("Invalid request: Missing \"response_type\" parameter", e.getErrorObject().getDescription());
+			assertEquals(clientID, e.getClientID());
+			assertEquals(redirectionURI, e.getRedirectionURI());
+			assertEquals(e.getState(), e.getState());
+		}
+	}
+	
+	
+	public void testParse_missingClientID() {
+		
+		ResponseType rt = new ResponseType("code");
+		ClientID clientID = new ClientID("123");
+		
+		Map<String,List<String>> params = new AuthorizationRequest.Builder(rt, clientID)
+			.build()
+			.toParameters();
+		params.remove("client_id");
+		
+		try {
+			AuthorizationRequest.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing \"client_id\" parameter", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
+			assertEquals("Invalid request: Missing \"client_id\" parameter", e.getErrorObject().getDescription());
+			assertNull(e.getClientID());
+			assertNull(e.getRedirectionURI());
+			assertNull(e.getState());
+		}
+	}
+	
+	
+	public void testParse_missingClientID_redirectionInfoIgnored() {
+		
+		ResponseType rt = new ResponseType("code");
+		ClientID clientID = new ClientID("123");
+		URI redirectionURI = URI.create("https://example.com/cb");
+		State state = new State();
+		
+		Map<String,List<String>> params = new AuthorizationRequest.Builder(rt, clientID)
+			.redirectionURI(redirectionURI)
+			.state(state)
+			.build()
+			.toParameters();
+		params.remove("client_id");
+		
+		try {
+			AuthorizationRequest.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing \"client_id\" parameter", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
+			assertEquals("Invalid request: Missing \"client_id\" parameter", e.getErrorObject().getDescription());
+			assertNull(e.getClientID());
+			assertNull(e.getRedirectionURI());
+			assertNull(e.getState());
+		}
 	}
 }

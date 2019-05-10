@@ -131,6 +131,9 @@ This SDK version implements the following standards and drafts:
 
     * OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
 
+    * The OAuth 2.0 Authorization Framework: JWT Secured Authorization Request
+      (JAR) draft-ietf-oauth-jwsreq-17
+
 	* OpenID Connect Core 1.0 (2014-02-25)
 
 	* OpenID Connect Discovery 1.0 (2014-02-25)
@@ -161,4 +164,4 @@ This SDK is provided under the terms of the Apache 2.0 licence.
 Questions or comments? Email support@connect2id.com
 
 
-2019-04-23
+2019-05-09
