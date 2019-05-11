@@ -66,6 +66,10 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("response_types"));
 		assertTrue(paramNames.contains("jwks_uri"));
 		assertTrue(paramNames.contains("jwks"));
+		assertTrue(paramNames.contains("request_uris"));
+		assertTrue(paramNames.contains("request_object_signing_alg"));
+		assertTrue(paramNames.contains("request_object_encryption_alg"));
+		assertTrue(paramNames.contains("request_object_encryption_enc"));
 		assertTrue(paramNames.contains("software_id"));
 		assertTrue(paramNames.contains("software_version"));
 		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
@@ -84,14 +88,10 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("userinfo_signed_response_alg"));
 		assertTrue(paramNames.contains("userinfo_encrypted_response_alg"));
 		assertTrue(paramNames.contains("userinfo_encrypted_response_enc"));
-		assertTrue(paramNames.contains("request_object_signing_alg"));
-		assertTrue(paramNames.contains("request_object_encryption_alg"));
-		assertTrue(paramNames.contains("request_object_encryption_enc"));
 		assertTrue(paramNames.contains("default_max_age"));
 		assertTrue(paramNames.contains("require_auth_time"));
 		assertTrue(paramNames.contains("default_acr_values"));
 		assertTrue(paramNames.contains("initiate_login_uri"));
-		assertTrue(paramNames.contains("request_uris"));
 		assertTrue(paramNames.contains("post_logout_redirect_uris"));
 		assertTrue(paramNames.contains("frontchannel_logout_uri"));
 		assertTrue(paramNames.contains("frontchannel_logout_session_required"));

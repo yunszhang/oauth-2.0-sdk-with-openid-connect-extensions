@@ -97,6 +97,10 @@ public class ClientMetadata {
 		p.add("token_endpoint_auth_signing_alg");
 		p.add("jwks_uri");
 		p.add("jwks");
+		p.add("request_uris");
+		p.add("request_object_signing_alg");
+		p.add("request_object_encryption_alg");
+		p.add("request_object_encryption_enc");
 		p.add("software_id");
 		p.add("software_version");
 		p.add("tls_client_certificate_bound_access_tokens");
@@ -197,6 +201,33 @@ public class ClientMetadata {
 	 * Intended as an alternative to {@link #jwkSetURI} for native clients.
 	 */
 	private JWKSet jwkSet;
+	
+	
+	/**
+	 * Pre-registered request object URIs.
+	 */
+	private Set<URI> requestObjectURIs;
+	
+	
+	/**
+	 * The JSON Web Signature (JWS) algorithm required for request objects
+	 * sent by this client.
+	 */
+	private JWSAlgorithm requestObjectJWSAlg;
+	
+	
+	/**
+	 * The JSON Web Encryption (JWE) algorithm required for request objects
+	 * sent by this client.
+	 */
+	private JWEAlgorithm requestObjectJWEAlg;
+	
+	
+	/**
+	 * The JSON Web Encryption (JWE) method required for request objects
+	 * sent by this client.
+	 */
+	private EncryptionMethod requestObjectJWEEnc;
 
 
 	/**
@@ -286,6 +317,10 @@ public class ClientMetadata {
 		authJWSAlg = metadata.authJWSAlg;
 		jwkSetURI = metadata.jwkSetURI;
 		jwkSet = metadata.getJWKSet();
+		requestObjectURIs = metadata.requestObjectURIs;
+		requestObjectJWSAlg = metadata.requestObjectJWSAlg;
+		requestObjectJWEAlg = metadata.requestObjectJWEAlg;
+		requestObjectJWEEnc = metadata.requestObjectJWEEnc;
 		softwareID = metadata.softwareID;
 		softwareVersion = metadata.softwareVersion;
 		tlsClientCertificateBoundAccessTokens = metadata.tlsClientCertificateBoundAccessTokens;
@@ -1010,6 +1045,112 @@ public class ClientMetadata {
 
 		this.jwkSet = jwkSet;
 	}
+	
+	
+	/**
+	 * Gets the pre-registered request object URIs. Corresponds to the
+	 * {@code request_uris} client metadata field.
+	 *
+	 * @return The request object URIs, {@code null} if not specified.
+	 */
+	public Set<URI> getRequestObjectURIs() {
+		
+		return requestObjectURIs;
+	}
+	
+	
+	/**
+	 * Sets the pre-registered request object URIs. Corresponds to the
+	 * {@code request_uris} client metadata field.
+	 *
+	 * @param requestObjectURIs The request object URIs, {@code null} if
+	 *                          not specified.
+	 */
+	public void setRequestObjectURIs(final Set<URI> requestObjectURIs) {
+		
+		this.requestObjectURIs = requestObjectURIs;
+	}
+	
+	
+	/**
+	 * Gets the JSON Web Signature (JWS) algorithm required for request
+	 * objects sent by this client. Corresponds to the
+	 * {@code request_object_signing_alg} client metadata field.
+	 *
+	 * @return The JWS algorithm, {@code null} if not specified.
+	 */
+	public JWSAlgorithm getRequestObjectJWSAlg() {
+		
+		return requestObjectJWSAlg;
+	}
+	
+	
+	/**
+	 * Sets the JSON Web Signature (JWS) algorithm required for request
+	 * objects sent by this client. Corresponds to the
+	 * {@code request_object_signing_alg} client metadata field.
+	 *
+	 * @param requestObjectJWSAlg The JWS algorithm, {@code null} if not
+	 *                            specified.
+	 */
+	public void setRequestObjectJWSAlg(final JWSAlgorithm requestObjectJWSAlg) {
+		
+		this.requestObjectJWSAlg = requestObjectJWSAlg;
+	}
+	
+	
+	/**
+	 * Gets the JSON Web Encryption (JWE) algorithm required for request
+	 * objects sent by this client. Corresponds to the
+	 * {@code request_object_encryption_alg} client metadata field.
+	 *
+	 * @return The JWE algorithm, {@code null} if not specified.
+	 */
+	public JWEAlgorithm getRequestObjectJWEAlg() {
+		
+		return requestObjectJWEAlg;
+	}
+	
+	
+	/**
+	 * Sets the JSON Web Encryption (JWE) algorithm required for request
+	 * objects sent by this client. Corresponds to the
+	 * {@code request_object_encryption_alg} client metadata field.
+	 *
+	 * @param requestObjectJWEAlg The JWE algorithm, {@code null} if not
+	 *                            specified.
+	 */
+	public void setRequestObjectJWEAlg(final JWEAlgorithm requestObjectJWEAlg) {
+		
+		this.requestObjectJWEAlg = requestObjectJWEAlg;
+	}
+	
+	
+	/**
+	 * Gets the JSON Web Encryption (JWE) method required for request
+	 * objects sent by this client. Corresponds to the
+	 * {@code request_object_encryption_enc} client metadata field.
+	 *
+	 * @return The JWE method, {@code null} if not specified.
+	 */
+	public EncryptionMethod getRequestObjectJWEEnc() {
+		
+		return requestObjectJWEEnc;
+	}
+	
+	
+	/**
+	 * Sets the JSON Web Encryption (JWE) method required for request
+	 * objects sent by this client. Corresponds to the
+	 * {@code request_object_encryption_enc} client metadata field.
+	 *
+	 * @param requestObjectJWEEnc The JWE method, {@code null} if not
+	 *                            specified.
+	 */
+	public void setRequestObjectJWEEnc(final EncryptionMethod requestObjectJWEEnc) {
+		
+		this.requestObjectJWEEnc = requestObjectJWEEnc;
+	}
 
 
 	/**
@@ -1512,6 +1653,27 @@ public class ClientMetadata {
 
 		if (jwkSet != null)
 			o.put("jwks", jwkSet.toJSONObject(true)); // prevent private keys from leaking
+		
+		
+		if (requestObjectURIs != null) {
+			
+			JSONArray uriList = new JSONArray();
+			
+			for (URI uri: requestObjectURIs)
+				uriList.add(uri.toString());
+			
+			o.put("request_uris", uriList);
+		}
+		
+		
+		if (requestObjectJWSAlg != null)
+			o.put("request_object_signing_alg", requestObjectJWSAlg.getName());
+		
+		if (requestObjectJWEAlg != null)
+			o.put("request_object_encryption_alg", requestObjectJWEAlg.getName());
+		
+		if (requestObjectJWEEnc != null)
+			o.put("request_object_encryption_enc", requestObjectJWEEnc.getName());
 
 
 		if (softwareID != null)
@@ -1769,6 +1931,46 @@ public class ClientMetadata {
 				}
 
 				jsonObject.remove("jwks");
+			}
+			
+			if (jsonObject.get("request_uris") != null) {
+				
+				Set<URI> requestURIs = new LinkedHashSet<>();
+				
+				for (String uriString : JSONObjectUtils.getStringArray(jsonObject, "request_uris")) {
+					
+					try {
+						requestURIs.add(new URI(uriString));
+						
+					} catch (URISyntaxException e) {
+						
+						throw new ParseException("Invalid \"request_uris\" parameter");
+					}
+				}
+				
+				metadata.setRequestObjectURIs(requestURIs);
+				jsonObject.remove("request_uris");
+			}
+			
+			if (jsonObject.get("request_object_signing_alg") != null) {
+				metadata.setRequestObjectJWSAlg(JWSAlgorithm.parse(
+					JSONObjectUtils.getString(jsonObject, "request_object_signing_alg")));
+				
+				jsonObject.remove("request_object_signing_alg");
+			}
+			
+			if (jsonObject.get("request_object_encryption_alg") != null) {
+				metadata.setRequestObjectJWEAlg(JWEAlgorithm.parse(
+					JSONObjectUtils.getString(jsonObject, "request_object_encryption_alg")));
+				
+				jsonObject.remove("request_object_encryption_alg");
+			}
+			
+			if (jsonObject.get("request_object_encryption_enc") != null) {
+				metadata.setRequestObjectJWEEnc(EncryptionMethod.parse(
+					JSONObjectUtils.getString(jsonObject, "request_object_encryption_enc")));
+				
+				jsonObject.remove("request_object_encryption_enc");
 			}
 
 			if (jsonObject.get("software_id") != null) {

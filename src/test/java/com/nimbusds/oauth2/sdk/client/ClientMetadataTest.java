@@ -65,6 +65,10 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("response_types"));
 		assertTrue(paramNames.contains("jwks_uri"));
 		assertTrue(paramNames.contains("jwks"));
+		assertTrue(paramNames.contains("request_uris"));
+		assertTrue(paramNames.contains("request_object_signing_alg"));
+		assertTrue(paramNames.contains("request_object_encryption_alg"));
+		assertTrue(paramNames.contains("request_object_encryption_enc"));
 		assertTrue(paramNames.contains("software_id"));
 		assertTrue(paramNames.contains("software_version"));
 		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
@@ -73,7 +77,7 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 
-		assertEquals(21, ClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(25, ClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -149,6 +153,12 @@ public class ClientMetadataTest extends TestCase {
 		RSAKey rsaKey = new RSAKey.Builder(new Base64URL("nabc"), new Base64URL("eabc")).build();
 		JWKSet jwkSet = new JWKSet(rsaKey);
 		meta.setJWKSet(jwkSet);
+		
+		Set<URI> requestObjURIs = Collections.singleton(new URI("http://client.com/reqobj"));
+		meta.setRequestObjectURIs(requestObjURIs);
+		meta.setRequestObjectJWSAlg(JWSAlgorithm.HS512);
+		meta.setRequestObjectJWEAlg(JWEAlgorithm.A128KW);
+		meta.setRequestObjectJWEEnc(EncryptionMethod.A128GCM);
 
 		SoftwareID softwareID = new SoftwareID();
 		meta.setSoftwareID(softwareID);
@@ -201,6 +211,10 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(jwksURI, meta.getJWKSetURI());
 		assertEquals("nabc", ((RSAKey)meta.getJWKSet().getKeys().get(0)).getModulus().toString());
 		assertEquals("eabc", ((RSAKey)meta.getJWKSet().getKeys().get(0)).getPublicExponent().toString());
+		assertEquals(requestObjURIs, meta.getRequestObjectURIs());
+		assertEquals(JWSAlgorithm.HS512, meta.getRequestObjectJWSAlg());
+		assertEquals(JWEAlgorithm.A128KW, meta.getRequestObjectJWEAlg());
+		assertEquals(EncryptionMethod.A128GCM, meta.getRequestObjectJWEEnc());
 		assertEquals(1, meta.getJWKSet().getKeys().size());
 		assertEquals(softwareID, meta.getSoftwareID());
 		assertEquals(softwareVersion, meta.getSoftwareVersion());
@@ -246,6 +260,10 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals("nabc", ((RSAKey)meta.getJWKSet().getKeys().get(0)).getModulus().toString());
 		assertEquals("eabc", ((RSAKey)meta.getJWKSet().getKeys().get(0)).getPublicExponent().toString());
 		assertEquals(1, meta.getJWKSet().getKeys().size());
+		assertEquals(requestObjURIs, meta.getRequestObjectURIs());
+		assertEquals(JWSAlgorithm.HS512, meta.getRequestObjectJWSAlg());
+		assertEquals(JWEAlgorithm.A128KW, meta.getRequestObjectJWEAlg());
+		assertEquals(EncryptionMethod.A128GCM, meta.getRequestObjectJWEEnc());
 		assertEquals(softwareID, meta.getSoftwareID());
 		assertEquals(softwareVersion, meta.getSoftwareVersion());
 		assertTrue(meta.getTLSClientCertificateBoundAccessTokens());
@@ -478,6 +496,12 @@ public class ClientMetadataTest extends TestCase {
 		RSAKey rsaKey = new RSAKey.Builder(new Base64URL("nabc"), new Base64URL("eabc")).build();
 		JWKSet jwkSet = new JWKSet(rsaKey);
 		meta.setJWKSet(jwkSet);
+		
+		Set<URI> requestObjURIs = Collections.singleton(new URI("http://client.com/reqobj"));
+		meta.setRequestObjectURIs(requestObjURIs);
+		meta.setRequestObjectJWSAlg(JWSAlgorithm.HS512);
+		meta.setRequestObjectJWEAlg(JWEAlgorithm.A128KW);
+		meta.setRequestObjectJWEEnc(EncryptionMethod.A128GCM);
 
 		SoftwareID softwareID = new SoftwareID();
 		meta.setSoftwareID(softwareID);
@@ -528,6 +552,10 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals("nabc", ((RSAKey)copy.getJWKSet().getKeys().get(0)).getModulus().toString());
 		assertEquals("eabc", ((RSAKey)copy.getJWKSet().getKeys().get(0)).getPublicExponent().toString());
 		assertEquals(1, copy.getJWKSet().getKeys().size());
+		assertEquals(requestObjURIs, meta.getRequestObjectURIs());
+		assertEquals(JWSAlgorithm.HS512, meta.getRequestObjectJWSAlg());
+		assertEquals(JWEAlgorithm.A128KW, meta.getRequestObjectJWEAlg());
+		assertEquals(EncryptionMethod.A128GCM, meta.getRequestObjectJWEEnc());
 		assertEquals(softwareID, copy.getSoftwareID());
 		assertEquals(softwareVersion, copy.getSoftwareVersion());
 		assertTrue(copy.getTLSClientCertificateBoundAccessTokens());

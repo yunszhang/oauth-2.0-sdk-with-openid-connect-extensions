@@ -1085,3 +1085,5 @@ version 6.10 (2019-05-10)
       the requested response mode based on the response_mode and response_type
       parameters.
 
+version 6.11 (2019-05-12)
+    * Moves JAR fields from OIDCClientMetadata to ClientMetadata.
