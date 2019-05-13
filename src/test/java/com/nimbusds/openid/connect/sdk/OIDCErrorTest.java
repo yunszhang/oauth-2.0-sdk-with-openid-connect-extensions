@@ -20,18 +20,18 @@ package com.nimbusds.openid.connect.sdk;
 
 import junit.framework.TestCase;
 
+import com.nimbusds.oauth2.sdk.OAuth2Error;
+
 
 public class OIDCErrorTest extends TestCase {
 	
 
-	public void testConstants() {
+	public void testCodes() {
 		
-		assertEquals("invalid_request_uri", OIDCError.INVALID_REQUEST_URI.getCode());
-		assertEquals("Invalid OpenID request URI", OIDCError.INVALID_REQUEST_URI.getDescription());
-		assertNull(OIDCError.INVALID_REQUEST_URI.getURI());
-		
-		assertEquals("invalid_request_object", OIDCError.INVALID_REQUEST_OBJECT.getCode());
-		assertEquals("Invalid OpenID request JWT", OIDCError.INVALID_REQUEST_OBJECT.getDescription());
-		assertNull(OIDCError.INVALID_REQUEST_OBJECT.getURI());
+		assertEquals("interaction_required", OIDCError.INTERACTION_REQUIRED.getCode());
+		assertEquals("login_required", OIDCError.LOGIN_REQUIRED.getCode());
+		assertEquals("account_selection_required", OIDCError.ACCOUNT_SELECTION_REQUIRED.getCode());
+		assertEquals("consent_required", OIDCError.CONSENT_REQUIRED.getCode());
+		assertEquals("registration_not_supported", OIDCError.REGISTRATION_NOT_SUPPORTED.getCode());
 	}
 }

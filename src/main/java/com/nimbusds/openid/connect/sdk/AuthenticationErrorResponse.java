@@ -22,10 +22,7 @@ import java.net.URI;
 import java.util.*;
 
 import com.nimbusds.jwt.JWT;
-import com.nimbusds.oauth2.sdk.AuthorizationErrorResponse;
-import com.nimbusds.oauth2.sdk.ErrorObject;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.ResponseMode;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.State;
@@ -63,11 +60,11 @@ import net.jcip.annotations.Immutable;
  *             <li>{@link OIDCError#LOGIN_REQUIRED}
  *             <li>{@link OIDCError#ACCOUNT_SELECTION_REQUIRED}
  *             <li>{@link OIDCError#CONSENT_REQUIRED}
- *             <li>{@link OIDCError#INVALID_REQUEST_URI}
- *             <li>{@link OIDCError#INVALID_REQUEST_OBJECT}
+ *             <li>{@link OAuth2Error#INVALID_REQUEST_URI}
+ *             <li>{@link OAuth2Error#INVALID_REQUEST_OBJECT}
  *             <li>{@link OIDCError#REGISTRATION_NOT_SUPPORTED}
- *             <li>{@link OIDCError#REQUEST_NOT_SUPPORTED}
- *             <li>{@link OIDCError#REQUEST_URI_NOT_SUPPORTED}
+ *             <li>{@link OAuth2Error#REQUEST_NOT_SUPPORTED}
+ *             <li>{@link OAuth2Error#REQUEST_URI_NOT_SUPPORTED}
  *         </ul>
  *     </li>
  * </ul>
@@ -113,11 +110,11 @@ public class AuthenticationErrorResponse
 		stdErrors.add(OIDCError.LOGIN_REQUIRED);
 		stdErrors.add(OIDCError.ACCOUNT_SELECTION_REQUIRED);
 		stdErrors.add(OIDCError.CONSENT_REQUIRED);
-		stdErrors.add(OIDCError.INVALID_REQUEST_URI);
-		stdErrors.add(OIDCError.INVALID_REQUEST_OBJECT);
+		stdErrors.add(OAuth2Error.INVALID_REQUEST_URI);
+		stdErrors.add(OAuth2Error.INVALID_REQUEST_OBJECT);
 		stdErrors.add(OIDCError.REGISTRATION_NOT_SUPPORTED);
-		stdErrors.add(OIDCError.REQUEST_NOT_SUPPORTED);
-		stdErrors.add(OIDCError.REQUEST_URI_NOT_SUPPORTED);
+		stdErrors.add(OAuth2Error.REQUEST_NOT_SUPPORTED);
+		stdErrors.add(OAuth2Error.REQUEST_URI_NOT_SUPPORTED);
 	}
 
 

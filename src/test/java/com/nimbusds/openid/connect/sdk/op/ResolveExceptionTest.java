@@ -22,14 +22,11 @@ import java.net.URI;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
-import com.nimbusds.oauth2.sdk.ErrorObject;
-import com.nimbusds.oauth2.sdk.ResponseMode;
-import com.nimbusds.oauth2.sdk.ResponseType;
-import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-import com.nimbusds.openid.connect.sdk.OIDCError;
+
 import junit.framework.TestCase;
 
 
@@ -41,7 +38,7 @@ public class ResolveExceptionTest extends TestCase{
 
 	public void testWithErrorObject_minimalTopLevelRequest() {
 
-		ErrorObject errorObject = OIDCError.REQUEST_URI_NOT_SUPPORTED;
+		ErrorObject errorObject = OAuth2Error.REQUEST_URI_NOT_SUPPORTED;
 
 		AuthenticationRequest request = new AuthenticationRequest.Builder(
 			ResponseType.getDefault(),
@@ -65,7 +62,7 @@ public class ResolveExceptionTest extends TestCase{
 
 	public void testWithErrorObject_completeTopLevelRequest() {
 
-		ErrorObject errorObject = OIDCError.REQUEST_URI_NOT_SUPPORTED;
+		ErrorObject errorObject = OAuth2Error.REQUEST_URI_NOT_SUPPORTED;
 
 		AuthenticationRequest request = new AuthenticationRequest.Builder(
 			ResponseType.getDefault(),
@@ -106,7 +103,7 @@ public class ResolveExceptionTest extends TestCase{
 		ResolveException e = new ResolveException(exMessage, clientMessage, request, null);
 
 		assertEquals(exMessage, e.getMessage());
-		assertEquals(OIDCError.INVALID_REQUEST_URI.getCode(), e.getErrorObject().getCode());
+		assertEquals(OAuth2Error.INVALID_REQUEST_URI.getCode(), e.getErrorObject().getCode());
 		assertEquals(clientMessage, e.getErrorObject().getDescription());
 		assertEquals(request.getClientID(), e.getClientID());
 		assertEquals(request.getRedirectionURI(), e.getRedirectionURI());
@@ -137,7 +134,7 @@ public class ResolveExceptionTest extends TestCase{
 		ResolveException e = new ResolveException(exMessage, clientMessage, request, null);
 
 		assertEquals(exMessage, e.getMessage());
-		assertEquals(OIDCError.INVALID_REQUEST_OBJECT.getCode(), e.getErrorObject().getCode());
+		assertEquals(OAuth2Error.INVALID_REQUEST_OBJECT.getCode(), e.getErrorObject().getCode());
 		assertEquals(clientMessage, e.getErrorObject().getDescription());
 		assertEquals(request.getClientID(), e.getClientID());
 		assertEquals(request.getRedirectionURI(), e.getRedirectionURI());
@@ -169,7 +166,7 @@ public class ResolveExceptionTest extends TestCase{
 		ResolveException e = new ResolveException(exMessage, clientMessage, request, cause);
 
 		assertEquals(exMessage, e.getMessage());
-		assertEquals(OIDCError.INVALID_REQUEST_OBJECT.getCode(), e.getErrorObject().getCode());
+		assertEquals(OAuth2Error.INVALID_REQUEST_OBJECT.getCode(), e.getErrorObject().getCode());
 		assertEquals(clientMessage, e.getErrorObject().getDescription());
 		assertEquals(request.getClientID(), e.getClientID());
 		assertEquals(request.getRedirectionURI(), e.getRedirectionURI());
@@ -201,8 +198,8 @@ public class ResolveExceptionTest extends TestCase{
 		ResolveException e = new ResolveException(exMessage, clientMessage, request, cause);
 
 		assertEquals(exMessage, e.getMessage());
-		assertEquals(OIDCError.INVALID_REQUEST_OBJECT.getCode(), e.getErrorObject().getCode());
-		assertEquals(OIDCError.INVALID_REQUEST_OBJECT.getDescription(), e.getErrorObject().getDescription());
+		assertEquals(OAuth2Error.INVALID_REQUEST_OBJECT.getCode(), e.getErrorObject().getCode());
+		assertEquals(OAuth2Error.INVALID_REQUEST_OBJECT.getDescription(), e.getErrorObject().getDescription());
 		assertEquals(request.getClientID(), e.getClientID());
 		assertEquals(request.getRedirectionURI(), e.getRedirectionURI());
 		assertEquals(request.getState(), e.getState());

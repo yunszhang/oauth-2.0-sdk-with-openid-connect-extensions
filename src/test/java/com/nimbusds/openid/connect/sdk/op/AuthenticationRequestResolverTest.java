@@ -36,6 +36,7 @@ import com.nimbusds.jose.util.Resource;
 import com.nimbusds.jose.util.ResourceRetriever;
 import com.nimbusds.jwt.*;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
+import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.auth.Secret;
@@ -44,7 +45,7 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.ClaimsRequest;
-import com.nimbusds.openid.connect.sdk.OIDCError;
+
 import junit.framework.TestCase;
 
 
@@ -87,8 +88,8 @@ public class AuthenticationRequestResolverTest extends TestCase {
 		try {
 			resolver.resolve(request, null);
 		} catch (ResolveException e) {
-			assertEquals(OIDCError.REQUEST_NOT_SUPPORTED.getCode(), e.getErrorObject().getCode());
-			assertEquals(OIDCError.REQUEST_NOT_SUPPORTED.getDescription(), e.getErrorObject().getDescription());
+			assertEquals(OAuth2Error.REQUEST_NOT_SUPPORTED.getCode(), e.getErrorObject().getCode());
+			assertEquals(OAuth2Error.REQUEST_NOT_SUPPORTED.getDescription(), e.getErrorObject().getDescription());
 			assertEquals(request.getClientID(), e.getClientID());
 			assertEquals(request.getRedirectionURI(), e.getRedirectionURI());
 			assertNull(e.getState());
@@ -108,8 +109,8 @@ public class AuthenticationRequestResolverTest extends TestCase {
 		try {
 			resolver.resolve(request, null);
 		} catch (ResolveException e) {
-			assertEquals(OIDCError.REQUEST_URI_NOT_SUPPORTED.getCode(), e.getErrorObject().getCode());
-			assertEquals(OIDCError.REQUEST_URI_NOT_SUPPORTED.getDescription(), e.getErrorObject().getDescription());
+			assertEquals(OAuth2Error.REQUEST_URI_NOT_SUPPORTED.getCode(), e.getErrorObject().getCode());
+			assertEquals(OAuth2Error.REQUEST_URI_NOT_SUPPORTED.getDescription(), e.getErrorObject().getDescription());
 			assertEquals(request.getClientID(), e.getClientID());
 			assertEquals(request.getRedirectionURI(), e.getRedirectionURI());
 			assertNull(e.getState());
@@ -212,7 +213,7 @@ public class AuthenticationRequestResolverTest extends TestCase {
 			resolver.resolve(request, null);
 		} catch (ResolveException e) {
 			assertEquals("Couldn't create final OpenID authentication request: Missing \"redirect_uri\" parameter", e.getMessage());
-			assertEquals(OIDCError.INVALID_REQUEST_OBJECT.getCode(), e.getErrorObject().getCode());
+			assertEquals(OAuth2Error.INVALID_REQUEST_OBJECT.getCode(), e.getErrorObject().getCode());
 			assertEquals("Invalid request object parameter(s): Missing \"redirect_uri\" parameter", e.getErrorObject().getDescription());
 			assertNull(e.getRedirectionURI());
 			assertEquals(request.getState(), e.getState());
@@ -292,7 +293,7 @@ public class AuthenticationRequestResolverTest extends TestCase {
 			resolver.resolve(request, null);
 		} catch (ResolveException e) {
 			assertEquals("Invalid request object: Payload of unsecured JOSE object is not a valid JSON object", e.getMessage());
-			assertEquals(OIDCError.INVALID_REQUEST_OBJECT.getCode(), e.getErrorObject().getCode());
+			assertEquals(OAuth2Error.INVALID_REQUEST_OBJECT.getCode(), e.getErrorObject().getCode());
 			assertEquals("Bad JWT / signature / HMAC / encryption", e.getErrorObject().getDescription());
 			assertNull(e.getRedirectionURI());
 			assertEquals(request.getState(), e.getState());
@@ -416,7 +417,7 @@ public class AuthenticationRequestResolverTest extends TestCase {
 			resolver.resolve(request, null);
 		} catch (ResolveException e) {
 			assertEquals("Invalid request object: Signed JWT rejected: Invalid signature", e.getMessage());
-			assertEquals(OIDCError.INVALID_REQUEST_URI.getCode(), e.getErrorObject().getCode());
+			assertEquals(OAuth2Error.INVALID_REQUEST_URI.getCode(), e.getErrorObject().getCode());
 			assertEquals("Bad JWT / signature / HMAC / encryption", e.getErrorObject().getDescription());
 			assertNull(e.getRedirectionURI());
 			assertEquals(request.getState(), e.getState());
@@ -476,7 +477,7 @@ public class AuthenticationRequestResolverTest extends TestCase {
 			resolver.resolve(request, null);
 		} catch (ResolveException e) {
 			assertEquals("Couldn't retrieve request_uri: Connect timeout", e.getMessage());
-			assertEquals(OIDCError.INVALID_REQUEST_URI.getCode(), e.getErrorObject().getCode());
+			assertEquals(OAuth2Error.INVALID_REQUEST_URI.getCode(), e.getErrorObject().getCode());
 			assertEquals("Network error, check the request_uri", e.getErrorObject().getDescription());
 			assertNull(e.getRedirectionURI());
 			assertEquals(request.getState(), e.getState());

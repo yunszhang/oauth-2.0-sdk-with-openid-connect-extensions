@@ -33,9 +33,10 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.proc.JWTProcessor;
+import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-import com.nimbusds.openid.connect.sdk.OIDCError;
+
 import net.jcip.annotations.ThreadSafe;
 
 
@@ -216,27 +217,27 @@ public class AuthenticationRequestResolver<C extends SecurityContext> {
 
 			// Check if request_uri is supported
 			if (jwtRetriever == null || jwtProcessor == null) {
-				throw new ResolveException(OIDCError.REQUEST_URI_NOT_SUPPORTED, request);
+				throw new ResolveException(OAuth2Error.REQUEST_URI_NOT_SUPPORTED, request);
 			}
 
 			// Download request object
 			try {
 				jwt = JWTParser.parse(jwtRetriever.retrieveResource(request.getRequestURI().toURL()).getContent());
 			} catch (MalformedURLException e) {
-				throw new ResolveException(OIDCError.INVALID_REQUEST_URI.setDescription("Malformed URL"), request);
+				throw new ResolveException(OAuth2Error.INVALID_REQUEST_URI.setDescription("Malformed URL"), request);
 			} catch (IOException e) {
 				// Most likely client problem, possible causes: bad URL, timeout, network down
 				throw new ResolveException("Couldn't retrieve request_uri: " + e.getMessage(),
 					"Network error, check the request_uri", // error_description for client, hide details
 					request, e);
 			} catch (java.text.ParseException e) {
-				throw new ResolveException(OIDCError.INVALID_REQUEST_URI.setDescription("Invalid JWT"), request);
+				throw new ResolveException(OAuth2Error.INVALID_REQUEST_URI.setDescription("Invalid JWT"), request);
 			}
 
 		} else {
 			// Check if request by value is supported
 			if (jwtProcessor == null) {
-				throw new ResolveException(OIDCError.REQUEST_NOT_SUPPORTED, request);
+				throw new ResolveException(OAuth2Error.REQUEST_NOT_SUPPORTED, request);
 			}
 
 			// Request object inlined

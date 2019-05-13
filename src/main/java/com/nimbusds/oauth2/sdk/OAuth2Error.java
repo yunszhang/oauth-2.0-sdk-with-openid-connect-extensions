@@ -117,12 +117,44 @@ public final class OAuth2Error {
 	
 	
 	/**
+	 * The {@code request_uri} in the {@link AuthorizationRequest}
+	 * returns an error or invalid data.
+	 */
+	public static final ErrorObject INVALID_REQUEST_URI =
+		new ErrorObject("invalid_request_uri", "Invalid request URI", HTTPResponse.SC_FOUND);
+	
+	
+	/**
+	 * The {@code request} parameter in the {@link AuthorizationRequest}
+	 * contains an invalid request object.
+	 */
+	public static final ErrorObject	INVALID_REQUEST_OBJECT =
+		new ErrorObject("invalid_request_object", "Invalid request JWT", HTTPResponse.SC_FOUND);
+	
+	
+	/**
+	 * The {@code request_uri} parameter in the
+	 * {@link AuthorizationRequest} is not supported.
+	 */
+	public static final ErrorObject REQUEST_URI_NOT_SUPPORTED =
+		new ErrorObject("request_uri_not_supported", "Request URI parameter not supported", HTTPResponse.SC_FOUND);
+	
+	
+	/**
+	 * The {@code request} parameter in the {@link AuthorizationRequest} is
+	 * not supported.
+	 */
+	public static final ErrorObject REQUEST_NOT_SUPPORTED =
+		new ErrorObject("request_not_supported", "Request parameter not supported", HTTPResponse.SC_FOUND);
+	
+	
+	/**
 	 * The specified resource server URI is not valid or accepted by the
 	 * authorisation server.
 	 */
 	public static final ErrorObject INVALID_RESOURCE =
 		new ErrorObject("invalid_resource", "Invalid or unaccepted resource", HTTPResponse.SC_BAD_REQUEST);
-
+	
 	
 	/**
 	 * Prevents public instantiation.

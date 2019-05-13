@@ -20,8 +20,8 @@ package com.nimbusds.openid.connect.sdk.op;
 
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.GeneralException;
+import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-import com.nimbusds.openid.connect.sdk.OIDCError;
 
 
 /**
@@ -52,8 +52,8 @@ public class ResolveException extends GeneralException {
 
 	/**
 	 * Creates a new resolve exception. The error code is set to
-	 * {@link OIDCError#INVALID_REQUEST_URI} or
-	 * {@link OIDCError#INVALID_REQUEST_OBJECT} depending on the request
+	 * {@link OAuth2Error#INVALID_REQUEST_URI} or
+	 * {@link OAuth2Error#INVALID_REQUEST_OBJECT} depending on the request
 	 * type.
 	 *
 	 * @param exMessage     The original exception message (to be logged).
@@ -102,9 +102,9 @@ public class ResolveException extends GeneralException {
 		ErrorObject errorObject;
 
 		if (authRequest.getRequestURI() != null) {
-			errorObject = OIDCError.INVALID_REQUEST_URI;
+			errorObject = OAuth2Error.INVALID_REQUEST_URI;
 		} else {
-			errorObject = OIDCError.INVALID_REQUEST_OBJECT;
+			errorObject = OAuth2Error.INVALID_REQUEST_OBJECT;
 		}
 
 		if (clientMessage != null) {

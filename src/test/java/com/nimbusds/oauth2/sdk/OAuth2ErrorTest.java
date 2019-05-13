@@ -43,6 +43,30 @@ public class OAuth2ErrorTest extends TestCase {
 	}
 	
 	
+	public void testJARErrors() {
+		
+		assertEquals("invalid_request_uri", OAuth2Error.INVALID_REQUEST_URI.getCode());
+		assertEquals("Invalid request URI", OAuth2Error.INVALID_REQUEST_URI.getDescription());
+		assertNull(OAuth2Error.INVALID_REQUEST_URI.getURI());
+		assertEquals(302, OAuth2Error.INVALID_REQUEST_URI.getHTTPStatusCode());
+		
+		assertEquals("invalid_request_object", OAuth2Error.INVALID_REQUEST_OBJECT.getCode());
+		assertEquals("Invalid request JWT", OAuth2Error.INVALID_REQUEST_OBJECT.getDescription());
+		assertNull(OAuth2Error.INVALID_REQUEST_OBJECT.getURI());
+		assertEquals(302, OAuth2Error.INVALID_REQUEST_OBJECT.getHTTPStatusCode());
+		
+		assertEquals("request_uri_not_supported", OAuth2Error.REQUEST_URI_NOT_SUPPORTED.getCode());
+		assertEquals("Request URI parameter not supported", OAuth2Error.REQUEST_URI_NOT_SUPPORTED.getDescription());
+		assertNull(OAuth2Error.REQUEST_URI_NOT_SUPPORTED.getURI());
+		assertEquals(302, OAuth2Error.REQUEST_URI_NOT_SUPPORTED.getHTTPStatusCode());
+		
+		assertEquals("request_not_supported", OAuth2Error.REQUEST_NOT_SUPPORTED.getCode());
+		assertEquals("Request parameter not supported", OAuth2Error.REQUEST_NOT_SUPPORTED.getDescription());
+		assertNull(OAuth2Error.REQUEST_NOT_SUPPORTED.getURI());
+		assertEquals(302, OAuth2Error.REQUEST_NOT_SUPPORTED.getHTTPStatusCode());
+	}
+	
+	
 	public void testInvalidResourceError() {
 		
 		assertEquals("invalid_resource", OAuth2Error.INVALID_RESOURCE.getCode());

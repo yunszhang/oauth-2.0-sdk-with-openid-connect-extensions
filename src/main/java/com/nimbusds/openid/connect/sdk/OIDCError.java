@@ -87,23 +87,7 @@ public final class OIDCError {
 	 */
 	public static final ErrorObject	CONSENT_REQUIRED =
 		new ErrorObject("consent_required", "Consent required", HTTPResponse.SC_FOUND);
-
-
-	/**
-	 * The {@code request_uri} in the {@link AuthenticationRequest}
-	 * returns an error or invalid data.
-	 */
-	public static final ErrorObject INVALID_REQUEST_URI =
-		new ErrorObject("invalid_request_uri", "Invalid OpenID request URI", HTTPResponse.SC_FOUND);
-
 	
-	/**
-	 * The {@code request} parameter in the {@link AuthenticationRequest}
-	 * contains an invalid OpenID Connect request object.
-	 */
-	public static final ErrorObject	INVALID_REQUEST_OBJECT =
-		new ErrorObject("invalid_request_object", "Invalid OpenID request JWT", HTTPResponse.SC_FOUND);
-
 	
 	/**
 	 * The {@code registration} parameter in the 
@@ -113,22 +97,6 @@ public final class OIDCError {
 	public static final ErrorObject REGISTRATION_NOT_SUPPORTED =
 		new ErrorObject("registration_not_supported", "Registration parameter not supported", HTTPResponse.SC_FOUND);
 	
-	
-	/**
-	 * The {@code request} parameter in the 
-	 * {@link AuthenticationRequest} is not supported.
-	 */
-	public static final ErrorObject REQUEST_NOT_SUPPORTED =
-		new ErrorObject("request_not_supported", "Request parameter not supported", HTTPResponse.SC_FOUND);
-	
-	
-	/**
-	 * The {@code request_uri} parameter in the 
-	 * {@link AuthenticationRequest} is not supported.
-	 */
-	public static final ErrorObject REQUEST_URI_NOT_SUPPORTED =
-		new ErrorObject("request_uri_not_supported", "Request URI parameter not supported", HTTPResponse.SC_FOUND);
-
 	
 	/**
 	 * Prevents public instantiation.

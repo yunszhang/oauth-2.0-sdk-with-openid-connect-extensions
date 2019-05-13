@@ -1087,3 +1087,6 @@ version 6.10 (2019-05-10)
 
 version 6.11 (2019-05-12)
     * Moves JAR fields from OIDCClientMetadata to ClientMetadata.
+
+version 6.12 (2019-05-13)
+    * Moves JAR error codes from OIDCError to OAuth2Error.
