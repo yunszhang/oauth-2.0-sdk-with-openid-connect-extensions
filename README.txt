@@ -5,88 +5,56 @@ Copyright (c) Connect2id Ltd., 2012 - 2019
 
 README
 
-This open source Java library is your starting point for developing OAuth 2.0
-and OpenID Connect based applications:
+This open source SDK is your starting point for developing OAuth 2.0 and OpenID
+Connect based applications in Java.
 
-	* For OAuth 2.0 Authorisation Servers:
+OAuth 2.0
 
-		- Parse and process requests at the Authorisation Endpoint, then
-		  generate the appropriate responses with an authorisation code or
-		  access token;
+Supported endpoint requests and responses:
 
-		- Parse and process requests at the Token Endpoint, then generate the
-		  appropriate responses;
+    * Authorisation Server Metadata
 
-		- Parse and process requests at the Token Introspection Endpoint;
+    * Authorisation Endpoint
 
-		- Parse and process requests at the Token Revocation Endpoint;
+    * Token Endpoint
 
-		- Parse and process requests at the Client Registration Endpoint, then
-		  generate the appropriate responses.
+    * Token Introspection Endpoint
 
-	* For OAuth 2.0 clients:
+    * Token Revocation Endpoint
 
-		- Make requests to an OAuth 2.0 Authorisation Endpoint and parse the
-		  responses;
+    * Client Registration and Management Endpoint
 
-		- Make requests to an OAuth 2.0 Token Endpoint and parse the responses;
+    * Request Object Endpoint
 
-		- Make requests to an OAuth 2.0 Token Introspection Endpoint and
-		  process the responses;
-
-		- Make requests to an OAuth 2.0 Token Revocation Endpoint and parse the
-		  responses;
-
-		- Make requests to a protected resource with an OAuth 2.0 access token.
-
-	* For OpenID Connect Providers:
-	
-		- Parse and process OpenID Authentication requests at the Authorisation
-		  Endpoint, then generate the appropriate responses with an
-		  authorisation code, ID Token and / or UserInfo access token;
-		  
-		- Parse and process requests at the Token Endpoint, then generate the
-		  appropriate responses;
-		  
-		- Parse and process requests at the OpenID Connect UserInfo Endpoint,
-		  then generate the appropriate responses;
-		  
-		- Parse and process requests at the OpenID Connect Client Registration
-		  Endpoint, then generate the appropriate responses;
-
-		- Parse and process requests at the OpenID Connect End-Session (Logout)
-		  Endpoint.
-
-		- Make requests to a Relying Party Back-Channel Logout Endpoint.
-	
-	* For OpenID Connect Relying Parties:
-	
-		- Make OpenID Authentication requests to an Authorisation Endpoint and
-		  process the responses;
-		  
-		- Make requests to a Token Endpoint and process the responses;
-		  
-		- Make requests to an OpenID Connect UserInfo Endpoint and process the
-		  responses;
-
-		- Make requests to an OpenID Connect Provider Configuration endpoint
-		  and process the responses;
-		  
-		- Make requests to an OpenID Connect Client Registration Endpoint and
-		  process the responses.
-
-		- Make requests to an OpenID Connect End-Session (Logout) Endpoint.
-
-		- Parse and process requests at a Back-Channel Logout Endpoint.
+    * Resource protected with an OAuth 2.0 access token
 
 
-Additional features:
+OpenID Connect
+
+Supported endpoint requests and responses:
+
+    * OpenID Provider Metadata
+
+    * Authorisation Endpoint for OpenID Authentication requests
+
+    * Token Endpoint
+
+    * UserInfo Endpoint
+
+    * End-Session (Logout) Endpoint
+
+    * Back-Channel Logout Endpoint
+
+
+Features:
 
 	* Process plain, signed and encrypted JSON Web Tokens (JWTs) with help 
 	  of the Nimbus JOSE+JWT library.
 
-	* Full OpenID Connect UserInfo i10n and l10n support with help of the
-	  Nimbus Language Tags (RFC 5646) library.
+	* OpenID Connect UserInfo i10n and l10n support with help of the Nimbus
+	  Language Tags (RFC 5646) library.
+
+	* Java Servlet integration.
 
 
 This SDK version implements the following standards and drafts:
