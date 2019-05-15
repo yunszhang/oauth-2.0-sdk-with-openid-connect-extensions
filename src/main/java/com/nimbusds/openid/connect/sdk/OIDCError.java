@@ -90,7 +90,17 @@ public final class OIDCError {
 	
 	
 	/**
-	 * The {@code registration} parameter in the 
+	 * The OpenID provider is unable to authenticate the end-user at the
+	 * required Authentication Context Class Reference value when
+	 * requested with an essential {@code acr} claim. This error code may
+	 * also be used in other appropriate cases.
+	 */
+	public static final ErrorObject UNMET_AUTHENTICATION_REQUIREMENTS =
+		new ErrorObject("unmet_authentication_requirements", "Unmet authentication requirements", HTTPResponse.SC_FOUND);
+	
+	
+	/**
+	 * The {@code registration} parameter in the
 	 * {@link AuthenticationRequest} is not supported. Applies only to
 	 * self-issued OpenID providers.
 	 */

@@ -1090,3 +1090,7 @@ version 6.11 (2019-05-12)
 
 version 6.12 (2019-05-13)
     * Moves JAR error codes from OIDCError to OAuth2Error.
+
+version 6.13 (2019-05-15)
+    * Adds unmet_authentication_requirements OpenID Connect error code
+      specified in OpenID Connect Core Unmet Authentication Requirements 1.0.

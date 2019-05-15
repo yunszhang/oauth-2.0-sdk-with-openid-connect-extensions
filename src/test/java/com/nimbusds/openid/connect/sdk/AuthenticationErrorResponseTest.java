@@ -22,7 +22,9 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import com.nimbusds.oauth2.sdk.AuthorizationErrorResponse;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ResponseMode;
@@ -31,10 +33,24 @@ import com.nimbusds.oauth2.sdk.util.URLUtils;
 import junit.framework.TestCase;
 
 
-/**
- * Tests the authentication error response class.
- */
 public class AuthenticationErrorResponseTest extends TestCase {
+	
+	
+	public void testStandardErrors() {
+		
+		Set<ErrorObject> stdErrors = AuthenticationErrorResponse.getStandardErrors();
+		
+		assertTrue(stdErrors.contains(OIDCError.INTERACTION_REQUIRED));
+		assertTrue(stdErrors.contains(OIDCError.LOGIN_REQUIRED));
+		assertTrue(stdErrors.contains(OIDCError.ACCOUNT_SELECTION_REQUIRED));
+		assertTrue(stdErrors.contains(OIDCError.CONSENT_REQUIRED));
+		assertTrue(stdErrors.contains(OIDCError.UNMET_AUTHENTICATION_REQUIREMENTS));
+		assertTrue(stdErrors.contains(OIDCError.REGISTRATION_NOT_SUPPORTED));
+		
+		int numAuthzResponseErrors = AuthorizationErrorResponse.getStandardErrors().size();
+		
+		assertEquals(6, AuthenticationErrorResponse.getStandardErrors().size() - numAuthzResponseErrors);
+	}
 
 
 	public void testCodeErrorResponse()

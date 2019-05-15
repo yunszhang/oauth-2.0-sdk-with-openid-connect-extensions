@@ -32,6 +32,7 @@ public class OIDCErrorTest extends TestCase {
 		assertEquals("login_required", OIDCError.LOGIN_REQUIRED.getCode());
 		assertEquals("account_selection_required", OIDCError.ACCOUNT_SELECTION_REQUIRED.getCode());
 		assertEquals("consent_required", OIDCError.CONSENT_REQUIRED.getCode());
+		assertEquals("unmet_authentication_requirements", OIDCError.UNMET_AUTHENTICATION_REQUIREMENTS.getCode());
 		assertEquals("registration_not_supported", OIDCError.REGISTRATION_NOT_SUPPORTED.getCode());
 	}
 }

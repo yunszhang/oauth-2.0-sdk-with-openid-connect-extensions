@@ -83,6 +83,7 @@ import net.jcip.annotations.Immutable;
  *
  * <ul>
  *     <li>OpenID Connect Core 1.0, section 3.1.2.6.
+ *     <li>OpenID Connect Core Unmet Authentication Requirements 1.0.
  *     <li>OAuth 2.0 (RFC 6749), sections 4.1.2.1 and 4.2.2.1.
  *     <li>OAuth 2.0 Multiple Response Type Encoding Practices 1.0.
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
@@ -110,11 +111,8 @@ public class AuthenticationErrorResponse
 		stdErrors.add(OIDCError.LOGIN_REQUIRED);
 		stdErrors.add(OIDCError.ACCOUNT_SELECTION_REQUIRED);
 		stdErrors.add(OIDCError.CONSENT_REQUIRED);
-		stdErrors.add(OAuth2Error.INVALID_REQUEST_URI);
-		stdErrors.add(OAuth2Error.INVALID_REQUEST_OBJECT);
+		stdErrors.add(OIDCError.UNMET_AUTHENTICATION_REQUIREMENTS);
 		stdErrors.add(OIDCError.REGISTRATION_NOT_SUPPORTED);
-		stdErrors.add(OAuth2Error.REQUEST_NOT_SUPPORTED);
-		stdErrors.add(OAuth2Error.REQUEST_URI_NOT_SUPPORTED);
 	}
 
 

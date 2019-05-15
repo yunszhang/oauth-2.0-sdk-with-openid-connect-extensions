@@ -136,6 +136,8 @@ This SDK version implements the following standards and drafts:
 
 	* OpenID Connect Core 1.0 (2014-02-25)
 
+	* OpenID Connect Core Unmet Authentication Requirements 1.0 (2019-05-08)
+
 	* OpenID Connect Discovery 1.0 (2014-02-25)
 
 	* OpenID Connect Dynamic Registration 1.0 (2014-02-25)
@@ -164,4 +166,4 @@ This SDK is provided under the terms of the Apache 2.0 licence.
 Questions or comments? Email support@connect2id.com
 
 
-2019-05-09
+2019-05-15
