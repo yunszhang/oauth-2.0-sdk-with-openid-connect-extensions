@@ -145,7 +145,8 @@ public abstract class ClientAuthentication {
 		}
 		
 		// Self-signed client TLS?
-		if (StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(params, "client_id")) && httpRequest.getClientX509Certificate() != null) {
+		if (httpRequest.getClientX509Certificate() != null && httpRequest.getClientX509CertificateSubjectDN() != null &&
+				httpRequest.getClientX509CertificateSubjectDN().equals(httpRequest.getClientX509CertificateRootDN())) {
 			// Don't do self-signed check, too expensive in terms of CPU time
 			return SelfSignedTLSClientAuthentication.parse(httpRequest);
 		}

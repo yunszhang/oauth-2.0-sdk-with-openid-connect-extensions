@@ -65,6 +65,24 @@ public class X509CertificateGenerator {
 		return X509CertUtils.parse(certHolder.getEncoded());
 	}
 	
+
+	/**
+	 * Technically this is not allowed (a self signed sertificate should always be
+	 * self issued), but for tests this is good enough to simulate a PKI certificate.
+	 */
+	public static X509Certificate generateSelfSignedNotSelfIssuedCertificate(final String issuer,
+			final String subject)
+		throws Exception {
+
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+		keyPairGenerator.initialize(2048);
+		KeyPair keyPair = keyPairGenerator.generateKeyPair();
+		
+		RSAPublicKey rsaPublicKey = (RSAPublicKey)keyPair.getPublic();
+		RSAPrivateKey rsaPrivateKey = (RSAPrivateKey)keyPair.getPrivate();
+
+		return generateCertificate(new Issuer(issuer), new Subject(subject), rsaPublicKey, rsaPrivateKey);
+	}
 	
 	public static X509Certificate generateSelfSignedCertificate(final Issuer issuer,
 								    final RSAPublicKey rsaPublicKey,
