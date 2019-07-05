@@ -66,7 +66,7 @@ import net.minidev.json.JSONObject;
  *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section
  *         2.
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-12), sections 2.1.2 and 3.4.
+ *         Access Tokens (draft-ietf-oauth-mtls-15), sections 2.1.2 and 3.4.
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM).
  * </ul>
@@ -105,6 +105,10 @@ public class ClientMetadata {
 		p.add("software_version");
 		p.add("tls_client_certificate_bound_access_tokens");
 		p.add("tls_client_auth_subject_dn");
+		p.add("tls_client_auth_san_dns");
+		p.add("tls_client_auth_san_uri");
+		p.add("tls_client_auth_san_ip");
+		p.add("tls_client_auth_san_email");
 		p.add("authorization_signed_response_alg");
 		p.add("authorization_encrypted_response_alg");
 		p.add("authorization_encrypted_response_enc");
@@ -256,6 +260,35 @@ public class ClientMetadata {
 	
 	
 	/**
+	 * The expected dNSName SAN entry in the X.509 certificate, which
+	 * the OAuth client will use in mutual TLS authentication.
+	 */
+	private String tlsClientAuthSanDNS = null;
+	
+	
+	/**
+	 * The expected uniformResourceIdentifier SAN entry in the X.509
+	 * certificate, which the OAuth client will use in mutual TLS
+	 * authentication.
+	 */
+	private String tlsClientAuthSanURI = null;
+	
+	
+	/**
+	 * The expected iPAddress SAN entry in the X.509 certificate, which
+	 * the OAuth client will use in mutual TLS authentication.
+	 */
+	private String tlsClientAuthSanIP = null;
+	
+	
+	/**
+	 * The expected rfc822Name SAN entry in the X.509 certificate, which
+	 * the OAuth client will use in mutual TLS authentication.
+	 */
+	private String tlsClientAuthSanEmail = null;
+	
+	
+	/**
 	 * The JWS algorithm for JWT-encoded authorisation responses.
 	 */
 	private JWSAlgorithm authzJWSAlg;
@@ -325,6 +358,10 @@ public class ClientMetadata {
 		softwareVersion = metadata.softwareVersion;
 		tlsClientCertificateBoundAccessTokens = metadata.tlsClientCertificateBoundAccessTokens;
 		tlsClientAuthSubjectDN = metadata.tlsClientAuthSubjectDN;
+		tlsClientAuthSanDNS = metadata.tlsClientAuthSanDNS;
+		tlsClientAuthSanURI = metadata.tlsClientAuthSanURI;
+		tlsClientAuthSanIP = metadata.tlsClientAuthSanIP;
+		tlsClientAuthSanEmail = metadata.tlsClientAuthSanEmail;
 		authzJWSAlg = metadata.authzJWSAlg;
 		authzJWEAlg = metadata.authzJWEAlg;
 		authzJWEEnc = metadata.authzJWEEnc;
@@ -1298,6 +1335,120 @@ public class ClientMetadata {
 	
 	
 	/**
+	 * Gets the expected dNSName SAN entry in the X.509 certificate, which
+	 * the OAuth client will use in mutual TLS authentication. Corresponds
+	 * to the {@code tls_client_auth_san_dns} client metadata field.
+	 *
+	 * @return The expected dNSName SAN entry in the X.509 certificate,
+	 *         {@code null} if not specified.
+	 */
+	public String getTLSClientAuthSanDNS() {
+		
+		return tlsClientAuthSanDNS;
+	}
+	
+	
+	/**
+	 * Sets the expected dNSName SAN entry in the X.509 certificate, which
+	 * the OAuth client will use in mutual TLS authentication. Corresponds
+	 * to the {@code tls_client_auth_san_dns} client metadata field.
+	 *
+	 * @param subjectDN The expected dNSName SAN entry in the X.509
+	 *                  certificate, {@code null} if not specified.
+	 */
+	public void setTLSClientAuthSanDNS(final String dns) {
+		
+		this.tlsClientAuthSanDNS = dns;
+	}
+	
+	
+	/**
+	 * Gets the expected uniformResourceIdentifier SAN entry in the X.509
+	 * certificate, which the OAuth client will use in mutual TLS
+	 * authentication. Corresponds to the {@code tls_client_auth_san_uri}
+	 * client metadata field.
+	 *
+	 * @return The expected uniformResourceIdentifier SAN entry in the X.509
+	 *         certificate, {@code null} if not specified.
+	 */
+	public String getTLSClientAuthSanURI() {
+		
+		return tlsClientAuthSanURI;
+	}
+	
+	
+	/**
+	 * Sets the expected uniformResourceIdentifier SAN entry in the X.509
+	 * certificate, which the OAuth client will use in mutual TLS
+	 * authentication. Corresponds to the {@code tls_client_auth_san_uri}
+	 * client metadata field.
+	 *
+	 * @param uri The expected uniformResourceIdentifier SAN entry in the X.509
+	 *            certificate, {@code null} if not specified.
+	 */
+	public void setTLSClientAuthSanURI(final String uri) {
+		
+		this.tlsClientAuthSanURI = uri;
+	}
+	
+	
+	/**
+	 * Gets the expected iPAddress SAN entry in the X.509 certificate, which
+	 * the OAuth client will use in mutual TLS authentication. Corresponds
+	 * to the {@code tls_client_auth_san_ip} client metadata field.
+	 *
+	 * @return The expected iPAddress SAN entry in the X.509 certificate,
+	 *         {@code null} if not specified.
+	 */
+	public String getTLSClientAuthSanIP() {
+		
+		return tlsClientAuthSanIP;
+	}
+	
+	
+	/**
+	 * Sets the expected iPAddress SAN entry in the X.509 certificate, which
+	 * the OAuth client will use in mutual TLS authentication. Corresponds
+	 * to the {@code tls_client_auth_san_ip} client metadata field.
+	 *
+	 * @param ip The expected iPAddress SAN entry in the X.509
+	 *           certificate, {@code null} if not specified.
+	 */
+	public void setTLSClientAuthSanIP(final String ip) {
+		
+		this.tlsClientAuthSanIP = ip;
+	}
+	
+	
+	/**
+	 * Gets the expected rfc822Name SAN entry in the X.509 certificate, which
+	 * the OAuth client will use in mutual TLS authentication. Corresponds
+	 * to the {@code tls_client_auth_san_email} client metadata field.
+	 *
+	 * @return The expected rfc822Name SAN entry in the X.509 certificate,
+	 *         {@code null} if not specified.
+	 */
+	public String getTLSClientAuthSanEmail() {
+		
+		return tlsClientAuthSanEmail;
+	}
+	
+	
+	/**
+	 * Sets the expected rfc822Name SAN entry in the X.509 certificate, which
+	 * the OAuth client will use in mutual TLS authentication. Corresponds
+	 * to the {@code tls_client_auth_san_email} client metadata field.
+	 *
+	 * @param email The expected rfc822Name SAN entry in the X.509
+	 *              certificate, {@code null} if not specified.
+	 */
+	public void setTLSClientAuthSanEmail(final String email) {
+		
+		this.tlsClientAuthSanEmail = email;
+	}
+	
+	
+	/**
 	 * Gets the JWS algorithm for JWT-encoded authorisation responses.
 	 * Corresponds to the {@code authorization_signed_response_alg} client
 	 * metadata field.
@@ -1687,6 +1838,18 @@ public class ClientMetadata {
 		if (tlsClientAuthSubjectDN != null)
 			o.put("tls_client_auth_subject_dn", tlsClientAuthSubjectDN);
 		
+		if (tlsClientAuthSanDNS != null)
+			o.put("tls_client_auth_san_dns", tlsClientAuthSanDNS);
+		
+		if (tlsClientAuthSanURI != null)
+			o.put("tls_client_auth_san_uri", tlsClientAuthSanURI);
+		
+		if (tlsClientAuthSanIP != null)
+			o.put("tls_client_auth_san_ip", tlsClientAuthSanIP);
+		
+		if (tlsClientAuthSanEmail != null)
+			o.put("tls_client_auth_san_email", tlsClientAuthSanEmail);
+		
 		if (authzJWSAlg != null) {
 			o.put("authorization_signed_response_alg", authzJWSAlg.getName());
 		}
@@ -1991,6 +2154,26 @@ public class ClientMetadata {
 			if (jsonObject.get("tls_client_auth_subject_dn") != null) {
 				metadata.setTLSClientAuthSubjectDN(JSONObjectUtils.getString(jsonObject, "tls_client_auth_subject_dn"));
 				jsonObject.remove("tls_client_auth_subject_dn");
+			}
+			
+			if (jsonObject.get("tls_client_auth_san_dns") != null) {
+				metadata.setTLSClientAuthSanDNS(JSONObjectUtils.getString(jsonObject, "tls_client_auth_san_dns"));
+				jsonObject.remove("tls_client_auth_san_dns");
+			}
+			
+			if (jsonObject.get("tls_client_auth_san_uri") != null) {
+				metadata.setTLSClientAuthSanURI(JSONObjectUtils.getString(jsonObject, "tls_client_auth_san_uri"));
+				jsonObject.remove("tls_client_auth_san_uri");
+			}
+			
+			if (jsonObject.get("tls_client_auth_san_ip") != null) {
+				metadata.setTLSClientAuthSanIP(JSONObjectUtils.getString(jsonObject, "tls_client_auth_san_ip"));
+				jsonObject.remove("tls_client_auth_san_ip");
+			}
+			
+			if (jsonObject.get("tls_client_auth_san_email") != null) {
+				metadata.setTLSClientAuthSanEmail(JSONObjectUtils.getString(jsonObject, "tls_client_auth_san_email"));
+				jsonObject.remove("tls_client_auth_san_email");
 			}
 			
 			if (jsonObject.get("authorization_signed_response_alg") != null) {

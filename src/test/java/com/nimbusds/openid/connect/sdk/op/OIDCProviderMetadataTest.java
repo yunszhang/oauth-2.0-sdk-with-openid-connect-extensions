@@ -21,14 +21,12 @@ package com.nimbusds.openid.connect.sdk.op;
 import java.net.URI;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.*;
+import com.nimbusds.oauth2.sdk.as.AuthorizationServerEndpointMetadata;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
@@ -100,13 +98,14 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("frontchannel_logout_session_supported"));
 		assertTrue(paramNames.contains("backchannel_logout_supported"));
 		assertTrue(paramNames.contains("backchannel_logout_session_supported"));
+		assertTrue(paramNames.contains("mtls_endpoint_aliases"));
 		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
 		assertTrue(paramNames.contains("authorization_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("authorization_encryption_alg_values_supported"));
 		assertTrue(paramNames.contains("authorization_encryption_enc_values_supported"));
 		assertTrue(paramNames.contains("device_authorization_endpoint"));
 
-		assertEquals(54, paramNames.size());
+		assertEquals(55, paramNames.size());
 	}
 
 
@@ -329,6 +328,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertFalse(op.supportsBackChannelLogout());
 		assertFalse(op.supportsBackChannelLogoutSession());
 		
+		assertNull(op.getMtlsEndpointAliases());
 		assertFalse(op.supportsTLSClientCertificateBoundAccessTokens());
 		assertFalse(op.supportsMutualTLSSenderConstrainedAccessTokens());
 		
@@ -551,6 +551,30 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertFalse(meta.supportsBackChannelLogoutSession());
 		meta.setSupportsBackChannelLogoutSession(true);
 		assertTrue(meta.supportsBackChannelLogoutSession());
+		
+		AuthorizationServerEndpointMetadata asEndpoints = new AuthorizationServerEndpointMetadata();
+		asEndpoints.setAuthorizationEndpointURI(meta.getAuthorizationEndpointURI());
+		asEndpoints.setTokenEndpointURI(meta.getTokenEndpointURI());
+		asEndpoints.setRegistrationEndpointURI(meta.getRegistrationEndpointURI());
+		asEndpoints.setIntrospectionEndpointURI(meta.getIntrospectionEndpointURI());
+		asEndpoints.setRevocationEndpointURI(meta.getRevocationEndpointURI());
+		asEndpoints.setDeviceAuthorizationEndpointURI(meta.getDeviceAuthorizationEndpointURI());
+		asEndpoints.setRequestObjectEndpoint(meta.getRequestObjectEndpoint());
+		assertNull(meta.getMtlsEndpointAliases());
+		
+		meta.setMtlsEndpointAliases(asEndpoints);
+		assertTrue(meta.getMtlsEndpointAliases() instanceof OIDCProviderEndpointMetadata);
+		assertEquals(meta.getMtlsEndpointAliases().getAuthorizationEndpointURI(), meta.getAuthorizationEndpointURI());
+		assertEquals(meta.getMtlsEndpointAliases().getTokenEndpointURI(), meta.getTokenEndpointURI());
+		assertEquals(meta.getMtlsEndpointAliases().getRegistrationEndpointURI(), meta.getRegistrationEndpointURI());
+		assertEquals(meta.getMtlsEndpointAliases().getIntrospectionEndpointURI(), meta.getIntrospectionEndpointURI());
+		assertEquals(meta.getMtlsEndpointAliases().getRevocationEndpointURI(), meta.getRevocationEndpointURI());
+		assertEquals(meta.getMtlsEndpointAliases().getDeviceAuthorizationEndpointURI(), meta.getDeviceAuthorizationEndpointURI());
+		assertEquals(meta.getMtlsEndpointAliases().getRequestObjectEndpoint(), meta.getRequestObjectEndpoint());
+		assertNull(meta.getMtlsEndpointAliases().getUserInfoEndpointURI());
+		
+		meta.getMtlsEndpointAliases().setUserInfoEndpointURI(meta.getUserInfoEndpointURI());
+		assertEquals(meta.getMtlsEndpointAliases().getUserInfoEndpointURI(), meta.getUserInfoEndpointURI());
 		
 		assertFalse(meta.supportsTLSClientCertificateBoundAccessTokens());
 		assertFalse(meta.supportsMutualTLSSenderConstrainedAccessTokens());

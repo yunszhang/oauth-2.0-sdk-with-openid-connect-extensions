@@ -74,6 +74,10 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("software_version"));
 		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
 		assertTrue(paramNames.contains("tls_client_auth_subject_dn"));
+		assertTrue(paramNames.contains("tls_client_auth_san_dns"));
+		assertTrue(paramNames.contains("tls_client_auth_san_uri"));
+		assertTrue(paramNames.contains("tls_client_auth_san_ip"));
+		assertTrue(paramNames.contains("tls_client_auth_san_email"));
 		assertTrue(paramNames.contains("authorization_signed_response_alg"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
@@ -98,7 +102,7 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("backchannel_logout_uri"));
 		assertTrue(paramNames.contains("backchannel_logout_session_required"));
 
-		assertEquals(43, OIDCClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(47, OIDCClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	

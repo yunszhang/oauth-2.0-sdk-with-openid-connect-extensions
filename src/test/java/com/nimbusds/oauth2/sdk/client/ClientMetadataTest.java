@@ -73,11 +73,15 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("software_version"));
 		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
 		assertTrue(paramNames.contains("tls_client_auth_subject_dn"));
+		assertTrue(paramNames.contains("tls_client_auth_san_dns"));
+		assertTrue(paramNames.contains("tls_client_auth_san_uri"));
+		assertTrue(paramNames.contains("tls_client_auth_san_ip"));
+		assertTrue(paramNames.contains("tls_client_auth_san_email"));
 		assertTrue(paramNames.contains("authorization_signed_response_alg"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 
-		assertEquals(25, ClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(29, ClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -174,6 +178,23 @@ public class ClientMetadataTest extends TestCase {
 		String subjectDN = "cn=123";
 		meta.setTLSClientAuthSubjectDN(subjectDN);
 		
+		assertNull(meta.getTLSClientAuthSanDNS());
+		String sanDNS = "example.com";
+		meta.setTLSClientAuthSanDNS(sanDNS);
+		
+		assertNull(meta.getTLSClientAuthSanURI());
+		String sanURI = "http://example.com/";
+		meta.setTLSClientAuthSanURI(sanURI);
+		
+		assertNull(meta.getTLSClientAuthSanIP());
+		String sanIP = "1.2.3.4";
+		meta.setTLSClientAuthSanIP(sanIP);
+		
+		assertNull(meta.getTLSClientAuthSanEmail());
+		String sanEmail= "me@example.com";
+		meta.setTLSClientAuthSanEmail(sanEmail);
+
+		
 		JWSAlgorithm authzJWSAlg = JWSAlgorithm.ES512;
 		meta.setAuthorizationJWSAlg(authzJWSAlg);
 		assertEquals(authzJWSAlg, meta.getAuthorizationJWSAlg());
@@ -221,6 +242,10 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(meta.getTLSClientCertificateBoundAccessTokens());
 		assertTrue(meta.getMutualTLSSenderConstrainedAccessTokens());
 		assertEquals(subjectDN, meta.getTLSClientAuthSubjectDN());
+		assertEquals(sanDNS, meta.getTLSClientAuthSanDNS());
+		assertEquals(sanURI, meta.getTLSClientAuthSanURI());
+		assertEquals(sanIP, meta.getTLSClientAuthSanIP());
+		assertEquals(sanEmail, meta.getTLSClientAuthSanEmail());
 		assertEquals(authzJWSAlg, meta.getAuthorizationJWSAlg());
 		assertEquals(authzJWEAlg, meta.getAuthorizationJWEAlg());
 		assertEquals(authzJWEEnc, meta.getAuthorizationJWEEnc());
@@ -514,6 +539,18 @@ public class ClientMetadataTest extends TestCase {
 		String subjectDN = "cn=123";
 		meta.setTLSClientAuthSubjectDN(subjectDN);
 		
+		String sanDNS = "example.com";
+		meta.setTLSClientAuthSanDNS(sanDNS);
+		
+		String sanURI = "http://example.com/";
+		meta.setTLSClientAuthSanURI(sanURI);
+		
+		String sanIP = "1.2.3.4";
+		meta.setTLSClientAuthSanIP(sanIP);
+		
+		String sanEmail= "me@example.com";
+		meta.setTLSClientAuthSanEmail(sanEmail);
+		
 		JWSAlgorithm authzJWSAlg = JWSAlgorithm.ES512;
 		meta.setAuthorizationJWSAlg(authzJWSAlg);
 		
@@ -561,6 +598,10 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(copy.getTLSClientCertificateBoundAccessTokens());
 		assertTrue(copy.getMutualTLSSenderConstrainedAccessTokens());
 		assertEquals(subjectDN, copy.getTLSClientAuthSubjectDN());
+		assertEquals(sanDNS, copy.getTLSClientAuthSanDNS());
+		assertEquals(sanURI, copy.getTLSClientAuthSanURI());
+		assertEquals(sanIP, copy.getTLSClientAuthSanIP());
+		assertEquals(sanEmail, copy.getTLSClientAuthSanEmail());
 		assertTrue(copy.getCustomFields().isEmpty());
 		assertEquals(authzJWSAlg, copy.getAuthorizationJWSAlg());
 		assertEquals(authzJWEAlg, copy.getAuthorizationJWEAlg());
@@ -603,6 +644,10 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(copy.getTLSClientCertificateBoundAccessTokens());
 		assertTrue(copy.getMutualTLSSenderConstrainedAccessTokens());
 		assertEquals(subjectDN, copy.getTLSClientAuthSubjectDN());
+		assertEquals(sanDNS, copy.getTLSClientAuthSanDNS());
+		assertEquals(sanURI, copy.getTLSClientAuthSanURI());
+		assertEquals(sanIP, copy.getTLSClientAuthSanIP());
+		assertEquals(sanEmail, copy.getTLSClientAuthSanEmail());
 		assertEquals(authzJWSAlg, copy.getAuthorizationJWSAlg());
 		assertEquals(authzJWEAlg, copy.getAuthorizationJWEAlg());
 		assertEquals(authzJWEEnc, copy.getAuthorizationJWEEnc());
