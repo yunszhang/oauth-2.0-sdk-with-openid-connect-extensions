@@ -25,7 +25,14 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 import javax.net.ssl.SSLSocketFactory;
 
 import com.nimbusds.jose.JOSEException;
@@ -35,11 +42,24 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.oauth2.sdk.auth.*;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
+import com.nimbusds.oauth2.sdk.auth.ClientSecretJWT;
+import com.nimbusds.oauth2.sdk.auth.JWTAuthenticationClaimsSet;
+import com.nimbusds.oauth2.sdk.auth.PKITLSClientAuthentication;
+import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
+import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.auth.SelfSignedTLSClientAuthentication;
 import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.oauth2.sdk.http.X509CertificateGenerator;
-import com.nimbusds.oauth2.sdk.id.*;
+import com.nimbusds.oauth2.sdk.id.Audience;
+import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.id.JWTID;
+import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.util.X509CertificateUtils;
+
 import junit.framework.TestCase;
 
 
@@ -153,11 +173,11 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 	};
 	
 	
-	private static final ClientX509CertificateBindingVerifier<ClientMetadata> CERT_BINDING_VERIFIER = new ClientX509CertificateBindingVerifier<ClientMetadata>() {
+	private static final PKIClientX509CertificateBindingVerifier<ClientMetadata> CERT_BINDING_VERIFIER = new PKIClientX509CertificateBindingVerifier<ClientMetadata>() {
 		
 		@Override
 		public void verifyCertificateBinding(ClientID clientID,
-						     String subjectDN,
+						     X509Certificate certificate,
 						     Context<ClientMetadata> ctx)
 			throws InvalidClientException {
 			
@@ -165,7 +185,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 				throw InvalidClientException.BAD_ID;
 			}
 			
-			if (! VALID_SUBJECT_DN.equalsIgnoreCase(subjectDN)) {
+			if (! VALID_SUBJECT_DN.equalsIgnoreCase(certificate.getSubjectDN().getName())) {
 				throw new InvalidClientException("Bad subject DN");
 			}
 		}
@@ -190,7 +210,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		Set<Audience> audienceSet = new HashSet<>();
 		audienceSet.add(new Audience("https://c2id.com/token"));
 
-		ClientAuthenticationVerifier verifier = new ClientAuthenticationVerifier(selector, null, audienceSet);
+		ClientAuthenticationVerifier verifier = new ClientAuthenticationVerifier(selector, audienceSet);
 
 		assertEquals(selector, verifier.getClientCredentialsSelector());
 		assertNull(verifier.getClientX509CertificateBindingVerifier());
@@ -200,7 +220,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 
 	private static ClientAuthenticationVerifier<ClientMetadata> createBasicVerifier() {
 
-		return new ClientAuthenticationVerifier<>(CLIENT_CREDENTIALS_SELECTOR, null, EXPECTED_JWT_AUDIENCE);
+		return new ClientAuthenticationVerifier<>(CLIENT_CREDENTIALS_SELECTOR, EXPECTED_JWT_AUDIENCE);
 	}
 	
 	
@@ -610,7 +630,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		
 		ClientAuthentication clientAuthentication = new PKITLSClientAuthentication(
 			VALID_CLIENT_ID,
-			VALID_SUBJECT_DN
+			X509CertificateGenerator.generateSelfSignedNotSelfIssuedCertificate("issuer", "client-123")
 		);
 		
 		createVerifierWithPKIBoundCertSupport().verify(clientAuthentication, null, null);
@@ -622,7 +642,7 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 		
 		ClientAuthentication clientAuthentication = new PKITLSClientAuthentication(
 			VALID_CLIENT_ID,
-			"cn=invalid-subject"
+			X509CertificateGenerator.generateSelfSignedNotSelfIssuedCertificate("issuer", "invalid-subject")
 		);
 		
 		try {

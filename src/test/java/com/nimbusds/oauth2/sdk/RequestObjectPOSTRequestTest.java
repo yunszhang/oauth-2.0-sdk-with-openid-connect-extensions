@@ -117,6 +117,8 @@ public class RequestObjectPOSTRequestTest extends TestCase {
 		assertEquals(jsonObject, httpRequest.getQueryAsJSONObject());
 		
 		httpRequest.setClientX509Certificate(clientCert); // simulate reverse proxy
+		httpRequest.setClientX509CertificateRootDN(clientCert.getIssuerDN().getName());
+		httpRequest.setClientX509CertificateSubjectDN(clientCert.getSubjectDN().getName());
 		postRequest = RequestObjectPOSTRequest.parse(httpRequest);
 		
 		assertEquals(endpoint, postRequest.getEndpointURI());
@@ -149,7 +151,8 @@ public class RequestObjectPOSTRequestTest extends TestCase {
 		assertNull(httpRequest.getClientX509CertificateSubjectDN());
 		assertEquals(jsonObject, httpRequest.getQueryAsJSONObject());
 		
-		httpRequest.setClientX509CertificateSubjectDN("cn=123"); // simulate reverse proxy
+		httpRequest.setClientX509Certificate(X509CertificateGenerator.generateSelfSignedNotSelfIssuedCertificate(
+				"issuer", "123")); // simulate reverse proxy
 		postRequest = RequestObjectPOSTRequest.parse(httpRequest);
 		
 		assertEquals(endpoint, postRequest.getEndpointURI());

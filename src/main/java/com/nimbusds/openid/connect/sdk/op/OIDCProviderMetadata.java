@@ -31,6 +31,7 @@ import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.GeneralException;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.as.AuthorizationServerEndpointMetadata;
 import com.nimbusds.oauth2.sdk.as.AuthorizationServerMetadata;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
@@ -55,7 +56,7 @@ import net.minidev.json.JSONObject;
  *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.1 (draft 04).
  *     <li>OAuth 2.0 Authorization Server Metadata (RFC 8414)
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-12)
+ *         Access Tokens (draft-ietf-oauth-mtls-15)
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
  * </ul>
@@ -71,7 +72,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 
 	static {
 		Set<String> p = new HashSet<>(AuthorizationServerMetadata.getRegisteredParameterNames());
-		p.add("userinfo_endpoint");
+		p.addAll(OIDCProviderEndpointMetadata.getRegisteredParameterNames());
 		p.add("check_session_iframe");
 		p.add("end_session_endpoint");
 		p.add("acr_values_supported");
@@ -247,6 +248,24 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		
 		// Default OpenID Connect setting is supported
 		setSupportsRequestParam(true);
+	}
+	
+	
+	@Override
+	public void setMtlsEndpointAliases(AuthorizationServerEndpointMetadata mtlsEndpointAliases) {
+	
+		if (mtlsEndpointAliases != null && !(mtlsEndpointAliases instanceof OIDCProviderEndpointMetadata)) {
+			// convert the provided endpoints to OIDC
+			super.setMtlsEndpointAliases(new OIDCProviderEndpointMetadata(mtlsEndpointAliases));
+		} else {
+			super.setMtlsEndpointAliases(mtlsEndpointAliases);
+		}
+	}
+	
+	@Override
+	public OIDCProviderEndpointMetadata getMtlsEndpointAliases() {
+	
+		return (OIDCProviderEndpointMetadata) super.getMtlsEndpointAliases();
 	}
 
 
@@ -1169,6 +1188,9 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		
 		if (op.frontChannelLogoutSupported && jsonObject.get("backchannel_logout_session_supported") != null)
 			op.backChannelLogoutSessionSupported = JSONObjectUtils.getBoolean(jsonObject, "backchannel_logout_session_supported");
+		
+		if (jsonObject.get("mtls_endpoint_aliases") != null)
+			op.setMtlsEndpointAliases(OIDCProviderEndpointMetadata.parse(JSONObjectUtils.getJSONObject(jsonObject, "mtls_endpoint_aliases")));
 		
 		op.setSupportsTLSClientCertificateBoundAccessTokens(as.supportsTLSClientCertificateBoundAccessTokens());
 		

@@ -259,10 +259,11 @@ public final class RequestObjectPOSTRequest extends AbstractOptionallyAuthentica
 			ClientID clientID = new ClientID(JSONObjectUtils.getString(jsonObject, "client_id"));
 			
 			TLSClientAuthentication tlsClientAuth;
-			if (httpRequest.getClientX509CertificateSubjectDN() != null) {
-				tlsClientAuth = new PKITLSClientAuthentication(clientID, httpRequest.getClientX509CertificateSubjectDN());
-			} else if (httpRequest.getClientX509Certificate() != null) {
+			if (httpRequest.getClientX509Certificate() != null && httpRequest.getClientX509CertificateSubjectDN() != null &&
+					httpRequest.getClientX509CertificateSubjectDN().equals(httpRequest.getClientX509CertificateRootDN())) {
 				tlsClientAuth = new SelfSignedTLSClientAuthentication(clientID, httpRequest.getClientX509Certificate());
+			} else if (httpRequest.getClientX509Certificate() != null) {
+				tlsClientAuth = new PKITLSClientAuthentication(clientID, httpRequest.getClientX509Certificate());
 			} else {
 				throw new ParseException("Missing mutual TLS client authentication");
 			}

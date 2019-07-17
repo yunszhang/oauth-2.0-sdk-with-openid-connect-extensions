@@ -68,6 +68,8 @@ public class ClientAuthenticationTest extends TestCase {
 		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=123");
 		httpRequest.setClientX509Certificate(clientCert);
+		httpRequest.setClientX509CertificateSubjectDN(clientCert.getSubjectDN().getName());
+		httpRequest.setClientX509CertificateRootDN(clientCert.getIssuerDN().getName());
 		
 		SelfSignedTLSClientAuthentication clientAuth = (SelfSignedTLSClientAuthentication) ClientAuthentication.parse(httpRequest);
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
@@ -78,16 +80,19 @@ public class ClientAuthenticationTest extends TestCase {
 	
 	public void testTLSClientCertificateAuthentication()
 		throws Exception {
-		
+
+		X509Certificate clientCert = X509CertificateGenerator.generateSelfSignedNotSelfIssuedCertificate("issuer", "client-123");
+
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
 		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=123");
-		httpRequest.setClientX509CertificateSubjectDN("cn=client-123");
+		httpRequest.setClientX509Certificate(clientCert);
+		httpRequest.setClientX509CertificateSubjectDN(clientCert.getSubjectDN().getName());
 		
 		PKITLSClientAuthentication clientAuth = (PKITLSClientAuthentication) ClientAuthentication.parse(httpRequest);
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
-		assertEquals("cn=client-123", clientAuth.getClientX509CertificateSubjectDN());
+		assertEquals("CN=client-123", clientAuth.getClientX509CertificateSubjectDN());
 	}
 	
 	

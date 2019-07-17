@@ -46,7 +46,7 @@ import net.jcip.annotations.Immutable;
  *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section
  *         2.
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-08), section 2.
+ *         Access Tokens (draft-ietf-oauth-mtls-15), section 2.
  * </ul>
  */
 @Immutable

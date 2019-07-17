@@ -43,7 +43,7 @@ import net.jcip.annotations.Immutable;
  *
  * <ul>
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-14), section 2.2.
+ *         Access Tokens (draft-ietf-oauth-mtls-15), section 2.2.
  * </ul>
  */
 @Immutable

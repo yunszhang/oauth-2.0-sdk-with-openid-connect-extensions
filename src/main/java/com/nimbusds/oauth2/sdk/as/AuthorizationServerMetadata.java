@@ -40,7 +40,6 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import com.nimbusds.oauth2.sdk.util.OrderedJSONObject;
 
 
 /**
@@ -51,7 +50,7 @@ import com.nimbusds.oauth2.sdk.util.OrderedJSONObject;
  * <ul>
  *     <li>OAuth 2.0 Authorization Server Metadata (RFC 8414)
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-12)
+ *         Access Tokens (draft-ietf-oauth-mtls-15)
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
  *     <li>Financial-grade API - Part 2: Read and Write API Security Profile
@@ -59,7 +58,7 @@ import com.nimbusds.oauth2.sdk.util.OrderedJSONObject;
  *         (draft-ietf-oauth-device-flow-14)
  * </ul>
  */
-public class AuthorizationServerMetadata {
+public class AuthorizationServerMetadata extends AuthorizationServerEndpointMetadata {
 	
 	/**
 	 * The registered parameter names.
@@ -68,11 +67,8 @@ public class AuthorizationServerMetadata {
 	
 	
 	static {
-		Set<String> p = new HashSet<>();
+		Set<String> p = new HashSet<>(AuthorizationServerEndpointMetadata.getRegisteredParameterNames());
 		p.add("issuer");
-		p.add("authorization_endpoint");
-		p.add("token_endpoint");
-		p.add("registration_endpoint");
 		p.add("jwks_uri");
 		p.add("scopes_supported");
 		p.add("response_types_supported");
@@ -91,18 +87,15 @@ public class AuthorizationServerMetadata {
 		p.add("service_documentation");
 		p.add("op_policy_uri");
 		p.add("op_tos_uri");
-		p.add("introspection_endpoint");
 		p.add("introspection_endpoint_auth_methods_supported");
 		p.add("introspection_endpoint_auth_signing_alg_values_supported");
-		p.add("revocation_endpoint");
 		p.add("revocation_endpoint_auth_methods_supported");
 		p.add("revocation_endpoint_auth_signing_alg_values_supported");
+		p.add("mtls_endpoint_aliases");
 		p.add("tls_client_certificate_bound_access_tokens");
 		p.add("authorization_signing_alg_values_supported");
 		p.add("authorization_encryption_alg_values_supported");
 		p.add("authorization_encryption_enc_values_supported");
-		p.add("device_authorization_endpoint");
-		p.add("request_object_endpoint");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 	
@@ -124,36 +117,6 @@ public class AuthorizationServerMetadata {
 	 * The issuer.
 	 */
 	private final Issuer issuer;
-	
-	
-	/**
-	 * The authorisation endpoint.
-	 */
-	private URI authzEndpoint;
-	
-	
-	/**
-	 * The token endpoint.
-	 */
-	private URI tokenEndpoint;
-	
-	
-	/**
-	 * The registration endpoint.
-	 */
-	private URI regEndpoint;
-	
-	
-	/**
-	 * The token introspection endpoint.
-	 */
-	private URI introspectionEndpoint;
-	
-	
-	/**
-	 * The token revocation endpoint.
-	 */
-	private URI revocationEndpoint;
 	
 	
 	/**
@@ -234,12 +197,6 @@ public class AuthorizationServerMetadata {
 	
 	
 	/**
-	 * The request object endpoint.
-	 */
-	private URI requestObjectEndpoint;
-	
-	
-	/**
 	 * The supported JWS algorithms for request objects.
 	 */
 	private List<JWSAlgorithm> requestObjectJWSAlgs;
@@ -303,11 +260,18 @@ public class AuthorizationServerMetadata {
 	
 	
 	/**
+	 * Aliases for endpoints with mutial TLS authentication.
+	 */
+	private AuthorizationServerEndpointMetadata mtlsEndpointAliases;
+	
+	
+	/**
 	 * If {@code true} the
 	 * {@code tls_client_certificate_bound_access_tokens} if set, else
 	 * not.
 	 */
 	private boolean tlsClientCertificateBoundAccessTokens = false;
+	
 	
 	/**
 	 * The supported JWS algorithms for JWT-encoded authorisation
@@ -334,12 +298,6 @@ public class AuthorizationServerMetadata {
 	 * Custom (not-registered) parameters.
 	 */
 	private final JSONObject customParameters = new JSONObject();
-	
-	
-	/**
-	 * The device authorization endpoint.
-	 */
-	private URI deviceAuthzEndpoint;
 	
 	
 	/**
@@ -377,135 +335,6 @@ public class AuthorizationServerMetadata {
 	public Issuer getIssuer() {
 		
 		return issuer;
-	}
-	
-	
-	/**
-	 * Gets the authorisation endpoint URI. Corresponds the
-	 * {@code authorization_endpoint} metadata field.
-	 *
-	 * @return The authorisation endpoint URI, {@code null} if not
-	 *         specified.
-	 */
-	public URI getAuthorizationEndpointURI() {
-		
-		return authzEndpoint;
-	}
-	
-	
-	/**
-	 * Sets the authorisation endpoint URI. Corresponds the
-	 * {@code authorization_endpoint} metadata field.
-	 *
-	 * @param authzEndpoint The authorisation endpoint URI, {@code null} if
-	 *                      not specified.
-	 */
-	public void setAuthorizationEndpointURI(final URI authzEndpoint) {
-		
-		this.authzEndpoint = authzEndpoint;
-	}
-	
-	
-	/**
-	 * Gets the token endpoint URI. Corresponds the {@code token_endpoint}
-	 * metadata field.
-	 *
-	 * @return The token endpoint URI, {@code null} if not specified.
-	 */
-	public URI getTokenEndpointURI() {
-		
-		return tokenEndpoint;
-	}
-	
-	
-	/**
-	 * Sts the token endpoint URI. Corresponds the {@code token_endpoint}
-	 * metadata field.
-	 *
-	 * @param tokenEndpoint The token endpoint URI, {@code null} if not
-	 *                      specified.
-	 */
-	public void setTokenEndpointURI(final URI tokenEndpoint) {
-		
-		this.tokenEndpoint = tokenEndpoint;
-	}
-	
-	
-	/**
-	 * Gets the client registration endpoint URI. Corresponds to the
-	 * {@code registration_endpoint} metadata field.
-	 *
-	 * @return The client registration endpoint URI, {@code null} if not
-	 *         specified.
-	 */
-	public URI getRegistrationEndpointURI() {
-		
-		return regEndpoint;
-	}
-	
-	
-	/**
-	 * Sets the client registration endpoint URI. Corresponds to the
-	 * {@code registration_endpoint} metadata field.
-	 *
-	 * @param regEndpoint The client registration endpoint URI,
-	 *                    {@code null} if not specified.
-	 */
-	public void setRegistrationEndpointURI(final URI regEndpoint) {
-		
-		this.regEndpoint = regEndpoint;
-	}
-	
-	
-	/**
-	 * Gets the token introspection endpoint URI. Corresponds to the
-	 * {@code introspection_endpoint} metadata field.
-	 *
-	 * @return The token introspection endpoint URI, {@code null} if not
-	 *         specified.
-	 */
-	public URI getIntrospectionEndpointURI() {
-		
-		return introspectionEndpoint;
-	}
-	
-	
-	/**
-	 * Sets the token introspection endpoint URI. Corresponds to the
-	 * {@code introspection_endpoint} metadata field.
-	 *
-	 * @param introspectionEndpoint  The token introspection endpoint URI,
-	 *                               {@code null} if not specified.
-	 */
-	public void setIntrospectionEndpointURI(final URI introspectionEndpoint) {
-		
-		this.introspectionEndpoint = introspectionEndpoint;
-	}
-	
-	
-	/**
-	 * Gets the token revocation endpoint URI. Corresponds to the
-	 * {@code revocation_endpoint} metadata field.
-	 *
-	 * @return The token revocation endpoint URI, {@code null} if not
-	 *         specified.
-	 */
-	public URI getRevocationEndpointURI() {
-		
-		return revocationEndpoint;
-	}
-	
-	
-	/**
-	 * Sets the token revocation endpoint URI. Corresponds to the
-	 * {@code revocation_endpoint} metadata field.
-	 *
-	 * @param revocationEndpoint The token revocation endpoint URI,
-	 *                           {@code null} if not specified.
-	 */
-	public void setRevocationEndpointURI(final URI revocationEndpoint) {
-		
-		this.revocationEndpoint = revocationEndpoint;
 	}
 	
 	
@@ -854,31 +683,6 @@ public class AuthorizationServerMetadata {
 	
 	
 	/**
-	 * Gets the request object endpoint. Corresponds to the
-	 * {@code request_object_endpoint} metadata field.
-	 *
-	 * @return The request object endpoint, {@code null} if not specified.
-	 */
-	public URI getRequestObjectEndpoint() {
-		
-		return requestObjectEndpoint;
-	}
-	
-	
-	/**
-	 * Sets the request object endpoint. Corresponds to the
-	 * {@code request_object_endpoint} metadata field.
-	 *
-	 * @param requestObjectEndpoint The request object endpoint,
-	 *                              {@code null} if not specified.
-	 */
-	public void setRequestObjectEndpoint(final URI requestObjectEndpoint) {
-		
-		this.requestObjectEndpoint = requestObjectEndpoint;
-	}
-	
-	
-	/**
 	 * Gets the supported JWS algorithms for request objects. Corresponds
 	 * to the {@code request_object_signing_alg_values_supported} metadata
 	 * field.
@@ -1150,6 +954,33 @@ public class AuthorizationServerMetadata {
 	
 	
 	/**
+	 * Gets the aliases for communication with mutual TLS. Corresponds to the
+	 * {@code mtls_endpoint_aliases} metadata field.
+	 * 
+	 * @return The aliases for communication with mutual TLS, or {@code null}
+	 *         when no aliases are defined.
+	 */
+	public AuthorizationServerEndpointMetadata getMtlsEndpointAliases() {
+
+		return mtlsEndpointAliases;
+	}
+	
+	
+	/**
+	 * Sets the aliases for communication with mutual TLS. Corresponds to the
+	 * {@code mtls_endpoint_aliases} metadata field.
+	 * 
+	 * @param mtlsEndpointAliases The aliases for communication with mutual
+	 *                            TLS, or {@code null} when no aliases are
+	 *                            defined.
+	 */
+	public void setMtlsEndpointAliases(AuthorizationServerEndpointMetadata mtlsEndpointAliases) {
+
+		this.mtlsEndpointAliases = mtlsEndpointAliases;
+	}
+	
+	
+	/**
 	 * Gets the support for TLS client certificate bound access tokens.
 	 * Corresponds to the
 	 * {@code tls_client_certificate_bound_access_tokens} metadata field.
@@ -1298,32 +1129,6 @@ public class AuthorizationServerMetadata {
 	
 	
 	/**
-	 * Gets the device authorization endpoint URI. Corresponds the
-	 * {@code device_authorization_endpoint} metadata field.
-	 *
-	 * @return The device authorization endpoint URI, {@code null} if not
-	 *         specified.
-	 */
-	public URI getDeviceAuthorizationEndpointURI() {
-		
-		return deviceAuthzEndpoint;
-	}
-	
-	
-	/**
-	 * Sets the device authorization endpoint URI. Corresponds the
-	 * {@code device_authorization_endpoint} metadata field.
-	 *
-	 * @param deviceAuthzEndpoint The device authorization endpoint URI,
-	 *                            {@code null} if not specified.
-	 */
-	public void setDeviceAuthorizationEndpointURI(final URI deviceAuthzEndpoint) {
-		
-		this.deviceAuthzEndpoint = deviceAuthzEndpoint;
-	}
-	
-	
-	/**
 	 * Gets the specified custom (not registered) parameter.
 	 *
 	 * @param name The parameter name. Must not be {@code null}.
@@ -1421,7 +1226,7 @@ public class AuthorizationServerMetadata {
 	 */
 	public JSONObject toJSONObject() {
 		
-		JSONObject o = new OrderedJSONObject();
+		JSONObject o = super.toJSONObject();
 		
 		// Mandatory fields
 		o.put("issuer", issuer.getValue());
@@ -1430,21 +1235,6 @@ public class AuthorizationServerMetadata {
 		// Optional fields
 		if (jwkSetURI != null)
 			o.put("jwks_uri", jwkSetURI.toString());
-		
-		if (authzEndpoint != null)
-			o.put("authorization_endpoint", authzEndpoint.toString());
-		
-		if (tokenEndpoint != null)
-			o.put("token_endpoint", tokenEndpoint.toString());
-		
-		if (regEndpoint != null)
-			o.put("registration_endpoint", regEndpoint.toString());
-		
-		if (introspectionEndpoint != null)
-			o.put("introspection_endpoint", introspectionEndpoint.toString());
-		
-		if (revocationEndpoint != null)
-			o.put("revocation_endpoint", revocationEndpoint.toString());
 		
 		if (scope != null)
 			o.put("scopes_supported", scope.toStringList());
@@ -1542,10 +1332,6 @@ public class AuthorizationServerMetadata {
 			o.put("revocation_endpoint_auth_methods_supported", stringList);
 		}
 		
-		if (requestObjectEndpoint != null) {
-			o.put("request_object_endpoint", requestObjectEndpoint.toString());
-		}
-		
 		if (revocationEndpointJWSAlgs != null) {
 			
 			stringList = new ArrayList<>(revocationEndpointJWSAlgs.size());
@@ -1609,6 +1395,9 @@ public class AuthorizationServerMetadata {
 		o.put("request_uri_parameter_supported", requestURIParamSupported);
 		o.put("require_request_uri_registration", requireRequestURIReg);
 		
+		if (mtlsEndpointAliases != null)
+			o.put("mtls_endpoint_aliases", mtlsEndpointAliases.toJSONObject());
+		
 		o.put("tls_client_certificate_bound_access_tokens", tlsClientCertificateBoundAccessTokens);
 		
 		// JARM
@@ -1642,19 +1431,10 @@ public class AuthorizationServerMetadata {
 			o.put("authorization_encryption_enc_values_supported", stringList);
 		}
 
-		if (deviceAuthzEndpoint != null)
-			o.put("device_authorization_endpoint", deviceAuthzEndpoint.toString());
-		
 		// Append any custom (not registered) parameters
 		o.putAll(customParameters);
 		
 		return o;
-	}
-	
-	
-	@Override
-	public String toString() {
-		return toJSONObject().toJSONString();
 	}
 	
 	
@@ -1676,6 +1456,8 @@ public class AuthorizationServerMetadata {
 		// Parse issuer and subject_types_supported first
 		
 		Issuer issuer = new Issuer(JSONObjectUtils.getURI(jsonObject, "issuer").toString());
+
+		AuthorizationServerEndpointMetadata asEndpoints = AuthorizationServerEndpointMetadata.parse(jsonObject);
 		
 		AuthorizationServerMetadata as;
 		
@@ -1686,13 +1468,14 @@ public class AuthorizationServerMetadata {
 		}
 		
 		// Endpoints
-		as.authzEndpoint = JSONObjectUtils.getURI(jsonObject, "authorization_endpoint", null);
-		as.tokenEndpoint = JSONObjectUtils.getURI(jsonObject, "token_endpoint", null);
-		as.regEndpoint = JSONObjectUtils.getURI(jsonObject, "registration_endpoint", null);
+		as.setAuthorizationEndpointURI(asEndpoints.getAuthorizationEndpointURI());
+		as.setTokenEndpointURI(asEndpoints.getTokenEndpointURI());
+		as.setRegistrationEndpointURI(asEndpoints.getRegistrationEndpointURI());
+		as.setIntrospectionEndpointURI(asEndpoints.getIntrospectionEndpointURI());
+		as.setRevocationEndpointURI(asEndpoints.getRevocationEndpointURI());
+		as.setDeviceAuthorizationEndpointURI(asEndpoints.getDeviceAuthorizationEndpointURI());
+		as.setRequestObjectEndpoint(asEndpoints.getRequestObjectEndpoint());
 		as.jwkSetURI = JSONObjectUtils.getURI(jsonObject, "jwks_uri", null);
-		as.introspectionEndpoint = JSONObjectUtils.getURI(jsonObject, "introspection_endpoint", null);
-		as.revocationEndpoint = JSONObjectUtils.getURI(jsonObject, "revocation_endpoint", null);
-		as.deviceAuthzEndpoint = JSONObjectUtils.getURI(jsonObject, "device_authorization_endpoint", null);
 		
 		// AS capabilities
 		if (jsonObject.get("scopes_supported") != null) {
@@ -1827,8 +1610,6 @@ public class AuthorizationServerMetadata {
 		
 		
 		// Request object
-		as.requestObjectEndpoint = JSONObjectUtils.getURI(jsonObject, "request_object_endpoint", null);
-		
 		if (jsonObject.get("request_object_signing_alg_values_supported") != null) {
 			
 			as.requestObjectJWSAlgs = new ArrayList<>();
@@ -1903,6 +1684,9 @@ public class AuthorizationServerMetadata {
 		
 		if (jsonObject.get("require_request_uri_registration") != null)
 			as.requireRequestURIReg = JSONObjectUtils.getBoolean(jsonObject, "require_request_uri_registration");
+		
+		if (jsonObject.get("mtls_endpoint_aliases") != null)
+			as.mtlsEndpointAliases = AuthorizationServerEndpointMetadata.parse(JSONObjectUtils.getJSONObject(jsonObject, "mtls_endpoint_aliases"));
 		
 		if (jsonObject.get("tls_client_certificate_bound_access_tokens") != null)
 			as.tlsClientCertificateBoundAccessTokens = JSONObjectUtils.getBoolean(jsonObject, "tls_client_certificate_bound_access_tokens");

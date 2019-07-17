@@ -18,38 +18,39 @@
 package com.nimbusds.oauth2.sdk.auth.verifier;
 
 
+import java.security.cert.X509Certificate;
+
 import com.nimbusds.oauth2.sdk.id.ClientID;
 
 
 /**
- * Client X.509 certificate binding verifier. Intended for verifying that the
- * subject of a client X.509 certificate submitted during successful PKI mutual
- * TLS authentication (in
+ * Client X.509 certificate binding verifier. Intended for verifying that a
+ * client X.509 certificate submitted during successful PKI mutual TLS
+ * authentication (in
  * {@link com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod#TLS_CLIENT_AUTH
- * tls_client_auth}) matches the registered {@code tls_client_auth_subject_dn}
- * values for the submitted client ID.
+ * tls_client_auth}) matches one of the the registered values for the client.
+ * These can be: {@code tls_client_auth_subject_dn}, {@code tls_client_auth_san_dns},
+ * {@code tls_client_auth_san_uri}, {@code tls_client_auth_san_ip} or
+ * {@code tls_client_auth_san_email}.
  *
  * <p>Implementations must be tread-safe.
- * 
- * @deprecated use {@link PKIClientX509CertificateBindingVerifier}
  */
-@Deprecated
-public interface ClientX509CertificateBindingVerifier<T> {
+public interface PKIClientX509CertificateBindingVerifier<T> {
 	
 	
 	/**
-	 * Verifies that the specified X.509 certificate subject DN binds to
+	 * Verifies that the specified X.509 certificate binds to
 	 * the claimed client ID.
 	 *
 	 * @param clientID  The claimed client ID. Not {@code null}.
-	 * @param subjectDN The X.509 certificate subject DN. Not {@code null}.
+	 * @param subjectDN The X.509 certificate. Not {@code null}.
 	 * @param context   Additional context. May be {@code null}.
 	 *
-	 * @throws InvalidClientException If client ID and subject DN don't
+	 * @throws InvalidClientException If client ID and certificate don't
 	 *                                bind or are invalid.
 	 */
 	void verifyCertificateBinding(final ClientID clientID,
-				      final String subjectDN,
+				      final X509Certificate certificate,
 				      final Context<T> context)
 		throws InvalidClientException;
 }

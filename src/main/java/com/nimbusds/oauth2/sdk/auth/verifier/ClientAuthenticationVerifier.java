@@ -48,7 +48,7 @@ import net.jcip.annotations.ThreadSafe;
  *     <li>JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and
  *         Authorization Grants (RFC 7523).
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-12), section 2.
+ *         Access Tokens (draft-ietf-oauth-mtls-15), section 2.
  * </ul>
  */
 @ThreadSafe
@@ -64,8 +64,17 @@ public class ClientAuthenticationVerifier<T> {
 	/**
 	 * Optional client X.509 certificate binding verifier for
 	 * {@code tls_client_auth}.
+	 * @deprecated Replaced by pkiCertBindingVerifier
 	 */
+	@Deprecated
 	private final ClientX509CertificateBindingVerifier<T> certBindingVerifier;
+
+
+	/**
+	 * Optional client X.509 certificate binding verifier for
+	 * {@code tls_client_auth}.
+	 */
+	private final PKIClientX509CertificateBindingVerifier<T> pkiCertBindingVerifier;
 
 
 	/**
@@ -96,7 +105,9 @@ public class ClientAuthenticationVerifier<T> {
 	 *                                  contain the token endpoint URI and
 	 *                                  for OpenID provider it may also
 	 *                                  include the issuer URI.
+	 * @deprecated Use the constructor with {@link PKIClientX509CertificateBindingVerifier}
 	 */
+	@Deprecated
 	public ClientAuthenticationVerifier(final ClientCredentialsSelector<T> clientCredentialsSelector,
 					    final ClientX509CertificateBindingVerifier<T> certBindingVerifier,
 					    final Set<Audience> expectedAudience) {
@@ -108,6 +119,71 @@ public class ClientAuthenticationVerifier<T> {
 		}
 		
 		this.certBindingVerifier = certBindingVerifier;
+		this.pkiCertBindingVerifier = null;
+
+		this.clientCredentialsSelector = clientCredentialsSelector;
+	}
+
+	
+	/**
+	 * Creates a new client authentication verifier without support for
+	 * {@code tls_client_auth}.
+	 *
+	 * @param clientCredentialsSelector The client credentials selector.
+	 *                                  Must not be {@code null}.
+	 * @param expectedAudience          The permitted audience (aud) claim
+	 *                                  values in JWT authentication
+	 *                                  assertions. Must not be empty or
+	 *                                  {@code null}. Should typically
+	 *                                  contain the token endpoint URI and
+	 *                                  for OpenID provider it may also
+	 *                                  include the issuer URI.
+	 */
+	public ClientAuthenticationVerifier(final ClientCredentialsSelector<T> clientCredentialsSelector,
+					    final Set<Audience> expectedAudience) {
+
+		claimsSetVerifier = new JWTAuthenticationClaimsSetVerifier(expectedAudience);
+
+		if (clientCredentialsSelector == null) {
+			throw new IllegalArgumentException("The client credentials selector must not be null");
+		}
+		
+		this.certBindingVerifier = null;
+		this.pkiCertBindingVerifier = null;
+
+		this.clientCredentialsSelector = clientCredentialsSelector;
+	}
+	
+
+	/**
+	 * Creates a new client authentication verifier.
+	 *
+	 * @param clientCredentialsSelector The client credentials selector.
+	 *                                  Must not be {@code null}.
+	 * @param pkiCertBindingVerifier    Optional client X.509 certificate
+	 *                                  binding verifier for
+	 *                                  {@code tls_client_auth},
+	 *                                  {@code null} if not supported.
+	 * @param expectedAudience          The permitted audience (aud) claim
+	 *                                  values in JWT authentication
+	 *                                  assertions. Must not be empty or
+	 *                                  {@code null}. Should typically
+	 *                                  contain the token endpoint URI and
+	 *                                  for OpenID provider it may also
+	 *                                  include the issuer URI.
+	 */
+	public ClientAuthenticationVerifier(final ClientCredentialsSelector<T> clientCredentialsSelector,
+					    final PKIClientX509CertificateBindingVerifier<T> pkiCertBindingVerifier,
+					    final Set<Audience> expectedAudience) {
+
+		claimsSetVerifier = new JWTAuthenticationClaimsSetVerifier(expectedAudience);
+
+		if (clientCredentialsSelector == null) {
+			throw new IllegalArgumentException("The client credentials selector must not be null");
+		}
+		
+		this.certBindingVerifier = null;
+		this.pkiCertBindingVerifier = pkiCertBindingVerifier;
 
 		this.clientCredentialsSelector = clientCredentialsSelector;
 	}
@@ -130,10 +206,25 @@ public class ClientAuthenticationVerifier<T> {
 	 *
 	 * @return The client X.509 certificate binding verifier, {@code null}
 	 *         if not specified.
+	 * @deprecated See {@link PKIClientX509CertificateBindingVerifier}
 	 */
+	@Deprecated
 	public ClientX509CertificateBindingVerifier<T> getClientX509CertificateBindingVerifier() {
 		
 		return certBindingVerifier;
+	}
+	
+	
+	/**
+	 * Returns the client X.509 certificate binding verifier for use in
+	 * {@code tls_client_auth}.
+	 *
+	 * @return The client X.509 certificate binding verifier, {@code null}
+	 *         if not specified.
+	 */
+	public PKIClientX509CertificateBindingVerifier<T> getPKIClientX509CertificateBindingVerifier() {
+		
+		return pkiCertBindingVerifier;
 	}
 	
 	
@@ -373,17 +464,21 @@ public class ClientAuthenticationVerifier<T> {
 			
 		} else if (clientAuth instanceof PKITLSClientAuthentication) {
 			
-			if (certBindingVerifier == null) {
+			PKITLSClientAuthentication tlsClientAuth = (PKITLSClientAuthentication) clientAuth;
+			if (pkiCertBindingVerifier != null) {
+				pkiCertBindingVerifier.verifyCertificateBinding(
+						clientAuth.getClientID(),
+						tlsClientAuth.getClientX509Certificate(),
+						context);
+				
+			} else if (certBindingVerifier != null) {
+				certBindingVerifier.verifyCertificateBinding(
+						clientAuth.getClientID(),
+						tlsClientAuth.getClientX509CertificateSubjectDN(),
+						context);
+			} else {
 				throw new InvalidClientException("Mutual TLS client Authentication (tls_client_auth) not supported");
 			}
-			
-			PKITLSClientAuthentication tlsClientAuth = (PKITLSClientAuthentication) clientAuth;
-			
-			certBindingVerifier.verifyCertificateBinding(
-				clientAuth.getClientID(),
-				tlsClientAuth.getClientX509CertificateSubjectDN(),
-				context);
-
 		} else {
 			throw new RuntimeException("Unexpected client authentication: " + clientAuth.getMethod());
 		}

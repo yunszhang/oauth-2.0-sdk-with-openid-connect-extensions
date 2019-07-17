@@ -24,6 +24,7 @@ import javax.net.ssl.SSLSocketFactory;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.X509CertificateGenerator;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import junit.framework.TestCase;
 
@@ -183,7 +184,7 @@ public class PKITLSClientAuthenticationTest extends TestCase {
 	}
 	
 	
-	public void testParse_missingClientCertificateSubjectDN()
+	public void testParse_missingClientCertificate()
 		throws Exception {
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
@@ -194,7 +195,7 @@ public class PKITLSClientAuthenticationTest extends TestCase {
 			PKITLSClientAuthentication.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing client X.509 certificate subject DN", e.getMessage());
+			assertEquals("Missing client X.509 certificate", e.getMessage());
 		}
 	}
 	
@@ -205,11 +206,13 @@ public class PKITLSClientAuthenticationTest extends TestCase {
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
 		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=123");
+		httpRequest.setClientX509Certificate(X509CertificateGenerator.generateSelfSignedNotSelfIssuedCertificate(
+				"issuer", "client-123"));
 		httpRequest.setClientX509CertificateSubjectDN("cn=client-123");
 		
 		PKITLSClientAuthentication clientAuth = PKITLSClientAuthentication.parse(httpRequest);
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
-		assertEquals("cn=client-123", clientAuth.getClientX509CertificateSubjectDN());
+		assertEquals("CN=client-123", clientAuth.getClientX509CertificateSubjectDN());
 	}
 }
