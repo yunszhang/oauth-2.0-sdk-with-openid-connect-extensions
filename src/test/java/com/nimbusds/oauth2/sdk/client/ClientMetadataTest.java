@@ -22,6 +22,10 @@ import java.net.URI;
 import java.util.*;
 import javax.mail.internet.InternetAddress;
 
+import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
+import org.apache.commons.math3.util.Combinations;
+
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -37,8 +41,6 @@ import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.id.SoftwareID;
 import com.nimbusds.oauth2.sdk.id.SoftwareVersion;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import junit.framework.TestCase;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -1117,6 +1119,65 @@ public class ClientMetadataTest extends TestCase {
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("The JWS algorithm must not be \"none\"", e.getMessage());
+		}
+	}
+	
+	
+	public void testRequireOneTLSSubjectParam() {
+	
+		ClientMetadata clientMetadata = new ClientMetadata();
+		clientMetadata.setTokenEndpointAuthMethod(ClientAuthenticationMethod.TLS_CLIENT_AUTH);
+		clientMetadata.applyDefaults();
+		
+		try {
+			ClientMetadata.parse(clientMetadata.toJSONObject());
+			fail();
+		} catch (ParseException e) {
+			assertEquals("A certificate field name must be specified to indicate the subject in tls_client_auth: " +
+				"tls_client_auth_subject_dn, tls_client_auth_san_dns, tls_client_auth_san_uri, tls_client_auth_san_ip or tls_client_auth_san_email",
+				e.getMessage());
+			assertEquals("invalid_client_metadata", e.getErrorObject().getCode());
+			assertEquals("Invalid client metadata field: " +
+				"A certificate field name must be specified to indicate the subject in tls_client_auth: " +
+				"tls_client_auth_subject_dn, tls_client_auth_san_dns, tls_client_auth_san_uri, tls_client_auth_san_ip or tls_client_auth_san_email",
+				e.getErrorObject().getDescription());
+		}
+	}
+	
+	
+	public void testRejectMoreThanOneTLSSubjectParam() {
+	
+		ClientMetadata clientMetadata = new ClientMetadata();
+		clientMetadata.setTokenEndpointAuthMethod(ClientAuthenticationMethod.TLS_CLIENT_AUTH);
+		clientMetadata.applyDefaults();
+		
+		List<String> certParams = new LinkedList<>();
+		certParams.add("tls_client_auth_subject_dn");
+		certParams.add("tls_client_auth_san_dns");
+		certParams.add("tls_client_auth_san_uri");
+		certParams.add("tls_client_auth_san_ip");
+		certParams.add("tls_client_auth_san_email");
+		
+		String expectedMessage = "Exactly one certificate field name must be specified to indicate the subject in tls_client_auth: " +
+			"tls_client_auth_subject_dn, tls_client_auth_san_dns, tls_client_auth_san_uri, tls_client_auth_san_ip or tls_client_auth_san_email";
+		
+		for (int subsetSize: new int[]{2,3,4,5}) {
+			
+			for (int[] combi : new Combinations(certParams.size(), subsetSize)) {
+				
+				JSONObject jsonObject = clientMetadata.toJSONObject();
+				for (int i: combi) {
+					jsonObject.put(certParams.get(i), "value");
+				}
+				try {
+					ClientMetadata.parse(jsonObject);
+					fail(jsonObject.toJSONString());
+				} catch (ParseException e) {
+					assertEquals(expectedMessage, e.getMessage());
+					assertEquals("invalid_client_metadata", e.getErrorObject().getCode());
+					assertEquals("Invalid client metadata field: " + expectedMessage, e.getErrorObject().getDescription());
+				}
+			}
 		}
 	}
 }

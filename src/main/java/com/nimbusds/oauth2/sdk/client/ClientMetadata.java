@@ -1353,8 +1353,8 @@ public class ClientMetadata {
 	 * the OAuth client will use in mutual TLS authentication. Corresponds
 	 * to the {@code tls_client_auth_san_dns} client metadata field.
 	 *
-	 * @param subjectDN The expected dNSName SAN entry in the X.509
-	 *                  certificate, {@code null} if not specified.
+	 * @param dns The expected dNSName SAN entry in the X.509 certificate,
+	 *            {@code null} if not specified.
 	 */
 	public void setTLSClientAuthSanDNS(final String dns) {
 		
@@ -1445,6 +1445,53 @@ public class ClientMetadata {
 	public void setTLSClientAuthSanEmail(final String email) {
 		
 		this.tlsClientAuthSanEmail = email;
+	}
+	
+	
+	/**
+	 * Ensures that for {@code tls_client_auth} a certificate field for the
+	 * subject is specified. See
+	 * https://tools.ietf.org/html/draft-ietf-oauth-mtls-15#section-2.1.2
+	 */
+	private void ensureExactlyOneCertSubjectFieldForTLSClientAuth()
+		throws IllegalStateException {
+		
+		if (! ClientAuthenticationMethod.TLS_CLIENT_AUTH.equals(getTokenEndpointAuthMethod())) {
+			// Not tls_client_auth, ignore
+			return;
+		}
+		
+		if (tlsClientAuthSubjectDN == null && tlsClientAuthSanDNS == null && tlsClientAuthSanURI == null && tlsClientAuthSanIP == null && tlsClientAuthSanEmail == null) {
+			throw new IllegalStateException("A certificate field name must be specified to indicate the subject in tls_client_auth: " +
+				"tls_client_auth_subject_dn, tls_client_auth_san_dns, tls_client_auth_san_uri, tls_client_auth_san_ip or tls_client_auth_san_email");
+		}
+		
+		String exceptionMessage = "Exactly one certificate field name must be specified to indicate the subject in tls_client_auth: " +
+			"tls_client_auth_subject_dn, tls_client_auth_san_dns, tls_client_auth_san_uri, tls_client_auth_san_ip or tls_client_auth_san_email";
+		
+		if (tlsClientAuthSubjectDN != null) {
+			if (tlsClientAuthSanDNS != null || tlsClientAuthSanURI != null || tlsClientAuthSanIP != null || tlsClientAuthSanEmail != null) {
+				throw new IllegalStateException(exceptionMessage);
+			}
+		}
+		
+		if (tlsClientAuthSanDNS != null) {
+			if (tlsClientAuthSanURI != null || tlsClientAuthSanIP != null || tlsClientAuthSanEmail != null) {
+				throw new IllegalStateException(exceptionMessage);
+			}
+		}
+		
+		if (tlsClientAuthSanURI != null) {
+			if (tlsClientAuthSanIP != null || tlsClientAuthSanEmail != null) {
+				throw new IllegalStateException(exceptionMessage);
+			}
+		}
+		
+		if (tlsClientAuthSanIP != null) {
+			if (tlsClientAuthSanEmail != null) {
+				throw new IllegalStateException(exceptionMessage);
+			}
+		}
 	}
 	
 	
@@ -2176,6 +2223,8 @@ public class ClientMetadata {
 				jsonObject.remove("tls_client_auth_san_email");
 			}
 			
+			metadata.ensureExactlyOneCertSubjectFieldForTLSClientAuth();
+			
 			if (jsonObject.get("authorization_signed_response_alg") != null) {
 				metadata.setAuthorizationJWSAlg(JWSAlgorithm.parse(JSONObjectUtils.getString(jsonObject, "authorization_signed_response_alg")));
 				jsonObject.remove("authorization_signed_response_alg");
@@ -2191,7 +2240,7 @@ public class ClientMetadata {
 				jsonObject.remove("authorization_encrypted_response_enc");
 			}
 
-		} catch (ParseException e) {
+		} catch (ParseException | IllegalStateException e) {
 			// Insert client_client_metadata error code so that it
 			// can be reported back to the client if we have a
 			// registration event
