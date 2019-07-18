@@ -1094,3 +1094,15 @@ version 6.12 (2019-05-13)
 version 6.13 (2019-05-15)
     * Adds unmet_authentication_requirements OpenID Connect error code
       specified in OpenID Connect Core Unmet Authentication Requirements 1.0.
+
+version 6.14 (2019-07-18)
+    * Updates mTLS support to draft-ietf-oauth-mtls-15.
+    * Adds support for new tls_client_auth tls_client_auth_san_dns,
+      tls_client_auth_san_uri, tls_client_auth_san_ip and
+      tls_client_auth_san_email client metadata parameters.
+    * Updates and refactors AuthorizationServerMetadata for
+      mtls_endpoint_aliases.
+    * Updates PKITLSClientAuthentication to utilise the entire X.509
+      certificate.
+    * Deprecates ClientX509CertificateBindingVerifier for a new
+      PKIClientX509CertificateBindingVerifier interface.
