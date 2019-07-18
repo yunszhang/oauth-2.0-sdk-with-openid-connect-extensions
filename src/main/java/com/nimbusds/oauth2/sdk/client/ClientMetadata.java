@@ -1462,11 +1462,11 @@ public class ClientMetadata {
 		}
 		
 		if (tlsClientAuthSubjectDN == null && tlsClientAuthSanDNS == null && tlsClientAuthSanURI == null && tlsClientAuthSanIP == null && tlsClientAuthSanEmail == null) {
-			throw new IllegalStateException("A certificate field name must be specified to indicate the subject in tls_client_auth: " +
+			throw new IllegalStateException("A certificate field must be specified to indicate the subject in tls_client_auth: " +
 				"tls_client_auth_subject_dn, tls_client_auth_san_dns, tls_client_auth_san_uri, tls_client_auth_san_ip or tls_client_auth_san_email");
 		}
 		
-		String exceptionMessage = "Exactly one certificate field name must be specified to indicate the subject in tls_client_auth: " +
+		String exceptionMessage = "Exactly one certificate field must be specified to indicate the subject in tls_client_auth: " +
 			"tls_client_auth_subject_dn, tls_client_auth_san_dns, tls_client_auth_san_uri, tls_client_auth_san_ip or tls_client_auth_san_email";
 		
 		if (tlsClientAuthSubjectDN != null) {

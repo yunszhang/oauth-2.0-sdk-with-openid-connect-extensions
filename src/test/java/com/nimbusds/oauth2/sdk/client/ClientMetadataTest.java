@@ -1133,12 +1133,12 @@ public class ClientMetadataTest extends TestCase {
 			ClientMetadata.parse(clientMetadata.toJSONObject());
 			fail();
 		} catch (ParseException e) {
-			assertEquals("A certificate field name must be specified to indicate the subject in tls_client_auth: " +
+			assertEquals("A certificate field must be specified to indicate the subject in tls_client_auth: " +
 				"tls_client_auth_subject_dn, tls_client_auth_san_dns, tls_client_auth_san_uri, tls_client_auth_san_ip or tls_client_auth_san_email",
 				e.getMessage());
 			assertEquals("invalid_client_metadata", e.getErrorObject().getCode());
 			assertEquals("Invalid client metadata field: " +
-				"A certificate field name must be specified to indicate the subject in tls_client_auth: " +
+				"A certificate field must be specified to indicate the subject in tls_client_auth: " +
 				"tls_client_auth_subject_dn, tls_client_auth_san_dns, tls_client_auth_san_uri, tls_client_auth_san_ip or tls_client_auth_san_email",
 				e.getErrorObject().getDescription());
 		}
@@ -1158,7 +1158,7 @@ public class ClientMetadataTest extends TestCase {
 		certParams.add("tls_client_auth_san_ip");
 		certParams.add("tls_client_auth_san_email");
 		
-		String expectedMessage = "Exactly one certificate field name must be specified to indicate the subject in tls_client_auth: " +
+		String expectedMessage = "Exactly one certificate field must be specified to indicate the subject in tls_client_auth: " +
 			"tls_client_auth_subject_dn, tls_client_auth_san_dns, tls_client_auth_san_uri, tls_client_auth_san_ip or tls_client_auth_san_email";
 		
 		for (int subsetSize: new int[]{2,3,4,5}) {
