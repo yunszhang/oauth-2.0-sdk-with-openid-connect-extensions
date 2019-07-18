@@ -1106,3 +1106,7 @@ version 6.14 (2019-07-18)
       certificate.
     * Deprecates ClientX509CertificateBindingVerifier for a new
       PKIClientX509CertificateBindingVerifier interface.
+    * Fixes detection of SelfSignedTLSClientAuthentication. Self-signed TLS is
+      now chosen with the subject DN matches the root DN. When the PKI method
+      is used, the request will have a certificate, but its root DN will be
+      null (or at least not equal to the subject DN).
