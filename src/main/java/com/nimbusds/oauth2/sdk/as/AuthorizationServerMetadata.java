@@ -1758,6 +1758,40 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	
 	
 	/**
+	 * Resolves OAuth 2.0 authorisation server metadata URL from the
+	 * specified issuer identifier.
+	 *
+	 * @param issuer The issuer identifier. Must represent a valid HTTPS or
+	 *               HTTP URL. Must not be {@code null}.
+	 *
+	 * @return The OAuth 2.0 authorisation server metadata URL.
+	 *
+	 * @throws GeneralException If the issuer identifier is invalid.
+	 */
+	public static URL resolveURL(final Issuer issuer)
+		throws GeneralException {
+		
+		try {
+			URL issuerURL = new URL(issuer.getValue());
+			
+			// Validate but don't insist on HTTPS
+			if (issuerURL.getQuery() != null && ! issuerURL.getQuery().trim().isEmpty()) {
+				throw new GeneralException("The issuer identifier must not contain a query component");
+			}
+			
+			if (issuerURL.getPath() != null && issuerURL.getPath().endsWith("/")) {
+				return new URL(issuerURL + ".well-known/oauth-authorization-server");
+			} else {
+				return new URL(issuerURL + "/.well-known/oauth-authorization-server");
+			}
+			
+		} catch (MalformedURLException e) {
+			throw new GeneralException("The issuer identifier doesn't represent a valid URL: " + e.getMessage(), e);
+		}
+	}
+	
+	
+	/**
 	 * Resolves OAuth 2.0 authorisation server metadata from the specified
 	 * issuer identifier. The metadata is downloaded by HTTP GET from
 	 * {@code [issuer-url]/.well-known/oauth-authorization-server}.
@@ -1802,25 +1836,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 							  final int readTimeout)
 		throws GeneralException, IOException {
 		
-		URL configURL;
-		
-		try {
-			URL issuerURL = new URL(issuer.getValue());
-			
-			// Validate but don't insist on HTTPS
-			if (issuerURL.getQuery() != null && ! issuerURL.getQuery().trim().isEmpty()) {
-				throw new GeneralException("The issuer identifier must not contain a query component");
-			}
-			
-			if (issuerURL.getPath() != null && issuerURL.getPath().endsWith("/")) {
-				configURL = new URL(issuerURL + ".well-known/oauth-authorization-server");
-			} else {
-				configURL = new URL(issuerURL + "/.well-known/oauth-authorization-server");
-			}
-			
-		} catch (MalformedURLException e) {
-			throw new GeneralException("The issuer identifier doesn't represent a valid URL: " + e.getMessage(), e);
-		}
+		URL configURL = resolveURL(issuer);
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, configURL);
 		httpRequest.setConnectTimeout(connectTimeout);

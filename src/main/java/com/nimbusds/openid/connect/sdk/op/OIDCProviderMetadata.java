@@ -1229,6 +1229,41 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	
 	
 	/**
+	 * Resolves OpenID Provider metadata URL from the specified issuer
+	 * identifier.
+	 *
+	 * @param issuer The OpenID Provider issuer identifier. Must represent
+	 *               a valid HTTPS or HTTP URL. Must not be {@code null}.
+	 *
+	 * @return The OpenID Provider metadata URL.
+	 *
+	 * @throws GeneralException If the issuer identifier is invalid.
+	 */
+	public static URL resolveURL(final Issuer issuer)
+		throws GeneralException {
+		
+		try {
+			URL issuerURL = new URL(issuer.getValue());
+			
+			// Validate but don't insist on HTTPS, see
+			// http://openid.net/specs/openid-connect-core-1_0.html#Terminology
+			if (issuerURL.getQuery() != null && ! issuerURL.getQuery().trim().isEmpty()) {
+				throw new GeneralException("The issuer identifier must not contain a query component");
+			}
+			
+			if (issuerURL.getPath() != null && issuerURL.getPath().endsWith("/")) {
+				return new URL(issuerURL + ".well-known/openid-configuration");
+			} else {
+				return new URL(issuerURL + "/.well-known/openid-configuration");
+			}
+			
+		} catch (MalformedURLException e) {
+			throw new GeneralException("The issuer identifier doesn't represent a valid URL: " + e.getMessage(), e);
+		}
+	}
+	
+	
+	/**
 	 * Resolves OpenID Provider metadata from the specified issuer
 	 * identifier. The metadata is downloaded by HTTP GET from
 	 * {@code [issuer-url]/.well-known/openid-configuration}.
@@ -1274,26 +1309,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 						   final int readTimeout)
 		throws GeneralException, IOException {
 		
-		URL configURL;
-		
-		try {
-			URL issuerURL = new URL(issuer.getValue());
-			
-			// Validate but don't insist on HTTPS, see
-			// http://openid.net/specs/openid-connect-core-1_0.html#Terminology
-			if (issuerURL.getQuery() != null && ! issuerURL.getQuery().trim().isEmpty()) {
-				throw new GeneralException("The issuer identifier must not contain a query component");
-			}
-			
-			if (issuerURL.getPath() != null && issuerURL.getPath().endsWith("/")) {
-				configURL = new URL(issuerURL + ".well-known/openid-configuration");
-			} else {
-				configURL = new URL(issuerURL + "/.well-known/openid-configuration");
-			}
-			
-		} catch (MalformedURLException e) {
-			throw new GeneralException("The issuer identifier doesn't represent a valid URL: " + e.getMessage(), e);
-		}
+		URL configURL = resolveURL(issuer);
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, configURL);
 		httpRequest.setConnectTimeout(connectTimeout);
