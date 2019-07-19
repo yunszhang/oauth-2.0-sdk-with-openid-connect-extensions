@@ -37,12 +37,38 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  *
  * <ul>
  *     <li>OpenID Connect Core 1.0, section 2.
+ *     <li>OpenID Connect Extended Authentication Profile (EAP) ACR Values 1.0
+ *         - draft 00
  *     <li>RFC 6711
  *     <li>See ISO/IEC DIS 29115
  * </ul>
  */
 @Immutable
 public final class ACR extends Identifier {
+	
+	
+	/**
+	 * Phishing-Resistant. An authentication mechanism where a party
+	 * potentially under the control of the Relying Party cannot gain
+	 * sufficient information to be able to successfully authenticate to
+	 * the End User's OpenID Provider as if that party were the End User.
+	 * (Note that the potentially malicious Relying Party controls where
+	 * the User-Agent is redirected to and thus may not send it to the End
+	 * User's actual OpenID Provider). NOTE: These semantics are the same
+	 * as those specified in [OpenID.PAPE].
+	 */
+	public static final ACR PHR = new ACR("phr");
+	
+	
+	/**
+	 * Phishing-Resistant Hardware-Protected. An authentication mechanism
+	 * meeting the requirements for phishing-resistant {@link #PHR}
+	 * authentication in which additionally information needed to be able
+	 * to successfully authenticate to the End User's OpenID Provider as if
+	 * that party were the End User is held in a hardware-protected device
+	 * or component.
+	 */
+	public static final ACR PHRH = new ACR("phrh");
 	
 	
 	/**

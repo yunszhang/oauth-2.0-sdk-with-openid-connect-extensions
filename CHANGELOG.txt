@@ -1110,3 +1110,7 @@ version 6.14 (2019-07-18)
       now chosen with the subject DN matches the root DN. When the PKI method
       is used, the request will have a certificate, but its root DN will be
       null (or at least not equal to the subject DN).
+
+version 6.15 (2019-07-19)
+    * Adds "phr" and "phrh" ACR constants from OpenID Connect Extended
+      Authentication Profile (EAP) ACR Values 1.0 - draft 00.
