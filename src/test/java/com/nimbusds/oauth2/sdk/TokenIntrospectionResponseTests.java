@@ -15,8 +15,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-
-import com.nimbusds.oauth2.sdk.OAuth2Error;
+package com.nimbusds.oauth2.sdk;import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.TokenIntrospectionErrorResponse;
 import com.nimbusds.oauth2.sdk.TokenIntrospectionResponse;
 import com.nimbusds.oauth2.sdk.TokenIntrospectionSuccessResponse;
