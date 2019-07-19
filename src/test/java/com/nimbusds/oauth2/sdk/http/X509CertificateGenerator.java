@@ -67,7 +67,7 @@ public class X509CertificateGenerator {
 	
 
 	/**
-	 * Technically this is not allowed (a self signed sertificate should always be
+	 * Technically this is not allowed (a self signed certificate should always be
 	 * self issued), but for tests this is good enough to simulate a PKI certificate.
 	 */
 	public static X509Certificate generateSelfSignedNotSelfIssuedCertificate(final String issuer,
