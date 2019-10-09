@@ -21,6 +21,8 @@ package com.nimbusds.openid.connect.sdk;
 import java.net.URI;
 import java.util.*;
 
+import com.nimbusds.langtag.LangTag;
+import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -35,58 +37,58 @@ import net.minidev.json.JSONObject;
  * Tests the claims request class.
  */
 public class ClaimsRequestTest extends TestCase {
-	
-	
-	private static boolean containsVoluntaryClaimsRequestEntry(final Collection<ClaimsRequest.Entry> entries, 
+
+
+	private static boolean containsVoluntaryClaimsRequestEntry(final Collection<ClaimsRequest.Entry> entries,
 		                                                   final String claimName) {
-		
+
 		for (ClaimsRequest.Entry en: entries) {
-			
+
 			if (en.getClaimName().equals(claimName) &&
 			    en.getClaimRequirement().equals(ClaimRequirement.VOLUNTARY) &&
 			    en.getLangTag() == null &&
 			    en.getValue() == null &&
 			    en.getValues() == null)
-				
+
 				return true;
 		}
-		
+
 		return false;
 	}
-	
-	
-	private static boolean containsEssentialClaimsRequestEntry(final Collection<ClaimsRequest.Entry> entries, 
+
+
+	private static boolean containsEssentialClaimsRequestEntry(final Collection<ClaimsRequest.Entry> entries,
 		                                                   final String claimName) {
-		
+
 		for (ClaimsRequest.Entry en: entries) {
-			
+
 			if (en.getClaimName().equals(claimName) &&
 			    en.getClaimRequirement().equals(ClaimRequirement.ESSENTIAL) &&
 			    en.getLangTag() == null &&
 			    en.getValue() == null &&
 			    en.getValues() == null)
-				
+
 				return true;
 		}
-		
+
 		return false;
 	}
-	
-	
+
+
 	public void testResolveOAuthAuthorizationRequestWithNoScope() {
-		
+
 		ClaimsRequest cr = ClaimsRequest.resolve(new ResponseType(ResponseType.Value.CODE), null);
 		assertTrue(cr.getIDTokenClaims().isEmpty());
 		assertTrue(cr.getUserInfoClaims().isEmpty());
-		
+
 		cr = ClaimsRequest.resolve(new ResponseType(ResponseType.Value.CODE), null, (Map)null);
 		assertTrue(cr.getIDTokenClaims().isEmpty());
 		assertTrue(cr.getUserInfoClaims().isEmpty());
-		
+
 		cr = ClaimsRequest.resolve(new ResponseType(ResponseType.Value.CODE), null, (ClaimsRequest) null);
 		assertTrue(cr.getIDTokenClaims().isEmpty());
 		assertTrue(cr.getUserInfoClaims().isEmpty());
-		
+
 		cr = ClaimsRequest.resolve(new ResponseType(ResponseType.Value.CODE), null, null, null);
 		assertTrue(cr.getIDTokenClaims().isEmpty());
 		assertTrue(cr.getUserInfoClaims().isEmpty());
@@ -105,24 +107,24 @@ public class ClaimsRequestTest extends TestCase {
 		assertTrue(cr.getIDTokenClaims().isEmpty());
 		assertTrue(cr.getUserInfoClaims().isEmpty());
 	}
-	
-	
+
+
 	public void testResolveToUserInfo()
 		throws Exception {
-		
+
 		Scope scope = Scope.parse("openid email profile phone address");
-		
+
 		ClaimsRequest cr = ClaimsRequest.resolve(ResponseType.parse("code"), scope);
-		
+
 		System.out.println("Claims request for scope openid email profile phone address: " + cr.toJSONObject());
-		
+
 		assertTrue(cr.getIDTokenClaims().isEmpty());
-		
+
 		Collection<ClaimsRequest.Entry> userInfoClaims = cr.getUserInfoClaims();
-		
+
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "email"));
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "email_verified"));
-		
+
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "name"));
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "given_name"));
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "family_name"));
@@ -137,19 +139,19 @@ public class ClaimsRequestTest extends TestCase {
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "zoneinfo"));
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "locale"));
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "updated_at"));
-		
+
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "phone_number"));
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "phone_number_verified"));
-		
+
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "address"));
-		
+
 		assertEquals(19, userInfoClaims.size());
-		
+
 		Set<String> claimNames = cr.getIDTokenClaimNames(false);
 		assertTrue(claimNames.isEmpty());
-		
+
 		claimNames = cr.getUserInfoClaimNames(false);
-		
+
 		assertTrue(claimNames.contains("email"));
 		assertTrue(claimNames.contains("email_verified"));
 		assertTrue(claimNames.contains("name"));
@@ -169,7 +171,7 @@ public class ClaimsRequestTest extends TestCase {
 		assertTrue(claimNames.contains("phone_number"));
 		assertTrue(claimNames.contains("phone_number_verified"));
 		assertTrue(claimNames.contains("address"));
-		
+
 		assertEquals(19, claimNames.size());
 	}
 
@@ -182,7 +184,6 @@ public class ClaimsRequestTest extends TestCase {
 		ClaimsRequest cr = ClaimsRequest.resolve(ResponseType.parse("id_token"), scope);
 
 		System.out.println("Claims request for scope openid email profile phone address: " + cr.toJSONObject());
-
 		assertTrue(cr.getUserInfoClaims().isEmpty());
 
 		Collection<ClaimsRequest.Entry> idTokenClaims = cr.getIDTokenClaims();
@@ -262,21 +263,21 @@ public class ClaimsRequestTest extends TestCase {
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "email"));
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "email_verified"));
 	}
-	
-	
+
+
 	public void testAdd()
 		throws Exception {
-		
+
 		Scope scope = Scope.parse("openid profile");
-		
+
 		ClaimsRequest cr = ClaimsRequest.resolve(ResponseType.parse("code"), scope);
 
 		System.out.println("Claims request for scope openid profile: " + cr.toJSONObject());
-		
+
 		assertTrue(cr.getIDTokenClaims().isEmpty());
-		
+
 		Collection<ClaimsRequest.Entry> userInfoClaims = cr.getUserInfoClaims();
-		
+
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "name"));
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "given_name"));
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "family_name"));
@@ -291,22 +292,22 @@ public class ClaimsRequestTest extends TestCase {
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "zoneinfo"));
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "locale"));
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "updated_at"));
-		
+
 		assertEquals(14, userInfoClaims.size());
-		
-		
+
+
 		ClaimsRequest addon = new ClaimsRequest();
 		addon.addUserInfoClaim("email", ClaimRequirement.ESSENTIAL);
 		addon.addUserInfoClaim("email_verified", ClaimRequirement.ESSENTIAL);
-		
+
 		System.out.println("Essential claims request: " + addon.toJSONObject());
-		
+
 		cr.add(addon);
-		
-	
+
+
 		assertTrue(containsEssentialClaimsRequestEntry(userInfoClaims, "email"));
 		assertTrue(containsEssentialClaimsRequestEntry(userInfoClaims, "email_verified"));
-		
+
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "name"));
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "given_name"));
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "family_name"));
@@ -321,15 +322,15 @@ public class ClaimsRequestTest extends TestCase {
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "zoneinfo"));
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "locale"));
 		assertTrue(containsVoluntaryClaimsRequestEntry(userInfoClaims, "updated_at"));
-		
+
 		assertEquals(16, userInfoClaims.size());
-		
-		
+
+
 		Set<String> claimNames = cr.getIDTokenClaimNames(false);
 		assertTrue(claimNames.isEmpty());
-		
+
 		claimNames = cr.getUserInfoClaimNames(false);
-		
+
 		assertTrue(claimNames.contains("email"));
 		assertTrue(claimNames.contains("email_verified"));
 		assertTrue(claimNames.contains("name"));
@@ -346,7 +347,7 @@ public class ClaimsRequestTest extends TestCase {
 		assertTrue(claimNames.contains("zoneinfo"));
 		assertTrue(claimNames.contains("locale"));
 		assertTrue(claimNames.contains("updated_at"));
-		
+
 		assertEquals(16, claimNames.size());
 	}
 
@@ -578,6 +579,119 @@ public class ClaimsRequestTest extends TestCase {
 		assertTrue(claimsRequest.getUserInfoClaims().isEmpty());
 	}
 
+	public void testParseIndividualClaimRequestWithAdditionalInformationExample()
+		throws Exception {
+
+		String json = "{\n" +
+			"   \"userinfo\":\n" +
+			"    {\n" +
+			"     \"given_name\": {\"essential\": true},\n" +
+			"     \"nickname\": null,\n" +
+			"     \"email\": {\"essential\": true},\n" +
+			"     \"email_verified\": {\"essential\": true},\n" +
+			"     \"picture\": null,\n" +
+			"     \"http://example.info/claims/groups\": null,\n" +
+			"     \"http://example.info/claims/additionalInfo#de\": {\"info\" : \"custom information\"}\n" +
+			"    },\n" +
+			"   \"id_token\":\n" +
+			"    {\n" +
+			"     \"auth_time\": {\"essential\": true},\n" +
+			"     \"acr\": {\"values\": [\"urn:mace:incommon:iap:silver\"] }\n" +
+			"    }\n" +
+			"  }";
+
+		JSONObject jsonObject = JSONObjectUtils.parse(json);
+
+		ClaimsRequest claimsRequest = ClaimsRequest.parse(jsonObject);
+
+		Set<String> idTokenClaimNames = claimsRequest.getIDTokenClaimNames(false);
+		assertTrue(idTokenClaimNames.contains("auth_time"));
+		assertTrue(idTokenClaimNames.contains("acr"));
+		assertEquals(2, idTokenClaimNames.size());
+
+		ClaimsRequest.Entry entry = claimsRequest.removeIDTokenClaim("auth_time", null);
+		assertEquals("auth_time", entry.getClaimName());
+		assertNull(entry.getLangTag());
+		assertNull(entry.getValue());
+		assertNull(entry.getValues());
+		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
+
+		entry = claimsRequest.removeIDTokenClaim("acr", null);
+		assertEquals("acr", entry.getClaimName());
+		assertNull(entry.getLangTag());
+		assertNull(entry.getValue());
+		assertTrue(entry.getValues().contains("urn:mace:incommon:iap:silver"));
+		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
+
+		assertTrue(claimsRequest.getIDTokenClaims().isEmpty());
+
+
+		Set<String> userInfoClaimNames = claimsRequest.getUserInfoClaimNames(false);
+		assertTrue(userInfoClaimNames.contains("given_name"));
+		assertTrue(userInfoClaimNames.contains("nickname"));
+		assertTrue(userInfoClaimNames.contains("email"));
+		assertTrue(userInfoClaimNames.contains("email_verified"));
+		assertTrue(userInfoClaimNames.contains("picture"));
+		assertTrue(userInfoClaimNames.contains("http://example.info/claims/groups"));
+		assertTrue(userInfoClaimNames.contains("http://example.info/claims/additionalInfo"));
+		assertEquals(7, userInfoClaimNames.size());
+
+		entry = claimsRequest.removeUserInfoClaim("given_name", null);
+		assertEquals("given_name", entry.getClaimName());
+		assertNull(entry.getLangTag());
+		assertNull(entry.getValue());
+		assertNull(entry.getValues());
+		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
+
+		entry = claimsRequest.removeUserInfoClaim("nickname", null);
+		assertEquals("nickname", entry.getClaimName());
+		assertNull(entry.getLangTag());
+		assertNull(entry.getValue());
+		assertNull(entry.getValues());
+		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
+
+		entry = claimsRequest.removeUserInfoClaim("email", null);
+		assertEquals("email", entry.getClaimName());
+		assertNull(entry.getLangTag());
+		assertNull(entry.getValue());
+		assertNull(entry.getValues());
+		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
+
+		entry = claimsRequest.removeUserInfoClaim("email_verified", null);
+		assertEquals("email_verified", entry.getClaimName());
+		assertNull(entry.getLangTag());
+		assertNull(entry.getValue());
+		assertNull(entry.getValues());
+		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
+
+		entry = claimsRequest.removeUserInfoClaim("picture", null);
+		assertEquals("picture", entry.getClaimName());
+		assertNull(entry.getLangTag());
+		assertNull(entry.getValue());
+		assertNull(entry.getValues());
+		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
+
+		entry = claimsRequest.removeUserInfoClaim("http://example.info/claims/groups", null);
+		assertEquals("http://example.info/claims/groups", entry.getClaimName());
+		assertNull(entry.getLangTag());
+		assertNull(entry.getValue());
+		assertNull(entry.getValues());
+		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
+
+		entry = claimsRequest.removeUserInfoClaim("http://example.info/claims/additionalInfo", LangTag.parse("de"));
+		assertEquals("http://example.info/claims/additionalInfo", entry.getClaimName());
+		assertEquals(LangTag.parse("de"),entry.getLangTag());
+		assertNull(entry.getValue());
+		assertNull(entry.getValues());
+		Map<String, Object> additionalInformation = entry.getAdditionalInformation();
+		assertNotNull(additionalInformation);
+		assertTrue( additionalInformation.containsKey("info"));
+		assertEquals("custom information", additionalInformation.get("info"));
+		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
+
+		assertTrue(claimsRequest.getUserInfoClaims().isEmpty());
+	}
+
 
 	public void testAddAndRemoveIDTokenClaims()
 		throws Exception {
@@ -586,10 +700,15 @@ public class ClaimsRequestTest extends TestCase {
 
 		r.addIDTokenClaim("email");
 		r.addIDTokenClaim("name");
+		Map<String, Object> additionalInformationClaimA1 = new HashMap<>();
+		additionalInformationClaimA1.put("info", "custom information");
+		r.addIDTokenClaim("a-1", ClaimRequirement.ESSENTIAL, null , "a1", additionalInformationClaimA1);
+
 
 		assertTrue(r.getIDTokenClaimNames(false).contains("email"));
 		assertTrue(r.getIDTokenClaimNames(false).contains("name"));
-		assertEquals(2, r.getIDTokenClaims().size());
+		assertTrue(r.getIDTokenClaimNames(false).contains("a-1"));
+		assertEquals(3, r.getIDTokenClaims().size());
 
 		JSONObject object = r.toJSONObject();
 		assertEquals(1, object.size());
@@ -599,13 +718,17 @@ public class ClaimsRequestTest extends TestCase {
 		assertNull(idTokenObject.get("email"));
 		assertTrue(idTokenObject.containsKey("name"));
 		assertNull(idTokenObject.get("name"));
-		assertEquals(2, idTokenObject.size());
+		assertTrue(idTokenObject.containsKey("a-1"));
+		assertNotNull(idTokenObject.get("a-1"));
+		assertEquals(3, idTokenObject.size());
 
 		r.removeIDTokenClaims("email");
 		r.removeIDTokenClaims("name");
+		r.removeIDTokenClaims("a-1");
 
 		assertFalse(r.getIDTokenClaimNames(false).contains("email"));
 		assertFalse(r.getIDTokenClaimNames(false).contains("name"));
+		assertFalse(r.getIDTokenClaimNames(false).contains("a-1"));
 		assertEquals(0, r.getIDTokenClaims().size());
 
 		object = r.toJSONObject();
@@ -620,10 +743,14 @@ public class ClaimsRequestTest extends TestCase {
 
 		r.addUserInfoClaim("email");
 		r.addUserInfoClaim("name");
+		Map<String, Object> additionalInformationClaimA1 = new HashMap<>();
+		additionalInformationClaimA1.put("info", "custom information");
+		r.addUserInfoClaim("a-1", ClaimRequirement.ESSENTIAL, null , "a1", additionalInformationClaimA1);
 
 		assertTrue(r.getUserInfoClaimNames(false).contains("email"));
 		assertTrue(r.getUserInfoClaimNames(false).contains("name"));
-		assertEquals(2, r.getUserInfoClaims().size());
+		assertTrue(r.getUserInfoClaimNames(false).contains("a-1"));
+		assertEquals(3, r.getUserInfoClaims().size());
 
 		JSONObject object = r.toJSONObject();
 		assertEquals(1, object.size());
@@ -633,13 +760,17 @@ public class ClaimsRequestTest extends TestCase {
 		assertNull(userInfoObject.get("email"));
 		assertTrue(userInfoObject.containsKey("name"));
 		assertNull(userInfoObject.get("name"));
-		assertEquals(2, userInfoObject.size());
+		assertTrue(userInfoObject.containsKey("a-1"));
+		assertNotNull(userInfoObject.get("a-1"));
+		assertEquals(3, userInfoObject.size());
 
 		r.removeUserInfoClaims("email");
 		r.removeUserInfoClaims("name");
+		r.removeUserInfoClaims("a-1");
 
 		assertFalse(r.getUserInfoClaimNames(false).contains("email"));
 		assertFalse(r.getUserInfoClaimNames(false).contains("name"));
+		assertFalse(r.getUserInfoClaimNames(false).contains("a-1"));
 		assertEquals(0, r.getUserInfoClaims().size());
 
 		object = r.toJSONObject();
@@ -753,144 +884,263 @@ public class ClaimsRequestTest extends TestCase {
 			}
 		}
 	}
-	
-	
+
+
 	public void testResolveCustomClaims_UserInfo() {
-		
+
 		ResponseType responseType = new ResponseType(ResponseType.Value.CODE);
-		
+
 		Scope scope = new Scope("openid", "email", "custom-scope-a", "custom-scope-b");
-		
-		Map<Scope.Value,Set<String>> customClaims = new HashMap<>();
-		customClaims.put(new Scope.Value("custom-scope-a"), new HashSet<>(Arrays.asList("a-1", "a-2", "a-3")));
-		customClaims.put(new Scope.Value("custom-scope-b"), new HashSet<>(Arrays.asList("b-1", "b-2")));
-		customClaims.put(new Scope.Value("custom-scope-c"), new HashSet<>(Collections.singletonList("c-1")));
-		
+
+		Map<Scope.Value,Map<String, Map<String, Object>>> customClaims = new HashMap<>();
+		Map<String,  Map<String, Object>> customScopeAValue = new HashMap<>();
+		customScopeAValue.put("a-1", null);
+		customScopeAValue.put("a-2", null);
+		customScopeAValue.put("a-3", null);
+		Map<String,  Map<String, Object>> customScopeBValue = new HashMap<>();
+		customScopeBValue.put("b-1", null);
+		customScopeBValue.put("b-2", null);
+		Map<String,  Map<String, Object>> customScopeCValue = new HashMap<>();
+		customScopeCValue.put("c-1", null);
+		customClaims.put(new Scope.Value("custom-scope-a"), customScopeAValue);
+		customClaims.put(new Scope.Value("custom-scope-b"), customScopeBValue);
+		customClaims.put(new Scope.Value("custom-scope-c"), customScopeCValue);
+
 		ClaimsRequest claimsRequest = ClaimsRequest.resolve(responseType, scope, customClaims);
-		
+
 		for (ClaimsRequest.Entry en: claimsRequest.getUserInfoClaims()) {
 			assertTrue(Arrays.asList("email", "email_verified", "a-1", "a-2", "a-3", "b-1", "b-2").contains(en.getClaimName()));
 			assertEquals(ClaimRequirement.VOLUNTARY, en.getClaimRequirement());
 		}
-		
+
 		assertTrue(claimsRequest.getIDTokenClaims().isEmpty());
 	}
-	
-	
+
+
 	public void testResolveCustomClaims_IDToken() {
-		
+
 		ResponseType responseType = new ResponseType(OIDCResponseTypeValue.ID_TOKEN);
-		
+
 		Scope scope = new Scope("openid", "email", "custom-scope-a", "custom-scope-b");
-		
-		Map<Scope.Value,Set<String>> customClaims = new HashMap<>();
-		customClaims.put(new Scope.Value("custom-scope-a"), new HashSet<>(Arrays.asList("a-1", "a-2", "a-3")));
-		customClaims.put(new Scope.Value("custom-scope-b"), new HashSet<>(Arrays.asList("b-1", "b-2")));
-		customClaims.put(new Scope.Value("custom-scope-c"), new HashSet<>(Collections.singletonList("c-1")));
-		
+
+		Map<Scope.Value,Map<String, Map<String, Object>>> customClaims = new HashMap<>();
+		Map<String,  Map<String, Object>> customScopeAValue = new HashMap<>();
+		customScopeAValue.put("a-1", null);
+		customScopeAValue.put("a-2", null);
+		customScopeAValue.put("a-3", null);
+		Map<String,  Map<String, Object>> customScopeBValue = new HashMap<>();
+		customScopeBValue.put("b-1", null);
+		customScopeBValue.put("b-2", null);
+		Map<String,  Map<String, Object>> customScopeCValue = new HashMap<>();
+		customScopeCValue.put("c-1", null);
+		customClaims.put(new Scope.Value("custom-scope-a"), customScopeAValue);
+		customClaims.put(new Scope.Value("custom-scope-b"), customScopeBValue);
+		customClaims.put(new Scope.Value("custom-scope-c"), customScopeCValue);
 		ClaimsRequest claimsRequest = ClaimsRequest.resolve(responseType, scope, customClaims);
-		
 		assertTrue(claimsRequest.getUserInfoClaims().isEmpty());
-		
+
 		for (ClaimsRequest.Entry en: claimsRequest.getIDTokenClaims()) {
 			assertTrue(Arrays.asList("email", "email_verified", "a-1", "a-2", "a-3", "b-1", "b-2").contains(en.getClaimName()));
 			assertEquals(ClaimRequirement.VOLUNTARY, en.getClaimRequirement());
 		}
 	}
-	
-	
+
+
 	public void testResolveCustomClaims_UserInfo_withNullClaimsRequest() {
-		
+
 		ResponseType responseType = new ResponseType(ResponseType.Value.CODE);
-		
+
 		Scope scope = new Scope("openid", "email", "custom-scope-a", "custom-scope-b");
-		
-		Map<Scope.Value,Set<String>> customClaims = new HashMap<>();
-		customClaims.put(new Scope.Value("custom-scope-a"), new HashSet<>(Arrays.asList("a-1", "a-2", "a-3")));
-		customClaims.put(new Scope.Value("custom-scope-b"), new HashSet<>(Arrays.asList("b-1", "b-2")));
-		customClaims.put(new Scope.Value("custom-scope-c"), new HashSet<>(Collections.singletonList("c-1")));
-		
+
+		Map<Scope.Value,Map<String, Map<String, Object>>> customClaims = new HashMap<>();
+		Map<String,  Map<String, Object>> customScopeAValue = new HashMap<>();
+		customScopeAValue.put("a-1", null);
+		customScopeAValue.put("a-2", null);
+		customScopeAValue.put("a-3", null);
+		Map<String,  Map<String, Object>> customScopeBValue = new HashMap<>();
+		customScopeBValue.put("b-1", null);
+		customScopeBValue.put("b-2", null);
+		Map<String,  Map<String, Object>> customScopeCValue = new HashMap<>();
+		customScopeCValue.put("c-1", null);
+		customClaims.put(new Scope.Value("custom-scope-a"), customScopeAValue);
+		customClaims.put(new Scope.Value("custom-scope-b"), customScopeBValue);
+		customClaims.put(new Scope.Value("custom-scope-c"), customScopeCValue);
+
 		ClaimsRequest claimsRequest = ClaimsRequest.resolve(responseType, scope, null, customClaims);
-		
+
 		for (ClaimsRequest.Entry en: claimsRequest.getUserInfoClaims()) {
 			assertTrue(Arrays.asList("email", "email_verified", "a-1", "a-2", "a-3", "b-1", "b-2").contains(en.getClaimName()));
 			assertEquals(ClaimRequirement.VOLUNTARY, en.getClaimRequirement());
 		}
-		
+
 		assertTrue(claimsRequest.getIDTokenClaims().isEmpty());
 	}
-	
-	
+
+
 	public void testResolveCustomClaims_IDToken_withNullClaimsRequest() {
-		
+
 		ResponseType responseType = new ResponseType(OIDCResponseTypeValue.ID_TOKEN);
-		
+
 		Scope scope = new Scope("openid", "email", "custom-scope-a", "custom-scope-b");
-		
-		Map<Scope.Value,Set<String>> customClaims = new HashMap<>();
-		customClaims.put(new Scope.Value("custom-scope-a"), new HashSet<>(Arrays.asList("a-1", "a-2", "a-3")));
-		customClaims.put(new Scope.Value("custom-scope-b"), new HashSet<>(Arrays.asList("b-1", "b-2")));
-		customClaims.put(new Scope.Value("custom-scope-c"), new HashSet<>(Collections.singletonList("c-1")));
-		
+
+		Map<Scope.Value,Map<String, Map<String, Object>>> customClaims = new HashMap<>();
+		Map<String,  Map<String, Object>> customScopeAValue = new HashMap<>();
+		customScopeAValue.put("a-1", null);
+		customScopeAValue.put("a-2", null);
+		customScopeAValue.put("a-3", null);
+		Map<String,  Map<String, Object>> customScopeBValue = new HashMap<>();
+		customScopeBValue.put("b-1", null);
+		customScopeBValue.put("b-2", null);
+		Map<String,  Map<String, Object>> customScopeCValue = new HashMap<>();
+		customScopeCValue.put("c-1", null);
+		customClaims.put(new Scope.Value("custom-scope-a"), customScopeAValue);
+		customClaims.put(new Scope.Value("custom-scope-b"), customScopeBValue);
+		customClaims.put(new Scope.Value("custom-scope-c"), customScopeCValue);
+
 		ClaimsRequest claimsRequest = ClaimsRequest.resolve(responseType, scope, null, customClaims);
-		
+
 		assertTrue(claimsRequest.getUserInfoClaims().isEmpty());
-		
+
 		for (ClaimsRequest.Entry en: claimsRequest.getIDTokenClaims()) {
 			assertTrue(Arrays.asList("email", "email_verified", "a-1", "a-2", "a-3", "b-1", "b-2").contains(en.getClaimName()));
 			assertEquals(ClaimRequirement.VOLUNTARY, en.getClaimRequirement());
 		}
 	}
-	
-	
+
+
 	public void testResolveCustomClaims_UserInfo_withClaimsRequest() {
-		
+
 		ResponseType responseType = new ResponseType(ResponseType.Value.CODE);
-		
+
 		Scope scope = new Scope("openid", "custom-scope-a", "custom-scope-b");
-		
-		Map<Scope.Value,Set<String>> customClaims = new HashMap<>();
-		customClaims.put(new Scope.Value("custom-scope-a"), new HashSet<>(Arrays.asList("a-1", "a-2", "a-3")));
-		customClaims.put(new Scope.Value("custom-scope-b"), new HashSet<>(Arrays.asList("b-1", "b-2")));
-		customClaims.put(new Scope.Value("custom-scope-c"), new HashSet<>(Collections.singletonList("c-1")));
-		
+		Map<Scope.Value,Map<String, Map<String, Object>>> customClaims = new HashMap<>();
+		Map<String,  Map<String, Object>> customScopeAValue = new HashMap<>();
+		customScopeAValue.put("a-1", null);
+		customScopeAValue.put("a-2", null);
+		customScopeAValue.put("a-3", null);
+		Map<String,  Map<String, Object>> customScopeBValue = new HashMap<>();
+		customScopeBValue.put("b-1", null);
+		customScopeBValue.put("b-2", null);
+		Map<String,  Map<String, Object>> customScopeCValue = new HashMap<>();
+		customScopeCValue.put("c-1", null);
+		customClaims.put(new Scope.Value("custom-scope-a"), customScopeAValue);
+		customClaims.put(new Scope.Value("custom-scope-b"), customScopeBValue);
+		customClaims.put(new Scope.Value("custom-scope-c"), customScopeCValue);
+
 		ClaimsRequest claimsRequest = new ClaimsRequest();
 		claimsRequest.addUserInfoClaim("email");
 		claimsRequest.addUserInfoClaim("email_verified");
-		
+
 		ClaimsRequest resolvedClaimsRequest = ClaimsRequest.resolve(responseType, scope, claimsRequest, customClaims);
-		
+
 		for (ClaimsRequest.Entry en: resolvedClaimsRequest.getUserInfoClaims()) {
 			assertTrue(Arrays.asList("email", "email_verified", "a-1", "a-2", "a-3", "b-1", "b-2").contains(en.getClaimName()));
 			assertEquals(ClaimRequirement.VOLUNTARY, en.getClaimRequirement());
 		}
-		
+
 		assertTrue(resolvedClaimsRequest.getIDTokenClaims().isEmpty());
 	}
-	
-	
-	public void testResolveCustomClaims_IDToken_withClaimsRequest() {
-		
+
+
+
+	public void testResolveCustomClaims_IDToken_withClaimsRequest() throws LangTagException {
+
 		ResponseType responseType = new ResponseType(OIDCResponseTypeValue.ID_TOKEN);
-		
-		Scope scope = new Scope("openid", "custom-scope-a", "custom-scope-b");
-		
-		Map<Scope.Value,Set<String>> customClaims = new HashMap<>();
-		customClaims.put(new Scope.Value("custom-scope-a"), new HashSet<>(Arrays.asList("a-1", "a-2", "a-3")));
-		customClaims.put(new Scope.Value("custom-scope-b"), new HashSet<>(Arrays.asList("b-1", "b-2")));
-		customClaims.put(new Scope.Value("custom-scope-c"), new HashSet<>(Collections.singletonList("c-1")));
-		
+
+		Scope scope = new Scope("openid", "custom-scope-a", "custom-scope-b", "custom-scope-c");
+
+		Map<Scope.Value,Map<String, Map<String, Object>>> customClaims = new HashMap<>();
+		Map<String,  Map<String, Object>> customScopeAValue = new HashMap<>();
+		Map<String, Object> customClaimA1Value = new HashMap<>();
+		customClaimA1Value.put("value", "a-1");
+		customClaimA1Value.put("essential", true);
+		customClaimA1Value.put("info", "custom information");
+		customScopeAValue.put("a-1", customClaimA1Value);
+		customScopeAValue.put("a-2", null);
+		customScopeAValue.put("a-3", null);
+		Map<String,  Map<String, Object>> customScopeBValue = new HashMap<>();
+		Map<String, Object> customClaimB1Value = new HashMap<>();
+		customClaimB1Value.put("values", new String[] {"a-1", "a-2", "a-3"});
+		customClaimB1Value.put("essential", false);
+		customScopeBValue.put("b-1", customClaimB1Value);
+		customScopeBValue.put("b-2", null);
+		Map<String,  Map<String, Object>> customScopeCValue = new HashMap<>();
+		Map<String, Object> customClaimC1Value = new HashMap<>();
+		customClaimC1Value.put("values", Arrays.asList("c1"));
+		customScopeCValue.put("c-1#ja-Kana-JP", customClaimC1Value);
+		customClaims.put(new Scope.Value("custom-scope-a"), customScopeAValue);
+		customClaims.put(new Scope.Value("custom-scope-b"), customScopeBValue);
+		customClaims.put(new Scope.Value("custom-scope-c"), customScopeCValue);
+		customClaims.put(new Scope.Value("custom-scope-d"), null);
+
 		ClaimsRequest claimsRequest = new ClaimsRequest();
 		claimsRequest.addIDTokenClaim("email");
 		claimsRequest.addIDTokenClaim("email_verified");
-		
+
 		ClaimsRequest resolvedClaimsRequest = ClaimsRequest.resolve(responseType, scope, claimsRequest, customClaims);
-		
+		System.out.println(resolvedClaimsRequest);
 		assertTrue(resolvedClaimsRequest.getUserInfoClaims().isEmpty());
-		
-		for (ClaimsRequest.Entry en: resolvedClaimsRequest.getIDTokenClaims()) {
-			assertTrue(Arrays.asList("email", "email_verified", "a-1", "a-2", "a-3", "b-1", "b-2").contains(en.getClaimName()));
-			assertEquals(ClaimRequirement.VOLUNTARY, en.getClaimRequirement());
+
+		Collection<ClaimsRequest.Entry> idTokenClaims = resolvedClaimsRequest.getIDTokenClaims();
+		for (ClaimsRequest.Entry en: idTokenClaims) {
+			assertTrue(Arrays.asList("email", "email_verified", "a-1", "a-2", "a-3", "b-1", "b-2", "c-1").contains(en.getClaimName()));
+			if(en.getClaimName().equals("email")){
+				assertEquals(ClaimRequirement.VOLUNTARY, en.getClaimRequirement());
+				assertNull(en.getAdditionalInformation());
+				assertNull(en.getValue());
+				assertNull(en.getValues());
+				assertNull(en.getLangTag());
+			}
+			if(en.getClaimName().equals("email_verified")){
+				assertEquals(ClaimRequirement.VOLUNTARY, en.getClaimRequirement());
+				assertNull(en.getAdditionalInformation());
+				assertNull(en.getValue());
+				assertNull(en.getValues());
+				assertNull(en.getLangTag());
+			}
+			if(en.getClaimName().equals("a-1")){
+				assertEquals(ClaimRequirement.ESSENTIAL, en.getClaimRequirement());
+				assertNull(en.getValues());
+				assertNull(en.getLangTag());
+				assertEquals("a-1", en.getValue());
+				assertTrue( en.getAdditionalInformation().containsKey("info"));
+				assertEquals("custom information",  en.getAdditionalInformation().get("info"));
+			}
+			if(en.getClaimName().equals("b-1")){
+				assertEquals(ClaimRequirement.VOLUNTARY, en.getClaimRequirement());
+				assertNull(en.getAdditionalInformation());
+				assertNull(en.getValue());
+				assertNull(en.getLangTag());
+				assertTrue(en.getValues().containsAll(Arrays.asList("a-1", "a-2", "a-3")));
+			}
+			if(en.getClaimName().equals("a-2")){
+				assertEquals(ClaimRequirement.VOLUNTARY, en.getClaimRequirement());
+				assertNull(en.getAdditionalInformation());
+				assertNull(en.getValue());
+				assertNull(en.getValues());
+				assertNull(en.getLangTag());
+			}
+			if(en.getClaimName().equals("a-3")){
+				assertEquals(ClaimRequirement.VOLUNTARY, en.getClaimRequirement());
+				assertNull(en.getAdditionalInformation());
+				assertNull(en.getValue());
+				assertNull(en.getValues());
+				assertNull(en.getLangTag());
+			}
+			if(en.getClaimName().equals("b-2")){
+				assertEquals(ClaimRequirement.VOLUNTARY, en.getClaimRequirement());
+				assertNull(en.getAdditionalInformation());
+				assertNull(en.getValue());
+				assertNull(en.getValues());
+				assertNull(en.getLangTag());
+			}
+			if(en.getClaimName().equals("c-1")){
+				assertEquals(ClaimRequirement.VOLUNTARY, en.getClaimRequirement());
+				assertNull(en.getAdditionalInformation());
+				assertNull(en.getValue());
+				assertTrue(en.getValues().contains("c1"));
+				assertEquals(LangTag.parse("ja-Kana-JP"), en.getLangTag());
+			}
 		}
 	}
 }
