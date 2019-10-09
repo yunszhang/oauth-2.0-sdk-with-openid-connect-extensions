@@ -36,6 +36,7 @@ import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.util.*;
+import com.nimbusds.openid.connect.sdk.Prompt;
 
 
 /**
@@ -98,11 +99,12 @@ public class AuthorizationRequest extends AbstractRequest {
 		p.add("include_granted_scopes");
 		p.add("request_uri");
 		p.add("request");
+		p.add("prompt");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
-
-
+	
+	
 	/**
 	 * The response type (required unless in JAR).
 	 */
@@ -174,6 +176,12 @@ public class AuthorizationRequest extends AbstractRequest {
 	 * Request object URI (optional).
 	 */
 	private final URI requestURI;
+	
+	
+	/**
+	 * The requested prompt (optional).
+	 */
+	protected final Prompt prompt;
 
 
 	/**
@@ -266,6 +274,12 @@ public class AuthorizationRequest extends AbstractRequest {
 		 * Request object URI (optional).
 		 */
 		private URI requestURI;
+		
+		
+		/**
+		 * The requested prompt (optional).
+		 */
+		private Prompt prompt;
 
 
 		/**
@@ -351,6 +365,7 @@ public class AuthorizationRequest extends AbstractRequest {
 			includeGrantedScopes = request.includeGrantedScopes();
 			requestObject = request.requestObject;
 			requestURI = request.requestURI;
+			prompt = request.prompt;
 			customParams.putAll(request.getCustomParameters());
 		}
 		
@@ -573,6 +588,22 @@ public class AuthorizationRequest extends AbstractRequest {
 		
 		
 		/**
+		 * Sets the requested prompt. Corresponds to the optional
+		 * {@code prompt} parameter.
+		 *
+		 * @param prompt The requested prompt, {@code null} if not
+		 *               specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder prompt(final Prompt prompt) {
+			
+			this.prompt = prompt;
+			return this;
+		}
+		
+		
+		/**
 		 * Sets a custom parameter.
 		 *
 		 * @param name   The parameter name. Must not be {@code null}.
@@ -619,6 +650,7 @@ public class AuthorizationRequest extends AbstractRequest {
 				return new AuthorizationRequest(uri, rt, rm, clientID, redirectURI, scope, state,
 					codeChallenge, codeChallengeMethod, resources, includeGrantedScopes,
 					requestObject, requestURI,
+					prompt,
 					customParams);
 			} catch (IllegalArgumentException e) {
 				throw new IllegalStateException(e.getMessage(), e);
@@ -644,7 +676,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		                    final ResponseType rt,
 	                            final ClientID clientID) {
 
-		this(uri, rt, null, clientID, null, null, null, null, null, null, false, null, null, null);
+		this(uri, rt, null, clientID, null, null, null, null, null, null, false, null, null, null, null);
 	}
 
 
@@ -684,7 +716,7 @@ public class AuthorizationRequest extends AbstractRequest {
 	                            final Scope scope,
 				    final State state) {
 
-		this(uri, rt, rm, clientID, redirectURI, scope, state, null, null, null, false, null, null, null);
+		this(uri, rt, rm, clientID, redirectURI, scope, state, null, null, null, false, null, null, null, null);
 	}
 
 
@@ -737,15 +769,17 @@ public class AuthorizationRequest extends AbstractRequest {
 	 *                             parameter. Must not be specified
 	 *                             together with a request object.
 	 *                             {@code null} if not specified.
+	 * @param prompt               The requested prompt. Corresponds to the
+	 *                             optional {@code prompt} parameter.
 	 * @param customParams         Custom parameters, empty map or
 	 *                             {@code null} if none.
 	 */
 	public AuthorizationRequest(final URI uri,
-		                    final ResponseType rt,
+				    final ResponseType rt,
 				    final ResponseMode rm,
-	                            final ClientID clientID,
+				    final ClientID clientID,
 				    final URI redirectURI,
-	                            final Scope scope,
+				    final Scope scope,
 				    final State state,
 				    final CodeChallenge codeChallenge,
 				    final CodeChallengeMethod codeChallengeMethod,
@@ -753,7 +787,8 @@ public class AuthorizationRequest extends AbstractRequest {
 				    final boolean includeGrantedScopes,
 				    final JWT requestObject,
 				    final URI requestURI,
-				    final Map<String,List<String>> customParams) {
+				    final Prompt prompt,
+				    final Map<String, List<String>> customParams) {
 
 		super(uri);
 
@@ -794,6 +829,8 @@ public class AuthorizationRequest extends AbstractRequest {
 		
 		this.requestObject = requestObject;
 		this.requestURI = requestURI;
+		
+		this.prompt = prompt; // technically OpenID
 
 		if (MapUtils.isNotEmpty(customParams)) {
 			this.customParams = Collections.unmodifiableMap(customParams);
@@ -990,6 +1027,18 @@ public class AuthorizationRequest extends AbstractRequest {
 	
 	
 	/**
+	 * Gets the requested prompt. Corresponds to the optional
+	 * {@code prompt} parameter.
+	 *
+	 * @return The requested prompt, {@code null} if not specified.
+	 */
+	public Prompt getPrompt() {
+		
+		return prompt;
+	}
+	
+	
+	/**
 	 * Returns the additional custom parameters.
 	 *
 	 * @return The additional custom parameters as a unmodifiable map,
@@ -999,8 +1048,8 @@ public class AuthorizationRequest extends AbstractRequest {
 
 		return customParams;
 	}
-
-
+	
+	
 	/**
 	 * Returns the specified custom parameter.
 	 *
@@ -1012,8 +1061,8 @@ public class AuthorizationRequest extends AbstractRequest {
 
 		return customParams.get(name);
 	}
-
-
+	
+	
 	/**
 	 * Returns the URI query parameters for this authorisation request.
 	 * Query parameters which are part of the authorisation endpoint are
@@ -1085,6 +1134,9 @@ public class AuthorizationRequest extends AbstractRequest {
 		
 		if (requestURI != null)
 			params.put("request_uri", Collections.singletonList(requestURI.toString()));
+		
+		if (prompt != null)
+			params.put("prompt", Collections.singletonList(prompt.toString()));
 
 		return params;
 	}
@@ -1431,6 +1483,16 @@ public class AuthorizationRequest extends AbstractRequest {
 			includeGrantedScopes = true;
 		}
 		
+		Prompt prompt;
+		try {
+			prompt = Prompt.parse(MultivaluedMapUtils.getFirstValue(params, "prompt"));
+			
+		} catch (ParseException e) {
+			String msg = "Invalid \"prompt\" parameter: " + e.getMessage();
+			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
+				clientID, redirectURI, ResponseMode.resolve(rm, rt), state, e);
+		}
+		
 		// Parse custom parameters
 		Map<String,List<String>> customParams = null;
 
@@ -1449,6 +1511,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		return new AuthorizationRequest(uri, rt, rm, clientID, redirectURI, scope, state,
 			codeChallenge, codeChallengeMethod, resources, includeGrantedScopes,
 			requestObject, requestURI,
+			prompt,
 			customParams);
 	}
 

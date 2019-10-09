@@ -87,7 +87,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 		p.add("nonce");
 		p.add("display");
-		p.add("prompt");
 		p.add("max_age");
 		p.add("ui_locales");
 		p.add("claims_locales");
@@ -113,12 +112,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 	private final Display display;
 	
 	
-	/**
-	 * The requested prompt (optional).
-	 */
-	private final Prompt prompt;
-
-
 	/**
 	 * The required maximum authentication age, in seconds, -1 if not
 	 * specified, zero implies prompt=login (optional).
@@ -1058,7 +1051,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				     final boolean includeGrantedScopes,
 				     final Map<String,List<String>> customParams) {
 
-		super(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, resources, includeGrantedScopes, requestObject, requestURI, customParams);
+		super(uri, rt, rm, clientID, redirectURI, scope, state, codeChallenge, codeChallengeMethod, resources, includeGrantedScopes, requestObject, requestURI, prompt, customParams);
 		
 		if (! specifiesRequestObject()) {
 			
@@ -1084,7 +1077,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		
 		// Optional parameters
 		this.display = display;
-		this.prompt = prompt;
 		this.maxAge = maxAge;
 
 		if (uiLocales != null)
@@ -1146,18 +1138,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 	}
 	
 	
-	/**
-	 * Gets the requested prompt. Corresponds to the optional 
-	 * {@code prompt} parameter.
-	 *
-	 * @return The requested prompt, {@code null} if not specified.
-	 */
-	public Prompt getPrompt() {
-	
-		return prompt;
-	}
-
-
 	/**
 	 * Gets the required maximum authentication age. Corresponds to the
 	 * optional {@code max_age} parameter.
@@ -1256,9 +1236,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		
 		if (display != null)
 			params.put("display", Collections.singletonList(display.toString()));
-		
-		if (prompt != null)
-			params.put("prompt", Collections.singletonList(prompt.toString()));
 
 		if (maxAge >= 0)
 			params.put("max_age", Collections.singletonList("" + maxAge));
@@ -1468,18 +1445,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 					ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
 			}
 		}
-		
-		
-		Prompt prompt;
-		
-		try {
-			prompt = Prompt.parse(MultivaluedMapUtils.getFirstValue(params, "prompt"));
-				
-		} catch (ParseException e) {
-			String msg = "Invalid \"prompt\" parameter: " + e.getMessage();
-			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-				                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
-		}
 
 
 		String v = MultivaluedMapUtils.getFirstValue(params, "max_age");
@@ -1621,7 +1586,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 		return new AuthenticationRequest(
 			uri, ar.getResponseType(), ar.getResponseMode(), ar.getScope(), ar.getClientID(), ar.getRedirectionURI(), ar.getState(), nonce,
-			display, prompt, maxAge, uiLocales, claimsLocales,
+			display, ar.getPrompt(), maxAge, uiLocales, claimsLocales,
 			idTokenHint, loginHint, acrValues, claims,
 			ar.getRequestObject(), ar.getRequestURI(),
 			ar.getCodeChallenge(), ar.getCodeChallengeMethod(),
