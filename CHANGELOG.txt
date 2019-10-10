@@ -1111,7 +1111,7 @@ version 6.14 (2019-07-18)
       is used, the request will have a certificate, but its root DN will be
       null (or at least not equal to the subject DN).
 
-version 6.15 (2019-10-09)
+version 6.15 (2019-10-10)
     * Adds "phr" and "phrh" ACR constants from OpenID Connect Extended
       Authentication Profile (EAP) ACR Values 1.0 - draft 00.
     * Adds new static AuthorizationServerMetadata.resolveURL method.
@@ -1119,3 +1119,4 @@ version 6.15 (2019-10-09)
     * Makes the OpenID Connect "prompt" parameter available to plain OAuth 2.0
       requests by pulling it up from AuthenticationRequest to
       AuthorizationRequest.
+    * Updates ClaimsRequest to support additional information for a claim.
