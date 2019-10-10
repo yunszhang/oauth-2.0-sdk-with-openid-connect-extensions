@@ -85,8 +85,22 @@ public class ClaimsRequest {
          * Optional claim values.
          */
         private final List<String> values;
-
-
+    
+    
+        /**
+         * Optional additional claim information.
+         *
+         * <p>Example additional information in the "info" member:
+         *
+         * <pre>
+         * {
+         *   "userinfo" : {
+         *       "email": null,
+         *       "email_verified": null,
+         *       "http://example.info/claims/groups" : { "info" : "custom information" } }
+         * }
+         * </pre>
+         */
         private final Map<String, Object> additionalInformation;
 
 
@@ -309,6 +323,17 @@ public class ClaimsRequest {
 
         /**
          * Gets the optional additional information for the claim.
+         *
+         * <p>Example additional information in the "info" member:
+         *
+         * <pre>
+         * {
+         *   "userinfo" : {
+         *       "email": null,
+         *       "email_verified": null,
+         *       "http://example.info/claims/groups" : { "info" : "custom information" } }
+         * }
+         * </pre>
          *
          * @return The additional information, {@code null} if not specified.
          */
@@ -1157,7 +1182,7 @@ public class ClaimsRequest {
     }
     
 
-    private static Map<String, Object> resolveAdditionalInformationForClaim(Map<String, Object> customClaims) {
+    private static Map<String, Object> resolveAdditionalInformationForClaim(final Map<String, Object> customClaims) {
  	customClaims.remove("essential");
  	customClaims.remove("value");
  	customClaims.remove("values");
