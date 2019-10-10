@@ -1120,3 +1120,4 @@ version 6.15 (2019-10-10)
       requests by pulling it up from AuthenticationRequest to
       AuthorizationRequest.
     * Updates ClaimsRequest to support additional information for a claim.
+    * Bumps Nimbus JOSE+JWT to min 7.9.
