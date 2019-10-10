@@ -18,6 +18,7 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
+import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,13 @@ import com.nimbusds.oauth2.sdk.util.URLUtils;
  * endpoint.
  */
 public abstract class TLSClientAuthentication extends ClientAuthentication {
+	
+	
+	/**
+	 * The validated client X.509 certificate from the received HTTPS
+	 * request, {@code null} for an outgoing HTTPS request.
+	 */
+	protected final X509Certificate certificate;
 	
 	
 	/**
@@ -64,6 +72,7 @@ public abstract class TLSClientAuthentication extends ClientAuthentication {
 		
 		super(method, clientID);
 		this.sslSocketFactory = sslSocketFactory;
+		certificate = null;
 	}
 	
 	
@@ -71,14 +80,19 @@ public abstract class TLSClientAuthentication extends ClientAuthentication {
 	 * Creates a new abstract mutual TLS client authentication. This
 	 * constructor is intended for a received token request.
 	 *
-	 * @param method   The client authentication method. Must not be
-	 *                 {@code null}.
-	 * @param clientID The client identifier. Must not be {@code null}.
+	 * @param method      The client authentication method. Must not be
+	 *                    {@code null}.
+	 * @param clientID    The client identifier. Must not be {@code null}.
+	 * @param certificate The validated client X.509 certificate from the
+	 *                    received HTTPS request. Should not be
+	 *                    {@code null}.
 	 */
 	protected TLSClientAuthentication(final ClientAuthenticationMethod method,
-					  final ClientID clientID) {
+					  final ClientID clientID,
+					  final X509Certificate certificate) {
 		super(method, clientID);
 		sslSocketFactory = null;
+		this.certificate = certificate;
 	}
 	
 	
@@ -91,6 +105,19 @@ public abstract class TLSClientAuthentication extends ClientAuthentication {
 	public SSLSocketFactory getSSLSocketFactory() {
 		
 		return sslSocketFactory;
+	}
+	
+	
+	/**
+	 * The validated client X.509 certificate from the received HTTPS
+	 * request.
+	 *
+	 * @return The validated client X.509 certificate from the received
+	 *         HTTPS request, {@code null} for an outgoing HTTPS request.
+	 */
+	public X509Certificate getClientX509Certificate() {
+		
+		return certificate;
 	}
 	
 	

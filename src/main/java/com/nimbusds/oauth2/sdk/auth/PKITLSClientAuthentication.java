@@ -23,13 +23,14 @@ import java.util.List;
 import java.util.Map;
 import javax.net.ssl.SSLSocketFactory;
 
+import net.jcip.annotations.Immutable;
+
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
-import net.jcip.annotations.Immutable;
 
 
 /**
@@ -55,11 +56,6 @@ public class PKITLSClientAuthentication extends TLSClientAuthentication {
 	 */
 	private final String certSubjectDN;
 	
-	/**
-	 * The client X.509 certificate used for authentication
-	 */
-	private final X509Certificate certificate;
-	
 	
 	/**
 	 * Creates a new PKI mutual TLS client authentication. This constructor
@@ -77,7 +73,6 @@ public class PKITLSClientAuthentication extends TLSClientAuthentication {
 		
 		super(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientID, sslSocketFactory);
 		certSubjectDN = null;
-		certificate = null;
 	}
 	
 	
@@ -95,34 +90,32 @@ public class PKITLSClientAuthentication extends TLSClientAuthentication {
 	public PKITLSClientAuthentication(final ClientID clientID,
 					  final String certSubjectDN) {
 		
-		super(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientID);
+		super(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientID, (X509Certificate) null);
 		
 		if (certSubjectDN == null) {
 			throw new IllegalArgumentException("The X.509 client certificate subject DN must not be null");
 		}
 		this.certSubjectDN = certSubjectDN;
-		this.certificate = null;
 	}
+	
 	
 	/**
 	 * Creates a new PKI mutual TLS client authentication. This constructor
 	 * is intended for a received token request.
 	 *
-	 * @param clientID      The client identifier. Must not be
-	 *                      {@code null}.
-	 * @param certificate   The received validated client X.509 certificate.
-	 *                      Must not be {@code null}.
+	 * @param clientID    The client identifier. Must not be {@code null}.
+	 * @param certificate The validated client X.509 certificate from the
+	 *                    received HTTPS request. Must not be {@code null}.
 	 */
 	public PKITLSClientAuthentication(final ClientID clientID,
 					  final X509Certificate certificate) {
 		
-		super(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientID);
+		super(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientID, certificate);
 		
 		if (certificate == null) {
 			throw new IllegalArgumentException("The X.509 client certificate must not be null");
 		}
-		this.certSubjectDN = certificate.getSubjectDN().getName();
-		this.certificate = certificate;
+		this.certSubjectDN = certificate.getSubjectX500Principal().getName();
 	}
 	
 	
@@ -135,17 +128,6 @@ public class PKITLSClientAuthentication extends TLSClientAuthentication {
 	public String getClientX509CertificateSubjectDN() {
 		
 		return certSubjectDN;
-	}
-	
-	
-	/**
-	 * Gets the received validated client X.509 certificate.
-	 *
-	 * @return The X.509 certificated used for authentication
-	 */
-	public X509Certificate getClientX509Certificate() {
-		
-		return certificate;
 	}
 	
 	

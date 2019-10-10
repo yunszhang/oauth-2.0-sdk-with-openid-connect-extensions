@@ -23,13 +23,14 @@ import java.util.List;
 import java.util.Map;
 import javax.net.ssl.SSLSocketFactory;
 
+import net.jcip.annotations.Immutable;
+
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
-import net.jcip.annotations.Immutable;
 
 
 /**
@@ -51,13 +52,6 @@ public class SelfSignedTLSClientAuthentication extends TLSClientAuthentication {
 	
 	
 	/**
-	 * The validated client X.509 certificate from the received HTTPS
-	 * request, {@code null} for an outgoing HTTPS request.
-	 */
-	private final X509Certificate x509Certificate;
-	
-	
-	/**
 	 * Creates a new self-signed certificate mutual TLS client
 	 * authentication. This constructor is intended for an outgoing token
 	 * request.
@@ -73,7 +67,6 @@ public class SelfSignedTLSClientAuthentication extends TLSClientAuthentication {
 						 final SSLSocketFactory sslSocketFactory) {
 		
 		super(ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH, clientID, sslSocketFactory);
-		x509Certificate = null;
 	}
 	
 	
@@ -82,35 +75,18 @@ public class SelfSignedTLSClientAuthentication extends TLSClientAuthentication {
 	 * authentication. This constructor is intended for a received token
 	 * request.
 	 *
-	 * @param clientID        The client identifier. Must not be
-	 *                        {@code null}.
-	 * @param x509Certificate The validated client X.509 certificate from
-	 *                        the received HTTPS request. Must not be
-	 *                        {@code null}.
+	 * @param clientID    The client identifier. Must not be {@code null}.
+	 * @param certificate The validated client X.509 certificate from the
+	 *                    received HTTPS request. Must not be {@code null}.
 	 */
 	public SelfSignedTLSClientAuthentication(final ClientID clientID,
-						 final X509Certificate x509Certificate) {
+						 final X509Certificate certificate) {
 		
-		super(ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH, clientID);
+		super(ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH, clientID, certificate);
 		
-		if (x509Certificate == null) {
+		if (certificate == null) {
 			throw new IllegalArgumentException("The client X.509 certificate must not be null");
 		}
-		
-		this.x509Certificate = x509Certificate;
-	}
-	
-	
-	/**
-	 * Returns the validated client X.509 certificate from the received
-	 * HTTPS request.
-	 *
-	 * @return The client X.509 certificate, {@code null} for an outgoing
-	 *         HTTPS request.
-	 */
-	public X509Certificate getClientX509Certificate() {
-		
-		return x509Certificate;
 	}
 	
 	

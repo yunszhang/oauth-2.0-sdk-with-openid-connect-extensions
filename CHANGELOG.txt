@@ -1124,3 +1124,6 @@ version 6.15 (2019-10-10)
       not require the issuer DN and subject DN HTTP request metadata / TLS
       headers to be set (iss #272).
     * Bumps Nimbus JOSE+JWT to min 7.9.
+
+version 6.16 (2019-10-10)
+    * Pulls client X509Certificate field up to TLSClientAuthentication.
