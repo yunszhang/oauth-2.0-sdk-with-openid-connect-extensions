@@ -20,6 +20,7 @@ package com.nimbusds.oauth2.sdk.auth;
 
 import java.util.List;
 import java.util.Map;
+import javax.security.auth.x500.X500Principal;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
@@ -144,16 +145,35 @@ public abstract class ClientAuthentication {
 			return JWTAuthentication.parse(httpRequest);
 		}
 		
-		// Self-signed client TLS?
-		if (httpRequest.getClientX509Certificate() != null && httpRequest.getClientX509CertificateSubjectDN() != null &&
-				httpRequest.getClientX509CertificateSubjectDN().equals(httpRequest.getClientX509CertificateRootDN())) {
-			// Don't do self-signed check, too expensive in terms of CPU time
-			return SelfSignedTLSClientAuthentication.parse(httpRequest);
-		}
-		
-		// PKI bound client TLS?
+		// Client TLS?
 		if (httpRequest.getClientX509Certificate() != null) {
-			return PKITLSClientAuthentication.parse(httpRequest);
+			
+			// Check for self-issued first (not for self-signed (too expensive in terms of CPU time)
+			
+			X500Principal issuer = httpRequest.getClientX509Certificate().getIssuerX500Principal();
+			X500Principal subject = httpRequest.getClientX509Certificate().getSubjectX500Principal();
+			
+			if (issuer != null && issuer.equals(subject)) {
+				// Additional checks
+				if (httpRequest.getClientX509CertificateRootDN() != null) {
+					// If TLS proxy set issuer header it must match the certificate's
+					if (! httpRequest.getClientX509CertificateRootDN().equalsIgnoreCase(issuer.toString())) {
+						throw new ParseException("Client X.509 certificate issuer DN doesn't match HTTP request metadata");
+					}
+				}
+				if (httpRequest.getClientX509CertificateSubjectDN() != null) {
+					// If TLS proxy set subject header it must match the certificate's
+					if (! httpRequest.getClientX509CertificateSubjectDN().equalsIgnoreCase(subject.toString())) {
+						throw new ParseException("Client X.509 certificate subject DN doesn't match HTTP request metadata");
+					}
+				}
+				
+				// Self-issued (assumes self-signed)
+				return SelfSignedTLSClientAuthentication.parse(httpRequest);
+			} else {
+				// PKI bound
+				return PKITLSClientAuthentication.parse(httpRequest);
+			}
 		}
 		
 		return null; // no auth

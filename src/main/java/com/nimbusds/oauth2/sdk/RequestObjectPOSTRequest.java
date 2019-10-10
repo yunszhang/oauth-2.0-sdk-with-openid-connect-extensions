@@ -258,6 +258,7 @@ public final class RequestObjectPOSTRequest extends AbstractOptionallyAuthentica
 			
 			ClientID clientID = new ClientID(JSONObjectUtils.getString(jsonObject, "client_id"));
 			
+			// TODO
 			TLSClientAuthentication tlsClientAuth;
 			if (httpRequest.getClientX509Certificate() != null && httpRequest.getClientX509CertificateSubjectDN() != null &&
 					httpRequest.getClientX509CertificateSubjectDN().equals(httpRequest.getClientX509CertificateRootDN())) {

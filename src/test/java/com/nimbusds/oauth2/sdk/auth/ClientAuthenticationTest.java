@@ -21,6 +21,7 @@ package com.nimbusds.oauth2.sdk.auth;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.X509CertificateGenerator;
@@ -59,7 +60,7 @@ public class ClientAuthenticationTest extends TestCase {
 	}
 	
 	
-	public void testPublicKeyTLSClientCertificateAuthentication()
+	public void testSelfSignedClientCertificateAuthentication_fromCertOnly()
 		throws Exception {
 		
 		X509Certificate clientCert = X509CertificateGenerator.generateSampleClientCertificate();
@@ -68,13 +69,72 @@ public class ClientAuthenticationTest extends TestCase {
 		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=123");
 		httpRequest.setClientX509Certificate(clientCert);
-		httpRequest.setClientX509CertificateSubjectDN(clientCert.getSubjectDN().getName());
-		httpRequest.setClientX509CertificateRootDN(clientCert.getIssuerDN().getName());
 		
 		SelfSignedTLSClientAuthentication clientAuth = (SelfSignedTLSClientAuthentication) ClientAuthentication.parse(httpRequest);
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals(clientCert, clientAuth.getClientX509Certificate());
+	}
+	
+	
+	public void testSelfSignedClientCertificateAuthentication_withSubjectAndRootParams()
+		throws Exception {
+		
+		X509Certificate clientCert = X509CertificateGenerator.generateSampleClientCertificate();
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
+		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setQuery("client_id=123");
+		httpRequest.setClientX509Certificate(clientCert);
+		httpRequest.setClientX509CertificateRootDN(clientCert.getIssuerX500Principal().getName());
+		httpRequest.setClientX509CertificateSubjectDN(clientCert.getSubjectX500Principal().getName());
+		
+		SelfSignedTLSClientAuthentication clientAuth = (SelfSignedTLSClientAuthentication) ClientAuthentication.parse(httpRequest);
+		assertEquals(new ClientID("123"), clientAuth.getClientID());
+		assertNull(clientAuth.getSSLSocketFactory());
+		assertEquals(clientCert, clientAuth.getClientX509Certificate());
+	}
+	
+	
+	public void testSelfSignedClientCertificateAuthentication_detectIssuerMismatch()
+		throws Exception {
+		
+		X509Certificate clientCert = X509CertificateGenerator.generateSampleClientCertificate();
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
+		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setQuery("client_id=123");
+		httpRequest.setClientX509Certificate(clientCert);
+		httpRequest.setClientX509CertificateRootDN("cn=invalidIssuer");
+		httpRequest.setClientX509CertificateSubjectDN(clientCert.getSubjectX500Principal().getName());
+		
+		try {
+			ClientAuthentication.parse(httpRequest);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Client X.509 certificate issuer DN doesn't match HTTP request metadata", e.getMessage());
+		}
+	}
+	
+	
+	public void testSelfSignedClientCertificateAuthentication_detectSubjectMismatch()
+		throws Exception {
+		
+		X509Certificate clientCert = X509CertificateGenerator.generateSampleClientCertificate();
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
+		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setQuery("client_id=123");
+		httpRequest.setClientX509Certificate(clientCert);
+		httpRequest.setClientX509CertificateRootDN(clientCert.getIssuerX500Principal().getName());
+		httpRequest.setClientX509CertificateSubjectDN("cn=invalidSubject");
+		
+		try {
+			ClientAuthentication.parse(httpRequest);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Client X.509 certificate subject DN doesn't match HTTP request metadata", e.getMessage());
+		}
 	}
 	
 	
