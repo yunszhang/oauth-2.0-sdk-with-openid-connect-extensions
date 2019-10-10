@@ -308,9 +308,9 @@ public class ClaimsRequest {
         }
 
         /**
-         * Get the optional additionalInformation for the claim
+         * Gets the optional additional information for the claim.
          *
-         * @return The additonalInformation, {@code null} if not specified
+         * @return The additional information, {@code null} if not specified.
          */
         public Map<String, Object> getAdditionalInformation() {
             return additionalInformation;
@@ -599,8 +599,8 @@ public class ClaimsRequest {
      *                    specified.
      * @param value       The expected claim value, {@code null} if not
      *                    specified.
-	 * @param additionalInformation The additional information for this claim,
-	 *                              {@code null} if not specified
+     * @param additionalInformation The additional information for this claim,
+     *                              {@code null} if not specified
      */
     public void addIDTokenClaim(final String claimName, final ClaimRequirement requirement,
                                 final LangTag langTag, final String value, final Map<String, Object> additionalInformation) {
@@ -634,8 +634,8 @@ public class ClaimsRequest {
      *                    specified.
      * @param values      The expected claim values, {@code null} if not
      *                    specified.
-	 * @param additionalInformation The additional information for this claim,
-	 *                              {@code null} if not specified
+     * @param additionalInformation The additional information for this claim,
+     *                              {@code null} if not specified
      */
     public void addIDTokenClaim(final String claimName, final ClaimRequirement requirement,
                                 final LangTag langTag, final List<String> values, final Map<String, Object> additionalInformation) {
@@ -677,8 +677,9 @@ public class ClaimsRequest {
      *
      * @param withLangTag If {@code true} the language tags, if any, will
      *                    be appended to the names, else not.
+     *
      * @return The ID token claim names, as an unmodifiable set, empty set
-     * if none.
+     *         if none.
      */
     public Set<String> getIDTokenClaimNames(final boolean withLangTag) {
 
@@ -696,6 +697,7 @@ public class ClaimsRequest {
      *
      * @param claimName The claim name. Must not be {@code null}.
      * @param langTag   The associated language tag, {@code null} if none.
+     *
      * @return The removed ID token claim, {@code null} if not found.
      */
     public Entry removeIDTokenClaim(final String claimName, final LangTag langTag) {
@@ -713,8 +715,9 @@ public class ClaimsRequest {
      * existing language tag variations.
      *
      * @param claimName The claim name. Must not be {@code null}.
+     *
      * @return The removed ID token claims, as an unmodifiable collection,
-     * empty set if none were found.
+     *         empty set if none were found.
      */
     public Collection<Entry> removeIDTokenClaims(final String claimName) {
 
@@ -796,6 +799,7 @@ public class ClaimsRequest {
         addUserInfoClaim(new Entry(claimName, requirement, langTag, value));
     }
 
+    
     /**
      * Adds the specified UserInfo claim to the request.
      *
@@ -805,8 +809,8 @@ public class ClaimsRequest {
      *                    specified.
      * @param value       The expected claim value, {@code null} if not
      *                    specified.
-	 * @param additionalInformation The additional information for this claim,
-	 *                              {@code null} if not specified
+     * @param additionalInformation The additional information for this claim,
+     *                              {@code null} if not specified
      */
     public void addUserInfoClaim(final String claimName, final ClaimRequirement requirement,
                                  final LangTag langTag, final String value, final Map<String, Object> additionalInformation) {
@@ -830,6 +834,8 @@ public class ClaimsRequest {
 
         addUserInfoClaim(new Entry(claimName, requirement, langTag, values));
     }
+    
+    
     /**
      * Adds the specified UserInfo claim to the request.
      *
@@ -839,8 +845,8 @@ public class ClaimsRequest {
      *                    specified.
      * @param values      The expected claim values, {@code null} if not
      *                    specified.
-	 * @param additionalInformation The additional information for this claim,
-	 *                              {@code null} if not specified
+     * @param additionalInformation The additional information for this claim,
+     *                              {@code null} if not specified
      */
     public void addUserInfoClaim(final String claimName, final ClaimRequirement requirement,
                                  final LangTag langTag, final List<String> values, final Map<String, Object> additionalInformation) {
@@ -869,7 +875,7 @@ public class ClaimsRequest {
      * Gets the requested UserInfo claims.
      *
      * @return The UserInfo claims, as an unmodifiable collection, empty
-     * set if none.
+     *         set if none.
      */
     public Collection<Entry> getUserInfoClaims() {
 
@@ -882,8 +888,9 @@ public class ClaimsRequest {
      *
      * @param withLangTag If {@code true} the language tags, if any, will
      *                    be appended to the names, else not.
+     *
      * @return The UserInfo claim names, as an unmodifiable set, empty set
-     * if none.
+     *         if none.
      */
     public Set<String> getUserInfoClaimNames(final boolean withLangTag) {
 
@@ -901,6 +908,7 @@ public class ClaimsRequest {
      *
      * @param claimName The claim name. Must not be {@code null}.
      * @param langTag   The associated language tag, {@code null} if none.
+     *
      * @return The removed UserInfo claim, {@code null} if not found.
      */
     public Entry removeUserInfoClaim(final String claimName, final LangTag langTag) {
@@ -918,8 +926,9 @@ public class ClaimsRequest {
      * existing language tag variations.
      *
      * @param claimName The claim name. Must not be {@code null}.
+     *
      * @return The removed UserInfo claims, as an unmodifiable collection,
-     * empty set if none were found.
+     *         empty set if none were found.
      */
     public Collection<Entry> removeUserInfoClaims(final String claimName) {
 
@@ -1009,6 +1018,7 @@ public class ClaimsRequest {
      * @param scope        The scope, {@code null} if not specified (for a
      *                     plain OAuth 2.0 authorisation request with no
      *                     scope explicitly specified).
+     *
      * @return The claims request.
      */
     public static ClaimsRequest resolve(final ResponseType responseType, final Scope scope) {
@@ -1030,6 +1040,7 @@ public class ClaimsRequest {
      *                     scope explicitly specified).
      * @param customClaims Custom scope to claim name map, {@code null} if
      *                     not specified.
+     *
      * @return The claims request.
      */
     public static ClaimsRequest resolve(final ResponseType responseType,
@@ -1120,7 +1131,7 @@ public class ClaimsRequest {
 									values.add((String) collectionValue);
 								}
 							}
-							Map<String, Object> additionalInformation = resolveAdditionalInformationForClaim(new HashMap<String, Object>(claimNames.get(key)));
+							Map<String, Object> additionalInformation = resolveAdditionalInformationForClaim(new HashMap<>(claimNames.get(key)));
 							entries.add(new Entry(name, requirement, langTag, null, values, additionalInformation));
 						}
 					} else {
@@ -1144,13 +1155,14 @@ public class ClaimsRequest {
 
         return claimsRequest;
     }
+    
 
     private static Map<String, Object> resolveAdditionalInformationForClaim(Map<String, Object> customClaims) {
- 			customClaims.remove("essential");
- 			customClaims.remove("value");
- 			customClaims.remove("values");
+ 	customClaims.remove("essential");
+ 	customClaims.remove("value");
+ 	customClaims.remove("values");
     	return customClaims.isEmpty() ? null : customClaims;
-	}
+    }
 
 
     /**
@@ -1168,6 +1180,7 @@ public class ClaimsRequest {
      *                      optional {@code claims} OpenID Connect
      *                      authorisation request parameter, {@code null}
      *                      if not specified.
+     *
      * @return The merged claims request.
      */
     public static ClaimsRequest resolve(final ResponseType responseType,
@@ -1196,6 +1209,7 @@ public class ClaimsRequest {
      *                      if not specified.
      * @param customClaims  Custom scope to claim name map, {@code null} if
      *                      not specified.
+     *
      * @return The merged claims request.
      */
     public static ClaimsRequest resolve(final ResponseType responseType,
@@ -1220,6 +1234,7 @@ public class ClaimsRequest {
      *
      * @param authRequest The OpenID authentication request. Must not be
      *                    {@code null}.
+     *
      * @return The merged claims request.
      */
     public static ClaimsRequest resolve(final AuthenticationRequest authRequest) {
@@ -1279,7 +1294,9 @@ public class ClaimsRequest {
      *
      * @param json The JSON object string to parse. Must not be
      *             {@code null}.
+     *
      * @return The claims request.
+     *
      * @throws ParseException If the string couldn't be parsed to a valid
      *                        JSON object.
      */
