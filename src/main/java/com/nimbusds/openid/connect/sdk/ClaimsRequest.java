@@ -20,6 +20,9 @@ package com.nimbusds.openid.connect.sdk;
 
 import java.util.*;
 
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -27,9 +30,6 @@ import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
-
-import net.jcip.annotations.Immutable;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -1070,7 +1070,7 @@ public class ClaimsRequest {
 	 */
 	public static ClaimsRequest resolve(final ResponseType responseType, final Scope scope) {
 		
-		return resolve(responseType, scope, Collections.<Scope.Value, Map<String, Map<String, Object>>>emptyMap());
+		return resolve(responseType, scope, Collections.<Scope.Value, Set<String>>emptyMap());
 	}
 	
 	
@@ -1085,14 +1085,14 @@ public class ClaimsRequest {
 	 * @param scope        The scope, {@code null} if not specified (for a
 	 *                     plain OAuth 2.0 authorisation request with no
 	 *                     scope explicitly specified).
-	 * @param customClaims Custom scope to claim name map, {@code null} if
-	 *                     not specified.
+	 * @param customClaims Custom scope value to set of claim names map,
+	 *                     {@code null} if not specified.
          *
 	 * @return The claims request.
 	 */
 	public static ClaimsRequest resolve(final ResponseType responseType,
 					    final Scope scope,
-					    final Map<Scope.Value, Map<String, Map<String, Object>>> customClaims) {
+					    final Map<Scope.Value, Set<String>> customClaims) {
 		
 		// Determine the claims target (ID token or UserInfo)
 		final boolean switchToIDToken =
@@ -1129,7 +1129,9 @@ public class ClaimsRequest {
 				
 			} else if (customClaims != null && customClaims.containsKey(value)) {
 				
-				Map<String, Map<String, Object>> claimNames = customClaims.get(value);
+				// Process custom scope value -> claim names expansion, e.g.
+				// "corp_profile" -> ["employeeNumber", "dept", "ext"]
+				Set<String> claimNames = customClaims.get(value);
 				
 				if (claimNames == null || claimNames.isEmpty()) {
 					continue; // skip
@@ -1137,53 +1139,8 @@ public class ClaimsRequest {
 				
 				entries = new HashSet<>();
 				
-				for (Map.Entry<String, Map<String, Object>> claimName : claimNames.entrySet()) {
-					String key = claimName.getKey();
-					ClaimRequirement requirement = ClaimRequirement.VOLUNTARY;
-					String name = key;
-					LangTag langTag = null;
-					
-					if (key.contains("#")) {
-						
-						String[] parts = key.split("#", 2);
-						
-						name = parts[0];
-						
-						try {
-							langTag = LangTag.parse(parts[1]);
-							
-						} catch (LangTagException e) {
-							
-							// Ignore and continue
-							continue;
-						}
-						
-					}
-					if (claimName.getValue() != null) {
-						if (claimName.getValue().containsKey("essential") && claimName.getValue().get("essential") != null && claimName.getValue().get("essential") instanceof Boolean && (Boolean) claimName.getValue().get("essential")) {
-							requirement = ClaimRequirement.ESSENTIAL;
-						}
-						if (claimName.getValue().containsKey("value") && claimName.getValue().get("value") != null && claimName.getValue().get("value") instanceof String) {
-							String claimValue = (String) claimName.getValue().get("value");
-							Map<String, Object> additionalInformation = resolveAdditionalInformationForClaim(new HashMap<String, Object>(claimNames.get(key)));
-							entries.add(new Entry(name, requirement, langTag, claimValue, null, additionalInformation));
-						} else if (claimName.getValue().containsKey("values") && claimName.getValue().get("values") != null && claimName.getValue().get("values") instanceof String[]) {
-							List<String> values = Arrays.asList((String[]) claimName.getValue().get("values"));
-							Map<String, Object> additionalInformation = resolveAdditionalInformationForClaim(new HashMap<String, Object>(claimNames.get(key)));
-							entries.add(new Entry(name, requirement, langTag, null, values, additionalInformation));
-						} else if (claimName.getValue().containsKey("values") && claimName.getValue().get("values") != null && claimName.getValue().get("values") instanceof Collection<?>) {
-							List<String> values = new ArrayList<>();
-							for (Object collectionValue : (Collection<?>) claimName.getValue().get("values")) {
-								if (collectionValue instanceof String) {
-									values.add((String) collectionValue);
-								}
-							}
-							Map<String, Object> additionalInformation = resolveAdditionalInformationForClaim(new HashMap<>(claimNames.get(key)));
-							entries.add(new Entry(name, requirement, langTag, null, values, additionalInformation));
-						}
-					} else {
-						entries.add(new Entry(key, ClaimRequirement.VOLUNTARY));
-					}
+				for (String claimName: claimNames) {
+					entries.add(new ClaimsRequest.Entry(claimName, ClaimRequirement.VOLUNTARY));
 				}
 				
 			} else {
@@ -1234,7 +1191,7 @@ public class ClaimsRequest {
 					    final Scope scope,
 					    final ClaimsRequest claimsRequest) {
 		
-		return resolve(responseType, scope, claimsRequest, Collections.<Scope.Value, Map<String, Map<String, Object>>>emptyMap());
+		return resolve(responseType, scope, claimsRequest, Collections.<Scope.Value, Set<String>>emptyMap());
 	}
 	
 	
@@ -1253,15 +1210,15 @@ public class ClaimsRequest {
 	 *                      optional {@code claims} OpenID Connect
 	 *                      authorisation request parameter, {@code null}
 	 *                      if not specified.
-	 * @param customClaims  Custom scope to claim name map, {@code null} if
-	 *                      not specified.
+	 * @param customClaims  Custom scope value to set of claim names map,
+	 *                      {@code null} if not specified.
          *
 	 * @return The merged claims request.
 	 */
 	public static ClaimsRequest resolve(final ResponseType responseType,
 					    final Scope scope,
 					    final ClaimsRequest claimsRequest,
-					    final Map<Scope.Value, Map<String, Map<String, Object>>> customClaims) {
+					    final Map<Scope.Value, Set<String>> customClaims) {
 		
 		ClaimsRequest mergedClaimsRequest = resolve(responseType, scope, customClaims);
 		
