@@ -146,7 +146,7 @@ public abstract class ClientAuthentication {
 		}
 		
 		// Client TLS?
-		if (httpRequest.getClientX509Certificate() != null) {
+		if (httpRequest.getClientX509Certificate() != null && StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(params, "client_id"))) {
 			
 			// Check for self-issued first (not for self-signed (too expensive in terms of CPU time)
 			

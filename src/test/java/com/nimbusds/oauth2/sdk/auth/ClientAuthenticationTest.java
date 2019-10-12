@@ -18,14 +18,19 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
+import java.net.URI;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.TokenIntrospectionRequest;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.X509CertificateGenerator;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+
 import junit.framework.TestCase;
 
 
@@ -162,6 +167,28 @@ public class ClientAuthenticationTest extends TestCase {
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
 		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=123");
+		
+		assertNull(ClientAuthentication.parse(httpRequest));
+	}
+	
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/274/clientauthenticationparse-should-return-no
+	public void testClientAuthenticationNone_withClientCertificate()
+		throws Exception {
+		
+		URI endpoint = URI.create("https://c2id.com/token/introspect");
+		
+		X509Certificate clientCert = X509CertificateGenerator.generateSampleClientCertificate();
+		AccessToken clientAuthz = new BearerAccessToken();
+		AccessToken introspectedToken = new BearerAccessToken();
+		
+		TokenIntrospectionRequest request = new TokenIntrospectionRequest(
+			endpoint,
+			clientAuthz,
+			introspectedToken);
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		httpRequest.setClientX509Certificate(clientCert);
 		
 		assertNull(ClientAuthentication.parse(httpRequest));
 	}

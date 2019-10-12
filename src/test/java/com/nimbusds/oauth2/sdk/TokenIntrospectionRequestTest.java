@@ -19,7 +19,11 @@ package com.nimbusds.oauth2.sdk;
 
 
 import java.net.URI;
+import java.security.cert.X509Certificate;
 import java.util.*;
+
+import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
@@ -27,12 +31,11 @@ import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.X509CertificateGenerator;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.Token;
-import junit.framework.TestCase;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -293,5 +296,30 @@ public class TokenIntrospectionRequestTest extends TestCase {
 		assertEquals(clientAuthz, request.getClientAuthorization());
 		assertEquals(Collections.singletonList("10.20.30.40"), request.getCustomParameters().get("ip"));
 		assertEquals(1, request.getCustomParameters().size());
+	}
+	
+	
+	public void testMTLSBearerTokenAuthorized() throws Exception {
+		
+		URI endpoint = URI.create("https://c2id.com/token/introspect");
+		
+		X509Certificate clientCert = X509CertificateGenerator.generateSampleClientCertificate();
+		AccessToken mtlsClientAuthz = new BearerAccessToken();
+		AccessToken introspectedToken = new BearerAccessToken();
+		
+		TokenIntrospectionRequest request = new TokenIntrospectionRequest(
+			endpoint,
+			mtlsClientAuthz,
+			introspectedToken);
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		httpRequest.setClientX509Certificate(clientCert);
+		
+		request = TokenIntrospectionRequest.parse(httpRequest);
+		
+		assertEquals(endpoint, request.getEndpointURI());
+		assertEquals(introspectedToken.getValue(), request.getToken().getValue());
+		assertEquals(mtlsClientAuthz.getValue(), request.getClientAuthorization().getValue());
+		assertNull(request.getClientAuthentication());
 	}
 }
