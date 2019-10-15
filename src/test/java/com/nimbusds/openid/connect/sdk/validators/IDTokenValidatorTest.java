@@ -26,11 +26,15 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 
+import junit.framework.TestCase;
+import org.junit.Assert;
+
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.*;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.proc.*;
 import com.nimbusds.jose.util.Base64URL;
@@ -52,8 +56,6 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
-import junit.framework.TestCase;
-import org.junit.Assert;
 
 
 /**
@@ -130,15 +132,11 @@ public class IDTokenValidatorTest extends TestCase {
 
 	public void testVerifySigned()
 		throws Exception {
-
-		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-		gen.initialize(2048);
-		KeyPair keyPair = gen.generateKeyPair();
-		RSAKey rsaJWK = new RSAKey.Builder((RSAPublicKey)keyPair.getPublic())
-				.privateKey((RSAPrivateKey)keyPair.getPrivate())
-				.keyID("1")
-				.keyUse(KeyUse.SIGNATURE)
-				.build();
+		
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.keyID("1")
+			.keyUse(KeyUse.SIGNATURE)
+			.generate();
 		JWKSet jwkSet = new JWKSet(rsaJWK);
 
 		Issuer iss = new Issuer("https://c2id.com");
@@ -171,15 +169,11 @@ public class IDTokenValidatorTest extends TestCase {
 
 	public void testVerifyBadSigned()
 		throws Exception {
-
-		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-		gen.initialize(2048);
-		KeyPair keyPair = gen.generateKeyPair();
-		RSAKey rsaJWK = new RSAKey.Builder((RSAPublicKey)keyPair.getPublic())
-				.privateKey((RSAPrivateKey)keyPair.getPrivate())
-				.keyID("1")
-				.keyUse(KeyUse.SIGNATURE)
-				.build();
+		
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.keyID("1")
+			.keyUse(KeyUse.SIGNATURE)
+			.generate();
 		JWKSet jwkSet = new JWKSet(rsaJWK);
 
 		Issuer iss = new Issuer("https://c2id.com");
@@ -207,19 +201,56 @@ public class IDTokenValidatorTest extends TestCase {
 			assertEquals("Signed JWT rejected: Invalid signature", e.getMessage());
 		}
 	}
+	
+	
+	public void testVerify_rejectType()
+		throws Exception {
+		
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.keyID("1")
+			.keyUse(KeyUse.SIGNATURE)
+			.generate();
+		JWKSet jwkSet = new JWKSet(rsaJWK);
+		
+		Issuer iss = new Issuer("https://c2id.com");
+		ClientID clientID = new ClientID("123");
+		Date now = new Date();
+		
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+			.issuer(iss.getValue())
+			.subject("alice")
+			.audience(clientID.getValue())
+			.expirationTime(new Date(now.getTime() + 10*60*1000L))
+			.issueTime(now)
+			.claim("scope", "openid")
+			.build();
+		
+		SignedJWT idToken = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256)
+			.type(new JOSEObjectType("at+jwt"))
+			.build(),
+			claimsSet);
+		idToken.sign(new RSASSASigner(rsaJWK));
+		
+		IDTokenValidator idTokenValidator = new IDTokenValidator(iss, clientID, JWSAlgorithm.RS256, jwkSet);
+		assertNotNull(idTokenValidator.getJWSKeySelector());
+		assertNull(idTokenValidator.getJWEKeySelector());
+		
+		try {
+			idTokenValidator.validate(idToken, null);
+			fail();
+		} catch (BadJOSEException e) {
+			assertEquals("JOSE header \"typ\" (type) \"at+jwt\" not allowed", e.getMessage());
+		}
+	}
 
 
 	public void testVerifySignedWithNonce()
 		throws Exception {
-
-		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-		gen.initialize(2048);
-		KeyPair keyPair = gen.generateKeyPair();
-		RSAKey rsaJWK = new RSAKey.Builder((RSAPublicKey)keyPair.getPublic())
-				.privateKey((RSAPrivateKey)keyPair.getPrivate())
-				.keyID("1")
-				.keyUse(KeyUse.SIGNATURE)
-				.build();
+		
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.keyID("1")
+			.keyUse(KeyUse.SIGNATURE)
+			.generate();
 		JWKSet jwkSet = new JWKSet(rsaJWK);
 
 		Issuer iss = new Issuer("https://c2id.com");

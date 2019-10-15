@@ -1137,5 +1137,9 @@ version 6.16.1 (2019-10-12)
     * Fixes ClientAuthentication.parse(HTTPRequest) to return no client
       authentication if a client X.509 certificate is present but no client_id
       parameter. Intended to fix TokenIntrospectionRequest.parse(HTTPRequest)
-      with mTLS bearer token as authorisation. Bug introduced in 6.14 (issue
+      with mTLS bearer token as authorisation. Bug introduced in 6.14 (iss
       #274).
+
+version 6.16.1 (2019-10-12)
+    * Bumps Nimbus JOSE+JWT to min 8.0 to support ID token "typ" validation
+      (iss #275).
