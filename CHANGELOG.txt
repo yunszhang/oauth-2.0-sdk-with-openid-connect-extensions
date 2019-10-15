@@ -1140,6 +1140,6 @@ version 6.16.1 (2019-10-12)
       with mTLS bearer token as authorisation. Bug introduced in 6.14 (iss
       #274).
 
-version 6.16.1 (2019-10-12)
+version 6.16.2 (2019-10-15)
     * Bumps Nimbus JOSE+JWT to min 8.0 to support ID token "typ" validation
       (iss #275).
