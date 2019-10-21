@@ -1133,14 +1133,14 @@ version 6.16.1 (2019-10-11)
       6.14, custom scope value to claim names expansions always resolved as
       voluntary claims with no additional information (iss #273).
 
-version 6.16.1 (2019-10-12)
+version 6.16.2 (2019-10-12)
     * Fixes ClientAuthentication.parse(HTTPRequest) to return no client
       authentication if a client X.509 certificate is present but no client_id
       parameter. Intended to fix TokenIntrospectionRequest.parse(HTTPRequest)
       with mTLS bearer token as authorisation. Bug introduced in 6.14 (iss
       #274).
 
-version 6.16.2 (2019-10-21)
+version 6.16.3 (2019-10-21)
     * Bumps Nimbus JOSE+JWT to min 8.2 to support ID token "typ" validation
       (iss #275).
     * Fixes BearerAccessToken.parse to not throw ParseException instances with
