@@ -1141,5 +1141,5 @@ version 6.16.1 (2019-10-12)
       #274).
 
 version 6.16.2 (2019-10-15)
-    * Bumps Nimbus JOSE+JWT to min 8.0 to support ID token "typ" validation
+    * Bumps Nimbus JOSE+JWT to min 8.2 to support ID token "typ" validation
       (iss #275).
