@@ -283,4 +283,40 @@ public class BearerAccessTokenTest extends TestCase {
 			assertEquals(BearerTokenError.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
 		}
 	}
+	
+	
+	public void testParseException_validChars_TokenTypeMustBeBearer() {
+		
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("token_type", "some-token-type");
+		
+		ParseException pe = null;
+		try {
+			BearerAccessToken.parse(jsonObject);
+			fail();
+		} catch (ParseException e) {
+			pe = e;
+		}
+		assertEquals("Token type must be Bearer", pe.getMessage());
+		assertTrue(BearerTokenError.isDescriptionWithValidChars(pe.getMessage()));
+	}
+	
+	
+	public void testParseExpiresInError() {
+		
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("token_type", "Bearer");
+		jsonObject.put("access_token", "xyz");
+		jsonObject.put("expires_in", "invalid-time");
+		
+		ParseException pe = null;
+		try {
+			BearerAccessToken.parse(jsonObject);
+			fail();
+		} catch (ParseException e) {
+			pe = e;
+		}
+		assertEquals("Invalid expires_in parameter, must be integer", pe.getMessage());
+		assertTrue(BearerTokenError.isDescriptionWithValidChars(pe.getMessage()));
+	}
 }

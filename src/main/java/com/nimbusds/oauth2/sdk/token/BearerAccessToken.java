@@ -189,7 +189,7 @@ public class BearerAccessToken extends AccessToken {
 		AccessTokenType tokenType = new AccessTokenType(JSONObjectUtils.getString(jsonObject, "token_type"));
 		
 		if (! tokenType.equals(AccessTokenType.BEARER))
-			throw new ParseException("Token type must be \"Bearer\"");
+			throw new ParseException("Token type must be Bearer");
 		
 
 		// Parse value
@@ -215,7 +215,7 @@ public class BearerAccessToken extends AccessToken {
 
 				} catch (NumberFormatException e) {
 
-					throw new ParseException("Invalid \"expires_in\" parameter, must be integer");
+					throw new ParseException("Invalid expires_in parameter, must be integer");
 				}
 			}
 		}

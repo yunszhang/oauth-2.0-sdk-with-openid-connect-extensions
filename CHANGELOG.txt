@@ -1140,6 +1140,9 @@ version 6.16.1 (2019-10-12)
       with mTLS bearer token as authorisation. Bug introduced in 6.14 (iss
       #274).
 
-version 6.16.2 (2019-10-15)
+version 6.16.2 (2019-10-21)
     * Bumps Nimbus JOSE+JWT to min 8.2 to support ID token "typ" validation
       (iss #275).
+    * Fixes BearerAccessToken.parse to not throw ParseException instances with
+      messages which include illegal characters according to RFC 6750, section
+      3 (iss #276).
