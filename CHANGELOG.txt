@@ -1148,4 +1148,4 @@ version 6.16.3 (2019-10-21)
       3 (iss #276).
 
 version 6.16.4 (2019-10-21)
-    * ClientInformationResponse.toHTTPResponse must return HTTP 201(iss #277).
+    * ClientInformationResponse.toHTTPResponse must return HTTP 201 (iss #277).
