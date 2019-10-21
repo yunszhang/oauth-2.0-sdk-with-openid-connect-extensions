@@ -112,7 +112,7 @@ public class ClientInformationResponse
 	@Override
 	public HTTPResponse toHTTPResponse() {
 	
-		HTTPResponse httpResponse = new HTTPResponse(HTTPResponse.SC_OK);
+		HTTPResponse httpResponse = new HTTPResponse(HTTPResponse.SC_CREATED);
 		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
 		httpResponse.setCacheControl("no-store");
 		httpResponse.setPragma("no-cache");

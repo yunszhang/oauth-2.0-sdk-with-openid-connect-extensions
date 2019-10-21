@@ -1146,3 +1146,6 @@ version 6.16.3 (2019-10-21)
     * Fixes BearerAccessToken.parse to not throw ParseException instances with
       messages which include illegal characters according to RFC 6750, section
       3 (iss #276).
+
+version 6.16.4 (2019-10-21)
+    * ClientInformationResponse.toHTTPResponse must return HTTP 201(iss #277).

@@ -45,6 +45,7 @@ public class ClientRegistrationResponseTest extends TestCase {
 		ClientInformationResponse clientInfoResponse = new ClientInformationResponse(clientInfo);
 		
 		HTTPResponse httpResponse = clientInfoResponse.toHTTPResponse();
+		assertEquals(HTTPResponse.SC_CREATED, httpResponse.getStatusCode());
 		
 		clientInfoResponse = ClientRegistrationResponse.parse(httpResponse).toSuccessResponse();
 		
