@@ -256,7 +256,7 @@ public class BearerAccessToken extends AccessToken {
 			throw new ParseException("Invalid HTTP Authorization header value", BearerTokenError.INVALID_REQUEST);
 		
 		if (! parts[0].equals("Bearer"))
-			throw new ParseException("Token type must be \"Bearer\"", BearerTokenError.INVALID_REQUEST);
+			throw new ParseException("Token type must be Bearer", BearerTokenError.INVALID_REQUEST);
 		
 		try {
 			return new BearerAccessToken(parts[1]);

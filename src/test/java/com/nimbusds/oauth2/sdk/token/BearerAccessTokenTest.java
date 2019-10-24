@@ -319,4 +319,19 @@ public class BearerAccessTokenTest extends TestCase {
 		assertEquals("Invalid expires_in parameter, must be integer", pe.getMessage());
 		assertTrue(BearerTokenError.isDescriptionWithValidChars(pe.getMessage()));
 	}
+	
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/276/bearer-access-token-invalid-error-message
+	public void testParseHeader_tokenTypeMustBeBearer() {
+	
+		ParseException pe = null;
+		try {
+			BearerAccessToken.parse("XYZ aiXe4moo8aiguaL4ohnu3bod");
+			fail();
+		} catch (ParseException e) {
+			pe = e;
+		}
+		assertEquals("Token type must be Bearer", pe.getMessage());
+		assertTrue(BearerTokenError.isDescriptionWithValidChars(pe.getMessage()));
+	}
 }
