@@ -19,11 +19,13 @@ package com.nimbusds.oauth2.sdk.as;
 
 
 import java.net.URI;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.minidev.json.JSONObject;
 
-import com.nimbusds.oauth2.sdk.*;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.OrderedJSONObject;
 
@@ -37,6 +39,8 @@ import com.nimbusds.oauth2.sdk.util.OrderedJSONObject;
  *     <li>OAuth 2.0 Authorization Server Metadata (RFC 8414)
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
  *         Access Tokens (draft-ietf-oauth-mtls-15)
+ *     <li>OAuth 2.0 Pushed Authorization Requests
+ *         (draft-lodderstedt-oauth-par-00)
  *     <li>OAuth 2.0 Device Flow for Browserless and Input Constrained Devices
  *         (draft-ietf-oauth-device-flow-14)
  * </ul>
@@ -58,6 +62,7 @@ public class AuthorizationServerEndpointMetadata {
 		p.add("revocation_endpoint");
 		p.add("device_authorization_endpoint");
 		p.add("request_object_endpoint");
+		p.add("pushed_authorization_request_endpoint");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 	
@@ -108,6 +113,12 @@ public class AuthorizationServerEndpointMetadata {
 	 * The request object endpoint.
 	 */
 	private URI requestObjectEndpoint;
+	
+	
+	/**
+	 * The pushed request object endpoint.
+	 */
+	private URI parEndpoint;
 	
 	
 	/**
@@ -278,6 +289,32 @@ public class AuthorizationServerEndpointMetadata {
 	
 	
 	/**
+	 * Gets the pushed authorisation request endpoint. Corresponds to the
+	 * {@code pushed_authorization_request_endpoint} metadata field.
+	 *
+	 * @return The pushed authorisation request endpoint, {@code null} if
+	 *         not specified.
+	 */
+	public URI getPushedAuthorizationRequestEndpoint() {
+		
+		return parEndpoint;
+	}
+	
+	
+	/**
+	 * Gets the pushed authorisation request endpoint. Corresponds to the
+	 * {@code pushed_authorization_request_endpoint} metadata field.
+	 *
+	 * @param parEndpoint The pushed authorisation request endpoint,
+	 *                    {@code null} if not specified.
+	 */
+	public void setPushedAuthorizationRequestEndpoint(final URI parEndpoint) {
+		
+		this.parEndpoint = parEndpoint;
+	}
+	
+	
+	/**
 	 * Gets the device authorization endpoint URI. Corresponds the
 	 * {@code device_authorization_endpoint} metadata field.
 	 *
@@ -331,6 +368,9 @@ public class AuthorizationServerEndpointMetadata {
 		if (requestObjectEndpoint != null)
 			o.put("request_object_endpoint", requestObjectEndpoint.toString());
 		
+		if (parEndpoint != null)
+			o.put("pushed_authorization_request_endpoint", parEndpoint.toString());
+		
 		if (deviceAuthzEndpoint != null)
 			o.put("device_authorization_endpoint", deviceAuthzEndpoint.toString());
 		
@@ -370,7 +410,7 @@ public class AuthorizationServerEndpointMetadata {
 		as.revocationEndpoint = JSONObjectUtils.getURI(jsonObject, "revocation_endpoint", null);
 		as.deviceAuthzEndpoint = JSONObjectUtils.getURI(jsonObject, "device_authorization_endpoint", null);
 		as.requestObjectEndpoint = JSONObjectUtils.getURI(jsonObject, "request_object_endpoint", null);
-		
+		as.parEndpoint = JSONObjectUtils.getURI(jsonObject, "pushed_authorization_request_endpoint", null);
 		return as;
 	}
 }

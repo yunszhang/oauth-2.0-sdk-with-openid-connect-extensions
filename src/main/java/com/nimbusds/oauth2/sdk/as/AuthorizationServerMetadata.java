@@ -54,6 +54,8 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
  *     <li>Financial-grade API - Part 2: Read and Write API Security Profile
+ *     <li>OAuth 2.0 Pushed Authorization Requests
+ *         (draft-lodderstedt-oauth-par-00)
  *     <li>OAuth 2.0 Device Flow for Browserless and Input Constrained Devices
  *         (draft-ietf-oauth-device-flow-14)
  * </ul>
@@ -292,6 +294,9 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	 * responses.
 	 */
 	private List<EncryptionMethod> authzJWEEncs;
+	
+	
+	private URI parEndpoint;
 	
 	
 	/**
@@ -1475,6 +1480,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 		as.setRevocationEndpointURI(asEndpoints.getRevocationEndpointURI());
 		as.setDeviceAuthorizationEndpointURI(asEndpoints.getDeviceAuthorizationEndpointURI());
 		as.setRequestObjectEndpoint(asEndpoints.getRequestObjectEndpoint());
+		as.setPushedAuthorizationRequestEndpoint(asEndpoints.getPushedAuthorizationRequestEndpoint());
 		as.jwkSetURI = JSONObjectUtils.getURI(jsonObject, "jwks_uri", null);
 		
 		// AS capabilities

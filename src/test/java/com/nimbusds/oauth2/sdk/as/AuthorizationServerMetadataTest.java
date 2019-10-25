@@ -57,6 +57,7 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("request_object_endpoint"));
 		assertTrue(paramNames.contains("request_parameter_supported"));
 		assertTrue(paramNames.contains("require_request_uri_registration"));
+		assertTrue(paramNames.contains("pushed_authorization_request_endpoint"));
 		assertTrue(paramNames.contains("request_object_endpoint"));
 		assertTrue(paramNames.contains("request_object_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("request_object_encryption_alg_values_supported"));
@@ -80,7 +81,7 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_encryption_enc_values_supported"));
 		assertTrue(paramNames.contains("device_authorization_endpoint"));
 		
-		assertEquals(35, paramNames.size());
+		assertEquals(36, paramNames.size());
 	}
 	
 	
@@ -313,5 +314,26 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		
 		JSONObject jsonObject = as.toJSONObject();
 		assertFalse(JSONObjectUtils.getBoolean(jsonObject, "request_uri_parameter_supported"));
+	}
+	
+	
+	public void testPAR() throws ParseException {
+		
+		AuthorizationServerMetadata as = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
+		
+		assertNull(as.getPushedAuthorizationRequestEndpoint());
+		
+		as.applyDefaults();
+		assertNull(as.getPushedAuthorizationRequestEndpoint());
+		
+		URI parEndpoint = URI.create("https://c2id.com/par");
+		as.setPushedAuthorizationRequestEndpoint(parEndpoint);
+		assertEquals(parEndpoint, as.getPushedAuthorizationRequestEndpoint());
+		
+		JSONObject jsonObject = as.toJSONObject();
+		assertEquals(parEndpoint.toString(), jsonObject.get("pushed_authorization_request_endpoint"));
+		
+		as = AuthorizationServerMetadata.parse(jsonObject.toJSONString());
+		assertEquals(parEndpoint, as.getPushedAuthorizationRequestEndpoint());
 	}
 }
