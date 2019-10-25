@@ -1160,5 +1160,6 @@ version 6.17 (2019-10-25)
       (draft-lodderstedt-oauth-par-00), see PushedAuthorizationRequest,
       PushedAuthorizationResponse, PushedAuthorizationSuccessResponse and
       PushedAuthorizationSuccessResponse classes.
+    * Deprecates RequestObjectPOST classes.
     * Updates ErrorObject to support URL-encoded parameters.
     * Adds new AuthenticationRequestDetector utility.

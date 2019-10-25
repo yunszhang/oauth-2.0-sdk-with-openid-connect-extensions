@@ -59,6 +59,7 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  *         Request (JAR) (draft-ietf-oauth-jwsreq-17).
  * </ul>
  */
+@Deprecated
 @Immutable
 public final class RequestObjectPOSTSuccessResponse extends RequestObjectPOSTResponse implements SuccessResponse {
 	

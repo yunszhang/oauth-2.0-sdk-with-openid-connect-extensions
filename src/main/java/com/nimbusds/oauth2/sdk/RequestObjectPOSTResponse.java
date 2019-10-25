@@ -33,6 +33,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
  *         Request (JAR) (draft-ietf-oauth-jwsreq-17).
  * </ul>
  */
+@Deprecated
 public abstract class RequestObjectPOSTResponse implements Response {
 	
 	
