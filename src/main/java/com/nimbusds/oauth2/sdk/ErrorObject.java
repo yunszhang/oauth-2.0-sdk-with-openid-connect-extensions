@@ -19,11 +19,18 @@ package com.nimbusds.oauth2.sdk;
 
 
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import net.jcip.annotations.Immutable;
-import net.minidev.json.JSONObject;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 
 
 /**
@@ -247,7 +254,7 @@ public class ErrorObject {
 	 * {
 	 *   "error"             : "invalid_grant",
 	 *   "error_description" : "Invalid resource owner credentials"
-	   }
+	 * }
 	 * </pre>
 	 *
 	 * @return The JSON object.
@@ -269,6 +276,32 @@ public class ErrorObject {
 		}
 
 		return o;
+	}
+	
+	
+	/**
+	 * Returns a parameters representation of this error object. Suitable
+	 * for URL-encoded error responses.
+	 *
+	 * @return The parameters.
+	 */
+	public Map<String, List<String>> toParameters() {
+		
+		Map<String,List<String>> params = new HashMap<>();
+		
+		if (getCode() != null) {
+			params.put("error", Collections.singletonList(getCode()));
+		}
+		
+		if (getDescription() != null) {
+			params.put("error_description", Collections.singletonList(getDescription()));
+		}
+		
+		if (getURI() != null) {
+			params.put("error_uri", Collections.singletonList(getURI().toString()));
+		}
+		
+		return params;
 	}
 
 
@@ -308,17 +341,53 @@ public class ErrorObject {
 	public static ErrorObject parse(final JSONObject jsonObject) {
 
 		String code = null;
-		String description = null;
-		URI uri = null;
-
 		try {
 			code = JSONObjectUtils.getString(jsonObject, "error", null);
+		} catch (ParseException e) {
+			// ignore and continue
+		}
+		
+		String description = null;
+		try {
 			description = JSONObjectUtils.getString(jsonObject, "error_description", null);
+		} catch (ParseException e) {
+			// ignore and continue
+		}
+		
+		URI uri = null;
+		try {
 			uri = JSONObjectUtils.getURI(jsonObject, "error_uri", null);
 		} catch (ParseException e) {
 			// ignore and continue
 		}
 
+		return new ErrorObject(code, description, 0, uri);
+	}
+	
+	
+	/**
+	 * Parses an error object from the specified parameters representation.
+	 * Suitable for URL-encoded error responses.
+	 *
+	 * @param params The parameters. Must not be {@code null}.
+	 *
+	 * @return The error object.
+	 */
+	public static ErrorObject parse(final Map<String, List<String>> params) {
+		
+		String code = MultivaluedMapUtils.getFirstValue(params, "error");
+		String description = MultivaluedMapUtils.getFirstValue(params, "error_description");
+		String uriString = MultivaluedMapUtils.getFirstValue(params, "error_uri");
+		
+		URI uri = null;
+		if (uriString != null) {
+			try {
+				uri = new URI(uriString);
+			} catch (URISyntaxException e) {
+				// ignore
+			}
+		}
+		
 		return new ErrorObject(code, description, 0, uri);
 	}
 
@@ -334,12 +403,9 @@ public class ErrorObject {
 	public static ErrorObject parse(final HTTPResponse httpResponse) {
 
 		JSONObject jsonObject;
-
 		try {
 			jsonObject = httpResponse.getContentAsJSONObject();
-
 		} catch (ParseException e) {
-
 			return new ErrorObject(null, null, httpResponse.getStatusCode());
 		}
 

@@ -1154,3 +1154,11 @@ version 6.16.5 (2019-10-24)
     * Fixes BearerAccessToken.parse(String) to not throw ParseException
       instances with messages which include illegal characters according to RFC
       6750, section 3 (iss #276).
+
+version 6.17 (2019-10-25)
+    * Adds support for OAuth 2.0 Pushed Authorization Requests
+      (draft-lodderstedt-oauth-par-00), see PushedAuthorizationRequest,
+      PushedAuthorizationResponse, PushedAuthorizationSuccessResponse and
+      PushedAuthorizationSuccessResponse classes.
+    * Updates ErrorObject to support URL-encoded parameters.
+    * Adds new AuthenticationRequestDetector utility.

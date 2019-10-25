@@ -33,6 +33,8 @@ import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
  *     <li>{@link com.nimbusds.oauth2.sdk.auth.ClientSecretPost client_secret_post}
  *     <li>{@link com.nimbusds.oauth2.sdk.auth.ClientSecretJWT client_secret_jwt}
  *     <li>{@link com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT private_key_jwt}
+ *     <li>{@link com.nimbusds.oauth2.sdk.auth.SelfSignedTLSClientAuthentication self_signed_tls_client_auth}
+ *     <li>{@link com.nimbusds.oauth2.sdk.auth.PKITLSClientAuthentication tls_client_auth}
  * </ul>
  */
 public abstract class AbstractOptionallyAuthenticatedRequest extends AbstractRequest {

@@ -19,8 +19,9 @@ package com.nimbusds.oauth2.sdk;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
+
+import net.jcip.annotations.Immutable;
 
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
@@ -30,7 +31,6 @@ import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
-import net.jcip.annotations.Immutable;
 
 
 /**
@@ -199,13 +199,7 @@ public class AuthorizationErrorResponse
 			return params;
 		}
 
-		params.put("error", Collections.singletonList(error.getCode()));
-
-		if (error.getDescription() != null)
-			params.put("error_description", Collections.singletonList(error.getDescription()));
-
-		if (error.getURI() != null)
-			params.put("error_uri", Collections.singletonList(error.getURI().toString()));
+		params.putAll(getErrorObject().toParameters());
 
 		if (getState() != null)
 			params.put("state", Collections.singletonList(getState().getValue()));
@@ -244,31 +238,12 @@ public class AuthorizationErrorResponse
 		}
 
 		// Parse the error
-		if (StringUtils.isBlank(MultivaluedMapUtils.getFirstValue(params, "error")))
+		ErrorObject error = ErrorObject.parse(params);
+		
+		if (StringUtils.isBlank(error.getCode())) {
 			throw new ParseException("Missing error code");
-
-		// Parse error code
-		String errorCode = MultivaluedMapUtils.getFirstValue(params, "error");
-
-		String errorDescription = MultivaluedMapUtils.getFirstValue(params, "error_description");
-
-		String errorURIString = MultivaluedMapUtils.getFirstValue(params, "error_uri");
-
-		URI errorURI = null;
-
-		if (errorURIString != null) {
-			
-			try {
-				errorURI = new URI(errorURIString);
-				
-			} catch (URISyntaxException e) {
-		
-				throw new ParseException("Invalid error URI: " + errorURIString, e);
-			}
 		}
-
-		ErrorObject error = new ErrorObject(errorCode, errorDescription, HTTPResponse.SC_FOUND, errorURI);
-		
+		error = error.setHTTPStatusCode(HTTPResponse.SC_FOUND); // need a status code
 		
 		// State
 		State state = State.parse(MultivaluedMapUtils.getFirstValue(params, "state"));
