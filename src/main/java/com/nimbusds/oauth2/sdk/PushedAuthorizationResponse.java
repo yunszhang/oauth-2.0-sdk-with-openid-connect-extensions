@@ -70,7 +70,7 @@ public abstract class PushedAuthorizationResponse implements Response {
 	public static PushedAuthorizationResponse parse(final HTTPResponse httpResponse)
 		throws ParseException {
 		
-		if (httpResponse.getStatusCode() == HTTPResponse.SC_CREATED)
+		if (httpResponse.getStatusCode() == HTTPResponse.SC_CREATED || httpResponse.getStatusCode() == HTTPResponse.SC_OK)
 			return PushedAuthorizationSuccessResponse.parse(httpResponse);
 		else
 			return PushedAuthorizationErrorResponse.parse(httpResponse);

@@ -1164,3 +1164,7 @@ version 6.17 (2019-10-25)
     * Deprecates RequestObjectPOST classes.
     * Updates ErrorObject to support URL-encoded parameters.
     * Adds new AuthenticationRequestDetector utility.
+
+version 6.17.1 (2019-10-27)
+    * Updates PushedAuthorizationResponse.parse to treat HTTP status code 200
+      as success (in addition to HTTP 201 Created) (iss #279).
