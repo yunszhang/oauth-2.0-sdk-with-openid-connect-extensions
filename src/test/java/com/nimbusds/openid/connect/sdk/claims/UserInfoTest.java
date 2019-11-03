@@ -36,9 +36,6 @@ import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
 
-/**
- * Tests the UserInfo claims set.
- */
 public class UserInfoTest extends TestCase {
 	
 	
@@ -973,5 +970,53 @@ public class UserInfoTest extends TestCase {
 		userInfo.setAudience((List<Audience>)null);
 		
 		assertNull(userInfo.getAudience());
+	}
+	
+	
+	// Identity assurance
+	public void testParseExample_1() throws ParseException {
+		
+		String json = "{  " +
+			"   \"sub\":\"248289761001\"," +
+			"   \"email\":\"janedoe@example.com\"," +
+			"   \"email_verified\":true," +
+			"   \"verified_claims\":{  " +
+			"      \"verification\":{  " +
+			"         \"trust_framework\":\"de_aml\"," +
+			"         \"time\":\"2012-04-23T18:25:43.511+01\"," +
+			"         \"verification_process\":\"676q3636461467647q8498785747q487\"," +
+			"         \"evidence\":[  " +
+			"            {  " +
+			"               \"type\":\"id_document\"," +
+			"               \"method\":\"pipp\"," +
+			"               \"document\":{  " +
+			"                  \"type\":\"idcard\"," +
+			"                  \"issuer\":{  " +
+			"                     \"name\":\"Stadt Augsburg\"," +
+			"                     \"country\":\"DE\"" +
+			"                  }," +
+			"                  \"number\":\"53554554\"," +
+			"                  \"date_of_issuance\":\"2012-04-23\"," +
+			"                  \"date_of_expiry\":\"2022-04-22\"" +
+			"               }" +
+			"            }" +
+			"         ]" +
+			"      }," +
+			"      \"claims\":{  " +
+			"         \"given_name\":\"Max\"," +
+			"         \"family_name\":\"Meier\"," +
+			"         \"birthdate\":\"1956-01-28\"" +
+			"      }" +
+			"   }" +
+			"}";
+		
+		UserInfo userInfo = UserInfo.parse(json);
+		
+		assertEquals(new Subject("248289761001"), userInfo.getSubject());
+		assertEquals("janedoe@example.com", userInfo.getEmailAddress());
+		assertTrue(userInfo.getEmailVerified());
+		
+		Map<String,Object> verifiedClaimsMap = (Map<String,Object>)userInfo.getClaim("verified_claims", Map.class);
+		System.out.println(verifiedClaimsMap);
 	}
 }

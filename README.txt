@@ -119,6 +119,8 @@ This SDK version implements the following standards and drafts:
 	* OpenID Connect Extended Authentication Profile (EAP) ACR Values 1.0 -
 	  draft 00
 
+	* OpenID Connect for Identity Assurance 1.0 - draft 08
+
 	* OAuth 2.0 Multiple Response Type Encoding Practices 1.0 (2014-02-25)
 
     * Financial Services – Financial API - Part 1: Read Only API Security
@@ -137,4 +139,4 @@ This SDK is provided under the terms of the Apache 2.0 licence.
 Questions or comments? Email support@connect2id.com
 
 
-2019-07-19
+2019-10-31

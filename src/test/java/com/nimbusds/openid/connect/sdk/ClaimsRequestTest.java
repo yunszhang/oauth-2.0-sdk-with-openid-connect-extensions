@@ -23,6 +23,7 @@ import java.util.*;
 
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -33,9 +34,6 @@ import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
 
-/**
- * Tests the claims request class.
- */
 public class ClaimsRequestTest extends TestCase {
 
 
@@ -1023,5 +1021,41 @@ public class ClaimsRequestTest extends TestCase {
 			assertTrue(Arrays.asList("email", "email_verified", "a-1", "a-2", "a-3", "b-1", "b-2").contains(en.getClaimName()));
 			assertEquals(ClaimRequirement.VOLUNTARY, en.getClaimRequirement());
 		}
+	}
+	
+	
+	// Identity assurance
+	
+	public void testParseExample()
+		throws ParseException {
+		
+		String json = "{  " +
+			"   \"userinfo\":{  " +
+			"      \"verified_claims\":{  " +
+			"         \"claims\":{  " +
+			"            \"given_name\":null," +
+			"            \"family_name\":null," +
+			"            \"birthdate\":null" +
+			"         }" +
+			"      }" +
+			"   }" +
+			"}";
+		
+		ClaimsRequest claimsRequest = ClaimsRequest.parse(json);
+		
+		Collection<ClaimsRequest.Entry> cls = claimsRequest.getUserInfoClaims();
+		assertEquals(1, cls.size());
+		ClaimsRequest.Entry verifiedClaims = cls.iterator().next();
+		assertEquals("verified_claims", verifiedClaims.getClaimName());
+		assertNull(verifiedClaims.getValue());
+		assertNull(verifiedClaims.getValues());
+		Map<String,Object> additionalInfo = verifiedClaims.getAdditionalInformation();
+		Map<String,Object> verifiedClaimsSpec = (Map<String,Object>)additionalInfo.get("claims");
+		assertTrue(verifiedClaimsSpec.containsKey("given_name"));
+		assertTrue(verifiedClaimsSpec.containsKey("family_name"));
+		assertTrue(verifiedClaimsSpec.containsKey("birthdate"));
+		assertEquals(3, verifiedClaimsSpec.size());
+		
+		System.out.println(claimsRequest.toJSONObject());
 	}
 }

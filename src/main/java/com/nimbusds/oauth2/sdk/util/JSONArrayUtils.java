@@ -26,6 +26,7 @@ import java.util.List;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -127,6 +128,32 @@ public final class JSONArrayUtils {
 		}
 
 		return uriList;
+	}
+	
+	
+	public static List<JSONObject> toJSONObjectList(final JSONArray jsonArray)
+		throws ParseException {
+		
+		if (CollectionUtils.isEmpty(jsonArray)) {
+			return Collections.emptyList();
+		}
+		
+		List<JSONObject> objectList = new ArrayList<>(jsonArray.size());
+		
+		for (Object o: jsonArray) {
+			
+			if (o == null) {
+				continue; // skip
+			}
+			
+			try {
+				objectList.add((JSONObject) o);
+			} catch (Exception e) {
+				throw new ParseException("Invalid JSON object: " + e.getMessage());
+			}
+		}
+		
+		return objectList;
 	}
 	
 	

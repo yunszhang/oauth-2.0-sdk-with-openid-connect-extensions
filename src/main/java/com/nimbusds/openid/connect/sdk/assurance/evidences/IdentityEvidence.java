@@ -1,0 +1,137 @@
+/*
+ * oauth2-oidc-sdk
+ *
+ * Copyright 2012-2016, Connect2id Ltd and contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
+package com.nimbusds.openid.connect.sdk.assurance.evidences;
+
+
+import net.minidev.json.JSONAware;
+import net.minidev.json.JSONObject;
+
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+
+
+/**
+ * The base abstract class for identity evidences.
+ *
+ * <p>Related specifications:
+ *
+ * <ul>
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 4.1.1.
+ * </ul>
+ */
+public abstract class IdentityEvidence implements JSONAware {
+	
+	
+	/**
+	 * The evidence type.
+	 */
+	private final IdentityEvidenceType evidenceType;
+	
+	
+	/**
+	 * Creates a new evidence with the specified type.
+	 *
+	 * @param evidenceType The evidence type. Must not be {@code null}.
+	 */
+	protected IdentityEvidence(final IdentityEvidenceType evidenceType) {
+		if (evidenceType == null) {
+			throw new IllegalArgumentException("The evidence type must not be null");
+		}
+		this.evidenceType = evidenceType;
+	}
+	
+	
+	/**
+	 * Returns the evidence type.
+	 *
+	 * @return The evidence type.
+	 */
+	public IdentityEvidenceType getEvidenceType() {
+		return evidenceType;
+	}
+	
+	
+	/**
+	 * Returns a JSON object representation of this evidence.
+	 *
+	 * @return The JSON object.
+	 */
+	public JSONObject toJSONObject() {
+	
+		JSONObject o = new JSONObject();
+		o.put("type", getEvidenceType().getValue());
+		return o;
+	}
+	
+	
+	@Override
+	public String toJSONString() {
+		return toJSONObject().toJSONString();
+	}
+	
+	
+	/**
+	 * Parses an identity evidence from the specified JSON object.
+	 *
+	 * @param jsonObject The JSON object. Must not be {@code null}.
+	 *
+	 * @return A {@link IDDocumentEvidence}, {@link QESEvidence} or
+	 *         {@link UtilityBillEvidence} instance.
+	 *
+	 * @throws ParseException If parsing failed or the evidence type isn't
+	 *                        supported.
+	 */
+	public static IdentityEvidence parse(final JSONObject jsonObject)
+		throws ParseException {
+		
+		IdentityEvidenceType type = new IdentityEvidenceType(JSONObjectUtils.getString(jsonObject, "type"));
+		
+		if (IdentityEvidenceType.ID_DOCUMENT.equals(type)) {
+			return IDDocumentEvidence.parse(jsonObject);
+			
+		} else if (IdentityEvidenceType.QES.equals(type)) {
+			return QESEvidence.parse(jsonObject);
+		
+		} else if (IdentityEvidenceType.UTILITY_BILL.equals(type)) {
+			return UtilityBillEvidence.parse(jsonObject);
+		
+		} else {
+			throw new ParseException("Unsupported type: " + type);
+		}
+	}
+	
+	
+	/**
+	 * Ensures the {@code type} member of the specified JSON object matches
+	 * the expected.
+	 *
+	 * @param expectedType The expected type. Must not be {@code null}.
+	 * @param jsonObject The JSON object. Must not be {@code null}.
+	 *
+	 * @throws ParseException If parsing failed or mismatch.
+	 */
+	protected static void ensureType(final IdentityEvidenceType expectedType, JSONObject jsonObject)
+		throws ParseException {
+		
+		String parsedType = JSONObjectUtils.getString(jsonObject, "type");
+		
+		if (! expectedType.getValue().equals(parsedType)) {
+			throw new ParseException("The identity evidence type must be " + expectedType);
+		}
+	}
+}

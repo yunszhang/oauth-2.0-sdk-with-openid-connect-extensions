@@ -20,11 +20,16 @@ package com.nimbusds.oauth2.sdk.id;
 
 import java.io.Serializable;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import net.minidev.json.JSONAware;
+import net.minidev.json.JSONValue;
 
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
-import net.minidev.json.JSONAware;
-import net.minidev.json.JSONValue;
 
 
 /**
@@ -41,6 +46,26 @@ public class Identifier implements Serializable, Comparable<Identifier>, JSONAwa
 	 * The default byte length of generated identifiers.
 	 */
 	public static final int DEFAULT_BYTE_LENGTH = 32;
+	
+	
+	/**
+	 * Returns a string list representation of the specified identifier
+	 * collection.
+	 *
+	 * @param ids The identifiers, {@code null} if not specified.
+	 *
+	 * @return The string list, empty list if not specified.
+	 */
+	public static List<String> toStringList(final Collection<? extends  Identifier> ids) {
+		if (ids == null) {
+			return Collections.emptyList();
+		}
+		List<String> stringList = new ArrayList<>(ids.size());
+		for (Identifier id: ids) {
+			stringList.add(id.getValue());
+		}
+		return stringList;
+	}
 	
 	
 	/**
