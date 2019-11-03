@@ -30,8 +30,14 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
  * <p>Example HTTP response:
  *
  * <pre>
- * HTTP/1.1 401 Unauthorized
- * Date: Tue, 2 May 2017 15:22:31 GMT
+ * HTTP/1.1 400 Bad Request
+ * Content-Type: application/json
+ * Cache-Control: no-cache, no-store
+ *
+ * {
+ *  "error ": "invalid_request",
+ *  "error_description" : "The redirect_uri is not valid for the given client"
+ * }
  * </pre>
  *
  * <p>Related specifications:
