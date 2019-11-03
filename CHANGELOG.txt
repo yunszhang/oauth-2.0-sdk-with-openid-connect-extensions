@@ -1168,3 +1168,7 @@ version 6.17 (2019-10-25)
 version 6.17.1 (2019-10-27)
     * Updates PushedAuthorizationResponse.parse to treat HTTP status code 200
       as success (in addition to HTTP 201 Created) (iss #279).
+
+version 6.18 (2019-11-03)
+    * Updates OAuth 2.0 Pushed Authorization Requests support to
+      draft-lodderstedt-oauth-par-01.

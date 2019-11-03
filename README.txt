@@ -100,7 +100,9 @@ This SDK version implements the following standards and drafts:
     * OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
 
     * The OAuth 2.0 Authorization Framework: JWT Secured Authorization Request
-      (JAR) draft-ietf-oauth-jwsreq-17
+      (JAR) (draft-ietf-oauth-jwsreq-17)
+
+    * OAuth 2.0 Pushed Authorization Requests (draft-lodderstedt-oauth-par-01)
 
 	* OpenID Connect Core 1.0 (2014-02-25)
 

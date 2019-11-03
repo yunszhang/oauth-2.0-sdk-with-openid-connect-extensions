@@ -18,15 +18,12 @@
 package com.nimbusds.oauth2.sdk;
 
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
 
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
 
 
 public class PushedAuthorizationErrorResponseTest extends TestCase {
@@ -38,26 +35,26 @@ public class PushedAuthorizationErrorResponseTest extends TestCase {
 		assertEquals(OAuth2Error.INVALID_REQUEST, response.getErrorObject());
 		assertFalse(response.indicatesSuccess());
 		
-		Map<String, List<String>> params = response.getErrorObject().toParameters();
-		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getCode()), params.get("error"));
-		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getDescription()), params.get("error_description"));
+		Map<String, Object> params = response.getErrorObject().toJSONObject();
+		assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), params.get("error"));
+		assertEquals(OAuth2Error.INVALID_REQUEST.getDescription(), params.get("error_description"));
 		assertEquals(2, params.size());
 		
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		assertEquals(400, httpResponse.getStatusCode());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpResponse.getContentType().toString());
-		params = URLUtils.parseParameters(httpResponse.getContent());
-		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getCode()), params.get("error"));
-		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getDescription()), params.get("error_description"));
+		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpResponse.getContentType().toString());
+		params = httpResponse.getContentAsJSONObject();
+		assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), params.get("error"));
+		assertEquals(OAuth2Error.INVALID_REQUEST.getDescription(), params.get("error_description"));
 		assertEquals(2, params.size());
 		
 		response = PushedAuthorizationErrorResponse.parse(httpResponse);
 		assertEquals(OAuth2Error.INVALID_REQUEST, response.getErrorObject());
 		assertFalse(response.indicatesSuccess());
 		
-		params = response.getErrorObject().toParameters();
-		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getCode()), params.get("error"));
-		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getDescription()), params.get("error_description"));
+		params = response.getErrorObject().toJSONObject();
+		assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), params.get("error"));
+		assertEquals(OAuth2Error.INVALID_REQUEST.getDescription(), params.get("error_description"));
 		assertEquals(2, params.size());
 	}
 	

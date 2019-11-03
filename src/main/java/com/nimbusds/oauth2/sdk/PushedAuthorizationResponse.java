@@ -28,7 +28,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
  *
  * <ul>
  *     <li>OAuth 2.0 Pushed Authorization Requests
- *         (draft-lodderstedt-oauth-par-00)
+ *         (draft-lodderstedt-oauth-par-01)
  * </ul>
  */
 public abstract class PushedAuthorizationResponse implements Response {

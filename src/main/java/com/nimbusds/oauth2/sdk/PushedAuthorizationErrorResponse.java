@@ -18,14 +18,10 @@
 package com.nimbusds.oauth2.sdk;
 
 
-import java.util.List;
-import java.util.Map;
-
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
 
 
 /**
@@ -42,7 +38,7 @@ import com.nimbusds.oauth2.sdk.util.URLUtils;
  *
  * <ul>
  *     <li>OAuth 2.0 Pushed Authorization Requests
- *         (draft-lodderstedt-oauth-par-00)
+ *         (draft-lodderstedt-oauth-par-01)
  * </ul>
  */
 @Immutable
@@ -89,11 +85,11 @@ public class PushedAuthorizationErrorResponse extends PushedAuthorizationRespons
 		httpResponse.setCacheControl("no-store");
 		httpResponse.setPragma("no-cache");
 		
-		Map<String, List<String>> params = getErrorObject().toParameters();
-		if (! params.isEmpty()) {
-			httpResponse.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
-			httpResponse.setContent(URLUtils.serializeParameters(getErrorObject().toParameters()));
+		if (getErrorObject().getCode() != null) {
+			httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+			httpResponse.setContent(getErrorObject().toJSONObject().toJSONString());
 		}
+		
 		return httpResponse;
 	}
 	
@@ -119,8 +115,8 @@ public class PushedAuthorizationErrorResponse extends PushedAuthorizationRespons
 		}
 		
 		ErrorObject errorObject;
-		if (httpResponse.getContentType() != null && CommonContentTypes.APPLICATION_URLENCODED.getBaseType().equals(httpResponse.getContentType().getBaseType())) {
-			errorObject = ErrorObject.parse(URLUtils.parseParameters(httpResponse.getContent()));
+		if (httpResponse.getContentType() != null && CommonContentTypes.APPLICATION_JSON.getBaseType().equals(httpResponse.getContentType().getBaseType())) {
+			errorObject = ErrorObject.parse(httpResponse.getContentAsJSONObject());
 		} else {
 			errorObject = new ErrorObject(null);
 		}
