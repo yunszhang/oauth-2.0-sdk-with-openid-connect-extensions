@@ -222,10 +222,7 @@ public class BearerAccessToken extends AccessToken {
 
 
 		// Parse scope
-		Scope scope = null;
-
-		if (jsonObject.containsKey("scope"))
-			scope = Scope.parse(JSONObjectUtils.getString(jsonObject, "scope"));
+		Scope scope = Scope.parse(JSONObjectUtils.getString(jsonObject, "scope", null));
 
 
 		return new BearerAccessToken(accessTokenValue, lifetime, scope);

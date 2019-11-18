@@ -29,6 +29,8 @@ import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.token.Tokens;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
@@ -264,5 +266,20 @@ public class AccessTokenResponseTest extends TestCase {
 		assertEquals(1, response.getCustomParameters().size());
 		
 		assertEquals(keys, jsonObject.keySet());
+	}
+	
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/281/json-object-member-with-key-scope-has-null
+	public void testParseScopeNull()
+		throws Exception {
+		
+		String json = "{\"access_token\":\"valid access token with a lot of characters\",\"expires_in\":1800,\"" +
+			"token_type\":\"bearer\",\"scope\":null,\"refresh_token\":\"valid refresh token\"}";
+		
+		AccessTokenResponse response = AccessTokenResponse.parse(JSONObjectUtils.parse(json));
+		assertEquals("valid access token with a lot of characters", response.getTokens().getBearerAccessToken().getValue());
+		assertEquals(1800L, response.getTokens().getBearerAccessToken().getLifetime());
+		assertEquals("valid refresh token", response.getTokens().getRefreshToken().getValue());
+		assertNull(response.getTokens().getAccessToken().getScope());
 	}
 }

@@ -1172,3 +1172,6 @@ version 6.17.1 (2019-10-27)
 version 6.18 (2019-11-03)
     * Updates OAuth 2.0 Pushed Authorization Requests support to
       draft-lodderstedt-oauth-par-01.
+
+version 6.18.1 (2019-11-18)
+    * Allow scope=null in access token response (iss #281).
