@@ -50,4 +50,10 @@ public class AuthenticationRequestDetector {
 		
 		return scope.contains(OIDCScopeValue.OPENID);
 	}
+	
+	
+	/**
+	 * Prevents public instantiation.
+	 */
+	private AuthenticationRequestDetector() {}
 }
