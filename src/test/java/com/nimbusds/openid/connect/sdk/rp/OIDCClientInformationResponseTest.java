@@ -29,28 +29,45 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 
 
-/**
- * Tests the OIDC client information response.
- */
 public class OIDCClientInformationResponseTest extends TestCase {
-
-
-	public void testCycle()
-		throws Exception {
-
+	
+	
+	
+	private static OIDCClientInformation createSampleClientInformation() {
+		
 		ClientID id = new ClientID("123");
 		Date issueDate = new Date(new Date().getTime() / 1000 * 1000);
 		OIDCClientMetadata metadata = new OIDCClientMetadata();
-		metadata.setRedirectionURI(new URI("https://client.com/cb"));
+		metadata.setRedirectionURI(URI.create("https://client.com/cb"));
 		metadata.applyDefaults();
 		Secret secret = new Secret();
 		BearerAccessToken accessToken = new BearerAccessToken();
-		URI uri = new URI("https://c2id.com/client-reg/123");
+		URI uri = URI.create("https://c2id.com/client-reg/123");
+		
+		return new OIDCClientInformation(id, issueDate, metadata, secret, uri, accessToken);
+	}
+	
+	
+	private static void validate(OIDCClientInformation info, OIDCClientInformationResponse response) {
+		
+		assertTrue(response.indicatesSuccess());
+		assertEquals(info.getID(), response.getClientInformation().getID());
+		assertEquals(info.getIDIssueDate(), response.getClientInformation().getIDIssueDate());
+		assertEquals(info.getMetadata().getRedirectionURI(), response.getClientInformation().getMetadata().getRedirectionURI());
+		assertEquals(info.getSecret().getValue(), response.getClientInformation().getSecret().getValue());
+		assertEquals(info.getRegistrationURI(), response.getClientInformation().getRegistrationURI());
+		assertEquals(info.getRegistrationAccessToken().getValue(), response.getClientInformation().getRegistrationAccessToken().getValue());
+	}
 
-		OIDCClientInformation info = new OIDCClientInformation(
-			id, issueDate, metadata, secret, uri, accessToken);
 
-		OIDCClientInformationResponse response = new OIDCClientInformationResponse(info);
+	public void testCycle_201()
+		throws Exception {
+
+		OIDCClientInformation info = createSampleClientInformation();
+
+		boolean forNewClient = true;
+		OIDCClientInformationResponse response = new OIDCClientInformationResponse(info, forNewClient);
+		assertEquals(forNewClient, response.isForNewClient());
 
 		assertTrue(response.indicatesSuccess());
 		assertEquals(info, response.getOIDCClientInformation());
@@ -59,13 +76,30 @@ public class OIDCClientInformationResponseTest extends TestCase {
 		HTTPResponse httpResponse = response.toHTTPResponse();
 
 		response = OIDCClientInformationResponse.parse(httpResponse);
+		assertEquals(forNewClient, response.isForNewClient());
+		
+		validate(info, response);
+	}
+
+
+	public void testCycle_200()
+		throws Exception {
+
+		OIDCClientInformation info = createSampleClientInformation();
+
+		boolean forNewClient = false;
+		OIDCClientInformationResponse response = new OIDCClientInformationResponse(info, forNewClient);
+		assertEquals(forNewClient, response.isForNewClient());
 
 		assertTrue(response.indicatesSuccess());
-		assertEquals(id.getValue(), response.getClientInformation().getID().getValue());
-		assertEquals(issueDate, response.getClientInformation().getIDIssueDate());
-		assertEquals("https://client.com/cb", response.getClientInformation().getMetadata().getRedirectionURIs().iterator().next().toString());
-		assertEquals(secret.getValue(), response.getClientInformation().getSecret().getValue());
-		assertEquals(uri.toString(), response.getClientInformation().getRegistrationURI().toString());
-		assertEquals(accessToken.getValue(), response.getClientInformation().getRegistrationAccessToken().getValue());
+		assertEquals(info, response.getOIDCClientInformation());
+		assertEquals(info, response.getClientInformation());
+
+		HTTPResponse httpResponse = response.toHTTPResponse();
+
+		response = OIDCClientInformationResponse.parse(httpResponse);
+		assertEquals(forNewClient, response.isForNewClient());
+		
+		validate(info, response);
 	}
 }

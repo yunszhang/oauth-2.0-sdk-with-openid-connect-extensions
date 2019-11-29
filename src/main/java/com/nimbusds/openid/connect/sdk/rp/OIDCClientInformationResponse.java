@@ -75,12 +75,15 @@ public class OIDCClientInformationResponse extends ClientInformationResponse {
 	/**
 	 * Creates a new OpenID Connect client information response.
 	 *
-	 * @param clientInfo The OpenID Connect client information. Must not be
-	 *                   {@code null}.
+	 * @param clientInfo   The OpenID Connect client information. Must not
+	 *                     be {@code null}.
+	 * @param forNewClient {@code true} for a newly registered client,
+	 *                     {@code false} for a retrieved or updated client.
 	 */
-	public OIDCClientInformationResponse(final OIDCClientInformation clientInfo) {
+	public OIDCClientInformationResponse(final OIDCClientInformation clientInfo,
+					     final boolean forNewClient) {
 
-		super(clientInfo);
+		super(clientInfo, forNewClient);
 	}
 	
 	
@@ -111,6 +114,7 @@ public class OIDCClientInformationResponse extends ClientInformationResponse {
 
 		httpResponse.ensureStatusCode(HTTPResponse.SC_OK, HTTPResponse.SC_CREATED);
 		OIDCClientInformation clientInfo = OIDCClientInformation.parse(httpResponse.getContentAsJSONObject());
-		return new OIDCClientInformationResponse(clientInfo);
+		boolean forNewClient = HTTPResponse.SC_CREATED == httpResponse.getStatusCode();
+		return new OIDCClientInformationResponse(clientInfo, forNewClient);
 	}
 }

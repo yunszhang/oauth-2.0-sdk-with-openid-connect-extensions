@@ -30,26 +30,41 @@ import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.BearerTokenError;
 
 
-/**
- * Tests the OIDC client registration response parser.
- */
 public class OIDCClientRegistrationResponseParserTest extends TestCase {
-
-
-	public void testParseSuccess()
-		throws Exception {
-
+	
+	
+	private static OIDCClientInformation createSampleOIDCClientInformation() {
+		
 		ClientID id = new ClientID("123");
 		OIDCClientMetadata metadata = new OIDCClientMetadata();
-		metadata.setRedirectionURI(new URI("https://client.com/cb"));
-		URI regURI = new URI("https://c2id.com/client-reg/123");
+		metadata.setRedirectionURI(URI.create("https://client.com/cb"));
+		URI regURI = URI.create("https://c2id.com/client-reg/123");
 		BearerAccessToken accessToken = new BearerAccessToken();
 		metadata.setName("My app");
 		metadata.applyDefaults();
+		
+		return new OIDCClientInformation(id, null, metadata, null, regURI, accessToken);
+	}
+	
+	
+	private static void validate(final OIDCClientInformation clientInfo, final OIDCClientInformationResponse response) {
+		
+		assertEquals(clientInfo.getID(), response.getOIDCClientInformation().getID());
+		assertEquals(clientInfo.getMetadata().getName(), response.getOIDCClientInformation().getMetadata().getName());
+		assertNull(response.getOIDCClientInformation().getSecret());
+		assertNull(response.getOIDCClientInformation().getIDIssueDate());
+		assertEquals(clientInfo.getRegistrationURI(), response.getOIDCClientInformation().getRegistrationURI());
+		assertEquals(clientInfo.getRegistrationAccessToken().getValue(), response.getOIDCClientInformation().getRegistrationAccessToken().getValue());
+	}
 
-		OIDCClientInformation clientInfo = new OIDCClientInformation(id, null, metadata, null, regURI, accessToken);
 
-		OIDCClientInformationResponse response = new OIDCClientInformationResponse(clientInfo);
+	public void testParseSuccess_201()
+		throws Exception {
+
+		OIDCClientInformation clientInfo = createSampleOIDCClientInformation();
+
+		OIDCClientInformationResponse response = new OIDCClientInformationResponse(clientInfo, true);
+		assertTrue(response.isForNewClient());
 
 		assertTrue(response.indicatesSuccess());
 
@@ -59,13 +74,27 @@ public class OIDCClientRegistrationResponseParserTest extends TestCase {
 
 		assertTrue(regResponse.indicatesSuccess());
 		response = (OIDCClientInformationResponse)regResponse;
+		validate(clientInfo, response);
+	}
 
-		assertEquals(id, response.getOIDCClientInformation().getID());
-		assertEquals("My app", response.getOIDCClientInformation().getMetadata().getName());
-		assertNull(response.getOIDCClientInformation().getSecret());
-		assertNull(response.getOIDCClientInformation().getIDIssueDate());
-		assertEquals(regURI, response.getOIDCClientInformation().getRegistrationURI());
-		assertEquals(accessToken.getValue(), response.getOIDCClientInformation().getRegistrationAccessToken().getValue());
+
+	public void testParseSuccess_200()
+		throws Exception {
+
+		OIDCClientInformation clientInfo = createSampleOIDCClientInformation();
+
+		OIDCClientInformationResponse response = new OIDCClientInformationResponse(clientInfo, false);
+		assertFalse(response.isForNewClient());
+
+		assertTrue(response.indicatesSuccess());
+
+		HTTPResponse httpResponse = response.toHTTPResponse();
+
+		ClientRegistrationResponse regResponse = OIDCClientRegistrationResponseParser.parse(httpResponse);
+
+		assertTrue(regResponse.indicatesSuccess());
+		response = (OIDCClientInformationResponse)regResponse;
+		validate(clientInfo, response);
 	}
 
 

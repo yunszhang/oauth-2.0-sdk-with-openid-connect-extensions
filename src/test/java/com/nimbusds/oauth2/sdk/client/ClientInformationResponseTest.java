@@ -32,8 +32,7 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 public class ClientInformationResponseTest extends TestCase {
 	
 	
-	public void testLifeCycle() throws ParseException {
-		
+	private static final ClientInformation createSampleClientInformation() {
 		
 		ClientID clientID = new ClientID();
 		Date iat = new Date();
@@ -41,12 +40,31 @@ public class ClientInformationResponseTest extends TestCase {
 		metadata.setRedirectionURI(URI.create("https://example.com/cb"));
 		metadata.applyDefaults();
 		Secret secret = new Secret();
+		return new ClientInformation(clientID, iat, metadata, secret);
+	}
+	
+	
+	public void testLifeCycle_201() throws ParseException {
 		
-		ClientInformation clientInfo = new ClientInformation(clientID, iat, metadata, secret);
-		ClientInformationResponse response = new ClientInformationResponse(clientInfo);
+		ClientInformation clientInfo = createSampleClientInformation();
+		
+		ClientInformationResponse response = new ClientInformationResponse(clientInfo, true);
 		
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		assertEquals(201, httpResponse.getStatusCode());
+		
+		assertEquals(clientInfo.toJSONObject(), httpResponse.getContentAsJSONObject());
+	}
+	
+	
+	public void testLifeCycle_200() throws ParseException {
+		
+		ClientInformation clientInfo = createSampleClientInformation();
+		
+		ClientInformationResponse response = new ClientInformationResponse(clientInfo, false);
+		
+		HTTPResponse httpResponse = response.toHTTPResponse();
+		assertEquals(200, httpResponse.getStatusCode());
 		
 		assertEquals(clientInfo.toJSONObject(), httpResponse.getContentAsJSONObject());
 	}

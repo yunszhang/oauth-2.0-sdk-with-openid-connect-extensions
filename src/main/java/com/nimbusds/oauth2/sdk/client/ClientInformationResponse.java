@@ -74,20 +74,32 @@ public class ClientInformationResponse
 	/**
 	 * The client information.
 	 */
-	private ClientInformation clientInfo;
+	private final ClientInformation clientInfo;
+	
+	
+	/**
+	 * {@code true} for a newly registered client.
+	 */
+	private final boolean forNewClient;
 
 
 	/**
 	 * Creates a new client information response.
 	 *
-	 * @param clientInfo The client information. Must not be {@code null}.
+	 * @param clientInfo   The client information. Must not be
+	 *                     {@code null}.
+	 * @param forNewClient {@code true} for a newly registered client,
+	 *                     {@code false} for a retrieved or updated client.
 	 */
-	public ClientInformationResponse(final ClientInformation clientInfo) {
+	public ClientInformationResponse(final ClientInformation clientInfo,
+					 final boolean forNewClient) {
 
 		if (clientInfo == null)
 			throw new IllegalArgumentException("The client information must not be null");
 
 		this.clientInfo = clientInfo;
+		
+		this.forNewClient = forNewClient;
 	}
 
 
@@ -107,12 +119,25 @@ public class ClientInformationResponse
 
 		return clientInfo;
 	}
-
-
+	
+	
+	/**
+	 * Checks if the client information response is for a new client.
+	 *
+	 * @return {@code true} for a newly registered client, {@code false}
+	 *         for a retrieved or updated client.
+	 */
+	public boolean isForNewClient() {
+		
+		return forNewClient;
+	}
+	
+	
 	@Override
 	public HTTPResponse toHTTPResponse() {
 	
-		HTTPResponse httpResponse = new HTTPResponse(HTTPResponse.SC_CREATED);
+		// 201 for POST, 200 for GET or PUT
+		HTTPResponse httpResponse = new HTTPResponse(forNewClient ? HTTPResponse.SC_CREATED : HTTPResponse.SC_OK);
 		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
 		httpResponse.setCacheControl("no-store");
 		httpResponse.setPragma("no-cache");
@@ -137,6 +162,7 @@ public class ClientInformationResponse
 
 		httpResponse.ensureStatusCode(HTTPResponse.SC_OK, HTTPResponse.SC_CREATED);
 		ClientInformation clientInfo = ClientInformation.parse(httpResponse.getContentAsJSONObject());
-		return new ClientInformationResponse(clientInfo);
+		boolean forNewClient = HTTPResponse.SC_CREATED == httpResponse.getStatusCode();
+		return new ClientInformationResponse(clientInfo, forNewClient);
 	}
 }

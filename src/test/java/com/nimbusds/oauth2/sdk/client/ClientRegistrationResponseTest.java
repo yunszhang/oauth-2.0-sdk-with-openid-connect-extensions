@@ -21,18 +21,18 @@ package com.nimbusds.oauth2.sdk.client;
 import java.net.URI;
 import java.util.Date;
 
+import junit.framework.TestCase;
+
 import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import junit.framework.TestCase;
 
 
 public class ClientRegistrationResponseTest extends TestCase {
 	
 	
-	public void testToSuccessResponse()
-		throws Exception {
+	private static ClientInformation createSampleClientInformation() {
 		
 		ClientID clientID = new ClientID("123");
 		Date iat = new Date();
@@ -40,14 +40,46 @@ public class ClientRegistrationResponseTest extends TestCase {
 		metadata.setRedirectionURI(URI.create("https://example.com/cb"));
 		metadata.applyDefaults();
 		Secret secret = new Secret();
-		ClientInformation clientInfo = new ClientInformation(clientID, iat, metadata, secret);
+		return new ClientInformation(clientID, iat, metadata, secret);
+	}
+	
+	
+	// for new client
+	public void testToCreatedResponse()
+		throws Exception {
 		
-		ClientInformationResponse clientInfoResponse = new ClientInformationResponse(clientInfo);
+		ClientInformation clientInfo = createSampleClientInformation();
+		
+		boolean forNewClient = true;
+		ClientInformationResponse clientInfoResponse = new ClientInformationResponse(clientInfo, forNewClient);
+		assertEquals(forNewClient, clientInfoResponse.isForNewClient());
 		
 		HTTPResponse httpResponse = clientInfoResponse.toHTTPResponse();
 		assertEquals(HTTPResponse.SC_CREATED, httpResponse.getStatusCode());
 		
 		clientInfoResponse = ClientRegistrationResponse.parse(httpResponse).toSuccessResponse();
+		assertEquals(forNewClient, clientInfoResponse.isForNewClient());
+		
+		assertEquals(clientInfo.getID(), clientInfoResponse.getClientInformation().getID());
+		assertEquals(clientInfo.getMetadata().getRedirectionURI(), clientInfoResponse.getClientInformation().getMetadata().getRedirectionURI());
+	}
+	
+	
+	// for retrieved or updated client
+	public void testToSuccessResponse()
+		throws Exception {
+		
+		ClientInformation clientInfo = createSampleClientInformation();
+		
+		boolean forNewClient = false;
+		ClientInformationResponse clientInfoResponse = new ClientInformationResponse(clientInfo, forNewClient);
+		assertEquals(forNewClient, clientInfoResponse.isForNewClient());
+		
+		HTTPResponse httpResponse = clientInfoResponse.toHTTPResponse();
+		assertEquals(HTTPResponse.SC_OK, httpResponse.getStatusCode());
+		
+		clientInfoResponse = ClientRegistrationResponse.parse(httpResponse).toSuccessResponse();
+		assertEquals(forNewClient, clientInfoResponse.isForNewClient());
 		
 		assertEquals(clientInfo.getID(), clientInfoResponse.getClientInformation().getID());
 		assertEquals(clientInfo.getMetadata().getRedirectionURI(), clientInfoResponse.getClientInformation().getMetadata().getRedirectionURI());
