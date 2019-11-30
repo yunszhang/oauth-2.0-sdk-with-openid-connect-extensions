@@ -1176,8 +1176,8 @@ version 6.18 (2019-11-03)
 version 6.18.1 (2019-11-18)
     * Allow scope=null in access token response (iss #281).
 
-version 6.18.1 (2019-11-29)
+version 6.18.2 (2019-11-30)
     * Adds new parameter to the ClientInformationResponse constructor to
       indicate if the response is for a new client (HTTP status 201) or for a
-      retrieved or updated client (HTTP status 200).
+      retrieved or updated client (HTTP status 200) (iss #282).
 
