@@ -1190,8 +1190,8 @@ version 6.19 (2019-12-04)
       and parsing.
     * Adds new secevent.sdk.claims package and TXN claim.
     * Adds new com.nimbusds.openid.connect.sdk.assurance package implementing
-      the claims and the verified_claims object from OpenID Connect for Identity
-      Assurance 1.0 - 08.
+      the claims and the verified_claims object from OpenID Connect for
+      Identity Assurance 1.0 - 08.
     * Updates UserInfo to support OpenID Connect for Identity Assurance 1.0 -
       08.
     * Factors out a PersonClaims class with common claim getters and setters
