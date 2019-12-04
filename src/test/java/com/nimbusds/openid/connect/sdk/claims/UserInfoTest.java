@@ -37,6 +37,7 @@ import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.TypelessAccessToken;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.date.DateWithTimeZoneOffset;
+import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
 import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
 import com.nimbusds.openid.connect.sdk.assurance.IdentityVerification;
 import com.nimbusds.openid.connect.sdk.assurance.claims.Birthplace;
@@ -1356,5 +1357,74 @@ public class UserInfoTest extends TestCase {
 		assertEquals(qesEvidence.getQESCreationTime().toISO8601String(), out.getVerification().getEvidence().get(0).toQESEvidence().getQESCreationTime().toISO8601String());
 		
 		assertEquals(claims.getName(), out.getClaimsSet().getName());
+	}
+	
+	
+	public void testOnlineExampleWithVerifiedClaims() throws ParseException {
+		
+		Date now = new Date();
+		DateWithTimeZoneOffset timestamp = new DateWithTimeZoneOffset(
+			now,
+			TimeZone.getDefault());
+		String verificationProcess = "4ebc8150-1b26-460a-adc1-3e9096ab88f9";
+		
+		IdentityVerification verification = new IdentityVerification(
+			IdentityTrustFramework.EIDAS_IAL_SUBSTANTIAL,
+			timestamp,
+			verificationProcess,
+			new QESEvidence(
+				new Issuer("https://qes-provider.org"),
+				"cc58176d-6cd4-4d9d-bad9-50981ad3ee1f",
+				DateWithTimeZoneOffset.parseISO8601String("2019-12-01T08:00:00Z")));
+		
+		PersonClaims claims = new PersonClaims();
+		claims.setName("Alice Adams");
+		claims.setEmailAddress("alice@wonderland.com");
+		
+		VerifiedClaimsSet verifiedClaims = new VerifiedClaimsSet(
+			verification,
+			claims);
+		
+		UserInfo userInfo = new UserInfo(new Subject("alice"));
+		userInfo.setVerifiedClaims(verifiedClaims);
+		
+		System.out.println(userInfo.toJSONObject());
+		
+		// {
+		//   "sub":"alice",
+		//   "verified_claims":{
+		//       "claims":{
+		//           "name":"Alice Adams",
+		//           "email":"alice@wonderland.com"
+		//           },
+		//       "verification":{
+		//           "trust_framework":"eidas_ial_substantial",
+		//           "time":"2019-12-04T22:57:16+02:00",
+		//           "verification_process":"4ebc8150-1b26-460a-adc1-3e9096ab88f9",
+		//           "evidence":[{
+		//               "type":"qes",
+		//               "issuer":"https:\/\/qes-provider.org",
+		//               "serial_number":"cc58176d-6cd4-4d9d-bad9-50981ad3ee1f",
+		//               "created_at":"2019-12-01T08:00:00+00:00"
+		//           }]
+		//       }
+		//   }
+		// }
+		
+		UserInfoSuccessResponse userInfoResponse = new UserInfoSuccessResponse(userInfo);
+		userInfo = userInfoResponse.getUserInfo();
+		
+		System.out.println("Subject: " + userInfo.getSubject());
+		
+		verifiedClaims = userInfo.getVerifiedClaimsSet();
+		
+		System.out.println("Trust framework: " + verifiedClaims.getVerification().getTrustFramework());
+		System.out.println("Evidence type: " + verifiedClaims.getVerification().getEvidence().get(0).getEvidenceType());
+		System.out.println("Verified claims: " + verifiedClaims.getClaimsSet().toJSONObject());
+		
+		// Subject: alice
+		// Trust framework: eidas_ial_substantial
+		// Evidence type: qes
+		// Verified claims: {"name":"Alice Adams","email":"alice@wonderland.com"}
 	}
 }
