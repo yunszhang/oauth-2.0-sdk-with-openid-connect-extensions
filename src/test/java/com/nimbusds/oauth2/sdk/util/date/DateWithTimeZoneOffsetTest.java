@@ -19,6 +19,7 @@ package com.nimbusds.oauth2.sdk.util.date;
 
 
 import java.util.Date;
+import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
@@ -201,5 +202,15 @@ public class DateWithTimeZoneOffsetTest extends TestCase {
 		assertEquals(60, dtz.getTimeZoneOffsetMinutes());
 		
 		assertEquals("2012-04-23T18:25:43+01:00", new DateWithTimeZoneOffset(new Date(1335201943511L), 60).toISO8601String());
+	}
+	
+	
+	public void testConstructorWithTimezoneArg() {
+		
+		Date date = new Date(1575494059423L);
+		TimeZone tz = TimeZone.getTimeZone("CET");
+		
+		DateWithTimeZoneOffset dtz = new DateWithTimeZoneOffset(date, tz);
+		assertEquals("2019-12-04T22:14:19+01:00", dtz.toISO8601String());
 	}
 }

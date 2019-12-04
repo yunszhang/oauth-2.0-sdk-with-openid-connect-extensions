@@ -68,6 +68,17 @@ public class DateWithTimeZoneOffset {
 	
 	
 	/**
+	 * Creates a new date with timezone offset.
+	 *
+	 * @param date The date. Must not be {@code null}.
+	 * @param tz   The time zone to determine the time zone offset.
+	 */
+	public DateWithTimeZoneOffset(final Date date, final TimeZone tz) {
+		this(date, tz.getOffset(date.getTime()) / 60_000);
+	}
+	
+	
+	/**
 	 * Returns the date.
 	 *
 	 * @return The date.

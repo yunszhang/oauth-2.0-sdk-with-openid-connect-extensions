@@ -1199,3 +1199,4 @@ version 6.19 (2019-12-04)
 
 version 6.20 (2019-12-04)
     * Adds new IdentityVerification constructor with single evidence.
+    * Adds new DateWithTimeZoneOffset constructor with TimeZone argument.
