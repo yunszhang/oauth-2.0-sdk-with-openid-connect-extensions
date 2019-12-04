@@ -18,6 +18,8 @@
 package com.nimbusds.openid.connect.sdk.assurance.claims;
 
 
+import java.util.List;
+
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
@@ -38,7 +40,7 @@ public class VerifiedClaimsSetTest extends TestCase {
 			IdentityTrustFramework.DE_AML,
 			null,
 			null,
-			null);
+			(List<IdentityEvidence>) null);
 	}
 	
 	

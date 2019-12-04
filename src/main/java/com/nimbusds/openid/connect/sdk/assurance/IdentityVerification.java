@@ -18,6 +18,7 @@
 package com.nimbusds.openid.connect.sdk.assurance;
 
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -72,7 +73,29 @@ public final class IdentityVerification implements JSONAware {
 	
 	
 	/**
-	 * Creates a new identity verification.
+	 * Creates a new identity verification with a single evidence.
+	 *
+	 * @param trustFramework      The trust framework.
+	 * @param time                The verification timestamp if required by
+	 *                            the trust framework, {@code null} if not
+	 *                            required.
+	 * @param verificationProcess The verification process reference if
+	 *                            required by the trust framework,
+	 *                            {@code null} if not required.
+	 * @param evidence            The identity evidence, {@code null} if
+	 *                            not specified.
+	 */
+	public IdentityVerification(final IdentityTrustFramework trustFramework,
+				    final DateWithTimeZoneOffset time,
+				    final String verificationProcess,
+				    final IdentityEvidence evidence) {
+		
+		this(trustFramework, time, verificationProcess, Collections.singletonList(evidence));
+	}
+	
+	
+	/**
+	 * Creates a new identity verification
 	 *
 	 * @param trustFramework      The trust framework.
 	 * @param time                The verification timestamp if required by

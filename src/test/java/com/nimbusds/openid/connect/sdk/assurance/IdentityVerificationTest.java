@@ -20,6 +20,7 @@ package com.nimbusds.openid.connect.sdk.assurance;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import junit.framework.TestCase;
 import net.minidev.json.JSONArray;
@@ -44,7 +45,7 @@ public class IdentityVerificationTest extends TestCase {
 			IdentityTrustFramework.DE_AML,
 			null,
 			null,
-			null);
+			(List)null);
 		
 		assertEquals(IdentityTrustFramework.DE_AML, verification.getTrustFramework());
 		
@@ -67,7 +68,7 @@ public class IdentityVerificationTest extends TestCase {
 	public void testTrustFrameworkRequired(){
 		
 		try {
-			new IdentityVerification(null, null, null, null);
+			new IdentityVerification(null, null, null, (List)null);
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("The trust framework must not be null", e.getMessage());

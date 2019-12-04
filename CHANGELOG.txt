@@ -1196,3 +1196,6 @@ version 6.19 (2019-12-04)
       08.
     * Factors out a PersonClaims class with common claim getters and setters
       for UserInfo and the claims used in a VerifiedClaimsSet.
+
+version 6.20 (2019-12-04)
+    * Adds new IdentityVerification constructor with single evidence.
