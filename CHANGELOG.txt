@@ -1181,3 +1181,18 @@ version 6.18.2 (2019-11-30)
       indicate if the response is for a new client (HTTP status 201) or for a
       retrieved or updated client (HTTP status 200) (iss #282).
 
+version 6.19 (2019-12-04)
+    * Updates OIDCProviderMetadata to support OpenID Connect for Identity
+      Assurance 1.0 - 08.
+    * Adds new DateWithTimeZoneOffset utility class with support for ISO 8601
+      formatting and parsing.
+    * Adds new SimpleDate utility class with support for ISO 8601 formatting
+      and parsing.
+    * Adds new secevent.sdk.claims package and TXN claim.
+    * Adds new com.nimbusds.openid.connect.sdk.assurance package implementing
+      the claims and the verified_claims object from OpenID Connect for Identity
+      Assurance 1.0 - 08.
+    * Updates UserInfo to support OpenID Connect for Identity Assurance 1.0 -
+      08.
+    * Factors out a PersonClaims class with common claim getters and setters
+      for UserInfo and the claims used in a VerifiedClaimsSet.

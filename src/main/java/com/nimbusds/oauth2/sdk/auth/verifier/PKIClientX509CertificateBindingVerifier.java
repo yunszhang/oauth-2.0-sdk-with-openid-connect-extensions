@@ -42,9 +42,9 @@ public interface PKIClientX509CertificateBindingVerifier<T> {
 	 * Verifies that the specified X.509 certificate binds to
 	 * the claimed client ID.
 	 *
-	 * @param clientID  The claimed client ID. Not {@code null}.
-	 * @param subjectDN The X.509 certificate. Not {@code null}.
-	 * @param context   Additional context. May be {@code null}.
+	 * @param clientID    The claimed client ID. Not {@code null}.
+	 * @param certificate The X.509 certificate. Not {@code null}.
+	 * @param context     Additional context. May be {@code null}.
 	 *
 	 * @throws InvalidClientException If client ID and certificate don't
 	 *                                bind or are invalid.

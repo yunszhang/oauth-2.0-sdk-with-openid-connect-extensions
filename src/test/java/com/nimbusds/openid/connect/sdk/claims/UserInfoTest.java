@@ -22,9 +22,13 @@ import java.net.URI;
 import java.util.*;
 import javax.mail.internet.InternetAddress;
 
+import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.jose.util.DateUtils;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.langtag.LangTag;
+import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
@@ -32,21 +36,26 @@ import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.TypelessAccessToken;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import junit.framework.TestCase;
-import net.minidev.json.JSONObject;
+import com.nimbusds.oauth2.sdk.util.date.DateWithTimeZoneOffset;
+import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
+import com.nimbusds.openid.connect.sdk.assurance.IdentityVerification;
+import com.nimbusds.openid.connect.sdk.assurance.claims.Birthplace;
+import com.nimbusds.openid.connect.sdk.assurance.claims.CountryCode;
+import com.nimbusds.openid.connect.sdk.assurance.claims.ISO3166_1Alpha2CountryCode;
+import com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSet;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.*;
 
 
-/**
- * Tests the UserInfo claims set.
- */
 public class UserInfoTest extends TestCase {
 	
 	
 	public void testClaimNameConstants() {
 		
-		assertTrue(UserInfo.getStandardClaimNames().contains("sub"));
+		// Basic
 		assertTrue(UserInfo.getStandardClaimNames().contains("iss"));
 		assertTrue(UserInfo.getStandardClaimNames().contains("aud"));
+		
+		// Person
 		assertTrue(UserInfo.getStandardClaimNames().contains("name"));
 		assertTrue(UserInfo.getStandardClaimNames().contains("given_name"));
 		assertTrue(UserInfo.getStandardClaimNames().contains("family_name"));
@@ -66,7 +75,22 @@ public class UserInfoTest extends TestCase {
 		assertTrue(UserInfo.getStandardClaimNames().contains("phone_number_verified"));
 		assertTrue(UserInfo.getStandardClaimNames().contains("address"));
 		assertTrue(UserInfo.getStandardClaimNames().contains("updated_at"));
-		assertEquals(22, UserInfo.getStandardClaimNames().size());
+		assertTrue(UserInfo.getStandardClaimNames().contains("updated_at"));
+		
+		// UserInfo
+		assertTrue(UserInfo.getStandardClaimNames().contains("sub"));
+		
+		// Assurance
+		assertTrue(UserInfo.getStandardClaimNames().contains("birthplace"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("nationalities"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("birth_family_name"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("birth_given_name"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("birth_middle_name"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("salutation"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("title"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("verified_claims"));
+		
+		assertEquals(30, UserInfo.getStandardClaimNames().size());
 	}
 
 
@@ -190,6 +214,16 @@ public class UserInfoTest extends TestCase {
 		assertNull(userInfo.getPhoneNumberVerified());
 		assertNull(userInfo.getAddress());
 		assertNull(userInfo.getUpdatedTime());
+		
+		// Assurance
+		assertNull(userInfo.getBirthplace());
+		assertNull(userInfo.getNationalities());
+		assertNull(userInfo.getBirthFamilyName());
+		assertNull(userInfo.getBirthGivenName());
+		assertNull(userInfo.getBirthMiddleName());
+		assertNull(userInfo.getSalutation());
+		assertNull(userInfo.getTitle());
+		assertNull(userInfo.getVerifiedClaimsSet());
 		
 		// No external claims
 		assertNull(userInfo.getAggregatedClaims());
@@ -467,8 +501,7 @@ public class UserInfoTest extends TestCase {
 	}
 
 
-	public void testPutAll()
-		throws Exception {
+	public void testPutAll() {
 
 		Subject alice = new Subject("alice");
 
@@ -540,8 +573,7 @@ public class UserInfoTest extends TestCase {
 	}
 	
 	
-	public void testAggregatedClaims_addAndGet()
-		throws Exception {
+	public void testAggregatedClaims_addAndGet() {
 		
 		UserInfo userInfo = new UserInfo(new Subject("alice"));
 		
@@ -973,5 +1005,356 @@ public class UserInfoTest extends TestCase {
 		userInfo.setAudience((List<Audience>)null);
 		
 		assertNull(userInfo.getAudience());
+	}
+	
+	
+	// Identity assurance
+	public void testParseExample_1() throws ParseException {
+		
+		String json = "{  " +
+			"   \"sub\":\"248289761001\"," +
+			"   \"email\":\"janedoe@example.com\"," +
+			"   \"email_verified\":true," +
+			"   \"verified_claims\":{  " +
+			"      \"verification\":{  " +
+			"         \"trust_framework\":\"de_aml\"," +
+			"         \"time\":\"2012-04-23T18:25:43.511+01\"," +
+			"         \"verification_process\":\"676q3636461467647q8498785747q487\"," +
+			"         \"evidence\":[  " +
+			"            {  " +
+			"               \"type\":\"id_document\"," +
+			"               \"method\":\"pipp\"," +
+			"               \"document\":{  " +
+			"                  \"type\":\"idcard\"," +
+			"                  \"issuer\":{  " +
+			"                     \"name\":\"Stadt Augsburg\"," +
+			"                     \"country\":\"DE\"" +
+			"                  }," +
+			"                  \"number\":\"53554554\"," +
+			"                  \"date_of_issuance\":\"2012-04-23\"," +
+			"                  \"date_of_expiry\":\"2022-04-22\"" +
+			"               }" +
+			"            }" +
+			"         ]" +
+			"      }," +
+			"      \"claims\":{  " +
+			"         \"given_name\":\"Max\"," +
+			"         \"family_name\":\"Meier\"," +
+			"         \"birthdate\":\"1956-01-28\"" +
+			"      }" +
+			"   }" +
+			"}";
+		
+		UserInfo userInfo = UserInfo.parse(json);
+		
+		assertEquals(new Subject("248289761001"), userInfo.getSubject());
+		assertEquals("janedoe@example.com", userInfo.getEmailAddress());
+		assertTrue(userInfo.getEmailVerified());
+		
+		Map<String,Object> verifiedClaimsMap = (Map<String,Object>)userInfo.getClaim("verified_claims", Map.class);
+		System.out.println(verifiedClaimsMap);
+	}
+	
+	
+	// https://openid.net/specs/openid-connect-4-identity-assurance-1_0.html#userinfo-response
+	public void testExample_assurance()
+		throws Exception {
+		
+		String json = "{  " +
+			"   \"sub\":\"248289761001\"," +
+			"   \"email\":\"janedoe@example.com\"," +
+			"   \"email_verified\":true," +
+			"   \"verified_claims\":{  " +
+			"      \"verification\":{  " +
+			"         \"trust_framework\":\"de_aml\"," +
+			"         \"time\":\"2012-04-23T18:25:43.511+01\"," +
+			"         \"verification_process\":\"676q3636461467647q8498785747q487\"," +
+			"         \"evidence\":[  " +
+			"            {  " +
+			"               \"type\":\"id_document\"," +
+			"               \"method\":\"pipp\"," +
+			"               \"document\":{  " +
+			"                  \"type\":\"idcard\"," +
+			"                  \"issuer\":{  " +
+			"                     \"name\":\"Stadt Augsburg\"," +
+			"                     \"country\":\"DE\"" +
+			"                  }," +
+			"                  \"number\":\"53554554\"," +
+			"                  \"date_of_issuance\":\"2012-04-23\"," +
+			"                  \"date_of_expiry\":\"2022-04-22\"" +
+			"               }" +
+			"            }" +
+			"         ]" +
+			"      }," +
+			"      \"claims\":{  " +
+			"         \"given_name\":\"Max\"," +
+			"         \"family_name\":\"Meier\"," +
+			"         \"birthdate\":\"1956-01-28\"" +
+			"      }" +
+			"   }" +
+			"}";
+		
+		UserInfo userInfo = UserInfo.parse(json);
+		
+		assertEquals("248289761001", userInfo.getSubject().getValue());
+		assertEquals("janedoe@example.com", userInfo.getEmailAddress());
+		assertTrue(userInfo.getEmailVerified());
+		
+		VerifiedClaimsSet verifiedClaims = userInfo.getVerifiedClaimsSet();
+		
+		IdentityVerification verification = verifiedClaims.getVerification();
+		assertEquals(IdentityTrustFramework.DE_AML, verification.getTrustFramework());
+		assertEquals("2012-04-23T18:25:43+01:00", verification.getVerificationTime().toISO8601String());
+		assertEquals("676q3636461467647q8498785747q487", verification.getVerificationProcess());
+		
+		IDDocumentEvidence evidence = verification.getEvidence().get(0).toIDDocumentEvidence();
+		assertEquals(IdentityEvidenceType.ID_DOCUMENT, evidence.getEvidenceType());
+		assertEquals(IdentityVerificationMethod.PIPP, evidence.getVerificationMethod());
+		IDDocumentDescription idDoc = evidence.getIdentityDocument();
+		assertEquals(IDDocumentType.IDCARD, idDoc.getType());
+		assertEquals("Stadt Augsburg", idDoc.getIssuerName());
+		assertEquals("DE", idDoc.getIssuerCountry().getValue());
+		assertEquals("53554554", idDoc.getNumber());
+		assertEquals("2012-04-23", idDoc.getDateOfIssuance().toISO8601String());
+		assertEquals("2022-04-22", idDoc.getDateOfExpiry().toISO8601String());
+		
+		PersonClaims verifiedPersonClaims = verifiedClaims.getClaimsSet();
+		assertEquals("Max", verifiedPersonClaims.getGivenName());
+		assertEquals("Meier", verifiedPersonClaims.getFamilyName());
+		assertEquals("1956-01-28", verifiedPersonClaims.getBirthdate());
+	}
+	
+	
+	public void testAssurance_basicGettersAndSetters() throws ParseException {
+		
+		Subject subject = new Subject("alice");
+		UserInfo userInfo = new UserInfo(subject);
+		
+		assertNull(userInfo.getBirthplace());
+		Birthplace birthplace = new Birthplace(new ISO3166_1Alpha2CountryCode("DE"), "Muster Region", "Musterstadt");
+		userInfo.setBirthplace(birthplace);
+		assertEquals(birthplace.getCountry(), userInfo.getBirthplace().getCountry());
+		assertEquals(birthplace.getRegion(), userInfo.getBirthplace().getRegion());
+		assertEquals(birthplace.getLocality(), userInfo.getBirthplace().getLocality());
+		
+		assertNull(userInfo.getNationalities());
+		List<CountryCode> nats = Collections.singletonList((CountryCode) new ISO3166_1Alpha2CountryCode("DE"));
+		userInfo.setNationalities(nats);
+		assertEquals(nats, userInfo.getNationalities());
+		
+		assertNull(userInfo.getBirthFamilyName());
+		String birthFamilyName = "birth family name";
+		userInfo.setBirthFamilyName(birthFamilyName);
+		assertEquals(birthFamilyName, userInfo.getBirthFamilyName());
+		
+		assertNull(userInfo.getBirthGivenName());
+		String birthGivenName = "birth given name";
+		userInfo.setBirthGivenName(birthGivenName);
+		assertEquals(birthGivenName, userInfo.getBirthGivenName());
+		
+		assertNull(userInfo.getBirthMiddleName());
+		String birthMiddleName = "birth middle name";
+		userInfo.setBirthMiddleName(birthMiddleName);
+		assertEquals(birthMiddleName, userInfo.getBirthMiddleName());
+		
+		assertNull(userInfo.getSalutation());
+		String salutation = "dear";
+		userInfo.setSalutation(salutation);
+		assertEquals(salutation, userInfo.getSalutation());
+		
+		assertNull(userInfo.getTitle());
+		String title = "Mrs.";
+		userInfo.setTitle(title);
+		assertEquals(title, userInfo.getTitle());
+		
+		String json = userInfo.toJSONString();
+		
+		userInfo = UserInfo.parse(json);
+		
+		assertEquals(birthplace.getCountry(), userInfo.getBirthplace().getCountry());
+		assertEquals(birthplace.getRegion(), userInfo.getBirthplace().getRegion());
+		assertEquals(birthplace.getLocality(), userInfo.getBirthplace().getLocality());
+		assertEquals(nats, userInfo.getNationalities());
+		assertEquals(birthFamilyName, userInfo.getBirthFamilyName());
+		assertEquals(birthGivenName, userInfo.getBirthGivenName());
+		assertEquals(birthMiddleName, userInfo.getBirthMiddleName());
+		assertEquals(salutation, userInfo.getSalutation());
+		assertEquals(title, userInfo.getTitle());
+	}
+	
+	
+	public void testAssurance_langTaggedGettersAndSetters() throws ParseException, LangTagException {
+		
+		Subject subject = new Subject("alice");
+		UserInfo userInfo = new UserInfo(subject);
+		
+		LangTag en = LangTag.parse("en");
+		LangTag de = LangTag.parse("de");
+		
+		assertNull(userInfo.getBirthFamilyName(en));
+		assertNull(userInfo.getBirthFamilyName(de));
+		String birthFamilyName = "birth_family_name";
+		userInfo.setBirthFamilyName(birthFamilyName + "#en", en);
+		userInfo.setBirthFamilyName(birthFamilyName + "#de", de);
+		assertEquals(birthFamilyName + "#en", userInfo.getBirthFamilyName(en));
+		assertEquals(birthFamilyName + "#de", userInfo.getBirthFamilyName(de));
+		
+		assertNull(userInfo.getBirthGivenName(en));
+		assertNull(userInfo.getBirthGivenName(de));
+		String birthGivenName = "birth_given_name";
+		userInfo.setBirthGivenName(birthGivenName + "#en", en);
+		userInfo.setBirthGivenName(birthGivenName + "#de", de);
+		assertEquals(birthGivenName + "#en", userInfo.getBirthGivenName(en));
+		assertEquals(birthGivenName + "#de", userInfo.getBirthGivenName(de));
+		
+		assertNull(userInfo.getBirthMiddleName(en));
+		assertNull(userInfo.getBirthMiddleName(de));
+		String birthMiddleName = "birth_middle_name";
+		userInfo.setBirthMiddleName(birthMiddleName + "#en", en);
+		userInfo.setBirthMiddleName(birthMiddleName + "#de", de);
+		assertEquals(birthMiddleName + "#en", userInfo.getBirthMiddleName(en));
+		assertEquals(birthMiddleName + "#de", userInfo.getBirthMiddleName(de));
+		
+		assertNull(userInfo.getSalutation(en));
+		assertNull(userInfo.getSalutation(de));
+		String salutation = "dear";
+		userInfo.setSalutation(salutation + "#en", en);
+		userInfo.setSalutation(salutation + "#de", de);
+		assertEquals(salutation + "#en", userInfo.getSalutation(en));
+		assertEquals(salutation + "#de", userInfo.getSalutation(de));
+		
+		assertNull(userInfo.getTitle(en));
+		assertNull(userInfo.getTitle(de));
+		String title = "Mrs.";
+		userInfo.setTitle(title + "#en", en);
+		userInfo.setTitle(title + "#de", de);
+		assertEquals(title + "#en", userInfo.getTitle(en));
+		assertEquals(title + "#de", userInfo.getTitle(de));
+		
+		Map<LangTag, String> map = userInfo.getBirthFamilyNameEntries();
+		assertEquals(birthFamilyName + "#en", map.get(en));
+		assertEquals(birthFamilyName + "#de", map.get(de));
+		assertEquals(2, map.size());
+		
+		map = userInfo.getBirthGivenNameEntries();
+		assertEquals(birthGivenName + "#en", map.get(en));
+		assertEquals(birthGivenName + "#de", map.get(de));
+		assertEquals(2, map.size());
+		
+		map = userInfo.getBirthMiddleNameEntries();
+		assertEquals(birthMiddleName + "#en", map.get(en));
+		assertEquals(birthMiddleName + "#de", map.get(de));
+		assertEquals(2, map.size());
+		
+		map = userInfo.getSalutationEntries();
+		assertEquals(salutation + "#en", map.get(en));
+		assertEquals(salutation + "#de", map.get(de));
+		assertEquals(2, map.size());
+		
+		map = userInfo.getTitleEntries();
+		assertEquals(title + "#en", map.get(en));
+		assertEquals(title + "#de", map.get(de));
+		assertEquals(2, map.size());
+		
+		String json = userInfo.toJSONString();
+		
+		userInfo = UserInfo.parse(json);
+		
+		assertEquals(birthFamilyName + "#en", userInfo.getBirthFamilyName(en));
+		assertEquals(birthFamilyName + "#de", userInfo.getBirthFamilyName(de));
+		assertEquals(birthGivenName + "#en", userInfo.getBirthGivenName(en));
+		assertEquals(birthGivenName + "#de", userInfo.getBirthGivenName(de));
+		assertEquals(birthMiddleName + "#en", userInfo.getBirthMiddleName(en));
+		assertEquals(birthMiddleName + "#de", userInfo.getBirthMiddleName(de));
+		assertEquals(salutation + "#en", userInfo.getSalutation(en));
+		assertEquals(salutation + "#de", userInfo.getSalutation(de));
+		assertEquals(title + "#en", userInfo.getTitle(en));
+		assertEquals(title + "#de", userInfo.getTitle(de));
+		
+		map = userInfo.getBirthFamilyNameEntries();
+		assertEquals(birthFamilyName + "#en", map.get(en));
+		assertEquals(birthFamilyName + "#de", map.get(de));
+		assertEquals(2, map.size());
+		
+		map = userInfo.getBirthGivenNameEntries();
+		assertEquals(birthGivenName + "#en", map.get(en));
+		assertEquals(birthGivenName + "#de", map.get(de));
+		assertEquals(2, map.size());
+		
+		map = userInfo.getBirthMiddleNameEntries();
+		assertEquals(birthMiddleName + "#en", map.get(en));
+		assertEquals(birthMiddleName + "#de", map.get(de));
+		assertEquals(2, map.size());
+		
+		map = userInfo.getSalutationEntries();
+		assertEquals(salutation + "#en", map.get(en));
+		assertEquals(salutation + "#de", map.get(de));
+		assertEquals(2, map.size());
+		
+		map = userInfo.getTitleEntries();
+		assertEquals(title + "#en", map.get(en));
+		assertEquals(title + "#de", map.get(de));
+		assertEquals(2, map.size());
+	}
+	
+	
+	public void testAssurance_verifiedClaimsGetterAndSetter() throws ParseException {
+		
+		Subject subject = new Subject("alice");
+		UserInfo userInfo = new UserInfo(subject);
+		
+		assertNull(userInfo.getVerifiedClaimsSet());
+		
+		PersonClaims claims = new PersonClaims();
+		claims.setName("Alice Adams");
+		
+		Date now = new Date(new Date().getTime() / 1000 * 1000); // second precision
+		
+		String verificationProcess = "f3ae0ee3-bcda-4e4b-bf84-3b35eb0a1bc3";
+		
+		QESEvidence qesEvidence = new QESEvidence(
+			new Issuer("issuer"),
+			"001",
+			new DateWithTimeZoneOffset(now, 0));
+		
+		IdentityVerification verification = new IdentityVerification(
+			IdentityTrustFramework.DE_AML,
+			new DateWithTimeZoneOffset(now, 0),
+			verificationProcess,
+			Collections.singletonList((IdentityEvidence) qesEvidence));
+		
+		VerifiedClaimsSet verifiedClaimsSet = new VerifiedClaimsSet(verification, claims);
+		
+		userInfo.setVerifiedClaims(verifiedClaimsSet);
+		
+		VerifiedClaimsSet out = userInfo.getVerifiedClaimsSet();
+		
+		assertEquals(IdentityTrustFramework.DE_AML, out.getVerification().getTrustFramework());
+		assertEquals(verification.getVerificationTime().toISO8601String(), out.getVerification().getVerificationTime().toISO8601String());
+		assertEquals(verificationProcess, out.getVerification().getVerificationProcess());
+		assertEquals(IdentityEvidenceType.QES, out.getVerification().getEvidence().get(0).getEvidenceType());
+		assertEquals(qesEvidence.getQESIssuer(), out.getVerification().getEvidence().get(0).toQESEvidence().getQESIssuer());
+		assertEquals(qesEvidence.getQESSerialNumberString(), out.getVerification().getEvidence().get(0).toQESEvidence().getQESSerialNumberString());
+		assertEquals(qesEvidence.getQESCreationTime().toISO8601String(), out.getVerification().getEvidence().get(0).toQESEvidence().getQESCreationTime().toISO8601String());
+		
+		assertEquals(claims.getName(), out.getClaimsSet().getName());
+		
+		String json = userInfo.toJSONString();
+		
+		// Parse from JSON
+		
+		userInfo = UserInfo.parse(json);
+		
+		out = userInfo.getVerifiedClaimsSet();
+		
+		assertEquals(IdentityTrustFramework.DE_AML, out.getVerification().getTrustFramework());
+		assertEquals(verification.getVerificationTime().toISO8601String(), out.getVerification().getVerificationTime().toISO8601String());
+		assertEquals(verificationProcess, out.getVerification().getVerificationProcess());
+		assertEquals(IdentityEvidenceType.QES, out.getVerification().getEvidence().get(0).getEvidenceType());
+		assertEquals(qesEvidence.getQESIssuer(), out.getVerification().getEvidence().get(0).toQESEvidence().getQESIssuer());
+		assertEquals(qesEvidence.getQESSerialNumberString(), out.getVerification().getEvidence().get(0).toQESEvidence().getQESSerialNumberString());
+		assertEquals(qesEvidence.getQESCreationTime().toISO8601String(), out.getVerification().getEvidence().get(0).toQESEvidence().getQESCreationTime().toISO8601String());
+		
+		assertEquals(claims.getName(), out.getClaimsSet().getName());
 	}
 }

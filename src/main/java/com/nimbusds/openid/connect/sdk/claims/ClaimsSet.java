@@ -23,19 +23,56 @@ import java.net.URL;
 import java.util.*;
 import javax.mail.internet.InternetAddress;
 
+import net.minidev.json.JSONAware;
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagUtils;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.id.Audience;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import net.minidev.json.JSONObject;
 
 
 /**
- * Claims set serialisable to a JSON object.
+ * Claims set with basic getters and setters, serialisable to a JSON object.
  */
-public abstract class ClaimsSet {
+public class ClaimsSet implements JSONAware {
+	
+	
+	/**
+	 * The issuer claim name.
+	 */
+	public static final String ISS_CLAIM_NAME = "iss";
+	
+	
+	/**
+	 * The audience claim name.
+	 */
+	public static final String AUD_CLAIM_NAME = "aud";
+	
+	
+	/**
+	 * The names of the standard top-level claims.
+	 */
+	private static final Set<String> STD_CLAIM_NAMES = Collections.unmodifiableSet(
+		new HashSet<>(Arrays.asList(
+			ISS_CLAIM_NAME,
+			AUD_CLAIM_NAME
+		)));
+	
+	
+	/**
+	 * Gets the names of the standard top-level claims.
+	 *
+	 * @return The names of the standard top-level claims (read-only set).
+	 */
+	public static Set<String> getStandardClaimNames() {
+		
+		return STD_CLAIM_NAMES;
+	}
 
 
 	/**
@@ -47,7 +84,7 @@ public abstract class ClaimsSet {
 	/**
 	 * Creates a new empty claims set.
 	 */
-	protected ClaimsSet() {
+	public ClaimsSet() {
 
 		claims = new JSONObject();
 	}
@@ -58,7 +95,7 @@ public abstract class ClaimsSet {
 	 *
 	 * @param jsonObject The JSON object. Must not be {@code null}.
 	 */
-	protected ClaimsSet(final JSONObject jsonObject) {
+	public ClaimsSet(final JSONObject jsonObject) {
 
 		if (jsonObject == null)
 			throw new IllegalArgumentException("The JSON object must not be null");
@@ -431,10 +468,78 @@ public abstract class ClaimsSet {
 	public List<String> getStringListClaim(final String name) {
 
 		try {
-			return Arrays.asList(JSONObjectUtils.getStringArray(claims, name));
+			return JSONObjectUtils.getStringList(claims, name);
 		} catch (ParseException e) {
 			return null;
 		}
+	}
+	
+	
+	/**
+	 * Gets the issuer. Corresponds to the {@code iss} claim.
+	 *
+	 * @return The issuer, {@code null} if not specified.
+	 */
+	public Issuer getIssuer() {
+		
+		String iss = getStringClaim(ISS_CLAIM_NAME);
+		
+		return iss != null ? new Issuer(iss) : null;
+	}
+	
+	
+	/**
+	 * Sets the issuer. Corresponds to the {@code iss} claim.
+	 *
+	 * @param iss The issuer, {@code null} if not specified.
+	 */
+	public void setIssuer(final Issuer iss) {
+		
+		if (iss != null)
+			setClaim(ISS_CLAIM_NAME, iss.getValue());
+		else
+			setClaim(ISS_CLAIM_NAME, null);
+	}
+	
+	
+	/**
+	 * Gets the audience. Corresponds to the {@code aud} claim.
+	 *
+	 * @return The audience list, {@code null} if not specified.
+	 */
+	public List<Audience> getAudience() {
+		
+		List<String> list = getStringListClaim(AUD_CLAIM_NAME);
+		
+		return list != null && ! list.isEmpty() ? Audience.create(list) : null;
+	}
+	
+	
+	/**
+	 * Sets the audience. Corresponds to the {@code aud} claim.
+	 *
+	 * @param aud The audience, {@code null} if not specified.
+	 */
+	public void setAudience(final Audience aud) {
+		
+		if (aud != null)
+			setAudience(aud.toSingleAudienceList());
+		else
+			setClaim(AUD_CLAIM_NAME, null);
+	}
+	
+	
+	/**
+	 * Sets the audience list. Corresponds to the {@code aud} claim.
+	 *
+	 * @param audList The audience list, {@code null} if not specified.
+	 */
+	public void setAudience(final List<Audience> audList) {
+		
+		if (audList != null)
+			setClaim(AUD_CLAIM_NAME, Audience.toStringList(audList));
+		else
+			setClaim(AUD_CLAIM_NAME, null);
 	}
 
 
@@ -459,6 +564,12 @@ public abstract class ClaimsSet {
 		JSONObject out = new JSONObject();
 		out.putAll(claims);
 		return out;
+	}
+	
+	
+	@Override
+	public String toJSONString() {
+		return toJSONObject().toJSONString();
 	}
 
 

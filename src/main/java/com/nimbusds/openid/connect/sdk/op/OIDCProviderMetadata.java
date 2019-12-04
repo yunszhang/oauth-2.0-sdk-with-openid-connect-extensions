@@ -24,6 +24,8 @@ import java.net.URI;
 import java.net.URL;
 import java.util.*;
 
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -35,13 +37,17 @@ import com.nimbusds.oauth2.sdk.as.AuthorizationServerEndpointMetadata;
 import com.nimbusds.oauth2.sdk.as.AuthorizationServerMetadata;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.id.Identifier;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.Display;
 import com.nimbusds.openid.connect.sdk.SubjectType;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.IDDocumentType;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.IdentityEvidenceType;
+import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.IdentityVerificationMethod;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimType;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -54,6 +60,7 @@ import net.minidev.json.JSONObject;
  *     <li>OpenID Connect Session Management 1.0, section 2.1 (draft 28).
  *     <li>OpenID Connect Front-Channel Logout 1.0, section 3 (draft 02).
  *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.1 (draft 04).
+ *     <li>OpenID Connect for Identity Assurance 1.0 (draft 08).
  *     <li>OAuth 2.0 Authorization Server Metadata (RFC 8414)
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
  *         Access Tokens (draft-ietf-oauth-mtls-15)
@@ -92,6 +99,12 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		p.add("backchannel_logout_session_supported");
 		p.add("frontchannel_logout_supported");
 		p.add("frontchannel_logout_session_supported");
+		p.add("verified_claims_supported");
+		p.add("trust_frameworks_supported");
+		p.add("evidence_supported");
+		p.add("id_documents_supported");
+		p.add("id_documents_verification_methods_supported");
+		p.add("claims_in_verified_claims_supported");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 
@@ -218,6 +231,42 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	 * parameter is set, else not.
 	 */
 	private boolean backChannelLogoutSessionSupported = false;
+	
+	
+	/**
+	 * If {@code true} verified claims are supported.
+	 */
+	private boolean verifiedClaimsSupported = false;
+	
+	
+	/**
+	 * The supported trust frameworks.
+	 */
+	private List<IdentityTrustFramework> trustFrameworks;
+	
+	
+	/**
+	 * The supported identity evidence types.
+	 */
+	private List<IdentityEvidenceType> evidenceTypes;
+	
+	
+	/**
+	 * The supported identity documents.
+	 */
+	private List<IDDocumentType> idDocuments;
+	
+	
+	/**
+	 * The supported identity verification methods.
+	 */
+	private List<IdentityVerificationMethod> idVerificationMethods;
+	
+	
+	/**
+	 * The supported verified claims.
+	 */
+	private List<String> verifiedClaims;
 
 
 	/**
@@ -787,8 +836,154 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		
 		this.backChannelLogoutSessionSupported = backChannelLogoutSessionSupported;
 	}
-
-
+	
+	
+	/**
+	 * Gets support for verified claims. Corresponds to the
+	 * {@code verified_claims_supported} metadata field.
+	 *
+	 * @return {@code true} if verified claims are supported, else
+	 *         {@code false}.
+	 */
+	public boolean supportsVerifiedClaims() {
+		
+		return verifiedClaimsSupported;
+	}
+	
+	
+	/**
+	 * Sets support for verified claims. Corresponds to the
+	 * {@code verified_claims_supported} metadata field.
+	 *
+	 * @param verifiedClaimsSupported {@code true} if verified claims are
+	 *                                supported, else {@code false}.
+	 */
+	public void setSupportsVerifiedClaims(final boolean verifiedClaimsSupported) {
+		
+		this.verifiedClaimsSupported = verifiedClaimsSupported;
+	}
+	
+	
+	/**
+	 * Gets the supported identity trust frameworks. Corresponds to the
+	 * {@code trust_frameworks_supported} metadata field.
+	 *
+	 * @return The supported identity trust frameworks, {@code null} if not
+	 *         specified.
+	 */
+	public List<IdentityTrustFramework> getIdentityTrustFrameworks() {
+		return trustFrameworks;
+	}
+	
+	
+	/**
+	 * Sets the supported identity trust frameworks. Corresponds to the
+	 * {@code trust_frameworks_supported} metadata field.
+	 *
+	 * @param trustFrameworks The supported identity trust frameworks,
+	 *                        {@code null} if not specified.
+	 */
+	public void setIdentityTrustFrameworks(final List<IdentityTrustFramework> trustFrameworks) {
+		this.trustFrameworks = trustFrameworks;
+	}
+	
+	
+	/**
+	 * Gets the supported identity evidence types. Corresponds to the
+	 * {@code evidence_supported} metadata field.
+	 *
+	 * @return The supported identity evidence types, {@code null} if not
+	 *         specified.
+	 */
+	public List<IdentityEvidenceType> getIdentityEvidenceTypes() {
+		return evidenceTypes;
+	}
+	
+	
+	/**
+	 * Sets the supported identity evidence types. Corresponds to the
+	 * {@code evidence_supported} metadata field.
+	 *
+	 * @param evidenceTypes The supported identity evidence types,
+	 *                      {@code null} if not specified.
+	 */
+	public void setIdentityEvidenceTypes(final List<IdentityEvidenceType> evidenceTypes) {
+		this.evidenceTypes = evidenceTypes;
+	}
+	
+	
+	/**
+	 * Gets the supported identity document types. Corresponds to the
+	 * {@code id_documents_supported} metadata field.
+	 *
+	 * @return The supported identity documents types, {@code null}
+	 *         if not specified.
+	 */
+	public List<IDDocumentType> getIdentityDocumentTypes() {
+		return idDocuments;
+	}
+	
+	
+	/**
+	 * Sets the supported identity document types. Corresponds to the
+	 * {@code id_documents_supported} metadata field.
+	 *
+	 * @param idDocuments The supported identity document types,
+	 *                    {@code null} if not specified.
+	 */
+	public void setIdentityDocumentTypes(List<IDDocumentType> idDocuments) {
+		this.idDocuments = idDocuments;
+	}
+	
+	
+	/**
+	 * Gets the supported identity verification methods. Corresponds to the
+	 * {@code id_documents_verification_methods_supported} metadata field.
+	 *
+	 * @return The supported identity verification methods, {@code null}
+	 *         if not specified.
+	 */
+	public List<IdentityVerificationMethod> getIdentityVerificationMethods() {
+		return idVerificationMethods;
+	}
+	
+	
+	/**
+	 * Sets the supported identity verification methods. Corresponds to the
+	 * {@code id_documents_verification_methods_supported} metadata field.
+	 *
+	 * @param idVerificationMethods The supported identity verification
+	 *                              methods, {@code null} if not specified.
+	 */
+	public void setIdentityVerificationMethods(final List<IdentityVerificationMethod> idVerificationMethods) {
+		this.idVerificationMethods = idVerificationMethods;
+	}
+	
+	
+	/**
+	 * Gets the supported verified claims names. Corresponds to the
+	 * {@code claims_in_verified_claims_supported} metadata field.
+	 *
+	 * @return The supported verified claims names, {@code null} if not
+	 *         specified.
+	 */
+	public List<String> getVerifiedClaims() {
+		return verifiedClaims;
+	}
+	
+	
+	/**
+	 * Gets the supported verified claims names. Corresponds to the
+	 * {@code claims_in_verified_claims_supported} metadata field.
+	 *
+	 * @param verifiedClaims The supported verified claims names,
+	 *                       {@code null} if not specified.
+	 */
+	public void setVerifiedClaims(final List<String> verifiedClaims) {
+		this.verifiedClaims = verifiedClaims;
+	}
+	
+	
 	/**
 	 * Applies the OpenID Provider metadata defaults where no values have
 	 * been specified.
@@ -844,13 +1039,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 			o.put("end_session_endpoint", endSessionEndpoint.toString());
 
 		if (acrValues != null) {
-
-			stringList = new ArrayList<>(acrValues.size());
-
-			for (ACR acr: acrValues)
-				stringList.add(acr.getValue());
-
-			o.put("acr_values_supported", stringList);
+			o.put("acr_values_supported", Identifier.toStringList(acrValues));
 		}
 
 		if (idTokenJWSAlgs != null) {
@@ -959,6 +1148,25 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		
 		if (backChannelLogoutSupported) {
 			o.put("backchannel_logout_session_supported", backChannelLogoutSessionSupported);
+		}
+		
+		if (verifiedClaimsSupported) {
+			o.put("verified_claims_supported", true);
+			if (trustFrameworks != null) {
+				o.put("trust_frameworks_supported", Identifier.toStringList(trustFrameworks));
+			}
+			if (evidenceTypes != null) {
+				o.put("evidence_supported", Identifier.toStringList(evidenceTypes));
+			}
+			if (idDocuments != null) {
+				o.put("id_documents_supported", Identifier.toStringList(idDocuments));
+			}
+			if (idVerificationMethods != null) {
+				o.put("id_documents_verification_methods_supported", Identifier.toStringList(idVerificationMethods));
+			}
+			if (verifiedClaims != null) {
+				o.put("claims_in_verified_claims_supported", verifiedClaims);
+			}
 		}
 		
 		return o;
@@ -1198,6 +1406,40 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		op.setAuthorizationJWSAlgs(as.getAuthorizationJWSAlgs());
 		op.setAuthorizationJWEAlgs(as.getAuthorizationJWEAlgs());
 		op.setAuthorizationJWEEncs(as.getAuthorizationJWEEncs());
+		
+		// OpenID Connect for Identity Assurance 1.0
+		if (jsonObject.get("verified_claims_supported") != null) {
+			op.verifiedClaimsSupported = JSONObjectUtils.getBoolean(jsonObject, "verified_claims_supported");
+			if (op.verifiedClaimsSupported) {
+				if (jsonObject.get("trust_frameworks_supported") != null) {
+					op.trustFrameworks = new LinkedList<>();
+					for (String v : JSONObjectUtils.getStringList(jsonObject, "trust_frameworks_supported")) {
+						op.trustFrameworks.add(new IdentityTrustFramework(v));
+					}
+				}
+				if (jsonObject.get("evidence_supported") != null) {
+					op.evidenceTypes = new LinkedList<>();
+					for (String v: JSONObjectUtils.getStringList(jsonObject, "evidence_supported")) {
+						op.evidenceTypes.add(new IdentityEvidenceType(v));
+					}
+				}
+				if (jsonObject.get("id_documents_supported") != null) {
+					op.idDocuments = new LinkedList<>();
+					for (String v: JSONObjectUtils.getStringList(jsonObject, "id_documents_supported")) {
+						op.idDocuments.add(new IDDocumentType(v));
+					}
+				}
+				if (jsonObject.get("id_documents_verification_methods_supported") != null) {
+					op.idVerificationMethods = new LinkedList<>();
+					for (String v: JSONObjectUtils.getStringList(jsonObject, "id_documents_verification_methods_supported")) {
+						op.idVerificationMethods.add(new IdentityVerificationMethod(v));
+					}
+				}
+				if (jsonObject.get("claims_in_verified_claims_supported") != null) {
+					op.verifiedClaims = JSONObjectUtils.getStringList(jsonObject, "claims_in_verified_claims_supported");
+				}
+			}
+		}
 		
 		// Parse custom (not registered) parameters
 		for (Map.Entry<String,?> entry: as.getCustomParameters().entrySet()) {
