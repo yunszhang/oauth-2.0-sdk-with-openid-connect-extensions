@@ -18,6 +18,7 @@
 package com.nimbusds.oauth2.sdk.util.date;
 
 
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -103,6 +104,29 @@ public class SimpleDate {
 	public String toISO8601String() {
 		
 		return getYear() + "-" + (getMonth() < 10 ? "0" : "") + getMonth() + "-" + (getDay() < 10 ? "0" : "") + getDay();
+	}
+	
+	
+	@Override
+	public String toString() {
+		return toISO8601String();
+	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof SimpleDate)) return false;
+		SimpleDate that = (SimpleDate) o;
+		return getYear() == that.getYear() &&
+			getMonth() == that.getMonth() &&
+			getDay() == that.getDay();
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(getYear(), getMonth(), getDay());
 	}
 	
 	

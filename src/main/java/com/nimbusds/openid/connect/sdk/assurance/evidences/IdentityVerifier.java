@@ -32,6 +32,12 @@ import com.nimbusds.secevent.sdk.claims.TXN;
 /**
  * Legal entity that performed an identity verification on behalf of an OpenID
  * provider.
+ *
+ * <p>Related specifications:
+ *
+ * <ul>
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 4.1.1.1.
+ * </ul>
  */
 @Immutable
 public final class IdentityVerifier implements JSONAware {

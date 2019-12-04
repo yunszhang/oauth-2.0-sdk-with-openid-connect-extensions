@@ -18,11 +18,14 @@
 package com.nimbusds.openid.connect.sdk.assurance.claims;
 
 
+import net.minidev.json.JSONAware;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.assurance.IdentityVerification;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
+import com.nimbusds.openid.connect.sdk.claims.PersonClaims;
 
 
 /**
@@ -34,44 +37,113 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
  *     <li>OpenID Connect for Identity Assurance 1.0, section 4.
  * </ul>
  */
-public class VerifiedClaimsSet extends ClaimsSet {
+public class VerifiedClaimsSet implements JSONAware {
 	
 	
 	/**
-	 * The verification claim name.
+	 * The verification element.
 	 */
-	public static final String VERIFICATION_CLAIM_NAME = "verification";
+	public static final String VERIFICATION_ELEMENT = "verification";
 	
 	
 	/**
-	 * The claims claim name.
+	 * The claims element.
 	 */
-	public static final String CLAIMS_CLAIM_NAME = "claims";
+	public static final String CLAIMS_ELEMENT = "claims";
 	
-
+	
+	/**
+	 * The identity verification.
+	 */
+	private final IdentityVerification identityVerification;
+	
+	
+	/**
+	 * The verified claims.
+	 */
+	private final ClaimsSet claimsSet;
+	
+	
+	/**
+	 * Creates a new verified claims set.
+	 *
+	 * @param verification The identity verification. Must not be
+	 *                     {@code null}.
+	 * @param claims       The verified claims. Must not be {@code null}.
+	 */
 	public VerifiedClaimsSet(final IdentityVerification verification,
 				 final ClaimsSet claims) {
 		
-		setClaim(VERIFICATION_CLAIM_NAME, verification.toJSONObject());
-		setClaim(CLAIMS_CLAIM_NAME, claims.toJSONObject());
+		if (verification == null) {
+			throw new IllegalArgumentException("The verification must not be null");
+		}
+		identityVerification = verification;
+		
+		if (claims == null) {
+			throw new IllegalArgumentException("The claims must not be null");
+		}
+		claimsSet = claims;
 	}
 	
 	
+	/**
+	 * Returns the identity verification.
+	 *
+	 * @return The identity verification.
+	 */
 	public IdentityVerification getVerification() {
 	
-	
+		return identityVerification;
 	}
 	
 	
-	public ClaimsSet getClaimsSet() {
+	/**
+	 * Returns the verified claims.
+	 *
+	 * @return The verified claims wrapped in a person claims object for
+	 *         convenience.
+	 */
+	public PersonClaims getClaimsSet() {
 	
-	
+		return new PersonClaims(claimsSet.toJSONObject());
 	}
 	
 	
+	/**
+	 * Returns a JSON object representation of this verified claims set.
+	 *
+	 * @return The JSON object.
+	 */
+	public JSONObject toJSONObject() {
+		
+		JSONObject o = new JSONObject();
+		o.put(VERIFICATION_ELEMENT, identityVerification.toJSONObject());
+		o.put(CLAIMS_ELEMENT, claimsSet.toJSONObject());
+		return o;
+	}
+	
+	
+	@Override
+	public String toJSONString() {
+		
+		return toJSONObject().toJSONString();
+	}
+	
+	
+	/**
+	 * Parses a verified claims set from the specified JSON object.
+	 *
+	 * @param jsonObject The JSON object to parse.
+	 *
+	 * @return The verifier claims set.
+	 *
+	 * @throws ParseException If parsing failed.
+	 */
 	public static VerifiedClaimsSet parse(final JSONObject jsonObject)
 		throws ParseException {
 		
-		
+		return new VerifiedClaimsSet(
+			IdentityVerification.parse(JSONObjectUtils.getJSONObject(jsonObject, VERIFICATION_ELEMENT)),
+			new PersonClaims(JSONObjectUtils.getJSONObject(jsonObject, CLAIMS_ELEMENT)));
 	}
 }

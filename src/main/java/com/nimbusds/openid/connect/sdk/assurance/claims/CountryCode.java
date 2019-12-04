@@ -18,6 +18,7 @@
 package com.nimbusds.openid.connect.sdk.assurance.claims;
 
 
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Identifier;
 
 
@@ -35,4 +36,35 @@ public abstract class CountryCode extends Identifier {
 	protected CountryCode(final String value) {
 		super(value);
 	}
+	
+	
+	/**
+	 * Casts this code to an ISO 3166-1 alpha-2 (two-letter) country code.
+	 *
+	 * @return The ISO 3166-1 alpha-2 (two-letter) country code.
+	 */
+	public ISO3166_1Alpha2CountryCode toISO3166_1Alpha2CountryCode() {
+		
+		return (ISO3166_1Alpha2CountryCode)this;
+	}
+	
+	
+	/**
+	 * Parses a country code.
+	 *
+	 * @param s The string to parse. Must not be {@code null}.
+	 *
+	 * @return The country code.
+	 *
+	 * @throws ParseException If parsing failed.
+	 */
+	public static CountryCode parse(final String s)
+		throws ParseException {
+		
+		return ISO3166_1Alpha2CountryCode.parse(s);
+	}
+	
+	
+	@Override
+	public abstract boolean equals(final Object other);
 }

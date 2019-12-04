@@ -67,6 +67,39 @@ public abstract class IdentityEvidence implements JSONAware {
 	
 	
 	/**
+	 * Casts this identity evidence to an ID document evidence.
+	 *
+	 * @return The ID document evidence.
+	 */
+	public IDDocumentEvidence toIDDocumentEvidence() {
+		
+		return (IDDocumentEvidence)this;
+	}
+	
+	
+	/**
+	 * Casts this identity evidence to a utility bill evidence.
+	 *
+	 * @return The utility bill evidence.
+	 */
+	public UtilityBillEvidence toUtilityBillEvidence() {
+		
+		return (UtilityBillEvidence)this;
+	}
+	
+	
+	/**
+	 * Casts this identity evidence to a QES evidence.
+	 *
+	 * @return The QES evidence.
+	 */
+	public QESEvidence toQESEvidence() {
+		
+		return (QESEvidence)this;
+	}
+	
+	
+	/**
 	 * Returns a JSON object representation of this evidence.
 	 *
 	 * @return The JSON object.

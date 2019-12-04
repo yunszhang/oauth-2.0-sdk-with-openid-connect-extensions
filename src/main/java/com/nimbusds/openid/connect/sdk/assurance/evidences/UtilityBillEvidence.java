@@ -120,7 +120,7 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 	
 	
 	@Override
-	protected JSONObject toJSONObject() {
+	public JSONObject toJSONObject() {
 		
 		JSONObject o = super.toJSONObject();
 		

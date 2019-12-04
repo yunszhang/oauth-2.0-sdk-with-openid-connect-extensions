@@ -20,14 +20,17 @@ package com.nimbusds.oauth2.sdk.util.date;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.ParseException;
 
 
 /**
- * Date with timezone offset. Supports ISO 8601 formatting and parsing.
+ * Date with timezone offset. Supports basic ISO 8601 formatting and parsing.
  */
 public class DateWithTimeZoneOffset {
 	
@@ -140,6 +143,28 @@ public class DateWithTimeZoneOffset {
 	}
 	
 	
+	@Override
+	public String toString() {
+		return toISO8601String();
+	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof DateWithTimeZoneOffset)) return false;
+		DateWithTimeZoneOffset that = (DateWithTimeZoneOffset) o;
+		return tzOffsetMinutes == that.tzOffsetMinutes &&
+			getDate().equals(that.getDate());
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(getDate(), tzOffsetMinutes);
+	}
+	
+	
 	/**
 	 * Parses an ISO 8601 representation in
 	 * {@code YYYY-MM-DDThh:mm:ss±hh:mm} format.
@@ -155,23 +180,40 @@ public class DateWithTimeZoneOffset {
 	public static DateWithTimeZoneOffset parseISO8601String(final String s)
 		throws ParseException  {
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+		String stringToParse = s;
+		
+		if (Pattern.compile(".*[\\+\\-][\\d]{2}$").matcher(s).matches()) {
+			// append minutes to hour resolution offset TZ
+			stringToParse += ":00";
+		}
+		
+		Matcher m = Pattern.compile("(.*[\\+\\-][\\d]{2})(\\d{2})$").matcher(stringToParse);
+		if (m.matches()) {
+			// insert colon between hh and mm offset
+			stringToParse = m.group(1) + ":" + m.group(2);
+		}
+		
+		m = Pattern.compile("(.*\\d{2}:\\d{2}:\\d{2})([\\+\\-Z].*)$").matcher(stringToParse);
+		if (m.matches()) {
+			// insert zero milliseconds
+			stringToParse = m.group(1) + ".000" + m.group(2);
+		}
 		
 		Date date;
 		try {
-			date = sdf.parse(s);
+			date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse(stringToParse);
 		} catch (java.text.ParseException e) {
 			throw new ParseException(e.getMessage());
 		}
 		
 		int tzOffsetMinutes;
 		
-		if (s.trim().endsWith("Z") || s.trim().endsWith("z")) {
+		if (stringToParse.trim().endsWith("Z") || stringToParse.trim().endsWith("z")) {
 			tzOffsetMinutes = 0; // UTC
 		} else {
 			try {
 				// E.g. +03:00
-				String offsetSpec = s.substring("2019-11-01T06:19:43".length());
+				String offsetSpec = stringToParse.substring("2019-11-01T06:19:43.000".length());
 				int hoursOffset = Integer.parseInt(offsetSpec.substring(0, 3));
 				int minutesOffset = Integer.parseInt(offsetSpec.substring(4));
 				if (offsetSpec.startsWith("+")) {

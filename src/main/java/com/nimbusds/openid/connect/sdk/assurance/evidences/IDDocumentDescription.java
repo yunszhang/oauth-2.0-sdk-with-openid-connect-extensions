@@ -18,6 +18,8 @@
 package com.nimbusds.openid.connect.sdk.assurance.evidences;
 
 
+import java.util.Objects;
+
 import net.minidev.json.JSONAware;
 import net.minidev.json.JSONObject;
 
@@ -209,6 +211,32 @@ public class IDDocumentDescription implements JSONAware {
 	@Override
 	public String toJSONString() {
 		return toJSONObject().toJSONString();
+	}
+	
+	
+	@Override
+	public String toString() {
+		return toJSONString();
+	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof IDDocumentDescription)) return false;
+		IDDocumentDescription that = (IDDocumentDescription) o;
+		return getType().equals(that.getType()) &&
+			getNumber().equals(that.getNumber()) &&
+			getIssuerName().equals(that.getIssuerName()) &&
+			getIssuerCountry().equals(that.getIssuerCountry()) &&
+			getDateOfIssuance().equals(that.getDateOfIssuance()) &&
+			getDateOfExpiry().equals(that.getDateOfExpiry());
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(getType(), getNumber(), getIssuerName(), getIssuerCountry(), getDateOfIssuance(), getDateOfExpiry());
 	}
 	
 	

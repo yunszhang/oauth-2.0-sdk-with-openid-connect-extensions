@@ -35,6 +35,12 @@ import com.nimbusds.openid.connect.sdk.assurance.evidences.IdentityEvidence;
 
 /**
  * Identity verification.
+ *
+ * <p>Related specifications:
+ *
+ * <ul>
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 4.1.
+ * </ul>
  */
 @Immutable
 public final class IdentityVerification implements JSONAware {
@@ -75,8 +81,8 @@ public final class IdentityVerification implements JSONAware {
 	 * @param verificationProcess The verification process reference if
 	 *                            required by the trust framework,
 	 *                            {@code null} if not required.
-	 * @param evidence            The identity evidences, must not be
-	 *                            empty or {@code null}.
+	 * @param evidence            The identity evidences, {@code null} if
+	 *                            not specified.
 	 */
 	public IdentityVerification(final IdentityTrustFramework trustFramework,
 				    final DateWithTimeZoneOffset time,
@@ -90,10 +96,6 @@ public final class IdentityVerification implements JSONAware {
 		
 		this.time = time;
 		this.verificationProcess = verificationProcess;
-		
-		if (evidence == null || evidence.isEmpty()) {
-			throw new IllegalArgumentException("The evidence must not be null or empty");
-		}
 		this.evidence = evidence;
 	}
 	
@@ -112,7 +114,7 @@ public final class IdentityVerification implements JSONAware {
 	 * Returns the verification timestamp.
 	 *
 	 * @return The verification timestamp if required by the trust
-	 *         framework, {@code null} if not required.
+	 *         framework, {@code null} if not specified.
 	 */
 	public DateWithTimeZoneOffset getVerificationTime() {
 		return time;
@@ -123,7 +125,7 @@ public final class IdentityVerification implements JSONAware {
 	 * Returns the verification process reference.
 	 *
 	 * @return The verification process reference if required by the trust
-	 *         framework, {@code null} if not required.
+	 *         framework, {@code null} if not specified.
 	 */
 	public String getVerificationProcess() {
 		return verificationProcess;
@@ -133,7 +135,8 @@ public final class IdentityVerification implements JSONAware {
 	/**
 	 * Returns the identity evidence.
 	 *
-	 * @return The identity evidence.
+	 * @return The identity evidence, {@code null} or empty if not
+	 *         specified.
 	 */
 	public List<IdentityEvidence> getEvidence() {
 		return evidence;
@@ -158,11 +161,13 @@ public final class IdentityVerification implements JSONAware {
 			o.put("verification_process", getVerificationProcess());
 		}
 		
-		JSONArray evidenceArray = new JSONArray();
-		for (IdentityEvidence ev: getEvidence()) {
-			evidenceArray.add(ev.toJSONObject());
+		if (getEvidence() != null) {
+			JSONArray evidenceArray = new JSONArray();
+			for (IdentityEvidence ev : getEvidence()) {
+				evidenceArray.add(ev.toJSONObject());
+			}
+			o.put("evidence", evidenceArray);
 		}
-		o.put("evidence", evidenceArray);
 		
 		return o;
 	}
@@ -199,10 +204,13 @@ public final class IdentityVerification implements JSONAware {
 			verificationProcess = JSONObjectUtils.getString(jsonObject, "verification_process");
 		}
 		
-		List<IdentityEvidence> evidence = new LinkedList<>();
-		JSONArray jsonArray = JSONObjectUtils.getJSONArray(jsonObject, "evidence");
-		for (JSONObject item: JSONArrayUtils.toJSONObjectList(jsonArray)) {
-			evidence.add(IdentityEvidence.parse(item));
+		List<IdentityEvidence> evidence = null;
+		if (jsonObject.get("evidence") != null) {
+			evidence = new LinkedList<>();
+			JSONArray jsonArray = JSONObjectUtils.getJSONArray(jsonObject, "evidence");
+			for (JSONObject item : JSONArrayUtils.toJSONObjectList(jsonArray)) {
+				evidence.add(IdentityEvidence.parse(item));
+			}
 		}
 		
 		return new IdentityVerification(trustFramework, time, verificationProcess, evidence);

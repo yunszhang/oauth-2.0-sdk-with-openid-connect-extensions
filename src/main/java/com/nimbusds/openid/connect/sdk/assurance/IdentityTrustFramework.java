@@ -24,7 +24,9 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
 
 
 /**
- * Identity trust framework.
+ * Identity trust framework identifiers.
+ *
+ * <p>Related specifications:
  *
  * <ul>
  *     <li>OpenID Connect for Identity Assurance 1.0, sections 4.1.1 and 11.1.

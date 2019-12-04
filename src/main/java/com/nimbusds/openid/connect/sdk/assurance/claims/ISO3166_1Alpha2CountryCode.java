@@ -31,12 +31,13 @@ public final class ISO3166_1Alpha2CountryCode extends CountryCode {
 	
 	
 	/**
-	 * Creates a new ISO 3166-1 alpha-2 country code.
+	 * Creates a new ISO 3166-1 alpha-2 country code. Normalises the code
+	 * to upper case.
 	 *
 	 * @param value The country code value, must be two-letter.
 	 */
 	public ISO3166_1Alpha2CountryCode(final String value) {
-		super(value);
+		super(value.toUpperCase());
 		if (value.length() != 2) {
 			throw new IllegalArgumentException("The ISO 3166-1 alpha-2 country code must be two letters");
 		}
@@ -64,7 +65,7 @@ public final class ISO3166_1Alpha2CountryCode extends CountryCode {
 		throws ParseException {
 		
 		try {
-			return new ISO3166_1Alpha2CountryCode(s.trim().toUpperCase());
+			return new ISO3166_1Alpha2CountryCode(s);
 		} catch (IllegalArgumentException e) {
 			throw new ParseException(e.getMessage());
 		}

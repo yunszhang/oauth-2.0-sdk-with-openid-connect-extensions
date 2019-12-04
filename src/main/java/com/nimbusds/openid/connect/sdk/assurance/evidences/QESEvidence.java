@@ -72,17 +72,17 @@ public final class QESEvidence extends IdentityEvidence implements JSONAware {
 		super(IdentityEvidenceType.QES);
 		
 		if (issuer == null) {
-			throw new IllegalArgumentException("The issuer must not be null");
+			throw new IllegalArgumentException("The QES issuer must not be null");
 		}
 		this.issuer = issuer;
 		
 		if (serialNumber == null) {
-			throw new IllegalArgumentException("The serial number must not be null");
+			throw new IllegalArgumentException("The QES serial number must not be null");
 		}
 		this.serialNumber = serialNumber;
 		
 		if (createdAt == null) {
-			throw new IllegalArgumentException("The creation time must not be null");
+			throw new IllegalArgumentException("The QES creation time must not be null");
 		}
 		this.createdAt = createdAt;
 	}

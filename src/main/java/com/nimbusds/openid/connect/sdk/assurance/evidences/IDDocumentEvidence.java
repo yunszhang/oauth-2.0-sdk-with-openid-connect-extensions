@@ -64,20 +64,20 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 	
 	
 	/**
-	 * Creates a new identity document used as identity evidence.
+	 * Creates a new identity document evidence.
 	 *
 	 * @param method     The document verification method. Must not be
 	 *                   {@code null}.
-	 * @param dtz        The document verification timestamp. Must not be
-	 *                   {@code null}.
 	 * @param verifier   Optional verifier if not the OpenID provider
 	 *                   itself, {@code null} if none.
+	 * @param dtz        The document verification timestamp, {@code null}
+	 *                   if not specified.
 	 * @param idDocument The identity document description. Must not be
 	 *                   {@code null}.
 	 */
 	public IDDocumentEvidence(final IdentityVerificationMethod method,
-				  final DateWithTimeZoneOffset dtz,
 				  final IdentityVerifier verifier,
+				  final DateWithTimeZoneOffset dtz,
 				  final IDDocumentDescription idDocument) {
 		
 		super(IdentityEvidenceType.ID_DOCUMENT);
@@ -87,9 +87,6 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 		}
 		this.method = method;
 		
-		if (dtz == null) {
-			throw new IllegalArgumentException("The verification timestamp must not be null");
-		}
 		this.dtz = dtz;
 		
 		this.verifier = verifier;
@@ -114,7 +111,8 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 	/**
 	 * Returns the document verification timestamp.
 	 *
-	 * @return The document verification timestamp.
+	 * @return The document verification timestamp, {@code null} if not
+	 *         specified.
 	 */
 	public DateWithTimeZoneOffset getVerificationTime() {
 		return dtz;
@@ -143,10 +141,12 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 	
 	
 	@Override
-	protected JSONObject toJSONObject() {
+	public JSONObject toJSONObject() {
 		JSONObject o = super.toJSONObject();
 		o.put("method", getVerificationMethod().getValue());
-		o.put("time", getVerificationTime().toISO8601String());
+		if (dtz != null) {
+			o.put("time", getVerificationTime().toISO8601String());
+		}
 		if (verifier != null) {
 			o.put("verifier", getVerifier().toJSONObject());
 		}
@@ -169,8 +169,13 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 		throws ParseException {
 		
 		ensureType(IdentityEvidenceType.ID_DOCUMENT, jsonObject);
+		
 		IdentityVerificationMethod method = new IdentityVerificationMethod(JSONObjectUtils.getString(jsonObject, "method"));
-		DateWithTimeZoneOffset dtz = DateWithTimeZoneOffset.parseISO8601String(JSONObjectUtils.getString(jsonObject, "time"));
+		
+		DateWithTimeZoneOffset dtz = null;
+		if (jsonObject.get("time") != null) {
+			dtz = DateWithTimeZoneOffset.parseISO8601String(JSONObjectUtils.getString(jsonObject, "time"));
+		}
 		
 		IdentityVerifier verifier = null;
 		if (jsonObject.get("verifier") != null) {
@@ -179,6 +184,6 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 		
 		IDDocumentDescription idDocument = IDDocumentDescription.parse(JSONObjectUtils.getJSONObject(jsonObject, "document"));
 		
-		return new IDDocumentEvidence(method, dtz, verifier, idDocument);
+		return new IDDocumentEvidence(method, verifier, dtz, idDocument);
 	}
 }

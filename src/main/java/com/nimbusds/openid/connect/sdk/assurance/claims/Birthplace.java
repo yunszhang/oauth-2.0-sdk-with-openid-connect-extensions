@@ -22,9 +22,9 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
 
-import com.nimbusds.oauth2.sdk.util.StringUtils;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 
 
@@ -37,16 +37,25 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
  *     <li>OpenID Connect for Identity Assurance 1.0, section 3.1.
  * </ul>
  */
-@Immutable
+// TODO In anticipation of https://bitbucket.org/openid/connect/issues/1119/place_of_birth-birthplace
 public final class Birthplace extends ClaimsSet {
 	
-
+	
+	/**
+	 * The country claim name.
+	 */
 	public static final String COUNTRY_CLAIM_NAME = "country";
 	
 	
+	/**
+	 * The region claim name.
+	 */
 	public static final String REGION_CLAIM_NAME = "region";
 	
 	
+	/**
+	 * The locality claim name.
+	 */
 	public static final String LOCALITY_CLAIM_NAME = "locality";
 	
 	
@@ -77,37 +86,114 @@ public final class Birthplace extends ClaimsSet {
 	/**
 	 * Creates a new birthplace claims set.
 	 *
-	 * @param country  The country, as ISO3166-1 Alpha-2 or ISO3166-3 code.
-	 *                 Must not be {@code null}.
+	 * @param country  The country, as ISO3166-1 Alpha-2 or ISO3166-3 code,
+	 *                 {@code null} if not specified.
 	 * @param region   State, province, prefecture, or region component,
 	 *                 {@code null} if not specified.
-	 * @param locality City or other locality. Must not be {@code null}.
+	 * @param locality City or other locality, {@code null} if not
+	 *                 specified.       .
 	 */
 	public Birthplace(final CountryCode country, final String region, final String locality) {
 	
-		if (country == null) {
-			throw new IllegalArgumentException("The country code must not be null");
+		if (country != null) {
+			setClaim(COUNTRY_CLAIM_NAME, country.getValue());
 		}
-		setClaim(COUNTRY_CLAIM_NAME, country);
 		
 		setClaim(REGION_CLAIM_NAME, region);
-		
-		if (StringUtils.isNotBlank(locality)) {
-			throw new IllegalArgumentException("The locality must not be null");
-		}
 		setClaim(LOCALITY_CLAIM_NAME, locality);
 	}
 	
 	
 	/**
-	 * Creates a new birthplace claims set.
+	 * Creates a new birthplace claims set from the specified JSON object.
 	 *
-	 * @param country  The country, as ISO3166-1 Alpha-2 or ISO3166-3 code.
-	 *                 Must not be {@code null}.
-	 * @param locality City or other locality. Must not be {@code null}.
+	 * @param jsonObject The JSON object. Must not be {@code null}.
 	 */
-	public Birthplace(final CountryCode country, final String locality) {
+	public Birthplace(final JSONObject jsonObject) {
+		
+		super(jsonObject);
+	}
 	
-		this(country, null, locality);
+	
+	/**
+	 * Gets the country.
+	 *
+	 * @return The country, {@code null} if not specified or illegal
+	 *         ISO 3166-1 alpha-2 (two-letter) country code.
+	 */
+	public CountryCode getCountry() {
+	
+		String code = getStringClaim(COUNTRY_CLAIM_NAME);
+		if (code == null) {
+			return null;
+		}
+		
+		try {
+			return ISO3166_1Alpha2CountryCode.parse(code);
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Sets the country.
+	 *
+	 * @param country The country, {@code null} if not specified.
+	 */
+	public void setCountry(final CountryCode country) {
+	
+		if (country != null) {
+			setClaim(COUNTRY_CLAIM_NAME, country.getValue());
+		} else {
+			setClaim(COUNTRY_CLAIM_NAME, null);
+		}
+	}
+	
+	
+	/**
+	 * Gets the tate, province, prefecture, or region component.
+	 *
+	 * @return The state, province, prefecture, or region component,
+	 *         {@code null} if not specified.
+	 */
+	public String getRegion() {
+		
+		return getStringClaim(REGION_CLAIM_NAME);
+	}
+	
+	
+	/**
+	 * Sets the tate, province, prefecture, or region component.
+	 *
+	 * @param region The state, province, prefecture, or region component,
+	 *               {@code null} if not specified.
+	 */
+	public void setRegion(final String region) {
+		
+		setClaim(REGION_CLAIM_NAME, region);
+	}
+	
+	
+	/**
+	 * Gets the city or other locality.
+	 *
+	 * @return The city or other locality, {@code null} if not specified.
+	 */
+	public String getLocality() {
+		
+		return getStringClaim(LOCALITY_CLAIM_NAME);
+	}
+	
+	
+	/**
+	 * Sets the city or other locality.
+	 *
+	 * @param locality The city or other locality, {@code null} if not
+	 *                 specified.
+	 */
+	public void setLocality(final String locality) {
+		
+		setClaim(LOCALITY_CLAIM_NAME, locality);
 	}
 }

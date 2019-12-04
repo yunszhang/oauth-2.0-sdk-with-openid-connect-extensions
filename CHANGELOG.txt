@@ -1169,7 +1169,7 @@ version 6.17.1 (2019-10-27)
     * Updates PushedAuthorizationResponse.parse to treat HTTP status code 200
       as success (in addition to HTTP 201 Created) (iss #279).
 
-version 6.18 (2019-11-02)
+version 6.18 (2019-12-04)
     * Updates OIDCProviderMetadata to support OpenID Connect for Identity
       Assurance 1.0 - 08.
     * Adds new DateWithTimeZoneOffset utility class with support for ISO 8601
