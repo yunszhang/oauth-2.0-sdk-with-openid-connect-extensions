@@ -27,6 +27,7 @@ import java.security.MessageDigest;
 import java.util.*;
 
 import junit.framework.TestCase;
+import org.apache.commons.lang.RandomStringUtils;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -36,6 +37,7 @@ import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.*;
 import com.nimbusds.langtag.LangTag;
+import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.langtag.LangTagUtils;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -81,10 +83,11 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("login_hint"));
 		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("acr_values"));
 		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("claims"));
+		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("purpose"));
 		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("request_uri"));
 		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("request"));
 
-		assertEquals(22, AuthenticationRequest.getRegisteredParameterNames().size());
+		assertEquals(23, AuthenticationRequest.getRegisteredParameterNames().size());
 	}
 
 	
@@ -311,6 +314,8 @@ public class AuthenticationRequestTest extends TestCase {
 		ClaimsRequest claims = new ClaimsRequest();
 		claims.addUserInfoClaim("given_name");
 		claims.addUserInfoClaim("family_name");
+		
+		String purpose = "Some identity assurance purpose";
 
 		CodeVerifier codeVerifier = new CodeVerifier();
 		CodeChallengeMethod codeChallengeMethod = CodeChallengeMethod.S256;
@@ -326,7 +331,7 @@ public class AuthenticationRequestTest extends TestCase {
 		AuthenticationRequest request = new AuthenticationRequest(
 			uri, rts, rm, scope, clientID, redirectURI, state, nonce,
 			display, prompt, maxAge, uiLocales, claimsLocales,
-			idTokenHint, loginHint, acrValues, claims, null, null,
+			idTokenHint, loginHint, acrValues, claims, purpose, null, null,
 			codeChallenge, codeChallengeMethod,
 			resources,
 			true,
@@ -389,6 +394,8 @@ public class AuthenticationRequestTest extends TestCase {
 //		System.out.println("OIDC login request claims: " + claimsOut.toJSONObject().toString());
 
 		assertEquals(2, claimsOut.getUserInfoClaims().size());
+		
+		assertEquals(purpose, request.getPurpose());
 
 		assertEquals(codeChallenge, request.getCodeChallenge());
 		assertEquals(codeChallengeMethod, request.getCodeChallengeMethod());
@@ -464,6 +471,8 @@ public class AuthenticationRequestTest extends TestCase {
 //		System.out.println("OIDC login request claims: " + claimsOut.toJSONObject().toString());
 
 		assertEquals(2, claimsOut.getUserInfoClaims().size());
+		
+		assertEquals(purpose, request.getPurpose());
 
 		assertEquals(codeChallenge, request.getCodeChallenge());
 		assertEquals(codeChallengeMethod, request.getCodeChallengeMethod());
@@ -533,7 +542,7 @@ public class AuthenticationRequestTest extends TestCase {
 		AuthenticationRequest request = new AuthenticationRequest(
 			uri, rts, null, scope, clientID, redirectURI, state, nonce,
 			display, prompt, maxAge, uiLocales, claimsLocales,
-			idTokenHint, loginHint, acrValues, claims, requestObject, null,
+			idTokenHint, loginHint, acrValues, claims, null, requestObject, null,
 			null, null, null, false, null);
 
 		assertEquals(uri, request.getEndpointURI());
@@ -719,7 +728,7 @@ public class AuthenticationRequestTest extends TestCase {
 		AuthenticationRequest request = new AuthenticationRequest(
 			uri, rts, null, scope, clientID, redirectURI, state, nonce,
 			display, prompt, maxAge, uiLocales, claimsLocales,
-			idTokenHint, loginHint, acrValues, claims, null, requestURI,
+			idTokenHint, loginHint, acrValues, claims, null, null, requestURI,
 			null, null, null, false, null);
 
 		assertEquals(uri, request.getEndpointURI());
@@ -897,6 +906,8 @@ public class AuthenticationRequestTest extends TestCase {
 		ClaimsRequest claims = new ClaimsRequest();
 		claims.addUserInfoClaim("given_name");
 		claims.addUserInfoClaim("family_name");
+		
+		String purpose = "Some Identity Assurance purpose";
 
 		CodeVerifier codeVerifier = new CodeVerifier();
 		
@@ -916,6 +927,7 @@ public class AuthenticationRequestTest extends TestCase {
 			.loginHint("alice@wonderland.net")
 			.acrValues(acrValues)
 			.claims(claims)
+			.purpose(purpose)
 			.responseMode(ResponseMode.FORM_POST)
 			.codeChallenge(codeVerifier, CodeChallengeMethod.S256)
 			.resources(URI.create("https://rs1.com"))
@@ -943,6 +955,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals("alice@wonderland.net", request.getLoginHint());
 		assertEquals(acrValues, request.getACRValues());
 		assertEquals(claims, request.getClaims());
+		assertEquals(purpose, request.getPurpose());
 		assertEquals(CodeChallenge.compute(CodeChallengeMethod.S256, codeVerifier), request.getCodeChallenge());
 		assertEquals(CodeChallengeMethod.S256, request.getCodeChallengeMethod());
 		assertEquals(Collections.singletonList(URI.create("https://rs1.com")), request.getResources());
@@ -1405,7 +1418,6 @@ public class AuthenticationRequestTest extends TestCase {
 		jwt.sign(new RSASSASigner(rsaKeyPair.getPrivate()));
 		
 		String jwtString = jwt.serialize();
-		System.out.println(jwtString);
 		
 		CodeVerifier pkceVerifier = new CodeVerifier();
 		
@@ -2027,6 +2039,165 @@ public class AuthenticationRequestTest extends TestCase {
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("The client ID must not be null", e.getMessage());
+		}
+	}
+	
+	
+	// purpose
+	public void testPurposeParameter() throws LangTagException, ParseException {
+		
+		CodeVerifier pkceVerifier = new CodeVerifier();
+		
+		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
+			new ResponseType(ResponseType.Value.CODE),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.endpointURI(URI.create("https://c2id.com/login"))
+			.codeChallenge(pkceVerifier, CodeChallengeMethod.S256)
+			.uiLocales(Collections.singletonList(new LangTag("en")))
+			.purpose("Account holder identification")
+			.build();
+		
+		assertEquals("Account holder identification", authRequest.getPurpose());
+		
+		Map<String,List<String>> params = authRequest.toParameters();
+		assertEquals(Collections.singletonList("Account holder identification"), params.get("purpose"));
+		
+		URI request = authRequest.toURI();
+		
+		authRequest = AuthenticationRequest.parse(request);
+		
+		assertEquals("Account holder identification", authRequest.getPurpose());
+	}
+	
+	
+	public void testPurposeLimitConstants() {
+		
+		assertEquals(3, AuthenticationRequest.PURPOSE_MIN_LENGTH);
+		assertEquals(300, AuthenticationRequest.PURPOSE_MAX_LENGTH);
+	}
+	
+	
+	public void testPurposeMinLength() throws ParseException {
+		
+		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
+			new ResponseType(ResponseType.Value.CODE),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.endpointURI(URI.create("https://c2id.com/login"))
+			.purpose("abc")
+			.build();
+		
+		assertEquals("abc", authRequest.getPurpose());
+		
+		authRequest = AuthenticationRequest.parse(authRequest.toURI());
+		
+		assertEquals("abc", authRequest.getPurpose());
+	}
+	
+	
+	public void testPurposeMaxLength() throws ParseException {
+		
+		String purpose = RandomStringUtils.random(300);
+		assertEquals(300, purpose.length());
+		
+		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
+			new ResponseType(ResponseType.Value.CODE),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.endpointURI(URI.create("https://c2id.com/login"))
+			.purpose(purpose)
+			.build();
+		
+		assertEquals(purpose, authRequest.getPurpose());
+		
+		authRequest = AuthenticationRequest.parse(authRequest.toURI());
+		
+		assertEquals(purpose, authRequest.getPurpose());
+	}
+	
+	
+	public void testPurposeTooShort() {
+		
+		try {
+			new AuthenticationRequest.Builder(
+				new ResponseType(ResponseType.Value.CODE),
+				new Scope("openid"),
+				new ClientID("123"),
+				URI.create("https://example.com/cb"))
+				.endpointURI(URI.create("https://c2id.com/login"))
+				.purpose("ab")
+				.build();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("The purpose must not be shorter than 3 characters", e.getMessage());
+		}
+	}
+	
+	
+	public void testPurposeTooLong() {
+		
+		String purpose = RandomStringUtils.random(301);
+		assertEquals(301, purpose.length());
+		
+		try {
+			new AuthenticationRequest.Builder(
+				new ResponseType(ResponseType.Value.CODE),
+				new Scope("openid"),
+				new ClientID("123"),
+				URI.create("https://example.com/cb"))
+				.endpointURI(URI.create("https://c2id.com/login"))
+				.purpose(purpose)
+				.build();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("The purpose must not be longer than 300 characters", e.getMessage());
+		}
+	}
+	
+	
+	public void testPurposeParseTooShort() {
+		
+		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
+			new ResponseType(ResponseType.Value.CODE),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.endpointURI(URI.create("https://c2id.com/login"))
+			.state(new State())
+			.build();
+		
+		Map<String,List<String>> params = authRequest.toParameters();
+		
+		params.put("purpose", Collections.singletonList("ab"));
+		
+		try {
+			AuthenticationRequest.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid \"purpose\" parameter: Must not be shorter than 3 and longer than 300 characters", e.getMessage());
+			assertEquals(authRequest.getState(), e.getState());
+			assertEquals(authRequest.getClientID(), e.getClientID());
+			assertEquals(authRequest.getRedirectionURI(), e.getRedirectionURI());
+			assertEquals("invalid_request", e.getErrorObject().getCode());
+			assertEquals("Invalid request: Invalid \"purpose\" parameter: Must not be shorter than 3 and longer than 300 characters", e.getErrorObject().getDescription());
+		}
+		
+		params.put("purpose", Collections.singletonList(RandomStringUtils.random(301)));
+		
+		try {
+			AuthenticationRequest.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid \"purpose\" parameter: Must not be shorter than 3 and longer than 300 characters", e.getMessage());
+			assertEquals(authRequest.getState(), e.getState());
+			assertEquals(authRequest.getClientID(), e.getClientID());
+			assertEquals(authRequest.getRedirectionURI(), e.getRedirectionURI());
+			assertEquals("invalid_request", e.getErrorObject().getCode());
+			assertEquals("Invalid request: Invalid \"purpose\" parameter: Must not be shorter than 3 and longer than 300 characters", e.getErrorObject().getDescription());
 		}
 	}
 }

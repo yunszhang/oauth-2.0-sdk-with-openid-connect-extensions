@@ -1200,3 +1200,7 @@ version 6.19 (2019-12-04)
 version 6.20 (2019-12-04)
     * Adds new IdentityVerification constructor with single evidence.
     * Adds new DateWithTimeZoneOffset constructor with TimeZone argument.
+
+version 6.21 (2019-12-06)
+    * Adds support for the OpenID Connect Identity Assurance 1.0 "purpose"
+      parameter in AuthenticationRequest.

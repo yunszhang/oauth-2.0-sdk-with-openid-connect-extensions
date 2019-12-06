@@ -69,10 +69,23 @@ import com.nimbusds.openid.connect.sdk.claims.ACR;
  *         Request (JAR) draft-ietf-oauth-jwsreq-17
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 8.
  * </ul>
  */
 @Immutable
 public class AuthenticationRequest extends AuthorizationRequest {
+	
+	
+	/**
+	 * The purpose string parameter minimal length.
+	 */
+	public static final int PURPOSE_MIN_LENGTH = 3;
+	
+	
+	/**
+	 * The purpose string parameter maximum length.
+	 */
+	public static final int PURPOSE_MAX_LENGTH = 300;
 
 
 	/**
@@ -94,6 +107,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		p.add("login_hint");
 		p.add("acr_values");
 		p.add("claims");
+		p.add("purpose");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -159,6 +173,13 @@ public class AuthenticationRequest extends AuthorizationRequest {
 	 * Individual claims to be returned (optional).
 	 */
 	private final ClaimsRequest claims;
+	
+	
+	/**
+	 * The transaction specific purpose, for use in OpenID Connect Identity
+	 * Assurance.
+	 */
+	private final String purpose;
 
 
 	/**
@@ -272,6 +293,12 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		 * Individual claims to be returned (optional).
 		 */
 		private ClaimsRequest claims;
+		
+		
+		/**
+		 * The transaction specific purpose (optional).
+		 */
+		private String purpose;
 
 
 		/**
@@ -429,6 +456,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			loginHint = request.getLoginHint();
 			acrValues = request.getACRValues();
 			claims = request.getClaims();
+			purpose = request.getPurpose();
 			requestObject = request.getRequestObject();
 			requestURI = request.getRequestURI();
 			rm = request.getResponseMode();
@@ -706,6 +734,21 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			this.claims = claims;
 			return this;
 		}
+		
+		
+		/**
+		 * Sets the transaction specific purpose. Corresponds to the
+		 * optional {@code purpose} parameter.
+		 *
+		 * @param purpose The purpose, {@code null} if not specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder purpose(final String purpose) {
+			
+			this.purpose = purpose;
+			return this;
+		}
 
 
 		/**
@@ -875,6 +918,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 					uri, rt, rm, scope, clientID, redirectURI, state, nonce,
 					display, prompt, maxAge, uiLocales, claimsLocales,
 					idTokenHint, loginHint, acrValues, claims,
+					purpose,
 					requestObject, requestURI,
 					codeChallenge, codeChallengeMethod,
 					resources,
@@ -922,11 +966,12 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				     final Nonce nonce) {
 
 		// Not specified: display, prompt, maxAge, uiLocales, claimsLocales, 
-		// idTokenHint, loginHint, acrValues, claims
+		// idTokenHint, loginHint, acrValues, claims, purpose
 		// codeChallenge, codeChallengeMethod
 		this(uri, rt, null, scope, clientID, redirectURI, state, nonce,
 			null, null, -1, null, null,
-			null, null, null, null, null, null,
+			null, null, null, null, null,
+			null, null,
 			null, null,
 			null, false, null);
 	}
@@ -1005,6 +1050,8 @@ public class AuthenticationRequest extends AuthorizationRequest {
 	 *                             Corresponds to the optional
 	 *                             {@code claims} parameter. {@code null}
 	 *                             if not specified.
+	 * @param purpose              The transaction specific purpose,
+	 *                             {@code null} if not specified.
 	 * @param requestObject        The request object. Corresponds to the
 	 *                             optional {@code request} parameter. Must
 	 *                             not be specified together with a request
@@ -1043,6 +1090,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				     final String loginHint,
 				     final List<ACR> acrValues,
 				     final ClaimsRequest claims,
+				     final String purpose,
 				     final JWT requestObject,
 				     final URI requestURI,
 				     final CodeChallenge codeChallenge,
@@ -1098,6 +1146,17 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			this.acrValues = null;
 
 		this.claims = claims;
+		
+		if (purpose != null) {
+			if (purpose.length() < PURPOSE_MIN_LENGTH) {
+				throw new IllegalArgumentException("The purpose must not be shorter than " + PURPOSE_MIN_LENGTH + " characters");
+			}
+			if (purpose.length() > PURPOSE_MAX_LENGTH) {
+				throw new IllegalArgumentException("The purpose must not be longer than " + PURPOSE_MAX_LENGTH +" characters");
+			}
+		}
+		
+		this.purpose = purpose;
 	}
 
 
@@ -1224,6 +1283,18 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 		return claims;
 	}
+	
+	
+	/**
+	 * Gets the transaction specific purpose. Corresponds to the optional
+	 * {@code purpose} parameter.
+	 *
+	 * @return The purpose, {@code null} if not specified.
+	 */
+	public String getPurpose() {
+		
+		return purpose;
+	}
 
 
 	@Override
@@ -1302,6 +1373,9 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 		if (claims != null)
 			params.put("claims", Collections.singletonList(claims.toJSONObject().toString()));
+		
+		if (purpose != null)
+			params.put("purpose", Collections.singletonList(purpose));
 
 		return params;
 	}
@@ -1568,6 +1642,14 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			// Parse exceptions silently ignored
 			claims = ClaimsRequest.parse(jsonObject);
 		}
+		
+		String purpose = MultivaluedMapUtils.getFirstValue(params, "purpose");
+		
+		if (purpose != null && (purpose.length() < PURPOSE_MIN_LENGTH || purpose.length() > PURPOSE_MAX_LENGTH)) {
+			String msg = "Invalid \"purpose\" parameter: Must not be shorter than " + PURPOSE_MIN_LENGTH + " and longer than " + PURPOSE_MAX_LENGTH + " characters";
+			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
+				ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState());
+		}
 
 		// Parse additional custom parameters
 		Map<String,List<String>> customParams = null;
@@ -1587,7 +1669,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		return new AuthenticationRequest(
 			uri, ar.getResponseType(), ar.getResponseMode(), ar.getScope(), ar.getClientID(), ar.getRedirectionURI(), ar.getState(), nonce,
 			display, ar.getPrompt(), maxAge, uiLocales, claimsLocales,
-			idTokenHint, loginHint, acrValues, claims,
+			idTokenHint, loginHint, acrValues, claims, purpose,
 			ar.getRequestObject(), ar.getRequestURI(),
 			ar.getCodeChallenge(), ar.getCodeChallengeMethod(),
 			ar.getResources(),
