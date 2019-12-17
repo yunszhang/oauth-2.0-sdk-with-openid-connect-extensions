@@ -269,6 +269,7 @@ public class AuthorizationServerEndpointMetadata {
 	 *
 	 * @return The request object endpoint, {@code null} if not specified.
 	 */
+	@Deprecated
 	public URI getRequestObjectEndpoint() {
 		
 		return requestObjectEndpoint;
@@ -282,6 +283,7 @@ public class AuthorizationServerEndpointMetadata {
 	 * @param requestObjectEndpoint The request object endpoint,
 	 *                              {@code null} if not specified.
 	 */
+	@Deprecated
 	public void setRequestObjectEndpoint(final URI requestObjectEndpoint) {
 		
 		this.requestObjectEndpoint = requestObjectEndpoint;

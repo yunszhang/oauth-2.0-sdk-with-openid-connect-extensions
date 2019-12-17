@@ -1214,3 +1214,5 @@ version 6.21.2 (2019-12-17)
       AuthorizationServerEndpointMetadata to
       {get|set}PushedAuthorizationRequestEndpointURI to fit naming convention
       for endpoints.
+    * Deprecates old style request object endpoint getter and setter of
+      AuthorizationServerEndpointMetadata.
