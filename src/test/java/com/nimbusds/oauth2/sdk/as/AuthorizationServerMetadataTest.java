@@ -32,7 +32,7 @@ import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
+
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
@@ -321,19 +321,19 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		
 		AuthorizationServerMetadata as = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
 		
-		assertNull(as.getPushedAuthorizationRequestEndpoint());
+		assertNull(as.getPushedAuthorizationRequestEndpointURI());
 		
 		as.applyDefaults();
-		assertNull(as.getPushedAuthorizationRequestEndpoint());
+		assertNull(as.getPushedAuthorizationRequestEndpointURI());
 		
 		URI parEndpoint = URI.create("https://c2id.com/par");
-		as.setPushedAuthorizationRequestEndpoint(parEndpoint);
-		assertEquals(parEndpoint, as.getPushedAuthorizationRequestEndpoint());
+		as.setPushedAuthorizationRequestEndpointURI(parEndpoint);
+		assertEquals(parEndpoint, as.getPushedAuthorizationRequestEndpointURI());
 		
 		JSONObject jsonObject = as.toJSONObject();
 		assertEquals(parEndpoint.toString(), jsonObject.get("pushed_authorization_request_endpoint"));
 		
 		as = AuthorizationServerMetadata.parse(jsonObject.toJSONString());
-		assertEquals(parEndpoint, as.getPushedAuthorizationRequestEndpoint());
+		assertEquals(parEndpoint, as.getPushedAuthorizationRequestEndpointURI());
 	}
 }

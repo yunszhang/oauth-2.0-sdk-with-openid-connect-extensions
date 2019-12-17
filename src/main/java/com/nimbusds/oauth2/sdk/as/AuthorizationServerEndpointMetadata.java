@@ -295,7 +295,7 @@ public class AuthorizationServerEndpointMetadata {
 	 * @return The pushed authorisation request endpoint, {@code null} if
 	 *         not specified.
 	 */
-	public URI getPushedAuthorizationRequestEndpoint() {
+	public URI getPushedAuthorizationRequestEndpointURI() {
 		
 		return parEndpoint;
 	}
@@ -308,7 +308,7 @@ public class AuthorizationServerEndpointMetadata {
 	 * @param parEndpoint The pushed authorisation request endpoint,
 	 *                    {@code null} if not specified.
 	 */
-	public void setPushedAuthorizationRequestEndpoint(final URI parEndpoint) {
+	public void setPushedAuthorizationRequestEndpointURI(final URI parEndpoint) {
 		
 		this.parEndpoint = parEndpoint;
 	}

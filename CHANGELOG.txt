@@ -1208,3 +1208,9 @@ version 6.21 (2019-12-06)
 version 6.21.1 (2019-12-17)
     * Fixes PushedAuthorizationErrorResponse.parse to set the HTTP status code
       in the ErrorObject.
+
+version 6.21.2 (2019-12-17)
+    * Renames PAR endpoint getter and setter of
+      AuthorizationServerEndpointMetadata to
+      {get|set}PushedAuthorizationRequestEndpointURI to fit naming convention
+      for endpoints.

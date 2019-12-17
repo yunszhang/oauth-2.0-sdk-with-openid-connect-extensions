@@ -1480,7 +1480,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 		as.setRevocationEndpointURI(asEndpoints.getRevocationEndpointURI());
 		as.setDeviceAuthorizationEndpointURI(asEndpoints.getDeviceAuthorizationEndpointURI());
 		as.setRequestObjectEndpoint(asEndpoints.getRequestObjectEndpoint());
-		as.setPushedAuthorizationRequestEndpoint(asEndpoints.getPushedAuthorizationRequestEndpoint());
+		as.setPushedAuthorizationRequestEndpointURI(asEndpoints.getPushedAuthorizationRequestEndpointURI());
 		as.jwkSetURI = JSONObjectUtils.getURI(jsonObject, "jwks_uri", null);
 		
 		// AS capabilities
