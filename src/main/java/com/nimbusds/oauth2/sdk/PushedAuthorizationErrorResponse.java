@@ -127,6 +127,6 @@ public class PushedAuthorizationErrorResponse extends PushedAuthorizationRespons
 			errorObject = new ErrorObject(null);
 		}
 		
-		return new PushedAuthorizationErrorResponse(errorObject);
+		return new PushedAuthorizationErrorResponse(errorObject.setHTTPStatusCode(statusCode));
 	}
 }

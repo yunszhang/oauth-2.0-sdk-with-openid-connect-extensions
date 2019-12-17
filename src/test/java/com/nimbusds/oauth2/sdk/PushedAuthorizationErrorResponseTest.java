@@ -49,6 +49,7 @@ public class PushedAuthorizationErrorResponseTest extends TestCase {
 		assertEquals(2, params.size());
 		
 		response = PushedAuthorizationErrorResponse.parse(httpResponse);
+		assertEquals(400, response.getErrorObject().getHTTPStatusCode());
 		assertEquals(OAuth2Error.INVALID_REQUEST, response.getErrorObject());
 		assertFalse(response.indicatesSuccess());
 		
@@ -72,6 +73,7 @@ public class PushedAuthorizationErrorResponseTest extends TestCase {
 		
 		response = PushedAuthorizationErrorResponse.parse(httpResponse);
 		assertFalse(response.indicatesSuccess());
+		assertEquals(400, response.getErrorObject().getHTTPStatusCode());
 		assertTrue(response.getErrorObject().toParameters().isEmpty());
 	}
 	
