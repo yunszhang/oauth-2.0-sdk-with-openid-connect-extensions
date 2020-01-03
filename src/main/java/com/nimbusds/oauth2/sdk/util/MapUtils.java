@@ -28,6 +28,20 @@ public final class MapUtils {
 	
 	
 	/**
+	 * Returns {@code true} if the specified map is {@code null} or empty.
+	 *
+	 * @param map The map. May be {@code null}.
+	 *
+	 * @return {@code true} if the map is {@code null} or empty, else
+	 *         {@code false}.
+	 */
+	public static boolean isEmpty(final Map<?,?> map) {
+		
+		return map == null || map.isEmpty();
+	}
+	
+	
+	/**
 	 * Returns {@code true} if the specified map is not {@code null} and
 	 * not empty.
 	 *

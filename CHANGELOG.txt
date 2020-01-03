@@ -1216,3 +1216,6 @@ version 6.21.2 (2019-12-17)
       for endpoints.
     * Deprecates old style request object endpoint getter and setter of
       AuthorizationServerEndpointMetadata.
+
+version 6.22 (2020-01-03)
+    * Adds MapUtils.isEmpty utility method.
