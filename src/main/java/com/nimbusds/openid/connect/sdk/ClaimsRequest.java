@@ -687,15 +687,27 @@ public class ClaimsRequest {
 	/**
 	 * The requested ID token claims, keyed by claim name and language tag.
 	 */
-	private final Map<Map.Entry<String, LangTag>, Entry> idTokenClaims =
-		new HashMap<>();
+	private final Map<Map.Entry<String, LangTag>, Entry> idTokenClaims = new HashMap<>();
+	
+	
+	/**
+	 * The requested verified ID token claims, keyed by claim name and
+	 * language tag.
+	 */
+	private final Map<Map.Entry<String, LangTag>, Entry> verifiedIDTokenClaims = new HashMap<>();
 	
 	
 	/**
 	 * The requested UserInfo claims, keyed by claim name and language tag.
 	 */
-	private final Map<Map.Entry<String, LangTag>, Entry> userInfoClaims =
-		new HashMap<>();
+	private final Map<Map.Entry<String, LangTag>, Entry> userInfoClaims = new HashMap<>();
+	
+	
+	/**
+	 * The requested verified UserInfo claims, keyed by claim name and
+	 * language tag.
+	 */
+	private final Map<Map.Entry<String, LangTag>, Entry> verifiedUserInfoClaims = new HashMap<>();
 	
 	
 	/**
@@ -719,7 +731,9 @@ public class ClaimsRequest {
 			return;
 		
 		idTokenClaims.putAll(other.idTokenClaims);
+		verifiedIDTokenClaims.putAll(other.verifiedIDTokenClaims);
 		userInfoClaims.putAll(other.userInfoClaims);
+		verifiedUserInfoClaims.putAll(other.verifiedUserInfoClaims);
 	}
 	
 	
@@ -1312,14 +1326,6 @@ public class ClaimsRequest {
 		}
 		
 		return claimsRequest;
-	}
-	
-	
-	private static Map<String, Object> resolveAdditionalInformationForClaim(final Map<String, Object> customClaims) {
-		customClaims.remove("essential");
-		customClaims.remove("value");
-		customClaims.remove("values");
-		return customClaims.isEmpty() ? null : customClaims;
 	}
 	
 	
