@@ -699,6 +699,12 @@ public class ClaimsRequest implements JSONAware {
 	
 	
 	/**
+	 * The verification element for the requested verified ID token claims.
+	 */
+	private JSONObject idTokenClaimsVerification;
+	
+	
+	/**
 	 * The requested UserInfo claims, keyed by claim name and language tag.
 	 */
 	private final Map<Map.Entry<String, LangTag>, Entry> userInfoClaims = new HashMap<>();
@@ -709,6 +715,12 @@ public class ClaimsRequest implements JSONAware {
 	 * language tag.
 	 */
 	private final Map<Map.Entry<String, LangTag>, Entry> verifiedUserInfoClaims = new HashMap<>();
+	
+	
+	/**
+	 * The verification element for the requested verified UserInfo claims.
+	 */
+	private JSONObject userInfoClaimsVerification;
 	
 	
 	/**
@@ -733,8 +745,11 @@ public class ClaimsRequest implements JSONAware {
 		
 		idTokenClaims.putAll(other.idTokenClaims);
 		verifiedIDTokenClaims.putAll(other.verifiedIDTokenClaims);
+		idTokenClaimsVerification = other.idTokenClaimsVerification;
+		
 		userInfoClaims.putAll(other.userInfoClaims);
 		verifiedUserInfoClaims.putAll(other.verifiedUserInfoClaims);
+		userInfoClaimsVerification = other.userInfoClaimsVerification;
 	}
 	
 	
@@ -884,6 +899,32 @@ public class ClaimsRequest implements JSONAware {
 	public void addVerifiedIDTokenClaim(final Entry entry) {
 		
 		verifiedIDTokenClaims.put(toKey(entry), entry);
+	}
+	
+	
+	/**
+	 * Sets the {@code verification} element for the requested verified ID
+	 * token claims.
+	 *
+	 * @param jsonObject The {@code verification} JSON object, {@code null}
+	 *                   if not specified.
+	 */
+	public void setIDTokenClaimsVerificationJSONObject(final JSONObject jsonObject) {
+		
+		this.idTokenClaimsVerification = jsonObject;
+	}
+	
+	
+	/**
+	 * Gets the {@code verification} element for the requested verified ID
+	 * token claims.
+	 *
+	 * @return The {@code verification} JSON object, {@code null} if not
+	 *         specified.
+	 */
+	public JSONObject getIDTokenClaimsVerificationJSONObject() {
+		
+		return idTokenClaimsVerification;
 	}
 	
 	
@@ -1144,6 +1185,32 @@ public class ClaimsRequest implements JSONAware {
 	
 	
 	/**
+	 * Sets the {@code verification} element for the requested verified
+	 * UserInfo claims.
+	 *
+	 * @param jsonObject The {@code verification} JSON object, {@code null}
+	 *                   if not specified.
+	 */
+	public void setUserInfoClaimsVerificationJSONObject(final JSONObject jsonObject) {
+		
+		this.userInfoClaimsVerification = jsonObject;
+	}
+	
+	
+	/**
+	 * Gets the {@code verification} element for the requested verified
+	 * UserInfo claims.
+	 *
+	 * @return The {@code verification} JSON object, {@code null} if not
+	 *         specified.
+	 */
+	public JSONObject getUserInfoClaimsVerificationJSONObject() {
+		
+		return userInfoClaimsVerification;
+	}
+	
+	
+	/**
 	 * Gets the requested UserInfo claims.
 	 *
 	 * @return The UserInfo claims, as an unmodifiable collection, empty
@@ -1290,8 +1357,15 @@ public class ClaimsRequest implements JSONAware {
 			} else {
 				idTokenObject = new JSONObject();
 			}
+			
 			JSONObject verifiedClaims = new JSONObject();
+			
 			verifiedClaims.put("claims", Entry.toJSONObject(getVerifiedIDTokenClaims()));
+			
+			if (getIDTokenClaimsVerificationJSONObject() != null) {
+				verifiedClaims.put("verification", getIDTokenClaimsVerificationJSONObject());
+			}
+			
 			idTokenObject.put("verified_claims", verifiedClaims);
 			o.put("id_token", idTokenObject);
 		}
@@ -1309,8 +1383,15 @@ public class ClaimsRequest implements JSONAware {
 			} else {
 				userInfoObject = new JSONObject();
 			}
+			
 			JSONObject verifiedClaims = new JSONObject();
+			
 			verifiedClaims.put("claims", Entry.toJSONObject(getVerifiedUserInfoClaims()));
+			
+			if (getUserInfoClaimsVerificationJSONObject() != null) {
+				verifiedClaims.put("verification", getUserInfoClaimsVerificationJSONObject());
+			}
+			
 			userInfoObject.put("verified_claims", verifiedClaims);
 			o.put("userinfo", userInfoObject);
 		}
@@ -1544,12 +1625,15 @@ public class ClaimsRequest implements JSONAware {
 				JSONObject verifiedClaimsObject = JSONObjectUtils.getJSONObject(idTokenObject, "verified_claims", null);
 				
 				if (verifiedClaimsObject != null) {
+					// id_token -> verified_claims -> claims
 					JSONObject claimsObject = JSONObjectUtils.getJSONObject(verifiedClaimsObject, "claims", null);
 					if (claimsObject != null) {
 						for (Entry entry : Entry.parseEntries(claimsObject)) {
 							claimsRequest.addVerifiedIDTokenClaim(entry);
 						}
 					}
+					// id_token -> verified_claims -> verification
+					claimsRequest.setIDTokenClaimsVerificationJSONObject(JSONObjectUtils.getJSONObject(verifiedClaimsObject, "verification", null));
 				}
 			}
 			
@@ -1567,12 +1651,15 @@ public class ClaimsRequest implements JSONAware {
 				JSONObject verifiedClaimsObject = JSONObjectUtils.getJSONObject(userInfoObject, "verified_claims", null);
 				
 				if (verifiedClaimsObject != null) {
+					// userinfo -> verified_claims -> claims
 					JSONObject claimsObject = JSONObjectUtils.getJSONObject(verifiedClaimsObject, "claims", null);
 					if (claimsObject != null) {
 						for (Entry entry : Entry.parseEntries(claimsObject)) {
 							claimsRequest.addVerifiedUserInfoClaim(entry);
 						}
 					}
+					// userinfo -> verified_claims -> verification
+					claimsRequest.setUserInfoClaimsVerificationJSONObject(JSONObjectUtils.getJSONObject(verifiedClaimsObject, "verification", null));
 				}
 			}
 			

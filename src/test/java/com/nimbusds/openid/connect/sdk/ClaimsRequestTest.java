@@ -29,6 +29,7 @@ import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
 import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
@@ -1310,5 +1311,63 @@ public class ClaimsRequestTest extends TestCase {
 		assertEquals("email", claimsRequest.getUserInfoClaims().iterator().next().getClaimName());
 		
 		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
+	}
+	
+	
+	public void testVerificationElements()
+		throws Exception {
+		
+		ClaimsRequest claimsRequest = new ClaimsRequest();
+		
+		// Getters and setters with null
+		assertNull(claimsRequest.getIDTokenClaimsVerificationJSONObject());
+		assertNull(claimsRequest.getUserInfoClaimsVerificationJSONObject());
+		
+		claimsRequest.setIDTokenClaimsVerificationJSONObject(null);
+		claimsRequest.setUserInfoClaimsVerificationJSONObject(null);
+		
+		assertNull(claimsRequest.getIDTokenClaimsVerificationJSONObject());
+		assertNull(claimsRequest.getUserInfoClaimsVerificationJSONObject());
+		
+		// Add claims with verification to id_token and userinfo top-level members
+		claimsRequest.addVerifiedIDTokenClaim(new ClaimsRequest.Entry("email"));
+		
+		JSONObject idTokenVerification = new JSONObject();
+		idTokenVerification.put("time", null);
+		
+		claimsRequest.setIDTokenClaimsVerificationJSONObject(idTokenVerification);
+		
+		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("name"));
+		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("address"));
+		
+		JSONObject userInfoVerification = new JSONObject();
+		userInfoVerification.put("trust_framework", IdentityTrustFramework.EIDAS_IAL_HIGH.getValue());
+		
+		claimsRequest.setUserInfoClaimsVerificationJSONObject(userInfoVerification);
+		
+		// Getters
+		assertEquals(idTokenVerification, claimsRequest.getIDTokenClaimsVerificationJSONObject());
+		assertEquals(userInfoVerification, claimsRequest.getUserInfoClaimsVerificationJSONObject());
+		
+		// JSON output
+		JSONObject jsonObject = claimsRequest.toJSONObject();
+		
+		String expectedJSON = "{\"id_token\":{\"verified_claims\":{\"claims\":{\"email\":null},\"verification\":{\"time\":null}}},\"userinfo\":{\"verified_claims\":{\"claims\":{\"address\":null,\"name\":null},\"verification\":{\"trust_framework\":\"eidas_ial_high\"}}}}";
+		
+		assertEquals(JSONObjectUtils.parse(expectedJSON), jsonObject);
+		
+		// Parse
+		claimsRequest = ClaimsRequest.parse(jsonObject.toJSONString());
+		
+		// Getters
+		assertEquals(idTokenVerification, claimsRequest.getIDTokenClaimsVerificationJSONObject());
+		assertEquals(userInfoVerification, claimsRequest.getUserInfoClaimsVerificationJSONObject());
+		
+		// Copy
+		ClaimsRequest copy = new ClaimsRequest();
+		copy.add(claimsRequest);
+		
+		assertEquals(idTokenVerification, copy.getIDTokenClaimsVerificationJSONObject());
+		assertEquals(userInfoVerification, copy.getUserInfoClaimsVerificationJSONObject());
 	}
 }
