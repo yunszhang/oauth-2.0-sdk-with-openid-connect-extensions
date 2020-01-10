@@ -33,25 +33,27 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
 
 
 /**
- * Specifies the individual claims to return from the UserInfo endpoint and /
- * or in the ID Token.
+ * Specifies the individual OpenID claims to return from the UserInfo endpoint
+ * and / or in the ID Token.
  *
  * <p>Related specifications:
  *
  * <ul>
  *     <li>OpenID Connect Core 1.0, section 5.5.
+ *     <li>OpenID Connect for Identity Assurance 1.0.
  * </ul>
  */
 public class ClaimsRequest {
 	
 	
 	/**
-	 * Individual claim request.
+	 * Individual OpenID claim request.
 	 *
 	 * <p>Related specifications:
 	 *
 	 * <ul>
 	 *     <li>OpenID Connect Core 1.0, section 5.5.1.
+	 *     <li>OpenID Connect for Identity Assurance 1.0.
 	 * </ul>
 	 */
 	@Immutable
@@ -89,6 +91,12 @@ public class ClaimsRequest {
 		
 		
 		/**
+		 * The claim purpose.
+		 */
+		private final String purpose;
+		
+		
+		/**
 		 * Optional additional claim information.
 		 *
 		 * <p>Example additional information in the "info" member:
@@ -108,11 +116,25 @@ public class ClaimsRequest {
 		/**
 		 * Creates a new individual claim request. The claim
                  * requirement is set to voluntary (the default) and no
+                 * expected value(s) or other parameters are specified.
+		 *
+		 * @param claimName The claim name. Must not be {@code null}.
+		 */
+		public Entry(final String claimName) {
+			
+			this(claimName, ClaimRequirement.VOLUNTARY, null, null, null, null, null);
+		}
+		
+		
+		/**
+		 * Creates a new individual claim request. The claim
+                 * requirement is set to voluntary (the default) and no
                  * expected value(s) are specified.
 		 *
 		 * @param claimName The claim name. Must not be {@code null}.
 		 * @param langTag   Optional language tag for the claim.
 		 */
+		@Deprecated
 		public Entry(final String claimName, final LangTag langTag) {
 			
 			this(claimName, ClaimRequirement.VOLUNTARY, langTag, null, null);
@@ -126,6 +148,7 @@ public class ClaimsRequest {
 		 * @param requirement The claim requirement. Must not be
                  *                    {@code null}.
 		 */
+		@Deprecated
 		public Entry(final String claimName, final ClaimRequirement requirement) {
 			
 			this(claimName, requirement, null, null, null);
@@ -141,6 +164,7 @@ public class ClaimsRequest {
 		 * @param langTag     Optional language tag for the claim.
 		 * @param value       Optional expected value for the claim.
 		 */
+		@Deprecated
 		public Entry(final String claimName, final ClaimRequirement requirement,
 			     final LangTag langTag, final String value) {
 			
@@ -157,10 +181,11 @@ public class ClaimsRequest {
 		 * @param langTag     Optional language tag for the claim.
 		 * @param values      Optional expected values for the claim.
 		 */
+		@Deprecated
 		public Entry(final String claimName, final ClaimRequirement requirement,
 			     final LangTag langTag, final List<String> values) {
 			
-			this(claimName, requirement, langTag, null, values, null);
+			this(claimName, requirement, langTag, null, values, null, null);
 		}
 		
 		
@@ -180,9 +205,10 @@ public class ClaimsRequest {
                  *                    If set, then the {@code value} parameter
                  *                    must not be set.
 		 */
+		@Deprecated
 		private Entry(final String claimName, final ClaimRequirement requirement, final LangTag langTag,
 			      final String value, final List<String> values) {
-			this(claimName, requirement, langTag, value, values, null);
+			this(claimName, requirement, langTag, value, values, null, null);
 		}
 		
 		
@@ -205,11 +231,18 @@ public class ClaimsRequest {
                  *                              the claim. If set, then the
                  *                              {@code value} parameter must
                  *                              not be set.
+		 * @param purpose               The purpose for the requested
+		 *                              claim, {@code null} if not
+		 *                              specified.
 		 * @param additionalInformation Optional additional information
-		 *                              about the requested Claims.
 		 */
-		private Entry(final String claimName, final ClaimRequirement requirement, final LangTag langTag,
-			      final String value, final List<String> values, final Map<String, Object> additionalInformation) {
+		private Entry(final String claimName,
+			      final ClaimRequirement requirement,
+			      final LangTag langTag,
+			      final String value,
+			      final List<String> values,
+			      final String purpose,
+			      final Map<String, Object> additionalInformation) {
 			
 			if (claimName == null)
 				throw new IllegalArgumentException("The claim name must not be null");
@@ -246,12 +279,14 @@ public class ClaimsRequest {
 				throw new IllegalArgumentException("Either value or values must be specified, but not both");
 			}
 			
+			this.purpose = purpose;
+			
 			this.additionalInformation = additionalInformation;
 		}
 		
 		
 		/**
-		 * Gets the claim name.
+		 * Returns the claim name.
 		 *
 		 * @return The claim name.
 		 */
@@ -262,7 +297,7 @@ public class ClaimsRequest {
 		
 		
 		/**
-		 * Gets the claim name, optionally with the language tag
+		 * Returns the claim name, optionally with the language tag
 		 * appended.
 		 *
 		 * <p>Example with language tag:
@@ -287,7 +322,20 @@ public class ClaimsRequest {
 		
 		
 		/**
-		 * Gets the claim requirement.
+		 * Returns a new claim entry with the specified requirement.
+		 *
+		 * @param requirement The claim requirement.
+		 *
+		 * @return The new entry.
+		 */
+		public Entry withClaimRequirement(final ClaimRequirement requirement) {
+			
+			return new Entry(claimName, requirement, langTag, value, values, purpose, additionalInformation);
+		}
+		
+		
+		/**
+		 * Returns the claim requirement.
 		 *
 		 * @return The claim requirement.
 		 */
@@ -298,7 +346,22 @@ public class ClaimsRequest {
 		
 		
 		/**
-		 * Gets the optional language tag for the claim.
+		 * Returns a new claim entry with the specified language tag
+		 * for the claim.
+		 *
+		 * @param langTag The language tag, {@code null} if not
+		 *                specified.
+		 *
+		 * @return The new entry.
+		 */
+		public Entry withLangTag(final LangTag langTag) {
+			
+			return new Entry(claimName, requirement, langTag, value, values, purpose, additionalInformation);
+		}
+		
+		
+		/**
+		 * Returns the optional language tag for the claim.
 		 *
 		 * @return The language tag, {@code null} if not specified.
 		 */
@@ -309,7 +372,21 @@ public class ClaimsRequest {
 		
 		
 		/**
-		 * Gets the optional value for the claim.
+		 * Returns a new claim entry with the specified requested value
+		 * for the claim.
+		 *
+		 * @param value The value, {@code null} if not specified.
+		 *
+		 * @return The new entry.
+		 */
+		public Entry withValue(final String value) {
+			
+			return new Entry(claimName, requirement, langTag, value, null, purpose, additionalInformation);
+		}
+		
+		
+		/**
+		 * Returns the requested value for the claim.
 		 *
 		 * @return The value, {@code null} if not specified.
 		 */
@@ -320,7 +397,21 @@ public class ClaimsRequest {
 		
 		
 		/**
-		 * Gets the optional values for the claim.
+		 * Returns a new claim entry with the specified requested
+		 * values for the claim.
+		 *
+		 * @param values The values, {@code null} if not specified.
+		 *
+		 * @return The new entry.
+		 */
+		public Entry withValues(final List<String> values) {
+			
+			return new Entry(claimName, requirement, langTag, null, values, purpose, additionalInformation);
+		}
+		
+		
+		/**
+		 * Returns the optional values for the claim.
 		 *
 		 * @return The values, {@code null} if not specified.
 		 */
@@ -331,7 +422,58 @@ public class ClaimsRequest {
 		
 		
 		/**
-		 * Gets the optional additional information for the claim.
+		 * Returns a new claim entry with the specified purpose for the
+		 * requested claim.
+		 *
+		 * @param purpose The purpose, {@code null} if not specified.
+		 *
+		 * @return The new entry.
+		 */
+		public Entry withPurpose(final String purpose) {
+			
+			return new Entry(claimName, requirement, langTag, value, values, purpose, additionalInformation);
+		}
+		
+		
+		/**
+		 * Returns the optional purpose for the requested claim.
+		 *
+		 * @return The purpose, {@code null} if not specified.
+		 */
+		public String getPurpose() {
+			
+			return purpose;
+		}
+		
+		
+		/**
+		 * Returns a new claim entry with the specified additional
+		 * information for the claim.
+		 *
+		 * <p>Example additional information in the "info" member:
+		 *
+		 * <pre>
+		 * {
+		 *   "userinfo" : {
+		 *       "email": null,
+		 *       "email_verified": null,
+		 *       "http://example.info/claims/groups" : { "info" : "custom information" } }
+		 * }
+		 * </pre>
+		 *
+		 * @param additionalInformation The additional information,
+		 *                              {@code null} if not specified.
+		 *
+		 * @return The new entry.
+		 */
+		public Entry withAdditionalInformation(final Map<String, Object> additionalInformation) {
+			
+			return new Entry(claimName, requirement, langTag, value, values, purpose, additionalInformation);
+		}
+		
+		
+		/**
+		 * Returns the additional information for the claim.
 		 *
 		 * <p>Example additional information in the "info" member:
 		 *
@@ -403,6 +545,13 @@ public class ClaimsRequest {
 						entrySpec = new JSONObject();
 					
 					entrySpec.put("essential", true);
+				}
+				
+				if (entry.getPurpose() != null) {
+					if (entrySpec == null) {
+						entrySpec = new JSONObject();
+					}
+					entrySpec.put("purpose", entry.getPurpose());
 				}
 				
 				if (entry.getAdditionalInformation() != null) {
@@ -486,11 +635,16 @@ public class ClaimsRequest {
 							requirement = ClaimRequirement.ESSENTIAL;
 					}
 					
+					String purpose = null;
+					if (entrySpec.containsKey("purpose")) {
+						purpose = (String) entrySpec.get("purpose");
+					}
+					
 					if (entrySpec.containsKey("value")) {
 						
 						String expectedValue = (String) entrySpec.get("value");
 						Map<String, Object> additionalInformation = getAdditionalInformationFromClaim(entrySpec);
-						entries.add(new Entry(claimName, requirement, langTag, expectedValue, null, additionalInformation));
+						entries.add(new Entry(claimName, requirement, langTag, expectedValue, null, purpose, additionalInformation));
 						
 					} else if (entrySpec.containsKey("values")) {
 						
@@ -502,11 +656,11 @@ public class ClaimsRequest {
 						}
 						Map<String, Object> additionalInformation = getAdditionalInformationFromClaim(entrySpec);
 						
-						entries.add(new Entry(claimName, requirement, langTag, null, expectedValues, additionalInformation));
+						entries.add(new Entry(claimName, requirement, langTag, null, expectedValues, purpose, additionalInformation));
 						
 					} else {
 						Map<String, Object> additionalInformation = getAdditionalInformationFromClaim(entrySpec);
-						entries.add(new Entry(claimName, requirement, langTag, (String) null, null, additionalInformation));
+						entries.add(new Entry(claimName, requirement, langTag, (String) null, null, purpose, additionalInformation));
 					}
 					
 				} catch (Exception e) {
@@ -519,7 +673,7 @@ public class ClaimsRequest {
 		
 		
 		private static Map<String, Object> getAdditionalInformationFromClaim(JSONObject entrySpec) {
-			List<String> keysToRemove = Arrays.asList("essential", "value", "values");
+			List<String> keysToRemove = Arrays.asList("essential", "value", "values", "purpose");
 			entrySpec.keySet().removeAll(keysToRemove);
 			Map<String, Object> additionalClaimInformation = new HashMap<>();
 			for (Map.Entry<String, Object> additionalClaimInformationEntry : entrySpec.entrySet()) {
@@ -645,7 +799,7 @@ public class ClaimsRequest {
 	public void addIDTokenClaim(final String claimName, final ClaimRequirement requirement,
 				    final LangTag langTag, final String value, final Map<String, Object> additionalInformation) {
 		
-		addIDTokenClaim(new Entry(claimName, requirement, langTag, value, null, additionalInformation));
+		addIDTokenClaim(new Entry(claimName, requirement, langTag, value, null, null, additionalInformation));
 	}
 	
 	
@@ -683,7 +837,7 @@ public class ClaimsRequest {
 	public void addIDTokenClaim(final String claimName, final ClaimRequirement requirement,
 				    final LangTag langTag, final List<String> values, final Map<String, Object> additionalInformation) {
 		
-		addIDTokenClaim(new Entry(claimName, requirement, langTag, null, values, additionalInformation));
+		addIDTokenClaim(new Entry(claimName, requirement, langTag, null, values, null, additionalInformation));
 	}
 	
 	
@@ -860,7 +1014,7 @@ public class ClaimsRequest {
 	public void addUserInfoClaim(final String claimName, final ClaimRequirement requirement,
 				     final LangTag langTag, final String value, final Map<String, Object> additionalInformation) {
 		
-		addUserInfoClaim(new Entry(claimName, requirement, langTag, value, null, additionalInformation));
+		addUserInfoClaim(new Entry(claimName, requirement, langTag, value, null, null, additionalInformation));
 	}
 	
 	
@@ -898,7 +1052,7 @@ public class ClaimsRequest {
 	public void addUserInfoClaim(final String claimName, final ClaimRequirement requirement,
 				     final LangTag langTag, final List<String> values, final Map<String, Object> additionalInformation) {
 		
-		addUserInfoClaim(new Entry(claimName, requirement, langTag, null, values, additionalInformation));
+		addUserInfoClaim(new Entry(claimName, requirement, langTag, null, values, null, additionalInformation));
 	}
 	
 	

@@ -2200,4 +2200,12 @@ public class AuthenticationRequestTest extends TestCase {
 			assertEquals("Invalid request: Invalid \"purpose\" parameter: Must not be shorter than 3 and longer than 300 characters", e.getErrorObject().getDescription());
 		}
 	}
+	
+	
+	public void testIdentityAssuranceExample()
+		throws Exception {
+		
+		ClaimsRequest claimsRequest = new ClaimsRequest();
+		
+	}
 }

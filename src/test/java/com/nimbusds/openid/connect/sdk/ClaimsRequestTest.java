@@ -1058,4 +1058,124 @@ public class ClaimsRequestTest extends TestCase {
 		
 		System.out.println(claimsRequest.toJSONObject());
 	}
+	
+	public void testParseExampleWithPurpose()
+		throws ParseException {
+		
+		String json = "{" +
+			"\"userinfo\":{" +
+			"  \"verified_claims\":{" +
+			"    \"claims\":{" +
+			"      \"address\": {" +
+			"        \"essential\": true," +
+			"        \"purpose\": \"Required for insurance policy calculation\"" +
+			"      }" +
+			"    }" +
+			"  }" +
+			"}" +
+			"}";
+		
+		ClaimsRequest claimsRequest = ClaimsRequest.parse(json);
+		
+		Collection<ClaimsRequest.Entry> cls = claimsRequest.getUserInfoClaims();
+		assertEquals(1, cls.size());
+		ClaimsRequest.Entry verifiedClaims = cls.iterator().next();
+		assertEquals("verified_claims", verifiedClaims.getClaimName());
+		assertNull(verifiedClaims.getValue());
+		assertNull(verifiedClaims.getValues());
+		Map<String,Object> additionalInfo = verifiedClaims.getAdditionalInformation();
+		Map<String,Object> verifiedClaimsSpec = (Map<String,Object>)additionalInfo.get("claims");
+		assertTrue(verifiedClaimsSpec.containsKey("address"));
+		assertEquals(1, verifiedClaimsSpec.size());
+		
+		System.out.println(claimsRequest.toJSONObject());
+	}
+	
+	
+	public void testEntry() throws LangTagException, ParseException {
+		
+		ClaimsRequest.Entry entry = new ClaimsRequest.Entry("name");
+		
+		assertEquals("name", entry.getClaimName());
+		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
+		assertNull(entry.getLangTag());
+		assertNull(entry.getValue());
+		assertNull(entry.getValues());
+		assertNull(entry.getPurpose());
+		assertNull(entry.getAdditionalInformation());
+		
+		LangTag langTag = new LangTag("en");
+		entry = entry.withLangTag(langTag);
+		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
+		assertEquals(langTag, entry.getLangTag());
+		assertNull(entry.getValue());
+		assertNull(entry.getValues());
+		assertNull(entry.getPurpose());
+		assertNull(entry.getAdditionalInformation());
+		
+		entry = entry.withClaimRequirement(ClaimRequirement.ESSENTIAL);
+		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
+		assertEquals(langTag, entry.getLangTag());
+		assertNull(entry.getValue());
+		assertNull(entry.getValues());
+		assertNull(entry.getPurpose());
+		assertNull(entry.getAdditionalInformation());
+		
+		String value = "Alice";
+		entry = entry.withValue(value);
+		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
+		assertEquals(langTag, entry.getLangTag());
+		assertEquals(value, entry.getValue());
+		assertNull(entry.getValues());
+		assertNull(entry.getPurpose());
+		assertNull(entry.getAdditionalInformation());
+		
+		String purpose = "Contract formation";
+		entry = entry.withPurpose(purpose);
+		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
+		assertEquals(langTag, entry.getLangTag());
+		assertEquals(value, entry.getValue());
+		assertNull(entry.getValues());
+		assertEquals(purpose, entry.getPurpose());
+		assertNull(entry.getAdditionalInformation());
+		
+		Map<String,Object> otherInfo = new HashMap<>();
+		otherInfo.put("patientId", "p123");
+		entry = entry.withAdditionalInformation(otherInfo);
+		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
+		assertEquals(langTag, entry.getLangTag());
+		assertEquals(value, entry.getValue());
+		assertNull(entry.getValues());
+		assertEquals(purpose, entry.getPurpose());
+		assertEquals(otherInfo, entry.getAdditionalInformation());
+		
+		List<String> values = Arrays.asList("Alice", "Alice Adams");
+		entry = entry.withValues(values);
+		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
+		assertEquals(langTag, entry.getLangTag());
+		assertNull(entry.getValue());
+		assertEquals(values, entry.getValues());
+		assertEquals(purpose, entry.getPurpose());
+		assertEquals(otherInfo, entry.getAdditionalInformation());
+		
+		JSONObject jsonObject = ClaimsRequest.Entry.toJSONObject(Collections.singleton(entry));
+		
+		JSONObject nameObject = JSONObjectUtils.getJSONObject(jsonObject, "name#en");
+		assertTrue(JSONObjectUtils.getBoolean(nameObject, "essential"));
+		assertEquals(values, JSONObjectUtils.getStringList(nameObject, "values"));
+		assertEquals("p123", JSONObjectUtils.getString(nameObject, "patientId"));
+		assertEquals(purpose, JSONObjectUtils.getString(nameObject, "purpose"));
+		assertEquals(4, nameObject.size());
+		assertEquals(1, jsonObject.size());
+		
+		Collection<ClaimsRequest.Entry> entries = ClaimsRequest.Entry.parseEntries(jsonObject);
+		entry = entries.iterator().next();
+		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
+		assertEquals(langTag, entry.getLangTag());
+		assertNull(entry.getValue());
+		assertEquals(values, entry.getValues());
+		assertEquals(purpose, entry.getPurpose());
+		assertEquals(otherInfo, entry.getAdditionalInformation());
+		assertEquals(1, entries.size());
+	}
 }
