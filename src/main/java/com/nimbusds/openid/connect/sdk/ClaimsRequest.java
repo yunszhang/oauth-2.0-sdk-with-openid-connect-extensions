@@ -21,6 +21,7 @@ package com.nimbusds.openid.connect.sdk;
 import java.util.*;
 
 import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONAware;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.langtag.LangTag;
@@ -43,7 +44,7 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
  *     <li>OpenID Connect for Identity Assurance 1.0.
  * </ul>
  */
-public class ClaimsRequest {
+public class ClaimsRequest implements JSONAware {
 	
 	
 	/**
@@ -774,7 +775,6 @@ public class ClaimsRequest {
 	public void addIDTokenClaim(final String claimName, final ClaimRequirement requirement,
 				    final LangTag langTag) {
 		
-		
 		addIDTokenClaim(claimName, requirement, langTag, (String) null);
 	}
 	
@@ -855,6 +855,14 @@ public class ClaimsRequest {
 	}
 	
 	
+	private static Map.Entry<String, LangTag> toKey(final Entry entry) {
+		
+		return new AbstractMap.SimpleImmutableEntry<>(
+			entry.getClaimName(),
+			entry.getLangTag());
+	}
+	
+	
 	/**
 	 * Adds the specified ID token claim to the request.
 	 *
@@ -863,11 +871,19 @@ public class ClaimsRequest {
 	 */
 	public void addIDTokenClaim(final Entry entry) {
 		
-		Map.Entry<String, LangTag> key = new AbstractMap.SimpleImmutableEntry<>(
-			entry.getClaimName(),
-			entry.getLangTag());
+		idTokenClaims.put(toKey(entry), entry);
+	}
+	
+	
+	/**
+	 * Adds the specified verified ID token claim to the request.
+	 *
+	 * @param entry The individual verified ID token claim request. Must
+	 *              not be {@code null}.
+	 */
+	public void addVerifiedIDTokenClaim(final Entry entry) {
 		
-		idTokenClaims.put(key, entry);
+		verifiedIDTokenClaims.put(toKey(entry), entry);
 	}
 	
 	
@@ -884,6 +900,29 @@ public class ClaimsRequest {
 	
 	
 	/**
+	 * Gets the requested verified ID token claims.
+	 *
+	 * @return The verified ID token claims, as an unmodifiable collection,
+	 *         empty set if none.
+	 */
+	public Collection<Entry> getVerifiedIDTokenClaims() {
+		
+		return Collections.unmodifiableCollection(verifiedIDTokenClaims.values());
+	}
+	
+	
+	private static Set<String> getClaimNames(final Map<Map.Entry<String, LangTag>, Entry> claims, final boolean withLangTag) {
+		
+		Set<String> names = new HashSet<>();
+		
+		for (Entry en : claims.values())
+			names.add(en.getClaimName(withLangTag));
+		
+		return Collections.unmodifiableSet(names);
+	}
+	
+	
+	/**
 	 * Gets the names of the requested ID token claim names.
 	 *
 	 * @param withLangTag If {@code true} the language tags, if any, will
@@ -894,12 +933,22 @@ public class ClaimsRequest {
 	 */
 	public Set<String> getIDTokenClaimNames(final boolean withLangTag) {
 		
-		Set<String> names = new HashSet<>();
+		return getClaimNames(idTokenClaims, withLangTag);
+	}
+	
+	
+	/**
+	 * Gets the names of the requested verified ID token claim names.
+	 *
+	 * @param withLangTag If {@code true} the language tags, if any, will
+	 *                    be appended to the names, else not.
+         *
+	 * @return The ID token claim names, as an unmodifiable set, empty set
+	 *         if none.
+	 */
+	public Set<String> getVerifiedIDTokenClaimNames(final boolean withLangTag) {
 		
-		for (Entry en : idTokenClaims.values())
-			names.add(en.getClaimName(withLangTag));
-		
-		return Collections.unmodifiableSet(names);
+		return getClaimNames(verifiedIDTokenClaims, withLangTag);
 	}
 	
 	
@@ -1078,11 +1127,19 @@ public class ClaimsRequest {
 	 */
 	public void addUserInfoClaim(final Entry entry) {
 		
-		Map.Entry<String, LangTag> key = new AbstractMap.SimpleImmutableEntry<>(
-			entry.getClaimName(),
-			entry.getLangTag());
+		userInfoClaims.put(toKey(entry), entry);
+	}
+	
+	
+	/**
+	 * Adds the specified verified UserInfo claim to the request.
+	 *
+	 * @param entry The individual verified UserInfo claim request. Must
+	 *              not be {@code null}.
+	 */
+	public void addVerifiedUserInfoClaim(final Entry entry) {
 		
-		userInfoClaims.put(key, entry);
+		verifiedUserInfoClaims.put(toKey(entry), entry);
 	}
 	
 	
@@ -1099,6 +1156,18 @@ public class ClaimsRequest {
 	
 	
 	/**
+	 * Gets the requested verified UserInfo claims.
+	 *
+	 * @return The UserInfo claims, as an unmodifiable collection, empty
+	 *         set if none.
+	 */
+	public Collection<Entry> getVerifiedUserInfoClaims() {
+		
+		return Collections.unmodifiableCollection(verifiedUserInfoClaims.values());
+	}
+	
+	
+	/**
 	 * Gets the names of the requested UserInfo claim names.
 	 *
 	 * @param withLangTag If {@code true} the language tags, if any, will
@@ -1109,12 +1178,22 @@ public class ClaimsRequest {
 	 */
 	public Set<String> getUserInfoClaimNames(final boolean withLangTag) {
 		
-		Set<String> names = new HashSet<>();
+		return getClaimNames(userInfoClaims, withLangTag);
+	}
+	
+	
+	/**
+	 * Gets the names of the requested verified UserInfo claim names.
+	 *
+	 * @param withLangTag If {@code true} the language tags, if any, will
+	 *                    be appended to the names, else not.
+         *
+	 * @return The UserInfo claim names, as an unmodifiable set, empty set
+	 *         if none.
+	 */
+	public Set<String> getVerifiedUserInfoClaimNames(final boolean withLangTag) {
 		
-		for (Entry en : userInfoClaims.values())
-			names.add(en.getClaimName(withLangTag));
-		
-		return Collections.unmodifiableSet(names);
+		return getClaimNames(verifiedUserInfoClaims, withLangTag);
 	}
 	
 	
@@ -1198,18 +1277,42 @@ public class ClaimsRequest {
 		
 		JSONObject o = new JSONObject();
 		
-		Collection<Entry> idTokenEntries = getIDTokenClaims();
-		
-		if (!idTokenEntries.isEmpty()) {
+		if (! getIDTokenClaims().isEmpty()) {
 			
-			o.put("id_token", Entry.toJSONObject(idTokenEntries));
+			o.put("id_token", Entry.toJSONObject(getIDTokenClaims()));
 		}
 		
-		Collection<Entry> userInfoEntries = getUserInfoClaims();
-		
-		if (!userInfoEntries.isEmpty()) {
+		if (! getVerifiedIDTokenClaims().isEmpty()) {
 			
-			o.put("userinfo", Entry.toJSONObject(userInfoEntries));
+			JSONObject idTokenObject;
+			if (o.get("id_token") != null) {
+				idTokenObject = (JSONObject) o.get("id_token");
+			} else {
+				idTokenObject = new JSONObject();
+			}
+			JSONObject verifiedClaims = new JSONObject();
+			verifiedClaims.put("claims", Entry.toJSONObject(getVerifiedIDTokenClaims()));
+			idTokenObject.put("verified_claims", verifiedClaims);
+			o.put("id_token", idTokenObject);
+		}
+		
+		if (! getUserInfoClaims().isEmpty()) {
+			
+			o.put("userinfo", Entry.toJSONObject(getUserInfoClaims()));
+		}
+		
+		if (! getVerifiedUserInfoClaims().isEmpty()) {
+			
+			JSONObject userInfoObject;
+			if (o.get("userinfo") != null) {
+				userInfoObject = (JSONObject) o.get("userinfo");
+			} else {
+				userInfoObject = new JSONObject();
+			}
+			JSONObject verifiedClaims = new JSONObject();
+			verifiedClaims.put("claims", Entry.toJSONObject(getVerifiedUserInfoClaims()));
+			userInfoObject.put("verified_claims", verifiedClaims);
+			o.put("userinfo", userInfoObject);
 		}
 		
 		return o;
@@ -1217,9 +1320,15 @@ public class ClaimsRequest {
 	
 	
 	@Override
+	public String toJSONString() {
+		return toJSONObject().toJSONString();
+	}
+	
+	
+	@Override
 	public String toString() {
 		
-		return toJSONObject().toString();
+		return toJSONString();
 	}
 	
 	
@@ -1421,25 +1530,50 @@ public class ClaimsRequest {
 		ClaimsRequest claimsRequest = new ClaimsRequest();
 		
 		try {
-			if (jsonObject.containsKey("id_token")) {
+			JSONObject idTokenObject = JSONObjectUtils.getJSONObject(jsonObject, "id_token", null);
+			
+			if (idTokenObject != null) {
 				
-				JSONObject idTokenObject = (JSONObject) jsonObject.get("id_token");
-				
-				Collection<Entry> idTokenClaims = Entry.parseEntries(idTokenObject);
-				
-				for (Entry entry : idTokenClaims)
+				for (Entry entry : Entry.parseEntries(idTokenObject)) {
+					if ("verified_claims".equals(entry.getClaimName())) {
+						continue; //skip
+					}
 					claimsRequest.addIDTokenClaim(entry);
+				}
+				
+				JSONObject verifiedClaimsObject = JSONObjectUtils.getJSONObject(idTokenObject, "verified_claims", null);
+				
+				if (verifiedClaimsObject != null) {
+					JSONObject claimsObject = JSONObjectUtils.getJSONObject(verifiedClaimsObject, "claims", null);
+					if (claimsObject != null) {
+						for (Entry entry : Entry.parseEntries(claimsObject)) {
+							claimsRequest.addVerifiedIDTokenClaim(entry);
+						}
+					}
+				}
 			}
 			
+			JSONObject userInfoObject = JSONObjectUtils.getJSONObject(jsonObject, "userinfo", null);
 			
-			if (jsonObject.containsKey("userinfo")) {
+			if (userInfoObject != null) {
 				
-				JSONObject userInfoObject = (JSONObject) jsonObject.get("userinfo");
-				
-				Collection<Entry> userInfoClaims = Entry.parseEntries(userInfoObject);
-				
-				for (Entry entry : userInfoClaims)
+				for (Entry entry : Entry.parseEntries(userInfoObject)) {
+					if ("verified_claims".equals(entry.getClaimName())) {
+						continue; //skip
+					}
 					claimsRequest.addUserInfoClaim(entry);
+				}
+				
+				JSONObject verifiedClaimsObject = JSONObjectUtils.getJSONObject(userInfoObject, "verified_claims", null);
+				
+				if (verifiedClaimsObject != null) {
+					JSONObject claimsObject = JSONObjectUtils.getJSONObject(verifiedClaimsObject, "claims", null);
+					if (claimsObject != null) {
+						for (Entry entry : Entry.parseEntries(claimsObject)) {
+							claimsRequest.addVerifiedUserInfoClaim(entry);
+						}
+					}
+				}
 			}
 			
 		} catch (Exception e) {

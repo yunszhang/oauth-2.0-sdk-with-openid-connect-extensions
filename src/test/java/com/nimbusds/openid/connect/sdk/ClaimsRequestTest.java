@@ -1043,20 +1043,23 @@ public class ClaimsRequestTest extends TestCase {
 		
 		ClaimsRequest claimsRequest = ClaimsRequest.parse(json);
 		
-		Collection<ClaimsRequest.Entry> cls = claimsRequest.getUserInfoClaims();
-		assertEquals(1, cls.size());
-		ClaimsRequest.Entry verifiedClaims = cls.iterator().next();
-		assertEquals("verified_claims", verifiedClaims.getClaimName());
-		assertNull(verifiedClaims.getValue());
-		assertNull(verifiedClaims.getValues());
-		Map<String,Object> additionalInfo = verifiedClaims.getAdditionalInformation();
-		Map<String,Object> verifiedClaimsSpec = (Map<String,Object>)additionalInfo.get("claims");
-		assertTrue(verifiedClaimsSpec.containsKey("given_name"));
-		assertTrue(verifiedClaimsSpec.containsKey("family_name"));
-		assertTrue(verifiedClaimsSpec.containsKey("birthdate"));
-		assertEquals(3, verifiedClaimsSpec.size());
+		assertTrue(claimsRequest.getUserInfoClaims().isEmpty());
 		
-		System.out.println(claimsRequest.toJSONObject());
+		assertEquals(3, claimsRequest.getVerifiedUserInfoClaims().size());
+		
+		for (ClaimsRequest.Entry en: claimsRequest.getVerifiedUserInfoClaims()) {
+			
+			assertTrue(Arrays.asList("given_name", "family_name", "birthdate").contains(en.getClaimName()));
+			
+			assertEquals(ClaimRequirement.VOLUNTARY, en.getClaimRequirement());
+			assertNull(en.getLangTag());
+			assertNull(en.getValue());
+			assertNull(en.getValues());
+			assertNull(en.getPurpose());
+			assertNull(en.getAdditionalInformation());
+		}
+		
+		assertEquals(JSONObjectUtils.parse(json), claimsRequest.toJSONObject());
 	}
 	
 	public void testParseExampleWithPurpose()
@@ -1077,18 +1080,22 @@ public class ClaimsRequestTest extends TestCase {
 		
 		ClaimsRequest claimsRequest = ClaimsRequest.parse(json);
 		
-		Collection<ClaimsRequest.Entry> cls = claimsRequest.getUserInfoClaims();
-		assertEquals(1, cls.size());
-		ClaimsRequest.Entry verifiedClaims = cls.iterator().next();
-		assertEquals("verified_claims", verifiedClaims.getClaimName());
-		assertNull(verifiedClaims.getValue());
-		assertNull(verifiedClaims.getValues());
-		Map<String,Object> additionalInfo = verifiedClaims.getAdditionalInformation();
-		Map<String,Object> verifiedClaimsSpec = (Map<String,Object>)additionalInfo.get("claims");
-		assertTrue(verifiedClaimsSpec.containsKey("address"));
-		assertEquals(1, verifiedClaimsSpec.size());
+		assertTrue(claimsRequest.getUserInfoClaims().isEmpty());
 		
-		System.out.println(claimsRequest.toJSONObject());
+		assertEquals(1, claimsRequest.getVerifiedUserInfoClaims().size());
+		
+		for (ClaimsRequest.Entry en: claimsRequest.getVerifiedUserInfoClaims()) {
+			
+			assertEquals("address", en.getClaimName());
+			assertEquals(ClaimRequirement.ESSENTIAL, en.getClaimRequirement());
+			assertNull(en.getLangTag());
+			assertNull(en.getValue());
+			assertNull(en.getValues());
+			assertEquals("Required for insurance policy calculation", en.getPurpose());
+			assertNull(en.getAdditionalInformation());
+		}
+		
+		assertEquals(JSONObjectUtils.parse(json), claimsRequest.toJSONObject());
 	}
 	
 	
@@ -1177,5 +1184,131 @@ public class ClaimsRequestTest extends TestCase {
 		assertEquals(purpose, entry.getPurpose());
 		assertEquals(otherInfo, entry.getAdditionalInformation());
 		assertEquals(1, entries.size());
+	}
+	
+	
+	public void testVerifiedIDTokenClaims()
+		throws Exception {
+		
+		ClaimsRequest claimsRequest = new ClaimsRequest();
+		claimsRequest.addVerifiedIDTokenClaim(new ClaimsRequest.Entry("name"));
+		claimsRequest.addVerifiedIDTokenClaim(new ClaimsRequest.Entry("address"));
+		
+		Collection<ClaimsRequest.Entry> entries = claimsRequest.getVerifiedIDTokenClaims();
+		ClaimsRequest.Entry en = entries.iterator().next();
+		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
+		en = entries.iterator().next();
+		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
+		assertEquals(2, entries.size());
+		
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getVerifiedIDTokenClaimNames(false));
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getVerifiedIDTokenClaimNames(true));
+		
+		String expectedJSON = "{\"id_token\":{\"verified_claims\":{\"claims\":{\"name\":null,\"address\":null}}}}";
+		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
+		
+		claimsRequest = ClaimsRequest.parse(claimsRequest.toJSONString());
+		
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getVerifiedIDTokenClaimNames(false));
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getVerifiedIDTokenClaimNames(true));
+		
+		assertTrue(claimsRequest.getIDTokenClaims().isEmpty());
+		
+		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
+	}
+	
+	
+	public void testPlainAndVerifiedIDTokenClaims()
+		throws Exception {
+		
+		ClaimsRequest claimsRequest = new ClaimsRequest();
+		claimsRequest.addIDTokenClaim(new ClaimsRequest.Entry("email"));
+		claimsRequest.addVerifiedIDTokenClaim(new ClaimsRequest.Entry("name"));
+		claimsRequest.addVerifiedIDTokenClaim(new ClaimsRequest.Entry("address"));
+		
+		Collection<ClaimsRequest.Entry> entries = claimsRequest.getVerifiedIDTokenClaims();
+		ClaimsRequest.Entry en = entries.iterator().next();
+		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
+		en = entries.iterator().next();
+		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
+		assertEquals(2, entries.size());
+		
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getVerifiedIDTokenClaimNames(false));
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getVerifiedIDTokenClaimNames(true));
+		
+		String expectedJSON = "{\"id_token\":{\"verified_claims\":{\"claims\":{\"address\":null,\"name\":null}},\"email\":null}}";
+		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
+		
+		claimsRequest = ClaimsRequest.parse(claimsRequest.toJSONString());
+		
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getVerifiedIDTokenClaimNames(false));
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getVerifiedIDTokenClaimNames(true));
+		
+		assertEquals("email", claimsRequest.getIDTokenClaims().iterator().next().getClaimName());
+		
+		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
+	}
+	
+	
+	public void testVerifiedUserInfoClaims()
+		throws Exception {
+		
+		ClaimsRequest claimsRequest = new ClaimsRequest();
+		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("name"));
+		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("address"));
+		
+		Collection<ClaimsRequest.Entry> entries = claimsRequest.getVerifiedUserInfoClaims();
+		ClaimsRequest.Entry en = entries.iterator().next();
+		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
+		en = entries.iterator().next();
+		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
+		assertEquals(2, entries.size());
+		
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getVerifiedUserInfoClaimNames(false));
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getVerifiedUserInfoClaimNames(true));
+		
+		String expectedJSON = "{\"userinfo\":{\"verified_claims\":{\"claims\":{\"name\":null,\"address\":null}}}}";
+		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
+		
+		claimsRequest = ClaimsRequest.parse(claimsRequest.toJSONString());
+		
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getVerifiedUserInfoClaimNames(false));
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getVerifiedUserInfoClaimNames(true));
+		
+		assertTrue(claimsRequest.getUserInfoClaims().isEmpty());
+		
+		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
+	}
+	
+	
+	public void testPlainAndVerifiedUserInfoClaims()
+		throws Exception {
+		
+		ClaimsRequest claimsRequest = new ClaimsRequest();
+		claimsRequest.addUserInfoClaim(new ClaimsRequest.Entry("email"));
+		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("name"));
+		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("address"));
+		
+		Collection<ClaimsRequest.Entry> entries = claimsRequest.getVerifiedUserInfoClaims();
+		ClaimsRequest.Entry en = entries.iterator().next();
+		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
+		en = entries.iterator().next();
+		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
+		assertEquals(2, entries.size());
+		
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getVerifiedUserInfoClaimNames(false));
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getVerifiedUserInfoClaimNames(true));
+		
+		String expectedJSON = "{\"userinfo\":{\"verified_claims\":{\"claims\":{\"address\":null,\"name\":null}},\"email\":null}}";
+		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
+		
+		claimsRequest = ClaimsRequest.parse(claimsRequest.toJSONString());
+		
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getVerifiedUserInfoClaimNames(false));
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getVerifiedUserInfoClaimNames(true));
+		
+		assertEquals("email", claimsRequest.getUserInfoClaims().iterator().next().getClaimName());
+		
+		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
 	}
 }

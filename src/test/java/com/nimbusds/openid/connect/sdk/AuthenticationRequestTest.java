@@ -2202,10 +2202,37 @@ public class AuthenticationRequestTest extends TestCase {
 	}
 	
 	
-	public void testIdentityAssuranceExample()
+	public void testIdentityAssurance_basicExample()
 		throws Exception {
 		
 		ClaimsRequest claimsRequest = new ClaimsRequest();
+		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("given_name"));
+		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("family_name"));
+		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("address"));
 		
+		CodeVerifier pkceVerifier = new CodeVerifier();
+		
+		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
+			new ResponseType(ResponseType.Value.CODE),
+			new Scope(OIDCScopeValue.OPENID),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.state(new State("7a4b68ab-5315-4e25-a10f-0fbfaa36d6c7"))
+			.codeChallenge(pkceVerifier, CodeChallengeMethod.S256)
+			.claims(claimsRequest)
+			.uiLocales(Collections.singletonList(new LangTag("en")))
+			.purpose("Account holder identification")
+			.endpointURI(URI.create("https://c2id.com/authz"))
+			.build();
+		
+		System.out.println(authRequest.toURI());
+		
+		authRequest = AuthenticationRequest.parse(authRequest.toURI());
+		
+		assertEquals(claimsRequest.toJSONObject(), authRequest.getClaims().toJSONObject());
+		
+		assertEquals(Collections.singletonList(new LangTag("en")), authRequest.getUILocales());
+		assertEquals("Account holder identification", authRequest.getPurpose());
+		assertEquals(claimsRequest.getVerifiedUserInfoClaimNames(false), authRequest.getClaims().getVerifiedUserInfoClaimNames(false));
 	}
 }
