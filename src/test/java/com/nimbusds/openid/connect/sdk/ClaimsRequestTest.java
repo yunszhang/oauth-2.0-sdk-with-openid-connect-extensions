@@ -1370,4 +1370,66 @@ public class ClaimsRequestTest extends TestCase {
 		assertEquals(idTokenVerification, copy.getIDTokenClaimsVerificationJSONObject());
 		assertEquals(userInfoVerification, copy.getUserInfoClaimsVerificationJSONObject());
 	}
+	
+	
+	public void testRemoveMethods_forIDToken() {
+		
+		ClaimsRequest claimsRequest = new ClaimsRequest();
+		claimsRequest.addIDTokenClaim(new ClaimsRequest.Entry("email"));
+		claimsRequest.addVerifiedIDTokenClaim(new ClaimsRequest.Entry("name"));
+		
+		assertEquals(Collections.singleton("email"), claimsRequest.getIDTokenClaimNames(true));
+		assertEquals(Collections.singleton("name"), claimsRequest.getVerifiedIDTokenClaimNames(true));
+		
+		assertEquals("email", claimsRequest.removeIDTokenClaim("email", null).getClaimName());
+		assertEquals("name", claimsRequest.removeVerifiedIDTokenClaim("name", null).getClaimName());
+		
+		assertTrue(claimsRequest.getIDTokenClaimNames(true).isEmpty());
+		assertTrue(claimsRequest.getVerifiedIDTokenClaimNames(true).isEmpty());
+	}
+	
+	
+	public void testRemoveMethods_forUserInfo() {
+		
+		ClaimsRequest claimsRequest = new ClaimsRequest();
+		claimsRequest.addUserInfoClaim(new ClaimsRequest.Entry("email"));
+		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("name"));
+		
+		assertEquals(Collections.singleton("email"), claimsRequest.getUserInfoClaimNames(true));
+		assertEquals(Collections.singleton("name"), claimsRequest.getVerifiedUserInfoClaimNames(true));
+		
+		assertEquals("email", claimsRequest.removeUserInfoClaim("email", null).getClaimName());
+		assertEquals("name", claimsRequest.removeVerifiedUserInfoClaim("name", null).getClaimName());
+		
+		assertTrue(claimsRequest.getUserInfoClaimNames(true).isEmpty());
+		assertTrue(claimsRequest.getVerifiedUserInfoClaimNames(true).isEmpty());
+	}
+	
+	
+	public void testRemoveMethods_collection_forIDToken() {
+		
+		ClaimsRequest claimsRequest = new ClaimsRequest();
+		claimsRequest.addIDTokenClaim(new ClaimsRequest.Entry("email"));
+		claimsRequest.addVerifiedIDTokenClaim(new ClaimsRequest.Entry("name"));
+		
+		assertEquals("email", claimsRequest.removeIDTokenClaims("email").iterator().next().getClaimName());
+		assertEquals("name", claimsRequest.removeVerifiedIDTokenClaims("name").iterator().next().getClaimName());
+		
+		assertTrue(claimsRequest.getIDTokenClaimNames(true).isEmpty());
+		assertTrue(claimsRequest.getVerifiedIDTokenClaimNames(true).isEmpty());
+	}
+	
+	
+	public void testRemoveMethods_collection_forUserInfo() {
+		
+		ClaimsRequest claimsRequest = new ClaimsRequest();
+		claimsRequest.addUserInfoClaim(new ClaimsRequest.Entry("email"));
+		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("name"));
+		
+		assertEquals("email", claimsRequest.removeUserInfoClaims("email").iterator().next().getClaimName());
+		assertEquals("name", claimsRequest.removeVerifiedUserInfoClaims("name").iterator().next().getClaimName());
+		
+		assertTrue(claimsRequest.getUserInfoClaimNames(true).isEmpty());
+		assertTrue(claimsRequest.getVerifiedUserInfoClaimNames(true).isEmpty());
+	}
 }

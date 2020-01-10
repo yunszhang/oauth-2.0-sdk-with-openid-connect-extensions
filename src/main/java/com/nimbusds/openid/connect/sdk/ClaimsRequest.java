@@ -993,6 +993,12 @@ public class ClaimsRequest implements JSONAware {
 	}
 	
 	
+	private static Map.Entry<String, LangTag> toKey(final String claimName, final LangTag langTag) {
+		
+		return new AbstractMap.SimpleImmutableEntry<>(claimName, langTag);
+	}
+	
+	
 	/**
 	 * Removes the specified ID token claim from the request.
 	 *
@@ -1003,28 +1009,29 @@ public class ClaimsRequest implements JSONAware {
 	 */
 	public Entry removeIDTokenClaim(final String claimName, final LangTag langTag) {
 		
-		Map.Entry<String, LangTag> key = new AbstractMap.SimpleImmutableEntry<>(
-			claimName,
-			langTag);
-		
-		return idTokenClaims.remove(key);
+		return idTokenClaims.remove(toKey(claimName, langTag));
 	}
 	
 	
 	/**
-	 * Removes the specified ID token claims from the request, in all
-	 * existing language tag variations.
+	 * Removes the specified verified ID token claim from the request.
 	 *
 	 * @param claimName The claim name. Must not be {@code null}.
+	 * @param langTag   The associated language tag, {@code null} if none.
          *
-	 * @return The removed ID token claims, as an unmodifiable collection,
-	 *         empty set if none were found.
+	 * @return The removed ID token claim, {@code null} if not found.
 	 */
-	public Collection<Entry> removeIDTokenClaims(final String claimName) {
+	public Entry removeVerifiedIDTokenClaim(final String claimName, final LangTag langTag) {
+		
+		return verifiedIDTokenClaims.remove(toKey(claimName, langTag));
+	}
+	
+	
+	private static Collection<Entry> removeClaims(final Map<Map.Entry<String, LangTag>, Entry> claims, final String claimName) {
 		
 		Collection<Entry> removedClaims = new LinkedList<>();
 		
-		Iterator<Map.Entry<Map.Entry<String, LangTag>, Entry>> it = idTokenClaims.entrySet().iterator();
+		Iterator<Map.Entry<Map.Entry<String, LangTag>, Entry>> it = claims.entrySet().iterator();
 		
 		while (it.hasNext()) {
 			
@@ -1039,6 +1046,36 @@ public class ClaimsRequest implements JSONAware {
 		}
 		
 		return Collections.unmodifiableCollection(removedClaims);
+	}
+	
+	
+	/**
+	 * Removes the specified ID token claims from the request, in all
+	 * existing language tag variations.
+	 *
+	 * @param claimName The claim name. Must not be {@code null}.
+         *
+	 * @return The removed ID token claims, as an unmodifiable collection,
+	 *         empty set if none were found.
+	 */
+	public Collection<Entry> removeIDTokenClaims(final String claimName) {
+		
+		return removeClaims(idTokenClaims, claimName);
+	}
+	
+	
+	/**
+	 * Removes the specified verified ID token claims from the request, in
+	 * all existing language tag variations.
+	 *
+	 * @param claimName The claim name. Must not be {@code null}.
+         *
+	 * @return The removed ID token claims, as an unmodifiable collection,
+	 *         empty set if none were found.
+	 */
+	public Collection<Entry> removeVerifiedIDTokenClaims(final String claimName) {
+		
+		return removeClaims(verifiedIDTokenClaims, claimName);
 	}
 	
 	
@@ -1274,11 +1311,21 @@ public class ClaimsRequest implements JSONAware {
 	 */
 	public Entry removeUserInfoClaim(final String claimName, final LangTag langTag) {
 		
-		Map.Entry<String, LangTag> key = new AbstractMap.SimpleImmutableEntry<>(
-			claimName,
-			langTag);
+		return userInfoClaims.remove(toKey(claimName, langTag));
+	}
+	
+	
+	/**
+	 * Removes the specified verified UserInfo claim from the request.
+	 *
+	 * @param claimName The claim name. Must not be {@code null}.
+	 * @param langTag   The associated language tag, {@code null} if none.
+         *
+	 * @return The removed UserInfo claim, {@code null} if not found.
+	 */
+	public Entry removeVerifiedUserInfoClaim(final String claimName, final LangTag langTag) {
 		
-		return userInfoClaims.remove(key);
+		return verifiedUserInfoClaims.remove(toKey(claimName, langTag));
 	}
 	
 	
@@ -1293,23 +1340,22 @@ public class ClaimsRequest implements JSONAware {
 	 */
 	public Collection<Entry> removeUserInfoClaims(final String claimName) {
 		
-		Collection<Entry> removedClaims = new LinkedList<>();
+		return removeClaims(userInfoClaims, claimName);
+	}
+	
+	
+	/**
+	 * Removes the specified verified UserInfo claims from the request, in
+	 * all existing language tag variations.
+	 *
+	 * @param claimName The claim name. Must not be {@code null}.
+         *
+	 * @return The removed UserInfo claims, as an unmodifiable collection,
+	 *         empty set if none were found.
+	 */
+	public Collection<Entry> removeVerifiedUserInfoClaims(final String claimName) {
 		
-		Iterator<Map.Entry<Map.Entry<String, LangTag>, Entry>> it = userInfoClaims.entrySet().iterator();
-		
-		while (it.hasNext()) {
-			
-			Map.Entry<Map.Entry<String, LangTag>, Entry> reqEntry = it.next();
-			
-			if (reqEntry.getKey().getKey().equals(claimName)) {
-				
-				removedClaims.add(reqEntry.getValue());
-				
-				it.remove();
-			}
-		}
-		
-		return Collections.unmodifiableCollection(removedClaims);
+		return removeClaims(verifiedUserInfoClaims, claimName);
 	}
 	
 	
