@@ -21,6 +21,9 @@ package com.nimbusds.openid.connect.sdk;
 import java.net.URI;
 import java.util.*;
 
+import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -31,8 +34,6 @@ import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
 import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
-import junit.framework.TestCase;
-import net.minidev.json.JSONObject;
 
 
 public class ClaimsRequestTest extends TestCase {
@@ -1431,5 +1432,67 @@ public class ClaimsRequestTest extends TestCase {
 		
 		assertTrue(claimsRequest.getUserInfoClaimNames(true).isEmpty());
 		assertTrue(claimsRequest.getVerifiedUserInfoClaimNames(true).isEmpty());
+	}
+	
+	
+	public void testParseExampleFromDocs()
+		throws Exception {
+		
+		String json = "{" +
+			"  \"userinfo\" : {" +
+			"    \"email\" : null," +
+			"    \"verified_claims\" : {" +
+			"      \"verification\" : {" +
+			"        \"trust_framework\" : \"eidas_ial_high\"" +
+			"      }," +
+			"      \"claims\" : {" +
+			"        \"name\" : {" +
+			"          \"essential\" : true," +
+			"          \"purpose\"   : \"Name required for contract\"" +
+			"        }," +
+			"        \"address\" : {" +
+			"          \"essential\" : true," +
+			"          \"purpose\"   : \"Address required for contract\"" +
+			"        }" +
+			"      }" +
+			"    }" +
+			"  }" +
+			"}";
+		
+		ClaimsRequest claimsRequest = ClaimsRequest.parse(json);
+		
+		// Get UserInfo verification element if any
+		System.out.println(claimsRequest.getUserInfoClaimsVerificationJSONObject());
+		
+		// Get requested verified claims at UserInfo endpoint if any
+		for (ClaimsRequest.Entry en: claimsRequest.getVerifiedUserInfoClaims()) {
+			System.out.println("verified claim name: " + en.getClaimName());
+			System.out.println("requirement: " + en.getClaimRequirement());
+			System.out.println("optional language tag: " + en.getLangTag());
+			System.out.println("optional purpose message: " + en.getPurpose());
+		}
+		
+		// Get requested plain claims at UserInfo endpoint if any
+		for (ClaimsRequest.Entry en: claimsRequest.getUserInfoClaims()) {
+			System.out.println("claim name: " + en.getClaimName());
+			System.out.println("requirement: " + en.getClaimRequirement());
+			System.out.println("optional language tag: " + en.getLangTag());
+		}
+		
+		// Repeat for claims delivered with ID token if any
+		System.out.println(claimsRequest.getIDTokenClaimsVerificationJSONObject());
+		
+		for (ClaimsRequest.Entry en: claimsRequest.getVerifiedIDTokenClaims()) {
+			System.out.println("verified claim name: " + en.getClaimName());
+			System.out.println("requirement: " + en.getClaimRequirement());
+			System.out.println("optional language tag: " + en.getLangTag());
+			System.out.println("optional purpose message: " + en.getPurpose());
+		}
+		
+		for (ClaimsRequest.Entry en: claimsRequest.getIDTokenClaims()) {
+			System.out.println("claim name: " + en.getClaimName());
+			System.out.println("requirement: " + en.getClaimRequirement());
+			System.out.println("optional language tag: " + en.getLangTag());
+		}
 	}
 }
