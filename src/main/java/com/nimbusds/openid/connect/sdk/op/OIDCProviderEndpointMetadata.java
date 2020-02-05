@@ -36,13 +36,14 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  * <ul>
  *     <li>OAuth 2.0 Authorization Server Metadata (RFC 8414)
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-15)
+ *         Access Tokens (draft-ietf-oauth-mtls-17)
  *     <li>OAuth 2.0 Device Flow for Browserless and Input Constrained Devices
  *         (draft-ietf-oauth-device-flow-14)
  *     <li>OpenID Connect Discovery 1.0, section 3.
  *     <li>OpenID Connect Session Management 1.0, section 2.1 (draft 28).
  *     <li>OpenID Connect Front-Channel Logout 1.0, section 3 (draft 02).
  *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.1 (draft 04).
+ *     <li>OpenID Connect Federation 1.0 (draft 10).
  * </ul>
  */
 public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMetadata {
@@ -56,6 +57,7 @@ public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMet
 	static {
 		Set<String> p = new HashSet<>(AuthorizationServerEndpointMetadata.getRegisteredParameterNames());
 		p.add("userinfo_endpoint");
+		p.add("federation_registration_endpoint");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 	
@@ -63,8 +65,8 @@ public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMet
 	/**
 	 * Gets the registered provider metadata parameter names for endpoints.
 	 *
-	 * @return The registered provider metadata parameter names for endpoints,
-	 * as an unmodifiable set.
+	 * @return The registered provider metadata parameter names for the
+	 *         endpoints, as an unmodifiable set.
 	 */
 	public static Set<String> getRegisteredParameterNames() {
 		
@@ -79,6 +81,12 @@ public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMet
 	
 	
 	/**
+	 * The federation registration endpoint.
+	 */
+	private URI federationRegistrationEndpoint;
+	
+	
+	/**
 	 * Creates a new OpenID Connect provider endpoint metadata instance.
 	 */
 	public OIDCProviderEndpointMetadata() {
@@ -86,10 +94,10 @@ public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMet
 	
 	
 	/**
-	 * Converts an authorization server endpoint metadata to an OpenID Connect
-	 * provider endpoint metadata instance.
+	 * Converts an authorization server endpoint metadata to an OpenID
+	 * Connect provider endpoint metadata instance.
 	 */
-	public OIDCProviderEndpointMetadata(AuthorizationServerEndpointMetadata mtlsEndpointAliases) {
+	public OIDCProviderEndpointMetadata(final AuthorizationServerEndpointMetadata mtlsEndpointAliases) {
 
 		setAuthorizationEndpointURI(mtlsEndpointAliases.getAuthorizationEndpointURI());
 		setTokenEndpointURI(mtlsEndpointAliases.getTokenEndpointURI());
@@ -97,6 +105,7 @@ public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMet
 		setIntrospectionEndpointURI(mtlsEndpointAliases.getIntrospectionEndpointURI());
 		setRevocationEndpointURI(mtlsEndpointAliases.getRevocationEndpointURI());
 		setDeviceAuthorizationEndpointURI(mtlsEndpointAliases.getDeviceAuthorizationEndpointURI());
+		setPushedAuthorizationRequestEndpointURI(mtlsEndpointAliases.getPushedAuthorizationRequestEndpointURI());
 		setRequestObjectEndpoint(mtlsEndpointAliases.getRequestObjectEndpoint());
 	}
 
@@ -127,6 +136,33 @@ public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMet
 	
 	
 	/**
+	 * Gets the federation registration endpoint URI. Corresponds to the
+	 * {@code federation_registration_endpoint} metadata field.
+	 *
+	 * @return The federation registration endpoint URI, {@code null} if
+	 *         not specified.
+	 */
+	public URI getFederationRegistrationEndpointURI() {
+		
+		return federationRegistrationEndpoint;
+	}
+	
+	
+	/**
+	 * Sets the federation registration endpoint URI. Corresponds to the
+	 * {@code federation_registration_endpoint} metadata field.
+	 *
+	 * @param federationRegistrationEndpoint The federation registration
+	 *                                       endpoint URI, {@code null} if
+	 *                                       not specified.
+	 */
+	public void setFederationRegistrationEndpointURI(final URI federationRegistrationEndpoint) {
+		
+		this.federationRegistrationEndpoint = federationRegistrationEndpoint;
+	}
+	
+	
+	/**
 	 * Returns the JSON object representation of this OpenID Connect
 	 * provider metadata.
 	 *
@@ -138,6 +174,9 @@ public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMet
 		
 		if (userInfoEndpoint != null)
 			o.put("userinfo_endpoint", userInfoEndpoint.toString());
+		
+		if (federationRegistrationEndpoint != null)
+			o.put("federation_registration_endpoint", federationRegistrationEndpoint.toString());
 		
 		return o;
 	}
@@ -168,8 +207,10 @@ public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMet
 		op.setIntrospectionEndpointURI(as.getIntrospectionEndpointURI());
 		op.setRevocationEndpointURI(as.getRevocationEndpointURI());
 		op.setDeviceAuthorizationEndpointURI(as.getDeviceAuthorizationEndpointURI());
+		op.setPushedAuthorizationRequestEndpointURI(as.getPushedAuthorizationRequestEndpointURI());
 		op.setRequestObjectEndpoint(as.getRequestObjectEndpoint());
 		op.userInfoEndpoint = JSONObjectUtils.getURI(jsonObject, "userinfo_endpoint", null);
+		op.federationRegistrationEndpoint = JSONObjectUtils.getURI(jsonObject, "federation_registration_endpoint", null);
 		
 		return op;
 	}
