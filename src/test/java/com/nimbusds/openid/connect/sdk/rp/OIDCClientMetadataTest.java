@@ -23,6 +23,9 @@ import java.net.URL;
 import java.util.*;
 import javax.mail.internet.InternetAddress;
 
+import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -31,19 +34,14 @@ import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
-import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.oauth2.sdk.client.RegistrationError;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
+import com.nimbusds.openid.connect.sdk.federation.FederationType;
 import com.nimbusds.openid.connect.sdk.id.SectorID;
-import junit.framework.TestCase;
-import net.minidev.json.JSONObject;
 
 
-/**
- * Tests the OIDC client metadata class.
- */
 public class OIDCClientMetadataTest extends TestCase {
 
 
@@ -101,8 +99,10 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("frontchannel_logout_session_required"));
 		assertTrue(paramNames.contains("backchannel_logout_uri"));
 		assertTrue(paramNames.contains("backchannel_logout_session_required"));
+		assertTrue(paramNames.contains("federation_type"));
+		assertTrue(paramNames.contains("organization_name"));
 
-		assertEquals(47, OIDCClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(49, OIDCClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -745,5 +745,36 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertEquals(JWSAlgorithm.ES256, clientMetadata.getAuthorizationJWSAlg());
 		assertEquals(JWEAlgorithm.ECDH_ES, clientMetadata.getAuthorizationJWEAlg());
 		assertEquals(EncryptionMethod.A256GCM, clientMetadata.getAuthorizationJWEEnc());
+	}
+	
+	
+	public void testFederationFields()
+		throws Exception {
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		
+		URI redirectionURI = URI.create("https://example.com/cb");
+		clientMetadata.setRedirectionURI(redirectionURI);
+		
+		assertNull(clientMetadata.getFederationTypes());
+		List<FederationType> federationTypes = Arrays.asList(FederationType.EXPLICIT, FederationType.AUTOMATIC);
+		clientMetadata.setFederationTypes(federationTypes);
+		assertEquals(federationTypes, clientMetadata.getFederationTypes());
+		
+		assertNull(clientMetadata.getOrganizationName());
+		String orgName = "Example Org";
+		clientMetadata.setOrganizationName(orgName);
+		assertEquals(orgName, clientMetadata.getOrganizationName());
+		
+		JSONObject jsonObject = clientMetadata.toJSONObject();
+		
+		assertEquals(Arrays.asList("explicit", "automatic"), JSONObjectUtils.getStringList(jsonObject, "federation_type"));
+		assertEquals(orgName, JSONObjectUtils.getString(jsonObject, "organization_name"));
+		
+		clientMetadata = OIDCClientMetadata.parse(jsonObject);
+		
+		assertEquals(redirectionURI, clientMetadata.getRedirectionURI());
+		assertEquals(federationTypes, clientMetadata.getFederationTypes());
+		assertEquals(orgName, clientMetadata.getOrganizationName());
 	}
 }
