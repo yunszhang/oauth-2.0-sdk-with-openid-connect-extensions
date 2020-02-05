@@ -25,13 +25,13 @@ import java.net.URL;
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.oauth2.sdk.auth.PKITLSClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.SelfSignedTLSClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.TLSClientAuthentication;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
@@ -197,10 +197,10 @@ public final class RequestObjectPOSTRequest extends AbstractOptionallyAuthentica
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, url);
 		
 		if (getRequestObject() != null) {
-			httpRequest.setContentType(CommonContentTypes.APPLICATION_JWT);
+			httpRequest.setEntityContentType(ContentType.APPLICATION_JWT);
 			httpRequest.setQuery(getRequestObject().serialize());
 		} else if (getRequestJSONObject() != null) {
-			httpRequest.setContentType(CommonContentTypes.APPLICATION_JSON);
+			httpRequest.setEntityContentType(ContentType.APPLICATION_JSON);
 			httpRequest.setQuery(getRequestJSONObject().toJSONString());
 			getTLSClientAuthentication().applyTo(httpRequest);
 		}
@@ -226,13 +226,13 @@ public final class RequestObjectPOSTRequest extends AbstractOptionallyAuthentica
 		// Only HTTP POST accepted
 		httpRequest.ensureMethod(HTTPRequest.Method.POST);
 		
-		if (httpRequest.getContentType() == null) {
+		if (httpRequest.getEntityContentType() == null) {
 			throw new ParseException("Missing Content-Type");
 		}
 		
 		if (
-			CommonContentTypes.APPLICATION_JOSE.match(httpRequest.getContentType()) ||
-			CommonContentTypes.APPLICATION_JWT.match(httpRequest.getContentType())) {
+			ContentType.APPLICATION_JOSE.matches(httpRequest.getEntityContentType()) ||
+			ContentType.APPLICATION_JWT.matches(httpRequest.getEntityContentType())) {
 			
 			// Signed or signed and encrypted request object
 			
@@ -249,7 +249,7 @@ public final class RequestObjectPOSTRequest extends AbstractOptionallyAuthentica
 			
 			return new RequestObjectPOSTRequest(httpRequest.getURI(), requestObject);
 			
-		} else if (CommonContentTypes.APPLICATION_JSON.match(httpRequest.getContentType())) {
+		} else if (ContentType.APPLICATION_JSON.matches(httpRequest.getEntityContentType())) {
 			
 			JSONObject jsonObject = httpRequest.getQueryAsJSONObject();
 			
@@ -274,7 +274,7 @@ public final class RequestObjectPOSTRequest extends AbstractOptionallyAuthentica
 			
 		} else {
 			
-			throw new ParseException("Unexpected Content-Type: " + httpRequest.getContentType());
+			throw new ParseException("Unexpected Content-Type: " + httpRequest.getEntityContentType());
 		}
 	}
 }

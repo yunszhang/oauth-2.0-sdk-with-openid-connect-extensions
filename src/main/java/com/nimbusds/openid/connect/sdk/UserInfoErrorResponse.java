@@ -22,14 +22,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.jcip.annotations.Immutable;
+
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ErrorResponse;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.token.BearerTokenError;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
-import net.jcip.annotations.Immutable;
 
 
 /**
@@ -170,7 +171,7 @@ public class UserInfoErrorResponse
 		if (error instanceof BearerTokenError) {
 			httpResponse.setWWWAuthenticate(((BearerTokenError) error).toWWWAuthenticateHeader());
 		} else if (error != null){
-			httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+			httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
 			httpResponse.setContent(error.toJSONObject().toJSONString());
 		}
 

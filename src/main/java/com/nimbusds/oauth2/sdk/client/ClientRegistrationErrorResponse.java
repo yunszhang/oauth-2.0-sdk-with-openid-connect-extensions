@@ -22,15 +22,16 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
+
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ErrorResponse;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.token.BearerTokenError;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
-import net.jcip.annotations.Immutable;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -187,7 +188,7 @@ public class ClientRegistrationErrorResponse
 			if (error.getDescription() != null)
 				jsonObject.put("error_description", error.getDescription());
 
-			httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+			httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
 
 			httpResponse.setContent(jsonObject.toString());
 		}

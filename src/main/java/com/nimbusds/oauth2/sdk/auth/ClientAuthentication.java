@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 import javax.security.auth.x500.X500Principal;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
@@ -129,7 +129,7 @@ public abstract class ClientAuthentication {
 		
 		// The other methods require HTTP POST with URL-encoded params
 		if (httpRequest.getMethod() != HTTPRequest.Method.POST &&
-		    ! httpRequest.getContentType().match(CommonContentTypes.APPLICATION_URLENCODED)) {
+		    ! httpRequest.getEntityContentType().matches(ContentType.APPLICATION_URLENCODED)) {
 			return null; // no auth
 		}
 		

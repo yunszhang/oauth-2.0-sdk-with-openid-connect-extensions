@@ -21,12 +21,11 @@ package com.nimbusds.oauth2.sdk;
 import java.util.*;
 
 import net.jcip.annotations.Immutable;
-
 import net.minidev.json.JSONObject;
 
-import com.nimbusds.oauth2.sdk.token.Tokens;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.token.Tokens;
 
 
 /**
@@ -173,7 +172,7 @@ public class AccessTokenResponse extends TokenResponse implements SuccessRespons
 	
 		HTTPResponse httpResponse = new HTTPResponse(HTTPResponse.SC_OK);
 		
-		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
 		httpResponse.setCacheControl("no-store");
 		httpResponse.setPragma("no-cache");
 		
@@ -199,8 +198,7 @@ public class AccessTokenResponse extends TokenResponse implements SuccessRespons
 		Tokens tokens = Tokens.parse(jsonObject);
 
 		// Determine the custom param names
-		Set<String> customParamNames = new HashSet<>();
-		customParamNames.addAll(jsonObject.keySet());
+		Set<String> customParamNames = new HashSet<>(jsonObject.keySet());
 		customParamNames.removeAll(tokens.getParameterNames());
 
 		Map<String,Object> customParams = null;

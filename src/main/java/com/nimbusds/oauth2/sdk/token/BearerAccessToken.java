@@ -211,7 +211,7 @@ public class BearerAccessToken extends AccessToken {
 				String lifetimeStr = JSONObjectUtils.getString(jsonObject, "expires_in");
 
 				try {
-					lifetime = new Long(lifetimeStr);
+					lifetime = Long.parseLong(lifetimeStr);
 
 				} catch (NumberFormatException e) {
 

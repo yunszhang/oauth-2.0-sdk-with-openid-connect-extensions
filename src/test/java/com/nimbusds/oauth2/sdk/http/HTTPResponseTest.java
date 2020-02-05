@@ -22,12 +22,14 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jwt.JWT;
-import com.nimbusds.oauth2.sdk.ParseException;
 import junit.framework.TestCase;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+
+import com.nimbusds.common.contenttype.ContentType;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.oauth2.sdk.ParseException;
 
 
 /**
@@ -59,9 +61,9 @@ public class HTTPResponseTest extends TestCase {
 		response.setStatusMessage("OK");
 		assertEquals("OK", response.getStatusMessage());
 
-		assertNull(response.getContentType());
-		response.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), response.getContentType().toString());
+		assertNull(response.getEntityContentType());
+		response.setEntityContentType(ContentType.APPLICATION_URLENCODED);
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), response.getEntityContentType().toString());
 
 		assertNull(response.getLocation());
 		URI location = new URI("https://client.com/cb");
@@ -96,7 +98,7 @@ public class HTTPResponseTest extends TestCase {
 			// ok
 		}
 
-		response.setContentType(CommonContentTypes.APPLICATION_JSON);
+		response.setEntityContentType(ContentType.APPLICATION_JSON);
 		response.setContent("{\"apples\":\"123\"}");
 		assertEquals("{\"apples\":\"123\"}", response.getContent());
 
@@ -111,7 +113,7 @@ public class HTTPResponseTest extends TestCase {
 			"." +
 			"dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
 
-		response.setContentType(CommonContentTypes.APPLICATION_JWT);
+		response.setEntityContentType(ContentType.APPLICATION_JWT);
 		response.setContent(exampleJWTString);
 
 		JWT jwt = response.getContentAsJWT();
@@ -123,7 +125,7 @@ public class HTTPResponseTest extends TestCase {
 		throws Exception {
 
 		HTTPResponse response = new HTTPResponse(200);
-		response.setContentType(CommonContentTypes.APPLICATION_JSON);
+		response.setEntityContentType(ContentType.APPLICATION_JSON);
 		response.setContent("[\"apples\",\"pears\"]");
 
 		JSONArray array = response.getContentAsJSONArray();

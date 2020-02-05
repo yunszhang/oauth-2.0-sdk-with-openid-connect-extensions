@@ -164,8 +164,7 @@ public class OIDCTokenResponse extends AccessTokenResponse {
 		OIDCTokens tokens = OIDCTokens.parse(jsonObject);
 
 		// Parse the custom parameters
-		Map<String,Object> customParams = new HashMap<>();
-		customParams.putAll(jsonObject);
+		Map<String, Object> customParams = new HashMap<>(jsonObject);
 		for (String tokenParam: tokens.getParameterNames()) {
 			customParams.remove(tokenParam);
 		}

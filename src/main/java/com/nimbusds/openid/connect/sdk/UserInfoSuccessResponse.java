@@ -18,18 +18,15 @@
 package com.nimbusds.openid.connect.sdk;
 
 
-import javax.mail.internet.ContentType;
-
 import net.jcip.annotations.Immutable;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jwt.JWT;
-
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.SuccessResponse;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
 
@@ -126,7 +123,20 @@ public class UserInfoSuccessResponse
 	 *
 	 * @return The content type, according to the claims format.
 	 */
-	public ContentType getContentType() {
+	public ContentType getEntityContentType() {
+	
+		if (claimsSet != null)
+			return ContentType.APPLICATION_JSON;
+		else
+			return ContentType.APPLICATION_JWT;
+	}
+	
+	
+	/**
+	 * @see #getEntityContentType()
+	 */
+	@Deprecated
+	public javax.mail.internet.ContentType getContentType() {
 	
 		if (claimsSet != null)
 			return CommonContentTypes.APPLICATION_JSON;
@@ -166,7 +176,7 @@ public class UserInfoSuccessResponse
 	
 		HTTPResponse httpResponse = new HTTPResponse(HTTPResponse.SC_OK);
 		
-		httpResponse.setContentType(getContentType());
+		httpResponse.setEntityContentType(getEntityContentType());
 		
 		String content;
 		
@@ -223,14 +233,13 @@ public class UserInfoSuccessResponse
 		
 		httpResponse.ensureStatusCode(HTTPResponse.SC_OK);
 		
-		httpResponse.ensureContentType();
+		httpResponse.ensureEntityContentType();
 		
-		ContentType ct = httpResponse.getContentType();
-		
+		ContentType ct = httpResponse.getEntityContentType();
 		
 		UserInfoSuccessResponse response;
 		
-		if (ct.match(CommonContentTypes.APPLICATION_JSON)) {
+		if (ct.matches(ContentType.APPLICATION_JSON)) {
 		
 			UserInfo claimsSet;
 			
@@ -244,8 +253,8 @@ public class UserInfoSuccessResponse
 			}
 			
 			response = new UserInfoSuccessResponse(claimsSet);
-		}
-		else if (ct.match(CommonContentTypes.APPLICATION_JWT)) {
+			
+		} else if (ct.matches(ContentType.APPLICATION_JWT)) {
 		
 			JWT jwt;
 			
@@ -259,12 +268,12 @@ public class UserInfoSuccessResponse
 			}
 			
 			response = new UserInfoSuccessResponse(jwt);
-		}
-		else {
+			
+		} else {
 			throw new ParseException("Unexpected Content-Type, must be " + 
-			                         CommonContentTypes.APPLICATION_JSON +
+			                         ContentType.APPLICATION_JSON +
 						 " or " +
-						 CommonContentTypes.APPLICATION_JWT);
+						 ContentType.APPLICATION_JWT);
 		}
 		
 		return response;

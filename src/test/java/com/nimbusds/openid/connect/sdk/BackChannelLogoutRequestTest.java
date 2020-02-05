@@ -28,6 +28,9 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 
+import junit.framework.TestCase;
+
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -38,7 +41,6 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
@@ -46,7 +48,6 @@ import com.nimbusds.oauth2.sdk.id.JWTID;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.claims.LogoutTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.claims.SessionID;
-import junit.framework.TestCase;
 
 
 public class BackChannelLogoutRequestTest extends TestCase {
@@ -133,7 +134,7 @@ public class BackChannelLogoutRequestTest extends TestCase {
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 		params = httpRequest.getQueryParameters();
 		assertEquals(Collections.singletonList(logoutToken.serialize()), params.get("logout_token"));
 		assertEquals(1, params.size());
@@ -159,7 +160,7 @@ public class BackChannelLogoutRequestTest extends TestCase {
 		throws Exception {
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, LOGOUT_ENDPOINT_URL);
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		
 		try {
 			BackChannelLogoutRequest.parse(httpRequest);
@@ -174,7 +175,7 @@ public class BackChannelLogoutRequestTest extends TestCase {
 		throws Exception {
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, LOGOUT_ENDPOINT_URL);
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery("logout_token=ey...");
 		
 		try {
@@ -208,7 +209,7 @@ public class BackChannelLogoutRequestTest extends TestCase {
 		PlainJWT jwt = new PlainJWT(createLogoutTokenClaimsSet());
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, LOGOUT_ENDPOINT_URL);
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery("logout_token=" + jwt.serialize());
 		
 		try {
@@ -253,7 +254,7 @@ public class BackChannelLogoutRequestTest extends TestCase {
 		throws Exception {
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, LOGOUT_ENDPOINT_URL);
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_JSON);
 		JWT logoutToken = createSignedLogoutToken();
 		httpRequest.setQuery("logout_token=" + logoutToken.serialize());
 		

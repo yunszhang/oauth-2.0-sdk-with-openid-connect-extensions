@@ -22,6 +22,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 
@@ -42,7 +43,7 @@ public class PushedAuthorizationErrorResponseTest extends TestCase {
 		
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		assertEquals(400, httpResponse.getStatusCode());
-		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpResponse.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_JSON.toString(), httpResponse.getEntityContentType().toString());
 		params = httpResponse.getContentAsJSONObject();
 		assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), params.get("error"));
 		assertEquals(OAuth2Error.INVALID_REQUEST.getDescription(), params.get("error_description"));
@@ -68,7 +69,7 @@ public class PushedAuthorizationErrorResponseTest extends TestCase {
 		
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		assertEquals(400, httpResponse.getStatusCode());
-		assertNull(httpResponse.getContentType());
+		assertNull(httpResponse.getEntityContentType());
 		assertNull(httpResponse.getContent());
 		
 		response = PushedAuthorizationErrorResponse.parse(httpResponse);

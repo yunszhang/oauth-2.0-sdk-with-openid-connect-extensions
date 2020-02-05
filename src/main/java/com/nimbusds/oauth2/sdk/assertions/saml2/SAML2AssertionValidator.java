@@ -20,6 +20,7 @@ package com.nimbusds.oauth2.sdk.assertions.saml2;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
@@ -118,7 +119,7 @@ public class SAML2AssertionValidator {
 		try {
 			DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
 
-			Document document = docBuilder.parse(new InputSource(new ByteArrayInputStream(xml.getBytes("utf-8"))));
+			Document document = docBuilder.parse(new InputSource(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8))));
 			Element element = document.getDocumentElement();
 
 			xmlObject = XMLObjectProviderRegistrySupport

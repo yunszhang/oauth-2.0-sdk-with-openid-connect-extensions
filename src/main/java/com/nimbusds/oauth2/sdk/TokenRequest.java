@@ -24,14 +24,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
+import net.jcip.annotations.Immutable;
+
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.util.*;
-import net.jcip.annotations.Immutable;
 
 
 /**
@@ -426,7 +427,7 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 		}
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, url);
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 
 		if (getClientAuthentication() != null) {
 			getClientAuthentication().applyTo(httpRequest);
@@ -493,7 +494,7 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 		}
 
 		httpRequest.ensureMethod(HTTPRequest.Method.POST);
-		httpRequest.ensureContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.ensureEntityContentType(ContentType.APPLICATION_URLENCODED);
 
 		// Parse client authentication, if any
 		ClientAuthentication clientAuth;

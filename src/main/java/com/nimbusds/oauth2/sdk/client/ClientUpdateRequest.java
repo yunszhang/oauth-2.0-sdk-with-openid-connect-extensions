@@ -24,14 +24,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import net.jcip.annotations.Immutable;
-
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ProtectedResourceRequest;
 import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.auth.Secret;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
@@ -188,7 +187,7 @@ public class ClientUpdateRequest extends ProtectedResourceRequest {
 
 		httpRequest.setAuthorization(getAccessToken().toAuthorizationHeader());
 
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_JSON);
 		
 		JSONObject jsonObject = metadata.toJSONObject();
 		

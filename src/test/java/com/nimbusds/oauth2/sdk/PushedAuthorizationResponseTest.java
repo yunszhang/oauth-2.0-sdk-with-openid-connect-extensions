@@ -55,7 +55,7 @@ public class PushedAuthorizationResponseTest extends TestCase {
 		assertEquals(201, httpResponse.getStatusCode());
 		
 		HTTPResponse modifiedHTTPResponse = new HTTPResponse(200);
-		modifiedHTTPResponse.setContentType(httpResponse.getContentType());
+		modifiedHTTPResponse.setEntityContentType(httpResponse.getEntityContentType());
 		modifiedHTTPResponse.setContent(httpResponse.getContent());
 		
 		response = PushedAuthorizationResponse.parse(modifiedHTTPResponse).toSuccessResponse();

@@ -24,6 +24,11 @@ import java.util.*;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLSocketFactory;
 
+import junit.framework.TestCase;
+import org.opensaml.security.credential.BasicCredential;
+import org.opensaml.xmlsec.signature.support.SignatureConstants;
+
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jose.util.Base64URL;
@@ -33,7 +38,6 @@ import com.nimbusds.oauth2.sdk.assertions.jwt.JWTAssertionFactory;
 import com.nimbusds.oauth2.sdk.assertions.saml2.SAML2AssertionDetails;
 import com.nimbusds.oauth2.sdk.assertions.saml2.SAML2AssertionFactory;
 import com.nimbusds.oauth2.sdk.auth.*;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -43,9 +47,6 @@ import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
-import junit.framework.TestCase;
-import org.opensaml.security.credential.BasicCredential;
-import org.opensaml.xmlsec.signature.support.SignatureConstants;
 
 
 public class TokenRequestTest extends TestCase {
@@ -439,7 +440,7 @@ public class TokenRequestTest extends TestCase {
 		throws Exception {
 	
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://connect2id.com/token/"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		
 		String authBasicString = "czZCaGRSa3F0MzpnWDFmQmF0M2JW";
 		httpRequest.setAuthorization("Basic " + authBasicString);
@@ -472,7 +473,7 @@ public class TokenRequestTest extends TestCase {
 		httpRequest = tr.toHTTPRequest();
 		
 		assertEquals(new URL("https://connect2id.com/token/"), httpRequest.getURL());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 		assertEquals("Basic " + authBasicString, httpRequest.getAuthorization());
 		assertEquals(Collections.singletonList("authorization_code"), httpRequest.getQueryParameters().get("grant_type"));
 		assertEquals(Collections.singletonList("SplxlOBeZQQYbYS6WxSbIA"), httpRequest.getQueryParameters().get("code"));
@@ -481,8 +482,7 @@ public class TokenRequestTest extends TestCase {
 	}
 	
 	
-	public void testCodeGrantWithPKCE()
-		throws Exception {
+	public void testCodeGrantWithPKCE() {
 		
 		AuthorizationCode code = new AuthorizationCode();
 		URI redirectURI = URI.create("app://oauth-callback");
@@ -497,7 +497,7 @@ public class TokenRequestTest extends TestCase {
 		
 		assertNull(httpRequest.getAuthorization()); // no client auth here
 		
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 		
 		Map<String,List<String>> params = httpRequest.getQueryParameters();
 		assertEquals(Collections.singletonList(GrantType.AUTHORIZATION_CODE.getValue()), params.get("grant_type"));
@@ -513,7 +513,7 @@ public class TokenRequestTest extends TestCase {
 		throws Exception {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://connect2id.com/token/"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 
 		String postBody =
 			"grant_type=authorization_code" +
@@ -540,7 +540,7 @@ public class TokenRequestTest extends TestCase {
 		httpRequest = tr.toHTTPRequest();
 		
 		assertEquals(new URL("https://connect2id.com/token/"), httpRequest.getURL());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 		assertNull(httpRequest.getAuthorization());
 		assertEquals(Collections.singletonList("authorization_code"), httpRequest.getQueryParameters().get("grant_type"));
 		assertEquals(Collections.singletonList("SplxlOBeZQQYbYS6WxSbIA"), httpRequest.getQueryParameters().get("code"));
@@ -555,7 +555,7 @@ public class TokenRequestTest extends TestCase {
 		throws Exception {
 	
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://connect2id.com/token/"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		
 		final String authBasicString = "czZCaGRSa3F0MzpnWDFmQmF0M2JW";
 		httpRequest.setAuthorization("Basic " + authBasicString);
@@ -582,7 +582,7 @@ public class TokenRequestTest extends TestCase {
 		httpRequest = tr.toHTTPRequest();
 		
 		assertEquals(new URL("https://connect2id.com/token/"), httpRequest.getURL());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 		assertEquals("Basic " + authBasicString, httpRequest.getAuthorization());
 		assertEquals(postBody, httpRequest.getQuery());
 	}
@@ -592,7 +592,7 @@ public class TokenRequestTest extends TestCase {
 		throws Exception {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://connect2id.com/token/"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 
 		final String postBody = "grant_type=password&username=johndoe&password=A3ddj3w";
 
@@ -615,7 +615,7 @@ public class TokenRequestTest extends TestCase {
 		httpRequest = tr.toHTTPRequest();
 		
 		assertEquals(new URL("https://connect2id.com/token/"), httpRequest.getURL());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 		assertNull(httpRequest.getAuthorization());
 		assertEquals(Collections.singletonList("password"), httpRequest.getQueryParameters().get("grant_type"));
 		assertEquals(Collections.singletonList("johndoe"), httpRequest.getQueryParameters().get("username"));
@@ -628,7 +628,7 @@ public class TokenRequestTest extends TestCase {
 		throws Exception {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://connect2id.com/token/"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 
 		final String authBasicString = "czZCaGRSa3F0MzpnWDFmQmF0M2JW";
 		httpRequest.setAuthorization("Basic " + authBasicString);
@@ -656,7 +656,7 @@ public class TokenRequestTest extends TestCase {
 		httpRequest = tr.toHTTPRequest();
 		
 		assertEquals(new URL("https://connect2id.com/token/"), httpRequest.getURL());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 		assertEquals("Basic " + authBasicString, httpRequest.getAuthorization());
 		assertEquals(Collections.singletonList("password"), httpRequest.getQueryParameters().get("grant_type"));
 		assertEquals(Collections.singletonList("johndoe"), httpRequest.getQueryParameters().get("username"));
@@ -669,7 +669,7 @@ public class TokenRequestTest extends TestCase {
 		throws Exception {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://connect2id.com/token/"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 
 		final String authBasicString = "czZCaGRSa3F0MzpnWDFmQmF0M2JW";
 		httpRequest.setAuthorization("Basic " + authBasicString);
@@ -695,7 +695,7 @@ public class TokenRequestTest extends TestCase {
 		httpRequest = tr.toHTTPRequest();
 		
 		assertEquals(new URL("https://connect2id.com/token/"), httpRequest.getURL());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 		assertEquals("Basic " + authBasicString, httpRequest.getAuthorization());
 		assertEquals(postBody, httpRequest.getQuery());
 	}
@@ -705,7 +705,7 @@ public class TokenRequestTest extends TestCase {
 		throws Exception {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://connect2id.com/token/"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		final String postBody = "grant_type=client_credentials";
 
 		httpRequest.setQuery(postBody);
@@ -745,7 +745,7 @@ public class TokenRequestTest extends TestCase {
 		throws Exception {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://googleapis.com/oauth2/v3/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery("code=0a2b49a9-985d-47cb-b36f-be9ed4927b4c&redirect_uri=https%3A%2F%2Fdevelopers.google.com%2Foauthplayground&client_id=google&client_secret=&scope=&grant_type=authorization_code");
 
 		TokenRequest tokenRequest = TokenRequest.parse(httpRequest);
@@ -864,7 +864,7 @@ public class TokenRequestTest extends TestCase {
 
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery(URLUtils.serializeParameters(codeGrant.toParameters()));
 
 		try {
@@ -1084,7 +1084,7 @@ public class TokenRequestTest extends TestCase {
 		}
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery(URLUtils.serializeParameters(grant.toParameters()));
 
 		try {
@@ -1110,7 +1110,7 @@ public class TokenRequestTest extends TestCase {
 		}
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery(URLUtils.serializeParameters(grant.toParameters()));
 
 		try {
@@ -1330,8 +1330,7 @@ public class TokenRequestTest extends TestCase {
 
 
 	// https://bitbucket.org/connect2id/openid-connect-dev-client/issues/5/stripping-equal-sign-from-access_code-in
-	public void testCodeGrantEqualsCharEncoding()
-		throws Exception {
+	public void testCodeGrantEqualsCharEncoding() {
 
 		AuthorizationCode code = new AuthorizationCode("abc=");
 		AuthorizationCodeGrant grant = new AuthorizationCodeGrant(code, URI.create("https://example.com/cb"));
@@ -1496,7 +1495,7 @@ public class TokenRequestTest extends TestCase {
 		throws Exception {
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://connect2id.com/token/"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		
 		httpRequest.setAuthorization("Basic " + Base64.encode("alice"));
 		
@@ -1529,7 +1528,7 @@ public class TokenRequestTest extends TestCase {
 		URL tokenEndpoint = new URL("https://c2id.com/token");
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, tokenEndpoint);
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setAuthorization(new ClientSecretBasic(clientID, clientSecret).toHTTPAuthorizationHeader());
 		
 		AuthorizationCodeGrant grant = new AuthorizationCodeGrant(new AuthorizationCode(), URI.create("https://example.com/cb"));
@@ -1559,7 +1558,7 @@ public class TokenRequestTest extends TestCase {
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
 		httpRequest.setAuthorization("Basic KVQdqB25zeFg4duoJf7ZYo4wDMXtQjqlpxWdgFm06vc");
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setHeader("Cache-Control", "no-cache");
 		httpRequest.setQuery("grant_type=authorization_code" +
 			"&code=a0x3DwU3vE9Ad1CbWdy1LQ.KaPahOgJJjODKWE47-DXzg" +

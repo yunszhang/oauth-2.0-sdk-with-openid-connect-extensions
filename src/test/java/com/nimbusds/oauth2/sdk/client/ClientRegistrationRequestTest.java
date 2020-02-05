@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.*;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import junit.framework.TestCase;
@@ -68,7 +69,7 @@ public class ClientRegistrationRequestTest extends TestCase {
 		HTTPRequest httpRequest = request.toHTTPRequest();
 
 		assertEquals(uri.toString(), httpRequest.getURL().toString());
-		assertTrue(httpRequest.getContentType().toString().startsWith("application/json"));
+		assertTrue(httpRequest.getEntityContentType().toString().startsWith("application/json"));
 
 		JSONObject jsonObject = httpRequest.getQueryAsJSONObject();
 
@@ -230,7 +231,7 @@ public class ClientRegistrationRequestTest extends TestCase {
 		URI endpointURI = new URI("https://server.example.com/register/");
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, endpointURI.toURL());
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_JSON);
 		
 		String json = "{"
 			+ "    \"redirect_uris\":[\"https://client.example.org/callback\","

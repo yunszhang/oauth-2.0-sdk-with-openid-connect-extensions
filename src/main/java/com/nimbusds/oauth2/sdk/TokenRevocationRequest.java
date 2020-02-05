@@ -24,8 +24,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
+
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
@@ -35,8 +38,6 @@ import com.nimbusds.oauth2.sdk.token.TypelessAccessToken;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
-import net.jcip.annotations.Immutable;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -167,7 +168,7 @@ public final class TokenRevocationRequest extends AbstractOptionallyIdentifiedRe
 		}
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, url);
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 
 		Map<String,List<String>> params = new HashMap<>();
 
@@ -210,7 +211,7 @@ public final class TokenRevocationRequest extends AbstractOptionallyIdentifiedRe
 
 		// Only HTTP POST accepted
 		httpRequest.ensureMethod(HTTPRequest.Method.POST);
-		httpRequest.ensureContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.ensureEntityContentType(ContentType.APPLICATION_URLENCODED);
 
 		Map<String,List<String>> params = httpRequest.getQueryParameters();
 

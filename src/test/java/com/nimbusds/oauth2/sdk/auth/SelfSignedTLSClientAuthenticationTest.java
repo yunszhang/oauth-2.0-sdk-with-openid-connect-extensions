@@ -22,6 +22,7 @@ import java.net.URL;
 import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLSocketFactory;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
@@ -48,7 +49,7 @@ public class SelfSignedTLSClientAuthenticationTest extends TestCase {
 		HTTPRequest httpRequest = new HTTPRequest(
 			HTTPRequest.Method.POST,
 			new URL("https://c2id.com/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		
 		assertNull(httpRequest.getSSLSocketFactory());
 		
@@ -76,7 +77,7 @@ public class SelfSignedTLSClientAuthenticationTest extends TestCase {
 		HTTPRequest httpRequest = new HTTPRequest(
 			HTTPRequest.Method.POST,
 			new URL("https://c2id.com/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		
 		assertNull(httpRequest.getSSLSocketFactory());
 		
@@ -105,7 +106,7 @@ public class SelfSignedTLSClientAuthenticationTest extends TestCase {
 		HTTPRequest httpRequest = new HTTPRequest(
 			HTTPRequest.Method.POST,
 			new URL("https://c2id.com/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		
 		assertNull(httpRequest.getSSLSocketFactory());
 		
@@ -133,7 +134,7 @@ public class SelfSignedTLSClientAuthenticationTest extends TestCase {
 		throws Exception {
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery("a=b");
 		
 		try {
@@ -149,7 +150,7 @@ public class SelfSignedTLSClientAuthenticationTest extends TestCase {
 		throws Exception {
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=");
 		
 		try {
@@ -165,7 +166,7 @@ public class SelfSignedTLSClientAuthenticationTest extends TestCase {
 		throws Exception {
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=123");
 		
 		try {
@@ -183,7 +184,7 @@ public class SelfSignedTLSClientAuthenticationTest extends TestCase {
 		X509Certificate clientCert = X509CertificateGenerator.generateSampleClientCertificate();
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=123");
 		httpRequest.setClientX509Certificate(clientCert);
 		

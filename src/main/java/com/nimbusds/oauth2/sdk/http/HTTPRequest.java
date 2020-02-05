@@ -20,7 +20,7 @@ package com.nimbusds.oauth2.sdk.http;
 
 import java.io.*;
 import java.net.*;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +28,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
@@ -403,7 +404,7 @@ public class HTTPRequest extends HTTPMessage {
 	public JSONObject getQueryAsJSONObject()
 		throws ParseException {
 
-		ensureContentType(CommonContentTypes.APPLICATION_JSON);
+		ensureEntityContentType(ContentType.APPLICATION_JSON);
 
 		ensureQuery();
 
@@ -806,8 +807,8 @@ public class HTTPRequest extends HTTPMessage {
 
 			conn.setDoOutput(true);
 
-			if (getContentType() != null)
-				conn.setRequestProperty("Content-Type", getContentType().toString());
+			if (getEntityContentType() != null)
+				conn.setRequestProperty("Content-Type", getEntityContentType().toString());
 
 			if (query != null) {
 				try {
@@ -887,7 +888,7 @@ public class HTTPRequest extends HTTPMessage {
 
 		try {
 			// Open a connection, then send method and headers
-			reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), Charset.forName("UTF-8")));
+			reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
 
 			// The next step is to get the status
 			statusCode = conn.getResponseCode();

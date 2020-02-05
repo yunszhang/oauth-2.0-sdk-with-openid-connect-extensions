@@ -26,12 +26,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
+
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.X509CertificateUtilsTest;
-import junit.framework.TestCase;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -45,8 +47,8 @@ public class ServletUtilsTest extends TestCase {
 
 		MockServletRequest servletRequest = new MockServletRequest();
 		servletRequest.setMethod("POST");
-		servletRequest.setHeader("Content-Type", CommonContentTypes.APPLICATION_JSON.toString());
-		servletRequest.setHeader("Accept", CommonContentTypes.APPLICATION_JSON.toString());
+		servletRequest.setHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
+		servletRequest.setHeader("Accept", ContentType.APPLICATION_JSON.toString());
 		servletRequest.setHeader("Authorization", "Bearer yoto9reech8AhP2eibieg1uix2ahg5Ve");
 		servletRequest.setLocalAddr("c2id.com");
 		servletRequest.setLocalPort(8080);
@@ -57,8 +59,8 @@ public class ServletUtilsTest extends TestCase {
 
 		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(servletRequest);
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpRequest.getContentType().toString());
-		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpRequest.getAccept());
+		assertEquals(ContentType.APPLICATION_JSON.toString(), httpRequest.getEntityContentType().toString());
+		assertEquals(ContentType.APPLICATION_JSON.toString(), httpRequest.getAccept());
 		assertEquals("Bearer yoto9reech8AhP2eibieg1uix2ahg5Ve", httpRequest.getAuthorization());
 		assertNull(httpRequest.getClientIPAddress());
 		assertEquals(entityBody, httpRequest.getQuery());
@@ -73,7 +75,7 @@ public class ServletUtilsTest extends TestCase {
 
 		MockServletRequest servletRequest = new MockServletRequest();
 		servletRequest.setMethod("POST");
-		servletRequest.setHeader("Content-Type", CommonContentTypes.APPLICATION_JSON.toString());
+		servletRequest.setHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
 		servletRequest.setHeader("Multivalued-Header", "A", "B", "C");
 		servletRequest.setLocalAddr("c2id.com");
 		servletRequest.setLocalPort(8080);
@@ -84,7 +86,7 @@ public class ServletUtilsTest extends TestCase {
 
 		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(servletRequest);
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_JSON.toString(), httpRequest.getEntityContentType().toString());
 		assertNull(httpRequest.getAccept());
 		assertNull(httpRequest.getAuthorization());
 		assertNull(httpRequest.getClientIPAddress());
@@ -109,7 +111,7 @@ public class ServletUtilsTest extends TestCase {
 
 		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(servletRequest);
 		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
-		assertNull(httpRequest.getContentType());
+		assertNull(httpRequest.getEntityContentType());
 		assertNull(httpRequest.getAccept());
 		assertNull(httpRequest.getAuthorization());
 		assertNull(httpRequest.getQuery());
@@ -124,7 +126,7 @@ public class ServletUtilsTest extends TestCase {
 		
 		MockServletRequest servletRequest = new MockServletRequest();
 		servletRequest.setMethod("POST");
-		servletRequest.setHeader("Content-Type", CommonContentTypes.APPLICATION_JSON.toString());
+		servletRequest.setHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
 		servletRequest.setLocalAddr("c2id.com");
 		servletRequest.setLocalPort(8080);
 		servletRequest.setRequestURI("/clients");
@@ -136,7 +138,7 @@ public class ServletUtilsTest extends TestCase {
 
 		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(servletRequest);
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_JSON.toString(), httpRequest.getEntityContentType().toString());
 		assertNull(httpRequest.getAccept());
 		assertNull(httpRequest.getAuthorization());
 		assertEquals(entityBody, httpRequest.getQuery());
@@ -161,7 +163,7 @@ public class ServletUtilsTest extends TestCase {
 		
 		MockServletRequest servletRequest = new MockServletRequest();
 		servletRequest.setMethod("POST");
-		servletRequest.setHeader("Content-Type", CommonContentTypes.APPLICATION_JSON.toString());
+		servletRequest.setHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
 		servletRequest.setLocalAddr("c2id.com");
 		servletRequest.setLocalPort(8080);
 		servletRequest.setRequestURI("/clients");
@@ -173,7 +175,7 @@ public class ServletUtilsTest extends TestCase {
 
 		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(servletRequest);
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_JSON.toString(), httpRequest.getEntityContentType().toString());
 		assertNull(httpRequest.getAccept());
 		assertNull(httpRequest.getAuthorization());
 		assertEquals(entityBody, httpRequest.getQuery());
@@ -191,7 +193,7 @@ public class ServletUtilsTest extends TestCase {
 
 		MockServletRequest servletRequest = new MockServletRequest();
 		servletRequest.setMethod("POST");
-		servletRequest.setHeader("Content-Type", CommonContentTypes.APPLICATION_URLENCODED.toString());
+		servletRequest.setHeader("Content-Type", ContentType.APPLICATION_URLENCODED.toString());
 		servletRequest.setLocalAddr("c2id.com");
 		servletRequest.setLocalPort(8080);
 		servletRequest.setRequestURI("/token");
@@ -202,7 +204,7 @@ public class ServletUtilsTest extends TestCase {
 
 		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(servletRequest);
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 		assertNull(httpRequest.getAccept());
 		assertNull(httpRequest.getAuthorization());
 		Map<String, List<String>> queryParams = httpRequest.getQueryParameters();
@@ -224,7 +226,7 @@ public class ServletUtilsTest extends TestCase {
 
 		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(servletRequest);
 		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
-		assertNull(httpRequest.getContentType());
+		assertNull(httpRequest.getEntityContentType());
 		assertNull(httpRequest.getAccept());
 		assertNull(httpRequest.getAuthorization());
 		Map<String,List<String>> queryParams = httpRequest.getQueryParameters();
@@ -234,8 +236,7 @@ public class ServletUtilsTest extends TestCase {
 	}
 
 
-	public void testServletRequestWithExceededEntityLengthLimit()
-		throws Exception {
+	public void testServletRequestWithExceededEntityLengthLimit() {
 
 		MockServletRequest servletRequest = new MockServletRequest();
 		servletRequest.setMethod("POST");
@@ -265,7 +266,7 @@ public class ServletUtilsTest extends TestCase {
 
 		MockServletRequest servletRequest = new MockServletRequest();
 		servletRequest.setMethod("POST");
-		servletRequest.setHeader("Content-Type", CommonContentTypes.APPLICATION_URLENCODED.toString());
+		servletRequest.setHeader("Content-Type", ContentType.APPLICATION_URLENCODED.toString());
 		servletRequest.setLocalAddr("c2id.com");
 		servletRequest.setLocalPort(8080);
 		servletRequest.setRequestURI("/token");
@@ -302,7 +303,7 @@ public class ServletUtilsTest extends TestCase {
 		throws Exception {
 
 		HTTPResponse response = new HTTPResponse(200);
-		response.setContentType(CommonContentTypes.APPLICATION_JSON);
+		response.setEntityContentType(ContentType.APPLICATION_JSON);
 		response.setCacheControl("no-cache");
 		response.setPragma("no-cache");
 		response.setContent("{\"apples\":\"123\"}");
@@ -326,7 +327,7 @@ public class ServletUtilsTest extends TestCase {
 		
 		MockServletRequest servletRequest = new MockServletRequest();
 		servletRequest.setMethod("POST");
-		servletRequest.setHeader("Content-Type", CommonContentTypes.APPLICATION_JSON.toString());
+		servletRequest.setHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
 		servletRequest.setLocalAddr(null);
 		servletRequest.setLocalPort(8080);
 		servletRequest.setRequestURI("/clients");
@@ -336,7 +337,7 @@ public class ServletUtilsTest extends TestCase {
 		
 		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(servletRequest);
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_JSON.toString(), httpRequest.getEntityContentType().toString());
 		assertNull(httpRequest.getAccept());
 		assertNull(httpRequest.getAuthorization());
 		assertEquals(entityBody, httpRequest.getQuery());

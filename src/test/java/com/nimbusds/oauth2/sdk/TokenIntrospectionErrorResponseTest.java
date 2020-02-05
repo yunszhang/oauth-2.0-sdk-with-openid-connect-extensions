@@ -18,6 +18,7 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.token.BearerTokenError;
@@ -51,7 +52,7 @@ public class TokenIntrospectionErrorResponseTest extends TestCase {
 		assertNull(errorResponse.getErrorObject());
 		HTTPResponse httpResponse = errorResponse.toHTTPResponse();
 		assertEquals(400, httpResponse.getStatusCode());
-		assertNull(httpResponse.getContentType());
+		assertNull(httpResponse.getEntityContentType());
 		assertNull(httpResponse.getContent());
 	}
 
@@ -66,7 +67,7 @@ public class TokenIntrospectionErrorResponseTest extends TestCase {
 		HTTPResponse httpResponse = errorResponse.toHTTPResponse();
 
 		assertEquals(401, httpResponse.getStatusCode());
-		assertTrue(CommonContentTypes.APPLICATION_JSON.match(httpResponse.getContentType()));
+		assertTrue(ContentType.APPLICATION_JSON.matches(httpResponse.getEntityContentType()));
 		assertTrue(OAuth2Error.INVALID_CLIENT.getCode().equals(ErrorObject.parse(httpResponse.getContentAsJSONObject()).getCode()));
 		assertTrue(OAuth2Error.INVALID_CLIENT.getDescription().equals(ErrorObject.parse(httpResponse.getContentAsJSONObject()).getDescription()));
 
@@ -88,7 +89,7 @@ public class TokenIntrospectionErrorResponseTest extends TestCase {
 
 		assertEquals(401, httpResponse.getStatusCode());
 		assertEquals(BearerTokenError.INVALID_TOKEN.toWWWAuthenticateHeader(), httpResponse.getWWWAuthenticate());
-		assertTrue(CommonContentTypes.APPLICATION_JSON.match(httpResponse.getContentType()));
+		assertTrue(ContentType.APPLICATION_JSON.matches(httpResponse.getEntityContentType()));
 		assertTrue(BearerTokenError.INVALID_TOKEN.getCode().equals(ErrorObject.parse(httpResponse.getContentAsJSONObject()).getCode()));
 		assertTrue(BearerTokenError.INVALID_TOKEN.getDescription().equals(ErrorObject.parse(httpResponse.getContentAsJSONObject()).getDescription()));
 

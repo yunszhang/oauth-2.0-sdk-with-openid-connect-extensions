@@ -18,7 +18,7 @@
 package com.nimbusds.openid.connect.sdk.claims;
 
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -115,7 +115,7 @@ public abstract class HashClaim extends Identifier {
 		if (md == null)
 			return null;
 
-		md.update(identifier.getValue().getBytes(Charset.forName("US-ASCII")));
+		md.update(identifier.getValue().getBytes(StandardCharsets.US_ASCII));
 
 		byte[] hash = md.digest();
 

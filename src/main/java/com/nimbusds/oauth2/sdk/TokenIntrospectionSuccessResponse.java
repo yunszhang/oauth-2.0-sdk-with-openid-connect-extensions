@@ -22,16 +22,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
+
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.auth.X509CertificateConfirmation;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.*;
 import com.nimbusds.oauth2.sdk.token.AccessTokenType;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import net.jcip.annotations.Immutable;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -734,7 +735,7 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 	public HTTPResponse toHTTPResponse() {
 
 		HTTPResponse httpResponse = new HTTPResponse(HTTPResponse.SC_OK);
-		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
 		httpResponse.setContent(params.toJSONString());
 		return httpResponse;
 	}

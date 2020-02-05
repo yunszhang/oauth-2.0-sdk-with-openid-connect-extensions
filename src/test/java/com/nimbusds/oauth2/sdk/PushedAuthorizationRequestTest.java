@@ -27,10 +27,10 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
@@ -59,7 +59,7 @@ public class PushedAuthorizationRequestTest extends TestCase {
 		
 		HTTPRequest httpRequest = par.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 		assertEquals(clientID, ClientSecretBasic.parse(httpRequest).getClientID());
 		assertEquals(clientSecret, ClientSecretBasic.parse(httpRequest).getClientSecret());
 		assertEquals(Collections.singletonList("code"), httpRequest.getQueryParameters().get("response_type"));
@@ -92,7 +92,7 @@ public class PushedAuthorizationRequestTest extends TestCase {
 		
 		HTTPRequest httpRequest = par.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 		assertEquals(clientID, ClientSecretBasic.parse(httpRequest).getClientID());
 		assertEquals(clientSecret, ClientSecretBasic.parse(httpRequest).getClientSecret());
 		assertEquals(Collections.singletonList("code"), httpRequest.getQueryParameters().get("response_type"));
@@ -125,7 +125,7 @@ public class PushedAuthorizationRequestTest extends TestCase {
 		
 		HTTPRequest httpRequest = par.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 		assertNull(httpRequest.getAuthorization());
 		assertEquals(Collections.singletonList("code"), httpRequest.getQueryParameters().get("response_type"));
 		assertEquals(Collections.singletonList(clientID.getValue()), httpRequest.getQueryParameters().get("client_id"));
@@ -231,7 +231,7 @@ public class PushedAuthorizationRequestTest extends TestCase {
 	}
 	
 	
-	public void testParseHTTPRequest_requireURLEncodedParams() throws ParseException {
+	public void testParseHTTPRequest_requireURLEncodedParams() {
 		
 		URI endpoint = URI.create("https://c2id.com/par");
 		ClientID clientID = new ClientID();
@@ -245,7 +245,7 @@ public class PushedAuthorizationRequestTest extends TestCase {
 		HTTPRequest httpRequest = par.toHTTPRequest();
 		
 		// Remove encoding
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_JSON);
 		
 		try {
 			PushedAuthorizationRequest.parse(httpRequest);
@@ -275,7 +275,7 @@ public class PushedAuthorizationRequestTest extends TestCase {
 		params.remove("client_id"); // remove from body
 		
 		HTTPRequest modifiedHTTPRequest = new HTTPRequest(httpRequest.getMethod(), httpRequest.getURL());
-		modifiedHTTPRequest.setContentType(httpRequest.getContentType());
+		modifiedHTTPRequest.setEntityContentType(httpRequest.getEntityContentType());
 		modifiedHTTPRequest.setAuthorization(httpRequest.getAuthorization());
 		modifiedHTTPRequest.setQuery(URLUtils.serializeParameters(params));
 		
@@ -324,7 +324,7 @@ public class PushedAuthorizationRequestTest extends TestCase {
 			.build();
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, endpoint.toURL());
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		clientAuth.applyTo(httpRequest);
 		httpRequest.setQuery(authzRequest.toQueryString());
 		

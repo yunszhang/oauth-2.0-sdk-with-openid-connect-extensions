@@ -23,8 +23,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.mail.internet.InternetAddress;
 
+import junit.framework.TestCase;
+
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -37,12 +39,10 @@ import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.client.*;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.openid.connect.sdk.SubjectType;
-import junit.framework.TestCase;
 
 
 
@@ -85,7 +85,7 @@ public class OIDCClientRegistrationRequestTest extends TestCase {
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_JSON.toString(), httpRequest.getEntityContentType().toString());
 		
 		System.out.println(httpRequest.getQuery());
 		
@@ -131,7 +131,7 @@ public class OIDCClientRegistrationRequestTest extends TestCase {
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, uri.toURL());
 		httpRequest.setAuthorization("Bearer eyJhbGciOiJSUzI1NiJ9.eyJ");
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_JSON);
 		httpRequest.setQuery(json);
 		
 		OIDCClientRegistrationRequest req = OIDCClientRegistrationRequest.parse(httpRequest);
@@ -166,9 +166,9 @@ public class OIDCClientRegistrationRequestTest extends TestCase {
 		assertEquals(JWEAlgorithm.RSA1_5, metadata.getUserInfoJWEAlg());
 		assertEquals(EncryptionMethod.A128CBC_HS256, metadata.getUserInfoJWEEnc());
 		
-		List<InternetAddress> contacts = metadata.getContacts();
-		assertTrue(contacts.contains(new InternetAddress("ve7jtb@example.org")));
-		assertTrue(contacts.contains(new InternetAddress("mary@example.org")));
+		List<String> contacts = metadata.getEmailContacts();
+		assertTrue(contacts.contains("ve7jtb@example.org"));
+		assertTrue(contacts.contains("mary@example.org"));
 		assertEquals(2, contacts.size());
 		
 		Set<URI> requestObjectURIs = metadata.getRequestObjectURIs();
@@ -383,7 +383,6 @@ public class OIDCClientRegistrationRequestTest extends TestCase {
 			// We have an error
 			ClientRegistrationErrorResponse errorResponse = (ClientRegistrationErrorResponse)regResponse;
 			System.err.println(errorResponse.getErrorObject());
-			return;
 		}
 		
 		// Success: nothing returned

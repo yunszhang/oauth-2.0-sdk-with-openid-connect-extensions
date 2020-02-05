@@ -27,6 +27,9 @@ import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import junit.framework.TestCase;
+
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.proc.BadJOSEException;
@@ -40,13 +43,10 @@ import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.auth.Secret;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.ClaimsRequest;
-
-import junit.framework.TestCase;
 
 
 /**
@@ -333,7 +333,7 @@ public class AuthenticationRequestResolverTest extends TestCase {
 		ResourceRetriever jwtRetriever = new ResourceRetriever() {
 			@Override
 			public Resource retrieveResource(URL url) throws IOException {
-				return new Resource(requestObject.serialize(), CommonContentTypes.APPLICATION_JWT.toString());
+				return new Resource(requestObject.serialize(), ContentType.APPLICATION_JWT.toString());
 			}
 		};
 
@@ -398,7 +398,7 @@ public class AuthenticationRequestResolverTest extends TestCase {
 		ResourceRetriever jwtRetriever = new ResourceRetriever() {
 			@Override
 			public Resource retrieveResource(URL url) {
-				return new Resource(requestObject.serialize(), CommonContentTypes.APPLICATION_JWT.toString());
+				return new Resource(requestObject.serialize(), ContentType.APPLICATION_JWT.toString());
 			}
 		};
 

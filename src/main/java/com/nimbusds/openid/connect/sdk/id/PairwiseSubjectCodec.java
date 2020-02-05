@@ -20,6 +20,7 @@ package com.nimbusds.openid.connect.sdk.id;
 
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.Provider;
 import java.util.Map;
 
@@ -51,7 +52,7 @@ public abstract class PairwiseSubjectCodec {
 	/**
 	 * The charset (UTF-8) for string to byte conversions.
 	 */
-	public static final Charset CHARSET = Charset.forName("UTF-8");
+	public static final Charset CHARSET = StandardCharsets.UTF_8;
 
 
 	/**

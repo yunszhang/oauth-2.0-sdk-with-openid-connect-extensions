@@ -28,9 +28,9 @@ import java.util.Map;
 
 import net.jcip.annotations.Immutable;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
@@ -149,7 +149,7 @@ public class PushedAuthorizationRequest extends AbstractOptionallyAuthenticatedR
 		}
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, url);
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		
 		if (getClientAuthentication() != null) {
 			getClientAuthentication().applyTo(httpRequest);
@@ -186,7 +186,7 @@ public class PushedAuthorizationRequest extends AbstractOptionallyAuthenticatedR
 		}
 		
 		httpRequest.ensureMethod(HTTPRequest.Method.POST);
-		httpRequest.ensureContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.ensureEntityContentType(ContentType.APPLICATION_URLENCODED);
 		
 		// Parse client authentication, if any
 		ClientAuthentication clientAuth;

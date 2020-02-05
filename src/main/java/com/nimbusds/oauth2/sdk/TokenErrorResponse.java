@@ -23,11 +23,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
-import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
+
+import com.nimbusds.common.contenttype.ContentType;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
 
 /**
@@ -179,7 +180,7 @@ public class TokenErrorResponse extends TokenResponse implements ErrorResponse {
 		if (error == null)
 			return httpResponse;
 		
-		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
 		httpResponse.setCacheControl("no-store");
 		httpResponse.setPragma("no-cache");
 		

@@ -22,14 +22,16 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
+import net.jcip.annotations.ThreadSafe;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONArrayUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import net.jcip.annotations.ThreadSafe;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -366,7 +368,7 @@ public class HTTPResponse extends HTTPMessage {
 	public JSONObject getContentAsJSONObject()
 		throws ParseException {
 		
-		ensureContentType(CommonContentTypes.APPLICATION_JSON);
+		ensureEntityContentType(ContentType.APPLICATION_JSON);
 		
 		ensureContent();
 		
@@ -387,7 +389,7 @@ public class HTTPResponse extends HTTPMessage {
 	public JSONArray getContentAsJSONArray()
 		throws ParseException {
 
-		ensureContentType(CommonContentTypes.APPLICATION_JSON);
+		ensureEntityContentType(ContentType.APPLICATION_JSON);
 
 		ensureContent();
 
@@ -408,7 +410,7 @@ public class HTTPResponse extends HTTPMessage {
 	public JWT getContentAsJWT()
 		throws ParseException {
 		
-		ensureContentType(CommonContentTypes.APPLICATION_JWT);
+		ensureEntityContentType(ContentType.APPLICATION_JWT);
 		
 		ensureContent();
 		

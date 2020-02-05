@@ -23,7 +23,7 @@ import java.net.URI;
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
 
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
@@ -140,7 +140,7 @@ public class PushedAuthorizationSuccessResponse extends PushedAuthorizationRespo
 	public HTTPResponse toHTTPResponse() {
 		
 		HTTPResponse httpResponse = new HTTPResponse(HTTPResponse.SC_CREATED);
-		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
 		httpResponse.setContent(toJSONObject().toString());
 		return httpResponse;
 	}

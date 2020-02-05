@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
@@ -187,7 +188,7 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 
 		HTTPRequest httpRequest = resp.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 		assertEquals(ABS_REDIRECT_URI, httpRequest.getURL().toURI());
 
 		assertEquals(Collections.singletonList("Bearer"), httpRequest.getQueryParameters().get("token_type"));

@@ -23,6 +23,7 @@ import java.net.URI;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 
@@ -48,7 +49,7 @@ public class PushedAuthorizationSuccessResponseTest extends TestCase {
 		
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		assertEquals(201, httpResponse.getStatusCode());
-		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpResponse.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_JSON.toString(), httpResponse.getEntityContentType().toString());
 		jsonObject = response.toJSONObject();
 		assertEquals(requestURI.toString(), jsonObject.get("request_uri"));
 		assertEquals(lifetime, jsonObject.get("expires_in"));

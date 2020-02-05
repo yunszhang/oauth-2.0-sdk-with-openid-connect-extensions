@@ -32,10 +32,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.jcip.annotations.ThreadSafe;
+
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import com.nimbusds.oauth2.sdk.util.X509CertificateUtils;
-import net.jcip.annotations.ThreadSafe;
 
 
 /**
@@ -207,8 +209,7 @@ public class ServletUtils {
 			// See issues
 			// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/184
 			// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/186
-			if (request.getContentType() != null && request.getContentType()
-				.getBaseType().equals(CommonContentTypes.APPLICATION_URLENCODED.getBaseType())) {
+			if (ContentType.APPLICATION_URLENCODED.matches(request.getEntityContentType())) {
 
 				// Recreate the content based on parameters
 				request.setQuery(URLUtils.serializeParametersAlt(sr.getParameterMap()));
@@ -282,8 +283,8 @@ public class ServletUtils {
 			}
 		}
 
-		if (httpResponse.getContentType() != null)
-			servletResponse.setContentType(httpResponse.getContentType().toString());
+		if (httpResponse.getEntityContentType() != null)
+			servletResponse.setContentType(httpResponse.getEntityContentType().toString());
 
 
 		// Write out the content

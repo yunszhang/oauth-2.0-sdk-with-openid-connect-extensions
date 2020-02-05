@@ -661,7 +661,7 @@ public class ClaimsRequest implements JSONAware {
 						
 					} else {
 						Map<String, Object> additionalInformation = getAdditionalInformationFromClaim(entrySpec);
-						entries.add(new Entry(claimName, requirement, langTag, (String) null, null, purpose, additionalInformation));
+						entries.add(new Entry(claimName, requirement, langTag, null, null, purpose, additionalInformation));
 					}
 					
 				} catch (Exception e) {

@@ -22,6 +22,7 @@ import junit.framework.TestCase;
 
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.token.BearerTokenError;
@@ -65,7 +66,7 @@ public class ClientRegistrationErrorResponseTest extends TestCase {
 			new ClientRegistrationErrorResponse(RegistrationError.INVALID_CLIENT_METADATA).toHTTPResponse();
 
 		assertEquals(400, httpResponse.getStatusCode());
-		assertTrue(CommonContentTypes.APPLICATION_JSON.match(httpResponse.getContentType()));
+		assertTrue(ContentType.APPLICATION_JSON.matches(httpResponse.getEntityContentType()));
 		JSONObject content = httpResponse.getContentAsJSONObject();
 		assertEquals("invalid_client_metadata", (String)content.get("error"));
 		assertEquals("Invalid client metadata field", (String)content.get("error_description"));

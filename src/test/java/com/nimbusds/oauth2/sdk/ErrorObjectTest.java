@@ -29,6 +29,7 @@ import static org.junit.Assert.assertNotEquals;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
@@ -113,7 +114,7 @@ public class ErrorObjectTest extends TestCase {
 	public void testParseFull_httpRequest() {
 
 		HTTPResponse httpResponse = new HTTPResponse(403);
-		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("error", "access_denied");
 		jsonObject.put("error_description", "Access denied");
@@ -133,7 +134,7 @@ public class ErrorObjectTest extends TestCase {
 	public void testParseWithOmittedURI_httpRequest() {
 
 		HTTPResponse httpResponse = new HTTPResponse(403);
-		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("error", "access_denied");
 		jsonObject.put("error_description", "Access denied");
@@ -152,7 +153,7 @@ public class ErrorObjectTest extends TestCase {
 	public void testParseWithCodeOnly_httpRequest() {
 
 		HTTPResponse httpResponse = new HTTPResponse(403);
-		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("error", "access_denied");
 

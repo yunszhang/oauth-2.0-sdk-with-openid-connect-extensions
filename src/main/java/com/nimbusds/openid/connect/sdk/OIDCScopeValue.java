@@ -249,7 +249,7 @@ public class OIDCScopeValue extends Scope.Value {
 			return Collections.unmodifiableSet(entries);
 		
 		for (String claimName: getClaimNames())
-			entries.add(new ClaimsRequest.Entry(claimName, ClaimRequirement.VOLUNTARY));
+			entries.add(new ClaimsRequest.Entry(claimName).withClaimRequirement(ClaimRequirement.VOLUNTARY));
 		
 		return Collections.unmodifiableSet(entries);
 	}

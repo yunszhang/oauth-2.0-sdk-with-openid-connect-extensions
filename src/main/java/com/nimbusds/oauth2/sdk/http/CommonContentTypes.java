@@ -27,42 +27,49 @@ import javax.mail.internet.ParameterList;
  * applications. The character set all of content types is set to 
  * {@link #DEFAULT_CHARSET UTF-8}.
  */
+@Deprecated
 public final class CommonContentTypes {
 
 
 	/**
 	 * The default character set.
 	 */
+	@Deprecated
 	public static final String DEFAULT_CHARSET = "UTF-8";
 
 
 	/**
 	 * The default content type parameter list.
 	 */
+	@Deprecated
 	private static final ParameterList PARAM_LIST = new ParameterList();
 
 
 	/**
 	 * Content type {@code application/json}.
 	 */
+	@Deprecated
 	public static final ContentType APPLICATION_JSON = new ContentType("application", "json", PARAM_LIST);
 	
 	
 	/**
 	 * Content type {@code application/jose}.
 	 */
+	@Deprecated
 	public static final ContentType APPLICATION_JOSE = new ContentType("application", "jose", PARAM_LIST);
 	
 	
 	/**
 	 * Content type {@code application/jwt}.
 	 */
+	@Deprecated
 	public static final ContentType APPLICATION_JWT = new ContentType("application", "jwt", PARAM_LIST);
 	
 	
 	/**
 	 * Content type {@code application/x-www-form-urlencoded}.
 	 */
+	@Deprecated
 	public static final ContentType APPLICATION_URLENCODED = new ContentType("application", "x-www-form-urlencoded", PARAM_LIST);
 
 

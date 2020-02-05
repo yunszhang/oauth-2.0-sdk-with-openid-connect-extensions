@@ -22,11 +22,10 @@ import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import javax.mail.internet.ContentType;
 import javax.net.ssl.SSLSocketFactory;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.SerializeException;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
@@ -127,16 +126,16 @@ public abstract class TLSClientAuthentication extends ClientAuthentication {
 		if (httpRequest.getMethod() != HTTPRequest.Method.POST)
 			throw new SerializeException("The HTTP request method must be POST");
 		
-		ContentType ct = httpRequest.getContentType();
+		ContentType ct = httpRequest.getEntityContentType();
 		
 		if (ct == null)
 			throw new SerializeException("Missing HTTP Content-Type header");
 		
-		if (ct.match(CommonContentTypes.APPLICATION_JSON)) {
+		if (ct.matches(ContentType.APPLICATION_JSON)) {
 			
 			// Possibly request object POST request, nothing to set
 			
-		} else if (ct.match(CommonContentTypes.APPLICATION_URLENCODED)) {
+		} else if (ct.matches(ContentType.APPLICATION_URLENCODED)) {
 			
 			// Token or similar request
 			Map<String,List<String>> params = httpRequest.getQueryParameters();
@@ -145,7 +144,7 @@ public abstract class TLSClientAuthentication extends ClientAuthentication {
 			httpRequest.setQuery(queryString);
 			
 		} else {
-			throw new SerializeException("The HTTP Content-Type header must be " + CommonContentTypes.APPLICATION_URLENCODED);
+			throw new SerializeException("The HTTP Content-Type header must be " + ContentType.APPLICATION_URLENCODED);
 		}
 		
 		// If set for an outgoing request

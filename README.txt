@@ -1,6 +1,6 @@
 Nimbus OAuth 2.0 SDK with OpenID Connect extensions
 
-Copyright (c) Connect2id Ltd., 2012 - 2019
+Copyright (c) Connect2id Ltd., 2012 - 2020
 
 
 README
@@ -141,4 +141,4 @@ This SDK is provided under the terms of the Apache 2.0 licence.
 Questions or comments? Email support@connect2id.com
 
 
-2019-12-04
+2020-02-04

@@ -73,7 +73,7 @@ public class UserInfoErrorResponseTest extends TestCase {
 		
 		HTTPResponse httpResponse = errorResponse.toHTTPResponse();
 		assertEquals(409, httpResponse.getStatusCode());
-		assertEquals("application/json; charset=UTF-8", httpResponse.getContentType().toString());
+		assertEquals("application/json; charset=UTF-8", httpResponse.getEntityContentType().toString());
 		assertNull(httpResponse.getWWWAuthenticate());
 		JSONObject jsonObject = httpResponse.getContentAsJSONObject();
 		assertEquals(error.getCode(), jsonObject.get("error"));

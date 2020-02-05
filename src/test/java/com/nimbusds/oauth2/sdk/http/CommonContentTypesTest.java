@@ -24,8 +24,11 @@ import junit.framework.TestCase;
 public class CommonContentTypesTest extends TestCase {
 	
 	
-	public void testApplicationJOSE() {
+	public void testConstants() {
 		
+		assertEquals("application/json; charset=UTF-8", CommonContentTypes.APPLICATION_JSON.toString());
 		assertEquals("application/jose; charset=UTF-8", CommonContentTypes.APPLICATION_JOSE.toString());
+		assertEquals("application/jwt; charset=UTF-8", CommonContentTypes.APPLICATION_JWT.toString());
+		assertEquals("application/x-www-form-urlencoded; charset=UTF-8", CommonContentTypes.APPLICATION_URLENCODED.toString());
 	}
 }

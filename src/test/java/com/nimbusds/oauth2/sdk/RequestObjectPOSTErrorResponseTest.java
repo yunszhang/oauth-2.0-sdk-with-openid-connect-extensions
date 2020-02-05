@@ -38,7 +38,7 @@ public class RequestObjectPOSTErrorResponseTest extends TestCase {
 		
 		HTTPResponse httpResponse = errorResponse.toHTTPResponse();
 		assertEquals(HTTPResponse.SC_UNAUTHORIZED, httpResponse.getStatusCode());
-		assertNull(httpResponse.getContentType());
+		assertNull(httpResponse.getEntityContentType());
 		assertNull(httpResponse.getContent());
 		
 		errorResponse = RequestObjectPOSTErrorResponse.parse(httpResponse);

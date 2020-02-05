@@ -27,18 +27,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.jcip.annotations.Immutable;
+
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.oauth2.sdk.AbstractRequest;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
-import net.jcip.annotations.Immutable;
 
 
 /**
@@ -151,7 +152,7 @@ public class BackChannelLogoutRequest extends AbstractRequest {
 		}
 		
 		httpRequest = new HTTPRequest(HTTPRequest.Method.POST, endpointURL);
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery(URLUtils.serializeParameters(toParameters()));
 		
 		return httpRequest;

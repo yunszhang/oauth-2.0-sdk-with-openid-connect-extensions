@@ -23,6 +23,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
+
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
@@ -30,9 +34,6 @@ import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.token.Tokens;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-
-import junit.framework.TestCase;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -124,7 +125,7 @@ public class AccessTokenResponseTest extends TestCase {
 		throws Exception {
 
 		HTTPResponse httpResponse = new HTTPResponse(HTTPResponse.SC_OK);
-		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
 		httpResponse.setCacheControl("no-store");
 		httpResponse.setPragma("no-cache");
 
@@ -178,7 +179,7 @@ public class AccessTokenResponseTest extends TestCase {
 
 		httpResponse = atr.toHTTPResponse();
 
-		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpResponse.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_JSON.toString(), httpResponse.getEntityContentType().toString());
 		assertEquals("no-store", httpResponse.getCacheControl());
 		assertEquals("no-cache", httpResponse.getPragma());
 
@@ -199,7 +200,7 @@ public class AccessTokenResponseTest extends TestCase {
 		throws Exception {
 
 		HTTPResponse httpResponse = new HTTPResponse(HTTPResponse.SC_OK);
-		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
 		httpResponse.setCacheControl("no-store");
 		httpResponse.setPragma("no-cache");
 
@@ -226,7 +227,7 @@ public class AccessTokenResponseTest extends TestCase {
 
 		httpResponse = atr.toHTTPResponse();
 
-		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpResponse.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_JSON.toString(), httpResponse.getEntityContentType().toString());
 		assertEquals("no-store", httpResponse.getCacheControl());
 		assertEquals("no-cache", httpResponse.getPragma());
 

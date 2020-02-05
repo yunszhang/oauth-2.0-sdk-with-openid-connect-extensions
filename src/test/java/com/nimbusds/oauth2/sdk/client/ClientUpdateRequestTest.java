@@ -24,6 +24,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.langtag.LangTag;
 
 import com.nimbusds.oauth2.sdk.GrantType;
@@ -48,7 +49,7 @@ public class ClientUpdateRequestTest extends TestCase {
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.PUT, regURI.toURL());
 		httpRequest.setAuthorization("Bearer reg-23410913-abewfq.123483");
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_JSON);
 
 		String json = "{\"client_id\":\"s6BhdRkqt3\","
 			+ "    \"client_secret\": \"cf136dc3c1fc93f31185e5885805d\","
@@ -114,7 +115,7 @@ public class ClientUpdateRequestTest extends TestCase {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.PUT, new URL("https://c2id.com/client-reg/123"));
 
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_JSON);
 
 		String json = "{\"client_id\":\"123\","
 			+ "    \"client_secret\": \"cf136dc3c1fc93f31185e5885805d\","

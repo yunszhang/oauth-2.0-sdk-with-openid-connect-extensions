@@ -21,6 +21,7 @@ package com.nimbusds.oauth2.sdk;
 import java.util.Arrays;
 import java.util.Date;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.auth.X509CertificateConfirmation;
@@ -123,7 +124,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		HTTPResponse httpResponse = response.toHTTPResponse();
 
 		assertEquals(200, httpResponse.getStatusCode());
-		assertEquals(CommonContentTypes.APPLICATION_JSON.getBaseType(), httpResponse.getContentType().getBaseType());
+		assertEquals(ContentType.APPLICATION_JSON.getBaseType(), httpResponse.getEntityContentType().getBaseType());
 		jsonObject = httpResponse.getContentAsJSONObject();
 		assertTrue((Boolean) jsonObject.get("active"));
 		assertEquals(1, jsonObject.size());
@@ -175,7 +176,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		HTTPResponse httpResponse = response.toHTTPResponse();
 
 		assertEquals(200, httpResponse.getStatusCode());
-		assertEquals(CommonContentTypes.APPLICATION_JSON.getBaseType(), httpResponse.getContentType().getBaseType());
+		assertEquals(ContentType.APPLICATION_JSON.getBaseType(), httpResponse.getEntityContentType().getBaseType());
 		jsonObject = httpResponse.getContentAsJSONObject();
 		assertFalse((Boolean) jsonObject.get("active"));
 		assertEquals(1, jsonObject.size());
@@ -249,7 +250,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		HTTPResponse httpResponse = response.toHTTPResponse();
 
 		assertEquals(200, httpResponse.getStatusCode());
-		assertEquals("application/json; charset=UTF-8", httpResponse.getContentType().toString());
+		assertEquals("application/json; charset=UTF-8", httpResponse.getEntityContentType().toString());
 
 		response = TokenIntrospectionSuccessResponse.parse(httpResponse);
 
@@ -289,7 +290,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		HTTPResponse httpResponse = response.toHTTPResponse();
 
 		assertEquals(200, httpResponse.getStatusCode());
-		assertEquals("application/json; charset=UTF-8", httpResponse.getContentType().toString());
+		assertEquals("application/json; charset=UTF-8", httpResponse.getEntityContentType().toString());
 
 		response = TokenIntrospectionSuccessResponse.parse(httpResponse);
 		

@@ -26,6 +26,7 @@ import static net.jadler.Jadler.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
@@ -70,7 +71,7 @@ public class HTTPTokenRequestTest {
 		onRequest()
 			.havingMethodEqualTo("POST")
 			.havingPathEqualTo("/token")
-			.havingHeaderEqualTo("Content-Type", CommonContentTypes.APPLICATION_URLENCODED.toString())
+			.havingHeaderEqualTo("Content-Type", ContentType.APPLICATION_URLENCODED.toString())
 			.havingBody(new BaseMatcher<String>() {
 				@Override
 				public boolean matches(Object o) {
@@ -95,7 +96,7 @@ public class HTTPTokenRequestTest {
 		HTTPRequest httpRequest = tokenRequest.toHTTPRequest();
 		
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 		
 		HTTPResponse httpResponse = httpRequest.send();
 		

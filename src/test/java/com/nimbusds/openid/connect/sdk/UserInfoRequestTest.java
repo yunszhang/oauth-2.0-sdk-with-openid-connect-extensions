@@ -75,7 +75,7 @@ public class UserInfoRequestTest extends TestCase {
 
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
 		assertEquals(url, httpRequest.getURL().toURI());
-		assertEquals("application/x-www-form-urlencoded; charset=UTF-8", httpRequest.getContentType().toString());
+		assertEquals("application/x-www-form-urlencoded; charset=UTF-8", httpRequest.getEntityContentType().toString());
 		assertEquals("access_token="+token.getValue(), httpRequest.getQuery());
 		assertNull(httpRequest.getAuthorization());
 

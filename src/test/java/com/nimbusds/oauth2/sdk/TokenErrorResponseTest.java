@@ -21,6 +21,7 @@ package com.nimbusds.oauth2.sdk;
 import java.net.URI;
 import java.util.Set;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
@@ -76,7 +77,7 @@ public class TokenErrorResponseTest extends TestCase {
 		HTTPResponse httpResponse = r.toHTTPResponse();
 		
 		assertEquals(HTTPResponse.SC_BAD_REQUEST, httpResponse.getStatusCode());
-		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpResponse.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_JSON.toString(), httpResponse.getEntityContentType().toString());
 		assertEquals("no-store", httpResponse.getCacheControl());
 		assertEquals("no-cache", httpResponse.getPragma());
 		
@@ -115,7 +116,7 @@ public class TokenErrorResponseTest extends TestCase {
 		throws Exception {
 
 		HTTPResponse httpResponse = new HTTPResponse(401);
-		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
 		httpResponse.setContent("{\"error\":\"invalid_client\", \"error_description\":\"Client authentication failed\"}");
 
 		TokenErrorResponse errorResponse = TokenErrorResponse.parse(httpResponse);
@@ -136,7 +137,7 @@ public class TokenErrorResponseTest extends TestCase {
 
 		HTTPResponse httpResponse = errorResponse.toHTTPResponse();
 		assertEquals(400, httpResponse.getStatusCode());
-		assertNull(httpResponse.getContentType());
+		assertNull(httpResponse.getEntityContentType());
 		assertNull(httpResponse.getContent());
 
 		errorResponse = TokenErrorResponse.parse(httpResponse);

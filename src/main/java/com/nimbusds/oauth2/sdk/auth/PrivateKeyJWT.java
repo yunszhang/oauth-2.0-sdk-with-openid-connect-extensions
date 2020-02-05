@@ -24,17 +24,18 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.*;
 
+import net.jcip.annotations.Immutable;
+
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.assertions.jwt.JWTAssertionFactory;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
-import net.jcip.annotations.Immutable;
 
 
 /**
@@ -349,7 +350,7 @@ public final class PrivateKeyJWT extends JWTAuthentication {
 		throws ParseException {
 		
 		httpRequest.ensureMethod(HTTPRequest.Method.POST);
-		httpRequest.ensureContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.ensureEntityContentType(ContentType.APPLICATION_URLENCODED);
 		
 		return parse(httpRequest.getQueryParameters());
 	}

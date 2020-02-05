@@ -25,10 +25,10 @@ import java.net.URL;
 
 import net.jcip.annotations.Immutable;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ProtectedResourceRequest;
 import com.nimbusds.oauth2.sdk.SerializeException;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 
@@ -138,7 +138,7 @@ public class UserInfoRequest extends ProtectedResourceRequest {
 				break;
 				
 			case POST:
-				httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+				httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 				httpRequest.setQuery("access_token=" + getAccessToken().getValue());
 				break;
 			

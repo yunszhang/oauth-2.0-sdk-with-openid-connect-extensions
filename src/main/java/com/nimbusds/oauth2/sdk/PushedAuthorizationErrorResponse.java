@@ -20,7 +20,7 @@ package com.nimbusds.oauth2.sdk;
 
 import net.jcip.annotations.Immutable;
 
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 
 
@@ -92,7 +92,7 @@ public class PushedAuthorizationErrorResponse extends PushedAuthorizationRespons
 		httpResponse.setPragma("no-cache");
 		
 		if (getErrorObject().getCode() != null) {
-			httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+			httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
 			httpResponse.setContent(getErrorObject().toJSONObject().toJSONString());
 		}
 		
@@ -121,7 +121,7 @@ public class PushedAuthorizationErrorResponse extends PushedAuthorizationRespons
 		}
 		
 		ErrorObject errorObject;
-		if (httpResponse.getContentType() != null && CommonContentTypes.APPLICATION_JSON.getBaseType().equals(httpResponse.getContentType().getBaseType())) {
+		if (httpResponse.getEntityContentType() != null && ContentType.APPLICATION_JSON.matches(httpResponse.getEntityContentType())) {
 			errorObject = ErrorObject.parse(httpResponse.getContentAsJSONObject());
 		} else {
 			errorObject = new ErrorObject(null);

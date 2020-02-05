@@ -26,10 +26,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
@@ -37,7 +39,6 @@ import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.token.Token;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
-import junit.framework.TestCase;
 
 
 /**
@@ -61,7 +62,7 @@ public class TokenRevocationRequestTest extends TestCase {
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
 		assertEquals(endpointURI.toURL().toString(), httpRequest.getURL().toString());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 		assertNull(httpRequest.getAuthorization());
 
 		assertEquals(Collections.singletonList(token.getValue()), httpRequest.getQueryParameters().get("token"));
@@ -94,7 +95,7 @@ public class TokenRevocationRequestTest extends TestCase {
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
 		assertEquals(endpointURI.toURL().toString(), httpRequest.getURL().toString());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 
 		assertEquals(Collections.singletonList(token.getValue()), httpRequest.getQueryParameters().get("token"));
 		assertEquals(Collections.singletonList("access_token"), httpRequest.getQueryParameters().get("token_type_hint"));
@@ -128,7 +129,7 @@ public class TokenRevocationRequestTest extends TestCase {
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
 		assertEquals(endpointURI.toURL().toString(), httpRequest.getURL().toString());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 		assertNull(httpRequest.getAuthorization());
 
 		assertEquals(Collections.singletonList(token.getValue()), httpRequest.getQueryParameters().get("token"));
@@ -160,7 +161,7 @@ public class TokenRevocationRequestTest extends TestCase {
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
 		assertEquals(endpointURI.toURL().toString(), httpRequest.getURL().toString());
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
 
 		assertEquals(Collections.singletonList(token.getValue()), httpRequest.getQueryParameters().get("token"));
 		assertEquals(Collections.singletonList("refresh_token"), httpRequest.getQueryParameters().get("token_type_hint"));
@@ -184,7 +185,7 @@ public class TokenRevocationRequestTest extends TestCase {
 		throws Exception {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token/revoke"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 
 		Map<String,List<String>> queryParams = new HashMap<>();
 		queryParams.put("token", Collections.singletonList("abc"));
@@ -205,7 +206,7 @@ public class TokenRevocationRequestTest extends TestCase {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token/revoke"));
 		httpRequest.setAuthorization(new ClientSecretBasic(new ClientID("123"), new Secret("secret")).toHTTPAuthorizationHeader());
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 
 		Map<String,List<String>> queryParams = new HashMap<>();
 		queryParams.put("token", Collections.singletonList("abc"));
@@ -247,7 +248,7 @@ public class TokenRevocationRequestTest extends TestCase {
 		throws MalformedURLException {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token/revoke"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 
 		Map<String,List<String>> queryParams = new HashMap<>();
 		queryParams.put("token", Collections.singletonList("abc"));

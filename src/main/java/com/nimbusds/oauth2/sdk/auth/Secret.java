@@ -18,7 +18,7 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -83,7 +83,7 @@ public class Secret {
 	 */
 	public Secret(final String value, final Date expDate) {
 
-		this.value = value.getBytes(Charset.forName("utf-8"));
+		this.value = value.getBytes(StandardCharsets.UTF_8);
 		this.expDate = expDate;
 	}
 	
@@ -120,7 +120,7 @@ public class Secret {
 		
 		SECURE_RANDOM.nextBytes(n);
 
-		value = Base64URL.encode(n).toString().getBytes(Charset.forName("UTF-8"));
+		value = Base64URL.encode(n).toString().getBytes(StandardCharsets.UTF_8);
 		
 		this.expDate = expDate;
 	}
@@ -148,7 +148,7 @@ public class Secret {
 			return null; // value has been erased
 		}
 
-		return new String(value, Charset.forName("utf-8"));
+		return new String(value, StandardCharsets.UTF_8);
 	}
 	
 	
@@ -193,10 +193,8 @@ public class Secret {
 		if (value == null) {
 			return; // Already erased
 		}
-
-		for (int i=0; i < value.length; i++) {
-			value[i] = 0;
-		}
+		
+		Arrays.fill(value, (byte) 0);
 		
 		value = null;
 	}

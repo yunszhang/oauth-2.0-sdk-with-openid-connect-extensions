@@ -21,14 +21,13 @@ package com.nimbusds.oauth2.sdk.http;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
-import javax.mail.internet.ContentType;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
@@ -36,19 +35,18 @@ import javax.net.ssl.SSLSession;
 import static net.jadler.Jadler.*;
 import static org.junit.Assert.*;
 
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.id.Issuer;
-import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.nimbusds.common.contenttype.ContentType;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
-/**
- * Tests the HTTP request class.
- */
+
 public class HTTPRequestTest {
 
 
@@ -86,9 +84,9 @@ public class HTTPRequestTest {
 			// ok
 		}
 
-		assertNull(request.getContentType());
-		request.setContentType(CommonContentTypes.APPLICATION_JSON);
-		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), request.getContentType().toString());
+		assertNull(request.getEntityContentType());
+		request.setEntityContentType(ContentType.APPLICATION_JSON);
+		assertEquals(ContentType.APPLICATION_JSON.toString(), request.getEntityContentType().toString());
 
 		assertNull(request.getAuthorization());
 		request.setAuthorization("Bearer 123");
@@ -108,7 +106,7 @@ public class HTTPRequestTest {
 
 		request.setQuery("{\"apples\":\"123\"}");
 		JSONObject jsonObject = request.getQueryAsJSONObject();
-		assertEquals("123", (String)jsonObject.get("apples"));
+		assertEquals("123", jsonObject.get("apples"));
 
 		request.setFragment("fragment");
 		assertEquals("fragment", request.getFragment());
@@ -125,6 +123,26 @@ public class HTTPRequestTest {
 		request.setFollowRedirects(false);
 		assertFalse(request.getFollowRedirects());
 	}
+	
+	
+	@Test
+	public void testDeprecatedContentTypeMethods()
+		throws Exception {
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
+		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
+		
+		httpRequest.ensureContentType();
+		httpRequest.ensureContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		
+		try {
+			httpRequest.ensureContentType(CommonContentTypes.APPLICATION_JSON);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("The HTTP Content-Type header must be application/json; charset=UTF-8", e.getMessage());
+		}
+	}
 
 
 	@Test
@@ -133,7 +151,7 @@ public class HTTPRequestTest {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("http://localhost"));
 
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_JSON);
 
 		httpRequest.setQuery("{\"apples\":30, \"pears\":\"green\"}");
 
@@ -151,7 +169,7 @@ public class HTTPRequestTest {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("http://localhost"));
 
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_JSON);
 
 		httpRequest.setQuery(" ");
 
@@ -184,7 +202,7 @@ public class HTTPRequestTest {
 		onRequest()
 			.havingMethodEqualTo("POST")
 			.havingHeaderEqualTo("Authorization", "Basic czZCaGRSa3F0MzpnWDFmQmF0M2JW")
-			.havingHeaderEqualTo("Content-Type", CommonContentTypes.APPLICATION_URLENCODED.toString())
+			.havingHeaderEqualTo("Content-Type", ContentType.APPLICATION_URLENCODED.toString())
 			.havingPathEqualTo("/c2id/token")
 			.havingBodyEqualTo("grant_type=authorization_code&code=SplxlOBeZQQYbYS6WxSbIA" +
 				"&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb")
@@ -195,7 +213,7 @@ public class HTTPRequestTest {
 		// Simulate token request with invalid token
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("http://localhost:" + port() + "/c2id/token"));
 		httpRequest.setAuthorization("Basic czZCaGRSa3F0MzpnWDFmQmF0M2JW");
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery("grant_type=authorization_code&code=SplxlOBeZQQYbYS6WxSbIA" +
 			"&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb");
 
@@ -247,7 +265,7 @@ public class HTTPRequestTest {
 		// Simulate token request with invalid token
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("http://localhost:" + port() + "/c2id/token"));
 		httpRequest.setAuthorization("Basic czZCaGRSa3F0MzpnWDFmQmF0M2JW");
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setConnectTimeout(250);
 		httpRequest.setReadTimeout(750);
 		httpRequest.setQuery("grant_type=authorization_code&code=SplxlOBeZQQYbYS6WxSbIA" +
@@ -268,7 +286,7 @@ public class HTTPRequestTest {
 		// Simulate token request with invalid token
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("http://localhost:" + port() + "/c2id/token"));
 		httpRequest.setAuthorization("Basic czZCaGRSa3F0MzpnWDFmQmF0M2JW");
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setConnectTimeout(250);
 		httpRequest.setReadTimeout(750);
 		httpRequest.setFollowRedirects(false);
@@ -290,26 +308,26 @@ public class HTTPRequestTest {
 		onRequest()
 			.havingMethodEqualTo("GET")
 			.havingHeaderEqualTo("Authorization", "Bearer xyz")
-			.havingHeaderEqualTo("Accept", CommonContentTypes.APPLICATION_JSON.toString())
+			.havingHeaderEqualTo("Accept", ContentType.APPLICATION_JSON.toString())
 			.havingPathEqualTo("/path")
 			.havingQueryStringEqualTo("apples=10&pears=20")
 			.respond()
 			.withStatus(200)
 			.withBody("[10, 20]")
-			.withEncoding(Charset.forName("UTF-8"))
-			.withContentType(CommonContentTypes.APPLICATION_JSON.toString());
+			.withEncoding(StandardCharsets.UTF_8)
+			.withContentType(ContentType.APPLICATION_JSON.toString());
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, new URL("http://localhost:" + port() + "/path"));
 		httpRequest.setQuery("apples=10&pears=20");
 		httpRequest.setFragment("fragment");
 		httpRequest.setAuthorization("Bearer xyz");
-		httpRequest.setAccept(CommonContentTypes.APPLICATION_JSON.toString());
+		httpRequest.setAccept(ContentType.APPLICATION_JSON.toString());
 
 		HTTPResponse httpResponse = httpRequest.send();
 
 		assertEquals(200, httpResponse.getStatusCode());
 		assertEquals("OK", httpResponse.getStatusMessage());
-		httpResponse.ensureContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.ensureEntityContentType(ContentType.APPLICATION_JSON);
 
 		JSONArray jsonArray = httpResponse.getContentAsJSONArray();
 		assertEquals(10L, jsonArray.get(0));
@@ -325,7 +343,7 @@ public class HTTPRequestTest {
 		onRequest()
 			.havingMethodEqualTo("GET")
 			.havingHeaderEqualTo("Authorization", "Bearer xyz")
-			.havingHeaderEqualTo("Accept", CommonContentTypes.APPLICATION_JSON.toString())
+			.havingHeaderEqualTo("Accept", ContentType.APPLICATION_JSON.toString())
 			.havingPathEqualTo("/path")
 			.havingQueryStringEqualTo("apples=10&pears=20")
 			.respond()
@@ -333,20 +351,20 @@ public class HTTPRequestTest {
 			.withHeader("SID", "abc")
 			.withHeader("X-App", "123")
 			.withBody("[10, 20]")
-			.withEncoding(Charset.forName("UTF-8"))
-			.withContentType(CommonContentTypes.APPLICATION_JSON.toString());
+			.withEncoding(StandardCharsets.UTF_8)
+			.withContentType(ContentType.APPLICATION_JSON.toString());
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, new URL("http://localhost:" + port() + "/path"));
 		httpRequest.setQuery("apples=10&pears=20");
 		httpRequest.setFragment("fragment");
 		httpRequest.setAuthorization("Bearer xyz");
-		httpRequest.setAccept(CommonContentTypes.APPLICATION_JSON.toString());
+		httpRequest.setAccept(ContentType.APPLICATION_JSON.toString());
 
 		HTTPResponse httpResponse = httpRequest.send();
 
 		assertEquals(200, httpResponse.getStatusCode());
 		assertEquals("OK", httpResponse.getStatusMessage());
-		httpResponse.ensureContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.ensureEntityContentType(ContentType.APPLICATION_JSON);
 		assertEquals("abc", httpResponse.getHeaderValue("SID"));
 		assertEquals("123", httpResponse.getHeaderValue("X-App"));
 
@@ -369,7 +387,7 @@ public class HTTPRequestTest {
 			.withHeader("Set-Cookie", "cookie-1")
 			.withHeader("Set-Cookie", "cookie-2")
 			.withBody("Hello, world!")
-			.withEncoding(Charset.forName("UTF-8"))
+			.withEncoding(StandardCharsets.UTF_8)
 			.withContentType("text/plain");
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, new URL("http://localhost:" + port() + "/path"));
@@ -379,7 +397,7 @@ public class HTTPRequestTest {
 		assertEquals(200, httpResponse.getStatusCode());
 		assertEquals("OK", httpResponse.getStatusMessage());
 		assertEquals(new HashSet<>(Arrays.asList("cookie-1", "cookie-2")), new HashSet<>(httpResponse.getHeaderValues("Set-Cookie")));
-		httpResponse.ensureContentType(new ContentType("text/plain"));
+		httpResponse.ensureEntityContentType(new ContentType("text", "plain"));
 		assertEquals("Hello, world!\n", httpResponse.getContent());
 	}
 	

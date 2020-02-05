@@ -22,8 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import javax.mail.internet.ContentType;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.ContentTypeUtils;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
@@ -45,26 +45,26 @@ abstract class HTTPMessage {
 	 * The client IP address.
 	 */
 	private String clientIPAddress;
-
-
+	
+	
 	/**
 	 * Gets the {@code Content-Type} header value.
 	 *
-	 * @return The {@code Content-Type} header value, {@code null} if not 
-	 *         specified.
+	 * @return The {@code Content-Type} header value, {@code null} if not
+	 *         specified or parsing failed.
 	 */
-	public ContentType getContentType() {
-
+	public ContentType getEntityContentType() {
+		
 		final String value = getHeaderValue("Content-Type");
-
+		
 		if (value == null) {
 			return null;
 		}
-
+		
 		try {
-			return new ContentType(value);
-
-		} catch (javax.mail.internet.ParseException e) {
+			return ContentType.parse(value);
+			
+		} catch (java.text.ParseException e) {
 			return null;
 		}
 	}
@@ -76,8 +76,8 @@ abstract class HTTPMessage {
 	 * @param ct The {@code Content-Type} header value, {@code null} if not
 	 *           specified.
 	 */
-	public void setContentType(final ContentType ct) {
-
+	public void setEntityContentType(final ContentType ct) {
+		
 		setHeader("Content-Type", ct != null ? ct.toString() : null);
 	}
 	
@@ -95,12 +95,43 @@ abstract class HTTPMessage {
 		throws ParseException {
 		
 		try {
-			setHeader("Content-Type", ct != null ? new ContentType(ct).toString() : null);
+			setHeader("Content-Type", ct != null ? ContentType.parse(ct).toString() : null);
 			
-		} catch (javax.mail.internet.ParseException e) {
-		
+		} catch (java.text.ParseException e) {
+			
 			throw new ParseException("Invalid Content-Type value: " + e.getMessage());
 		}
+	}
+	
+	
+	/**
+	 * @see #getEntityContentType()
+	 */
+	@Deprecated
+	public javax.mail.internet.ContentType getContentType() {
+
+		final String value = getHeaderValue("Content-Type");
+
+		if (value == null) {
+			return null;
+		}
+
+		try {
+			return new javax.mail.internet.ContentType(value);
+
+		} catch (javax.mail.internet.ParseException e) {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * @see #setEntityContentType(ContentType)
+	 */
+	@Deprecated
+	public void setContentType(final javax.mail.internet.ContentType ct) {
+
+		setHeader("Content-Type", ct != null ? ct.toString() : null);
 	}
 	
 	
@@ -110,11 +141,23 @@ abstract class HTTPMessage {
 	 * @throws ParseException If the {@code Content-Type} header is 
 	 *                        missing.
 	 */
-	public void ensureContentType()
+	public void ensureEntityContentType()
 		throws ParseException {
 	
-		if (getContentType() == null)
+		if (getEntityContentType() == null) {
 			throw new ParseException("Missing HTTP Content-Type header");
+		}
+	}
+	
+	
+	/**
+	 * @see #ensureEntityContentType()
+	 */
+	@Deprecated
+	public void ensureContentType()
+		throws ParseException {
+		
+		ensureEntityContentType();
 	}
 
 
@@ -129,8 +172,19 @@ abstract class HTTPMessage {
 	 *
 	 * @throws ParseException If the {@code Content-Type} header is missing
 	 *                        or its primary and subtype don't match.
-	 */ 
-	public void ensureContentType(final ContentType contentType)
+	 */
+	public void ensureEntityContentType(final ContentType contentType)
+		throws ParseException {
+		
+		ContentTypeUtils.ensureContentType(contentType, getEntityContentType());
+	}
+
+
+	/**
+	 * @see #ensureEntityContentType(ContentType)
+	 */
+	@Deprecated
+	public void ensureContentType(final javax.mail.internet.ContentType contentType)
 		throws ParseException {
 		
 		ContentTypeUtils.ensureContentType(contentType, getContentType());

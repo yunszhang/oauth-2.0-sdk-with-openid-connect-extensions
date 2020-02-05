@@ -24,9 +24,9 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.State;
@@ -313,7 +313,7 @@ public abstract class AuthorizationResponse implements Response {
 			throw new SerializeException(e.getMessage(), e);
 		}
 
-		request.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		request.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		request.setQuery(URLUtils.serializeParameters(toParameters()));
 		return request;
 	}

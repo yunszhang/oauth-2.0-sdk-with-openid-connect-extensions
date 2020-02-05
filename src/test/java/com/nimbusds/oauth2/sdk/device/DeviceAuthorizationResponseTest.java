@@ -21,6 +21,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
@@ -164,7 +165,7 @@ public class DeviceAuthorizationResponseTest extends TestCase {
 		o.put("expires_in", lifetime);
 
 		HTTPResponse httpResponse = new HTTPResponse(200);
-		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
 		httpResponse.setCacheControl("no-store");
 		httpResponse.setPragma("no-cache");
 		httpResponse.setContent(o.toString());
@@ -198,7 +199,7 @@ public class DeviceAuthorizationResponseTest extends TestCase {
 		o.put("expires_in", lifetime);
 
 		HTTPResponse httpResponse = new HTTPResponse(200);
-		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
 		httpResponse.setCacheControl("no-store");
 		httpResponse.setPragma("no-cache");
 		httpResponse.setContent(o.toString());
@@ -232,7 +233,7 @@ public class DeviceAuthorizationResponseTest extends TestCase {
 		o.put("expires_in", lifetime);
 
 		HTTPResponse httpResponse = new HTTPResponse(200);
-		httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+		httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
 		httpResponse.setCacheControl("no-store");
 		httpResponse.setPragma("no-cache");
 		httpResponse.setContent(o.toString());

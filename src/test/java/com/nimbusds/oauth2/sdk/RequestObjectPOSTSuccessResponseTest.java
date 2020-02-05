@@ -24,6 +24,7 @@ import java.util.Date;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
@@ -60,7 +61,7 @@ public class RequestObjectPOSTSuccessResponseTest extends TestCase {
 		
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		assertEquals(201, httpResponse.getStatusCode());
-		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpResponse.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_JSON.toString(), httpResponse.getEntityContentType().toString());
 		
 		jsonObject = httpResponse.getContentAsJSONObject();
 		assertEquals(issuer.getValue(), jsonObject.get("iss"));

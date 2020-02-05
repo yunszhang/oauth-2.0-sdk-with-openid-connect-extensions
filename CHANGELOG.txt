@@ -1224,3 +1224,17 @@ version 6.23 (2020-01-11)
     * ClaimsRequest supports OpenID Connect eKYC / IdA.
     * Refactors ClaimsRequest.Entry for fluent builder pattern, adds support
       for "purpose" parameter from OpenID Connect eKYC / IdA.
+
+version 7.0 (2020-02-05)
+    * Adds new com.nimbusds:content-type:2.0 dependency.
+    * Adds new HTTPMessage getEntityContentType, setEntityContentType and
+      ensureEntityContentType methods deprecating those that depend on
+      javax.mail.internet.ContentType.
+    * Makes com.sun.mail:javax.mail optional, use kept only in deprecated API
+      calls that depend on it.
+    * Deprecates CommonContentTypes and all its constants.
+    * Deprecates HTTPMessage.getContentType().
+    * Deprecates HTTPMessage.setContentType(javax.mail.internet.ContentType).
+    * Deprecates HTTPMessage.ensureContentType().
+    * Deprecates HTTPMessage.ensureContentType(javax.mail.internet.ContentType).
+    * Cleans up code.

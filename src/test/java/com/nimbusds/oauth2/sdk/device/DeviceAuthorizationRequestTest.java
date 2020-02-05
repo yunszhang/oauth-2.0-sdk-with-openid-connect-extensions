@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
@@ -240,7 +241,7 @@ public class DeviceAuthorizationRequestTest extends TestCase {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST,
 		                new URL("https://c2id.com/devauthz"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 
 		try {
 			DeviceAuthorizationRequest.parse(httpRequest);

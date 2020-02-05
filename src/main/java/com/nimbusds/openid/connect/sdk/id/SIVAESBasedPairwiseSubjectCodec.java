@@ -138,7 +138,7 @@ public class SIVAESBasedPairwiseSubjectCodec extends PairwiseSubjectCodec {
 			throw new InvalidPairwiseSubjectException("Decryption failed: " + e.getMessage(), e);
 		}
 		
-		String parts[] = new String(plainText, CHARSET).split("(?<!\\\\)\\|");
+		String[] parts = new String(plainText, CHARSET).split("(?<!\\\\)\\|");
 		
 		// Unescape delimiter
 		for (int i=0; i<parts.length; i++) {

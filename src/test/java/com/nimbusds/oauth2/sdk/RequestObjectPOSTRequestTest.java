@@ -26,6 +26,7 @@ import javax.net.ssl.SSLSocketFactory;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -38,7 +39,6 @@ import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.auth.PKITLSClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.SelfSignedTLSClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.TLSClientAuthentication;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.X509CertificateGenerator;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -81,7 +81,7 @@ public class RequestObjectPOSTRequestTest extends TestCase {
 		
 		HTTPRequest httpRequest = postRequest.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(CommonContentTypes.APPLICATION_JWT.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_JWT.toString(), httpRequest.getEntityContentType().toString());
 		assertEquals(jwt.serialize(), httpRequest.getQuery());
 		
 		postRequest = RequestObjectPOSTRequest.parse(httpRequest);
@@ -111,7 +111,7 @@ public class RequestObjectPOSTRequestTest extends TestCase {
 		
 		HTTPRequest httpRequest = postRequest.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_JSON.toString(), httpRequest.getEntityContentType().toString());
 		assertNull(httpRequest.getClientX509Certificate());
 		assertNull(httpRequest.getClientX509CertificateSubjectDN());
 		assertEquals(jsonObject, httpRequest.getQueryAsJSONObject());
@@ -146,7 +146,7 @@ public class RequestObjectPOSTRequestTest extends TestCase {
 		
 		HTTPRequest httpRequest = postRequest.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(CommonContentTypes.APPLICATION_JSON.toString(), httpRequest.getContentType().toString());
+		assertEquals(ContentType.APPLICATION_JSON.toString(), httpRequest.getEntityContentType().toString());
 		assertNull(httpRequest.getClientX509Certificate());
 		assertNull(httpRequest.getClientX509CertificateSubjectDN());
 		assertEquals(jsonObject, httpRequest.getQueryAsJSONObject());

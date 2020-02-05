@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.TokenIntrospectionRequest;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
@@ -71,7 +72,7 @@ public class ClientAuthenticationTest extends TestCase {
 		X509Certificate clientCert = X509CertificateGenerator.generateSampleClientCertificate();
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=123");
 		httpRequest.setClientX509Certificate(clientCert);
 		
@@ -88,7 +89,7 @@ public class ClientAuthenticationTest extends TestCase {
 		X509Certificate clientCert = X509CertificateGenerator.generateSampleClientCertificate();
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=123");
 		httpRequest.setClientX509Certificate(clientCert);
 		httpRequest.setClientX509CertificateRootDN(clientCert.getIssuerX500Principal().getName());
@@ -107,7 +108,7 @@ public class ClientAuthenticationTest extends TestCase {
 		X509Certificate clientCert = X509CertificateGenerator.generateSampleClientCertificate();
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=123");
 		httpRequest.setClientX509Certificate(clientCert);
 		httpRequest.setClientX509CertificateRootDN("cn=invalidIssuer");
@@ -128,7 +129,7 @@ public class ClientAuthenticationTest extends TestCase {
 		X509Certificate clientCert = X509CertificateGenerator.generateSampleClientCertificate();
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=123");
 		httpRequest.setClientX509Certificate(clientCert);
 		httpRequest.setClientX509CertificateRootDN(clientCert.getIssuerX500Principal().getName());
@@ -149,7 +150,7 @@ public class ClientAuthenticationTest extends TestCase {
 		X509Certificate clientCert = X509CertificateGenerator.generateSelfSignedNotSelfIssuedCertificate("issuer", "client-123");
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=123");
 		httpRequest.setClientX509Certificate(clientCert);
 		httpRequest.setClientX509CertificateSubjectDN(clientCert.getSubjectDN().getName());
@@ -165,7 +166,7 @@ public class ClientAuthenticationTest extends TestCase {
 		throws Exception {
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery("client_id=123");
 		
 		assertNull(ClientAuthentication.parse(httpRequest));
