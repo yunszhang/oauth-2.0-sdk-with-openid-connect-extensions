@@ -106,8 +106,9 @@ public final class PrivateKeyJWT extends JWTAuthentication {
 	 *
 	 * @param clientID      The client identifier. Must not be
 	 *                      {@code null}.
-	 * @param tokenEndpoint The token endpoint URI of the authorisation
-	 *                      server. Must not be {@code null}.
+	 * @param endpoint      The endpoint URI where the client will submit
+	 *                      the JWT authentication, for example the token
+	 *                      endpoint. Must not be {@code null}.
 	 * @param jwsAlgorithm  The expected RSA signature algorithm (RS256,
 	 *                      RS384 or RS512) for the private key JWT
 	 *                      assertion. Must be supported and not
@@ -122,14 +123,14 @@ public final class PrivateKeyJWT extends JWTAuthentication {
 	 * @throws JOSEException If RSA signing failed.
 	 */
 	public PrivateKeyJWT(final ClientID clientID,
-			     final URI tokenEndpoint,
+			     final URI endpoint,
 			     final JWSAlgorithm jwsAlgorithm,
 			     final RSAPrivateKey rsaPrivateKey,
 			     final String keyID,
 			     final Provider jcaProvider)
 		throws JOSEException {
 
-		this(new JWTAuthenticationClaimsSet(clientID, new Audience(tokenEndpoint.toString())),
+		this(new JWTAuthenticationClaimsSet(clientID, new Audience(endpoint.toString())),
 			jwsAlgorithm,
 			rsaPrivateKey,
 			keyID,
@@ -175,8 +176,9 @@ public final class PrivateKeyJWT extends JWTAuthentication {
 	 *
 	 * @param clientID      The client identifier. Must not be
 	 *                      {@code null}.
-	 * @param tokenEndpoint The token endpoint URI of the authorisation
-	 *                      server. Must not be {@code null}.
+	 * @param endpoint      The endpoint URI where the client will submit
+	 *                      the JWT authentication, for example the token
+	 *                      endpoint. Must not be {@code null}.
 	 * @param jwsAlgorithm  The expected EC signature algorithm (ES256,
 	 *                      ES384 or ES512) for the private key JWT
 	 *                      assertion. Must be supported and not
@@ -191,14 +193,14 @@ public final class PrivateKeyJWT extends JWTAuthentication {
 	 * @throws JOSEException If RSA signing failed.
 	 */
 	public PrivateKeyJWT(final ClientID clientID,
-			     final URI tokenEndpoint,
+			     final URI endpoint,
 			     final JWSAlgorithm jwsAlgorithm,
 			     final ECPrivateKey ecPrivateKey,
 			     final String keyID,
 			     final Provider jcaProvider)
 		throws JOSEException {
 
-		this(new JWTAuthenticationClaimsSet(clientID, new Audience(tokenEndpoint.toString())),
+		this(new JWTAuthenticationClaimsSet(clientID, new Audience(endpoint.toString())),
 			jwsAlgorithm,
 			ecPrivateKey,
 			keyID,

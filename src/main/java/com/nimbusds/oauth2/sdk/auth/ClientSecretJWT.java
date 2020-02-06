@@ -79,8 +79,9 @@ public final class ClientSecretJWT extends JWTAuthentication {
 	 *
 	 * @param clientID      The client identifier. Must not be
 	 *                      {@code null}.
-	 * @param tokenEndpoint The token endpoint URI of the authorisation
-	 *                      server. Must not be {@code null}.
+	 * @param endpoint      The endpoint URI where the client will submit
+	 *                      the JWT authentication, for example the token
+	 *                      endpoint. Must not be {@code null}.
 	 * @param jwsAlgorithm  The expected HMAC algorithm (HS256, HS384 or
 	 *                      HS512) for the client secret JWT assertion.
 	 *                      Must be supported and not {@code null}.
@@ -91,13 +92,13 @@ public final class ClientSecretJWT extends JWTAuthentication {
 	 *                       computation failed.
 	 */
 	public ClientSecretJWT(final ClientID clientID,
-			       final URI tokenEndpoint,
+			       final URI endpoint,
 			       final JWSAlgorithm jwsAlgorithm,
 			       final Secret clientSecret)
 		throws JOSEException {
 
 		this(JWTAssertionFactory.create(
-			new JWTAuthenticationClaimsSet(clientID, new Audience(tokenEndpoint.toString())),
+			new JWTAuthenticationClaimsSet(clientID, new Audience(endpoint.toString())),
 			jwsAlgorithm,
 			clientSecret));
 	}
