@@ -19,31 +19,21 @@ package com.nimbusds.openid.connect.sdk.claims;
 
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import net.minidev.json.JSONObject;
 
-import com.nimbusds.oauth2.sdk.id.Subject;
-
-
 /**
- * Common claims set.
+ * Common OpenID tokens (ID, logout) claims set.
  */
-public abstract class CommonClaimsSet extends ClaimsSet {
+abstract class CommonOIDCTokenClaimsSet extends CommonClaimsSet {
 	
 	
 	/**
-	 * The subject claim name.
+	 * The session identifier claim name.
 	 */
-	public static final String SUB_CLAIM_NAME = "sub";
-	
-	
-	/**
-	 * The issue time claim name.
-	 */
-	public static final String IAT_CLAIM_NAME = "iat";
+	public static final String SID_CLAIM_NAME = "sid";
 	
 	
 	/**
@@ -53,9 +43,8 @@ public abstract class CommonClaimsSet extends ClaimsSet {
 	
 	
 	static {
-		Set<String> claimNames = new HashSet<>(ClaimsSet.getStandardClaimNames());
-		claimNames.add(SUB_CLAIM_NAME);
-		claimNames.add(IAT_CLAIM_NAME);
+		Set<String> claimNames = new HashSet<>(CommonClaimsSet.getStandardClaimNames());
+		claimNames.add(SID_CLAIM_NAME);
 		STD_CLAIM_NAMES = Collections.unmodifiableSet(claimNames);
 	}
 	
@@ -72,44 +61,46 @@ public abstract class CommonClaimsSet extends ClaimsSet {
 	
 	
 	/**
-	 * Creates a new empty common claims set.
+	 * Creates a new empty common OpenID tokens claims set.
 	 */
-	protected CommonClaimsSet() {
+	protected CommonOIDCTokenClaimsSet() {
 		
 		super();
 	}
 	
 	
 	/**
-	 * Creates a new common claims set from the specified JSON object.
+	 * Creates a new common OpenID tokens claims set from the specified
+	 * JSON object.
 	 *
 	 * @param jsonObject The JSON object. Must not be {@code null}.
 	 */
-	protected CommonClaimsSet(final JSONObject jsonObject) {
+	protected CommonOIDCTokenClaimsSet(final JSONObject jsonObject) {
 		
 		super(jsonObject);
 	}
 	
 	
 	/**
-	 * Gets the subject. Corresponds to the {@code sub} claim.
+	 * Gets the session ID. Corresponds to the {@code sid} claim.
 	 *
-	 * @return The subject.
+	 * @return The session ID, {@code null} if not specified.
 	 */
-	public Subject getSubject() {
+	public SessionID getSessionID() {
 		
-		String val = getStringClaim(SUB_CLAIM_NAME);
-		return val != null ? new Subject(val) : null;
+		String val = getStringClaim(SID_CLAIM_NAME);
+		
+		return val != null ? new SessionID(val) : null;
 	}
 	
 	
 	/**
-	 * Gets the issue time. Corresponds to the {@code iss} claim.
+	 * Sets the session ID. Corresponds to the {@code sid} claim.
 	 *
-	 * @return The issue time, {@code null} if not specified.
+	 * @param sid The session ID, {@code null} if not specified.
 	 */
-	public Date getIssueTime() {
+	public void setSessionID(final SessionID sid) {
 		
-		return getDateClaim(IAT_CLAIM_NAME);
+		setClaim(SID_CLAIM_NAME, sid != null ? sid.getValue() : null);
 	}
 }
