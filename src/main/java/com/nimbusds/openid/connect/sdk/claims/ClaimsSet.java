@@ -617,7 +617,9 @@ public class ClaimsSet implements JSONAware {
 		throws ParseException {
 
 		try {
-			return JWTClaimsSet.parse(claims);
+			// Parse from JSON string to handle nested JSONArray & JSONObject properly
+			// Work around https://bitbucket.org/connect2id/nimbus-jose-jwt/issues/347/revise-nested-jsonarray-and-jsonobject
+			return JWTClaimsSet.parse(claims.toJSONString());
 
 		} catch (java.text.ParseException e) {
 
