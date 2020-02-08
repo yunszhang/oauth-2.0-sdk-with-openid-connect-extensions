@@ -20,6 +20,7 @@ package com.nimbusds.openid.connect.sdk.federation.entities;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONAware;
@@ -164,6 +165,23 @@ public final class TrustChainConstraints implements JSONAware {
 	@Override
 	public String toJSONString() {
 		return toJSONObject().toJSONString();
+	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof TrustChainConstraints)) return false;
+		TrustChainConstraints that = (TrustChainConstraints) o;
+		return getMaxPathLength() == that.getMaxPathLength() &&
+			Objects.equals(getPermittedEntities(), that.getPermittedEntities()) &&
+			Objects.equals(getExcludedEntities(), that.getExcludedEntities());
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(getMaxPathLength(), getPermittedEntities(), getExcludedEntities());
 	}
 	
 	

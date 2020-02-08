@@ -19,6 +19,7 @@ package com.nimbusds.openid.connect.sdk.federation.entities;
 
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -120,5 +121,21 @@ public class TrustChainConstraintsTest extends TestCase {
 		assertEquals(10, c.getMaxPathLength());
 		assertNull(c.getPermittedEntities());
 		assertNull(c.getExcludedEntities());
+	}
+	
+	
+	public void testEquality() {
+		
+		assertEquals(new TrustChainConstraints(10, null, null), new TrustChainConstraints(10, null, null));
+		
+		assertEquals(
+			new TrustChainConstraints(
+			10,
+				Collections.singletonList(new EntityID("1")),
+				Collections.singletonList(new EntityID("1"))),
+			new TrustChainConstraints(
+				10,
+				Collections.singletonList(new EntityID("1")),
+				Collections.singletonList(new EntityID("1"))));
 	}
 }
