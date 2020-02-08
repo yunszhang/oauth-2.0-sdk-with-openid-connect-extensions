@@ -296,9 +296,6 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	private List<EncryptionMethod> authzJWEEncs;
 	
 	
-	private URI parEndpoint;
-	
-	
 	/**
 	 * Custom (not-registered) parameters.
 	 */
