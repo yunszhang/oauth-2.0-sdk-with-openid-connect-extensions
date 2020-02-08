@@ -30,6 +30,12 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
 /**
  * Federation entity metadata.
+ *
+ * <p>Related specifications:
+ *
+ * <ul>
+ *     <li>OpenID Connect Federation 1.0, section 3.6.
+ * </ul>
  */
 public class FederationEntityMetadata implements JSONAware {
 	
