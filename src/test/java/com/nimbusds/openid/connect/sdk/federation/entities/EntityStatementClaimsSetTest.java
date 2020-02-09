@@ -191,8 +191,8 @@ public class EntityStatementClaimsSetTest extends TestCase {
 	public void testWithRPMetadata_selfStated()
 		throws Exception {
 		
-		Issuer iss = new Issuer("https://op.c2id.com");
-		Subject sub = new Subject("https://op.c2id.com");
+		Issuer iss = new Issuer("https://rp.c2id.com");
+		Subject sub = new Subject("https://rp.c2id.com");
 		
 		Date iat = DateUtils.fromSecondsSinceEpoch(1000);
 		Date exp = DateUtils.fromSecondsSinceEpoch(2000);
@@ -302,5 +302,145 @@ public class EntityStatementClaimsSetTest extends TestCase {
 		assertEquals(stmt.getCriticalExtensionClaims(), parsed.getCriticalExtensionClaims());
 		assertEquals(stmt.getStringClaim("jti"), parsed.getStringClaim("jti"));
 		assertEquals(stmt.getCriticalPolicyExtensions(), parsed.getCriticalPolicyExtensions());
+	}
+	
+	
+	public void testWithOPMetadata_selfStated()
+		throws Exception {
+		
+		Issuer iss = new Issuer("https://rp.c2id.com");
+		Subject sub = new Subject("https://rp.c2id.com");
+		
+		Date iat = DateUtils.fromSecondsSinceEpoch(1000);
+		Date exp = DateUtils.fromSecondsSinceEpoch(2000);
+		
+		EntityStatementClaimsSet stmt = new EntityStatementClaimsSet(
+			iss,
+			sub,
+			iat,
+			exp,
+			JWK_SET);
+		
+		OIDCProviderMetadata opMetadata = createOPMetadata();
+		
+		stmt.setOPMetadata(opMetadata);
+		assertEquals(opMetadata.toJSONObject(), stmt.getOPMetadata().toJSONObject());
+		
+		JWTClaimsSet jwtClaimsSet = stmt.toJWTClaimsSet();
+		JSONObject metadata = jwtClaimsSet.getJSONObjectClaim("metadata");
+		assertEquals(opMetadata.toJSONObject(), JSONObjectUtils.getJSONObject(metadata, "openid_provider"));
+		
+		stmt = new EntityStatementClaimsSet(jwtClaimsSet);
+		assertEquals(opMetadata.toJSONObject(), stmt.getOPMetadata().toJSONObject());
+		
+		stmt.validateRequiredClaimsPresence();
+		
+		stmt.setOPMetadata(null);
+		assertNull(stmt.getOPMetadata());
+	}
+	
+	
+	public void testWithASMetadata_selfStated()
+		throws Exception {
+		
+		Issuer iss = new Issuer("https://rp.c2id.com");
+		Subject sub = new Subject("https://rp.c2id.com");
+		
+		Date iat = DateUtils.fromSecondsSinceEpoch(1000);
+		Date exp = DateUtils.fromSecondsSinceEpoch(2000);
+		
+		EntityStatementClaimsSet stmt = new EntityStatementClaimsSet(
+			iss,
+			sub,
+			iat,
+			exp,
+			JWK_SET);
+		
+		AuthorizationServerMetadata asMetadata = createASMetadata();
+		
+		stmt.setASMetadata(asMetadata);
+		assertEquals(asMetadata.toJSONObject(), stmt.getASMetadata().toJSONObject());
+		
+		JWTClaimsSet jwtClaimsSet = stmt.toJWTClaimsSet();
+		JSONObject metadata = jwtClaimsSet.getJSONObjectClaim("metadata");
+		assertEquals(asMetadata.toJSONObject(), JSONObjectUtils.getJSONObject(metadata, "oauth_authorization_server"));
+		
+		stmt = new EntityStatementClaimsSet(jwtClaimsSet);
+		assertEquals(asMetadata.toJSONObject(), stmt.getASMetadata().toJSONObject());
+		
+		stmt.validateRequiredClaimsPresence();
+		
+		stmt.setASMetadata(null);
+		assertNull(stmt.getASMetadata());
+	}
+	
+	
+	public void testWithOAuthClientMetadata_selfStated()
+		throws Exception {
+		
+		Issuer iss = new Issuer("https://rp.c2id.com");
+		Subject sub = new Subject("https://rp.c2id.com");
+		
+		Date iat = DateUtils.fromSecondsSinceEpoch(1000);
+		Date exp = DateUtils.fromSecondsSinceEpoch(2000);
+		
+		EntityStatementClaimsSet stmt = new EntityStatementClaimsSet(
+			iss,
+			sub,
+			iat,
+			exp,
+			JWK_SET);
+		
+		ClientMetadata clientMetadata = createOAuthClientMetadata();
+		
+		stmt.setOAuthClientMetadata(clientMetadata);
+		assertEquals(clientMetadata.toJSONObject(), stmt.getOAuthClientMetadata().toJSONObject());
+		
+		JWTClaimsSet jwtClaimsSet = stmt.toJWTClaimsSet();
+		JSONObject metadata = jwtClaimsSet.getJSONObjectClaim("metadata");
+		assertEquals(clientMetadata.toJSONObject(), JSONObjectUtils.getJSONObject(metadata, "oauth_client"));
+		
+		stmt = new EntityStatementClaimsSet(jwtClaimsSet);
+		assertEquals(clientMetadata.toJSONObject(), stmt.getOAuthClientMetadata().toJSONObject());
+		
+		stmt.validateRequiredClaimsPresence();
+		
+		stmt.setOAuthClientMetadata(null);
+		assertNull(stmt.getOAuthClientMetadata());
+	}
+	
+	
+	public void testWithFederationEntityMetadata_selfStated()
+		throws Exception {
+		
+		Issuer iss = new Issuer("https://fed.c2id.com");
+		Subject sub = new Subject("https://fed.c2id.com");
+		
+		Date iat = DateUtils.fromSecondsSinceEpoch(1000);
+		Date exp = DateUtils.fromSecondsSinceEpoch(2000);
+		
+		EntityStatementClaimsSet stmt = new EntityStatementClaimsSet(
+			iss,
+			sub,
+			iat,
+			exp,
+			JWK_SET);
+		
+		FederationEntityMetadata fedMetadata = createFederationEntityMetadata();
+		
+		stmt.setFederationEntityMetadata(fedMetadata);
+		assertEquals(fedMetadata.toJSONObject(), stmt.getFederationEntityMetadata().toJSONObject());
+		
+		JWTClaimsSet jwtClaimsSet = stmt.toJWTClaimsSet();
+		JSONObject metadata = jwtClaimsSet.getJSONObjectClaim("metadata");
+		assertEquals(fedMetadata.toJSONObject(), JSONObjectUtils.getJSONObject(metadata, "federation_entity"));
+		
+		stmt = new EntityStatementClaimsSet(jwtClaimsSet);
+		assertEquals(fedMetadata.toJSONObject(), stmt.getFederationEntityMetadata().toJSONObject());
+		
+		stmt.validateRequiredClaimsPresence();
+		
+		stmt.setFederationEntityMetadata(null);
+		assertNull(stmt.getFederationEntityMetadata());
 	}
 }
