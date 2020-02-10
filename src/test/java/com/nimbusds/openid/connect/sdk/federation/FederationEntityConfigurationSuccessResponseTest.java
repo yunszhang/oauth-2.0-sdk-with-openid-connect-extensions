@@ -95,7 +95,7 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		assertEquals("application/jose; charset=UTF-8", httpResponse.getEntityContentType().toString());
 		assertEquals(signedJWT.serialize(), httpResponse.getContent());
 		
-		response = FederationEntityConfigurationSuccessResponse.parse(httpResponse);
+		response = FederationEntityConfigurationResponse.parse(httpResponse).toSuccessResponse();
 		
 		assertEquals(signedJWT.serialize(), response.getSignedStatement().getParsedString());
 		
@@ -147,7 +147,7 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		assertEquals("application/jose; charset=UTF-8", httpResponse.getEntityContentType().toString());
 		assertEquals(signedJWT.serialize(), httpResponse.getContent());
 		
-		response = FederationEntityConfigurationSuccessResponse.parse(httpResponse);
+		response = FederationEntityConfigurationResponse.parse(httpResponse).toSuccessResponse();
 		
 		assertEquals(signedJWT.serialize(), response.getSignedStatement().getParsedString());
 		
@@ -190,7 +190,7 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		assertEquals("application/jose; charset=UTF-8", httpResponse.getEntityContentType().toString());
 		assertEquals(signedStatement.serialize(), httpResponse.getContent());
 		
-		response = FederationEntityConfigurationSuccessResponse.parse(httpResponse);
+		response = FederationEntityConfigurationResponse.parse(httpResponse).toSuccessResponse();
 		
 		try {
 			response.validateSignatureAndExtractStatement(null);
