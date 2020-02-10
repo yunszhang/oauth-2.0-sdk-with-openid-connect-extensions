@@ -18,16 +18,12 @@
 package com.nimbusds.openid.connect.sdk.op;
 
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 
-import com.nimbusds.oauth2.sdk.AbstractRequest;
-import com.nimbusds.oauth2.sdk.SerializeException;
-import com.nimbusds.oauth2.sdk.http.HTTPRequest;
-import com.nimbusds.oauth2.sdk.id.Issuer;
-import com.nimbusds.oauth2.sdk.util.URIUtils;
 import net.jcip.annotations.Immutable;
+
+import com.nimbusds.oauth2.sdk.AbstractConfigurationRequest;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 
 
 /**
@@ -47,7 +43,7 @@ import net.jcip.annotations.Immutable;
  * </ul>
  */
 @Immutable
-public class OIDCProviderConfigurationRequest extends AbstractRequest {
+public class OIDCProviderConfigurationRequest extends AbstractConfigurationRequest {
 	
 	
 	/**
@@ -62,23 +58,6 @@ public class OIDCProviderConfigurationRequest extends AbstractRequest {
 	 * @param issuer The issuer. Must represent a valid URL.
 	 */
 	public OIDCProviderConfigurationRequest(final Issuer issuer) {
-		super(URI.create(URIUtils.removeTrailingSlash(URI.create(issuer.getValue())) + OPENID_PROVIDER_WELL_KNOWN_PATH));
-	}
-	
-	
-	@Override
-	public HTTPRequest toHTTPRequest() {
-		
-		URL url;
-		
-		try {
-			url = getEndpointURI().toURL();
-			
-		} catch (IllegalArgumentException | MalformedURLException e) {
-			
-			throw new SerializeException(e.getMessage(), e);
-		}
-		
-		return new HTTPRequest(HTTPRequest.Method.GET, url);
+		super(URI.create(issuer.getValue()), OPENID_PROVIDER_WELL_KNOWN_PATH);
 	}
 }

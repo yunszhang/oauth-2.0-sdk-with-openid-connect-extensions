@@ -18,16 +18,9 @@
 package com.nimbusds.openid.connect.sdk.federation;
 
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-
 import net.jcip.annotations.Immutable;
 
-import com.nimbusds.oauth2.sdk.AbstractRequest;
-import com.nimbusds.oauth2.sdk.SerializeException;
-import com.nimbusds.oauth2.sdk.http.HTTPRequest;
-import com.nimbusds.oauth2.sdk.util.URIUtils;
+import com.nimbusds.oauth2.sdk.AbstractConfigurationRequest;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 
 
@@ -48,7 +41,7 @@ import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
  * </ul>
  */
 @Immutable
-public class FederationEntityConfigurationRequest extends AbstractRequest {
+public class FederationEntityConfigurationRequest extends AbstractConfigurationRequest {
 	
 	
 	/**
@@ -64,20 +57,6 @@ public class FederationEntityConfigurationRequest extends AbstractRequest {
 	 *                 be {@code null}.
 	 */
 	public FederationEntityConfigurationRequest(final EntityID entityID) {
-		super(URI.create(URIUtils.removeTrailingSlash(entityID.toURI()) + OPENID_FEDERATION_ENTITY_WELL_KNOWN_PATH));
-	}
-	
-	
-	@Override
-	public HTTPRequest toHTTPRequest() {
-		
-		URL url;
-		try {
-			url = getEndpointURI().toURL();
-		} catch (IllegalArgumentException | MalformedURLException e) {
-			throw new SerializeException(e.getMessage(), e);
-		}
-		
-		return new HTTPRequest(HTTPRequest.Method.GET, url);
+		super(entityID.toURI(), OPENID_FEDERATION_ENTITY_WELL_KNOWN_PATH);
 	}
 }
