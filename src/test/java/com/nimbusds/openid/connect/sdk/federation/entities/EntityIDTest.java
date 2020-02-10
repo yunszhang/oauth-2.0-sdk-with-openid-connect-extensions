@@ -18,13 +18,24 @@
 package com.nimbusds.openid.connect.sdk.federation.entities;
 
 
+import java.net.URI;
+
 import junit.framework.TestCase;
 
 
 public class EntityIDTest extends TestCase {
 	
 	
-	public void testConstructor() {
+	public void testURIConstructor() {
+		
+		URI uri = URI.create("https://c2id.com");
+		EntityID entityID = new EntityID(uri);
+		assertEquals(uri.toString(), entityID.getValue());
+		assertEquals(uri, entityID.toURI());
+	}
+	
+	
+	public void testStringConstructor() {
 		
 		String value = "https://c2id.com";
 		

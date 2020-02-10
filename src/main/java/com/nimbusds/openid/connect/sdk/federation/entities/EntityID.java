@@ -41,6 +41,18 @@ public final class EntityID extends Identifier {
 	
 	
 	/**
+	 * Creates a new entity identifier from the specified URI.
+	 *
+	 * @param value The URI. Must not be {@code null}.
+	 */
+	public EntityID(final URI value) {
+		
+		super(value.toString());
+	}
+	
+	
+	
+	/**
 	 * Creates a new entity identifier with the specified value.
 	 *
 	 * @param value The identifier value. Must represent an URI and must
