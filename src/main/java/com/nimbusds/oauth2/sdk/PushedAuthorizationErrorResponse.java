@@ -85,18 +85,7 @@ public class PushedAuthorizationErrorResponse extends PushedAuthorizationRespons
 	
 	@Override
 	public HTTPResponse toHTTPResponse() {
-		
-		int statusCode = (error.getHTTPStatusCode() > 0) ? error.getHTTPStatusCode() : HTTPResponse.SC_BAD_REQUEST;
-		HTTPResponse httpResponse = new HTTPResponse(statusCode);
-		httpResponse.setCacheControl("no-store");
-		httpResponse.setPragma("no-cache");
-		
-		if (getErrorObject().getCode() != null) {
-			httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
-			httpResponse.setContent(getErrorObject().toJSONObject().toJSONString());
-		}
-		
-		return httpResponse;
+		return getErrorObject().toHTTPResponse();
 	}
 	
 	

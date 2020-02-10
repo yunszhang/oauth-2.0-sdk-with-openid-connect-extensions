@@ -1225,7 +1225,8 @@ version 6.23 (2020-01-11)
     * Refactors ClaimsRequest.Entry for fluent builder pattern, adds support
       for "purpose" parameter from OpenID Connect eKYC / IdA.
 
-version 7.0 (2020-02-05)
+version 7.0 (2020-02-10)
+    * Adds new ErrorObject.toHTTPResponse helper method.
     * Adds new com.nimbusds:content-type:2.0 dependency.
     * Adds new HTTPMessage getEntityContentType, setEntityContentType and
       ensureEntityContentType methods deprecating those that depend on

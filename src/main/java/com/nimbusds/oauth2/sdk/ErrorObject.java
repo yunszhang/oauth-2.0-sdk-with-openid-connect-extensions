@@ -28,6 +28,7 @@ import java.util.Map;
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
@@ -302,6 +303,31 @@ public class ErrorObject {
 		}
 		
 		return params;
+	}
+	
+	
+	/**
+	 * Returns an HTTP response for this error object. If no HTTP status
+	 * code is specified it will be set to 400 (Bad Request). If an error
+	 * code is specified the {@code Content-Type} header will be set to
+	 * {@link ContentType#APPLICATION_JSON application/json; charset=UTF-8}
+	 * and the error JSON object will be put in the entity body.
+	 *
+	 * @return The HTTP response.
+	 */
+	public HTTPResponse toHTTPResponse() {
+		
+		int statusCode = (getHTTPStatusCode() > 0) ? getHTTPStatusCode() : HTTPResponse.SC_BAD_REQUEST;
+		HTTPResponse httpResponse = new HTTPResponse(statusCode);
+		httpResponse.setCacheControl("no-store");
+		httpResponse.setPragma("no-cache");
+		
+		if (getCode() != null) {
+			httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
+			httpResponse.setContent(toJSONObject().toJSONString());
+		}
+		
+		return httpResponse;
 	}
 
 
