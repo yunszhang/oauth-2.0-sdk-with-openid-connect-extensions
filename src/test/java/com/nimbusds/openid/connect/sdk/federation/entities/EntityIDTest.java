@@ -26,12 +26,26 @@ public class EntityIDTest extends TestCase {
 	
 	public void testConstructor() {
 		
-		EntityID id = new EntityID("1");
-		assertEquals("1", id.getValue());
+		String value = "https://c2id.com";
 		
-		assertEquals(id, new EntityID("1"));
-		assertEquals(id.hashCode(), new EntityID("1").hashCode());
+		EntityID id = new EntityID(value);
+		assertEquals(value, id.getValue());
+		assertEquals(value, id.toURI().toString());
 		
-		assertNotSame(id, new EntityID("2"));
+		assertEquals(id, new EntityID(value));
+		assertEquals(id.hashCode(), new EntityID(value).hashCode());
+		
+		assertNotSame(id, new EntityID("https://op.example.com"));
+	}
+	
+	
+	public void testNotURI() {
+		
+		try {
+			new EntityID("a b c");
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The entity identifier must be an URI: Illegal character in path at index 1: a b c", e.getMessage());
+		}
 	}
 }
