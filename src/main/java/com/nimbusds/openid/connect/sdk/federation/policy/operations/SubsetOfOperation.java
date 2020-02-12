@@ -1,0 +1,81 @@
+/*
+ * oauth2-oidc-sdk
+ *
+ * Copyright 2012-2016, Connect2id Ltd and contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
+package com.nimbusds.openid.connect.sdk.federation.policy.operations;
+
+
+import java.util.*;
+
+import com.nimbusds.openid.connect.sdk.federation.policy.language.OperationName;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.StringListOperation;
+
+
+/**
+ * Subset-of (subset_of) operation.
+ *
+ * <p>Example policy:
+ *
+ * <pre>
+ * "response_types" : { "subset_of" : [ "code", "code token", "code id_token" ] }
+ * </pre>
+ *
+ * <p>Input:
+ *
+ * <pre>
+ * "response_types" : [ "code", "code id_token token", "code id_token" ]
+ * </pre>
+ *
+ * <p>Result:
+ *
+ * <pre>
+ * "response_types" : ["code", "code id_token"]
+ * </pre>
+ *
+ * <p>Related specifications:
+ *
+ * <ul>
+ *     <li>OpenID Connect Federation 1.0, section 4.1.1.
+ * </ul>
+ */
+public class SubsetOfOperation extends AbstractSetBasedOperation implements StringListOperation {
+	
+	
+	public static final OperationName NAME = new OperationName("subset_of");
+	
+	
+	@Override
+	public OperationName getOperationName() {
+		return NAME;
+	}
+	
+	
+	@Override
+	public List<String> apply(final List<String> stringList) {
+	
+		if (setConfig == null) {
+			throw new IllegalStateException("The policy is not initialized");
+		}
+		
+		if (stringList == null) {
+			return Collections.emptyList(); // TODO check with spec
+		}
+		
+		Set<String> setValue = new LinkedHashSet<>(stringList);
+		setValue.retainAll(setConfig);
+		return Collections.unmodifiableList(new LinkedList<>(setValue));
+	}
+}

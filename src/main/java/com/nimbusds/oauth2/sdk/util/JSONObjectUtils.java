@@ -29,9 +29,10 @@ import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
-import com.nimbusds.oauth2.sdk.ParseException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+
+import com.nimbusds.oauth2.sdk.ParseException;
 
 
 /**
@@ -117,22 +118,23 @@ public final class JSONObjectUtils {
 	 * @throws ParseException If the value is missing, {@code null} or not
 	 *                        of the expected type.
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T> T getGeneric(final JSONObject o, final String key, final Class<T> clazz)
 		throws ParseException {
 	
 		if (! o.containsKey(key))
 			throw new ParseException("Missing JSON object member with key \"" + key + "\"");
 		
-		if (o.get(key) == null)
-			throw new ParseException("JSON object member with key \"" + key + "\" has null value");
-		
 		Object value = o.get(key);
 		
-		if (! clazz.isAssignableFrom(value.getClass()))
-			throw new ParseException("Unexpected type of JSON object member with key \"" + key + "\"");
+		if (value == null) {
+			throw new ParseException("JSON object member with key \"" + key + "\" has null value");
+		}
 		
-		return (T)value;
+		try {
+			return JSONUtils.to(value, clazz);
+		} catch (ParseException e) {
+			throw new ParseException("Unexpected type of JSON object member with key \"" + key + "\"", e);
+		}
 	}
 
 

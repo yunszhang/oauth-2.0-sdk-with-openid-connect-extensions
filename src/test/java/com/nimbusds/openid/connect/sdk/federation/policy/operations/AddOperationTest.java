@@ -1,0 +1,108 @@
+/*
+ * oauth2-oidc-sdk
+ *
+ * Copyright 2012-2016, Connect2id Ltd and contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
+package com.nimbusds.openid.connect.sdk.federation.policy.operations;
+
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import junit.framework.TestCase;
+
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.util.JSONArrayUtils;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.OperationName;
+
+
+public class AddOperationTest extends TestCase {
+	
+
+	public void testStringParam() {
+		
+		AddOperation addOperation = new AddOperation();
+		assertEquals(new OperationName("add"), addOperation.getOperationName());
+		
+		String stringParam = "support@federation.example.com";
+		
+		addOperation.configure(stringParam);
+		
+		assertEquals(Collections.singletonList(stringParam), addOperation.apply(null));
+		assertEquals(Collections.singletonList(stringParam), addOperation.apply(Collections.<String>emptyList()));
+		assertEquals(Arrays.asList("support@example.com", stringParam), addOperation.apply(Collections.singletonList("support@example.com")));
+		assertEquals(Arrays.asList("admin@example.com", "support@example.com", stringParam), addOperation.apply(Arrays.asList("admin@example.com", "support@example.com")));
+	}
+	
+
+	public void testStringListParam() {
+		
+		AddOperation addOperation = new AddOperation();
+		assertEquals(new OperationName("add"), addOperation.getOperationName());
+		
+		List<String> stringListParam = Arrays.asList("support@federation.example.com", "admin@federation.example.com");
+		
+		addOperation.configure(stringListParam);
+		
+		assertEquals(stringListParam, addOperation.apply(null));
+		assertEquals(stringListParam, addOperation.apply(Collections.<String>emptyList()));
+		assertEquals(Arrays.asList("support@example.com", stringListParam.get(0), stringListParam.get(1)), addOperation.apply(Collections.singletonList("support@example.com")));
+		assertEquals(Arrays.asList("admin@example.com", "support@example.com", stringListParam.get(0), stringListParam.get(1)), addOperation.apply(Arrays.asList("admin@example.com", "support@example.com")));
+	}
+	
+	
+	public void testIllegalState() {
+		
+		try {
+			new AddOperation().apply(null);
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("The policy is not initialized", e.getMessage());
+		}
+	}
+	
+	
+	public void testParseConfig_string()
+		throws ParseException {
+		
+		AddOperation addOperation = new AddOperation();
+		addOperation.parseConfiguration("support@federation.example.com");
+		assertEquals("support@federation.example.com", addOperation.getStringConfiguration());
+	}
+	
+	
+	public void testParseConfig_stringList()
+		throws ParseException {
+		
+		AddOperation addOperation = new AddOperation();
+		String json = "[\"support@federation.example.com\", \"admin@federation.example.com\"]";
+		addOperation.parseConfiguration(JSONArrayUtils.parse(json));
+		assertEquals(Arrays.asList("support@federation.example.com", "admin@federation.example.com"), addOperation.getStringListConfiguration());
+	}
+	
+	
+	public void testParseConfig_stringList_itemNotString() {
+		
+		AddOperation addOperation = new AddOperation();
+		String json = "[\"support@federation.example.com\", 1]";
+		try {
+			addOperation.parseConfiguration(JSONArrayUtils.parse(json));
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Item not a string", e.getMessage());
+		}
+	}
+}
