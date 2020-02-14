@@ -26,6 +26,7 @@ import junit.framework.TestCase;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.OperationName;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
 
 
 public class SubsetOfOperationTest extends TestCase {
@@ -104,5 +105,33 @@ public class SubsetOfOperationTest extends TestCase {
 		SubsetOfOperation operation = new SubsetOfOperation();
 		operation.parseConfiguration((Object)param);
 		assertEquals(param, operation.getStringListConfiguration());
+	}
+	
+	
+	public void testMerge() throws PolicyViolationException {
+		
+		List<String> p1 = Arrays.asList("openid", "eduperson", "phone");
+		List<String> p2 = Arrays.asList("openid", "eduperson", "address");
+		
+		SubsetOfOperation o1 = new SubsetOfOperation();
+		o1.configure(p1);
+		SubsetOfOperation o2 = new SubsetOfOperation();
+		o2.configure(p2);
+		
+		assertEquals(Arrays.asList("openid", "eduperson"), ((SubsetOfOperation)o1.merge(o2)).getStringListConfiguration());
+	}
+	
+	
+	public void testMerge_noIntersection() throws PolicyViolationException {
+		
+		List<String> p1 = Arrays.asList("openid", "eduperson", "phone");
+		List<String> p2 = Arrays.asList("email", "address");
+		
+		SubsetOfOperation o1 = new SubsetOfOperation();
+		o1.configure(p1);
+		SubsetOfOperation o2 = new SubsetOfOperation();
+		o2.configure(p2);
+		
+		assertEquals(Collections.emptyList(), ((SubsetOfOperation)o1.merge(o2)).getStringListConfiguration());
 	}
 }

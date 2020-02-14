@@ -73,6 +73,22 @@ public class EssentialOperation implements PolicyOperation, BooleanConfiguration
 	
 	
 	@Override
+	public PolicyOperation merge(final PolicyOperation other)
+		throws PolicyViolationException {
+		
+		EssentialOperation otherTyped = Utils.castForMerge(other, EssentialOperation.class);
+		
+		if (getBooleanConfiguration() == otherTyped.getBooleanConfiguration()) {
+			EssentialOperation copy = new EssentialOperation();
+			copy.configure(getBooleanConfiguration());
+			return copy;
+		}
+		
+		throw new PolicyViolationException("Essential value mismatch");
+	}
+	
+	
+	@Override
 	public Object apply(final Object value) throws PolicyViolationException {
 	
 		if (enable && value == null) {

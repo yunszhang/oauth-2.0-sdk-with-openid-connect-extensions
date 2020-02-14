@@ -21,6 +21,8 @@ package com.nimbusds.openid.connect.sdk.federation.policy.operations;
 import java.util.*;
 
 import com.nimbusds.openid.connect.sdk.federation.policy.language.OperationName;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyOperation;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.StringListOperation;
 
 
@@ -60,6 +62,21 @@ public class SubsetOfOperation extends AbstractSetBasedOperation implements Stri
 	@Override
 	public OperationName getOperationName() {
 		return NAME;
+	}
+	
+	
+	@Override
+	public PolicyOperation merge(final PolicyOperation other) throws PolicyViolationException {
+		
+		SubsetOfOperation otherTyped = Utils.castForMerge(other, SubsetOfOperation.class);
+		
+		// intersect
+		Set<String> combinedConfig = new LinkedHashSet<>(setConfig);
+		combinedConfig.retainAll(otherTyped.getStringListConfiguration());
+		
+		SubsetOfOperation mergedPolicy = new SubsetOfOperation();
+		mergedPolicy.configure(new LinkedList<>(combinedConfig));
+		return mergedPolicy;
 	}
 	
 	

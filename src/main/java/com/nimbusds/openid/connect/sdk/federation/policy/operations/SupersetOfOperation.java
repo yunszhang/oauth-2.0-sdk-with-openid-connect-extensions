@@ -20,7 +20,6 @@ package com.nimbusds.openid.connect.sdk.federation.policy.operations;
 
 import java.util.*;
 
-import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.*;
 
 
@@ -60,6 +59,21 @@ public class SupersetOfOperation extends AbstractSetBasedOperation implements Po
 	@Override
 	public OperationName getOperationName() {
 		return NAME;
+	}
+	
+	
+	@Override
+	public PolicyOperation merge(final PolicyOperation other) throws PolicyViolationException {
+		
+		SupersetOfOperation otherTyped = Utils.castForMerge(other, SupersetOfOperation.class);
+		
+		// intersect
+		Set<String> combinedConfig = new LinkedHashSet<>(setConfig);
+		combinedConfig.retainAll(otherTyped.getStringListConfiguration());
+		
+		SupersetOfOperation mergedPolicy = new SupersetOfOperation();
+		mergedPolicy.configure(new LinkedList<>(combinedConfig));
+		return mergedPolicy;
 	}
 	
 	

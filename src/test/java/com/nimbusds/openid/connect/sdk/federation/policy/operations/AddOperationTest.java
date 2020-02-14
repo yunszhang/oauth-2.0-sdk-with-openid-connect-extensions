@@ -27,6 +27,7 @@ import junit.framework.TestCase;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONArrayUtils;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.OperationName;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
 
 
 public class AddOperationTest extends TestCase {
@@ -104,5 +105,17 @@ public class AddOperationTest extends TestCase {
 		} catch (ParseException e) {
 			assertEquals("Item not a string", e.getMessage());
 		}
+	}
+	
+	
+	public void testMerge() throws PolicyViolationException {
+		
+		AddOperation o1 = new AddOperation();
+		o1.configure("a");
+		
+		AddOperation o2 = new AddOperation();
+		o2.configure(Arrays.asList("b", "c"));
+		
+		assertEquals(Arrays.asList("a", "b", "c"), ((AddOperation)o1.merge(o2)).getStringListConfiguration());
 	}
 }

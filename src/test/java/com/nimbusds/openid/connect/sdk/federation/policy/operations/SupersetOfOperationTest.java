@@ -104,4 +104,32 @@ public class SupersetOfOperationTest extends TestCase {
 		operation.parseConfiguration((Object)param);
 		assertEquals(param, operation.getStringListConfiguration());
 	}
+	
+	
+	public void testMerge() throws PolicyViolationException {
+		
+		List<String> p1 = Arrays.asList("openid", "eduperson", "phone");
+		List<String> p2 = Arrays.asList("openid", "eduperson", "address");
+		
+		SupersetOfOperation o1 = new SupersetOfOperation();
+		o1.configure(p1);
+		SupersetOfOperation o2 = new SupersetOfOperation();
+		o2.configure(p2);
+		
+		assertEquals(Arrays.asList("openid", "eduperson"), ((SupersetOfOperation)o1.merge(o2)).getStringListConfiguration());
+	}
+	
+	
+	public void testMerge_noIntersection() throws PolicyViolationException {
+		
+		List<String> p1 = Arrays.asList("openid", "eduperson", "phone");
+		List<String> p2 = Arrays.asList("email", "address");
+		
+		SupersetOfOperation o1 = new SupersetOfOperation();
+		o1.configure(p1);
+		SupersetOfOperation o2 = new SupersetOfOperation();
+		o2.configure(p2);
+		
+		assertEquals(Collections.emptyList(), ((SupersetOfOperation)o1.merge(o2)).getStringListConfiguration());
+	}
 }

@@ -19,6 +19,7 @@ package com.nimbusds.openid.connect.sdk.federation.policy.operations;
 
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -80,5 +81,33 @@ public class OneOfOperationTest extends TestCase {
 		List<String> param = Arrays.asList("ES256", "ES384", "ES512");
 		operation.parseConfiguration((Object)param);
 		assertEquals(param, operation.getStringListConfiguration());
+	}
+	
+	
+	public void testMerge() throws PolicyViolationException {
+		
+		List<String> p1 = Arrays.asList("ES256", "ES384", "ES512");
+		List<String> p2 = Arrays.asList("ES256", "ES384", "ES512", "PS256", "PS384", "PS512");
+		
+		OneOfOperation o1 = new OneOfOperation();
+		o1.configure(p1);
+		OneOfOperation o2 = new OneOfOperation();
+		o2.configure(p2);
+		
+		assertEquals(Arrays.asList("ES256", "ES384", "ES512"), ((OneOfOperation)o1.merge(o2)).getStringListConfiguration());
+	}
+	
+	
+	public void testMerge_noIntersection() throws PolicyViolationException {
+		
+		List<String> p1 = Arrays.asList("ES256", "ES384", "ES512");
+		List<String> p2 = Arrays.asList("PS256", "PS384", "PS512");
+		
+		OneOfOperation o1 = new OneOfOperation();
+		o1.configure(p1);
+		OneOfOperation o2 = new OneOfOperation();
+		o2.configure(p2);
+		
+		assertEquals(Collections.emptyList(), ((OneOfOperation)o1.merge(o2)).getStringListConfiguration());
 	}
 }

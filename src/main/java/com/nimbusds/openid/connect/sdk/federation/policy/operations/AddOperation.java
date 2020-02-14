@@ -24,9 +24,7 @@ import java.util.List;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONUtils;
-import com.nimbusds.openid.connect.sdk.federation.policy.language.OperationName;
-import com.nimbusds.openid.connect.sdk.federation.policy.language.StringConfiguration;
-import com.nimbusds.openid.connect.sdk.federation.policy.language.StringListOperation;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.*;
 
 
 /**
@@ -89,6 +87,22 @@ public class AddOperation extends AbstractSetBasedOperation implements StringCon
 	@Override
 	public String getStringConfiguration() {
 		return getStringListConfiguration().get(0);
+	}
+	
+	
+	@Override
+	public PolicyOperation merge(final PolicyOperation other)
+		throws PolicyViolationException {
+		
+		AddOperation otherTyped = Utils.castForMerge(other, AddOperation.class);
+		
+		List<String> combined = new LinkedList<>();
+		combined.addAll(getStringListConfiguration());
+		combined.addAll(otherTyped.getStringListConfiguration());
+		
+		AddOperation mergedPolicy = new AddOperation();
+		mergedPolicy.configure(combined);
+		return mergedPolicy;
 	}
 	
 	

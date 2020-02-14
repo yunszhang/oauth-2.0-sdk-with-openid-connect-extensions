@@ -25,6 +25,7 @@ import junit.framework.TestCase;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.OperationName;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
 
 
 public class DefaultOperationTest extends TestCase {
@@ -118,5 +119,71 @@ public class DefaultOperationTest extends TestCase {
 		List<String> stringListParam = Arrays.asList("support@federation.example.com", "admin@federation.example.com");
 		valueOperation.parseConfiguration((Object)stringListParam);
 		assertEquals(stringListParam, valueOperation.getStringListConfiguration());
+	}
+	
+	
+	public void testMerge_boolean() throws PolicyViolationException {
+		
+		DefaultOperation o1 = new DefaultOperation();
+		o1.configure(true);
+		
+		DefaultOperation o2 = new DefaultOperation();
+		o2.configure(true);
+		
+		assertTrue(((DefaultOperation)o1.merge(o2)).getBooleanConfiguration());
+		
+		DefaultOperation o3 = new DefaultOperation();
+		o3.configure(false);
+		
+		try {
+			o1.merge(o3);
+			fail();
+		} catch (PolicyViolationException e) {
+			assertEquals("Default value mismatch", e.getMessage());
+		}
+	}
+	
+	
+	public void testMerge_string() throws PolicyViolationException {
+		
+		DefaultOperation o1 = new DefaultOperation();
+		o1.configure("a");
+		
+		DefaultOperation o2 = new DefaultOperation();
+		o2.configure("a");
+		
+		assertEquals("a", ((DefaultOperation)o1.merge(o2)).getStringConfiguration());
+		
+		DefaultOperation o3 = new DefaultOperation();
+		o3.configure("b");
+		
+		try {
+			o1.merge(o3);
+			fail();
+		} catch (PolicyViolationException e) {
+			assertEquals("Default value mismatch", e.getMessage());
+		}
+	}
+	
+	
+	public void testMerge_stringList() throws PolicyViolationException {
+		
+		DefaultOperation o1 = new DefaultOperation();
+		o1.configure(Arrays.asList("a", "b"));
+		
+		DefaultOperation o2 = new DefaultOperation();
+		o2.configure(Arrays.asList("a", "b"));
+		
+		assertEquals(Arrays.asList("a", "b"), ((DefaultOperation)o1.merge(o2)).getStringListConfiguration());
+		
+		DefaultOperation o3 = new DefaultOperation();
+		o3.configure(Arrays.asList("c", "d"));
+		
+		try {
+			o1.merge(o3);
+			fail();
+		} catch (PolicyViolationException e) {
+			assertEquals("Default value mismatch", e.getMessage());
+		}
 	}
 }

@@ -131,6 +131,49 @@ public class ValueOperation implements PolicyOperation,
 	
 	
 	@Override
+	public PolicyOperation merge(final PolicyOperation other)
+		throws PolicyViolationException {
+		
+		ValueOperation otherTyped = Utils.castForMerge(other, ValueOperation.class);
+		
+		if (! isInit.get() || ! otherTyped.isInit.get()) {
+			throw new PolicyViolationException("The value operation is not initialized");
+		}
+		
+		if (getStringListConfiguration() != null) {
+			
+			if (getStringListConfiguration().equals(otherTyped.getStringListConfiguration())) {
+				
+				ValueOperation copy = new ValueOperation();
+				copy.configure(getStringListConfiguration());
+				return copy;
+			}
+			
+			throw new PolicyViolationException("Value mismatch");
+			
+		} else if (getStringConfiguration() != null) {
+			
+			if (getStringConfiguration().equals(otherTyped.getStringConfiguration())) {
+				
+				ValueOperation copy = new ValueOperation();
+				copy.configure(getStringConfiguration());
+				return copy;
+			}
+			
+			throw new PolicyViolationException("Value mismatch");
+			
+		} else if (getBooleanConfiguration() == otherTyped.getBooleanConfiguration()) {
+			
+			ValueOperation copy = new ValueOperation();
+			copy.configure(getBooleanConfiguration());
+			return copy;
+		} else {
+			throw new PolicyViolationException("Value mismatch");
+		}
+	}
+	
+	
+	@Override
 	public Object apply(final Object value) {
 		
 		if (! isInit.get()) {

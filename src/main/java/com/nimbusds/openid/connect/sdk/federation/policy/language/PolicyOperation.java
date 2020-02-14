@@ -46,4 +46,17 @@ public interface PolicyOperation {
 	 * @throws ParseException On a parse exception.
 	 */
 	void parseConfiguration(final Object jsonEntity) throws ParseException;
+	
+	
+	/**
+	 * Merges a policy operation.
+	 *
+	 * @param other The policy to merge. Must be of the same type and not
+	 *              {@code null}.
+	 *
+	 * @return The resulting new policy operation.
+	 *
+	 * @throws PolicyViolationException On a merge exception.
+	 */
+	PolicyOperation merge(final PolicyOperation other) throws PolicyViolationException;
 }

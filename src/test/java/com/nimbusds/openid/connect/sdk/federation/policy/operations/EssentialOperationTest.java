@@ -77,11 +77,48 @@ public class EssentialOperationTest extends TestCase {
 	}
 	
 	
-	public void testParseConfiguration()
-		throws ParseException {
+	public void testParseConfiguration() throws ParseException {
 		
 		EssentialOperation operation = new EssentialOperation();
 		operation.parseConfiguration((Object)true);
 		assertTrue(operation.getBooleanConfiguration());
+	}
+	
+	
+	public void testMerge_true() throws PolicyViolationException {
+		
+		EssentialOperation o1 = new EssentialOperation();
+		o1.configure(true);
+		EssentialOperation o2 = new EssentialOperation();
+		o2.configure(true);
+		
+		assertTrue(((EssentialOperation)o1.merge(o2)).getBooleanConfiguration());
+	}
+	
+	
+	public void testMerge_false() throws PolicyViolationException {
+		
+		EssentialOperation o1 = new EssentialOperation();
+		o1.configure(false);
+		EssentialOperation o2 = new EssentialOperation();
+		o2.configure(false);
+		
+		assertFalse(((EssentialOperation)o1.merge(o2)).getBooleanConfiguration());
+	}
+	
+	
+	public void testMerge_valueMismatch() {
+		
+		EssentialOperation o1 = new EssentialOperation();
+		o1.configure(true);
+		EssentialOperation o2 = new EssentialOperation();
+		o2.configure(false);
+		
+		try {
+			o1.merge(o2);
+			fail();
+		} catch (PolicyViolationException e) {
+			assertEquals("Essential value mismatch", e.getMessage());
+		}
 	}
 }

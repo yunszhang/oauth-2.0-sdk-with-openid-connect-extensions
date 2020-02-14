@@ -18,7 +18,12 @@
 package com.nimbusds.openid.connect.sdk.federation.policy.operations;
 
 
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.Set;
+
 import com.nimbusds.openid.connect.sdk.federation.policy.language.OperationName;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyOperation;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.StringOperation;
 
@@ -59,6 +64,21 @@ public class OneOfOperation extends AbstractSetBasedOperation implements StringO
 	@Override
 	public OperationName getOperationName() {
 		return NAME;
+	}
+	
+	
+	@Override
+	public PolicyOperation merge(final PolicyOperation other) throws PolicyViolationException {
+		
+		OneOfOperation otherTyped = Utils.castForMerge(other, OneOfOperation.class);
+		
+		// intersect
+		Set<String> combinedConfig = new LinkedHashSet<>(setConfig);
+		combinedConfig.retainAll(otherTyped.getStringListConfiguration());
+		
+		OneOfOperation mergedPolicy = new OneOfOperation();
+		mergedPolicy.configure(new LinkedList<>(combinedConfig));
+		return mergedPolicy;
 	}
 	
 	

@@ -119,6 +119,49 @@ public class DefaultOperation implements PolicyOperation,
 	
 	
 	@Override
+	public PolicyOperation merge(final PolicyOperation other)
+		throws PolicyViolationException {
+		
+		DefaultOperation otherTyped = Utils.castForMerge(other, DefaultOperation.class);
+		
+		if (! isInit.get() || ! otherTyped.isInit.get()) {
+			throw new PolicyViolationException("The default operation is not initialized");
+		}
+		
+		if (getStringListConfiguration() != null) {
+			
+			if (getStringListConfiguration().equals(otherTyped.getStringListConfiguration())) {
+				
+				DefaultOperation copy = new DefaultOperation();
+				copy.configure(getStringListConfiguration());
+				return copy;
+			}
+			
+			throw new PolicyViolationException("Default value mismatch");
+			
+		} else if (getStringConfiguration() != null) {
+			
+			if (getStringConfiguration().equals(otherTyped.getStringConfiguration())) {
+				
+				DefaultOperation copy = new DefaultOperation();
+				copy.configure(getStringConfiguration());
+				return copy;
+			}
+			
+			throw new PolicyViolationException("Default value mismatch");
+			
+		} else if (getBooleanConfiguration() == otherTyped.getBooleanConfiguration()) {
+			
+			DefaultOperation copy = new DefaultOperation();
+			copy.configure(getBooleanConfiguration());
+			return copy;
+		} else {
+			throw new PolicyViolationException("Default value mismatch");
+		}
+	}
+	
+	
+	@Override
 	public Object apply(final Object value) {
 		
 		if (! isInit.get()) {

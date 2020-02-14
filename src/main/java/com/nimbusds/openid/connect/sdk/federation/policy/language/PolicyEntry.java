@@ -61,6 +61,17 @@ public final class PolicyEntry {
 	}
 	
 	
+	public PolicyEntry combine(final PolicyEntry other)
+		throws PolicyViolationException {
+		
+		if (! getParameterName().equals(other.getParameterName())) {
+			throw new PolicyViolationException("The parameter names must match");
+		}
+		
+		return null; // TODO
+	}
+	
+	
 	public Object apply(final Object value)
 		throws PolicyViolationException {
 		
@@ -120,7 +131,7 @@ public final class PolicyEntry {
 					throw new PolicyViolationException("The value must be a string list", e);
 				}
 			} else {
-				throw new PolicyViolationException("The value must be string list");
+				throw new PolicyViolationException("The value must be a string list");
 			}
 		}
 		
@@ -131,7 +142,7 @@ public final class PolicyEntry {
 	public static PolicyEntry parse(final String parameterName,
 					final Map<String,Object> spec,
 					final PolicyOperationFactory factory)
-		throws ParseException  {
+		throws ParseException {
 		
 		List<PolicyOperation> policyOperations = new LinkedList<>();
 		
@@ -147,7 +158,7 @@ public final class PolicyEntry {
 	
 	public static PolicyEntry parse(final String parameterName,
 					final Map<String,Object> spec)
-		throws ParseException  {
+		throws ParseException {
 		
 		return parse(parameterName, spec, new PolicyOperationFactory());
 	}
