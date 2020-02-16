@@ -20,9 +20,10 @@ package com.nimbusds.openid.connect.sdk;
 
 import java.util.*;
 
+import net.jcip.annotations.NotThreadSafe;
+
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
-import net.jcip.annotations.NotThreadSafe;
 
 
 /**
@@ -106,17 +107,16 @@ public class Prompt extends LinkedHashSet<Prompt.Type> {
 			if (StringUtils.isBlank(s))
 				throw new ParseException("Null or empty prompt type string");
 			
-			switch (s) {
-				case "none":
-					return NONE;
-				case "login":
-					return LOGIN;
-				case "consent":
-					return CONSENT;
-				case "select_account":
-					return SELECT_ACCOUNT;
-				default:
-					throw new ParseException("Unknown prompt type: " + s);
+			if ("none".equals(s)) {
+				return NONE;
+			} else if ("login".equals(s)) {
+				return LOGIN;
+			} else if ("consent".equals(s)) {
+				return CONSENT;
+			} else if ("select_account".equals(s)) {
+				return SELECT_ACCOUNT;
+			} else {
+				throw new ParseException("Unknown prompt type: " + s);
 			}
 		}
 	}
