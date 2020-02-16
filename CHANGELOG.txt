@@ -1225,7 +1225,7 @@ version 6.23 (2020-01-11)
     * Refactors ClaimsRequest.Entry for fluent builder pattern, adds support
       for "purpose" parameter from OpenID Connect eKYC / IdA.
 
-version 7.0 (2020-02-05)
+version 7.0 (2020-02-16)
     * Adds new com.nimbusds:content-type:2.0 dependency.
     * Adds new HTTPMessage getEntityContentType, setEntityContentType and
       ensureEntityContentType methods deprecating those that depend on
@@ -1237,4 +1237,6 @@ version 7.0 (2020-02-05)
     * Deprecates HTTPMessage.setContentType(javax.mail.internet.ContentType).
     * Deprecates HTTPMessage.ensureContentType().
     * Deprecates HTTPMessage.ensureContentType(javax.mail.internet.ContentType).
+    * Fixes LogoutRequest.toHTTPRequest for logout endpoints containing query
+      parameters in the URI (iss 285).
     * Cleans up code.

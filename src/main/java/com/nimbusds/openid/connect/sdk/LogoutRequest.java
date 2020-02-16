@@ -22,10 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
@@ -277,23 +274,23 @@ public class LogoutRequest extends AbstractRequest {
 
 		if (getEndpointURI() == null)
 			throw new SerializeException("The endpoint URI is not specified");
-
+		
+		Map<String, List<String>> mergedQueryParams = new HashMap<>(URLUtils.parseParameters(getEndpointURI().getQuery()));
+		mergedQueryParams.putAll(toParameters());
+		
 		HTTPRequest httpRequest;
 
-		URL endpointURL;
+		URL baseURL;
 
 		try {
-			endpointURL = getEndpointURI().toURL();
+			baseURL = URLUtils.getBaseURL(getEndpointURI().toURL());
 
 		} catch (MalformedURLException e) {
-
 			throw new SerializeException(e.getMessage(), e);
 		}
-
-		httpRequest = new HTTPRequest(HTTPRequest.Method.GET, endpointURL);
-
-		httpRequest.setQuery(toQueryString());
-
+		
+		httpRequest = new HTTPRequest(HTTPRequest.Method.GET, baseURL);
+		httpRequest.setQuery(URLUtils.serializeParameters(mergedQueryParams));
 		return httpRequest;
 	}
 

@@ -19,6 +19,7 @@ package com.nimbusds.openid.connect.sdk;
 
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Date;
@@ -43,9 +44,6 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import junit.framework.TestCase;
 
 
-/**
- * Tests the logout request class.
- */
 public class LogoutRequestTest extends TestCase {
 
 
@@ -64,8 +62,7 @@ public class LogoutRequestTest extends TestCase {
 	}
 	
 	
-	public void testMinimal()
-		throws Exception {
+	public void testMinimal() {
 		
 		URI endpoint = URI.create("https://c2id.com/logout");
 		LogoutRequest logoutRequest = new LogoutRequest(endpoint);
@@ -232,5 +229,47 @@ public class LogoutRequestTest extends TestCase {
 		assertNull(request.getIDTokenHint());
 		assertNull(request.getPostLogoutRedirectionURI());
 		assertNull(request.getState());
+	}
+	
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/285/logoutrequest-creates-invalid-uris-when
+	public void testToHTTPRequest_endpointWithQueryParams_minimal() {
+		
+		URI endpoint = URI.create("https://mydomain.auth.us-east-1.amazoncognito.com/logout?client_id=my-id&logout_uri=com.myclientapp://myclient/logout");
+		LogoutRequest logoutRequest = new LogoutRequest(endpoint);
+		
+		assertTrue(logoutRequest.toParameters().isEmpty());
+		
+		HTTPRequest httpRequest = logoutRequest.toHTTPRequest();
+		assertEquals(URI.create("https://mydomain.auth.us-east-1.amazoncognito.com/logout"), httpRequest.getURI());
+		Map<String,List<String>> queryParams = httpRequest.getQueryParameters();
+		
+		assertEquals(Collections.singletonList("my-id"), queryParams.get("client_id"));
+		assertEquals(Collections.singletonList("com.myclientapp://myclient/logout"), queryParams.get("logout_uri"));
+		assertEquals(2, queryParams.size());
+	}
+	
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/285/logoutrequest-creates-invalid-uris-when
+	public void testToHTTPRequest_endpointWithQueryParams_withParam() throws Exception {
+		
+		URI endpoint = URI.create("https://mydomain.auth.us-east-1.amazoncognito.com/logout?client_id=my-id&logout_uri=com.myclientapp://myclient/logout");
+		JWT idToken = createIDTokenHint();
+		URI postLogoutRedirectURI = new URI("https://client.com/post-logout");
+		State state = new State();
+		LogoutRequest logoutRequest = new LogoutRequest(endpoint, idToken, postLogoutRedirectURI, state);
+		
+		assertEquals(3, logoutRequest.toParameters().size());
+		
+		HTTPRequest httpRequest = logoutRequest.toHTTPRequest();
+		assertEquals(URI.create("https://mydomain.auth.us-east-1.amazoncognito.com/logout"), httpRequest.getURI());
+		Map<String,List<String>> queryParams = httpRequest.getQueryParameters();
+		
+		assertEquals(Collections.singletonList("my-id"), queryParams.get("client_id"));
+		assertEquals(Collections.singletonList("com.myclientapp://myclient/logout"), queryParams.get("logout_uri"));
+		assertEquals(Collections.singletonList(idToken.serialize()), queryParams.get("id_token_hint"));
+		assertEquals(Collections.singletonList(postLogoutRedirectURI.toString()), queryParams.get("post_logout_redirect_uri"));
+		assertEquals(Collections.singletonList(state.getValue()), queryParams.get("state"));
+		assertEquals(5, queryParams.size());
 	}
 }
