@@ -254,17 +254,18 @@ public class LogoutRequest extends AbstractRequest {
 
 		if (getEndpointURI() == null)
 			throw new SerializeException("The end-session endpoint URI is not specified");
-		
-		String query = toQueryString();
-		
+
+		final Map<String, List<String>> mergedQueryParams = new HashMap<>(URLUtils.parseParameters(getEndpointURI().getQuery()));
+		mergedQueryParams.putAll(toParameters());
+		String query = URLUtils.serializeParameters(mergedQueryParams);
 		if (StringUtils.isNotBlank(query)) {
 			query = '?' + query;
 		}
-		
 		try {
-			return new URI(getEndpointURI() + query);
-		} catch (URISyntaxException e) {
-			throw new SerializeException("Couldn't append query string: " + e.getMessage(), e);
+			final URL baseURL = URLUtils.getBaseURL(getEndpointURI().toURL());
+			return new URI(baseURL + query);
+		} catch (MalformedURLException | URISyntaxException e) {
+			throw new SerializeException(e.getMessage(), e);
 		}
 	}
 
