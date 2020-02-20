@@ -272,4 +272,44 @@ public class LogoutRequestTest extends TestCase {
 		assertEquals(Collections.singletonList(state.getValue()), queryParams.get("state"));
 		assertEquals(5, queryParams.size());
 	}
+
+
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/286
+	public void testToURI_endpointWithQueryParams_minimal() {
+
+		URI endpoint = URI.create("https://mydomain.auth.us-east-1.amazoncognito.com/logout?client_id=my-id&logout_uri=com.myclientapp://myclient/logout");
+		LogoutRequest logoutRequest = new LogoutRequest(endpoint);
+
+		assertTrue(logoutRequest.toParameters().isEmpty());
+
+		URI uri = logoutRequest.toURI();
+		Map<String,List<String>> queryParams = URLUtils.parseParameters(uri.getQuery());
+
+		assertEquals(Collections.singletonList("my-id"), queryParams.get("client_id"));
+		assertEquals(Collections.singletonList("com.myclientapp://myclient/logout"), queryParams.get("logout_uri"));
+		assertEquals(2, queryParams.size());
+	}
+
+
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/286
+	public void testToURI_endpointWithQueryParams_withParam() throws Exception {
+
+		URI endpoint = URI.create("https://mydomain.auth.us-east-1.amazoncognito.com/logout?client_id=my-id&logout_uri=com.myclientapp://myclient/logout");
+		JWT idToken = createIDTokenHint();
+		URI postLogoutRedirectURI = new URI("https://client.com/post-logout");
+		State state = new State();
+		LogoutRequest logoutRequest = new LogoutRequest(endpoint, idToken, postLogoutRedirectURI, state);
+
+		assertEquals(3, logoutRequest.toParameters().size());
+
+		URI uri = logoutRequest.toURI();
+		Map<String,List<String>> queryParams = URLUtils.parseParameters(uri.getQuery());
+
+		assertEquals(Collections.singletonList("my-id"), queryParams.get("client_id"));
+		assertEquals(Collections.singletonList("com.myclientapp://myclient/logout"), queryParams.get("logout_uri"));
+		assertEquals(Collections.singletonList(idToken.serialize()), queryParams.get("id_token_hint"));
+		assertEquals(Collections.singletonList(postLogoutRedirectURI.toString()), queryParams.get("post_logout_redirect_uri"));
+		assertEquals(Collections.singletonList(state.getValue()), queryParams.get("state"));
+		assertEquals(5, queryParams.size());
+	}
 }
