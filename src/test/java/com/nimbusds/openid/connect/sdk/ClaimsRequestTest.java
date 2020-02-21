@@ -24,6 +24,7 @@ import java.util.*;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -1494,5 +1495,27 @@ public class ClaimsRequestTest extends TestCase {
 			System.out.println("requirement: " + en.getClaimRequirement());
 			System.out.println("optional language tag: " + en.getLangTag());
 		}
+	}
+	
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/287/claimsrequestparse-jsonobject-modifies-the
+	public void testSourceJSONObjectMustNotBeModified()
+		throws Exception {
+		
+		JSONObject claims = JSONObjectUtils.parse("{\"id_token\":{\"email\":{\"essential\":true}},\"userinfo\":{\"name\":{\"essential\":true}}}");
+		
+		JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+			.subject("joe")
+			.claim("claims", claims)
+			.build();
+		
+		String before = jwtClaimsSet.toString();
+		
+		ClaimsRequest cr = ClaimsRequest.parse(claims);
+		assertEquals(claims, cr.toJSONObject());
+		
+		String after = jwtClaimsSet.toString();
+		
+		assertEquals(before, after);
 	}
 }

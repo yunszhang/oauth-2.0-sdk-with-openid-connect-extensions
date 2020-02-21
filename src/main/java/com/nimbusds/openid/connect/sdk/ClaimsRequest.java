@@ -673,13 +673,19 @@ public class ClaimsRequest implements JSONAware {
 		}
 		
 		
-		private static Map<String, Object> getAdditionalInformationFromClaim(JSONObject entrySpec) {
-			List<String> keysToRemove = Arrays.asList("essential", "value", "values", "purpose");
-			entrySpec.keySet().removeAll(keysToRemove);
+		private static Map<String, Object> getAdditionalInformationFromClaim(final JSONObject entrySpec) {
+			
+			Set<String> stdKeys = new HashSet<>(Arrays.asList("essential", "value", "values", "purpose"));
+			
 			Map<String, Object> additionalClaimInformation = new HashMap<>();
+			
 			for (Map.Entry<String, Object> additionalClaimInformationEntry : entrySpec.entrySet()) {
+				if (stdKeys.contains(additionalClaimInformationEntry.getKey())) {
+					continue; // skip std key
+				}
 				additionalClaimInformation.put(additionalClaimInformationEntry.getKey(), additionalClaimInformationEntry.getValue());
 			}
+			
 			return additionalClaimInformation.isEmpty() ? null : additionalClaimInformation;
 		}
 	}
