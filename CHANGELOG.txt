@@ -1238,7 +1238,7 @@ version 7.0 (2020-02-16)
     * Deprecates HTTPMessage.ensureContentType().
     * Deprecates HTTPMessage.ensureContentType(javax.mail.internet.ContentType).
     * Fixes LogoutRequest.toHTTPRequest for logout endpoints containing query
-      parameters in the URI (iss 285).
+      parameters in the URI (iss #285).
     * Cleans up code.
 
 version 7.0.1 (2020-02-21)
@@ -1248,3 +1248,6 @@ version 7.0.1 (2020-02-21)
 version 7.0.2 (2020-02-21)
     * ClaimsRequest.parse(JSONObject) must not modify the source object (iss
       #287).
+
+version 7.0.3 (2020-02-21)
+    * Fixes dependency versions (iss #288, #289).

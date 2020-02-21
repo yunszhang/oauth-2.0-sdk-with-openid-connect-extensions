@@ -25,6 +25,7 @@ import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
@@ -67,12 +68,12 @@ public class DeviceAuthorizationResponseTest extends TestCase {
 
 		HTTPResponse httpResp = resp.toHTTPResponse();
 		JSONObject params = httpResp.getContentAsJSONObject();
-		assertEquals(deviceCode.getValue(), params.getAsString("device_code"));
-		assertEquals(userCode.getValue(), params.getAsString("user_code"));
-		assertEquals(verificationUri.toString(), params.getAsString("verification_uri"));
+		assertEquals(deviceCode.getValue(), params.get("device_code"));
+		assertEquals(userCode.getValue(), params.get("user_code"));
+		assertEquals(verificationUri.toString(), params.get("verification_uri"));
 		assertFalse(params.containsKey("verification_uri_complete"));
-		assertEquals(lifetime, params.getAsNumber("expires_in"));
-		assertEquals(5L, params.getAsNumber("interval"));
+		assertEquals(lifetime, JSONObjectUtils.getLong(params, "expires_in"));
+		assertEquals(5L, JSONObjectUtils.getLong(params,"interval"));
 		assertEquals(5, params.size());
 
 		resp = DeviceAuthorizationResponse.parse(httpResp).toSuccessResponse();
@@ -119,15 +120,15 @@ public class DeviceAuthorizationResponseTest extends TestCase {
 
 		HTTPResponse httpResp = resp.toHTTPResponse();
 		JSONObject params = httpResp.getContentAsJSONObject();
-		assertEquals(deviceCode.getValue(), params.getAsString("device_code"));
-		assertEquals(userCode.getValue(), params.getAsString("user_code"));
-		assertEquals(verificationUri.toString(), params.getAsString("verification_uri"));
-		assertEquals(verificationUriComplete.toString(), params.getAsString("verification_uri_complete"));
-		assertEquals(lifetime, params.getAsNumber("expires_in"));
-		assertEquals(interval, params.getAsNumber("interval"));
-		assertEquals("100", params.getAsString("x"));
-		assertEquals("200", params.getAsString("y"));
-		assertEquals("300", params.getAsString("z"));
+		assertEquals(deviceCode.getValue(), params.get("device_code"));
+		assertEquals(userCode.getValue(), params.get("user_code"));
+		assertEquals(verificationUri.toString(), params.get("verification_uri"));
+		assertEquals(verificationUriComplete.toString(), params.get("verification_uri_complete"));
+		assertEquals(lifetime, params.get("expires_in"));
+		assertEquals(interval, params.get("interval"));
+		assertEquals("100", params.get("x"));
+		assertEquals("200", params.get("y"));
+		assertEquals("300", params.get("z"));
 		assertEquals(9, params.size());
 
 		resp = DeviceAuthorizationResponse.parse(httpResp).toSuccessResponse();

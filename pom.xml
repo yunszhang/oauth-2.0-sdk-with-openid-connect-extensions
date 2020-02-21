@@ -18,7 +18,7 @@
 
 	<organization>
 		<name>Connect2id Ltd.</name>
-		<url>http://connect2id.com</url>
+		<url>https://connect2id.com</url>
 	</organization>
 
 	<licenses>
@@ -62,40 +62,40 @@
 		<dependency>
 			<groupId>net.minidev</groupId>
 			<artifactId>json-smart</artifactId>
-			<version>[1.3.1,2.3]</version>
+			<version>1.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>lang-tag</artifactId>
-			<version>[1.4.3,)</version>
+			<version>1.4.4</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>nimbus-jose-jwt</artifactId>
-			<version>[8.2,)</version>
+			<version>8.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>siv-mode</artifactId>
-			<version>[1.1.1,)</version>
+			<version>1.3.2</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>opensaml-core</artifactId>
-			<version>[3.0.0,)</version>
+			<version>3.4.3</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>opensaml-saml-api</artifactId>
-			<version>[3.0.0,)</version>
+			<version>3.4.3</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>opensaml-saml-impl</artifactId>
-			<version>[3.0.0,)</version>
+			<version>3.4.3</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
