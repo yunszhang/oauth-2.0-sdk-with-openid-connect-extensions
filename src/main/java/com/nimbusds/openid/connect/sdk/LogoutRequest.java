@@ -24,6 +24,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
+import net.jcip.annotations.Immutable;
+
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.AbstractRequest;
@@ -35,7 +37,6 @@ import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
-import net.jcip.annotations.Immutable;
 
 
 /**
@@ -262,9 +263,8 @@ public class LogoutRequest extends AbstractRequest {
 			query = '?' + query;
 		}
 		try {
-			final URL baseURL = URLUtils.getBaseURL(getEndpointURI().toURL());
-			return new URI(baseURL + query);
-		} catch (MalformedURLException | URISyntaxException e) {
+			return new URI(URIUtils.getBaseURI(getEndpointURI()) + query);
+		} catch (URISyntaxException e) {
 			throw new SerializeException(e.getMessage(), e);
 		}
 	}

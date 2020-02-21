@@ -1240,3 +1240,7 @@ version 7.0 (2020-02-16)
     * Fixes LogoutRequest.toHTTPRequest for logout endpoints containing query
       parameters in the URI (iss 285).
     * Cleans up code.
+
+version 7.0.1 (2020-02-21)
+    * Fixes LogoutRequest.toURI for logout endpoints containing query
+      parameters in the URI (iss 286).
