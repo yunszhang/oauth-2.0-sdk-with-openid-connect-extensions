@@ -1246,4 +1246,5 @@ version 7.0.1 (2020-02-21)
       parameters in the URI (iss 286).
 
 version 7.0.2 (2020-02-21)
-    * ClaimsRequest.parse(JSONObject) must not modify the source object (iss #287).
+    * ClaimsRequest.parse(JSONObject) must not modify the source object (iss
+      #287).
