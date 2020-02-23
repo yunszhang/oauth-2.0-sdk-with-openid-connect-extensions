@@ -626,7 +626,11 @@ public class HTTPRequest extends HTTPMessage {
 	
 	
 	/**
-	 * Sets the SSL factory for outgoing HTTPS requests.
+	 * Sets the SSL factory for outgoing HTTPS requests. Use the
+	 * {@link com.nimbusds.oauth2.sdk.util.tls.TLSUtils TLS utility} to
+	 * set a custom trust store for server and CA certificates and / or a
+	 * custom key store for client private keys and certificates, also to
+	 * select a specific TLS protocol version.
 	 *
 	 * @param sslSocketFactory The SSL factory, {@code null} implies use of
 	 *                         the default one.
@@ -680,7 +684,11 @@ public class HTTPRequest extends HTTPMessage {
 
 	/**
 	 * Sets the default SSL socket factory for all outgoing HTTPS requests.
-	 * Can be overridden on a individual request basis.
+	 * Can be overridden on a individual request basis. Use the
+	 * {@link com.nimbusds.oauth2.sdk.util.tls.TLSUtils TLS utility} to
+	 * set a custom trust store for server and CA certificates and / or a
+	 * custom key store for client private keys and certificates, also to
+	 * select a specific TLS protocol version.
 	 *
 	 * @param sslSocketFactory The SSL socket factory. Must not be
 	 *                         {@code null}.
