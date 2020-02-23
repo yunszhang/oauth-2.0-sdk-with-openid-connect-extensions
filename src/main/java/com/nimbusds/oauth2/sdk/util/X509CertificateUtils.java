@@ -18,10 +18,25 @@
 package com.nimbusds.oauth2.sdk.util;
 
 
+import java.io.IOException;
+import java.math.BigInteger;
 import java.security.Principal;
+import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Date;
+import javax.security.auth.x500.X500Principal;
+
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+
+import com.nimbusds.jose.util.X509CertUtils;
+import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.id.Subject;
 
 
 /**
@@ -121,6 +136,110 @@ public final class X509CertificateUtils {
 		PublicKey certPubKey = cert.getPublicKey();
 		
 		return Arrays.equals(certPubKey.getEncoded(), pubKey.getEncoded());
+	}
+	
+	
+	/**
+	 * Generates a new X.509 certificate. The certificate is provisioned
+	 * with a 64-bit random serial number.
+	 *
+	 * <p>Signing algorithm:
+	 *
+	 * <ul>
+	 *     <li>For RSA signing keys: SHA256withRSA
+	 *     <li>For EC signing keys: SHA256withECDSA
+	 * </ul>
+	 *
+	 * @param issuer     The issuer. Will be prepended by {@code cn=} in
+	 *                   the certificate to ensure a valid Distinguished
+	 *                   Name (DN). Must not be {@code null}.
+	 * @param subject    The subject. Will be prepended by {@code cn=} in
+	 *                   the certificate to ensure a valid Distinguished
+	 *                   Name (DN). Must not be {@code null}.
+	 * @param nbf        Date before which the certificate is not valid.
+	 *                   Must not be {@code null}.
+	 * @param exp        Date after which the certificate is not valid.
+	 *                   Must not be {@code null}.
+	 * @param certKey    The public key to include in the certificate. Must
+	 *                   not be {@code null}.
+	 * @param signingKey The signing private key. Must not be {@code null}.
+	 *
+	 * @return The X.509 certificate.
+	 *
+	 * @throws OperatorCreationException On a generation exception.
+	 * @throws IOException               On a byte buffer exception.
+	 */
+	public static X509Certificate generate(final Issuer issuer,
+					       final Subject subject,
+					       final Date nbf,
+					       final Date exp,
+					       final PublicKey certKey,
+					       final PrivateKey signingKey)
+		throws OperatorCreationException, IOException {
+		
+		BigInteger serialNumber = new BigInteger(64, new SecureRandom());
+		
+		X500Principal certIssuer = new X500Principal("cn=" + issuer);
+		X500Principal certSubject = new X500Principal("cn=" + subject);
+		
+		final String signingAlg;
+		if ("RSA".equalsIgnoreCase(signingKey.getAlgorithm())) {
+			signingAlg = "SHA256withRSA";
+		} else if ("EC".equalsIgnoreCase(signingKey.getAlgorithm())) {
+			signingAlg = "SHA256withECDSA";
+		} else {
+			throw new OperatorCreationException("Unsupported signing key algorithm: " + signingKey.getAlgorithm());
+		}
+		
+		X509CertificateHolder certHolder = new JcaX509v3CertificateBuilder(
+			certIssuer,
+			serialNumber,
+			nbf,
+			exp,
+			certSubject,
+			certKey)
+			.build(new JcaContentSignerBuilder(signingAlg).build(signingKey));
+		
+		return X509CertUtils.parse(certHolder.getEncoded());
+	}
+	
+	
+	/**
+	 * Generates a new self-signed and self-issued X.509 certificate. The
+	 * certificate is provisioned with a 64-bit random serial number.
+	 *
+	 * <p>Signing algorithm:
+	 *
+	 * <ul>
+	 *     <li>For RSA signing keys: SHA256withRSA
+	 *     <li>For EC signing keys: SHA256withECDSA
+	 * </ul>
+	 *
+	 * @param issuer     The issuer, also used to set the subject. Will be
+	 *                   prepended by {@code cn=} in the certificate to
+	 *                   ensure a valid Distinguished Name (DN). Must not
+	 *                   be {@code null}.
+	 * @param nbf        Date before which the certificate is not valid.
+	 *                   Must not be {@code null}.
+	 * @param exp        Date after which the certificate is not valid.
+	 *                   Must not be {@code null}.
+	 * @param certKey    The public key to include in the certificate. Must
+	 *                   not be {@code null}.
+	 * @param signingKey The signing private key. Must not be {@code null}.
+	 *
+	 * @return The X.509 certificate.
+	 *
+	 * @throws OperatorCreationException On a generation exception.
+	 * @throws IOException               On a byte buffer exception.
+	 */
+	public static X509Certificate generateSelfSigned(final Issuer issuer,
+							 final Date nbf,
+							 final Date exp,
+							 final PublicKey certKey,
+							 final PrivateKey signingKey)
+		throws OperatorCreationException, IOException {
+		
+		return generate(issuer, new Subject(issuer.getValue()), nbf, exp, certKey, signingKey);
 	}
 	
 	

@@ -157,8 +157,8 @@ public class ServletUtilsTest extends TestCase {
 		X509Certificate cert = X509CertificateGenerator.generateCertificate(
 			new Issuer("123"),
 			new Subject("456"),
-			X509CertificateUtilsTest.PUBLIC_KEY,
-			X509CertificateUtilsTest.PRIVATE_KEY
+			X509CertificateUtilsTest.RSA_PUBLIC_KEY,
+			X509CertificateUtilsTest.RSA_PRIVATE_KEY
 		);
 		
 		MockServletRequest servletRequest = new MockServletRequest();

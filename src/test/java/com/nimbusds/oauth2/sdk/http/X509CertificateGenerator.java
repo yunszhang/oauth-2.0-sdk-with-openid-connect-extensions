@@ -19,21 +19,18 @@ package com.nimbusds.oauth2.sdk.http;
 
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.security.*;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 
-import com.nimbusds.jose.util.X509CertUtils;
+import org.bouncycastle.operator.OperatorCreationException;
+
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import com.nimbusds.oauth2.sdk.util.X509CertificateUtils;
 
 
 public class X509CertificateGenerator {
@@ -45,24 +42,12 @@ public class X509CertificateGenerator {
 							  final RSAPrivateKey rsaPrivateKey)
 		throws IOException, OperatorCreationException {
 		
-		X500Name certIssuer = new X500Name("cn=" + issuer);
-		BigInteger serialNumber = new BigInteger(64, new SecureRandom());
-		Date now = new Date();
-		Date nbf = new Date(now.getTime() - 1000L);
-		Date exp = new Date(now.getTime() + 365*24*60*60*1000L); // in 1 year
-		X500Name certSubject = new X500Name("cn=" + subject);
-		JcaX509v3CertificateBuilder x509certBuilder = new JcaX509v3CertificateBuilder(
-			certIssuer,
-			serialNumber,
-			nbf,
-			exp,
-			certSubject,
-			rsaPublicKey
-		);
 		
-		JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder("SHA256withRSA");
-		X509CertificateHolder certHolder = x509certBuilder.build(signerBuilder.build(rsaPrivateKey));
-		return X509CertUtils.parse(certHolder.getEncoded());
+		Date now = new Date();
+		Date nbf = new Date(now.getTime() - 1000L); // 1 second ago
+		Date exp = new Date(now.getTime() + 365*24*60*60*1000L); // in 1 year
+		
+		return X509CertificateUtils.generate(issuer, subject, nbf, exp, rsaPublicKey, rsaPrivateKey);
 	}
 	
 

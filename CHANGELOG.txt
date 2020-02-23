@@ -1251,3 +1251,11 @@ version 7.0.2 (2020-02-21)
 
 version 7.0.3 (2020-02-21)
     * Fixes dependency versions (iss #288, #289).
+
+version 7.1 (2020-02-23)
+    * Adds new X509CertificateUtils.generate and generateSelfSigned methods.
+    * Adds new TLSUtils utility for creating SSLSocketFactory instances for
+      HTTPS requests with a custom key store (for private keys and client X.509
+      certificates) and a custom trust store (for server and CA root
+      certificates).
+    * Upgrades to Nimbus JOSE+JWT 8.8.

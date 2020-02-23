@@ -651,10 +651,10 @@ public class HTTPRequest extends HTTPMessage {
 
 	/**
 	 * Sets the default hostname verifier for all outgoing HTTPS requests.
-	 * May be overridden on a individual request basis.
+	 * Can be overridden on a individual request basis.
 	 *
 	 * @param defaultHostnameVerifier The hostname verifier. Must not be
-	 *                         {@code null}.
+	 *                                {@code null}.
 	 */
 	public static void setDefaultHostnameVerifier(final HostnameVerifier defaultHostnameVerifier) {
 
@@ -680,7 +680,7 @@ public class HTTPRequest extends HTTPMessage {
 
 	/**
 	 * Sets the default SSL socket factory for all outgoing HTTPS requests.
-	 * May be overridden on a individual request basis.
+	 * Can be overridden on a individual request basis.
 	 *
 	 * @param sslSocketFactory The SSL socket factory. Must not be
 	 *                         {@code null}.
