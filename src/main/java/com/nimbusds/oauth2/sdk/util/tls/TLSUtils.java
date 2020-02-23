@@ -103,8 +103,9 @@ public final class TLSUtils {
 	 * @param keyStore   The key store to use. Must be initialised /
 	 *                   loaded. If {@code null} no client certificates
 	 *                   will be presented.
-	 * @param keyPw      The password protecting the client key(s), empty
-	 *                   array if none or not applicable.
+	 * @param keyPw      The password protecting the private client key(s),
+	 *                   empty array or {@code null} if none or not
+	 *                   applicable.
 	 * @param tlsVersion The TLS version to use. {@link TLSVersion#TLS_1_3}
 	 *                   is recommended. Must not be {@code null}.
 	 *

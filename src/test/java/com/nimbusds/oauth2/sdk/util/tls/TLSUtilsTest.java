@@ -104,7 +104,7 @@ public class TLSUtilsTest {
 	public void testHTTPSRequestWithCustomKeyStore_selfSignedClientCert()
 		throws Exception {
 		
-		System.setProperty("javax.net.debug", "ssl,handshake");
+//		System.setProperty("javax.net.debug", "ssl,handshake");
 		
 		Date now = new Date();
 		Date nbf = new Date(now.getTime() - 1000L);
@@ -121,6 +121,35 @@ public class TLSUtilsTest {
 		X509CertUtils.store(keyStore, rsaJWK.toRSAPrivateKey(), "keypassword".toCharArray(), cert);
 		
 		SSLSocketFactory sslSocketFactory = TLSUtils.createSSLSocketFactory(null, keyStore, "keypassword".toCharArray(), TLSVersion.TLS_1_3);
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, new URL("https://demo.c2id.com"));
+		httpRequest.setSSLSocketFactory(sslSocketFactory);
+		HTTPResponse httpResponse = httpRequest.send();
+		assertEquals(200, httpResponse.getStatusCode());
+	}
+	
+	
+	@Test
+	public void testHTTPSRequestWithCustomKeyStore_selfSignedClientCert_noKeyPassword()
+		throws Exception {
+		
+//		System.setProperty("javax.net.debug", "ssl,handshake");
+		
+		Date now = new Date();
+		Date nbf = new Date(now.getTime() - 1000L);
+		Date exp = new Date(now.getTime() + 3600_000L);
+		
+		RSAKey rsaJWK = new RSAKeyGenerator(2048).generate();
+		
+		X509Certificate cert = X509CertificateUtils.generateSelfSigned(new Issuer("example.com"), nbf, exp, rsaJWK.toRSAPublicKey(), rsaJWK.toRSAPrivateKey());
+		String alias = cert.getSubjectDN().getName();
+		assertEquals("CN=example.com", alias);
+		
+		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+		keyStore.load(null);
+		X509CertUtils.store(keyStore, rsaJWK.toRSAPrivateKey(), null, cert);
+		
+		SSLSocketFactory sslSocketFactory = TLSUtils.createSSLSocketFactory(null, keyStore, null, TLSVersion.TLS_1_3);
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, new URL("https://demo.c2id.com"));
 		httpRequest.setSSLSocketFactory(sslSocketFactory);
