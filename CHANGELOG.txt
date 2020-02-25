@@ -1259,3 +1259,8 @@ version 7.1 (2020-02-23)
       certificates) and a custom trust store (for server and CA root
       certificates).
     * Upgrades to Nimbus JOSE+JWT 8.8.
+
+version 7.1.1 (2020-02-25)
+    * Restores com.sun.mail:javax.mail:1.6.1 as non-optional dependency to
+      prevent class loading issues with JSONObjectUtils, HTTPMessage and other
+      classes (iss #291).
