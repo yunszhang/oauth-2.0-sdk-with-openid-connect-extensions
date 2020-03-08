@@ -27,6 +27,7 @@ import java.security.MessageDigest;
 import java.util.*;
 
 import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
 import org.apache.commons.lang.RandomStringUtils;
 
 import com.nimbusds.jose.JWSAlgorithm;
@@ -47,6 +48,7 @@ import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
+import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 
 
@@ -2234,5 +2236,30 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(Collections.singletonList(new LangTag("en")), authRequest.getUILocales());
 		assertEquals("Account holder identification", authRequest.getPurpose());
 		assertEquals(claimsRequest.getVerifiedUserInfoClaimNames(false), authRequest.getClaims().getVerifiedUserInfoClaimNames(false));
+	}
+	
+	
+	public void testIdentityAssurance_verificationElement()
+		throws Exception {
+		
+		ClaimsRequest claimsRequest = new ClaimsRequest();
+		claimsRequest.addUserInfoClaim("family_name");
+		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("given_name"));
+		JSONObject verification = new JSONObject();
+		verification.put("trust_framework", IdentityTrustFramework.DE_AML.getValue());
+		claimsRequest.setUserInfoClaimsVerificationJSONObject(verification);
+		
+		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
+			new ResponseType(ResponseType.Value.CODE),
+			new Scope("openid"),
+			new ClientID("123"),
+			new URI("https://client.com/callback"))
+			.state(new State())
+			.claims(claimsRequest)
+			.build();
+		
+		AuthenticationRequest parsed = AuthenticationRequest.parse(authRequest.toParameters());
+		
+		assertEquals(claimsRequest.toJSONObject(), parsed.getClaims().toJSONObject());
 	}
 }
