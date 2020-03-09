@@ -30,7 +30,8 @@ import com.nimbusds.oauth2.sdk.ParseException;
 
 
 /**
- * Date with timezone offset. Supports basic ISO 8601 formatting and parsing.
+ * Date with optional timezone offset. Supports basic ISO 8601 formatting and
+ * parsing.
  */
 public class DateWithTimeZoneOffset {
 	
@@ -48,12 +49,24 @@ public class DateWithTimeZoneOffset {
 	
 	
 	/**
-	 * Creates a new date in UTC.
+	 * {@code true} if the date is in UTC.
+	 */
+	private final boolean isUTC;
+	
+	
+	/**
+	 * Creates a new date in UTC, to be {@link #toISO8601String() output}
+	 * with {@code Z} timezone designation.
 	 *
 	 * @param date The date. Must not be {@code null}.
 	 */
 	public DateWithTimeZoneOffset(final Date date) {
-		this(date, 0);
+		if (date == null) {
+			throw new IllegalArgumentException("The date must not be null");
+		}
+		this.date = date;
+		tzOffsetMinutes = 0;
+		isUTC = true;
 	}
 	
 	
@@ -74,6 +87,7 @@ public class DateWithTimeZoneOffset {
 			throw new IllegalArgumentException("The time zone offset must be less than +/- 12 x 60 minutes");
 		}
 		this.tzOffsetMinutes = tzOffsetMinutes;
+		isUTC = false;
 	}
 	
 	
@@ -95,6 +109,17 @@ public class DateWithTimeZoneOffset {
 	 */
 	public Date getDate() {
 		return date;
+	}
+	
+	
+	/**
+	 * Returns {@code true} if the date is in UTC.
+	 *
+	 * @return {@code true} if the date is in UTC, else the time zone
+	 *         {@link #getTimeZoneOffsetMinutes offset} applies.
+	 */
+	public boolean isUTC() {
+		return isUTC;
 	}
 	
 	
@@ -129,6 +154,10 @@ public class DateWithTimeZoneOffset {
 		localTimeSeconds = localTimeSeconds + (tzOffsetMinutes * 60);
 		
 		String out = sdf.format(DateUtils.fromSecondsSinceEpoch(localTimeSeconds));
+		
+		if (isUTC()) {
+			return out + "Z";
+		}
 		
 		// Append TZ offset
 		int tzOffsetWholeHours = tzOffsetMinutes / 60;
@@ -227,25 +256,24 @@ public class DateWithTimeZoneOffset {
 			throw new ParseException(e.getMessage());
 		}
 		
-		int tzOffsetMinutes;
-		
 		if (stringToParse.trim().endsWith("Z") || stringToParse.trim().endsWith("z")) {
-			tzOffsetMinutes = 0; // UTC
-		} else {
-			try {
-				// E.g. +03:00
-				String offsetSpec = stringToParse.substring("2019-11-01T06:19:43.000".length());
-				int hoursOffset = Integer.parseInt(offsetSpec.substring(0, 3));
-				int minutesOffset = Integer.parseInt(offsetSpec.substring(4));
-				if (offsetSpec.startsWith("+")) {
-					tzOffsetMinutes = hoursOffset * 60 + minutesOffset;
-				} else {
-					// E.g. -03:00, -00:30
-					tzOffsetMinutes = hoursOffset * 60 - minutesOffset;
-				}
-			} catch (Exception e) {
-				throw new ParseException("Unexpected timezone offset: " + s);
+			return new DateWithTimeZoneOffset(date); // UTC
+		}
+		
+		int tzOffsetMinutes;
+		try {
+			// E.g. +03:00
+			String offsetSpec = stringToParse.substring("2019-11-01T06:19:43.000".length());
+			int hoursOffset = Integer.parseInt(offsetSpec.substring(0, 3));
+			int minutesOffset = Integer.parseInt(offsetSpec.substring(4));
+			if (offsetSpec.startsWith("+")) {
+				tzOffsetMinutes = hoursOffset * 60 + minutesOffset;
+			} else {
+				// E.g. -03:00, -00:30
+				tzOffsetMinutes = hoursOffset * 60 - minutesOffset;
 			}
+		} catch (Exception e) {
+			throw new ParseException("Unexpected timezone offset: " + s);
 		}
 		
 		return new DateWithTimeZoneOffset(date, tzOffsetMinutes);

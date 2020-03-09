@@ -30,17 +30,19 @@ import com.nimbusds.oauth2.sdk.ParseException;
 public class DateWithTimeZoneOffsetTest extends TestCase {
 	
 	
-	public void testWithNoOffset() throws ParseException {
+	public void testWithUTC() throws ParseException {
 		
 		// 2019-11-01T16:19:43Z
 		Date date = DateUtils.fromSecondsSinceEpoch(1572625183L);
 		DateWithTimeZoneOffset dtz = new DateWithTimeZoneOffset(date);
 		assertEquals(date, dtz.getDate());
+		assertTrue(dtz.isUTC());
 		assertEquals(0, dtz.getTimeZoneOffsetMinutes());
-		assertEquals("2019-11-01T16:19:43+00:00", dtz.toISO8601String());
+		assertEquals("2019-11-01T16:19:43Z", dtz.toISO8601String());
 		
 		dtz = DateWithTimeZoneOffset.parseISO8601String(dtz.toISO8601String());
 		assertEquals(date, dtz.getDate());
+		assertTrue(dtz.isUTC());
 		assertEquals(0, dtz.getTimeZoneOffsetMinutes());
 	}
 	
@@ -51,11 +53,13 @@ public class DateWithTimeZoneOffsetTest extends TestCase {
 		Date date = DateUtils.fromSecondsSinceEpoch(1572625183L);
 		DateWithTimeZoneOffset dtz = new DateWithTimeZoneOffset(date, 3 * 60);
 		assertEquals(date, dtz.getDate());
+		assertFalse(dtz.isUTC());
 		assertEquals(3 * 60, dtz.getTimeZoneOffsetMinutes());
 		assertEquals("2019-11-01T19:19:43+03:00", dtz.toISO8601String());
 		
 		dtz = DateWithTimeZoneOffset.parseISO8601String(dtz.toISO8601String());
 		assertEquals(date, dtz.getDate());
+		assertFalse(dtz.isUTC());
 		assertEquals(3 * 60, dtz.getTimeZoneOffsetMinutes());
 	}
 	
@@ -66,11 +70,13 @@ public class DateWithTimeZoneOffsetTest extends TestCase {
 		Date date = DateUtils.fromSecondsSinceEpoch(1572625183L);
 		DateWithTimeZoneOffset dtz = new DateWithTimeZoneOffset(date, 3 * 60 + 30);
 		assertEquals(date, dtz.getDate());
+		assertFalse(dtz.isUTC());
 		assertEquals(3 * 60 + 30, dtz.getTimeZoneOffsetMinutes());
 		assertEquals("2019-11-01T19:49:43+03:30", dtz.toISO8601String());
 		
 		dtz = DateWithTimeZoneOffset.parseISO8601String(dtz.toISO8601String());
 		assertEquals(date, dtz.getDate());
+		assertFalse(dtz.isUTC());
 		assertEquals(3 * 60 + 30, dtz.getTimeZoneOffsetMinutes());
 	}
 	
@@ -81,11 +87,13 @@ public class DateWithTimeZoneOffsetTest extends TestCase {
 		Date date = DateUtils.fromSecondsSinceEpoch(1572625183L);
 		DateWithTimeZoneOffset dtz = new DateWithTimeZoneOffset(date, 30);
 		assertEquals(date, dtz.getDate());
+		assertFalse(dtz.isUTC());
 		assertEquals(30, dtz.getTimeZoneOffsetMinutes());
 		assertEquals("2019-11-01T16:49:43+00:30", dtz.toISO8601String());
 		
 		dtz = DateWithTimeZoneOffset.parseISO8601String(dtz.toISO8601String());
 		assertEquals(date, dtz.getDate());
+		assertFalse(dtz.isUTC());
 		assertEquals(30, dtz.getTimeZoneOffsetMinutes());
 	}
 	
@@ -96,11 +104,13 @@ public class DateWithTimeZoneOffsetTest extends TestCase {
 		Date date = DateUtils.fromSecondsSinceEpoch(1572625183L);
 		DateWithTimeZoneOffset dtz = new DateWithTimeZoneOffset(date, 10 * 60);
 		assertEquals(date, dtz.getDate());
+		assertFalse(dtz.isUTC());
 		assertEquals(10 * 60, dtz.getTimeZoneOffsetMinutes());
 		assertEquals("2019-11-02T02:19:43+10:00", dtz.toISO8601String());
 		
 		dtz = DateWithTimeZoneOffset.parseISO8601String(dtz.toISO8601String());
 		assertEquals(date, dtz.getDate());
+		assertFalse(dtz.isUTC());
 		assertEquals(10 * 60, dtz.getTimeZoneOffsetMinutes());
 	}
 	
@@ -111,11 +121,13 @@ public class DateWithTimeZoneOffsetTest extends TestCase {
 		Date date = DateUtils.fromSecondsSinceEpoch(1572625183L);
 		DateWithTimeZoneOffset dtz = new DateWithTimeZoneOffset(date, -3 * 60);
 		assertEquals(date, dtz.getDate());
+		assertFalse(dtz.isUTC());
 		assertEquals(-3 * 60, dtz.getTimeZoneOffsetMinutes());
 		assertEquals("2019-11-01T13:19:43-03:00", dtz.toISO8601String());
 		
 		dtz = DateWithTimeZoneOffset.parseISO8601String(dtz.toISO8601String());
 		assertEquals(date, dtz.getDate());
+		assertFalse(dtz.isUTC());
 		assertEquals(-3 * 60, dtz.getTimeZoneOffsetMinutes());
 	}
 	
@@ -126,11 +138,13 @@ public class DateWithTimeZoneOffsetTest extends TestCase {
 		Date date = DateUtils.fromSecondsSinceEpoch(1572625183L);
 		DateWithTimeZoneOffset dtz = new DateWithTimeZoneOffset(date, -3 * 60 - 30);
 		assertEquals(date, dtz.getDate());
+		assertFalse(dtz.isUTC());
 		assertEquals(-3 * 60 - 30, dtz.getTimeZoneOffsetMinutes());
 		assertEquals("2019-11-01T12:49:43-03:30", dtz.toISO8601String());
 		
 		dtz = DateWithTimeZoneOffset.parseISO8601String(dtz.toISO8601String());
 		assertEquals(date, dtz.getDate());
+		assertFalse(dtz.isUTC());
 		assertEquals(-3 * 60 - 30, dtz.getTimeZoneOffsetMinutes());
 	}
 	
@@ -141,11 +155,13 @@ public class DateWithTimeZoneOffsetTest extends TestCase {
 		Date date = DateUtils.fromSecondsSinceEpoch(1572625183L);
 		DateWithTimeZoneOffset dtz = new DateWithTimeZoneOffset(date, -30);
 		assertEquals(date, dtz.getDate());
+		assertFalse(dtz.isUTC());
 		assertEquals(-30, dtz.getTimeZoneOffsetMinutes());
 		assertEquals("2019-11-01T15:49:43-00:30", dtz.toISO8601String());
 		
 		dtz = DateWithTimeZoneOffset.parseISO8601String(dtz.toISO8601String());
 		assertEquals(date, dtz.getDate());
+		assertFalse(dtz.isUTC());
 		assertEquals(-30, dtz.getTimeZoneOffsetMinutes());
 	}
 	
@@ -156,11 +172,13 @@ public class DateWithTimeZoneOffsetTest extends TestCase {
 		Date date = DateUtils.fromSecondsSinceEpoch(1572625183L);
 		DateWithTimeZoneOffset dtz = new DateWithTimeZoneOffset(date, -10 * 60);
 		assertEquals(date, dtz.getDate());
+		assertFalse(dtz.isUTC());
 		assertEquals(-10 * 60, dtz.getTimeZoneOffsetMinutes());
 		assertEquals("2019-11-01T06:19:43-10:00", dtz.toISO8601String());
 		
 		dtz = DateWithTimeZoneOffset.parseISO8601String(dtz.toISO8601String());
 		assertEquals(date, dtz.getDate());
+		assertFalse(dtz.isUTC());
 		assertEquals(-10 * 60, dtz.getTimeZoneOffsetMinutes());
 	}
 	
@@ -169,6 +187,7 @@ public class DateWithTimeZoneOffsetTest extends TestCase {
 		
 		DateWithTimeZoneOffset dtz = DateWithTimeZoneOffset.parseISO8601String("2019-11-01T16:19:43Z");
 		assertEquals(DateUtils.fromSecondsSinceEpoch(1572625183L), dtz.getDate());
+		assertTrue(dtz.isUTC());
 		assertEquals(0, dtz.getTimeZoneOffsetMinutes());
 	}
 	
@@ -177,10 +196,10 @@ public class DateWithTimeZoneOffsetTest extends TestCase {
 		
 		DateWithTimeZoneOffset dtz = DateWithTimeZoneOffset.parseISO8601String("2012-04-23T18:25:43+01");
 		assertEquals(1335201943000L, dtz.getDate().getTime());
+		assertFalse(dtz.isUTC());
 		assertEquals(60, dtz.getTimeZoneOffsetMinutes());
 		
 		assertEquals("2012-04-23T18:25:43+01:00", new DateWithTimeZoneOffset(new Date(1335201943000L), 60).toISO8601String());
-		
 	}
 	
 	
@@ -188,10 +207,10 @@ public class DateWithTimeZoneOffsetTest extends TestCase {
 		
 		DateWithTimeZoneOffset dtz = DateWithTimeZoneOffset.parseISO8601String("2012-04-23T18:25:43+0100");
 		assertEquals(1335201943000L, dtz.getDate().getTime());
+		assertFalse(dtz.isUTC());
 		assertEquals(60, dtz.getTimeZoneOffsetMinutes());
 		
 		assertEquals("2012-04-23T18:25:43+01:00", new DateWithTimeZoneOffset(new Date(1335201943000L), 60).toISO8601String());
-		
 	}
 	
 	
@@ -199,6 +218,7 @@ public class DateWithTimeZoneOffsetTest extends TestCase {
 		
 		DateWithTimeZoneOffset dtz = DateWithTimeZoneOffset.parseISO8601String("2012-04-23T18:25:43.511+01:00");
 		assertEquals(1335201943511L, dtz.getDate().getTime());
+		assertFalse(dtz.isUTC());
 		assertEquals(60, dtz.getTimeZoneOffsetMinutes());
 		
 		assertEquals("2012-04-23T18:25:43+01:00", new DateWithTimeZoneOffset(new Date(1335201943511L), 60).toISO8601String());
