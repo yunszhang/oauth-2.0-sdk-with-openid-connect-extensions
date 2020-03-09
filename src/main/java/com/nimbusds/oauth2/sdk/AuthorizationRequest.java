@@ -64,8 +64,7 @@ import com.nimbusds.openid.connect.sdk.Prompt;
  *     <li>OAuth 2.0 Multiple Response Type Encoding Practices 1.0.
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
  *     <li>Proof Key for Code Exchange by OAuth Public Clients (RFC 7636).
- *     <li>Resource Indicators for OAuth 2.0
- *         (draft-ietf-oauth-resource-indicators-00)
+ *     <li>Resource Indicators for OAuth 2.0 (RFC 8707)
  *     <li>OAuth 2.0 Incremental Authorization
  *         (draft-ietf-oauth-incremental-authz-00)
  *     <li>The OAuth 2.0 Authorization Framework: JWT Secured Authorization

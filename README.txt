@@ -91,8 +91,7 @@ This SDK version implements the following standards and drafts:
     * OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound Access
       Tokens (RFC 8705)
 
-    * Resource Indicators for OAuth 2.0
-      (draft-ietf-oauth-resource-indicators-00)
+    * Resource Indicators for OAuth 2.0 (RFC 8707)
 
     * OAuth 2.0 Incremental Authorization
       (draft-ietf-oauth-incremental-authz-00)
