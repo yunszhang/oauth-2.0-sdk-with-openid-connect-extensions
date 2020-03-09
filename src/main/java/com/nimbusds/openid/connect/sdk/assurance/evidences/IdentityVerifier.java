@@ -58,20 +58,12 @@ public final class IdentityVerifier implements JSONAware {
 	/**
 	 * Creates a new verifier.
 	 *
-	 * @param organization The organisation. Must not be {@code null}.
+	 * @param organization The organisation, {@code null} if not specified.
 	 * @param txn          Identifier for the identity verification
-	 *                     transaction. Must not be {@code null}.
+	 *                     transaction, {@code null} if not specified.
 	 */
 	public IdentityVerifier(final String organization, final TXN txn) {
-		
-		if (organization == null) {
-			throw new IllegalArgumentException("The organization must not be null");
-		}
 		this.organization = organization;
-		
-		if (txn == null) {
-			throw new IllegalArgumentException("The txn must not be null");
-		}
 		this.txn = txn;
 	}
 	
@@ -79,7 +71,7 @@ public final class IdentityVerifier implements JSONAware {
 	/**
 	 * Returns the organisation.
 	 *
-	 * @return The organisation.
+	 * @return The organisation, {@code null} if not specified.
 	 */
 	public String getOrganization() {
 		return organization;
@@ -89,7 +81,8 @@ public final class IdentityVerifier implements JSONAware {
 	/**
 	 * Returns the identifier for the identity verification transaction.
 	 *
-	 * @return The identity verification transaction identifier.
+	 * @return The identity verification transaction identifier,
+	 *         {@code null} if not specified.
 	 */
 	public TXN getTXN() {
 		return txn;
@@ -103,8 +96,12 @@ public final class IdentityVerifier implements JSONAware {
 	 */
 	public JSONObject toJSONObject() {
 		JSONObject o = new JSONObject();
-		o.put("organization", getOrganization());
-		o.put("txn", getTXN().getValue());
+		if (getOrganization() != null) {
+			o.put("organization", getOrganization());
+		}
+		if (getTXN() != null) {
+			o.put("txn", getTXN().getValue());
+		}
 		return o;
 	}
 	
@@ -143,8 +140,11 @@ public final class IdentityVerifier implements JSONAware {
 	public static IdentityVerifier parse(final JSONObject jsonObject)
 		throws ParseException {
 		
-		String org = JSONObjectUtils.getString(jsonObject, "organization");
-		TXN txn = new TXN(JSONObjectUtils.getString(jsonObject, "txn"));
+		String org = JSONObjectUtils.getString(jsonObject, "organization", null);
+		TXN txn = null;
+		if (jsonObject.get("txn") != null) {
+			txn = new TXN(JSONObjectUtils.getString(jsonObject, "txn"));
+		}
 		return new IdentityVerifier(org, txn);
 	}
 }
