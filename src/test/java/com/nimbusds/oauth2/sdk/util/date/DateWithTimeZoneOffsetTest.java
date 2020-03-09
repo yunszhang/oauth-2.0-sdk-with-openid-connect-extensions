@@ -34,7 +34,7 @@ public class DateWithTimeZoneOffsetTest extends TestCase {
 		
 		// 2019-11-01T16:19:43Z
 		Date date = DateUtils.fromSecondsSinceEpoch(1572625183L);
-		DateWithTimeZoneOffset dtz = new DateWithTimeZoneOffset(date, 0);
+		DateWithTimeZoneOffset dtz = new DateWithTimeZoneOffset(date);
 		assertEquals(date, dtz.getDate());
 		assertEquals(0, dtz.getTimeZoneOffsetMinutes());
 		assertEquals("2019-11-01T16:19:43+00:00", dtz.toISO8601String());

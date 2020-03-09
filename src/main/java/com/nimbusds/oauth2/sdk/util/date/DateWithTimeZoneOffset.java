@@ -48,6 +48,16 @@ public class DateWithTimeZoneOffset {
 	
 	
 	/**
+	 * Creates a new date in UTC.
+	 *
+	 * @param date The date. Must not be {@code null}.
+	 */
+	public DateWithTimeZoneOffset(final Date date) {
+		this(date, 0);
+	}
+	
+	
+	/**
 	 * Creates a new date with timezone offset.
 	 *
 	 * @param date            The date. Must not be {@code null}.
