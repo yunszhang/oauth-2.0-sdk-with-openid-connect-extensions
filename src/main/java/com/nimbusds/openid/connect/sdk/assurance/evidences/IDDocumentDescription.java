@@ -82,12 +82,15 @@ public class IDDocumentDescription implements JSONAware {
 	 * Creates a new identity document description.
 	 *
 	 * @param type           The type. Must not be {@code null}.
-	 * @param number         The number. Must not be {@code null}.
-	 * @param issuerName     The issuer name. Must not be {@code null}.
-	 * @param issuerCountry  The issuer country. Must not be {@code null}.
-	 * @param dateOfIssuance The date of issuance. Must not be
-	 *                       {@code null}.
-	 * @param dateOfExpiry   The date of expiry. Must not be {@code null}.
+	 * @param number         The number, {@code null} if not specified.
+	 * @param issuerName     The issuer name, {@code null} if not
+	 *                       specified.
+	 * @param issuerCountry  The issuer country, {@code null} if not
+	 *                       specified.
+	 * @param dateOfIssuance The date of issuance, {@code null} if not
+	 *                       specified.
+	 * @param dateOfExpiry   The date of expiry, {@code null} if not
+	 *                       specified.
 	 */
 	public IDDocumentDescription(final IDDocumentType type,
 				     final String number,
@@ -101,29 +104,10 @@ public class IDDocumentDescription implements JSONAware {
 		}
 		this.type = type;
 		
-		if (number == null) {
-			throw new IllegalArgumentException("The number must not be null");
-		}
 		this.number = number;
-		
-		if (issuerName == null) {
-			throw new IllegalArgumentException("The issuer name must not be null");
-		}
 		this.issuerName = issuerName;
-		
-		if (issuerCountry == null) {
-			throw new IllegalArgumentException("The issuer country must not be null");
-		}
 		this.issuerCountry = issuerCountry;
-		
-		if (dateOfIssuance == null) {
-			throw new IllegalArgumentException("The date of issuance must not be null");
-		}
 		this.dateOfIssuance = dateOfIssuance;
-		
-		if (dateOfExpiry == null) {
-			throw new IllegalArgumentException("The date of expiry must not be null");
-		}
 		this.dateOfExpiry = dateOfExpiry;
 	}
 	
@@ -141,7 +125,7 @@ public class IDDocumentDescription implements JSONAware {
 	/**
 	 * Returns the identity document number.
 	 *
-	 * @return The identity document number.
+	 * @return The identity document number, {@code null} if not specified.
 	 */
 	public String getNumber() {
 		return number;
@@ -151,7 +135,7 @@ public class IDDocumentDescription implements JSONAware {
 	/**
 	 * Returns the issuer name.
 	 *
-	 * @return The issuer name.
+	 * @return The issuer name, {@code null} if not specified.
 	 */
 	public String getIssuerName() {
 		return issuerName;
@@ -161,7 +145,7 @@ public class IDDocumentDescription implements JSONAware {
 	/**
 	 * Returns the issuer country.
 	 *
-	 * @return The issuer country code.
+	 * @return The issuer country code, {@code null} if not specified.
 	 */
 	public CountryCode getIssuerCountry() {
 		return issuerCountry;
@@ -171,7 +155,7 @@ public class IDDocumentDescription implements JSONAware {
 	/**
 	 * Returns the date of issuance.
 	 *
-	 * @return The date of issuance.
+	 * @return The date of issuance, {@code null} if not specified.
 	 */
 	public SimpleDate getDateOfIssuance() {
 		return dateOfIssuance;
@@ -181,7 +165,7 @@ public class IDDocumentDescription implements JSONAware {
 	/**
 	 * Returns the date of expiry.
 	 *
-	 * @return The date of expiry.
+	 * @return The date of expiry, {@code null} if not specified.
 	 */
 	public SimpleDate getDateOfExpiry() {
 		return dateOfExpiry;
@@ -197,13 +181,25 @@ public class IDDocumentDescription implements JSONAware {
 	public JSONObject toJSONObject() {
 		JSONObject o = new JSONObject();
 		o.put("type", getType().getValue());
-		o.put("number", getNumber()); // TODO https://bitbucket.org/openid/connect/issues/1123/assurance-4111-id_document-document-number
+		if (getNumber() != null) {
+			o.put("number", getNumber());
+		}
 		JSONObject issuerObject = new JSONObject();
-		issuerObject.put("name", getIssuerName());
-		issuerObject.put("country", getIssuerCountry().getValue());
-		o.put("issuer", issuerObject);
-		o.put("date_of_issuance", getDateOfIssuance().toISO8601String());
-		o.put("date_of_expiry", getDateOfExpiry().toISO8601String());
+		if (getIssuerName() != null) {
+			issuerObject.put("name", getIssuerName());
+		}
+		if (getIssuerCountry() != null) {
+			issuerObject.put("country", getIssuerCountry().getValue());
+		}
+		if (! issuerObject.isEmpty()) {
+			o.put("issuer", issuerObject);
+		}
+		if (getDateOfIssuance() != null) {
+			o.put("date_of_issuance", getDateOfIssuance().toISO8601String());
+		}
+		if (getDateOfExpiry() != null) {
+			o.put("date_of_expiry", getDateOfExpiry().toISO8601String());
+		}
 		return o;
 	}
 	
@@ -226,11 +222,11 @@ public class IDDocumentDescription implements JSONAware {
 		if (!(o instanceof IDDocumentDescription)) return false;
 		IDDocumentDescription that = (IDDocumentDescription) o;
 		return getType().equals(that.getType()) &&
-			getNumber().equals(that.getNumber()) &&
-			getIssuerName().equals(that.getIssuerName()) &&
-			getIssuerCountry().equals(that.getIssuerCountry()) &&
-			getDateOfIssuance().equals(that.getDateOfIssuance()) &&
-			getDateOfExpiry().equals(that.getDateOfExpiry());
+			Objects.equals(getNumber(), that.getNumber()) &&
+			Objects.equals(getIssuerName(), that.getIssuerName()) &&
+			Objects.equals(getIssuerCountry(), that.getIssuerCountry()) &&
+			Objects.equals(getDateOfIssuance(), that.getDateOfIssuance()) &&
+			Objects.equals(getDateOfExpiry(), that.getDateOfExpiry());
 	}
 	
 	
@@ -254,14 +250,28 @@ public class IDDocumentDescription implements JSONAware {
 		throws ParseException {
 		
 		IDDocumentType type = new IDDocumentType(JSONObjectUtils.getString(jsonObject, "type"));
-		String number = JSONObjectUtils.getString(jsonObject, "number");
+		String number = JSONObjectUtils.getString(jsonObject, "number", null);
 		
-		JSONObject issuerObject = JSONObjectUtils.getJSONObject(jsonObject, "issuer");
-		String issuerName = JSONObjectUtils.getString(issuerObject, "name");
-		CountryCode issuerCountry = ISO3166_1Alpha2CountryCode.parse(JSONObjectUtils.getString(issuerObject, "country"));
+		JSONObject issuerObject = JSONObjectUtils.getJSONObject(jsonObject, "issuer", null);
 		
-		SimpleDate dateOfIssuance = SimpleDate.parseISO8601String(JSONObjectUtils.getString(jsonObject, "date_of_issuance"));
-		SimpleDate dateOfExpiry = SimpleDate.parseISO8601String(JSONObjectUtils.getString(jsonObject, "date_of_expiry"));
+		String issuerName = null;
+		CountryCode issuerCountry = null;
+		if (issuerObject != null) {
+			issuerName = JSONObjectUtils.getString(issuerObject, "name", null);
+			if (issuerObject.get("country") != null) {
+				issuerCountry = ISO3166_1Alpha2CountryCode.parse(JSONObjectUtils.getString(issuerObject, "country"));
+			}
+		}
+		
+		SimpleDate dateOfIssuance = null;
+		if (jsonObject.get("date_of_issuance") != null) {
+			dateOfIssuance = SimpleDate.parseISO8601String(JSONObjectUtils.getString(jsonObject, "date_of_issuance"));
+		}
+		
+		SimpleDate dateOfExpiry = null;
+		if (jsonObject.get("date_of_expiry") != null) {
+			dateOfExpiry = SimpleDate.parseISO8601String(JSONObjectUtils.getString(jsonObject, "date_of_expiry"));
+		}
 		
 		return new IDDocumentDescription(type, number, issuerName, issuerCountry, dateOfIssuance, dateOfExpiry);
 	}
