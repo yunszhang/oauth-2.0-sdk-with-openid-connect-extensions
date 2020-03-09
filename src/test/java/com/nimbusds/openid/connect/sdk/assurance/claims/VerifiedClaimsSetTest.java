@@ -141,7 +141,7 @@ public class VerifiedClaimsSetTest extends TestCase {
 		IdentityVerification verification = verifiedClaimsSet.getVerification();
 		assertEquals(IdentityTrustFramework.DE_AML, verification.getTrustFramework());
 		assertEquals("2012-04-23T18:25:43+01:00", verification.getVerificationTime().toISO8601String());
-		assertEquals("676q3636461467647q8498785747q487", verification.getVerificationProcess());
+		assertEquals("676q3636461467647q8498785747q487", verification.getVerificationProcess().getValue());
 		
 		IDDocumentEvidence idDocumentEvidence = verification.getEvidence().get(0).toIDDocumentEvidence();
 		assertEquals(1, verification.getEvidence().size());
@@ -231,7 +231,7 @@ public class VerifiedClaimsSetTest extends TestCase {
 		IdentityVerification verification = verifiedClaimsSet.getVerification();
 		assertEquals(IdentityTrustFramework.DE_AML, verification.getTrustFramework());
 		assertEquals("2012-04-23T18:25:43+01:00", verification.getVerificationTime().toISO8601String());
-		assertEquals("676q3636461467647q8498785747q487", verification.getVerificationProcess());
+		assertEquals("676q3636461467647q8498785747q487", verification.getVerificationProcess().getValue());
 		
 		IDDocumentEvidence idDocumentEvidence = verification.getEvidence().get(0).toIDDocumentEvidence();
 		assertEquals(IdentityEvidenceType.ID_DOCUMENT, idDocumentEvidence.getEvidenceType());

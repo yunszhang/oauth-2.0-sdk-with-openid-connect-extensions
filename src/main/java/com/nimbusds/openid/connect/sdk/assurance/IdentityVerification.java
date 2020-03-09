@@ -63,7 +63,7 @@ public final class IdentityVerification implements JSONAware {
 	 * The verification process reference if required by the trust
 	 * framework.
 	 */
-	private final String verificationProcess;
+	private final VerificationProcess verificationProcess;
 	
 	
 	/**
@@ -88,7 +88,7 @@ public final class IdentityVerification implements JSONAware {
 	 */
 	public IdentityVerification(final IdentityTrustFramework trustFramework,
 				    final DateWithTimeZoneOffset time,
-				    final String verificationProcess,
+				    final VerificationProcess verificationProcess,
 				    final IdentityEvidence evidence) {
 		
 		this(trustFramework, time, verificationProcess, Collections.singletonList(evidence));
@@ -111,7 +111,7 @@ public final class IdentityVerification implements JSONAware {
 	 */
 	public IdentityVerification(final IdentityTrustFramework trustFramework,
 				    final DateWithTimeZoneOffset time,
-				    final String verificationProcess,
+				    final VerificationProcess verificationProcess,
 				    final List<IdentityEvidence> evidence) {
 		
 		if (trustFramework == null) {
@@ -152,7 +152,7 @@ public final class IdentityVerification implements JSONAware {
 	 * @return The verification process reference if required by the trust
 	 *         framework, {@code null} if not specified.
 	 */
-	public String getVerificationProcess() {
+	public VerificationProcess getVerificationProcess() {
 		return verificationProcess;
 	}
 	
@@ -183,7 +183,7 @@ public final class IdentityVerification implements JSONAware {
 		}
 		
 		if (getVerificationProcess() != null) {
-			o.put("verification_process", getVerificationProcess());
+			o.put("verification_process", getVerificationProcess().getValue());
 		}
 		
 		if (getEvidence() != null) {
@@ -224,9 +224,9 @@ public final class IdentityVerification implements JSONAware {
 			time = DateWithTimeZoneOffset.parseISO8601String(JSONObjectUtils.getString(jsonObject, "time"));
 		}
 		
-		String verificationProcess = null;
+		VerificationProcess verificationProcess = null;
 		if (jsonObject.get("verification_process") != null) {
-			verificationProcess = JSONObjectUtils.getString(jsonObject, "verification_process");
+			verificationProcess = new VerificationProcess(JSONObjectUtils.getString(jsonObject, "verification_process"));
 		}
 		
 		List<IdentityEvidence> evidence = null;

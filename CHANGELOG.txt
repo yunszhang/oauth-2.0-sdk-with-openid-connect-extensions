@@ -1266,4 +1266,7 @@ version 7.1.1 (2020-02-25)
       classes (iss #291).
 
 version 7.2 (2020-03-09)
+    * Adds new VerificationProcess class for type-safe representation of
+      "verification_process" in OpenID Connect for Identity Assurance 1.0,
+      updates the IdentityVerification class accordingly (breaking change).
     * New DateWithTimeZoneOffset constructor for UTC.

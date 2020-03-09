@@ -40,6 +40,7 @@ import com.nimbusds.oauth2.sdk.util.date.DateWithTimeZoneOffset;
 import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
 import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
 import com.nimbusds.openid.connect.sdk.assurance.IdentityVerification;
+import com.nimbusds.openid.connect.sdk.assurance.VerificationProcess;
 import com.nimbusds.openid.connect.sdk.assurance.claims.Birthplace;
 import com.nimbusds.openid.connect.sdk.assurance.claims.CountryCode;
 import com.nimbusds.openid.connect.sdk.assurance.claims.ISO3166_1Alpha2CountryCode;
@@ -1106,7 +1107,7 @@ public class UserInfoTest extends TestCase {
 		IdentityVerification verification = verifiedClaims.getVerification();
 		assertEquals(IdentityTrustFramework.DE_AML, verification.getTrustFramework());
 		assertEquals("2012-04-23T18:25:43+01:00", verification.getVerificationTime().toISO8601String());
-		assertEquals("676q3636461467647q8498785747q487", verification.getVerificationProcess());
+		assertEquals(new VerificationProcess("676q3636461467647q8498785747q487"), verification.getVerificationProcess());
 		
 		IDDocumentEvidence evidence = verification.getEvidence().get(0).toIDDocumentEvidence();
 		assertEquals(IdentityEvidenceType.ID_DOCUMENT, evidence.getEvidenceType());
@@ -1311,7 +1312,7 @@ public class UserInfoTest extends TestCase {
 		
 		Date now = new Date(new Date().getTime() / 1000 * 1000); // second precision
 		
-		String verificationProcess = "f3ae0ee3-bcda-4e4b-bf84-3b35eb0a1bc3";
+		VerificationProcess verificationProcess = new VerificationProcess("f3ae0ee3-bcda-4e4b-bf84-3b35eb0a1bc3");
 		
 		QESEvidence qesEvidence = new QESEvidence(
 			new Issuer("issuer"),
@@ -1366,7 +1367,7 @@ public class UserInfoTest extends TestCase {
 		DateWithTimeZoneOffset timestamp = new DateWithTimeZoneOffset(
 			now,
 			TimeZone.getDefault());
-		String verificationProcess = "4ebc8150-1b26-460a-adc1-3e9096ab88f9";
+		VerificationProcess verificationProcess = new VerificationProcess("4ebc8150-1b26-460a-adc1-3e9096ab88f9");
 		
 		IdentityVerification verification = new IdentityVerification(
 			IdentityTrustFramework.EIDAS_IAL_SUBSTANTIAL,

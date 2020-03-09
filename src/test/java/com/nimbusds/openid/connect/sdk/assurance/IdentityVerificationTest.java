@@ -83,7 +83,7 @@ public class IdentityVerificationTest extends TestCase {
 		
 		DateWithTimeZoneOffset ts = new DateWithTimeZoneOffset(now, 60);
 		
-		String verificationProcess = "25c2cf21-a40e-4901-a42a-d2b6e531feee";
+		VerificationProcess verificationProcess = new VerificationProcess("25c2cf21-a40e-4901-a42a-d2b6e531feee");
 		QESEvidence evidence = new QESEvidence(
 			new Issuer("qes-issuer"),
 			"8e0d81a2-c371-4a1e-9f68-a879b4053be1",
@@ -104,7 +104,7 @@ public class IdentityVerificationTest extends TestCase {
 		
 		assertEquals(IdentityTrustFramework.DE_AML.getValue(), jsonObject.get("trust_framework"));
 		assertEquals(ts.toISO8601String(), jsonObject.get("time"));
-		assertEquals(verificationProcess, jsonObject.get("verification_process"));
+		assertEquals(verificationProcess.getValue(), jsonObject.get("verification_process"));
 		JSONArray evidenceArray = JSONObjectUtils.getJSONArray(jsonObject, "evidence");
 		assertEquals(1, evidenceArray.size());
 		QESEvidence parsedEvidence = QESEvidence.parse(JSONArrayUtils.toJSONObjectList(evidenceArray).get(0));
