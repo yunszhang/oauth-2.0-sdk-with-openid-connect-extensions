@@ -225,6 +225,17 @@ public class DateWithTimeZoneOffsetTest extends TestCase {
 	}
 	
 	
+	public void testParseWithMinutesOnly() throws ParseException {
+		
+		DateWithTimeZoneOffset dtz = DateWithTimeZoneOffset.parseISO8601String("2012-04-23T18:25Z");
+		assertEquals(1335205500000L, dtz.getDate().getTime());
+		assertTrue(dtz.isUTC());
+		assertEquals(0, dtz.getTimeZoneOffsetMinutes());
+		
+		assertEquals("2012-04-23T18:25:00Z", new DateWithTimeZoneOffset(new Date(1335205500000L)).toISO8601String());
+	}
+	
+	
 	public void testConstructorWithTimezoneArg() {
 		
 		Date date = new Date(1575494059423L);

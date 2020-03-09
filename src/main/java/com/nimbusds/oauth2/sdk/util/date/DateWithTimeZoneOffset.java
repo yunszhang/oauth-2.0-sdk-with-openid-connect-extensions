@@ -136,7 +136,8 @@ public class DateWithTimeZoneOffset {
 	
 	/**
 	 * Returns an ISO 8601 representation in
-	 * {@code YYYY-MM-DDThh:mm:ss±hh:mm} format.
+	 * {@code YYYY-MM-DDThh:mm:ssZ} or {@code YYYY-MM-DDThh:mm:ss±hh:mm}
+	 * format
 	 *
 	 * <p>Example: {@code 2019-11-01T18:19:43+03:00}
 	 *
@@ -249,9 +250,15 @@ public class DateWithTimeZoneOffset {
 			stringToParse = m.group(1) + ".000" + m.group(2);
 		}
 		
+		int colonCount = stringToParse.length() - stringToParse.replace(":", "").length();
+		
 		Date date;
 		try {
-			date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse(stringToParse);
+			if (colonCount == 1) {
+				date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmXXX").parse(stringToParse);
+			} else {
+				date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse(stringToParse);
+			}
 		} catch (java.text.ParseException e) {
 			throw new ParseException(e.getMessage());
 		}
