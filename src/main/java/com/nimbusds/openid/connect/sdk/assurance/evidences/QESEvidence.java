@@ -62,35 +62,24 @@ public final class QESEvidence extends IdentityEvidence implements JSONAware {
 	/**
 	 * Creates a new QES used as identity evidence.
 	 *
-	 * @param issuer       The QES issuer. Must not be {@code null}.
-	 * @param serialNumber The QES serial number. Must not be
-	 *                     {@code null}.
-	 * @param createdAt    The QES creation time. Must not be {@code null}.
+	 * @param issuer       The QES issuer, {@code null} if not specified.
+	 * @param serialNumber The QES serial number, {@code null} if not
+	 *                     specified.
+	 * @param createdAt    The QES creation time, {@code null} if not
+	 *                     specified.
 	 */
 	public QESEvidence(final Issuer issuer, final String serialNumber, final DateWithTimeZoneOffset createdAt) {
 		
 		super(IdentityEvidenceType.QES);
-		
-		if (issuer == null) {
-			throw new IllegalArgumentException("The QES issuer must not be null");
-		}
 		this.issuer = issuer;
-		
-		if (serialNumber == null) {
-			throw new IllegalArgumentException("The QES serial number must not be null");
-		}
 		this.serialNumber = serialNumber;
-		
-		if (createdAt == null) {
-			throw new IllegalArgumentException("The QES creation time must not be null");
-		}
 		this.createdAt = createdAt;
 	}
 	
 	
 	/**
 	 * Returns the QES issuer.
-	 * @return The QES issuer.
+	 * @return The QES issuer, {@code null} if not specified.
 	 */
 	public Issuer getQESIssuer() {
 		return issuer;
@@ -100,7 +89,7 @@ public final class QESEvidence extends IdentityEvidence implements JSONAware {
 	/**
 	 * Returns the QES serial number.
 	 *
-	 * @return The QES serial number string.
+	 * @return The QES serial number string, {@code null} if not specified.
 	 */
 	public String getQESSerialNumberString() {
 		return serialNumber;
@@ -110,7 +99,7 @@ public final class QESEvidence extends IdentityEvidence implements JSONAware {
 	/**
 	 * Returns The QES creation time.
 	 *
-	 * @return The QES creation time.
+	 * @return The QES creation time, {@code null} if not specified.
 	 */
 	public DateWithTimeZoneOffset getQESCreationTime() {
 		return createdAt;
@@ -121,9 +110,15 @@ public final class QESEvidence extends IdentityEvidence implements JSONAware {
 	public JSONObject toJSONObject() {
 		
 		JSONObject o = super.toJSONObject();
-		o.put("issuer", getQESIssuer().getValue());
-		o.put("serial_number", getQESSerialNumberString());
-		o.put("created_at", getQESCreationTime().toISO8601String());
+		if (getQESIssuer() != null) {
+			o.put("issuer", getQESIssuer().getValue());
+		}
+		if (getQESSerialNumberString() != null) {
+			o.put("serial_number", getQESSerialNumberString());
+		}
+		if (getQESCreationTime() != null) {
+			o.put("created_at", getQESCreationTime().toISO8601String());
+		}
 		return o;
 	}
 	
@@ -141,9 +136,19 @@ public final class QESEvidence extends IdentityEvidence implements JSONAware {
 		throws ParseException {
 		
 		ensureType(IdentityEvidenceType.QES, jsonObject);
-		Issuer issuer = new Issuer(JSONObjectUtils.getString(jsonObject, "issuer"));
-		String serialNumber = JSONObjectUtils.getString(jsonObject, "serial_number");
-		DateWithTimeZoneOffset createdAt = DateWithTimeZoneOffset.parseISO8601String(JSONObjectUtils.getString(jsonObject, "created_at"));
+		
+		Issuer issuer = null;
+		if (jsonObject.get("issuer") != null) {
+			issuer = new Issuer(JSONObjectUtils.getString(jsonObject, "issuer"));
+		}
+		
+		String serialNumber = JSONObjectUtils.getString(jsonObject, "serial_number", null);
+		
+		DateWithTimeZoneOffset createdAt = null;
+		if (jsonObject.get("created_at") != null) {
+			createdAt = DateWithTimeZoneOffset.parseISO8601String(JSONObjectUtils.getString(jsonObject, "created_at"));
+		}
+		
 		return new QESEvidence(issuer, serialNumber, createdAt);
 	}
 }

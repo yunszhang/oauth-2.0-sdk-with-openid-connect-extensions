@@ -31,28 +31,23 @@ import com.nimbusds.oauth2.sdk.util.date.DateWithTimeZoneOffset;
 public class QESEvidenceTest extends TestCase {
 	
 	
-	public void testConstructorArgRequirement() {
+	public void testMinimal() throws ParseException {
 		
-		try {
-			new QESEvidence(null, null, null);
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The QES issuer must not be null", e.getMessage());
-		}
+		QESEvidence qesEvidence = new QESEvidence(null, null, null);
 		
-		try {
-			new QESEvidence(new Issuer("qes-issuer"), null, null);
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The QES serial number must not be null", e.getMessage());
-		}
+		assertNull(qesEvidence.getQESIssuer());
+		assertNull(qesEvidence.getQESSerialNumberString());
+		assertNull(qesEvidence.getQESCreationTime());
 		
-		try {
-			new QESEvidence(new Issuer("qes-issuer"), "6efe7fa4-91d8-4821-9859-eaab40f321b6", null);
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The QES creation time must not be null", e.getMessage());
-		}
+		JSONObject jsonObject = qesEvidence.toJSONObject();
+		assertEquals(IdentityEvidenceType.QES.getValue(), jsonObject.get("type"));
+		assertEquals(1, jsonObject.size());
+		
+		qesEvidence = QESEvidence.parse(jsonObject);
+		
+		assertNull(qesEvidence.getQESIssuer());
+		assertNull(qesEvidence.getQESSerialNumberString());
+		assertNull(qesEvidence.getQESCreationTime());
 	}
 	
 	
