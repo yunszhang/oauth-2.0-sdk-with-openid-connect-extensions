@@ -66,7 +66,7 @@ import net.minidev.json.JSONObject;
  *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section
  *         2.
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-15), sections 2.1.2 and 3.4.
+ *         Access Tokens (RFC 8705), sections 2.1.2 and 3.4.
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM).
  * </ul>
@@ -1451,7 +1451,7 @@ public class ClientMetadata {
 	/**
 	 * Ensures that for {@code tls_client_auth} a certificate field for the
 	 * subject is specified. See
-	 * https://tools.ietf.org/html/draft-ietf-oauth-mtls-15#section-2.1.2
+	 * https://www.rfc-editor.org/rfc/rfc8705.html#section-2.1.2
 	 */
 	private void ensureExactlyOneCertSubjectFieldForTLSClientAuth()
 		throws IllegalStateException {

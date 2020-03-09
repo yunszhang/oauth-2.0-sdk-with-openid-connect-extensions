@@ -48,7 +48,7 @@ import net.jcip.annotations.ThreadSafe;
  *     <li>JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and
  *         Authorization Grants (RFC 7523).
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-15), section 2.
+ *         Access Tokens (RFC 8705), section 2.
  * </ul>
  */
 @ThreadSafe

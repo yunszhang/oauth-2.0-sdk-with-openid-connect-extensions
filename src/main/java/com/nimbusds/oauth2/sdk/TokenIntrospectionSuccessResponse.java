@@ -43,7 +43,7 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  * <ul>
  *     <li>OAuth 2.0 Token Introspection (RFC 7662).
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-15).
+ *         Access Tokens (RFC 8705).
  * </ul>
  */
 @Immutable

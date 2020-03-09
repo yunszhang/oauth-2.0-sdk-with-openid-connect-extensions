@@ -44,7 +44,7 @@ import com.nimbusds.oauth2.sdk.util.URLUtils;
  *
  * <ul>
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
- *         Access Tokens (draft-ietf-oauth-mtls-15), section 2.1.
+ *         Access Tokens (RFC 8705), section 2.1.
  * </ul>
  */
 @Immutable
