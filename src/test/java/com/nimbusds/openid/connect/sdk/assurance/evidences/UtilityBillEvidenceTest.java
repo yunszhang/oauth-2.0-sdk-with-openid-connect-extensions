@@ -30,28 +30,23 @@ import com.nimbusds.openid.connect.sdk.claims.Address;
 public class UtilityBillEvidenceTest extends TestCase {
 	
 	
-	public void testArgRequirement() {
+	public void testMinimal() throws ParseException {
 		
-		try {
-			new UtilityBillEvidence(null, null, null);
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The utility provider name must not be null", e.getMessage());
-		}
+		UtilityBillEvidence utilityBillEvidence = new UtilityBillEvidence(null, null, null);
 		
-		try {
-			new UtilityBillEvidence("Some Provider", null, null);
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The utility provider address must not be null", e.getMessage());
-		}
+		assertNull(utilityBillEvidence.getUtilityProviderName());
+		assertNull(utilityBillEvidence.getUtilityProviderAddress());
+		assertNull(utilityBillEvidence.getUtilityBillDate());
 		
-		try {
-			new UtilityBillEvidence("Some Provider", new Address(), null);
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The utility bill date must not be null", e.getMessage());
-		}
+		JSONObject jsonObject = utilityBillEvidence.toJSONObject();
+		assertEquals(IdentityEvidenceType.UTILITY_BILL.getValue(), jsonObject.get("type"));
+		assertEquals(1, jsonObject.size());
+		
+		utilityBillEvidence = UtilityBillEvidence.parse(jsonObject);
+		
+		assertNull(utilityBillEvidence.getUtilityProviderName());
+		assertNull(utilityBillEvidence.getUtilityProviderAddress());
+		assertNull(utilityBillEvidence.getUtilityBillDate());
 	}
 	
 	

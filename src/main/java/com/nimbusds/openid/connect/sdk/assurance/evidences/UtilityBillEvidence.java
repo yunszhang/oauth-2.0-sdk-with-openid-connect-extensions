@@ -61,30 +61,18 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 	/**
 	 * Creates a new utility bill used as identity evidence.
 	 *
-	 * @param providerName    The utility provider name. Must not be
-	 *                        {@code null}.
-	 * @param providerAddress The utility provider address details. Must
-	 *                        not be {@code null}.
-	 * @param date            The utility bill date. Must not be
-	 *                        {@code null}.
+	 * @param providerName    The utility provider name, {@code null} if
+	 *                        not specified.
+	 * @param providerAddress The utility provider address details,
+	 *                        {@code null} if not specified.
+	 * @param date            The utility bill date, {@code null} if not
+	 *                        specified.
 	 */
 	public UtilityBillEvidence(final String providerName, final Address providerAddress, final SimpleDate date) {
 		
 		super(IdentityEvidenceType.UTILITY_BILL);
-		
-		if (providerName == null) {
-			throw new IllegalArgumentException("The utility provider name must not be null");
-		}
 		this.providerName = providerName;
-		
-		if (providerAddress == null) {
-			throw new IllegalArgumentException("The utility provider address must not be null");
-		}
 		this.providerAddress = providerAddress;
-		
-		if (date == null) {
-			throw new IllegalArgumentException("The utility bill date must not be null");
-		}
 		this.date = date;
 	}
 	
@@ -92,7 +80,7 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 	/**
 	 * The utility provider name.
 	 *
-	 * @return The utility provider name.
+	 * @return The utility provider name, {@code null} if not specified.
 	 */
 	public String getUtilityProviderName() {
 		return providerName;
@@ -102,7 +90,8 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 	/**
 	 * Returns the utility provider address details.
 	 *
-	 * @return The utility provider address details.
+	 * @return The utility provider address details, {@code null} if not
+	 *         specified.
 	 */
 	public Address getUtilityProviderAddress() {
 		return providerAddress;
@@ -112,7 +101,7 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 	/**
 	 * Returns the utility bill date.
 	 *
-	 * @return The utility bill date.
+	 * @return The utility bill date, {@code null} if not specified.
 	 */
 	public SimpleDate getUtilityBillDate() {
 		return date;
@@ -125,11 +114,19 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 		JSONObject o = super.toJSONObject();
 		
 		JSONObject providerDetails = new JSONObject();
-		providerDetails.put("name", getUtilityProviderName());
-		providerDetails.putAll(getUtilityProviderAddress().toJSONObject());
-		o.put("provider", providerDetails);
+		if (getUtilityProviderName() != null) {
+			providerDetails.put("name", getUtilityProviderName());
+		}
+		if (getUtilityProviderAddress() != null) {
+			providerDetails.putAll(getUtilityProviderAddress().toJSONObject());
+		}
+		if (! providerDetails.isEmpty()) {
+			o.put("provider", providerDetails);
+		}
 		
-		o.put("date", getUtilityBillDate().toISO8601String());
+		if (getUtilityBillDate() != null) {
+			o.put("date", getUtilityBillDate().toISO8601String());
+		}
 		
 		return o;
 	}
@@ -149,12 +146,25 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 		
 		ensureType(IdentityEvidenceType.UTILITY_BILL, jsonObject);
 		
-		JSONObject providerDetails = JSONObjectUtils.getJSONObject(jsonObject, "provider");
-		String providerName = JSONObjectUtils.getString(providerDetails, "name");
-		providerDetails.remove("name");
-		Address providerAddress = Address.parse(providerDetails.toJSONString());
+		JSONObject providerDetails = JSONObjectUtils.getJSONObject(jsonObject, "provider", null);
 		
-		SimpleDate date = SimpleDate.parseISO8601String(JSONObjectUtils.getString(jsonObject, "date"));
+		String providerName = null;
+		Address providerAddress = null;
+		if (providerDetails != null) {
+			providerName = JSONObjectUtils.getString(providerDetails, "name", null);
+			
+			JSONObject providerDetailsCopy = new JSONObject(providerDetails);
+			providerDetailsCopy.remove("name");
+			
+			if (! providerDetailsCopy.isEmpty()) {
+				providerAddress = new Address(providerDetailsCopy);
+			}
+		}
+		
+		SimpleDate date = null;
+		if (jsonObject.get("date") != null) {
+			date = SimpleDate.parseISO8601String(JSONObjectUtils.getString(jsonObject, "date"));
+		}
 		
 		return new UtilityBillEvidence(providerName, providerAddress, date);
 	}
