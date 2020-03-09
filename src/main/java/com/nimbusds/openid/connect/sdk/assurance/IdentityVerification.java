@@ -75,7 +75,8 @@ public final class IdentityVerification implements JSONAware {
 	/**
 	 * Creates a new identity verification with a single evidence.
 	 *
-	 * @param trustFramework      The trust framework.
+	 * @param trustFramework      The trust framework. Must not be
+	 *                            {@code null}.
 	 * @param time                The verification timestamp if required by
 	 *                            the trust framework, {@code null} if not
 	 *                            required.
@@ -97,7 +98,8 @@ public final class IdentityVerification implements JSONAware {
 	/**
 	 * Creates a new identity verification
 	 *
-	 * @param trustFramework      The trust framework.
+	 * @param trustFramework      The trust framework. Must not be
+	 *                            {@code null}.
 	 * @param time                The verification timestamp if required by
 	 *                            the trust framework, {@code null} if not
 	 *                            required.
