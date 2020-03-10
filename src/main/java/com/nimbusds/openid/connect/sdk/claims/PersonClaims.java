@@ -162,10 +162,17 @@ public class PersonClaims extends ClaimsSet {
 	
 	/**
 	 * The birthplace claim name (OpenID Connect for Identity Assurance
-	 * 1.0).
+	 * 1.0). Alternative for {@link #PLACE_OF_BIRTH_CLAIM_NAME}.
 	 */
 	// https://bitbucket.org/openid/connect/issues/1119/place_of_birth-birthplace
 	public static final String BIRTHPLACE_CLAIM_NAME = "birthplace";
+	
+	
+	/**
+	 * The place of birth claim name (OpenID Connect for Identity Assurance
+	 * 1.0). Alternative for {@link #BIRTHPLACE_CLAIM_NAME}.
+	 */
+	public static final String PLACE_OF_BIRTH_CLAIM_NAME = "place_of_birth";
 	
 	
 	/**
@@ -239,6 +246,7 @@ public class PersonClaims extends ClaimsSet {
 			ADDRESS_CLAIM_NAME,
 			UPDATED_AT_CLAIM_NAME,
 			BIRTHPLACE_CLAIM_NAME,
+			PLACE_OF_BIRTH_CLAIM_NAME,
 			NATIONALITIES_CLAIM_NAME,
 			BIRTH_FAMILY_NAME_CLAIM_NAME,
 			BIRTH_GIVEN_NAME_CLAIM_NAME,
@@ -1134,6 +1142,43 @@ public class PersonClaims extends ClaimsSet {
 		
 		if (birthplace != null) {
 			setClaim(BIRTHPLACE_CLAIM_NAME, birthplace.toJSONObject());
+		}
+	}
+	
+	
+	// place_of_birth
+	
+	
+	/**
+	 * Gets the birthplace. Corresponds to the {@code place_of_birth} claim
+	 * from OpenID Connect for Identity Assurance 1.0. Alternative for
+	 * {@link #getBirthplace()}.
+	 *
+	 * @return The birthplace, {@code null} if not specified.
+	 */
+	public Birthplace getPlaceOfBirth() {
+		
+		JSONObject jsonObject = getClaim(PLACE_OF_BIRTH_CLAIM_NAME, JSONObject.class);
+		
+		if (jsonObject == null) {
+			return null;
+		}
+		
+		return new Birthplace(jsonObject);
+	}
+	
+	
+	/**
+	 * Sets the birthplace. Corresponds to the {@code place_of_birth} claim
+	 * from OpenID Connect for Identity Assurance 1.0. Alternative for
+	 * {@link #setBirthplace(Birthplace)}.
+	 *
+	 * @param birthplace The birthplace, {@code null} if not specified.
+	 */
+	public void setPlaceOfBirth(final Birthplace birthplace) {
+		
+		if (birthplace != null) {
+			setClaim(PLACE_OF_BIRTH_CLAIM_NAME, birthplace.toJSONObject());
 		}
 	}
 	

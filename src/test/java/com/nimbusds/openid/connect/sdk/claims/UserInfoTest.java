@@ -86,6 +86,7 @@ public class UserInfoTest extends TestCase {
 		
 		// Assurance
 		assertTrue(UserInfo.getStandardClaimNames().contains("birthplace"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("place_of_birth"));
 		assertTrue(UserInfo.getStandardClaimNames().contains("nationalities"));
 		assertTrue(UserInfo.getStandardClaimNames().contains("birth_family_name"));
 		assertTrue(UserInfo.getStandardClaimNames().contains("birth_given_name"));
@@ -94,7 +95,7 @@ public class UserInfoTest extends TestCase {
 		assertTrue(UserInfo.getStandardClaimNames().contains("title"));
 		assertTrue(UserInfo.getStandardClaimNames().contains("verified_claims"));
 		
-		assertEquals(30, UserInfo.getStandardClaimNames().size());
+		assertEquals(31, UserInfo.getStandardClaimNames().size());
 	}
 
 
@@ -1310,6 +1311,77 @@ public class UserInfoTest extends TestCase {
 	}
 	
 	
+	// https://bitbucket.org/openid/ekyc-ida/src/master/examples/response/siop_aggregated_and_distributed_claims.json
+	public void testAssurance_selfIssuedExample() throws Exception {
+		
+		String json = "{" +
+			"  \"iss\": \"https://https://self-issued.me\"," +
+			"  \"sub\": \"248289761001\"," +
+			"  \"preferred_username\": \"superman445\"," +
+			"  \"_claim_names\": {" +
+			"    \"verified_claims\": [" +
+			"      \"src1\"," +
+			"      \"src2\"" +
+			"    ]" +
+			"  }," +
+			"  \"_claim_sources\": {" +
+			"    \"src1\": {" +
+			"      \"JWT\": \"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwcz" +
+			"      ovL3NlcnZlci5vdGhlcm9wLmNvbSIsInN1YiI6ImU4MTQ4NjAzLTg5MzQtNDI0N" +
+			"      S04MjViLWMxMDhiOGI2Yjk0NSIsInZlcmlmaWVkX2NsYWltcyI6eyJ2ZXJpZmlj" +
+			"      YXRpb24iOnsidHJ1c3RfZnJhbWV3b3JrIjoiaWFsX2V4YW1wbGVfZ29sZCJ9LCJ" +
+			"      jbGFpbXMiOnsiZ2l2ZW5fbmFtZSI6Ik1heCIsImZhbWlseV9uYW1lIjoiTWVpZX" +
+			"      IiLCJiaXJ0aGRhdGUiOiIxOTU2LTAxLTI4In19fQ.FArlPUtUVn95HCExePlWJQ" +
+			"      6ctVfVpQyeSbe3xkH9MH1QJjnk5GVbBW0qe1b7R3lE-8iVv__0mhRTUI5lcFhLj" +
+			"      oGjDS8zgWSarVsEEjwBK7WD3r9cEw6ZAhfEkhHL9eqAaED2rhhDbHD5dZWXkJCu" +
+			"      XIcn65g6rryiBanxlXK0ZmcK4fD9HV9MFduk0LRG_p4yocMaFvVkqawat5NV9QQ" +
+			"      3ij7UBr3G7A4FojcKEkoJKScdGoozir8m5XD83Sn45_79nCcgWSnCX2QTukL8Ny" +
+			"      wIItu_K48cjHiAGXXSzydDm_ccGCe0sY-Ai2-iFFuQo2PtfuK2SqPPmAZJxEFrF" +
+			"      oLY4g\"" +
+			"    }," +
+			"    \"src2\": {" +
+			"      \"endpoint\": \"https://op.mymno.com/claim_source\"," +
+			"      \"access_token\": \"ksj3n283dkeafb76cdef\"" +
+			"    }" +
+			"  }" +
+			"}";
+		
+		UserInfo userInfo = UserInfo.parse(json);
+		assertEquals(new Issuer("https://https://self-issued.me"), userInfo.getIssuer());
+		assertEquals(new Subject("248289761001"), userInfo.getSubject());
+		assertEquals("superman445", userInfo.getPreferredUsername());
+		
+		Set<AggregatedClaims> aggregatedClaimsSet = userInfo.getAggregatedClaims();
+		assertEquals(1, aggregatedClaimsSet.size());
+		AggregatedClaims aggregatedClaims = aggregatedClaimsSet.iterator().next();
+		assertEquals("src1", aggregatedClaims.getSourceID());
+		JWT jwt = aggregatedClaims.getClaimsJWT();
+		assertEquals(JOSEObjectType.JWT, jwt.getHeader().getType());
+		assertEquals(JWSAlgorithm.RS256, jwt.getHeader().getAlgorithm());
+		UserInfo aggregatedUserInfo = UserInfo.parse(jwt.getJWTClaimsSet().toString());
+		// {"sub":"e8148603-8934-4245-825b-c108b8b6b945",
+		// "verified_claims":{
+		// 	"claims":{"birthdate":"1956-01-28","given_name":"Max","family_name":"Meier"},
+		// 	"verification":{"trust_framework":"ial_example_gold"}},
+		// "iss":"https:\/\/server.otherop.com"}
+		assertEquals(new Subject("e8148603-8934-4245-825b-c108b8b6b945"), aggregatedUserInfo.getSubject());
+		assertEquals(new Issuer("https://server.otherop.com"), aggregatedUserInfo.getIssuer());
+		VerifiedClaimsSet verifiedClaimsSet = aggregatedUserInfo.getVerifiedClaims().get(0);
+		assertEquals(new IdentityTrustFramework("ial_example_gold"), verifiedClaimsSet.getVerification().getTrustFramework());
+		assertEquals("1956-01-28", verifiedClaimsSet.getClaimsSet().getBirthdate());
+		assertEquals("Max", verifiedClaimsSet.getClaimsSet().getGivenName());
+		assertEquals("Meier", verifiedClaimsSet.getClaimsSet().getFamilyName());
+		assertEquals(3, verifiedClaimsSet.getClaimsSet().toJSONObject().size());
+		
+		Set<DistributedClaims> distributedClaimsSet = userInfo.getDistributedClaims();
+		assertEquals(1, distributedClaimsSet.size());
+		DistributedClaims dClaims = distributedClaimsSet.iterator().next();
+		assertEquals("src2", dClaims.getSourceID());
+		assertEquals(new URI("https://op.mymno.com/claim_source"), dClaims.getSourceEndpoint());
+		assertEquals("ksj3n283dkeafb76cdef", dClaims.getAccessToken().getValue());
+	}
+	
+	
 	public void testAssurance_basicGettersAndSetters() throws ParseException {
 		
 		Subject subject = new Subject("alice");
@@ -1575,6 +1647,90 @@ public class UserInfoTest extends TestCase {
 		assertEquals(vList.get(0).toJSONObject(), userInfo.getVerifiedClaims().get(0).toJSONObject());
 		assertEquals(vList.get(1).toJSONObject(), userInfo.getVerifiedClaims().get(1).toJSONObject());
 		assertEquals(2, userInfo.getVerifiedClaims().size());
+	}
+	// https://bitbucket.org/openid/ekyc-ida/src/master/examples/response/multiple_verified_claims.json
+	
+	
+	public void testAssurance_exampleMultipleVerifiedClaims() throws ParseException {
+		
+		String json = "{" +
+			"  \"sub\":\"66dd9858-9e0c-460c-a173-0b7291c5c1b2\", " + // to make valid userinfo
+			"  \"verified_claims\":[" +
+			"    {" +
+			"      \"verification\": {" +
+			"        \"trust_framework\": \"eidas_ial_substantial\"" +
+			"      }," +
+			"      \"claims\": {" +
+			"        \"given_name\": \"Max\"," +
+			"        \"family_name\": \"Meier\"," +
+			"        \"birthdate\": \"1956-01-28\"," +
+			"        \"place_of_birth\": {" +
+			"          \"country\": \"DE\"," +
+			"          \"locality\": \"Musterstadt\"" +
+			"        }," +
+			"        \"nationalities\": [" +
+			"          \"DE\"" +
+			"        ]" +
+			"      }" +
+			"    }," +
+			"    {" +
+			"      \"verification\":{" +
+			"        \"trust_framework\":\"de_aml\"," +
+			"        \"time\":\"2012-04-23T18:25Z\"," +
+			"        \"verification_process\":\"f24c6f-6d3f-4ec5-973e-b0d8506f3bc7\"," +
+			"        \"evidence\":[" +
+			"          {" +
+			"            \"type\":\"id_document\"," +
+			"            \"method\":\"pipp\"," +
+			"            \"time\": \"2012-04-22T11:30Z\"," +
+			"            \"document\":{" +
+			"              \"type\":\"idcard\"" +
+			"            }" +
+			"          }" +
+			"        ]" +
+			"      }," +
+			"      \"claims\":{" +
+			"        \"address\":{" +
+			"          \"locality\":\"Maxstadt\"," +
+			"          \"postal_code\":\"12344\"," +
+			"          \"country\":\"DE\"," +
+			"          \"street_address\":\"An der Sanddüne 22\"" +
+			"        }" +
+			"      }" +
+			"    }" +
+			"  ]" +
+			"}";
+		
+		UserInfo userInfo = UserInfo.parse(json);
+		
+		assertEquals(new Subject("66dd9858-9e0c-460c-a173-0b7291c5c1b2"), userInfo.getSubject());
+		
+		List<VerifiedClaimsSet> verifiedClaimsSetList = userInfo.getVerifiedClaims();
+		assertEquals(2, verifiedClaimsSetList.size());
+		
+		VerifiedClaimsSet s1 = verifiedClaimsSetList.get(0);
+		assertEquals(IdentityTrustFramework.EIDAS_IAL_SUBSTANTIAL, s1.getVerification().getTrustFramework());
+		assertEquals("Max", s1.getClaimsSet().getGivenName());
+		assertEquals("Meier", s1.getClaimsSet().getFamilyName());
+		assertEquals("1956-01-28", s1.getClaimsSet().getBirthdate());
+		Birthplace birthplace = s1.getClaimsSet().getPlaceOfBirth();
+		assertEquals(new ISO3166_1Alpha2CountryCode("DE"), birthplace.getCountry());
+		assertEquals("Musterstadt", birthplace.getLocality());
+		assertEquals(Collections.singletonList(new ISO3166_1Alpha2CountryCode("DE")), s1.getClaimsSet().getNationalities());
+		
+		VerifiedClaimsSet s2 = verifiedClaimsSetList.get(1);
+		assertEquals(IdentityTrustFramework.DE_AML, s2.getVerification().getTrustFramework());
+		assertEquals("2012-04-23T18:25:00Z", s2.getVerification().getVerificationTime().toISO8601String());
+		assertEquals(new VerificationProcess("f24c6f-6d3f-4ec5-973e-b0d8506f3bc7"), s2.getVerification().getVerificationProcess());
+		IDDocumentEvidence evidence = s2.getVerification().getEvidence().get(0).toIDDocumentEvidence();
+		assertEquals(IdentityVerificationMethod.PIPP, evidence.getVerificationMethod());
+		assertEquals("2012-04-22T11:30:00Z", evidence.getVerificationTime().toISO8601String());
+		assertEquals(IDDocumentType.IDCARD, evidence.getIdentityDocument().getType());
+		Address address = s2.getClaimsSet().getAddress();
+		assertEquals("Maxstadt", address.getLocality());
+		assertEquals("12344", address.getPostalCode());
+		assertEquals("DE", address.getCountry());
+		assertEquals("An der Sanddüne 22", address.getStreetAddress());
 	}
 	
 	

@@ -18,6 +18,7 @@
 package com.nimbusds.openid.connect.sdk.assurance.claims;
 
 
+import java.util.Collections;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -90,7 +91,7 @@ public class VerifiedClaimsSetTest extends TestCase {
 	}
 	
 	
-	// https://openid.net/specs/openid-connect-4-identity-assurance-1_0.html#id-document-1
+	// https://bitbucket.org/openid/ekyc-ida/src/master/examples/response/id_document.json
 	public void testParseExample_idDocument()
 		throws Exception {
 		
@@ -98,35 +99,38 @@ public class VerifiedClaimsSetTest extends TestCase {
 //			"   \"verified_claims\":{  " +
 			"      \"verification\":{  " +
 			"         \"trust_framework\":\"de_aml\"," +
-			"         \"time\":\"2012-04-23T18:25:43.511+01\"," +
-			"         \"verification_process\":\"676q3636461467647q8498785747q487\"," +
-			"         \"evidence\":[  " +
-			"            {  " +
+			"         \"time\":\"2012-04-23T18:25Z\"," +
+			"         \"verification_process\":\"f24c6f-6d3f-4ec5-973e-b0d8506f3bc7\"," +
+			"         \"evidence\":[" +
+			"            {" +
 			"               \"type\":\"id_document\"," +
 			"               \"method\":\"pipp\"," +
-			"               \"document\":{  " +
+			"               \"time\": \"2012-04-22T11:30Z\"," +
+			"               \"document\":{" +
 			"                  \"type\":\"idcard\"," +
-			"                  \"issuer\":{  " +
+			"                  \"issuer\":{" +
 			"                     \"name\":\"Stadt Augsburg\"," +
 			"                     \"country\":\"DE\"" +
 			"                  }," +
 			"                  \"number\":\"53554554\"," +
-			"                  \"date_of_issuance\":\"2012-04-23\"," +
-			"                  \"date_of_expiry\":\"2022-04-22\"" +
+			"                  \"date_of_issuance\":\"2010-03-23\"," +
+			"                  \"date_of_expiry\":\"2020-03-22\"" +
 			"               }" +
 			"            }" +
 			"         ]" +
 			"      }," +
-			"      \"claims\":{  " +
+			"      \"claims\":{" +
 			"         \"given_name\":\"Max\"," +
 			"         \"family_name\":\"Meier\"," +
 			"         \"birthdate\":\"1956-01-28\"," +
-			"         \"birthplace\":{  " +
+			"         \"place_of_birth\":{" +
 			"            \"country\":\"DE\"," +
 			"            \"locality\":\"Musterstadt\"" +
 			"         }," +
-			"         \"nationalities\":[\"DE\"]," +
-			"         \"address\":{  " +
+			"         \"nationalities\":[" +
+			"            \"DE\"" +
+			"         ]," +
+			"         \"address\":{" +
 			"            \"locality\":\"Maxstadt\"," +
 			"            \"postal_code\":\"12344\"," +
 			"            \"country\":\"DE\"," +
@@ -140,8 +144,8 @@ public class VerifiedClaimsSetTest extends TestCase {
 		
 		IdentityVerification verification = verifiedClaimsSet.getVerification();
 		assertEquals(IdentityTrustFramework.DE_AML, verification.getTrustFramework());
-		assertEquals("2012-04-23T18:25:43+01:00", verification.getVerificationTime().toISO8601String());
-		assertEquals("676q3636461467647q8498785747q487", verification.getVerificationProcess().getValue());
+		assertEquals("2012-04-23T18:25:00Z", verification.getVerificationTime().toISO8601String());
+		assertEquals("f24c6f-6d3f-4ec5-973e-b0d8506f3bc7", verification.getVerificationProcess().getValue());
 		
 		IDDocumentEvidence idDocumentEvidence = verification.getEvidence().get(0).toIDDocumentEvidence();
 		assertEquals(1, verification.getEvidence().size());
@@ -152,14 +156,14 @@ public class VerifiedClaimsSetTest extends TestCase {
 		assertEquals("Stadt Augsburg", idDoc.getIssuerName());
 		assertEquals("DE", idDoc.getIssuerCountry().getValue());
 		assertEquals("53554554", idDoc.getNumber());
-		assertEquals("2012-04-23", idDoc.getDateOfIssuance().toISO8601String());
-		assertEquals("2022-04-22", idDoc.getDateOfExpiry().toISO8601String());
+		assertEquals("2010-03-23", idDoc.getDateOfIssuance().toISO8601String());
+		assertEquals("2020-03-22", idDoc.getDateOfExpiry().toISO8601String());
 		
 		PersonClaims claimsSet = verifiedClaimsSet.getClaimsSet();
 		assertEquals("Max", claimsSet.getGivenName());
 		assertEquals("Meier", claimsSet.getFamilyName());
 		assertEquals("1956-01-28", claimsSet.getBirthdate());
-		Birthplace birthplace = claimsSet.getBirthplace();
+		Birthplace birthplace = claimsSet.getPlaceOfBirth();
 		assertEquals("DE", birthplace.getCountry().getValue());
 		assertEquals("Musterstadt", birthplace.getLocality());
 		assertNull(birthplace.getRegion());
@@ -176,29 +180,31 @@ public class VerifiedClaimsSetTest extends TestCase {
 	public void testParseExample_idDocument_plus_utilityBill()
 		throws ParseException {
 		
-		String json = "{  " +
-			"      \"verification\":{  " +
+		String json = "{" +
+//			"   \"verified_claims\":{" +
+			"      \"verification\":{" +
 			"         \"trust_framework\":\"de_aml\"," +
-			"         \"time\":\"2012-04-23T18:25:43.511+01\"," +
-			"         \"verification_process\":\"676q3636461467647q8498785747q487\"," +
-			"         \"evidence\":[  " +
-			"            {  " +
+			"         \"time\":\"2012-04-23T18:25Z\"," +
+			"         \"verification_process\":\"513645-e44b-4951-942c-7091cf7d891d\"," +
+			"         \"evidence\":[" +
+			"            {" +
 			"               \"type\":\"id_document\"," +
 			"               \"method\":\"pipp\"," +
-			"               \"document\":{  " +
+			"               \"time\": \"2012-04-22T11:30Z\"," +
+			"               \"document\":{" +
 			"                  \"type\":\"de_erp_replacement_idcard\"," +
-			"                  \"issuer\":{  " +
+			"                  \"issuer\":{" +
 			"                     \"name\":\"Stadt Augsburg\"," +
 			"                     \"country\":\"DE\"" +
 			"                  }," +
 			"                  \"number\":\"53554554\"," +
-			"                  \"date_of_issuance\":\"2012-04-23\"," +
-			"                  \"date_of_expiry\":\"2022-04-22\"" +
+			"                  \"date_of_issuance\":\"2010-04-23\"," +
+			"                  \"date_of_expiry\":\"2020-04-22\"" +
 			"               }" +
 			"            }," +
-			"            {  " +
+			"            {" +
 			"               \"type\":\"utility_bill\"," +
-			"               \"provider\":{  " +
+			"               \"provider\":{" +
 			"                  \"name\":\"Stadtwerke Musterstadt\"," +
 			"                  \"country\":\"DE\"," +
 			"                  \"region\":\"Thüringen\"," +
@@ -208,30 +214,33 @@ public class VerifiedClaimsSetTest extends TestCase {
 			"            }" +
 			"         ]" +
 			"      }," +
-			"      \"claims\":{  " +
+			"      \"claims\":{" +
 			"         \"given_name\":\"Max\"," +
 			"         \"family_name\":\"Meier\"," +
 			"         \"birthdate\":\"1956-01-28\"," +
-			"         \"birthplace\":{  " +
+			"         \"place_of_birth\":{" +
 			"            \"country\":\"DE\"," +
 			"            \"locality\":\"Musterstadt\"" +
 			"         }," +
-			"         \"nationalities\":[\"DE\"]," +
-			"         \"address\":{  " +
+			"         \"nationalities\":[" +
+			"            \"DE\"" +
+			"         ]," +
+			"         \"address\":{" +
 			"            \"locality\":\"Maxstadt\"," +
 			"            \"postal_code\":\"12344\"," +
 			"            \"country\":\"DE\"," +
 			"            \"street_address\":\"An der Sanddüne 22\"" +
 			"         }" +
 			"      }" +
-			"   }";
+//			"   }" +
+			"}";
 		
 		VerifiedClaimsSet verifiedClaimsSet = VerifiedClaimsSet.parse(JSONObjectUtils.parse(json));
 		
 		IdentityVerification verification = verifiedClaimsSet.getVerification();
 		assertEquals(IdentityTrustFramework.DE_AML, verification.getTrustFramework());
-		assertEquals("2012-04-23T18:25:43+01:00", verification.getVerificationTime().toISO8601String());
-		assertEquals("676q3636461467647q8498785747q487", verification.getVerificationProcess().getValue());
+		assertEquals("2012-04-23T18:25:00Z", verification.getVerificationTime().toISO8601String());
+		assertEquals("513645-e44b-4951-942c-7091cf7d891d", verification.getVerificationProcess().getValue());
 		
 		IDDocumentEvidence idDocumentEvidence = verification.getEvidence().get(0).toIDDocumentEvidence();
 		assertEquals(IdentityEvidenceType.ID_DOCUMENT, idDocumentEvidence.getEvidenceType());
@@ -241,8 +250,8 @@ public class VerifiedClaimsSetTest extends TestCase {
 		assertEquals("Stadt Augsburg", idDoc.getIssuerName());
 		assertEquals("DE", idDoc.getIssuerCountry().getValue());
 		assertEquals("53554554", idDoc.getNumber());
-		assertEquals("2012-04-23", idDoc.getDateOfIssuance().toISO8601String());
-		assertEquals("2022-04-22", idDoc.getDateOfExpiry().toISO8601String());
+		assertEquals("2010-04-23", idDoc.getDateOfIssuance().toISO8601String());
+		assertEquals("2020-04-22", idDoc.getDateOfExpiry().toISO8601String());
 		
 		UtilityBillEvidence utilityBillEvidence = verification.getEvidence().get(1).toUtilityBillEvidence();
 		assertEquals("Stadtwerke Musterstadt", utilityBillEvidence.getUtilityProviderName());
@@ -257,7 +266,7 @@ public class VerifiedClaimsSetTest extends TestCase {
 		assertEquals("Max", claimsSet.getGivenName());
 		assertEquals("Meier", claimsSet.getFamilyName());
 		assertEquals("1956-01-28", claimsSet.getBirthdate());
-		Birthplace birthplace = claimsSet.getBirthplace();
+		Birthplace birthplace = claimsSet.getPlaceOfBirth();
 		assertEquals("DE", birthplace.getCountry().getValue());
 		assertEquals("Musterstadt", birthplace.getLocality());
 		assertNull(birthplace.getRegion());
@@ -270,10 +279,40 @@ public class VerifiedClaimsSetTest extends TestCase {
 	}
 	
 	
-	// TODO https://bitbucket.org/openid/connect/issues/1132/assurance-63-notified-eid-system-eidas
+	// https://bitbucket.org/openid/ekyc-ida/src/master/examples/response/eidas.json
 	public void testParseExample_QES()
 		throws Exception {
 		
+		String json = "{" +
+			"   \"verified_claims\":{" +
+			"      \"verification\":{" +
+			"         \"trust_framework\":\"eidas_ial_substantial\"" +
+			"      }," +
+			"      \"claims\":{" +
+			"         \"given_name\":\"Max\"," +
+			"         \"family_name\":\"Meier\"," +
+			"         \"birthdate\":\"1956-01-28\"," +
+			"         \"place_of_birth\":{" +
+			"            \"country\":\"DE\"," +
+			"            \"locality\":\"Musterstadt\"" +
+			"         }," +
+			"         \"nationalities\":[" +
+			"            \"DE\"" +
+			"         ]" +
+			"      }" +
+			"   }" +
+			"}";
 		
+		VerifiedClaimsSet verifiedClaimsSet = VerifiedClaimsSet.parse(JSONObjectUtils.getJSONObject(JSONObjectUtils.parse(json), "verified_claims"));
+		
+		assertEquals(IdentityTrustFramework.EIDAS_IAL_SUBSTANTIAL, verifiedClaimsSet.getVerification().getTrustFramework());
+		assertEquals("Max", verifiedClaimsSet.getClaimsSet().getGivenName());
+		assertEquals("Meier", verifiedClaimsSet.getClaimsSet().getFamilyName());
+		assertEquals("1956-01-28", verifiedClaimsSet.getClaimsSet().getBirthdate());
+		Birthplace birthplace = verifiedClaimsSet.getClaimsSet().getPlaceOfBirth();
+		assertEquals(new ISO3166_1Alpha2CountryCode("DE"), birthplace.getCountry());
+		assertEquals("Musterstadt", birthplace.getLocality());
+		assertEquals(2, birthplace.toJSONObject().size());
+		assertEquals(Collections.singletonList(new ISO3166_1Alpha2CountryCode("DE")), verifiedClaimsSet.getClaimsSet().getNationalities());
 	}
 }

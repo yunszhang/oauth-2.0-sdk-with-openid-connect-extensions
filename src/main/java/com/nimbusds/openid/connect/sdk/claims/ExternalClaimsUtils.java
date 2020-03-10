@@ -104,7 +104,22 @@ class ExternalClaimsUtils {
 		for (Map.Entry<String,Object> en: claimNamesJSONObject.entrySet()) {
 			
 			if (sourceID.equals(en.getValue())) {
+				// "_claim_names": {
+				//     "address": "src1",
+				//     "phone_number": "src1"
+				// }
 				claimNames.add(en.getKey());
+			}
+			
+			if (en.getValue() instanceof List) {
+				// "_claim_names": {
+				//    "verified_claims": [ "src1", "src2" ]
+				// }
+				for (Object item: (List<?>)en.getValue()) {
+					if (item instanceof String && sourceID.equals((String)item)) {
+						claimNames.add(en.getKey());
+					}
+				}
 			}
 		}
 		
