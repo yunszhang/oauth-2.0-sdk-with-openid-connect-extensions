@@ -189,9 +189,13 @@ public final class IdentityVerification implements JSONAware {
 		if (getEvidence() != null) {
 			JSONArray evidenceArray = new JSONArray();
 			for (IdentityEvidence ev : getEvidence()) {
-				evidenceArray.add(ev.toJSONObject());
+				if (ev != null) {
+					evidenceArray.add(ev.toJSONObject());
+				}
 			}
-			o.put("evidence", evidenceArray);
+			if (! evidenceArray.isEmpty()) {
+				o.put("evidence", evidenceArray);
+			}
 		}
 		
 		return o;

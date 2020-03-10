@@ -225,7 +225,7 @@ public class UserInfoTest extends TestCase {
 		assertNull(userInfo.getBirthMiddleName());
 		assertNull(userInfo.getSalutation());
 		assertNull(userInfo.getTitle());
-		assertNull(userInfo.getVerifiedClaimsSet());
+		assertNull(userInfo.getVerifiedClaims());
 		
 		// No external claims
 		assertNull(userInfo.getAggregatedClaims());
@@ -1102,7 +1102,7 @@ public class UserInfoTest extends TestCase {
 		assertEquals("janedoe@example.com", userInfo.getEmailAddress());
 		assertTrue(userInfo.getEmailVerified());
 		
-		VerifiedClaimsSet verifiedClaims = userInfo.getVerifiedClaimsSet();
+		VerifiedClaimsSet verifiedClaims = userInfo.getVerifiedClaims().get(0);
 		
 		IdentityVerification verification = verifiedClaims.getVerification();
 		assertEquals(IdentityTrustFramework.DE_AML, verification.getTrustFramework());
@@ -1305,7 +1305,7 @@ public class UserInfoTest extends TestCase {
 		Subject subject = new Subject("alice");
 		UserInfo userInfo = new UserInfo(subject);
 		
-		assertNull(userInfo.getVerifiedClaimsSet());
+		assertNull(userInfo.getVerifiedClaims());
 		
 		PersonClaims claims = new PersonClaims();
 		claims.setName("Alice Adams");
@@ -1329,7 +1329,7 @@ public class UserInfoTest extends TestCase {
 		
 		userInfo.setVerifiedClaims(verifiedClaimsSet);
 		
-		VerifiedClaimsSet out = userInfo.getVerifiedClaimsSet();
+		VerifiedClaimsSet out = userInfo.getVerifiedClaims().get(0);
 		
 		assertEquals(IdentityTrustFramework.DE_AML, out.getVerification().getTrustFramework());
 		assertEquals(verification.getVerificationTime().toISO8601String(), out.getVerification().getVerificationTime().toISO8601String());
@@ -1347,7 +1347,7 @@ public class UserInfoTest extends TestCase {
 		
 		userInfo = UserInfo.parse(json);
 		
-		out = userInfo.getVerifiedClaimsSet();
+		out = userInfo.getVerifiedClaims().get(0);
 		
 		assertEquals(IdentityTrustFramework.DE_AML, out.getVerification().getTrustFramework());
 		assertEquals(verification.getVerificationTime().toISO8601String(), out.getVerification().getVerificationTime().toISO8601String());
@@ -1361,7 +1361,42 @@ public class UserInfoTest extends TestCase {
 	}
 	
 	
-	public void testOnlineExampleWithVerifiedClaims() throws ParseException {
+	public void testAssurance_verifiedClaimsListGetterAndSetter() throws ParseException {
+		
+		PersonClaims claimsSet1 = new PersonClaims();
+		claimsSet1.setGivenName("Alice");
+		claimsSet1.setFamilyName("Adams");
+		VerifiedClaimsSet v1 = new VerifiedClaimsSet(
+			new IdentityVerification(IdentityTrustFramework.DE_AML, null, null, (IdentityEvidence) null),
+			claimsSet1);
+		
+		PersonClaims claimsSet2 = new PersonClaims();
+		claimsSet2.setEmailAddress("alice@wonderland.com");
+		VerifiedClaimsSet v2 = new VerifiedClaimsSet(
+			new IdentityVerification(IdentityTrustFramework.EIDAS_IAL_HIGH, null, null, (IdentityEvidence) null),
+			claimsSet2);
+		
+		UserInfo userInfo = new UserInfo(new Subject("alice"));
+		List<VerifiedClaimsSet> vList = Arrays.asList(v1, v2);
+		userInfo.setVerifiedClaims(vList);
+		
+		assertEquals(vList.get(0).toJSONObject(), userInfo.getVerifiedClaims().get(0).toJSONObject());
+		assertEquals(vList.get(1).toJSONObject(), userInfo.getVerifiedClaims().get(1).toJSONObject());
+		assertEquals(2, userInfo.getVerifiedClaims().size());
+		
+		JSONObject jsonObject = userInfo.toJSONObject();
+		
+		userInfo = UserInfo.parse(jsonObject.toJSONString());
+		
+		assertEquals(new Subject("alice"), userInfo.getSubject());
+		
+		assertEquals(vList.get(0).toJSONObject(), userInfo.getVerifiedClaims().get(0).toJSONObject());
+		assertEquals(vList.get(1).toJSONObject(), userInfo.getVerifiedClaims().get(1).toJSONObject());
+		assertEquals(2, userInfo.getVerifiedClaims().size());
+	}
+	
+	
+	public void testAssurance_onlineExampleWithVerifiedClaims() throws ParseException {
 		
 		Date now = new Date();
 		DateWithTimeZoneOffset timestamp = new DateWithTimeZoneOffset(
@@ -1417,7 +1452,7 @@ public class UserInfoTest extends TestCase {
 		
 		System.out.println("Subject: " + userInfo.getSubject());
 		
-		verifiedClaims = userInfo.getVerifiedClaimsSet();
+		verifiedClaims = userInfo.getVerifiedClaims().get(0);
 		
 		System.out.println("Trust framework: " + verifiedClaims.getVerification().getTrustFramework());
 		System.out.println("Evidence type: " + verifiedClaims.getVerification().getEvidence().get(0).getEvidenceType());

@@ -20,10 +20,7 @@ package com.nimbusds.openid.connect.sdk.claims;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import net.minidev.json.JSONObject;
 
@@ -235,18 +232,50 @@ public class UserInfo extends PersonClaims {
 	 * Gets the verified claims. Corresponds to the {@code verified_claims}
 	 * claim from OpenID Connect for Identity Assurance 1.0.
 	 *
-	 * @return The verified claims set, {@code null} if not specified or
-	 *         parsing failed.
+	 * @return List of the verified claims sets, {@code null} if not
+	 *         specified or parsing failed.
 	 */
-	public VerifiedClaimsSet getVerifiedClaimsSet() {
-	
-		JSONObject jsonObject = getClaim(VERIFIED_CLAIMS_CLAIM_NAME, JSONObject.class);
-		if (jsonObject == null) {
-			return null;
-		}
-		try {
-			return VerifiedClaimsSet.parse(jsonObject);
-		} catch (ParseException e) {
+	public List<VerifiedClaimsSet> getVerifiedClaims() {
+		
+		// Try JSON object first
+		Object value = getClaim(VERIFIED_CLAIMS_CLAIM_NAME);
+		
+		if (value instanceof JSONObject) {
+			
+			// Single verified_claims
+			try {
+				return Collections.singletonList(VerifiedClaimsSet.parse((JSONObject)value));
+			} catch (ParseException e) {
+				return null;
+			}
+			
+		} else if (value instanceof List) {
+			
+			// JSON array of verified_claims
+			
+			List<?> rawList = (List<?>)value;
+			
+			if (rawList.isEmpty()) {
+				return null;
+			}
+			
+			List<VerifiedClaimsSet> list = new LinkedList<>();
+			
+			for (Object item : rawList) {
+				if (item instanceof JSONObject) {
+					try {
+						list.add(VerifiedClaimsSet.parse((JSONObject) item));
+					} catch (ParseException e) {
+						return null;
+					}
+				} else {
+					return null;
+				}
+			}
+			
+			return list;
+		} else {
+			// Invalid
 			return null;
 		}
 	}
@@ -257,12 +286,37 @@ public class UserInfo extends PersonClaims {
 	 * claim from OpenID Connect for Identity Assurance 1.0.
 	 *
 	 * @param verifiedClaims The verified claims set, {@code null} if not
-	 *                       specified or parsing failed.
+	 *                       specified.
 	 */
 	public void setVerifiedClaims(final VerifiedClaimsSet verifiedClaims) {
 		
 		if (verifiedClaims != null) {
 			setClaim(VERIFIED_CLAIMS_CLAIM_NAME, verifiedClaims.toJSONObject());
+		} else {
+			setClaim(VERIFIED_CLAIMS_CLAIM_NAME, null);
+		}
+	}
+	
+	
+	/**
+	 * Sets a list of verified claims with separate verifications.
+	 * Corresponds to the {@code verified_claims} claim from OpenID Connect
+	 * for Identity Assurance 1.0.
+	 *
+	 * @param verifiedClaimsList List of the verified claims sets,
+	 *                           {@code null} if not specified or parsing
+	 *                           failed.
+	 */
+	public void setVerifiedClaims(final List<VerifiedClaimsSet> verifiedClaimsList) {
+		
+		if (verifiedClaimsList != null) {
+			List<JSONObject> jsonObjects = new LinkedList<>();
+			for (VerifiedClaimsSet verifiedClaims: verifiedClaimsList) {
+				if (verifiedClaims != null) {
+					jsonObjects.add(verifiedClaims.toJSONObject());
+				}
+			}
+			setClaim(VERIFIED_CLAIMS_CLAIM_NAME, jsonObjects);
 		} else {
 			setClaim(VERIFIED_CLAIMS_CLAIM_NAME, null);
 		}
