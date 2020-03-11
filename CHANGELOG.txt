@@ -1265,7 +1265,7 @@ version 7.1.1 (2020-02-25)
       prevent class loading issues with JSONObjectUtils, HTTPMessage and other
       classes (iss #291).
 
-version 7.2 (2020-03-10)
+version 7.2 (2020-03-11)
     * Updates UserInfo for JSON array of "verified_claims" (breaking change).
     * Adds PersonClaims support for "place_of_birth".
     * Updates the classes in the eKYC / Identity Assurance package to the JSON
@@ -1273,4 +1273,7 @@ version 7.2 (2020-03-10)
     * Adds new VerificationProcess class for type-safe representation of
       "verification_process" in OpenID Connect for Identity Assurance 1.0,
       updates the IdentityVerification class accordingly (breaking change).
+    * ClaimsRequest.parse(JSONObject) throws ParseException with
+      "invalid_request" OAuth 2.0 error on empty "verified_claims" -> "claims"
+      as required by the specification.
     * New DateWithTimeZoneOffset constructor for UTC.

@@ -26,6 +26,7 @@ import net.minidev.json.JSONObject;
 
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
+import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
@@ -1657,8 +1658,11 @@ public class ClaimsRequest implements JSONAware {
          *                   {@code null}.
          *
 	 * @return The claims request.
+	 *
+	 * @throws ParseException If parsing failed.
 	 */
-	public static ClaimsRequest parse(final JSONObject jsonObject) {
+	public static ClaimsRequest parse(final JSONObject jsonObject)
+		throws ParseException {
 		
 		ClaimsRequest claimsRequest = new ClaimsRequest();
 		
@@ -1680,6 +1684,12 @@ public class ClaimsRequest implements JSONAware {
 					// id_token -> verified_claims -> claims
 					JSONObject claimsObject = JSONObjectUtils.getJSONObject(verifiedClaimsObject, "claims", null);
 					if (claimsObject != null) {
+						
+						if (claimsObject.isEmpty()) {
+							String msg = "Invalid claims object: Empty verification claims object";
+							throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
+						}
+						
 						for (Entry entry : Entry.parseEntries(claimsObject)) {
 							claimsRequest.addVerifiedIDTokenClaim(entry);
 						}
@@ -1705,7 +1715,14 @@ public class ClaimsRequest implements JSONAware {
 				if (verifiedClaimsObject != null) {
 					// userinfo -> verified_claims -> claims
 					JSONObject claimsObject = JSONObjectUtils.getJSONObject(verifiedClaimsObject, "claims", null);
+					
 					if (claimsObject != null) {
+						
+						if (claimsObject.isEmpty()) {
+							String msg = "Invalid claims object: Empty verification claims object";
+							throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
+						}
+						
 						for (Entry entry : Entry.parseEntries(claimsObject)) {
 							claimsRequest.addVerifiedUserInfoClaim(entry);
 						}
@@ -1717,7 +1734,9 @@ public class ClaimsRequest implements JSONAware {
 			
 		} catch (Exception e) {
 			
-			// Ignore
+			if (e instanceof ParseException) {
+				throw e;
+			}
 		}
 		
 		return claimsRequest;

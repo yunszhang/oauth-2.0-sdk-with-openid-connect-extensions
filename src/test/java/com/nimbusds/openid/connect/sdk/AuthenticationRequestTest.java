@@ -2262,4 +2262,40 @@ public class AuthenticationRequestTest extends TestCase {
 		
 		assertEquals(claimsRequest.toJSONObject(), parsed.getClaims().toJSONObject());
 	}
+	
+	
+	public void testIdentityAssurance_invalidRequestOnEmptyClaimsObject()
+		throws Exception {
+		
+		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
+			new ResponseType(ResponseType.Value.CODE),
+			new Scope("openid"),
+			new ClientID("123"),
+			new URI("https://client.com/callback"))
+			.state(new State())
+			.build();
+		
+		String claimsJSON = "{"+
+			"\"userinfo\":{" +
+			"\"verified_claims\":{" +
+			"\"verification\":{" +
+			"\"trust_framework\":null" +
+			"}," +
+			"\"claims\":{}" +
+			"}" +
+			"}" +
+			"}";
+		
+		Map<String,List<String>> params = authRequest.toParameters();
+		params.put("claims", Collections.singletonList(claimsJSON));
+		
+		try {
+			AuthenticationRequest.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid claims object: Empty verification claims object", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
+			assertEquals("Invalid request: Invalid claims object: Empty verification claims object", e.getErrorObject().getDescription());
+		}
+	}
 }

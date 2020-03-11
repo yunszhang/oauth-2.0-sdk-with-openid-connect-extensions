@@ -27,6 +27,7 @@ import net.minidev.json.JSONObject;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
+import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
@@ -1029,13 +1030,17 @@ public class ClaimsRequestTest extends TestCase {
 	
 	// Identity assurance
 	
-	public void testParseExample()
+	// https://bitbucket.org/openid/ekyc-ida/src/master/examples/request/claims.json
+	public void testAssurance_simpleExample()
 		throws ParseException {
 		
-		String json = "{  " +
-			"   \"userinfo\":{  " +
-			"      \"verified_claims\":{  " +
-			"         \"claims\":{  " +
+		String json = "{" +
+			"   \"userinfo\":{" +
+			"      \"verified_claims\":{" +
+			"         \"verification\": {" +
+			"            \"trust_framework\": null" +
+			"         }," +
+			"         \"claims\":{" +
 			"            \"given_name\":null," +
 			"            \"family_name\":null," +
 			"            \"birthdate\":null" +
@@ -1065,40 +1070,131 @@ public class ClaimsRequestTest extends TestCase {
 		assertEquals(JSONObjectUtils.parse(json), claimsRequest.toJSONObject());
 	}
 	
-	public void testParseExampleWithPurpose()
+	// https://bitbucket.org/openid/ekyc-ida/src/master/examples/request/essential.json
+	public void testAssurance_essentialExample()
+		throws ParseException {
+		
+		String json = "{\n" +
+			"   \"userinfo\":{\n" +
+			"      \"verified_claims\":{\n" +
+			"         \"verification\": {\n" +
+			"            \"trust_framework\": null\n" +
+			"         },\n" +
+			"         \"claims\":{\n" +
+			"            \"given_name\":{\"essential\": true},\n" +
+			"            \"family_name\":{\"essential\": true},\n" +
+			"            \"birthdate\":null\n" +
+			"         }\n" +
+			"      }\n" +
+			"   }\n" +
+			"}\n";
+		
+		ClaimsRequest claimsRequest = ClaimsRequest.parse(json);
+		
+		assertTrue(claimsRequest.getUserInfoClaims().isEmpty());
+		
+		assertEquals(3, claimsRequest.getVerifiedUserInfoClaims().size());
+		
+		Map<String,ClaimRequirement> claimReq = new HashMap<>();
+		claimReq.put("given_name", ClaimRequirement.ESSENTIAL);
+		claimReq.put("family_name", ClaimRequirement.ESSENTIAL);
+		claimReq.put("birthdate", ClaimRequirement.VOLUNTARY);
+		
+		for (ClaimsRequest.Entry en: claimsRequest.getVerifiedUserInfoClaims()) {
+			
+			assertTrue(Arrays.asList("given_name", "family_name", "birthdate").contains(en.getClaimName()));
+			
+			assertEquals(claimReq.get(en.getClaimName()), en.getClaimRequirement());
+			assertNull(en.getLangTag());
+			assertNull(en.getValue());
+			assertNull(en.getValues());
+			assertNull(en.getPurpose());
+			assertNull(en.getAdditionalInformation());
+		}
+		
+		assertEquals(JSONObjectUtils.parse(json), claimsRequest.toJSONObject());
+	}
+	
+	
+	// https://bitbucket.org/openid/ekyc-ida/src/master/examples/request/purpose.json
+	public void testAssurance_exampleWithPurpose()
 		throws ParseException {
 		
 		String json = "{" +
-			"\"userinfo\":{" +
-			"  \"verified_claims\":{" +
-			"    \"claims\":{" +
-			"      \"address\": {" +
-			"        \"essential\": true," +
-			"        \"purpose\": \"Required for insurance policy calculation\"" +
+			"   \"userinfo\":{" +
+			"      \"verified_claims\":{" +
+			"         \"verification\": {" +
+			"            \"trust_framework\": null" +
+			"         }," +
+			"         \"claims\":{" +
+			"            \"given_name\":{" +
+			"               \"essential\":true," +
+			"               \"purpose\":\"To make communication look more personal\"" +
+			"            }," +
+			"            \"family_name\":{" +
+			"               \"essential\":true" +
+			"            }," +
+			"            \"birthdate\":{" +
+			"               \"purpose\":\"To send you best wishes on your birthday\"" +
+			"            }" +
+			"         }" +
 			"      }" +
-			"    }" +
-			"  }" +
-			"}" +
+			"   }" +
 			"}";
 		
 		ClaimsRequest claimsRequest = ClaimsRequest.parse(json);
 		
 		assertTrue(claimsRequest.getUserInfoClaims().isEmpty());
 		
-		assertEquals(1, claimsRequest.getVerifiedUserInfoClaims().size());
+		assertEquals(3, claimsRequest.getVerifiedUserInfoClaims().size());
+		
+		Map<String,ClaimRequirement> claimReq = new HashMap<>();
+		claimReq.put("given_name", ClaimRequirement.ESSENTIAL);
+		claimReq.put("family_name", ClaimRequirement.ESSENTIAL);
+		claimReq.put("birthdate", ClaimRequirement.VOLUNTARY);
+		
+		Map<String,String> purposes = new HashMap<>();
+		purposes.put("given_name", "To make communication look more personal");
+		purposes.put("family_name", null);
+		purposes.put("birthdate", "To send you best wishes on your birthday");
 		
 		for (ClaimsRequest.Entry en: claimsRequest.getVerifiedUserInfoClaims()) {
 			
-			assertEquals("address", en.getClaimName());
-			assertEquals(ClaimRequirement.ESSENTIAL, en.getClaimRequirement());
+			assertTrue(Arrays.asList("given_name", "family_name", "birthdate").contains(en.getClaimName()));
+			
+			assertEquals(claimReq.get(en.getClaimName()), en.getClaimRequirement());
 			assertNull(en.getLangTag());
 			assertNull(en.getValue());
 			assertNull(en.getValues());
-			assertEquals("Required for insurance policy calculation", en.getPurpose());
+			assertEquals(purposes.get(en.getClaimName()), en.getPurpose());
 			assertNull(en.getAdditionalInformation());
 		}
 		
 		assertEquals(JSONObjectUtils.parse(json), claimsRequest.toJSONObject());
+	}
+	
+	
+	public void testAssurance_rejectEmptyClaimsElement() {
+	
+		String json = "{" +
+			"   \"userinfo\":{" +
+			"      \"verified_claims\":{" +
+			"         \"verification\": {" +
+			"            \"trust_framework\": null" +
+			"         }," +
+			"         \"claims\":{}" +
+			"      }" +
+			"   }" +
+			"}";
+		
+		try {
+			ClaimsRequest.parse(json);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid claims object: Empty verification claims object", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
+			assertEquals("Invalid request: Invalid claims object: Empty verification claims object", e.getErrorObject().getDescription());
+		}
 	}
 	
 	

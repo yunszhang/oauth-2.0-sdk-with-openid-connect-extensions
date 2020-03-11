@@ -1637,9 +1637,13 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 					                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
 			}
-
-			// Parse exceptions silently ignored
-			claims = ClaimsRequest.parse(jsonObject);
+			
+			try {
+				claims = ClaimsRequest.parse(jsonObject);
+			} catch (ParseException e) {
+				throw new ParseException(e.getMessage(), e.getErrorObject(),
+					                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
+			}
 		}
 		
 		String purpose = MultivaluedMapUtils.getFirstValue(params, "purpose");
