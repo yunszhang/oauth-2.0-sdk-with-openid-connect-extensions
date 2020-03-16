@@ -1475,4 +1475,22 @@ public class AuthorizationRequestTest extends TestCase {
 			assertNull(e.getState());
 		}
 	}
+	
+	
+	public void testParseWithIllegalRequestObject() {
+		
+		URI uri = URI.create("https://example.com/webAuthorize?redirect_uri=//example.io&request=n");
+		
+		try {
+			AuthorizationRequest.parse(uri);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid \"request_object\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals("Invalid request: Invalid \"request_object\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getErrorObject().getDescription());
+			assertEquals(URI.create("//example.io"), e.getRedirectionURI());
+			assertNull(e.getState());
+			assertNull(e.getClientID());
+		}
+	}
 }
