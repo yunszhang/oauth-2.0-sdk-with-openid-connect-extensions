@@ -132,7 +132,7 @@ public class AuthorizationServerMetadataTest extends TestCase {
 	}
 	
 	
-	public void testApplyDefaults() {
+	public void testApplyDefaults() throws ParseException {
 		
 		Issuer issuer = new Issuer("https://c2id.com");
 		
@@ -151,6 +151,34 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertEquals(2, grantTypes.size());
 		
 		assertEquals(Collections.singletonList(ClientAuthenticationMethod.CLIENT_SECRET_BASIC), meta.getTokenEndpointAuthMethods());
+		
+		JSONObject jsonObject = meta.toJSONObject();
+		assertEquals(issuer.getValue(), jsonObject.get("issuer"));
+		assertEquals(Arrays.asList("query", "fragment"), JSONObjectUtils.getStringList(jsonObject, "response_modes_supported"));
+		assertEquals(Arrays.asList("authorization_code","implicit"), JSONObjectUtils.getStringList(jsonObject, "grant_types_supported"));
+		assertEquals(Collections.singletonList("client_secret_basic"), JSONObjectUtils.getStringList(jsonObject, "token_endpoint_auth_methods_supported"));
+		assertEquals(4, jsonObject.size());
+		
+		meta = AuthorizationServerMetadata.parse(jsonObject);
+		
+		assertEquals(issuer, meta.getIssuer());
+		
+		responseModes = meta.getResponseModes();
+		assertTrue(responseModes.contains(ResponseMode.QUERY));
+		assertTrue(responseModes.contains(ResponseMode.FRAGMENT));
+		assertEquals(2, responseModes.size());
+		
+		grantTypes = meta.getGrantTypes();
+		assertTrue(grantTypes.contains(GrantType.AUTHORIZATION_CODE));
+		assertTrue(grantTypes.contains(GrantType.IMPLICIT));
+		assertEquals(2, grantTypes.size());
+		
+		assertEquals(Collections.singletonList(ClientAuthenticationMethod.CLIENT_SECRET_BASIC), meta.getTokenEndpointAuthMethods());
+		
+		assertFalse(meta.supportsRequestParam());
+		assertFalse(meta.supportsRequestURIParam());
+		assertFalse(meta.requiresRequestURIRegistration());
+		assertFalse(meta.supportsTLSClientCertificateBoundAccessTokens());
 	}
 	
 	
@@ -313,7 +341,10 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertFalse(as.supportsRequestURIParam());
 		
 		JSONObject jsonObject = as.toJSONObject();
-		assertFalse(JSONObjectUtils.getBoolean(jsonObject, "request_uri_parameter_supported"));
+		assertNull(jsonObject.get("request_uri_parameter_supported"));
+		
+		as = AuthorizationServerMetadata.parse(jsonObject);
+		assertFalse(as.supportsRequestURIParam());
 	}
 	
 	

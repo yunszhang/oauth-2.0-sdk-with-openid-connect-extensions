@@ -1396,14 +1396,24 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 		if (tosURI != null)
 			o.put("op_tos_uri", tosURI.toString());
 		
-		o.put("request_parameter_supported", requestParamSupported);
-		o.put("request_uri_parameter_supported", requestURIParamSupported);
-		o.put("require_request_uri_registration", requireRequestURIReg);
+		if (requestParamSupported) {
+			o.put("request_parameter_supported", true);
+		}
+		
+		if (requestURIParamSupported) {
+			o.put("request_uri_parameter_supported", true);
+		}
+		
+		if (requireRequestURIReg) {
+			o.put("require_request_uri_registration", true);
+		}
 		
 		if (mtlsEndpointAliases != null)
 			o.put("mtls_endpoint_aliases", mtlsEndpointAliases.toJSONObject());
 		
-		o.put("tls_client_certificate_bound_access_tokens", tlsClientCertificateBoundAccessTokens);
+		if (tlsClientCertificateBoundAccessTokens) {
+			o.put("tls_client_certificate_bound_access_tokens", true);
+		}
 		
 		// JARM
 		if (authzJWSAlgs != null) {

@@ -1277,3 +1277,14 @@ version 7.2 (2020-03-11)
       "invalid_request" OAuth 2.0 error on empty "verified_claims" -> "claims"
       as required by the specification.
     * New DateWithTimeZoneOffset constructor for UTC.
+
+version 7.3 (2020-03-23)
+    * Don't output default AuthorizationServerMetadata values for
+      request_parameter_supported, request_uri_parameter_supported,
+      require_request_uri_registration and
+      tls_client_certificate_bound_access_tokens.
+    * Don't output default OIDCProviderMetadata values for
+      claims_parameter_supported, request_uri_parameter_supported,
+      frontchannel_logout_supported and backchannel_logout_supported.
+    * The default OIDCProviderMetadata value for request_parameter_supported
+      must be false, for request_uri_parameter_supported true (iss #293).

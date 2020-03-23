@@ -296,7 +296,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		setJWKSetURI(jwkSetURI);
 		
 		// Default OpenID Connect setting is supported
-		setSupportsRequestParam(true);
+		setSupportsRequestURIParam(true);
 	}
 	
 	
@@ -1135,16 +1135,29 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 			o.put("claims_locales_supported", stringList);
 		}
 
-		o.put("claims_parameter_supported", claimsParamSupported);
+		if (claimsParamSupported) {
+			o.put("claims_parameter_supported", true);
+		}
+		
+		if (supportsRequestURIParam()) {
+			// default true
+			o.remove("request_uri_parameter_supported");
+		} else {
+			o.put("request_uri_parameter_supported", false);
+		}
 		
 		// optional front and back-channel logout
-		o.put("frontchannel_logout_supported", frontChannelLogoutSupported);
+		if (frontChannelLogoutSupported) {
+			o.put("frontchannel_logout_supported", true);
+		}
 		
 		if (frontChannelLogoutSupported) {
 			o.put("frontchannel_logout_session_supported", frontChannelLogoutSessionSupported);
 		}
 		
-		o.put("backchannel_logout_supported", backChannelLogoutSupported);
+		if (backChannelLogoutSupported) {
+			o.put("backchannel_logout_supported", true);
+		}
 		
 		if (backChannelLogoutSupported) {
 			o.put("backchannel_logout_session_supported", backChannelLogoutSessionSupported);
@@ -1383,6 +1396,10 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		
 		if (jsonObject.get("claims_parameter_supported") != null)
 			op.claimsParamSupported = JSONObjectUtils.getBoolean(jsonObject, "claims_parameter_supported");
+		
+		if (jsonObject.get("request_uri_parameter_supported") == null) {
+			op.setSupportsRequestURIParam(true);
+		}
 		
 		// Optional front and back-channel logout
 		if (jsonObject.get("frontchannel_logout_supported") != null)

@@ -794,6 +794,51 @@ public class OIDCProviderMetadataTest extends TestCase {
 		List<ClaimType> claimTypes = meta.getClaimTypes();
 		assertTrue(claimTypes.contains(ClaimType.NORMAL));
 		assertEquals(1, claimTypes.size());
+		
+		assertFalse(meta.supportsClaimsParam());
+		assertFalse(meta.supportsRequestParam());
+		assertTrue(meta.supportsRequestURIParam());
+		assertFalse(meta.requiresRequestURIRegistration());
+		assertFalse(meta.supportsTLSClientCertificateBoundAccessTokens());
+		
+		JSONObject jsonObject = meta.toJSONObject();
+		
+		assertEquals(issuer.getValue(), jsonObject.get("issuer"));
+		assertEquals(jwksURI.toString(), jsonObject.get("jwks_uri"));
+		assertEquals(Arrays.asList("query","fragment"), JSONObjectUtils.getStringList(jsonObject, "response_modes_supported"));
+		assertEquals(Arrays.asList("authorization_code","implicit"), JSONObjectUtils.getStringList(jsonObject, "grant_types_supported"));
+		assertEquals(Collections.singletonList("client_secret_basic"), JSONObjectUtils.getStringList(jsonObject, "token_endpoint_auth_methods_supported"));
+		assertEquals(Collections.singletonList("public"), JSONObjectUtils.getStringList(jsonObject, "subject_types_supported"));
+		assertEquals(Collections.singletonList("normal"), JSONObjectUtils.getStringList(jsonObject, "claim_types_supported"));
+		assertEquals(7, jsonObject.size());
+		
+		meta = OIDCProviderMetadata.parse(jsonObject.toJSONString());
+		
+		assertEquals(issuer, meta.getIssuer());
+		
+		assertEquals(jwksURI, meta.getJWKSetURI());
+		
+		responseModes = meta.getResponseModes();
+		assertTrue(responseModes.contains(ResponseMode.QUERY));
+		assertTrue(responseModes.contains(ResponseMode.FRAGMENT));
+		assertEquals(2, responseModes.size());
+		
+		grantTypes = meta.getGrantTypes();
+		assertTrue(grantTypes.contains(GrantType.AUTHORIZATION_CODE));
+		assertTrue(grantTypes.contains(GrantType.IMPLICIT));
+		assertEquals(2, grantTypes.size());
+		
+		assertEquals(Collections.singletonList(ClientAuthenticationMethod.CLIENT_SECRET_BASIC), meta.getTokenEndpointAuthMethods());
+		
+		claimTypes = meta.getClaimTypes();
+		assertTrue(claimTypes.contains(ClaimType.NORMAL));
+		assertEquals(1, claimTypes.size());
+		
+		assertFalse(meta.supportsClaimsParam());
+		assertFalse(meta.supportsRequestParam());
+		assertTrue(meta.supportsRequestURIParam());
+		assertFalse(meta.requiresRequestURIRegistration());
+		assertFalse(meta.supportsTLSClientCertificateBoundAccessTokens());
 	}
 
 
@@ -930,7 +975,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		meta.applyDefaults();
 		
 		JSONObject out = meta.toJSONObject();
-		assertFalse(JSONObjectUtils.getBoolean(out, "frontchannel_logout_supported"));
+		assertFalse(JSONObjectUtils.containsKey(out, "frontchannel_logout_supported"));
 		assertFalse(JSONObjectUtils.containsKey(out, "frontchannel_logout_session_supported"));
 		
 		meta.setSupportsFrontChannelLogout(true);
@@ -956,7 +1001,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		meta.applyDefaults();
 		
 		JSONObject out = meta.toJSONObject();
-		assertFalse(JSONObjectUtils.getBoolean(out, "backchannel_logout_supported"));
+		assertFalse(JSONObjectUtils.containsKey(out, "backchannel_logout_supported"));
 		assertFalse(JSONObjectUtils.containsKey(out, "backchannel_logout_session_supported"));
 		
 		meta.setSupportsBackChannelLogout(true);
@@ -984,10 +1029,10 @@ public class OIDCProviderMetadataTest extends TestCase {
 		JSONObject out = meta.toJSONObject();
 		
 		// default - not set
-		assertNotNull(out.remove("frontchannel_logout_supported"));
-		assertNull(out.remove("frontchannel_logout_session_supported"));
-		assertNotNull(out.remove("backchannel_logout_supported"));
-		assertNull(out.remove("backchannel_logout_session_supported"));
+		assertNull(out.get("frontchannel_logout_supported"));
+		assertNull(out.get("frontchannel_logout_session_supported"));
+		assertNull(out.get("backchannel_logout_supported"));
+		assertNull(out.get("backchannel_logout_session_supported"));
 		
 		meta = OIDCProviderMetadata.parse(out.toJSONString());
 		
@@ -1037,12 +1082,12 @@ public class OIDCProviderMetadataTest extends TestCase {
 		
 		JSONObject jsonObject = meta.toJSONObject();
 		
-		assertFalse((Boolean) jsonObject.get("tls_client_certificate_bound_access_tokens"));
+		assertNull(jsonObject.get("tls_client_certificate_bound_access_tokens"));
 		
 		assertFalse(OIDCProviderMetadata.parse(jsonObject).supportsTLSClientCertificateBoundAccessTokens());
 		
 		// default to false
-		assertNotNull(jsonObject.remove("tls_client_certificate_bound_access_tokens"));
+		assertNull(jsonObject.remove("tls_client_certificate_bound_access_tokens"));
 		
 		assertFalse(OIDCProviderMetadata.parse(jsonObject).supportsTLSClientCertificateBoundAccessTokens());
 		
