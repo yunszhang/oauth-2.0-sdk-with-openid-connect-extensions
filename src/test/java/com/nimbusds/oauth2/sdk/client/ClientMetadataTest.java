@@ -669,18 +669,36 @@ public class ClientMetadataTest extends TestCase {
 		
 		meta.applyDefaults();
 		
-		Set<ResponseType> rts = meta.getResponseTypes();
-		assertTrue(rts.contains(ResponseType.parse("code")));
-		
-		Set<GrantType> grantTypes = meta.getGrantTypes();
-		assertTrue(grantTypes.contains(GrantType.AUTHORIZATION_CODE));
-		
+		assertEquals(Collections.singleton(new ResponseType("code")), meta.getResponseTypes());
+		assertEquals(Collections.singleton(GrantType.AUTHORIZATION_CODE), meta.getGrantTypes());
 		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, meta.getTokenEndpointAuthMethod());
 		
 		// JARM
 		assertNull(meta.getAuthorizationJWSAlg());
 		assertNull(meta.getAuthorizationJWEAlg());
 		assertNull(meta.getAuthorizationJWEEnc());
+		
+		assertFalse(meta.getTLSClientCertificateBoundAccessTokens());
+		
+		JSONObject jsonObject = meta.toJSONObject();
+		
+		assertEquals(Collections.singletonList("authorization_code"), JSONObjectUtils.getStringList(jsonObject, "grant_types"));
+		assertEquals(Collections.singletonList("code"), JSONObjectUtils.getStringList(jsonObject, "response_types"));
+		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC.getValue(), jsonObject.get("token_endpoint_auth_method"));
+		assertEquals(3, jsonObject.size());
+		
+		meta = ClientMetadata.parse(jsonObject);
+		
+		assertEquals(Collections.singleton(new ResponseType("code")), meta.getResponseTypes());
+		assertEquals(Collections.singleton(GrantType.AUTHORIZATION_CODE), meta.getGrantTypes());
+		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, meta.getTokenEndpointAuthMethod());
+		
+		// JARM
+		assertNull(meta.getAuthorizationJWSAlg());
+		assertNull(meta.getAuthorizationJWEAlg());
+		assertNull(meta.getAuthorizationJWEEnc());
+		
+		assertFalse(meta.getTLSClientCertificateBoundAccessTokens());
 	}
 
 

@@ -1288,3 +1288,5 @@ version 7.3 (2020-03-23)
       frontchannel_logout_supported and backchannel_logout_supported.
     * The default OIDCProviderMetadata value for request_parameter_supported
       must be false, for request_uri_parameter_supported true (iss #293).
+    * Don't output default ClientMetadata value for
+      tls_client_certificate_bound_access_tokens.

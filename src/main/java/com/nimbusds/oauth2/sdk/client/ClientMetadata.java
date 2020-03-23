@@ -1880,7 +1880,9 @@ public class ClientMetadata {
 		if (softwareVersion != null)
 			o.put("software_version", softwareVersion.getValue());
 		
-		o.put("tls_client_certificate_bound_access_tokens", tlsClientCertificateBoundAccessTokens);
+		if (getTLSClientCertificateBoundAccessTokens()) {
+			o.put("tls_client_certificate_bound_access_tokens", tlsClientCertificateBoundAccessTokens);
+		}
 		
 		if (tlsClientAuthSubjectDN != null)
 			o.put("tls_client_auth_subject_dn", tlsClientAuthSubjectDN);

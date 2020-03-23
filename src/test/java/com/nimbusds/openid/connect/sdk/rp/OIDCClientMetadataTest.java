@@ -344,7 +344,7 @@ public class OIDCClientMetadataTest extends TestCase {
 	}
 
 
-	public void testApplyDefaults() {
+	public void testApplyDefaults() throws ParseException {
 
 		OIDCClientMetadata metadata = new OIDCClientMetadata();
 
@@ -368,6 +368,15 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertEquals(JWSAlgorithm.RS256, metadata.getIDTokenJWSAlg());
 
 		assertEquals(ApplicationType.WEB, metadata.getApplicationType());
+		
+		JSONObject jsonObject = metadata.toJSONObject();
+		
+		assertEquals(Collections.singletonList("authorization_code"), JSONObjectUtils.getStringList(jsonObject, "grant_types"));
+		assertEquals(Collections.singletonList("code"), JSONObjectUtils.getStringList(jsonObject, "response_types"));
+		assertEquals(ApplicationType.WEB.toString(), jsonObject.get("application_type"));
+		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC.getValue(), jsonObject.get("token_endpoint_auth_method"));
+		assertEquals(JWSAlgorithm.RS256.getName(), jsonObject.get("id_token_signed_response_alg"));
+		assertEquals(5, jsonObject.size());
 	}
 	
 	
@@ -608,9 +617,9 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertNotNull(jsonObject.get("subject_type"));
 		assertNotNull(jsonObject.get("sector_identifier_uri"));
 		assertNotNull(jsonObject.get("id_token_signed_response_alg"));
-		assertFalse((Boolean) jsonObject.get("tls_client_certificate_bound_access_tokens"));
+		assertNull(jsonObject.get("tls_client_certificate_bound_access_tokens"));
 		
-		assertEquals(9, jsonObject.size());
+		assertEquals(8, jsonObject.size());
 	}
 	
 	
