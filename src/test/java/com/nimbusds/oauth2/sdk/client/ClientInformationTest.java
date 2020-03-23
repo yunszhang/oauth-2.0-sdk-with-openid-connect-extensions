@@ -218,12 +218,11 @@ public class ClientInformationTest extends TestCase {
 		assertEquals("https://example.com/in", ((List<String>)o.get("redirect_uris")).get(0));
 		assertEquals("secret", (String)o.get("client_secret"));
 		assertEquals(0L, ((Long)o.get("client_secret_expires_at")).longValue());
-		assertFalse((Boolean)o.get("tls_client_certificate_bound_access_tokens"));
-		assertEquals(5, o.size());
+		assertEquals(4, o.size());
 
 		String jsonString = o.toJSONString();
 
-		o = com.nimbusds.jose.util.JSONObjectUtils.parseJSONObject(jsonString);
+		o = com.nimbusds.jose.util.JSONObjectUtils.parse(jsonString);
 
 		clientInfo = ClientInformation.parse(o);
 
@@ -262,8 +261,7 @@ public class ClientInformationTest extends TestCase {
 		assertEquals("https://example.com/in", ((List<String>)o.get("redirect_uris")).get(0));
 		assertEquals("secret", (String)o.get("client_secret"));
 		assertEquals(0L, ((Long)o.get("client_secret_expires_at")).longValue());
-		assertFalse((Boolean) o.get("tls_client_certificate_bound_access_tokens"));
-		assertEquals(5, o.size());
+		assertEquals(4, o.size());
 
 		String jsonString = o.toJSONString();
 
