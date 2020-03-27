@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package com.nimbusds.openid.connect.sdk.federation;
+package com.nimbusds.openid.connect.sdk.federation.config;
 
 
 import java.nio.charset.StandardCharsets;

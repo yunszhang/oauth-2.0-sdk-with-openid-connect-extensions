@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package com.nimbusds.openid.connect.sdk.federation;
+package com.nimbusds.openid.connect.sdk.federation.config;
 
 
 import java.util.Date;
@@ -37,6 +37,8 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
+import com.nimbusds.openid.connect.sdk.federation.config.FederationEntityConfigurationResponse;
+import com.nimbusds.openid.connect.sdk.federation.config.FederationEntityConfigurationSuccessResponse;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
 
 

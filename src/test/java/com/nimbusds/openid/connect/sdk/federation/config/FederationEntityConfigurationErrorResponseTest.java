@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package com.nimbusds.openid.connect.sdk.federation;
+package com.nimbusds.openid.connect.sdk.federation.config;
 
 
 import junit.framework.TestCase;
@@ -24,6 +24,8 @@ import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.openid.connect.sdk.federation.config.FederationEntityConfigurationErrorResponse;
+import com.nimbusds.openid.connect.sdk.federation.config.FederationEntityConfigurationResponse;
 
 
 public class FederationEntityConfigurationErrorResponseTest extends TestCase {

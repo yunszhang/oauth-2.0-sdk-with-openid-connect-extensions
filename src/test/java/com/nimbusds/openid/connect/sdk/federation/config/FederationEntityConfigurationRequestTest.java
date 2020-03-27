@@ -15,12 +15,13 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package com.nimbusds.openid.connect.sdk.federation;
+package com.nimbusds.openid.connect.sdk.federation.config;
 
 
 import junit.framework.TestCase;
 
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.openid.connect.sdk.federation.config.FederationEntityConfigurationRequest;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 
 

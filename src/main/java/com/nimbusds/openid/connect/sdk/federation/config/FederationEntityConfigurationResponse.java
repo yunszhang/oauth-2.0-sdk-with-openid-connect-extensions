@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package com.nimbusds.openid.connect.sdk.federation;
+package com.nimbusds.openid.connect.sdk.federation.config;
 
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -41,7 +41,7 @@ public abstract class FederationEntityConfigurationResponse implements Response 
 	 *
 	 * @return The federation entity configuration success response.
 	 */
-	FederationEntityConfigurationSuccessResponse toSuccessResponse() {
+	public FederationEntityConfigurationSuccessResponse toSuccessResponse() {
 		
 		return (FederationEntityConfigurationSuccessResponse) this;
 	}
@@ -53,7 +53,7 @@ public abstract class FederationEntityConfigurationResponse implements Response 
 	 *
 	 * @return The federation entity configuration error response.
 	 */
-	FederationEntityConfigurationErrorResponse toErrorResponse() {
+	public FederationEntityConfigurationErrorResponse toErrorResponse() {
 		
 		return (FederationEntityConfigurationErrorResponse) this;
 	}
