@@ -15,6 +15,6 @@
  * specific language governing permissions and limitations under the License.
  */
 /**
- * Federation policy.
+ * OpenID Connect Federation 1.0 policy.
  */
 package com.nimbusds.openid.connect.sdk.federation.policy;

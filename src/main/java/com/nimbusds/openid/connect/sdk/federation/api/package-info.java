@@ -15,7 +15,6 @@
  * specific language governing permissions and limitations under the License.
  */
 /**
- * OpenID Connect Federation 1.0 entity configuration request and response
- * classes.
+ * OpenID Connect Federation 1.0 API classes.
  */
-package com.nimbusds.openid.connect.sdk.federation.config;
+package com.nimbusds.openid.connect.sdk.federation.api;

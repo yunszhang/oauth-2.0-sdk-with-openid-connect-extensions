@@ -1,7 +1,7 @@
 /*
  * oauth2-oidc-sdk
  *
- * Copyright 2012-2016, Connect2id Ltd and contributors.
+ * Copyright 2012-2020, Connect2id Ltd and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -14,8 +14,30 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+
+package com.nimbusds.openid.connect.sdk.federation.api;
+
+
 /**
- * OpenID Connect Federation 1.0 entity configuration request and response
- * classes.
+ * Federation entity listing spec.
  */
-package com.nimbusds.openid.connect.sdk.federation.config;
+public enum  EntityListingSpec {
+	
+	
+	/**
+	 * All nodes.
+	 */
+	ALL,
+	
+	
+	/**
+	 * Leaf nodes only.
+	 */
+	LEAF_ENTITIES_ONLY,
+	
+	
+	/**
+	 * Intermediate nodes only.
+	 */
+	INTERMEDIATES_ONLY
+}

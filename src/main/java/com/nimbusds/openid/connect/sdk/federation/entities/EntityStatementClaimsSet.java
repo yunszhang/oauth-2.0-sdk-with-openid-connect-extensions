@@ -339,12 +339,12 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 			return false;
 		}
 		
-		if (metadataObject.get("openid_relying_party") != null) return true;
-		if (metadataObject.get("openid_provider") != null) return true;
-		if (metadataObject.get("oauth_authorization_server") != null) return true;
-		if (metadataObject.get("oauth_client") != null) return true;
-		if (metadataObject.get("oauth_resource") != null) return true;
-		if (metadataObject.get("federation_entity") != null) return true;
+		if (metadataObject.get(FederationMetadataType.OPENID_RELYING_PARTY.getValue()) != null) return true;
+		if (metadataObject.get(FederationMetadataType.OPENID_PROVIDER.getValue()) != null) return true;
+		if (metadataObject.get(FederationMetadataType.OAUTH_AUTHORIZATION_SERVER.getValue()) != null) return true;
+		if (metadataObject.get(FederationMetadataType.OAUTH_CLIENT.getValue()) != null) return true;
+		if (metadataObject.get(FederationMetadataType.OAUTH_RESOURCE.getValue()) != null) return true;
+		if (metadataObject.get(FederationMetadataType.FEDERATION_ENTITY.getValue()) != null) return true;
 		
 		return false;
 	}
@@ -365,7 +365,7 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 		}
 		
 		try {
-			JSONObject rpo = JSONObjectUtils.getJSONObject(o, "openid_relying_party", null);
+			JSONObject rpo = JSONObjectUtils.getJSONObject(o, FederationMetadataType.OPENID_RELYING_PARTY.getValue(), null);
 			if (rpo == null) {
 				return null;
 			}
@@ -394,9 +394,9 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 		}
 		
 		if (rpMetadata != null) {
-			o.put("openid_relying_party", rpMetadata.toJSONObject());
+			o.put(FederationMetadataType.OPENID_RELYING_PARTY.getValue(), rpMetadata.toJSONObject());
 		} else {
-			o.put("openid_relying_party", null);
+			o.put(FederationMetadataType.OPENID_RELYING_PARTY.getValue(), null);
 		}
 		
 		setClaim(METADATA_CLAIM_NAME, o);
@@ -418,7 +418,7 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 		}
 		
 		try {
-			JSONObject opo = JSONObjectUtils.getJSONObject(o, "openid_provider", null);
+			JSONObject opo = JSONObjectUtils.getJSONObject(o, FederationMetadataType.OPENID_PROVIDER.getValue(), null);
 			if (opo == null) {
 				return null;
 			}
@@ -447,9 +447,9 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 		}
 		
 		if (opMetadata != null) {
-			o.put("openid_provider", opMetadata.toJSONObject());
+			o.put(FederationMetadataType.OPENID_PROVIDER.getValue(), opMetadata.toJSONObject());
 		} else {
-			o.put("openid_provider", null);
+			o.put(FederationMetadataType.OPENID_PROVIDER.getValue(), null);
 		}
 		
 		setClaim(METADATA_CLAIM_NAME, o);
@@ -471,7 +471,7 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 		}
 		
 		try {
-			JSONObject aco = JSONObjectUtils.getJSONObject(o, "oauth_client", null);
+			JSONObject aco = JSONObjectUtils.getJSONObject(o, FederationMetadataType.OAUTH_CLIENT.getValue(), null);
 			if (aco == null) {
 				return null;
 			}
@@ -501,9 +501,9 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 		}
 		
 		if (clientMetadata != null) {
-			o.put("oauth_client", clientMetadata.toJSONObject());
+			o.put(FederationMetadataType.OAUTH_CLIENT.getValue(), clientMetadata.toJSONObject());
 		} else {
-			o.put("oauth_client", null);
+			o.put(FederationMetadataType.OAUTH_CLIENT.getValue(), null);
 		}
 		
 		setClaim(METADATA_CLAIM_NAME, o);
@@ -526,7 +526,7 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 		}
 		
 		try {
-			JSONObject opo = JSONObjectUtils.getJSONObject(o, "oauth_authorization_server", null);
+			JSONObject opo = JSONObjectUtils.getJSONObject(o, FederationMetadataType.OAUTH_AUTHORIZATION_SERVER.getValue(), null);
 			if (opo == null) {
 				return null;
 			}
@@ -556,9 +556,9 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 		}
 		
 		if (asMetadata != null) {
-			o.put("oauth_authorization_server", asMetadata.toJSONObject());
+			o.put(FederationMetadataType.OAUTH_AUTHORIZATION_SERVER.getValue(), asMetadata.toJSONObject());
 		} else {
-			o.put("oauth_authorization_server", null);
+			o.put(FederationMetadataType.OAUTH_AUTHORIZATION_SERVER.getValue(), null);
 		}
 		
 		setClaim(METADATA_CLAIM_NAME, o);
@@ -580,7 +580,7 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 		}
 		
 		try {
-			JSONObject feo = JSONObjectUtils.getJSONObject(o, "federation_entity", null);
+			JSONObject feo = JSONObjectUtils.getJSONObject(o, FederationMetadataType.FEDERATION_ENTITY.getValue(), null);
 			if (feo == null) {
 				return null;
 			}
@@ -610,9 +610,9 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 		}
 		
 		if (entityMetadata != null) {
-			o.put("federation_entity", entityMetadata.toJSONObject());
+			o.put(FederationMetadataType.FEDERATION_ENTITY.getValue(), entityMetadata.toJSONObject());
 		} else {
-			o.put("federation_entity", null);
+			o.put(FederationMetadataType.FEDERATION_ENTITY.getValue(), null);
 		}
 		
 		setClaim(METADATA_CLAIM_NAME, o);
