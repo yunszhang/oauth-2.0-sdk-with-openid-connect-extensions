@@ -22,10 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
@@ -82,6 +79,36 @@ public final class JSONObjectUtils {
 		
 		if (o instanceof JSONObject)
 			return (JSONObject)o;
+		else
+			throw new ParseException("The JSON entity is not an object");
+	}
+	
+	
+	/**
+	 * Parses a JSON object while keeping the order of JSON object members.
+	 *
+	 * <p>Specific JSON to Java entity mapping (as per JSON Simple):
+	 *
+	 * <ul>
+	 *     <li>JSON numbers mapped to {@code java.lang.Number}.
+	 *     <li>JSON integer numbers mapped to {@code long}.
+	 *     <li>JSON fraction numbers mapped to {@code double}.
+	 * </ul>
+	 *
+	 * @param s The JSON object string to parse. Must not be {@code null}.
+	 *
+	 * @return The JSON object as linked hash map.
+	 *
+	 * @throws ParseException If the string cannot be parsed to a JSON
+	 *                        object.
+	 */
+	public static LinkedHashMap<String,Object> parseKeepingOrder(final String s)
+		throws ParseException {
+		
+		Object o = JSONUtils.parseJSONKeepingOrder(s);
+		
+		if (o instanceof LinkedHashMap)
+			return (LinkedHashMap<String,Object>)o;
 		else
 			throw new ParseException("The JSON entity is not an object");
 	}

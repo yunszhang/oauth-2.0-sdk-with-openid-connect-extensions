@@ -24,7 +24,9 @@ import java.util.List;
 import com.nimbusds.oauth2.sdk.ParseException;
 
 import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 import net.minidev.json.parser.JSONParser;
+import net.minidev.json.writer.JsonReader;
 
 
 /**
@@ -48,6 +50,29 @@ public final class JSONUtils {
 
 		try {
 			return new JSONParser(JSONParser.USE_HI_PRECISION_FLOAT | JSONParser.ACCEPT_TAILLING_SPACE).parse(s);
+
+		} catch (net.minidev.json.parser.ParseException e) {
+
+			throw new ParseException("Invalid JSON: " + e.getMessage(), e);
+		}
+	}
+
+
+	/**
+	 * Parses a JSON value while keeping the order of JSON object members.
+	 *
+	 * @param s The JSON string to parse. Must not be {@code null}.
+	 *
+	 * @return The JSON value.
+	 *
+	 * @throws ParseException If the string cannot be parsed to a JSON
+	 *                        value.
+	 */
+	public static Object parseJSONKeepingOrder(final String s)
+		throws ParseException {
+
+		try {
+			return new JSONParser(JSONParser.USE_HI_PRECISION_FLOAT | JSONParser.ACCEPT_TAILLING_SPACE).parse(s, new JsonReader().DEFAULT_ORDERED);
 
 		} catch (net.minidev.json.parser.ParseException e) {
 

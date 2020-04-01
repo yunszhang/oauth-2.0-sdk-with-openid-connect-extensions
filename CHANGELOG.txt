@@ -1239,3 +1239,7 @@ version 7.0 (2020-02-10)
     * Deprecates HTTPMessage.ensureContentType().
     * Deprecates HTTPMessage.ensureContentType(javax.mail.internet.ContentType).
     * Cleans up code.
+
+version 8.0 (2020-04-01)
+    * Adds JSONObjectUtils.parseKeepingOrder and
+      JSONUtils.parseJSONKeepingOrder methods.

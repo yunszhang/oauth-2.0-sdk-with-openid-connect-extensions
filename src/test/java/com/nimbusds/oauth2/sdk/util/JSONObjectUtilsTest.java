@@ -26,6 +26,7 @@ import com.nimbusds.oauth2.sdk.client.ClientType;
 import junit.framework.TestCase;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 import net.minidev.json.parser.JSONParser;
 import org.junit.Assert;
 
@@ -75,6 +76,26 @@ public class JSONObjectUtilsTest extends TestCase {
 		assertEquals(new Long(3), (Long)o.get("apples"));
 		assertEquals("none", (String)o.get("pears"));
 		assertEquals(2, o.size());
+	}
+	
+	
+	public void testJSONObjectParseOrdered()
+		throws Exception {
+		
+		Map<String,String> orderedMap = new LinkedHashMap<>();
+		for (int i=0; i < 10; i++) {
+			orderedMap.put(i+"-"+UUID.randomUUID().toString(), "v" + i);
+		}
+		
+		String json = JSONObject.toJSONString(orderedMap);
+		
+		LinkedHashMap<String,Object> parsedJSONObject = JSONObjectUtils.parseKeepingOrder(json);
+		
+		Iterator<String> it = parsedJSONObject.keySet().iterator();
+		
+		for (int i=0; i < 10; i++) {
+			assertTrue(it.next().startsWith(i+"-"));
+		}
 	}
 
 
