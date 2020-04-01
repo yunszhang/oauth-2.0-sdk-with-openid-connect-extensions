@@ -33,7 +33,7 @@ class Utils {
 	 *
 	 * @param op    The policy operation. Must not be {@code null}.
 	 * @param clazz The target class. Must not be {@code null}.
-	 * @param <T>
+	 * @param <T>   The return type.
 	 *
 	 * @return The cast policy operation.
 	 *
