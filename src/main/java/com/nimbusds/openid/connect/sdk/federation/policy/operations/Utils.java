@@ -18,6 +18,9 @@
 package com.nimbusds.openid.connect.sdk.federation.policy.operations;
 
 
+import java.util.List;
+
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyOperation;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
 
@@ -46,6 +49,33 @@ class Utils {
 		} catch (ClassCastException e) {
 			throw new PolicyViolationException("The policy must be " + clazz.getName());
 		}
+	}
+	
+	
+	/**
+	 * Retrieves a policy operation of the specified type from a list.
+	 *
+	 * @param opList The policy operations list. May be {@code null}.
+	 * @param clazz  The target class. Must not be {@code null}.
+	 * @param <T>    The policy operation type.
+	 *
+	 * @return The first found policy operation of the specified type,
+	 *         {@code null} if not found.
+	 */
+	static <T extends PolicyOperation> T getPolicyOperationByType(final List<PolicyOperation> opList, final Class<T> clazz) {
+		
+		if (CollectionUtils.isEmpty(opList)) {
+			return null;
+		}
+		
+		for (PolicyOperation op: opList) {
+			
+			if (clazz.isAssignableFrom(op.getClass())) {
+				return (T)op;
+			}
+		}
+		
+		return null;
 	}
 	
 	

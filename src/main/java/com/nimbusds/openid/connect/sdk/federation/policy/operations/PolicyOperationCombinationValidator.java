@@ -46,8 +46,10 @@ public interface PolicyOperationCombinationValidator {
 	 *
 	 * @param policyOperations The policy operations, empty list if none.
 	 *
+	 * @return The validated and optionally optimised policy operations.
+	 *
 	 * @throws PolicyViolationException On a illegal policy combination.
 	 */
-	void validate(final List<PolicyOperation> policyOperations)
+	List<PolicyOperation> validate(final List<PolicyOperation> policyOperations)
 		throws PolicyViolationException;
 }
