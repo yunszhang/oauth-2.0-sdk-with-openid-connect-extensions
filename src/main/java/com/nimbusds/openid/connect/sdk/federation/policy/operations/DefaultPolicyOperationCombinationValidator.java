@@ -156,6 +156,7 @@ public class DefaultPolicyOperationCombinationValidator implements PolicyOperati
 	}
 	
 	
+	// See https://bitbucket.org/openid/connect/issues/1163/federation-metadata-policy-current-spec
 	private static List<PolicyOperation> validateCombinationsOfValue(final List<PolicyOperation> ops)
 		throws PolicyViolationException {
 		// Can be combined with one_of, subset_of and superset_of. Here the order
