@@ -111,8 +111,8 @@ public class MetadataPolicy implements JSONAware {
 	 *         {@code null} if none.
 	 */
 	public List<PolicyOperation> get(final String parameterName) {
-		
-		return getEntry(parameterName).getValue();
+
+		return entries.get(parameterName);
 	}
 	
 	
@@ -121,14 +121,14 @@ public class MetadataPolicy implements JSONAware {
 	 *
 	 * @param parameterName The parameter name. Must not be {@code null}.
 	 *
-	 * @return The policy entry for the parameter.
+	 * @return The policy entry for the parameter, {@code null} if none.
 	 */
 	public MetadataPolicyEntry getEntry(final String parameterName) {
 		
 		List<PolicyOperation> policyOperations = entries.get(parameterName);
 		
 		if (policyOperations == null) {
-			return new MetadataPolicyEntry(parameterName, Collections.<PolicyOperation>emptyList());
+			return null;
 		}
 		
 		return new MetadataPolicyEntry(parameterName, policyOperations);

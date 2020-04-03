@@ -18,12 +18,10 @@
 package com.nimbusds.openid.connect.sdk.federation.policy;
 
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyOperation;
@@ -32,6 +30,73 @@ import com.nimbusds.openid.connect.sdk.federation.policy.operations.*;
 
 
 public class MetadataPolicyTest extends TestCase {
+	
+	
+	public void testEmpty() throws ParseException, PolicyViolationException {
+		
+		MetadataPolicy metadataPolicy = new MetadataPolicy();
+		
+		assertNull(metadataPolicy.get("no-such-parameter"));
+		assertNull(metadataPolicy.getEntry("no-such-parameter"));
+		
+		assertTrue(metadataPolicy.entrySet().isEmpty());
+		
+		assertNull(metadataPolicy.remove("no-such-parameter"));
+		
+		assertTrue(metadataPolicy.toJSONObject().isEmpty());
+		assertEquals("{}", metadataPolicy.toJSONString());
+		
+		metadataPolicy = MetadataPolicy.parse("{}");
+		
+		assertTrue(metadataPolicy.entrySet().isEmpty());
+	}
+	
+	
+	public void testWithOneEntry() throws ParseException, PolicyViolationException {
+		
+		MetadataPolicy metadataPolicy = new MetadataPolicy();
+		
+		String parameterName = "id_token_signing_alg";
+		OneOfOperation op = new OneOfOperation();
+		op.configure(Arrays.asList("RS256", "RS384", "RS512"));
+		
+		// put
+		metadataPolicy.put(parameterName, op);
+		
+		assertEquals(Collections.singletonList(op), metadataPolicy.get(parameterName));
+		
+		assertEquals(parameterName, metadataPolicy.getEntry(parameterName).getParameterName());
+		assertEquals(Collections.singletonList(op), metadataPolicy.getEntry(parameterName).getPolicyOperations());
+		
+		assertEquals(1, metadataPolicy.entrySet().size());
+		
+		// remove
+		assertEquals(Collections.singletonList(op), metadataPolicy.remove(parameterName));
+		
+		assertTrue(metadataPolicy.entrySet().isEmpty());
+		
+		// put back in
+		metadataPolicy.put(parameterName, op);
+		
+		Map<String,Object> jsonObject = metadataPolicy.toJSONObject();
+		
+		String json = JSONObject.toJSONString(jsonObject);
+		assertEquals("{\"id_token_signing_alg\":{\"one_of\":[\"RS256\",\"RS384\",\"RS512\"]}}", json);
+		
+		metadataPolicy = MetadataPolicy.parse(json);
+		
+		assertEquals(op.getOperationName(), metadataPolicy.getEntry(parameterName).getPolicyOperations().get(0).getOperationName());
+		assertEquals(op.getStringListConfiguration(), ((OneOfOperation)metadataPolicy.getEntry(parameterName).getPolicyOperations().get(0)).getStringListConfiguration());
+		
+		assertEquals(1, metadataPolicy.entrySet().size());
+		
+		Iterator<MetadataPolicyEntry> it = metadataPolicy.entrySet().iterator();
+		MetadataPolicyEntry en = it.next();
+		assertEquals(parameterName, en.getParameterName());
+		assertEquals(op.getOperationName(), en.getPolicyOperations().get(0).getOperationName());
+		assertEquals(op.getStringListConfiguration(), ((OneOfOperation)en.getPolicyOperations().get(0)).getStringListConfiguration());
+		assertFalse(it.hasNext());
+	}
 	
 	
 	public void testExample() throws ParseException, PolicyViolationException {
