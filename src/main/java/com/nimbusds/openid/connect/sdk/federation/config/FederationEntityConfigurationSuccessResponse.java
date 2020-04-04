@@ -38,7 +38,6 @@ import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsVerifier;
 
@@ -124,11 +123,9 @@ public class FederationEntityConfigurationSuccessResponse extends FederationEnti
 	
 	
 	/**
-	 * Validates the signature, issue and expiration times of the JOSE
-	 * (JWT) object and extracts the contained federation entity statement.
-	 *
-	 * @param expectedAudience The expected audience, {@code null} if not
-	 *                         specified.
+	 * Validates the self-issued signature, the issue and expiration times
+	 * of the JOSE (JWT) object and extracts the contained federation
+	 * entity statement.
 	 *
 	 * @return The federation entity claims set.
 	 *
@@ -138,19 +135,22 @@ public class FederationEntityConfigurationSuccessResponse extends FederationEnti
 	 * @throws JOSEException    If an internal signature validation
 	 *                          exception is encountered.
 	 */
-	public EntityStatementClaimsSet validateAndExtractStatement(final Audience expectedAudience)
+	public EntityStatementClaimsSet validateAndExtractStatement()
 		throws ParseException, BadJOSEException, JOSEException {
 		
 		// Parse and validate min claims first
 		JWTClaimsSet jwtClaimsSet;
 		try {
-			jwtClaimsSet = signedStatement.getJWTClaimsSet();
+			jwtClaimsSet = getSignedStatement().getJWTClaimsSet();
 		} catch (java.text.ParseException e) {
 			throw new ParseException(e.getMessage(), e);
 		}
 		
 		EntityStatementClaimsSet stmt = new EntityStatementClaimsSet(jwtClaimsSet);
 		stmt.validateRequiredClaimsPresence();
+		if (! stmt.isSelfStatement()) {
+			throw new ParseException("Entity statement not self-issued");
+		}
 		
 		// Validate self-issued signature
 		final JWKSet jwkSet = stmt.getJWKSet();
@@ -166,7 +166,7 @@ public class FederationEntityConfigurationSuccessResponse extends FederationEnti
 		});
 		
 		// Double check claims with JWT framework
-		jwtProcessor.setJWTClaimsSetVerifier(new EntityStatementClaimsVerifier(expectedAudience));
+		jwtProcessor.setJWTClaimsSetVerifier(new EntityStatementClaimsVerifier());
 		
 		jwtProcessor.process(signedStatement, null);
 		

@@ -18,6 +18,8 @@
 package com.nimbusds.openid.connect.sdk.federation.config;
 
 
+import java.net.URI;
+import java.util.Collections;
 import java.util.Date;
 
 import junit.framework.TestCase;
@@ -33,11 +35,14 @@ import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
+import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
+import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 
 public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
@@ -47,6 +52,9 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 	
 	
 	private static final JWKSet SIMPLE_JWK_SET;
+	
+	
+	private static final OIDCProviderMetadata OP_METADATA;
 	
 	
 	static {
@@ -59,14 +67,22 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		} catch (JOSEException e) {
 			throw new RuntimeException(e);
 		}
+		
+		OP_METADATA = new OIDCProviderMetadata(
+			new Issuer("https://op.c2id.com"),
+			Collections.singletonList(SubjectType.PAIRWISE),
+			URI.create("https://op.c2id.com/jwks.json"));
+		OP_METADATA.setAuthorizationEndpointURI(URI.create("https://op.c2id.com/login"));
+		OP_METADATA.setTokenEndpointURI(URI.create("https://op.c2id.com/token"));
+		OP_METADATA.applyDefaults();
 	}
 	
 	
 	public void testLifeCycle()
 		throws Exception {
 		
-		Issuer iss = new Issuer("https://abc-federation.c2id.com");
-		Subject sub = new Subject("https://op.c2id.com");
+		Issuer iss = OP_METADATA.getIssuer();
+		Subject sub = new Subject(OP_METADATA.getIssuer().getValue());
 		
 		Date now = new Date();
 		long nowTS = DateUtils.toSecondsSinceEpoch(now);
@@ -79,6 +95,7 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 			iat,
 			exp,
 			SIMPLE_JWK_SET);
+		stmt.setOPMetadata(OP_METADATA);
 		
 		FederationEntityConfigurationSuccessResponse response = FederationEntityConfigurationSuccessResponse.create(
 			stmt,
@@ -88,7 +105,7 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		assertEquals(JWSAlgorithm.RS256, signedJWT.getHeader().getAlgorithm());
 		assertEquals(stmt.toJWTClaimsSet().getClaims(), signedJWT.getJWTClaimsSet().getClaims());
 		
-		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.validateAndExtractStatement(null).toJWTClaimsSet().getClaims());
+		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.validateAndExtractStatement().toJWTClaimsSet().getClaims());
 		
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		assertEquals(200, httpResponse.getStatusCode());
@@ -99,67 +116,15 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		
 		assertEquals(signedJWT.serialize(), response.getSignedStatement().getParsedString());
 		
-		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.validateAndExtractStatement(null).toJWTClaimsSet().getClaims());
-	}
-	
-	
-	public void testLifeCycle_withAudience()
-		throws Exception {
-		
-		Issuer iss = new Issuer("https://abc-federation.c2id.com");
-		Subject sub = new Subject("https://op.c2id.com");
-		
-		Date now = new Date();
-		long nowTS = DateUtils.toSecondsSinceEpoch(now);
-		Date iat = DateUtils.fromSecondsSinceEpoch(nowTS);
-		Date exp = DateUtils.fromSecondsSinceEpoch(nowTS + 60);
-		
-		EntityStatementClaimsSet stmt = new EntityStatementClaimsSet(
-			iss,
-			sub,
-			iat,
-			exp,
-			SIMPLE_JWK_SET);
-		
-		Audience audience = new Audience("https://rp.example.com");
-		stmt.setAudience(audience);
-		
-		FederationEntityConfigurationSuccessResponse response = FederationEntityConfigurationSuccessResponse.create(
-			stmt,
-			RSA_JWK);
-		
-		SignedJWT signedJWT = response.getSignedStatement();
-		assertEquals(JWSAlgorithm.RS256, signedJWT.getHeader().getAlgorithm());
-		assertEquals(stmt.toJWTClaimsSet().getClaims(), signedJWT.getJWTClaimsSet().getClaims());
-		
-		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.validateAndExtractStatement(audience).toJWTClaimsSet().getClaims());
-		
-		// audience fail
-		try {
-			response.validateAndExtractStatement(new Audience("xxx"));
-			fail();
-		} catch (BadJOSEException e) {
-			assertEquals("JWT audience rejected: [https://rp.example.com]", e.getMessage());
-		}
-		
-		HTTPResponse httpResponse = response.toHTTPResponse();
-		assertEquals(200, httpResponse.getStatusCode());
-		assertEquals("application/jose; charset=UTF-8", httpResponse.getEntityContentType().toString());
-		assertEquals(signedJWT.serialize(), httpResponse.getContent());
-		
-		response = FederationEntityConfigurationResponse.parse(httpResponse).toSuccessResponse();
-		
-		assertEquals(signedJWT.serialize(), response.getSignedStatement().getParsedString());
-		
-		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.validateAndExtractStatement(null).toJWTClaimsSet().getClaims());
+		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.validateAndExtractStatement().toJWTClaimsSet().getClaims());
 	}
 	
 	
 	public void testInvalidSignature()
 		throws Exception {
 		
-		Issuer iss = new Issuer("https://abc-federation.c2id.com");
-		Subject sub = new Subject("https://op.c2id.com");
+		Issuer iss = OP_METADATA.getIssuer();
+		Subject sub = new Subject(OP_METADATA.getIssuer().getValue());
 		
 		Date now = new Date();
 		long nowTS = DateUtils.toSecondsSinceEpoch(now);
@@ -172,6 +137,7 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 			iat,
 			exp,
 			SIMPLE_JWK_SET);
+		stmt.setOPMetadata(OP_METADATA);
 		
 		Audience audience = new Audience("https://rp.example.com");
 		stmt.setAudience(audience);
@@ -186,7 +152,7 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		response = FederationEntityConfigurationResponse.parse(httpResponse).toSuccessResponse();
 		
 		try {
-			response.validateAndExtractStatement(null);
+			response.validateAndExtractStatement();
 			fail();
 		} catch (BadJOSEException e) {
 			assertEquals("Signed JWT rejected: Invalid signature", e.getMessage());
@@ -194,11 +160,11 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 	}
 	
 	
-	public void testExpired()
+	public void testNotSelfIssued()
 		throws Exception {
 		
-		Issuer iss = new Issuer("https://abc-federation.c2id.com");
-		Subject sub = new Subject("https://op.c2id.com");
+		Issuer iss = OP_METADATA.getIssuer();
+		Subject sub = new Subject("https://some-host.example.com");
 		
 		Date now = new Date();
 		long nowTS = DateUtils.toSecondsSinceEpoch(now);
@@ -211,6 +177,7 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 			iat,
 			exp,
 			SIMPLE_JWK_SET);
+		stmt.setOPMetadata(OP_METADATA);
 		
 		Audience audience = new Audience("https://rp.example.com");
 		stmt.setAudience(audience);
@@ -223,7 +190,45 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		response = FederationEntityConfigurationResponse.parse(httpResponse).toSuccessResponse();
 		
 		try {
-			response.validateAndExtractStatement(null);
+			response.validateAndExtractStatement();
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Entity statement not self-issued", e.getMessage());
+		}
+	}
+	
+	
+	public void testExpired()
+		throws Exception {
+		
+		Issuer iss = OP_METADATA.getIssuer();
+		Subject sub = new Subject(OP_METADATA.getIssuer().getValue());
+		
+		Date now = new Date();
+		long nowTS = DateUtils.toSecondsSinceEpoch(now);
+		Date iat = DateUtils.fromSecondsSinceEpoch(nowTS - 3600);
+		Date exp = DateUtils.fromSecondsSinceEpoch(nowTS - 1800);
+		
+		EntityStatementClaimsSet stmt = new EntityStatementClaimsSet(
+			iss,
+			sub,
+			iat,
+			exp,
+			SIMPLE_JWK_SET);
+		stmt.setOPMetadata(OP_METADATA);
+		
+		Audience audience = new Audience("https://rp.example.com");
+		stmt.setAudience(audience);
+		
+		SignedJWT signedStatement = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), stmt.toJWTClaimsSet());
+		signedStatement.sign(new RSASSASigner(RSA_JWK));
+		
+		FederationEntityConfigurationSuccessResponse response = new FederationEntityConfigurationSuccessResponse(signedStatement);
+		HTTPResponse httpResponse = response.toHTTPResponse();
+		response = FederationEntityConfigurationResponse.parse(httpResponse).toSuccessResponse();
+		
+		try {
+			response.validateAndExtractStatement();
 			fail();
 		} catch (BadJOSEException e) {
 			assertEquals("Expired JWT", e.getMessage());
@@ -234,8 +239,8 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 	public void testIssueTimeInFuture()
 		throws Exception {
 		
-		Issuer iss = new Issuer("https://abc-federation.c2id.com");
-		Subject sub = new Subject("https://op.c2id.com");
+		Issuer iss = OP_METADATA.getIssuer();
+		Subject sub = new Subject(OP_METADATA.getIssuer().getValue());
 		
 		Date now = new Date();
 		long nowTS = DateUtils.toSecondsSinceEpoch(now);
@@ -248,6 +253,7 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 			iat,
 			exp,
 			SIMPLE_JWK_SET);
+		stmt.setOPMetadata(OP_METADATA);
 		
 		Audience audience = new Audience("https://rp.example.com");
 		stmt.setAudience(audience);
@@ -260,10 +266,10 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		response = FederationEntityConfigurationResponse.parse(httpResponse).toSuccessResponse();
 		
 		try {
-			response.validateAndExtractStatement(null);
+			response.validateAndExtractStatement();
 			fail();
 		} catch (BadJOSEException e) {
-			assertEquals("JWT before issue time", e.getMessage());
+			assertEquals("JWT issue time after current time", e.getMessage());
 		}
 	}
 }
