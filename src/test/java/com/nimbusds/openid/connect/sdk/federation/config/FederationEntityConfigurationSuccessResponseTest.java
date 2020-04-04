@@ -37,8 +37,6 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
-import com.nimbusds.openid.connect.sdk.federation.config.FederationEntityConfigurationResponse;
-import com.nimbusds.openid.connect.sdk.federation.config.FederationEntityConfigurationSuccessResponse;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
 
 
@@ -90,7 +88,7 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		assertEquals(JWSAlgorithm.RS256, signedJWT.getHeader().getAlgorithm());
 		assertEquals(stmt.toJWTClaimsSet().getClaims(), signedJWT.getJWTClaimsSet().getClaims());
 		
-		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.validateSignatureAndExtractStatement(null).toJWTClaimsSet().getClaims());
+		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.validateAndExtractStatement(null).toJWTClaimsSet().getClaims());
 		
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		assertEquals(200, httpResponse.getStatusCode());
@@ -101,7 +99,7 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		
 		assertEquals(signedJWT.serialize(), response.getSignedStatement().getParsedString());
 		
-		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.validateSignatureAndExtractStatement(null).toJWTClaimsSet().getClaims());
+		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.validateAndExtractStatement(null).toJWTClaimsSet().getClaims());
 	}
 	
 	
@@ -134,14 +132,14 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		assertEquals(JWSAlgorithm.RS256, signedJWT.getHeader().getAlgorithm());
 		assertEquals(stmt.toJWTClaimsSet().getClaims(), signedJWT.getJWTClaimsSet().getClaims());
 		
-		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.validateSignatureAndExtractStatement(audience).toJWTClaimsSet().getClaims());
+		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.validateAndExtractStatement(audience).toJWTClaimsSet().getClaims());
 		
 		// audience fail
 		try {
-			response.validateSignatureAndExtractStatement(new Audience("xxx"));
+			response.validateAndExtractStatement(new Audience("xxx"));
 			fail();
 		} catch (BadJOSEException e) {
-			assertEquals("JWT \"aud\" claim doesn't match expected value: [https://rp.example.com]", e.getMessage());
+			assertEquals("JWT audience rejected: [https://rp.example.com]", e.getMessage());
 		}
 		
 		HTTPResponse httpResponse = response.toHTTPResponse();
@@ -153,7 +151,7 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		
 		assertEquals(signedJWT.serialize(), response.getSignedStatement().getParsedString());
 		
-		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.validateSignatureAndExtractStatement(null).toJWTClaimsSet().getClaims());
+		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.validateAndExtractStatement(null).toJWTClaimsSet().getClaims());
 	}
 	
 	
@@ -184,21 +182,88 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		signedStatement.sign(new RSASSASigner(signingJWK));
 		
 		FederationEntityConfigurationSuccessResponse response = new FederationEntityConfigurationSuccessResponse(signedStatement);
-		
-		assertEquals(signedStatement, response.getSignedStatement());
-		
 		HTTPResponse httpResponse = response.toHTTPResponse();
-		assertEquals(200, httpResponse.getStatusCode());
-		assertEquals("application/jose; charset=UTF-8", httpResponse.getEntityContentType().toString());
-		assertEquals(signedStatement.serialize(), httpResponse.getContent());
-		
 		response = FederationEntityConfigurationResponse.parse(httpResponse).toSuccessResponse();
 		
 		try {
-			response.validateSignatureAndExtractStatement(null);
+			response.validateAndExtractStatement(null);
 			fail();
 		} catch (BadJOSEException e) {
 			assertEquals("Signed JWT rejected: Invalid signature", e.getMessage());
+		}
+	}
+	
+	
+	public void testExpired()
+		throws Exception {
+		
+		Issuer iss = new Issuer("https://abc-federation.c2id.com");
+		Subject sub = new Subject("https://op.c2id.com");
+		
+		Date now = new Date();
+		long nowTS = DateUtils.toSecondsSinceEpoch(now);
+		Date iat = DateUtils.fromSecondsSinceEpoch(nowTS - 3600);
+		Date exp = DateUtils.fromSecondsSinceEpoch(nowTS - 1800);
+		
+		EntityStatementClaimsSet stmt = new EntityStatementClaimsSet(
+			iss,
+			sub,
+			iat,
+			exp,
+			SIMPLE_JWK_SET);
+		
+		Audience audience = new Audience("https://rp.example.com");
+		stmt.setAudience(audience);
+		
+		SignedJWT signedStatement = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), stmt.toJWTClaimsSet());
+		signedStatement.sign(new RSASSASigner(RSA_JWK));
+		
+		FederationEntityConfigurationSuccessResponse response = new FederationEntityConfigurationSuccessResponse(signedStatement);
+		HTTPResponse httpResponse = response.toHTTPResponse();
+		response = FederationEntityConfigurationResponse.parse(httpResponse).toSuccessResponse();
+		
+		try {
+			response.validateAndExtractStatement(null);
+			fail();
+		} catch (BadJOSEException e) {
+			assertEquals("Expired JWT", e.getMessage());
+		}
+	}
+	
+	
+	public void testIssueTimeInFuture()
+		throws Exception {
+		
+		Issuer iss = new Issuer("https://abc-federation.c2id.com");
+		Subject sub = new Subject("https://op.c2id.com");
+		
+		Date now = new Date();
+		long nowTS = DateUtils.toSecondsSinceEpoch(now);
+		Date iat = DateUtils.fromSecondsSinceEpoch(nowTS + 1800);
+		Date exp = DateUtils.fromSecondsSinceEpoch(nowTS + 3600);
+		
+		EntityStatementClaimsSet stmt = new EntityStatementClaimsSet(
+			iss,
+			sub,
+			iat,
+			exp,
+			SIMPLE_JWK_SET);
+		
+		Audience audience = new Audience("https://rp.example.com");
+		stmt.setAudience(audience);
+		
+		SignedJWT signedStatement = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), stmt.toJWTClaimsSet());
+		signedStatement.sign(new RSASSASigner(RSA_JWK));
+		
+		FederationEntityConfigurationSuccessResponse response = new FederationEntityConfigurationSuccessResponse(signedStatement);
+		HTTPResponse httpResponse = response.toHTTPResponse();
+		response = FederationEntityConfigurationResponse.parse(httpResponse).toSuccessResponse();
+		
+		try {
+			response.validateAndExtractStatement(null);
+			fail();
+		} catch (BadJOSEException e) {
+			assertEquals("JWT before issue time", e.getMessage());
 		}
 	}
 }

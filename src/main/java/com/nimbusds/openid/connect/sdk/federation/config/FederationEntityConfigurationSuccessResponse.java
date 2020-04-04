@@ -20,8 +20,6 @@ package com.nimbusds.openid.connect.sdk.federation.config;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,12 +35,12 @@ import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
+import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsVerifier;
 
 
 /**
@@ -126,8 +124,8 @@ public class FederationEntityConfigurationSuccessResponse extends FederationEnti
 	
 	
 	/**
-	 * Validates the signature of the JOSE (JWT) object and extracts the
-	 * contained federation entity statement.
+	 * Validates the signature, issue and expiration times of the JOSE
+	 * (JWT) object and extracts the contained federation entity statement.
 	 *
 	 * @param expectedAudience The expected audience, {@code null} if not
 	 *                         specified.
@@ -140,7 +138,7 @@ public class FederationEntityConfigurationSuccessResponse extends FederationEnti
 	 * @throws JOSEException    If an internal signature validation
 	 *                          exception is encountered.
 	 */
-	public EntityStatementClaimsSet validateSignatureAndExtractStatement(final Audience expectedAudience)
+	public EntityStatementClaimsSet validateAndExtractStatement(final Audience expectedAudience)
 		throws ParseException, BadJOSEException, JOSEException {
 		
 		// Parse and validate min claims first
@@ -154,7 +152,7 @@ public class FederationEntityConfigurationSuccessResponse extends FederationEnti
 		EntityStatementClaimsSet stmt = new EntityStatementClaimsSet(jwtClaimsSet);
 		stmt.validateRequiredClaimsPresence();
 		
-		// Validate signature
+		// Validate self-issued signature
 		final JWKSet jwkSet = stmt.getJWKSet();
 		
 		DefaultJWTProcessor<?> jwtProcessor = new DefaultJWTProcessor<>();
@@ -167,16 +165,8 @@ public class FederationEntityConfigurationSuccessResponse extends FederationEnti
 			}
 		});
 		
-		JWTClaimsSet exactMatchClaims = null;
-		if (expectedAudience != null) {
-			exactMatchClaims = new JWTClaimsSet.Builder().audience(expectedAudience.getValue()).build();
-		}
-		
 		// Double check claims with JWT framework
-		jwtProcessor.setJWTClaimsSetVerifier(new DefaultJWTClaimsVerifier(
-			exactMatchClaims,
-			new HashSet<>(Arrays.asList("iss", "sub", "iat", "exp", "jwks"))
-		));
+		jwtProcessor.setJWTClaimsSetVerifier(new EntityStatementClaimsVerifier(expectedAudience));
 		
 		jwtProcessor.process(signedStatement, null);
 		
