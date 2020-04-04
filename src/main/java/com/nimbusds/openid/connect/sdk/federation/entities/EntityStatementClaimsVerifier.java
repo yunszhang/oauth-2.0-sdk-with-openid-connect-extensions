@@ -48,6 +48,22 @@ public class EntityStatementClaimsVerifier extends DefaultJWTClaimsVerifier {
 	
 	
 	/**
+	 * {@code true} for self-issued statements.
+	 */
+	private final boolean isSelfIssued;
+	
+	
+	/**
+	 * Creates a new entity statement claims verifier for self-issued
+	 * statements.
+	 */
+	public EntityStatementClaimsVerifier() {
+		super(null, new HashSet<>(Arrays.asList("iss", "sub", "iat", "exp", "jwks")));
+		isSelfIssued = true;
+	}
+	
+	
+	/**
 	 * Creates a new entity statement claims verifier.
 	 *
 	 * @param expectedAudience The expected audience, {@code null} if not
@@ -59,6 +75,7 @@ public class EntityStatementClaimsVerifier extends DefaultJWTClaimsVerifier {
 			null,
 			new HashSet<>(Arrays.asList("iss", "sub", "iat", "exp", "jwks"))
 		);
+		isSelfIssued = false;
 	}
 	
 	
@@ -67,10 +84,16 @@ public class EntityStatementClaimsVerifier extends DefaultJWTClaimsVerifier {
 		
 		super.verify(claimsSet, context);
 		
+		if (isSelfIssued) {
+			if (!claimsSet.getIssuer().equals(claimsSet.getSubject())) {
+				throw new BadJWTException("JWT not self-issued");
+			}
+		}
+		
 		// Add iat check
 		Date now = new Date();
 		if (! DateUtils.isBefore(claimsSet.getIssueTime(), now, getMaxClockSkew())) {
-			throw new BadJWTException("JWT before issue time");
+			throw new BadJWTException("JWT issue time after current time");
 		}
 	}
 }
