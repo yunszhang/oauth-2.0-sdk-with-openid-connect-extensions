@@ -35,12 +35,12 @@ import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
-import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.SubjectType;
+import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
@@ -97,15 +97,16 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 			SIMPLE_JWK_SET);
 		stmt.setOPMetadata(OP_METADATA);
 		
-		FederationEntityConfigurationSuccessResponse response = FederationEntityConfigurationSuccessResponse.create(
-			stmt,
-			RSA_JWK);
+		EntityStatement entityStatement = EntityStatement.sign(stmt, RSA_JWK);
 		
-		SignedJWT signedJWT = response.getSignedStatement();
+		FederationEntityConfigurationSuccessResponse response = new FederationEntityConfigurationSuccessResponse(entityStatement);
+		
+		SignedJWT signedJWT = response.getEntityStatement().getSignedStatement();
 		assertEquals(JWSAlgorithm.RS256, signedJWT.getHeader().getAlgorithm());
 		assertEquals(stmt.toJWTClaimsSet().getClaims(), signedJWT.getJWTClaimsSet().getClaims());
 		
-		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.validateAndExtractStatement().toJWTClaimsSet().getClaims());
+		response.getEntityStatement().verifySignatureOfSelfStatement();
+		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.getEntityStatement().getClaimsSet().toJWTClaimsSet().getClaims());
 		
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		assertEquals(200, httpResponse.getStatusCode());
@@ -114,9 +115,10 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		
 		response = FederationEntityConfigurationResponse.parse(httpResponse).toSuccessResponse();
 		
-		assertEquals(signedJWT.serialize(), response.getSignedStatement().getParsedString());
+		assertEquals(signedJWT.serialize(), response.getEntityStatement().getSignedStatement().getParsedString());
 		
-		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.validateAndExtractStatement().toJWTClaimsSet().getClaims());
+		response.getEntityStatement().verifySignatureOfSelfStatement();
+		assertEquals(stmt.toJWTClaimsSet().getClaims(), response.getEntityStatement().getClaimsSet().toJWTClaimsSet().getClaims());
 	}
 	
 	
@@ -147,12 +149,12 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		SignedJWT signedStatement = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), stmt.toJWTClaimsSet());
 		signedStatement.sign(new RSASSASigner(signingJWK));
 		
-		FederationEntityConfigurationSuccessResponse response = new FederationEntityConfigurationSuccessResponse(signedStatement);
+		FederationEntityConfigurationSuccessResponse response = new FederationEntityConfigurationSuccessResponse(EntityStatement.parse(signedStatement));
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		response = FederationEntityConfigurationResponse.parse(httpResponse).toSuccessResponse();
 		
 		try {
-			response.validateAndExtractStatement();
+			response.getEntityStatement().verifySignatureOfSelfStatement();
 			fail();
 		} catch (BadJOSEException e) {
 			assertEquals("Signed JWT rejected: Invalid signature", e.getMessage());
@@ -182,17 +184,16 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		Audience audience = new Audience("https://rp.example.com");
 		stmt.setAudience(audience);
 		
-		SignedJWT signedStatement = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), stmt.toJWTClaimsSet());
-		signedStatement.sign(new RSASSASigner(RSA_JWK));
+		EntityStatement entityStatement = EntityStatement.sign(stmt, RSA_JWK);
 		
-		FederationEntityConfigurationSuccessResponse response = new FederationEntityConfigurationSuccessResponse(signedStatement);
+		FederationEntityConfigurationSuccessResponse response = new FederationEntityConfigurationSuccessResponse(entityStatement);
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		response = FederationEntityConfigurationResponse.parse(httpResponse).toSuccessResponse();
 		
 		try {
-			response.validateAndExtractStatement();
+			response.getEntityStatement().verifySignatureOfSelfStatement();
 			fail();
-		} catch (ParseException e) {
+		} catch (BadJOSEException e) {
 			assertEquals("Entity statement not self-issued", e.getMessage());
 		}
 	}
@@ -220,15 +221,14 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		Audience audience = new Audience("https://rp.example.com");
 		stmt.setAudience(audience);
 		
-		SignedJWT signedStatement = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), stmt.toJWTClaimsSet());
-		signedStatement.sign(new RSASSASigner(RSA_JWK));
+		EntityStatement entityStatement = EntityStatement.sign(stmt, RSA_JWK);
 		
-		FederationEntityConfigurationSuccessResponse response = new FederationEntityConfigurationSuccessResponse(signedStatement);
+		FederationEntityConfigurationSuccessResponse response = new FederationEntityConfigurationSuccessResponse(entityStatement);
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		response = FederationEntityConfigurationResponse.parse(httpResponse).toSuccessResponse();
 		
 		try {
-			response.validateAndExtractStatement();
+			response.getEntityStatement().verifySignatureOfSelfStatement();
 			fail();
 		} catch (BadJOSEException e) {
 			assertEquals("Expired JWT", e.getMessage());
@@ -258,15 +258,14 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 		Audience audience = new Audience("https://rp.example.com");
 		stmt.setAudience(audience);
 		
-		SignedJWT signedStatement = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), stmt.toJWTClaimsSet());
-		signedStatement.sign(new RSASSASigner(RSA_JWK));
+		EntityStatement entityStatement = EntityStatement.sign(stmt, RSA_JWK);
 		
-		FederationEntityConfigurationSuccessResponse response = new FederationEntityConfigurationSuccessResponse(signedStatement);
+		FederationEntityConfigurationSuccessResponse response = new FederationEntityConfigurationSuccessResponse(entityStatement);
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		response = FederationEntityConfigurationResponse.parse(httpResponse).toSuccessResponse();
 		
 		try {
-			response.validateAndExtractStatement();
+			response.getEntityStatement().verifySignatureOfSelfStatement();
 			fail();
 		} catch (BadJOSEException e) {
 			assertEquals("JWT issue time after current time", e.getMessage());

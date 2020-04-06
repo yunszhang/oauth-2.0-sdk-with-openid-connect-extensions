@@ -19,27 +19,12 @@ package com.nimbusds.openid.connect.sdk.federation.config;
 
 
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
-import java.util.LinkedList;
-import java.util.List;
 
 import com.nimbusds.common.contenttype.ContentType;
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.ECDSASigner;
-import com.nimbusds.jose.crypto.Ed25519Signer;
-import com.nimbusds.jose.crypto.RSASSASigner;
-import com.nimbusds.jose.jwk.*;
-import com.nimbusds.jose.proc.BadJOSEException;
-import com.nimbusds.jose.proc.JWSKeySelector;
-import com.nimbusds.jose.proc.SecurityContext;
-import com.nimbusds.jose.util.Base64URL;
-import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
-import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsVerifier;
+import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 
 
 /**
@@ -85,92 +70,35 @@ public class FederationEntityConfigurationSuccessResponse extends FederationEnti
 	
 	
 	/**
-	 * The entity statement as a signed JWT.
+	 * The entity statement.
 	 */
-	private final SignedJWT signedStatement;
+	private final EntityStatement entityStatement;
 	
 	
 	/**
 	 * Creates a new federation entity configuration success response.
 	 *
-	 * @param signedStatement The signed federation entity statement. Must
-	 *                        not be {@code null}.
+	 * @param entityStatement The entity statement. Must not be
+	 *                        {@code null}.
 	 */
-	public FederationEntityConfigurationSuccessResponse(final SignedJWT signedStatement) {
+	public FederationEntityConfigurationSuccessResponse(final EntityStatement entityStatement) {
 		
-		if (signedStatement == null) {
+		if (entityStatement == null) {
 			throw new IllegalArgumentException("The federation entity statement must not be null");
 		}
-		
-		if ( ! JWSObject.State.SIGNED.equals(signedStatement.getState())) {
-			throw new IllegalArgumentException("The federation entity statement must be signed");
-		}
-		
-		this.signedStatement = signedStatement;
+		this.entityStatement = entityStatement;
 	}
 	
 	
 	/**
-	 * Returns the raw signed statement. No signature validation or general
-	 * validation of the statement is performed.
+	 * Returns the entity statement. No signature or expiration validation
+	 * is performed.
 	 *
-	 * @return The signed statement as a JWT.
+	 * @return The entity statement.
 	 */
-	public SignedJWT getSignedStatement() {
+	public EntityStatement getEntityStatement() {
 		
-		return signedStatement;
-	}
-	
-	
-	/**
-	 * Validates the self-issued signature, the issue and expiration times
-	 * of the JOSE (JWT) object and extracts the contained federation
-	 * entity statement.
-	 *
-	 * @return The federation entity claims set.
-	 *
-	 * @throws ParseException   If the statement doesn't include the
-	 *                          minimum required claims.
-	 * @throws BadJOSEException If the signature is invalid.
-	 * @throws JOSEException    If an internal signature validation
-	 *                          exception is encountered.
-	 */
-	public EntityStatementClaimsSet validateAndExtractStatement()
-		throws ParseException, BadJOSEException, JOSEException {
-		
-		// Parse and validate min claims first
-		JWTClaimsSet jwtClaimsSet;
-		try {
-			jwtClaimsSet = getSignedStatement().getJWTClaimsSet();
-		} catch (java.text.ParseException e) {
-			throw new ParseException(e.getMessage(), e);
-		}
-		
-		EntityStatementClaimsSet stmt = new EntityStatementClaimsSet(jwtClaimsSet);
-		stmt.validateRequiredClaimsPresence();
-		if (! stmt.isSelfStatement()) {
-			throw new ParseException("Entity statement not self-issued");
-		}
-		
-		// Validate self-issued signature
-		final JWKSet jwkSet = stmt.getJWKSet();
-		
-		DefaultJWTProcessor<?> jwtProcessor = new DefaultJWTProcessor<>();
-		jwtProcessor.setJWSKeySelector(new JWSKeySelector() {
-			@Override
-			public List<? extends Key> selectJWSKeys(final JWSHeader header, final SecurityContext context) {
-				
-				List<JWK> jwkMatches = new JWKSelector(JWKMatcher.forJWSHeader(header)).select(jwkSet);
-				return new LinkedList<>(KeyConverter.toJavaKeys(jwkMatches));
-			}
-		});
-		
-		// Double check claims with JWT framework
-		jwtProcessor.setJWTClaimsSetVerifier(new EntityStatementClaimsVerifier());
-		
-		jwtProcessor.process(signedStatement, null);
-		
-		return stmt;
+		return entityStatement;
 	}
 	
 	
@@ -185,119 +113,8 @@ public class FederationEntityConfigurationSuccessResponse extends FederationEnti
 		
 		HTTPResponse httpResponse = new HTTPResponse(HTTPResponse.SC_OK);
 		httpResponse.setEntityContentType(CONTENT_TYPE);
-		httpResponse.setContent(signedStatement.serialize());
+		httpResponse.setContent(entityStatement.getSignedStatement().serialize());
 		return httpResponse;
-	}
-	
-	
-	private static void ensureSigningJWKisPresentInSet(final JWK jwk, final JWKSet jwkSet)
-		throws JOSEException {
-		
-		if (jwkSet == null) {
-			throw new JOSEException("Missing JWK set");
-		}
-		
-		Base64URL thumbprint = jwk.computeThumbprint();
-		
-		for (JWK k: jwkSet.getKeys()) {
-			if (thumbprint.equals(k.computeThumbprint())) {
-				return; // found
-			}
-		}
-		throw new JOSEException("Signing JWK not found in JWK set");
-	}
-	
-	
-	private static JWSAlgorithm resolveSigningAlgorithm(final JWK jwt)
-		throws JOSEException {
-		
-		KeyType jwkType = jwt.getKeyType();
-		
-		if (KeyType.RSA.equals(jwkType)) {
-			
-			if (jwt.getAlgorithm() != null) {
-				return new JWSAlgorithm(jwt.getAlgorithm().getName());
-			} else {
-				return JWSAlgorithm.RS256; // default alg
-			}
-		} else if (KeyType.EC.equals(jwkType)) {
-			ECKey ecJWK = jwt.toECKey();
-			if (jwt.getAlgorithm() != null) {
-				return new JWSAlgorithm(ecJWK.getAlgorithm().getName());
-			} else {
-				if (Curve.P_256.equals(ecJWK.getCurve())) {
-					return JWSAlgorithm.ES256;
-				} else if (Curve.P_384.equals(ecJWK.getCurve())) {
-					return JWSAlgorithm.ES384;
-				} else if (Curve.P_521.equals(ecJWK.getCurve())) {
-					return JWSAlgorithm.ES512;
-				} else {
-					throw new JOSEException("Unsupported ECDSA curve: " + ecJWK.getCurve());
-				}
-			}
-		} else if (KeyType.OKP.equals(jwkType)){
-			OctetKeyPair okp = jwt.toOctetKeyPair();
-			if (Curve.Ed25519.equals(okp.getCurve())) {
-				return JWSAlgorithm.EdDSA;
-			} else {
-				throw new JOSEException("Unsupported EdDSA curve: " + okp.getCurve());
-			}
-		} else {
-			throw new JOSEException("Unsupported JWK type: " + jwkType);
-		}
-	}
-	
-	
-	private static JWSSigner createSigner(final JWSAlgorithm jwsAlgorithm, final JWK privateJWK)
-		throws JOSEException {
-		
-		if (JWSAlgorithm.Family.RSA.contains(jwsAlgorithm)) {
-			return new RSASSASigner(privateJWK.toRSAKey());
-		}
-		
-		if (JWSAlgorithm.Family.EC.contains(jwsAlgorithm)) {
-			return new ECDSASigner(privateJWK.toECKey());
-		}
-		
-		if (JWSAlgorithm.Family.ED.contains(jwsAlgorithm)) {
-			return new Ed25519Signer(privateJWK.toOctetKeyPair());
-		}
-		
-		throw new JOSEException("Unsupported JWS algorithm: " + jwsAlgorithm);
-	}
-	
-	
-	/**
-	 * Creates a new federation entity configuration success response.
-	 *
-	 * @param entityStatementClaimsSet The federation entity statement
-	 *                                 claims set. Must not be
-	 *                                 {@code null}.
-	 * @param privateJWK               The private JWK to sign the
-	 *                                 statement. Must be present in the
-	 *                                 JWK set included in the statement.
-	 *                                 Must not be {@code null}.
-	 * @return The federation entity configuration success response.
-	 *
-	 * @throws JOSEException  If signing failed.
-	 * @throws ParseException If parsing of the statement failed.
-	 */
-	public static FederationEntityConfigurationSuccessResponse create(final EntityStatementClaimsSet entityStatementClaimsSet,
-									  final JWK privateJWK)
-		throws JOSEException, ParseException {
-		
-		if (! privateJWK.isPrivate()) {
-			throw new JOSEException("The signing JWK must be private");
-		}
-		
-		ensureSigningJWKisPresentInSet(privateJWK, entityStatementClaimsSet.getJWKSet());
-		
-		JWSAlgorithm alg = resolveSigningAlgorithm(privateJWK);
-		JWSHeader header = new JWSHeader.Builder(alg).keyID(privateJWK.getKeyID()).build();
-		SignedJWT signedJWT = new SignedJWT(header, entityStatementClaimsSet.toJWTClaimsSet());
-		signedJWT.sign(createSigner(alg, privateJWK));
-		
-		return new FederationEntityConfigurationSuccessResponse(signedJWT);
 	}
 	
 	
@@ -316,7 +133,7 @@ public class FederationEntityConfigurationSuccessResponse extends FederationEnti
 	public static FederationEntityConfigurationSuccessResponse parse(final HTTPResponse httpResponse)
 		throws ParseException {
 		
-		httpResponse.ensureStatusCode(200);
+		httpResponse.ensureStatusCode(HTTPResponse.SC_OK);
 		httpResponse.ensureEntityContentType(CONTENT_TYPE);
 		
 		SignedJWT signedJWT;
@@ -326,6 +143,6 @@ public class FederationEntityConfigurationSuccessResponse extends FederationEnti
 			throw new ParseException(e.getMessage(), e);
 		}
 		
-		return new FederationEntityConfigurationSuccessResponse(signedJWT);
+		return new FederationEntityConfigurationSuccessResponse(EntityStatement.parse(signedJWT));
 	}
 }
