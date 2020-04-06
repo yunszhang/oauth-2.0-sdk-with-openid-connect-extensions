@@ -74,67 +74,80 @@ public class EntityStatementClaimsSetTest extends TestCase {
 		Date iat = DateUtils.fromSecondsSinceEpoch(1000);
 		Date exp = DateUtils.fromSecondsSinceEpoch(2000);
 		
-		EntityStatementClaimsSet stmt = new EntityStatementClaimsSet(
-			iss,
-			sub,
-			iat,
-			exp,
-			JWK_SET);
-		
-		stmt.validateRequiredClaimsPresence();
-		assertFalse(stmt.isSelfStatement());
-		assertFalse(stmt.hasMetadata());
-		
-		assertEquals(iss, stmt.getIssuer());
-		assertEquals(sub, stmt.getSubject());
-		assertEquals(iat, stmt.getIssueTime());
-		assertEquals(exp, stmt.getExpirationTime());
-		assertEquals(JWK_SET.toJSONObject(), stmt.getJWKSet().toJSONObject());
-		
-		assertNull(stmt.getAudience());
-		assertNull(stmt.getAuthorityHints());
-		assertNull(stmt.getRPMetadata());
-		assertNull(stmt.getOPMetadata());
-		assertNull(stmt.getOAuthClientMetadata());
-		assertNull(stmt.getASMetadata());
-		assertNull(stmt.getFederationEntityMetadata());
-		assertNull(stmt.getMetadataPolicyJSONObject());
-		assertNull(stmt.getConstraints());
-		assertNull(stmt.getCriticalExtensionClaims());
-		assertNull(stmt.getCriticalPolicyExtensions());
-		
-		JWTClaimsSet jwtClaimsSet = stmt.toJWTClaimsSet();
-		
-		assertEquals(iss.getValue(), jwtClaimsSet.getIssuer());
-		assertEquals(sub.getValue(), jwtClaimsSet.getSubject());
-		assertEquals(iat, jwtClaimsSet.getIssueTime());
-		assertEquals(exp, jwtClaimsSet.getExpirationTime());
-		assertEquals(JWK_SET.toJSONObject(), jwtClaimsSet.getJSONObjectClaim("jwks"));
-		assertEquals(5, jwtClaimsSet.getClaims().size());
-		
-		stmt = new EntityStatementClaimsSet(jwtClaimsSet);
-		
-		stmt.validateRequiredClaimsPresence();
-		assertFalse(stmt.isSelfStatement());
-		assertFalse(stmt.hasMetadata());
-		
-		assertEquals(iss, stmt.getIssuer());
-		assertEquals(sub, stmt.getSubject());
-		assertEquals(iat, stmt.getIssueTime());
-		assertEquals(exp, stmt.getExpirationTime());
-		assertEquals(JWK_SET.toJSONObject(), stmt.getJWKSet().toJSONObject());
-		
-		assertNull(stmt.getAudience());
-		assertNull(stmt.getAuthorityHints());
-		assertNull(stmt.getRPMetadata());
-		assertNull(stmt.getOPMetadata());
-		assertNull(stmt.getOAuthClientMetadata());
-		assertNull(stmt.getASMetadata());
-		assertNull(stmt.getFederationEntityMetadata());
-		assertNull(stmt.getMetadataPolicyJSONObject());
-		assertNull(stmt.getConstraints());
-		assertNull(stmt.getCriticalExtensionClaims());
-		assertNull(stmt.getCriticalPolicyExtensions());
+		// Test ID and EntityID constructors
+		for (EntityStatementClaimsSet stmt: Arrays.asList(
+			new EntityStatementClaimsSet(
+				iss,
+				sub,
+				iat,
+				exp,
+				JWK_SET),
+			new EntityStatementClaimsSet(
+				new EntityID(iss.getValue()),
+				new EntityID(sub.getValue()),
+				iat,
+				exp,
+				JWK_SET))) {
+			
+			stmt.validateRequiredClaimsPresence();
+			assertFalse(stmt.isSelfStatement());
+			assertFalse(stmt.hasMetadata());
+			
+			assertEquals(iss, stmt.getIssuer());
+			assertEquals(iss.getValue(), stmt.getIssuerEntityID().getValue());
+			assertEquals(sub, stmt.getSubject());
+			assertEquals(sub.getValue(), stmt.getSubjectEntityID().getValue());
+			assertEquals(iat, stmt.getIssueTime());
+			assertEquals(exp, stmt.getExpirationTime());
+			assertEquals(JWK_SET.toJSONObject(), stmt.getJWKSet().toJSONObject());
+			
+			assertNull(stmt.getAudience());
+			assertNull(stmt.getAuthorityHints());
+			assertNull(stmt.getRPMetadata());
+			assertNull(stmt.getOPMetadata());
+			assertNull(stmt.getOAuthClientMetadata());
+			assertNull(stmt.getASMetadata());
+			assertNull(stmt.getFederationEntityMetadata());
+			assertNull(stmt.getMetadataPolicyJSONObject());
+			assertNull(stmt.getConstraints());
+			assertNull(stmt.getCriticalExtensionClaims());
+			assertNull(stmt.getCriticalPolicyExtensions());
+			
+			JWTClaimsSet jwtClaimsSet = stmt.toJWTClaimsSet();
+			
+			assertEquals(iss.getValue(), jwtClaimsSet.getIssuer());
+			assertEquals(sub.getValue(), jwtClaimsSet.getSubject());
+			assertEquals(iat, jwtClaimsSet.getIssueTime());
+			assertEquals(exp, jwtClaimsSet.getExpirationTime());
+			assertEquals(JWK_SET.toJSONObject(), jwtClaimsSet.getJSONObjectClaim("jwks"));
+			assertEquals(5, jwtClaimsSet.getClaims().size());
+			
+			stmt = new EntityStatementClaimsSet(jwtClaimsSet);
+			
+			stmt.validateRequiredClaimsPresence();
+			assertFalse(stmt.isSelfStatement());
+			assertFalse(stmt.hasMetadata());
+			
+			assertEquals(iss, stmt.getIssuer());
+			assertEquals(iss.getValue(), stmt.getIssuerEntityID().getValue());
+			assertEquals(sub, stmt.getSubject());
+			assertEquals(sub.getValue(), stmt.getSubjectEntityID().getValue());
+			assertEquals(iat, stmt.getIssueTime());
+			assertEquals(exp, stmt.getExpirationTime());
+			assertEquals(JWK_SET.toJSONObject(), stmt.getJWKSet().toJSONObject());
+			
+			assertNull(stmt.getAudience());
+			assertNull(stmt.getAuthorityHints());
+			assertNull(stmt.getRPMetadata());
+			assertNull(stmt.getOPMetadata());
+			assertNull(stmt.getOAuthClientMetadata());
+			assertNull(stmt.getASMetadata());
+			assertNull(stmt.getFederationEntityMetadata());
+			assertNull(stmt.getMetadataPolicyJSONObject());
+			assertNull(stmt.getConstraints());
+			assertNull(stmt.getCriticalExtensionClaims());
+			assertNull(stmt.getCriticalPolicyExtensions());
+		}
 	}
 	
 	

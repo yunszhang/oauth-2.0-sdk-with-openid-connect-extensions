@@ -166,6 +166,26 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 					final Date exp,
 					final JWKSet jwks) {
 		
+		this(new EntityID(iss.getValue()), new EntityID(sub.getValue()), iat, exp, jwks);
+	}
+	
+	
+	/**
+	 * Creates a new federation entity statement claims set with the
+	 * minimum required claims.
+	 *
+	 * @param iss  The issuer. Must not be {@code null}.
+	 * @param sub  The subject. Must not be {@code null}.
+	 * @param iat  The issue time. Must not be {@code null}.
+	 * @param exp  The expiration time. Must not be {@code null}.
+	 * @param jwks The entity public JWK set. Must not be {@code null}.
+	 */
+	public EntityStatementClaimsSet(final EntityID iss,
+					final EntityID sub,
+					final Date iat,
+					final Date exp,
+					final JWKSet jwks) {
+		
 		setClaim(ISS_CLAIM_NAME, iss.getValue());
 		setClaim(SUB_CLAIM_NAME, sub.getValue());
 		setDateClaim(IAT_CLAIM_NAME, iat);
@@ -209,9 +229,13 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 			throw new ParseException("Missing iss (issuer) claim");
 		}
 		
+		EntityID.parse(getIssuer()); // ensure URI
+		
 		if (getSubject() == null) {
 			throw new ParseException("Missing sub (subject) claim");
 		}
+		
+		EntityID.parse(getSubject()); // ensure URI
 		
 		if (getIssueTime() == null) {
 			throw new ParseException("Missing iat (issued-at) claim");
@@ -253,6 +277,28 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 		Subject subject = getSubject();
 		
 		return issuer != null && subject != null && issuer.getValue().equals(subject.getValue());
+	}
+	
+	
+	/**
+	 * Returns the issuer as entity ID.
+	 *
+	 * @return The issuer as entity ID.
+	 */
+	public EntityID getIssuerEntityID() {
+		
+		return new EntityID(getIssuer().getValue());
+	}
+	
+	
+	/**
+	 * Returns the subject as entity ID.
+	 *
+	 * @return The subject as entity ID.
+	 */
+	public EntityID getSubjectEntityID() {
+		
+		return new EntityID(getSubject().getValue());
 	}
 	
 	
