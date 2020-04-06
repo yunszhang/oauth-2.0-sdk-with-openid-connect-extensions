@@ -22,6 +22,10 @@ import java.net.URI;
 
 import junit.framework.TestCase;
 
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.id.Subject;
+
 
 public class EntityIDTest extends TestCase {
 	
@@ -58,5 +62,40 @@ public class EntityIDTest extends TestCase {
 		} catch (IllegalArgumentException e) {
 			assertEquals("The entity identifier must be an URI: Illegal character in path at index 1: a b c", e.getMessage());
 		}
+	}
+	
+	
+	public void testParseFromStringNotURI() {
+		
+		try {
+			EntityID.parse("a b c");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("The entity identifier must be an URI: Illegal character in path at index 1: a b c", e.getMessage());
+		}
+	}
+	
+	
+	public void testParseFromString() throws ParseException {
+		
+		String value = "https://c2id.com";
+		
+		assertEquals(value, EntityID.parse(value).getValue());
+	}
+	
+	
+	public void testParseFromIssuer() throws ParseException {
+		
+		String value = "https://c2id.com";
+		
+		assertEquals(value, EntityID.parse(new Issuer(value)).getValue());
+	}
+	
+	
+	public void testParseFromSubject() throws ParseException {
+		
+		String value = "https://c2id.com";
+		
+		assertEquals(value, EntityID.parse(new Subject(value)).getValue());
 	}
 }

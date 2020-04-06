@@ -23,7 +23,10 @@ import java.net.URISyntaxException;
 
 import net.jcip.annotations.Immutable;
 
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Identifier;
+import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.id.Subject;
 
 
 /**
@@ -85,5 +88,54 @@ public final class EntityID extends Identifier {
 		
 		return object instanceof EntityID &&
 			this.toString().equals(object.toString());
+	}
+	
+	
+	/**
+	 * Parses an entity ID from the specified string.
+	 *
+	 * @param value The string value. Must not be {@code null}.
+	 *
+	 * @return The entity ID.
+	 *
+	 * @throws ParseException On a illegal entity ID.
+	 */
+	public static EntityID parse(final String value)
+		throws ParseException {
+		try {
+			return new EntityID(value);
+		} catch (IllegalArgumentException e) {
+			throw new ParseException(e.getMessage());
+		}
+	}
+	
+	
+	/**
+	 * Parses an entity ID from the specified issuer.
+	 *
+	 * @param issuer The issuer. Must not be {@code null}.
+	 *
+	 * @return The entity ID.
+	 *
+	 * @throws ParseException On a illegal entity ID.
+	 */
+	public static EntityID parse(final Issuer issuer)
+		throws ParseException {
+		return parse(issuer.getValue());
+	}
+	
+	
+	/**
+	 * Parses an entity ID from the specified subject.
+	 *
+	 * @param subject The subject. Must not be {@code null}.
+	 *
+	 * @return The entity ID.
+	 *
+	 * @throws ParseException On a illegal entity ID.
+	 */
+	public static EntityID parse(final Subject subject)
+		throws ParseException {
+		return parse(subject.getValue());
 	}
 }
