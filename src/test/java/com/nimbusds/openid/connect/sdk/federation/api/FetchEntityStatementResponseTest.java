@@ -21,7 +21,6 @@ package com.nimbusds.openid.connect.sdk.federation.api;
 import junit.framework.TestCase;
 
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 
 
@@ -50,7 +49,7 @@ public class FetchEntityStatementResponseTest extends TestCase {
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		
 		response = FetchEntityStatementResponse.parse(httpResponse).toErrorResponse();
-		assertEquals(error.toJSONObject(), response.getError().toJSONObject());
+		assertEquals(error.toJSONObject(), response.getErrorObject().toJSONObject());
 		assertFalse(response.indicatesSuccess());
 	}
 }

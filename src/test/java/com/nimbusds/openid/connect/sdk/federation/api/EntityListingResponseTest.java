@@ -51,7 +51,7 @@ public class EntityListingResponseTest extends TestCase {
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		
 		response = EntityListingErrorResponse.parse(httpResponse).toErrorResponse();
-		assertEquals(error.toJSONObject(), response.getError().toJSONObject());
+		assertEquals(error.toJSONObject(), response.getErrorObject().toJSONObject());
 		assertFalse(response.indicatesSuccess());
 	}
 }

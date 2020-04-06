@@ -35,7 +35,7 @@ public class TrustNegotiationErrorResponseTest extends TestCase {
 			.withStatusCode(400);
 		
 		TrustNegotiationErrorResponse response = new TrustNegotiationErrorResponse(error);
-		assertEquals(error, response.getError());
+		assertEquals(error, response.getErrorObject());
 		assertFalse(response.indicatesSuccess());
 		
 		HTTPResponse httpResponse = response.toHTTPResponse();
@@ -44,7 +44,7 @@ public class TrustNegotiationErrorResponseTest extends TestCase {
 		assertEquals(error.toJSONObject(), httpResponse.getContentAsJSONObject());
 		
 		response = TrustNegotiationErrorResponse.parse(httpResponse);
-		assertEquals(error, response.getError());
+		assertEquals(error, response.getErrorObject());
 		assertFalse(response.indicatesSuccess());
 	}
 	
@@ -63,7 +63,7 @@ public class TrustNegotiationErrorResponseTest extends TestCase {
 	public void testNoErrorObject() throws ParseException {
 		
 		TrustNegotiationErrorResponse response = TrustNegotiationErrorResponse.parse(new HTTPResponse(400));
-		FederationAPIError error = response.getError();
+		FederationAPIError error = response.getErrorObject();
 		assertEquals(400, error.getHTTPStatusCode());
 		assertNull(error.getOperationType());
 		assertNull(error.getDescription());

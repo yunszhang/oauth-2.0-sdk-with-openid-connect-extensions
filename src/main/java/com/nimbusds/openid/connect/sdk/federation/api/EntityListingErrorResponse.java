@@ -61,7 +61,7 @@ public class EntityListingErrorResponse extends EntityListingResponse {
 	 *
 	 * @return The federation API error.
 	 */
-	public FederationAPIError getError() {
+	public FederationAPIError getErrorObject() {
 		return error;
 	}
 	

@@ -61,7 +61,7 @@ public class FetchEntityStatementErrorResponse extends FetchEntityStatementRespo
 	 *
 	 * @return The federation API error.
 	 */
-	public FederationAPIError getError() {
+	public FederationAPIError getErrorObject() {
 		return error;
 	}
 	

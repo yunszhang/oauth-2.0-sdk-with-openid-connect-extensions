@@ -35,7 +35,7 @@ public class FetchEntityStatementErrorResponseTest extends TestCase {
 			.withStatusCode(400);
 		
 		FetchEntityStatementErrorResponse response = new FetchEntityStatementErrorResponse(error);
-		assertEquals(error, response.getError());
+		assertEquals(error, response.getErrorObject());
 		assertFalse(response.indicatesSuccess());
 		
 		HTTPResponse httpResponse = response.toHTTPResponse();
@@ -44,7 +44,7 @@ public class FetchEntityStatementErrorResponseTest extends TestCase {
 		assertEquals(error.toJSONObject(), httpResponse.getContentAsJSONObject());
 		
 		response = FetchEntityStatementErrorResponse.parse(httpResponse);
-		assertEquals(error, response.getError());
+		assertEquals(error, response.getErrorObject());
 		assertFalse(response.indicatesSuccess());
 	}
 	
@@ -63,7 +63,7 @@ public class FetchEntityStatementErrorResponseTest extends TestCase {
 	public void testNoErrorObject() throws ParseException {
 		
 		FetchEntityStatementErrorResponse response = FetchEntityStatementErrorResponse.parse(new HTTPResponse(400));
-		FederationAPIError error = response.getError();
+		FederationAPIError error = response.getErrorObject();
 		assertEquals(400, error.getHTTPStatusCode());
 		assertNull(error.getOperationType());
 		assertNull(error.getDescription());

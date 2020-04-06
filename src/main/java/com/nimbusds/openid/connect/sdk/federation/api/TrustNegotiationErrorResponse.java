@@ -61,7 +61,7 @@ public class TrustNegotiationErrorResponse extends TrustNegotiationResponse {
 	 *
 	 * @return The federation API error.
 	 */
-	public FederationAPIError getError() {
+	public FederationAPIError getErrorObject() {
 		return error;
 	}
 	

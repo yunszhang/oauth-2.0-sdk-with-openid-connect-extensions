@@ -35,7 +35,7 @@ public class EntityListingErrorResponseTest extends TestCase {
 			.withStatusCode(400);
 		
 		EntityListingErrorResponse response = new EntityListingErrorResponse(error);
-		assertEquals(error, response.getError());
+		assertEquals(error, response.getErrorObject());
 		assertFalse(response.indicatesSuccess());
 		
 		HTTPResponse httpResponse = response.toHTTPResponse();
@@ -44,7 +44,7 @@ public class EntityListingErrorResponseTest extends TestCase {
 		assertEquals(error.toJSONObject(), httpResponse.getContentAsJSONObject());
 		
 		response = EntityListingErrorResponse.parse(httpResponse);
-		assertEquals(error, response.getError());
+		assertEquals(error, response.getErrorObject());
 		assertFalse(response.indicatesSuccess());
 	}
 	
@@ -63,7 +63,7 @@ public class EntityListingErrorResponseTest extends TestCase {
 	public void testNoErrorObject() throws ParseException {
 		
 		EntityListingErrorResponse response = EntityListingErrorResponse.parse(new HTTPResponse(400));
-		FederationAPIError error = response.getError();
+		FederationAPIError error = response.getErrorObject();
 		assertEquals(400, error.getHTTPStatusCode());
 		assertNull(error.getOperationType());
 		assertNull(error.getDescription());
