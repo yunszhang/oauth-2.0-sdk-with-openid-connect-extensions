@@ -216,8 +216,8 @@ public final class EntityStatement {
 					   final JWSAlgorithm jwsAlg)
 		throws JOSEException {
 		
-		if (! claimsSet.getJWKSet().containsJWK(signingJWK)) {
-			throw new JOSEException("Signing JWK not found in JWK set");
+		if (claimsSet.isSelfStatement() && ! claimsSet.getJWKSet().containsJWK(signingJWK)) {
+			throw new JOSEException("Signing JWK not found in JWK set of self-statement");
 		}
 		
 		JWSSigner jwsSigner = new DefaultJWSSignerFactory().createJWSSigner(signingJWK, jwsAlg);
