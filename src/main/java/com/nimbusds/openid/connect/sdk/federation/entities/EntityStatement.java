@@ -34,7 +34,6 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 
 
 /**
@@ -57,7 +56,7 @@ public final class EntityStatement {
 	
 	
 	/**
-	 * The extracted statement claims.
+	 * The statement claims.
 	 */
 	private final EntityStatementClaimsSet statementClaimsSet;
 	
@@ -76,7 +75,7 @@ public final class EntityStatement {
 		if (statementJWT == null) {
 			throw new IllegalArgumentException("The entity statement must not be null");
 		}
-		if (! JWSObject.State.SIGNED.equals(statementJWT.getState())) {
+		if (JWSObject.State.UNSIGNED.equals(statementJWT.getState())) {
 			throw new IllegalArgumentException("The statement is not signed");
 		}
 		this.statementJWT = statementJWT;
@@ -119,25 +118,8 @@ public final class EntityStatement {
 	
 	
 	/**
-	 * Resolves the federation entity role for this entity statement.
-	 *
-	 * @return The federation entity role.
-	 */
-	public EntityRole resolveEntityRole() {
-		
-		if (CollectionUtils.isEmpty(getClaimsSet().getAuthorityHints()) && getClaimsSet().isSelfStatement()) {
-			return EntityRole.TRUST_ANCHOR;
-		} else if (getClaimsSet().isSelfStatement()) {
-			return EntityRole.LEAF;
-		} else {
-			return EntityRole.INTERMEDIATE;
-		}
-	}
-	
-	
-	/**
 	 * Verifies the signature for a self-statement (typically for a trust
-	 * anchor or leaf).
+	 * anchor or leaf) and checks the statement issue and expiration times.
 	 *
 	 * @throws BadJOSEException If the signature is invalid or the
 	 *                          statement is expired or before the issue
@@ -199,13 +181,35 @@ public final class EntityStatement {
 					   final JWK signingJWK)
 		throws JOSEException {
 		
+		return sign(claimsSet, signingJWK, resolveSigningAlgorithm(signingJWK));
+	}
+	
+	
+	/**
+	 * Signs the specified federation entity claims set.
+	 *
+	 * @param claimsSet  The claims set. Must not be {@code null}.
+	 * @param signingJWK The private signing JWK. Must be contained in the
+	 *                   entity JWK set and not {@code null}.
+	 * @param jwsAlg     The signing algorithm. Must be supported by the
+	 *                   JWK and not {@code null}.
+	 *
+	 * @return The signed federation entity statement.
+	 *
+	 * @throws JOSEException On a internal signing exception.
+	 */
+	public static EntityStatement sign(final EntityStatementClaimsSet claimsSet,
+					   final JWK signingJWK,
+					   final JWSAlgorithm jwsAlg)
+		throws JOSEException {
+		
 		if (! claimsSet.getJWKSet().containsJWK(signingJWK)) {
 			throw new JOSEException("Signing JWK not found in JWK set");
 		}
 		
-		JWSSigner jwsSigner = new DefaultJWSSignerFactory().createJWSSigner(signingJWK);
+		JWSSigner jwsSigner = new DefaultJWSSignerFactory().createJWSSigner(signingJWK, jwsAlg);
 		
-		JWSHeader jwsHeader = new JWSHeader.Builder(resolveSigningAlgorithm(signingJWK))
+		JWSHeader jwsHeader = new JWSHeader.Builder(jwsAlg)
 			.keyID(signingJWK.getKeyID())
 			.build();
 		
@@ -272,7 +276,7 @@ public final class EntityStatement {
 	public static EntityStatement parse(final SignedJWT signedStmt)
 		throws ParseException {
 		
-		if (! JWSObject.State.SIGNED.equals(signedStmt.getState())) {
+		if (JWSObject.State.UNSIGNED.equals(signedStmt.getState())) {
 			throw new ParseException("The statement is not signed");
 		}
 		
