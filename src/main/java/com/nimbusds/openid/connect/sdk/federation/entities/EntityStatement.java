@@ -34,6 +34,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 
 
 /**
@@ -114,6 +115,18 @@ public final class EntityStatement {
 	 */
 	public EntityStatementClaimsSet getClaimsSet() {
 		return statementClaimsSet;
+	}
+	
+	
+	/**
+	 * Returns {@code true} if this entity statement is for a
+	 * {@link EntityRole#TRUST_ANCHOR trust anchor}.
+	 *
+	 * @return {@code true} for a trust anchor, else {@code false}.
+	 */
+	public boolean isTrustAnchor() {
+		
+		return getClaimsSet().isSelfStatement() && CollectionUtils.isEmpty(getClaimsSet().getAuthorityHints());
 	}
 	
 	

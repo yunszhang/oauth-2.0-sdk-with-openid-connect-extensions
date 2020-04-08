@@ -108,6 +108,7 @@ public class EntityStatementTest extends TestCase {
 		
 		assertEquals(OP_METADATA.getIssuer().getValue(), entityStatement.getEntityID().getValue());
 		assertEquals(claimsSet.toJWTClaimsSet().getClaims(), entityStatement.getClaimsSet().toJWTClaimsSet().getClaims());
+		assertFalse(entityStatement.isTrustAnchor());
 		
 		JWSHeader jwsHeader = entityStatement.getSignedStatement().getHeader();
 		assertEquals(JWSAlgorithm.RS256, jwsHeader.getAlgorithm());
@@ -225,5 +226,16 @@ public class EntityStatementTest extends TestCase {
 		} catch (BadJOSEException e) {
 			assertEquals("Signed JWT rejected: Invalid signature", e.getMessage());
 		}
+	}
+	
+	
+	public void testIsForTrustAnchor() throws Exception {
+		
+		EntityStatementClaimsSet claimsSet = createEntityStatementClaimsSet();
+		claimsSet.setAuthorityHints(null);
+		
+		EntityStatement entityStatement = EntityStatement.sign(claimsSet, RSA_JWK);
+		
+		assertTrue(entityStatement.isTrustAnchor());
 	}
 }
