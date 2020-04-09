@@ -174,7 +174,7 @@ public final class EntityStatement {
 		});
 		
 		// Double check claims with JWT framework
-		jwtProcessor.setJWTClaimsSetVerifier(new EntityStatementClaimsVerifier());
+		jwtProcessor.setJWTClaimsSetVerifier(new EntityStatementClaimsVerifier(null));
 		jwtProcessor.process(getSignedStatement(), null);
 	}
 	

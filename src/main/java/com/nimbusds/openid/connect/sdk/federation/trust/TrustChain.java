@@ -25,6 +25,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import net.jcip.annotations.Immutable;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
@@ -226,5 +229,44 @@ public final class TrustChain {
 		
 		exp = nearestExp;
 		return exp;
+	}
+	
+	
+	/**
+	 * Verifies the signatures in this trust chain.
+	 *
+	 * @param trustAnchorJWKSet The trust anchor JWK set. Must not be
+	 *                          {@code null}.
+	 *
+	 * @throws BadJOSEException If a signature is invalid or a statement is
+	 *                          expired or before the issue time.
+	 * @throws JOSEException    On a internal JOSE exception.
+	 */
+	public void verifySignatures(final JWKSet trustAnchorJWKSet)
+		throws BadJOSEException, JOSEException {
+		
+		try {
+			leaf.verifySignatureOfSelfStatement();
+		} catch (BadJOSEException e) {
+			throw new BadJOSEException("Invalid leaf statement: " + e.getMessage(), e);
+		}
+		
+		for (int i=0; i < superiors.size(); i++) {
+			
+			EntityStatement stmt = superiors.get(i);
+			
+			JWKSet verificationJWKSet;
+			if (i+1 == superiors.size()) {
+				verificationJWKSet = trustAnchorJWKSet;
+			} else {
+				verificationJWKSet = superiors.get(i+1).getClaimsSet().getJWKSet();
+			}
+			
+			try {
+				stmt.verifySignature(verificationJWKSet);
+			} catch (BadJOSEException e) {
+				throw new BadJOSEException("Invalid statement from " + stmt.getClaimsSet().getIssuer() + ": " + e.getMessage(), e);
+			}
+		}
 	}
 }
