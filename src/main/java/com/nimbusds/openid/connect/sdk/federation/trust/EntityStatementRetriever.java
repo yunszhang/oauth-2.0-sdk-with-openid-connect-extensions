@@ -40,23 +40,49 @@ import com.nimbusds.openid.connect.sdk.federation.entities.FederationEntityMetad
 class EntityStatementRetriever {
 	
 	
+	/**
+	 * The HTTP connect timeout in milliseconds.
+	 */
 	private final int httpConnectTimeoutMs;
 	
 	
+	/**
+	 * The HTTP read timeout in milliseconds.
+	 */
 	private final int httpReadTimeoutMs;
 	
 	
+	/**
+	 * The default HTTP connect timeout in milliseconds.
+	 */
 	static final int DEFAULT_HTTP_CONNECT_TIMEOUT_MS = 1000;
 	
 	
+	/**
+	 * The default HTTP read timeout in milliseconds.
+	 */
 	static final int DEFAULT_HTTP_READ_TIMEOUT_MS = 1000;
 	
 	
+	/**
+	 * Creates a new entity statement retriever using the default HTTP
+	 * timeout settings.
+	 */
 	EntityStatementRetriever() {
 		this(DEFAULT_HTTP_CONNECT_TIMEOUT_MS, DEFAULT_HTTP_READ_TIMEOUT_MS);
 	}
 	
 	
+	/**
+	 * Creates a new entity statement retriever.
+	 *
+	 * @param httpConnectTimeoutMs The HTTP connect timeout in
+	 *                             milliseconds, zero means timout
+	 *                             determined by the underlying HTTP client.
+	 * @param httpReadTimeoutMs    The HTTP read timeout in milliseconds,
+	 *                             zero means timeout determined by the
+	 *                             underlying HTTP client.
+	 */
 	EntityStatementRetriever(final int httpConnectTimeoutMs,
 				 final int httpReadTimeoutMs) {
 		this.httpConnectTimeoutMs = httpConnectTimeoutMs;
@@ -64,11 +90,23 @@ class EntityStatementRetriever {
 	}
 	
 	
+	/**
+	 * Returns the configured HTTP connect timeout.
+	 *
+	 * @return The configured HTTP connect timeout in milliseconds, zero
+	 *         means timeout determined by the underlying HTTP client.
+	 */
 	public int getHTTPConnectTimeout() {
 		return httpConnectTimeoutMs;
 	}
 	
 	
+	/**
+	 * Returns the configured HTTP read timeout.
+	 *
+	 * @return The configured HTTP read timeout in milliseconds, zero
+	 *         means timeout determined by the underlying HTTP client.
+	 */
 	public int getHTTPReadTimeout() {
 		return httpReadTimeoutMs;
 	}
@@ -80,6 +118,16 @@ class EntityStatementRetriever {
 	}
 	
 	
+	/**
+	 * Fetches an entity's self-issued statement from its federation entity
+	 * configuration endpoint.
+	 *
+	 * @param target The entity ID. Must not be {@code null}.
+	 *
+	 * @return The entity statement.
+	 *
+	 * @throws ResolveException If fetching failed.
+	 */
 	EntityStatement fetchSelfIssuedEntityStatement(final EntityID target)
 		throws ResolveException {
 		
@@ -111,6 +159,16 @@ class EntityStatementRetriever {
 	}
 	
 	
+	/**
+	 * Resolves an entity's federation API URI by fetching its self-issued
+	 * statement from the federation entity configuration endpoint.
+	 *
+	 * @param entityID The entity ID. Must not be {@code null}.
+	 *
+	 * @return The federation API URI, {@code null} if not advertised.
+	 *
+	 * @throws ResolveException If fetching failed.
+	 */
 	URI resolveFederationAPIURI(final EntityID entityID)
 		throws ResolveException {
 		
@@ -126,6 +184,21 @@ class EntityStatementRetriever {
 	}
 	
 	
+	/**
+	 * Fetches an entity statement from a federation API endpoint.
+	 *
+	 * @param federationAPIEndpoint The federation API endpoint. Must not
+	 *                              be {@code null}.
+	 * @param issuer                The entity statement issuer, typically
+	 *                              the ID of the entity operating the
+	 *                              endpoint. Must not be {@code null}.
+	 * @param subject               The entity statement subject. Must not
+	 *                              be {@code null}.
+	 *
+	 * @return The entity statement.
+	 *
+	 * @throws ResolveException If fetching failed.
+	 */
 	EntityStatement fetchEntityStatement(final URI federationAPIEndpoint, final EntityID issuer, final EntityID subject)
 		throws ResolveException {
 		

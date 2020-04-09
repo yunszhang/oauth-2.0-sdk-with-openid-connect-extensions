@@ -303,4 +303,25 @@ public final class EntityStatement {
 		EntityStatementClaimsSet claimsSet = new EntityStatementClaimsSet(jwtClaimsSet);
 		return new EntityStatement(signedStmt, claimsSet);
 	}
+	
+	
+	/**
+	 * Parses a federation entity statement.
+	 *
+	 * @param signedStmtString The signed statement as a signed JWT string.
+	 *                         Must not be {@code null}.
+	 *
+	 * @return The federation entity statement.
+	 *
+	 * @throws ParseException If parsing failed.
+	 */
+	public static EntityStatement parse(final String signedStmtString)
+		throws ParseException {
+		
+		try {
+			return parse(SignedJWT.parse(signedStmtString));
+		} catch (java.text.ParseException e) {
+			throw new ParseException("Invalid entity statement: " + e.getMessage(), e);
+		}
+	}
 }
