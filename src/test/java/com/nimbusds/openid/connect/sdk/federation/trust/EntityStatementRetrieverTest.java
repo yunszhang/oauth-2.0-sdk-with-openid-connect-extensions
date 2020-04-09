@@ -25,8 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static net.jadler.Jadler.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -205,6 +204,28 @@ public class EntityStatementRetrieverTest {
 	
 	
 	@Test
+	public void testFetchSelfIssuedEntityStatement_error_404() {
+		
+		Issuer issuer = new Issuer("http://localhost:" + port());
+		
+		onRequest()
+			.havingMethodEqualTo("GET")
+			.havingPathEqualTo(FederationEntityConfigurationRequest.OPENID_FEDERATION_ENTITY_WELL_KNOWN_PATH)
+			.respond()
+			.withStatus(404);
+		
+		EntityStatementRetriever retriever = new EntityStatementRetriever();
+		try {
+			retriever.fetchSelfIssuedEntityStatement(new EntityID(issuer.getValue()));
+			fail();
+		} catch (ResolveException e) {
+			assertEquals("Entity configuration error response from " + issuer + ": 404", e.getMessage());
+			assertEquals(404, e.getErrorObject().getHTTPStatusCode());
+		}
+	}
+	
+	
+	@Test
 	public void testResolveFederationAPIURI()
 		throws Exception {
 		
@@ -270,8 +291,7 @@ public class EntityStatementRetrieverTest {
 	
 	
 	@Test
-	public void testFetchEntityStatement_error_invalidSubject()
-		throws Exception {
+	public void testFetchEntityStatement_error_invalidSubject() {
 		
 		final Issuer issuer = new Issuer("http://localhost:" + port());
 		final Issuer opIssuer = new Issuer("https://op.c2id.com");
@@ -302,7 +322,7 @@ public class EntityStatementRetrieverTest {
 			retriever.fetchEntityStatement(URI.create(issuer + "/federation"), new EntityID(issuer.getValue()), new EntityID(opIssuer.getValue()));
 			fail();
 		} catch (ResolveException e) {
-			assertEquals("Entity statement error response from " + issuer + " at " + issuer + "/federation: invalid_subject", e.getMessage());
+			assertEquals("Entity statement error response from " + issuer + " at " + issuer + "/federation: 400 invalid_subject", e.getMessage());
 			assertEquals("invalid_subject", e.getErrorObject().getCode());
 			assertEquals("Invalid subject", e.getErrorObject().getDescription());
 			assertEquals(400, e.getErrorObject().getHTTPStatusCode());

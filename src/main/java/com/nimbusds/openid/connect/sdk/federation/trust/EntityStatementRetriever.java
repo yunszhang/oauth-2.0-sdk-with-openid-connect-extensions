@@ -152,7 +152,10 @@ class EntityStatementRetriever {
 		
 		if (! response.indicatesSuccess()) {
 			ErrorObject errorObject = response.toErrorResponse().getErrorObject();
-			throw new ResolveException("Entity configuration error response from " + target + ": " + errorObject.getCode(), errorObject);
+			throw new ResolveException("Entity configuration error response from " + target + ": " +
+				errorObject.getHTTPStatusCode() +
+				(errorObject.getCode() != null ? " " + errorObject.getCode() : ""),
+				errorObject);
 		}
 		
 		return response.toSuccessResponse().getEntityStatement();
@@ -222,7 +225,10 @@ class EntityStatementRetriever {
 		
 		if (! response.indicatesSuccess()) {
 			ErrorObject errorObject = response.toErrorResponse().getErrorObject();
-			throw new ResolveException("Entity statement error response from " + issuer + " at " + federationAPIEndpoint + ": " + errorObject.getCode(), errorObject);
+			throw new ResolveException("Entity statement error response from " + issuer + " at " + federationAPIEndpoint + ": " +
+				errorObject.getHTTPStatusCode() +
+				(errorObject.getCode() != null ? " " + errorObject.getCode() : ""),
+				errorObject);
 		}
 		
 		return response.toSuccessResponse().getEntityStatement();
