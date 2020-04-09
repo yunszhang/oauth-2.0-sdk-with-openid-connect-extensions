@@ -22,6 +22,7 @@ import junit.framework.TestCase;
 
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 
 
 public class FetchEntityStatementResponseTest extends TestCase {
@@ -29,12 +30,12 @@ public class FetchEntityStatementResponseTest extends TestCase {
 	
 	public void testParseSuccess() throws Exception {
 		
-		SignedJWT signedStmt = FetchEntityStatementSuccessResponseTest.createSignedEntityStatement();
+		EntityStatement signedStmt = FetchEntityStatementSuccessResponseTest.createSignedEntityStatement();
 		FetchEntityStatementSuccessResponse response = new FetchEntityStatementSuccessResponse(signedStmt);
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		
 		response = FetchEntityStatementResponse.parse(httpResponse).toSuccessResponse();
-		assertEquals(signedStmt.serialize(), response.getSignedEntityStatement().getParsedString());
+		assertEquals(signedStmt.getSignedStatement().serialize(), response.getEntityStatement().getSignedStatement().serialize());
 	}
 	
 	

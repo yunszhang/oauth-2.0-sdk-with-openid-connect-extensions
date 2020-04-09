@@ -21,10 +21,9 @@ package com.nimbusds.openid.connect.sdk.federation.api;
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.common.contenttype.ContentType;
-import com.nimbusds.jose.JWSObject;
-import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 
 
 /**
@@ -41,37 +40,34 @@ public class FetchEntityStatementSuccessResponse extends FetchEntityStatementRes
 	
 	
 	/**
-	 * The entity statement as signed JWT.
+	 * The entity statement.
 	 */
-	private final SignedJWT signedStmt;
+	private final EntityStatement entityStatement;
 	
 	
 	/**
 	 * Creates a new fetch entity statement success response.
 	 *
-	 * @param signedStmt The signed entity statement as signed JWT. Must
-	 *                   not be {@code null}.
+	 * @param entityStatement The entity statement. Must not be
+	 *                        {@code null}.
 	 */
-	public FetchEntityStatementSuccessResponse(final SignedJWT signedStmt) {
-		if (signedStmt == null) {
-			throw new IllegalArgumentException("The signed entity statement must not be null");
+	public FetchEntityStatementSuccessResponse(final EntityStatement entityStatement) {
+		if (entityStatement == null) {
+			throw new IllegalArgumentException("The federation entity statement must not be null");
 		}
-		if (! JWSObject.State.SIGNED.equals(signedStmt.getState())) {
-			throw new IllegalArgumentException("The entity statement must be in signed state");
-		}
-		this.signedStmt = signedStmt;
+		this.entityStatement = entityStatement;
 	}
 	
 	
 	/**
-	 * Returns the signed entity statement. After the signature if
-	 * validated the statement can be processed with
-	 * {@link com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet}.
+	 * Returns the entity statement. No signature or expiration validation
+	 * is performed.
 	 *
-	 * @return The signed entity statement as signed JWT.
+	 * @return The entity statement.
 	 */
-	public SignedJWT getSignedEntityStatement() {
-		return signedStmt;
+	public EntityStatement getEntityStatement() {
+		
+		return entityStatement;
 	}
 	
 	
@@ -85,7 +81,7 @@ public class FetchEntityStatementSuccessResponse extends FetchEntityStatementRes
 	public HTTPResponse toHTTPResponse() {
 		HTTPResponse httpResponse = new HTTPResponse(HTTPResponse.SC_OK);
 		httpResponse.setEntityContentType(ContentType.APPLICATION_JOSE);
-		httpResponse.setContent(getSignedEntityStatement().serialize());
+		httpResponse.setContent(getEntityStatement().getSignedStatement().serialize());
 		return httpResponse;
 	}
 	
@@ -105,11 +101,6 @@ public class FetchEntityStatementSuccessResponse extends FetchEntityStatementRes
 		
 		httpResponse.ensureStatusCode(HTTPResponse.SC_OK);
 		httpResponse.ensureEntityContentType(ContentType.APPLICATION_JOSE);
-		
-		try {
-			return new FetchEntityStatementSuccessResponse(SignedJWT.parse(httpResponse.getContent()));
-		} catch (java.text.ParseException e) {
-			throw new ParseException("Invalid signed entity statement: " + e.getMessage(), e);
-		}
+		return new FetchEntityStatementSuccessResponse(EntityStatement.parse(httpResponse.getContent()));
 	}
 }

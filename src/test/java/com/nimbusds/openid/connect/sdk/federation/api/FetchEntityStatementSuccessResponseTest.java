@@ -21,6 +21,7 @@ package com.nimbusds.openid.connect.sdk.federation.api;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 
 import junit.framework.TestCase;
@@ -28,15 +29,11 @@ import junit.framework.TestCase;
 import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.crypto.RSASSASigner;
-import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.KeyOperation;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
-import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -44,6 +41,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
+import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
 import com.nimbusds.openid.connect.sdk.rp.ApplicationType;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
@@ -73,14 +71,16 @@ public class FetchEntityStatementSuccessResponseTest extends TestCase {
 	
 	static EntityStatementClaimsSet createSampleEntityStatementClaimsSet() {
 		
+		long nowTs = DateUtils.toSecondsSinceEpoch(new Date());
+		
 		EntityStatementClaimsSet claimsSet = new EntityStatementClaimsSet(
 			new Issuer("https://openid.sunet.se"),
 			new Subject("https://openid.sunet.se"),
-			DateUtils.fromSecondsSinceEpoch(1516239022L),
-			DateUtils.fromSecondsSinceEpoch(1516298022),
+			DateUtils.fromSecondsSinceEpoch(nowTs),
+			DateUtils.fromSecondsSinceEpoch(nowTs + 3600),
 			JWK_SET);
-		
 		claimsSet.setAuthorityHints(Collections.singletonList(new EntityID("https://edugain.org/federation")));
+		
 		OIDCClientMetadata rpMetadata = new OIDCClientMetadata();
 		rpMetadata.setApplicationType(ApplicationType.WEB);
 		rpMetadata.setRedirectionURI(URI.create("https://openid.sunet.se/rp/callback"));
@@ -93,16 +93,11 @@ public class FetchEntityStatementSuccessResponseTest extends TestCase {
 	}
 	
 	
-	static SignedJWT createSignedEntityStatement() {
+	static EntityStatement createSignedEntityStatement() {
 		
 		try {
-			JWSHeader jwsHeader = new JWSHeader.Builder((JWSAlgorithm) RSA_KEY.getAlgorithm())
-				.keyID(RSA_KEY.getKeyID())
-				.build();
 			EntityStatementClaimsSet claimsSet = createSampleEntityStatementClaimsSet();
-			SignedJWT signedStmt = new SignedJWT(jwsHeader, claimsSet.toJWTClaimsSet());
-			signedStmt.sign(new RSASSASigner(RSA_KEY));
-			return signedStmt;
+			return EntityStatement.sign(claimsSet, RSA_KEY);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -111,24 +106,22 @@ public class FetchEntityStatementSuccessResponseTest extends TestCase {
 	
 	public void testLifeCycle() throws Exception {
 		
-		SignedJWT signedStmt = createSignedEntityStatement();
+		EntityStatement signedStmt = createSignedEntityStatement();
 		
 		FetchEntityStatementSuccessResponse response = new FetchEntityStatementSuccessResponse(signedStmt);
-		assertEquals(signedStmt, response.getSignedEntityStatement());
+		assertEquals(signedStmt, response.getEntityStatement());
 		assertTrue(response.indicatesSuccess());
 		
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		assertEquals(200, httpResponse.getStatusCode());
 		assertEquals("application/jose; charset=UTF-8", httpResponse.getEntityContentType().toString());
-		assertEquals(signedStmt.serialize(), httpResponse.getContent());
+		assertEquals(signedStmt.getSignedStatement().serialize(), httpResponse.getContent());
 		
 		response = FetchEntityStatementSuccessResponse.parse(httpResponse);
-		assertEquals(signedStmt.serialize(), response.getSignedEntityStatement().getParsedString());
+		assertEquals(signedStmt.getSignedStatement().serialize(), response.getEntityStatement().getSignedStatement().getParsedString());
 		assertTrue(response.indicatesSuccess());
 		
-		assertTrue(response.getSignedEntityStatement().verify(new RSASSAVerifier(RSA_KEY.toRSAPublicKey())));
-		
-		new EntityStatementClaimsSet(response.getSignedEntityStatement().getJWTClaimsSet());
+		response.getEntityStatement().verifySignature(JWK_SET);
 	}
 	
 	
@@ -147,7 +140,7 @@ public class FetchEntityStatementSuccessResponseTest extends TestCase {
 		
 		HTTPResponse httpResponse = new HTTPResponse(200);
 		httpResponse.setEntityContentType(ContentType.APPLICATION_URLENCODED);
-		httpResponse.setContent(createSignedEntityStatement().serialize());
+		httpResponse.setContent(createSignedEntityStatement().getSignedStatement().serialize());
 		
 		try {
 			FetchEntityStatementSuccessResponse.parse(httpResponse);
@@ -168,7 +161,7 @@ public class FetchEntityStatementSuccessResponseTest extends TestCase {
 			FetchEntityStatementSuccessResponse.parse(httpResponse);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid signed entity statement: Invalid serialized unsecured/JWS/JWE object: Missing part delimiters", e.getMessage());
+			assertEquals("Invalid entity statement: Invalid serialized unsecured/JWS/JWE object: Missing part delimiters", e.getMessage());
 		}
 	}
 }

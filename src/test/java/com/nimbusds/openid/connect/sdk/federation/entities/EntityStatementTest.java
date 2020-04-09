@@ -38,6 +38,7 @@ import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.SubjectType;
@@ -119,7 +120,7 @@ public class EntityStatementTest extends TestCase {
 		assertEquals(claimsSet.toJWTClaimsSet().getClaims(), signedJWT.getJWTClaimsSet().getClaims());
 		assertTrue(signedJWT.verify(new RSASSAVerifier(RSA_JWK.toRSAPublicKey())));
 		
-		entityStatement = EntityStatement.parse(signedJWT);
+		entityStatement = EntityStatement.parse(signedJWT.serialize());
 		
 		assertEquals(OP_METADATA.getIssuer().getValue(), entityStatement.getEntityID().getValue());
 		assertEquals(claimsSet.toJWTClaimsSet().getClaims(), entityStatement.getClaimsSet().toJWTClaimsSet().getClaims());
@@ -147,7 +148,7 @@ public class EntityStatementTest extends TestCase {
 		assertEquals(claimsSet.toJWTClaimsSet().getClaims(), signedJWT.getJWTClaimsSet().getClaims());
 		assertTrue(signedJWT.verify(new RSASSAVerifier(RSA_JWK.toRSAPublicKey())));
 		
-		entityStatement = EntityStatement.parse(signedJWT);
+		entityStatement = EntityStatement.parse(signedJWT.serialize());
 		
 		assertEquals(OP_METADATA.getIssuer().getValue(), entityStatement.getEntityID().getValue());
 		assertEquals(claimsSet.toJWTClaimsSet().getClaims(), entityStatement.getClaimsSet().toJWTClaimsSet().getClaims());
@@ -198,7 +199,7 @@ public class EntityStatementTest extends TestCase {
 		signedJWT.sign(new RSASSASigner(rsaJWK));
 		
 		try {
-			EntityStatement.parse(signedJWT).verifySignatureOfSelfStatement();
+			EntityStatement.parse(signedJWT.serialize()).verifySignatureOfSelfStatement();
 			fail();
 		} catch (BadJOSEException e) {
 			assertEquals("Signed JWT rejected: Another algorithm expected, or no matching key(s) found", e.getMessage());
@@ -221,10 +222,21 @@ public class EntityStatementTest extends TestCase {
 		signedJWT.sign(new RSASSASigner(rsaJWK));
 		
 		try {
-			EntityStatement.parse(signedJWT).verifySignatureOfSelfStatement();
+			EntityStatement.parse(signedJWT.serialize()).verifySignatureOfSelfStatement();
 			fail();
 		} catch (BadJOSEException e) {
 			assertEquals("Signed JWT rejected: Invalid signature", e.getMessage());
+		}
+	}
+	
+	
+	public void testParseNotJWT() {
+		
+		try {
+			EntityStatement.parse("invalid-jwt");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid entity statement: Invalid serialized unsecured/JWS/JWE object: Missing part delimiters", e.getMessage());
 		}
 	}
 	
