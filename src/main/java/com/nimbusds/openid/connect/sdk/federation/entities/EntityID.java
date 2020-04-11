@@ -27,6 +27,7 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Identifier;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 
 /**
@@ -42,15 +43,13 @@ import com.nimbusds.oauth2.sdk.id.Subject;
 public final class EntityID extends Identifier {
 	
 	
-	
 	/**
 	 * Creates a new entity identifier from the specified URI.
 	 *
 	 * @param value The URI. Must not be {@code null}.
 	 */
 	public EntityID(final URI value) {
-		
-		super(value.toString());
+		this(value.toString());
 	}
 	
 	
@@ -62,13 +61,21 @@ public final class EntityID extends Identifier {
 	 *              not be {@code null}.
 	 */
 	public EntityID(final String value) {
-		
 		super(value);
 		
+		URI uri;
 		try {
-			new URI(value);
+			uri = new URI(value);
 		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException("The entity identifier must be an URI: " + e.getMessage(), e);
+			throw new IllegalArgumentException("The entity ID must be an URI: " + e.getMessage(), e);
+		}
+		
+		if (! "https".equalsIgnoreCase(uri.getScheme()) && ! "http".equalsIgnoreCase(uri.getScheme())) {
+			throw new IllegalArgumentException("The entity ID must be an URI with https or http scheme");
+		}
+		
+		if (StringUtils.isBlank(uri.getAuthority())) {
+			throw new IllegalArgumentException("The entity ID must not be an URI with authority (hostname)");
 		}
 	}
 	

@@ -60,7 +60,29 @@ public class EntityIDTest extends TestCase {
 			new EntityID("a b c");
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("The entity identifier must be an URI: Illegal character in path at index 1: a b c", e.getMessage());
+			assertEquals("The entity ID must be an URI: Illegal character in path at index 1: a b c", e.getMessage());
+		}
+	}
+	
+	
+	public void testURISchemeNotHTTPS_HTTP() {
+		
+		try {
+			new EntityID("ftp://example.com");
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The entity ID must be an URI with https or http scheme", e.getMessage());
+		}
+	}
+	
+	
+	public void testURISchemeMissingAuthority() {
+		
+		try {
+			new EntityID("https:///");
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The entity ID must not be an URI with authority (hostname)", e.getMessage());
 		}
 	}
 	
@@ -71,7 +93,7 @@ public class EntityIDTest extends TestCase {
 			EntityID.parse("a b c");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("The entity identifier must be an URI: Illegal character in path at index 1: a b c", e.getMessage());
+			assertEquals("The entity ID must be an URI: Illegal character in path at index 1: a b c", e.getMessage());
 		}
 	}
 	
