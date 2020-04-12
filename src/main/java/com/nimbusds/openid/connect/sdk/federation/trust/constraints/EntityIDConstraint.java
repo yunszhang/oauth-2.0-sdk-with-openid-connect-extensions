@@ -18,6 +18,7 @@
 package com.nimbusds.openid.connect.sdk.federation.trust.constraints;
 
 
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 
 
@@ -43,4 +44,37 @@ public abstract class EntityIDConstraint {
 	 *         ID, else {@code false}.
 	 */
 	public abstract boolean matches(final EntityID entityID);
+	
+	
+	@Override
+	public abstract String toString();
+	
+	
+	@Override
+	public abstract boolean equals(final Object other);
+	
+	
+	/**
+	 * Parses an entity ID constraint.
+	 *
+	 * @param value The string value.
+	 *
+	 * @return The parsed {@link ExactMatchEntityIDConstraint} or
+	 *         {@link SubtreeEntityIDConstraint}.
+	 *
+	 * @throws ParseException If parsing failed.
+	 */
+	public static EntityIDConstraint parse(final String value)
+		throws ParseException {
+		
+		try {
+			return new SubtreeEntityIDConstraint(value);
+		} catch (IllegalArgumentException e) {
+			try {
+				return new ExactMatchEntityIDConstraint(new EntityID(value));
+			} catch (IllegalArgumentException e2) {
+				throw new ParseException(e2.getMessage(), e2);
+			}
+		}
+	}
 }

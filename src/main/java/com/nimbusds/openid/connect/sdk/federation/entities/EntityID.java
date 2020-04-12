@@ -75,7 +75,7 @@ public final class EntityID extends Identifier {
 		}
 		
 		if (StringUtils.isBlank(uri.getAuthority())) {
-			throw new IllegalArgumentException("The entity ID must not be an URI with authority (hostname)");
+			throw new IllegalArgumentException("The entity ID must be an URI with authority (hostname)");
 		}
 	}
 	

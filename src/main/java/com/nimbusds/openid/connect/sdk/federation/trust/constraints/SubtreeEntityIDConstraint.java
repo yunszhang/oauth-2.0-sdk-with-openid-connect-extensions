@@ -18,6 +18,8 @@
 package com.nimbusds.openid.connect.sdk.federation.trust.constraints;
 
 
+import java.util.Objects;
+
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
@@ -43,7 +45,7 @@ public final class SubtreeEntityIDConstraint extends EntityIDConstraint {
 	private final String scheme;
 	
 	
-	private final String pattern;
+	private final String hostNameAndRemainderPattern;
 	
 	
 	/**
@@ -62,9 +64,9 @@ public final class SubtreeEntityIDConstraint extends EntityIDConstraint {
 			throw new IllegalArgumentException("The entity ID pattern must be an URI with https or http scheme");
 		}
 		
-		pattern = entityIDPattern.substring(scheme.length());
+		hostNameAndRemainderPattern = entityIDPattern.substring(scheme.length());
 		
-		if (! pattern.startsWith(".")) {
+		if (! hostNameAndRemainderPattern.startsWith(".")) {
 			throw new IllegalArgumentException("The host part of the entity ID pattern must start with dot (.)");
 		}
 	}
@@ -89,6 +91,28 @@ public final class SubtreeEntityIDConstraint extends EntityIDConstraint {
 		
 		String patternIN = entityID.getValue().substring(schemeIN.length());
 		
-		return patternIN.endsWith(pattern);
+		return patternIN.endsWith(hostNameAndRemainderPattern);
+	}
+	
+	
+	@Override
+	public String toString() {
+		return scheme + hostNameAndRemainderPattern;
+	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof SubtreeEntityIDConstraint)) return false;
+		SubtreeEntityIDConstraint that = (SubtreeEntityIDConstraint) o;
+		return scheme.equals(that.scheme) &&
+			hostNameAndRemainderPattern.equals(that.hostNameAndRemainderPattern);
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(scheme, hostNameAndRemainderPattern);
 	}
 }

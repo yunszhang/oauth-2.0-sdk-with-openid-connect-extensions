@@ -1,7 +1,7 @@
 /*
  * oauth2-oidc-sdk
  *
- * Copyright 2012-2016, Connect2id Ltd and contributors.
+ * Copyright 2012-2020, Connect2id Ltd and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package com.nimbusds.openid.connect.sdk.federation.entities;
+package com.nimbusds.openid.connect.sdk.federation.trust.constraints;
 
 
 import java.util.LinkedList;
@@ -27,7 +27,6 @@ import net.minidev.json.JSONAware;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.id.Identifier;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
@@ -67,13 +66,13 @@ public final class TrustChainConstraints implements JSONAware {
 	/**
 	 * The permitted entities.
 	 */
-	private List<EntityID> permittedEntities;
+	private List<EntityIDConstraint> permittedEntities;
 	
 	
 	/**
 	 * The excluded entities.
 	 */
-	private List<EntityID> excludedEntities;
+	private List<EntityIDConstraint> excludedEntities;
 	
 	
 	/**
@@ -87,7 +86,7 @@ public final class TrustChainConstraints implements JSONAware {
 	 * @param excludedEntities  The excluded subordinate entities,
 	 *                          {@code null} if not specified.
 	 */
-	public TrustChainConstraints(final int maxPathLength, final List<EntityID> permittedEntities, final List<EntityID> excludedEntities) {
+	public TrustChainConstraints(final int maxPathLength, final List<EntityIDConstraint> permittedEntities, final List<EntityIDConstraint> excludedEntities) {
 		this.maxPathLength = maxPathLength;
 		this.permittedEntities = permittedEntities;
 		this.excludedEntities = excludedEntities;
@@ -113,7 +112,7 @@ public final class TrustChainConstraints implements JSONAware {
 	 * @return The permitted subordinate entities, {@code null} if not
 	 *         specified.
 	 */
-	public List<EntityID> getPermittedEntities() {
+	public List<EntityIDConstraint> getPermittedEntities() {
 		return permittedEntities;
 	}
 	
@@ -125,7 +124,7 @@ public final class TrustChainConstraints implements JSONAware {
 	 * @return The excluded subordinate entities, {@code null} if not
 	 *         specified.
 	 */
-	public List<EntityID> getExcludedEntities() {
+	public List<EntityIDConstraint> getExcludedEntities() {
 		return excludedEntities;
 	}
 	
@@ -147,11 +146,19 @@ public final class TrustChainConstraints implements JSONAware {
 		JSONObject namingConstraints = new JSONObject();
 		
 		if (CollectionUtils.isNotEmpty(permittedEntities)) {
-			namingConstraints.put("permitted", Identifier.toStringList(permittedEntities));
+			List<String> vals = new LinkedList<>();
+			for (EntityIDConstraint v: permittedEntities) {
+				vals.add(v.toString());
+			}
+			namingConstraints.put("permitted", vals);
 		}
 		
 		if (CollectionUtils.isNotEmpty(excludedEntities)) {
-			namingConstraints.put("excluded", Identifier.toStringList(excludedEntities));
+			List<String> vals = new LinkedList<>();
+			for (EntityIDConstraint v: excludedEntities) {
+				vals.add(v.toString());
+			}
+			namingConstraints.put("excluded", vals);
 		}
 		
 		if (! namingConstraints.isEmpty()) {
@@ -202,24 +209,24 @@ public final class TrustChainConstraints implements JSONAware {
 		
 		JSONObject namingConstraints = JSONObjectUtils.getJSONObject(jsonObject, "naming_constraints", new JSONObject());
 		
-		List<EntityID> permitted = null;
+		List<EntityIDConstraint> permitted = null;
 		List<String> values = JSONObjectUtils.getStringList(namingConstraints, "permitted", null);
 		if (values != null) {
 			permitted = new LinkedList<>();
 			for (String v: values) {
 				if (v != null) {
-					permitted.add(new EntityID(v));
+					permitted.add(EntityIDConstraint.parse(v));
 				}
 			}
 		}
 		
-		List<EntityID> excluded = null;
+		List<EntityIDConstraint> excluded = null;
 		values = JSONObjectUtils.getStringList(namingConstraints, "excluded", null);
 		if (values != null) {
 			excluded = new LinkedList<>();
 			for (String v: values) {
 				if (v != null) {
-					excluded.add(new EntityID(v));
+					excluded.add(EntityIDConstraint.parse(v));
 				}
 			}
 		}

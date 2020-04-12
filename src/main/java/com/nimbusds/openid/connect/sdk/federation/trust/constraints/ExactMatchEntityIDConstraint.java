@@ -18,6 +18,8 @@
 package com.nimbusds.openid.connect.sdk.federation.trust.constraints;
 
 
+import java.util.Objects;
+
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
@@ -60,5 +62,26 @@ public final class ExactMatchEntityIDConstraint extends EntityIDConstraint {
 	@Override
 	public boolean matches(final EntityID entityID) {
 		return this.entityID.equals(entityID);
+	}
+	
+	
+	@Override
+	public String toString() {
+		return entityID.getValue();
+	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof ExactMatchEntityIDConstraint)) return false;
+		ExactMatchEntityIDConstraint that = (ExactMatchEntityIDConstraint) o;
+		return entityID.equals(that.entityID);
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(entityID);
 	}
 }
