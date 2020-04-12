@@ -42,6 +42,7 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.SubjectType;
+import com.nimbusds.openid.connect.sdk.federation.trust.constraints.TrustChainConstraints;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
@@ -232,7 +233,7 @@ public class EntityStatementClaimsSetTest extends TestCase {
 		assertEquals(audList, stmt.getAudience());
 		
 		// authority_hints
-		List<EntityID> authorityHints = Collections.singletonList(new EntityID("abc123"));
+		List<EntityID> authorityHints = Collections.singletonList(new EntityID("https://federation.example.com"));
 		stmt.setAuthorityHints(authorityHints);
 		assertEquals(authorityHints, stmt.getAuthorityHints());
 		

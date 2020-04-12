@@ -39,7 +39,7 @@ public class FederationEntityMetadataTest extends TestCase {
 		assertEquals(fedEndpoint, metadata.getFederationAPIEndpointURI());
 		
 		assertNull(metadata.getTrustAnchorID());
-		EntityID anchorID = new EntityID("1");
+		EntityID anchorID = new EntityID("https://federation.example.com");
 		metadata.setTrustAnchorID(anchorID);
 		assertEquals(anchorID, metadata.getTrustAnchorID());
 		

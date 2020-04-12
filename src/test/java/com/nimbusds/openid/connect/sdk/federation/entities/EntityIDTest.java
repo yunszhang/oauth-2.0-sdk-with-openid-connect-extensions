@@ -82,7 +82,7 @@ public class EntityIDTest extends TestCase {
 			new EntityID("https:///");
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("The entity ID must not be an URI with authority (hostname)", e.getMessage());
+			assertEquals("The entity ID must be an URI with authority (hostname)", e.getMessage());
 		}
 	}
 	

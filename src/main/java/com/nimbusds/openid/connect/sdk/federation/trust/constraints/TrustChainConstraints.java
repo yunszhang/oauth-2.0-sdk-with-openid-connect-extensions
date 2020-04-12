@@ -60,19 +60,19 @@ public final class TrustChainConstraints implements JSONAware {
 	/**
 	 * The max path length, -1 if not specified.
 	 */
-	private int maxPathLength;
+	private final int maxPathLength;
 	
 	
 	/**
 	 * The permitted entities.
 	 */
-	private List<EntityIDConstraint> permittedEntities;
+	private final List<EntityIDConstraint> permittedEntities;
 	
 	
 	/**
 	 * The excluded entities.
 	 */
-	private List<EntityIDConstraint> excludedEntities;
+	private final List<EntityIDConstraint> excludedEntities;
 	
 	
 	/**
