@@ -18,11 +18,11 @@
 package com.nimbusds.openid.connect.sdk.federation.policy.operations;
 
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.OperationName;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyOperation;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
 
@@ -159,38 +159,29 @@ public class DefaultPolicyOperationCombinationValidator implements PolicyOperati
 	// See https://bitbucket.org/openid/connect/issues/1163/federation-metadata-policy-current-spec
 	private static List<PolicyOperation> validateCombinationsOfValue(final List<PolicyOperation> ops)
 		throws PolicyViolationException {
-		// Can be combined with one_of, subset_of and superset_of. Here the order
-		// matters. If value appear in a superiors policy statement then the others
-		// MUST be ignored. If value are defined by the subordinate then it MUST be
-		// a subset of subset_of, superset of superset_of and one of one_of.
+		// https://bitbucket.org/openid/connect/issues/1163/federation-metadata-policy-current-spec
+		// value must not be combined with other policy types, raise an error if this condition is detected.
 		ValueOperation o = Utils.getPolicyOperationByType(ops, ValueOperation.class);
 		if (o == null) {
 			return ops;
 		}
 		
-		List<PolicyOperation> updatedOps = new LinkedList<>();
-		
-		// Remove remaining policy ops
-		Iterator<PolicyOperation> it = ops.listIterator();
-		while (it.hasNext()) {
-			PolicyOperation currentOp = it.next();
-			updatedOps.add(currentOp);
-			if (currentOp instanceof ValueOperation) {
-				// Skip remaining policy ops
-				while (it.hasNext()) {
-					it.next();
-				}
+		List<OperationName> violating = new LinkedList<>();
+		for (PolicyOperation op: ops) {
+			if (op instanceof ValueOperation) {
+				// ok
+			} else if (op instanceof EssentialOperation) {
+				// ok
+			} else {
+				violating.add(op.getOperationName());
 			}
 		}
 		
-		if (o.getStringListConfiguration() != null) {
-			ensureSatisfiedBySubsetOf(updatedOps, o.getStringListConfiguration());
-			ensureSatisfiedBySupersetOf(updatedOps, o.getStringListConfiguration());
-		} else if (o.getStringConfiguration() != null) {
-			ensureSatisfiedByOneOf(updatedOps, o.getStringConfiguration());
+		if (! violating.isEmpty()) {
+			throw new PolicyViolationException("Policy operation " + ValueOperation.NAME + " must not be combined with: " + violating);
 		}
 		
-		return updatedOps;
+		return ops;
 	}
 	
 	

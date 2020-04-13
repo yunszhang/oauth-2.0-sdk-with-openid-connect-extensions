@@ -21,9 +21,9 @@ package com.nimbusds.openid.connect.sdk.federation.policy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
@@ -65,24 +65,27 @@ public class MetadataPolicyEntryTest extends TestCase {
 			 "\"superset_of\": [\"openid\"]," +
 			 "\"default\": [\"openid\", \"eduperson\"]}";
 		
-		Map<String,Object> spec = JSONObjectUtils.parseKeepingOrder(json);
+		JSONObject spec = JSONObjectUtils.parse(json);
 		
 		MetadataPolicyEntry policyEntry = MetadataPolicyEntry.parse("scope", spec);
 		
 		assertEquals("scope", policyEntry.getKey());
 		
-		
-		PolicyOperation op = policyEntry.getPolicyOperations().get(0);
-		SubsetOfOperation subsetOfOperation = (SubsetOfOperation)op;
-		assertEquals(Arrays.asList("openid", "eduperson", "phone"), subsetOfOperation.getStringListConfiguration());
-		
-		op = policyEntry.getPolicyOperations().get(1);
-		SupersetOfOperation supersetOfOperation = (SupersetOfOperation)op;
-		assertEquals(Collections.singletonList("openid"), supersetOfOperation.getStringListConfiguration());
-		
-		op = policyEntry.getPolicyOperations().get(2);
-		DefaultOperation defaultOperation = (DefaultOperation)op;
-		assertEquals(Arrays.asList("openid", "eduperson"), defaultOperation.getStringListConfiguration());
+		for (PolicyOperation op: policyEntry.getPolicyOperations()) {
+			
+			if (op instanceof SubsetOfOperation) {
+				SubsetOfOperation subsetOfOperation = (SubsetOfOperation) op;
+				assertEquals(Arrays.asList("openid", "eduperson", "phone"), subsetOfOperation.getStringListConfiguration());
+			} else if (op instanceof SupersetOfOperation) {
+				SupersetOfOperation supersetOfOperation = (SupersetOfOperation) op;
+				assertEquals(Collections.singletonList("openid"), supersetOfOperation.getStringListConfiguration());
+			} else if (op instanceof DefaultOperation) {
+				DefaultOperation defaultOperation = (DefaultOperation) op;
+				assertEquals(Arrays.asList("openid", "eduperson"), defaultOperation.getStringListConfiguration());
+			} else {
+				fail();
+			}
+		}
 		
 		assertEquals(3, policyEntry.getValue().size());
 	}

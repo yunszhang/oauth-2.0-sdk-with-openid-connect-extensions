@@ -66,7 +66,7 @@ public class FetchEntityStatementRequestTest extends TestCase {
 		URI endpoint = new URI("https://openid.sunet.se/federation_api_endpoint");
 		Issuer issuer = new Issuer("https://openid.sunet.se");
 		Subject subject = new Subject("https://https://ntnu.andreas.labs.uninett.no/");
-		Audience audience = new Audience("123");
+		Audience audience = new Audience("https://rp.example.com");
 		FetchEntityStatementRequest request = new FetchEntityStatementRequest(endpoint, issuer, subject, audience);
 		assertEquals(endpoint, request.getEndpointURI());
 		assertEquals(OperationType.FETCH, request.getOperationType());
@@ -105,7 +105,7 @@ public class FetchEntityStatementRequestTest extends TestCase {
 		URI endpoint = new URI("https://openid.sunet.se/federation_api_endpoint");
 		EntityID issuer = new EntityID("https://openid.sunet.se");
 		EntityID subject = new EntityID("https://https://ntnu.andreas.labs.uninett.no/");
-		EntityID audience = new EntityID("123");
+		EntityID audience = new EntityID("https://rp.example.com");
 		FetchEntityStatementRequest request = new FetchEntityStatementRequest(endpoint, issuer, subject, audience);
 		assertEquals(endpoint, request.getEndpointURI());
 		assertEquals(OperationType.FETCH, request.getOperationType());

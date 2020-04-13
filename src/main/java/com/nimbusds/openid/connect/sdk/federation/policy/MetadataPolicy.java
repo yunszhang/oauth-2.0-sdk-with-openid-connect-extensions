@@ -40,15 +40,19 @@ import com.nimbusds.openid.connect.sdk.federation.policy.operations.PolicyOperat
  *
  * <pre>
  * {
- *     "scopes": {
- *         "subset_of": ["openid", "eduperson", "phone"],
- *         "superset_of": ["openid"],
- *         "default": ["openid", "eduperson"]},
- *     "id_token_signed_response_alg": {
- *         "one_of": ["ES256", "ES384", "ES512"]},
- *     "contacts": {
- *         "add": "helpdesk@federation.example.org"},
- *     "application_type": {"value": "web"}
+ *   "scopes" : {
+ *       "subset_of"   : [ "openid", "eduperson", "phone" ],
+ *       "superset_of" : [ "openid" ],
+ *       "default"     : [ "openid", "eduperson" ]
+ *   },
+ *   "id_token_signed_response_alg" : {
+ *       "one_of" : [ "ES256", "ES384", "ES512" ]
+ *   },
+ *   "contacts" : {
+ *       "add" : "helpdesk@federation.example.org"
+ *   },
+ *   "application_type" : { "value": "web"
+ *   }
  * }
  * </pre>
  *
@@ -204,7 +208,7 @@ public class MetadataPolicy implements JSONAware {
 	 * @throws ParseException           On JSON parsing exception.
 	 * @throws PolicyViolationException On a policy violation.
 	 */
-	public static MetadataPolicy parse(final Map<String,Object> policySpec,
+	public static MetadataPolicy parse(final JSONObject policySpec,
 					   final PolicyOperationFactory factory,
 					   final PolicyOperationCombinationValidator combinationValidator)
 		throws ParseException, PolicyViolationException {
@@ -212,28 +216,11 @@ public class MetadataPolicy implements JSONAware {
 		MetadataPolicy metadataPolicy = new MetadataPolicy();
 		
 		for (String parameterName: policySpec.keySet()) {
-			Map<String,Object> entrySpec = getJSONObject(policySpec, parameterName);
+			JSONObject entrySpec = JSONObjectUtils.getJSONObject(policySpec, parameterName);
 			metadataPolicy.put(MetadataPolicyEntry.parse(parameterName, entrySpec, factory, combinationValidator));
 		}
 		
 		return metadataPolicy;
-	}
-	
-	
-	private static Map<String,Object> getJSONObject(final Map<String,Object> o, final String key)
-		throws ParseException {
-		
-		Object value = o.get(key);
-		
-		if (value == null) {
-			throw new ParseException("JSON object member with key \"" + key + "\" has null value");
-		}
-		
-		if (value instanceof Map) {
-			return (Map<String,Object>)value;
-		}
-		
-		throw new ParseException("Unexpected type of JSON object member with key \"" + key + "\"");
 	}
 	
 	
@@ -252,7 +239,7 @@ public class MetadataPolicy implements JSONAware {
 	 * @throws ParseException           On JSON parsing exception.
 	 * @throws PolicyViolationException On a policy violation.
 	 */
-	public static MetadataPolicy parse(final Map<String,Object> policySpec)
+	public static MetadataPolicy parse(final JSONObject policySpec)
 		throws ParseException, PolicyViolationException {
 		
 		return parse(policySpec,
@@ -283,7 +270,7 @@ public class MetadataPolicy implements JSONAware {
 					   final PolicyOperationCombinationValidator combinationValidator)
 		throws ParseException, PolicyViolationException {
 		
-		return parse(JSONObjectUtils.parseKeepingOrder(policySpec), factory, combinationValidator);
+		return parse(JSONObjectUtils.parse(policySpec), factory, combinationValidator);
 	}
 	
 	

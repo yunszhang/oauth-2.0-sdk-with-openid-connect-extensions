@@ -202,7 +202,7 @@ public class DefaultPolicyOperationCombinationValidatorTest extends TestCase {
 	}
 	
 	
-	public void testValue() throws PolicyViolationException {
+	public void testValueWithEssential() throws PolicyViolationException {
 		//        "essential": true,
 		//        "value": "RS256"
 		
@@ -214,102 +214,6 @@ public class DefaultPolicyOperationCombinationValidatorTest extends TestCase {
 		
 		List<PolicyOperation> policyOperations = new LinkedList<>();
 		policyOperations.add(essentialOperation);
-		policyOperations.add(valueOperation);
-		
-		assertEquals(policyOperations, new DefaultPolicyOperationCombinationValidator().validate(policyOperations));
-	}
-	
-	
-	public void testValue_removeRemaining() throws PolicyViolationException {
-		//        "value": "RS256",
-		//        "one_of": ["RS256", "RS384", "RS512"],
-		
-		ValueOperation valueOperation = new ValueOperation();
-		valueOperation.configure("RS256");
-		
-		OneOfOperation oneOfOperation = new OneOfOperation();
-		oneOfOperation.configure(Arrays.asList("RS256", "RS384", "RS512"));
-		
-		List<PolicyOperation> policyOperations = new LinkedList<>();
-		policyOperations.add(valueOperation);
-		policyOperations.add(oneOfOperation);
-		
-		assertEquals(Collections.singletonList(valueOperation), new DefaultPolicyOperationCombinationValidator().validate(policyOperations));
-	}
-	
-	
-	public void testValue_removeRemainingTwo() throws PolicyViolationException {
-		//        "value": "RS256",
-		//        "one_of": ["RS256", "RS384", "RS512"],
-		//        "essential": true
-		
-		ValueOperation valueOperation = new ValueOperation();
-		valueOperation.configure("RS256");
-		
-		OneOfOperation oneOfOperation = new OneOfOperation();
-		oneOfOperation.configure(Arrays.asList("RS256", "RS384", "RS512"));
-		
-		EssentialOperation essentialOperation = new EssentialOperation();
-		essentialOperation.configure(true);
-		
-		List<PolicyOperation> policyOperations = new LinkedList<>();
-		policyOperations.add(valueOperation);
-		policyOperations.add(oneOfOperation);
-		policyOperations.add(essentialOperation);
-		
-		assertEquals(Collections.singletonList(valueOperation), new DefaultPolicyOperationCombinationValidator().validate(policyOperations));
-	}
-	
-	
-	public void testValue_removeRemaining_essentialCombinesWithAll() throws PolicyViolationException {
-		//        "essential": true,
-		//        "value": "RS256",
-		//        "one_of": ["RS256", "RS384", "RS512"],
-		
-		EssentialOperation essentialOperation = new EssentialOperation();
-		essentialOperation.configure(true);
-		
-		ValueOperation valueOperation = new ValueOperation();
-		valueOperation.configure("RS256");
-		
-		OneOfOperation oneOfOperation = new OneOfOperation();
-		oneOfOperation.configure(Arrays.asList("RS256", "RS384", "RS512"));
-		
-		List<PolicyOperation> policyOperations = new LinkedList<>();
-		policyOperations.add(essentialOperation);
-		policyOperations.add(valueOperation);
-		policyOperations.add(oneOfOperation);
-		
-		assertEquals(Arrays.asList(essentialOperation, valueOperation), new DefaultPolicyOperationCombinationValidator().validate(policyOperations));
-	}
-	
-	
-	public void testValueWithSuperiorSubsetOf() throws PolicyViolationException {
-		
-		SubsetOfOperation subsetOfOperation = new SubsetOfOperation();
-		subsetOfOperation.configure(Arrays.asList("openid", "email", "profile"));
-		
-		ValueOperation valueOperation = new ValueOperation();
-		valueOperation.configure(Arrays.asList("openid", "email"));
-		
-		List<PolicyOperation> policyOperations = new LinkedList<>();
-		policyOperations.add(subsetOfOperation);
-		policyOperations.add(valueOperation);
-		
-		assertEquals(policyOperations, new DefaultPolicyOperationCombinationValidator().validate(policyOperations));
-	}
-	
-	
-	public void testValueWithSuperiorSupersetOf() throws PolicyViolationException {
-		
-		SupersetOfOperation supersetOfOperation = new SupersetOfOperation();
-		supersetOfOperation.configure(Collections.singletonList("openid"));
-		
-		ValueOperation valueOperation = new ValueOperation();
-		valueOperation.configure(Arrays.asList("openid", "email"));
-		
-		List<PolicyOperation> policyOperations = new LinkedList<>();
-		policyOperations.add(supersetOfOperation);
 		policyOperations.add(valueOperation);
 		
 		assertEquals(policyOperations, new DefaultPolicyOperationCombinationValidator().validate(policyOperations));
@@ -332,7 +236,7 @@ public class DefaultPolicyOperationCombinationValidatorTest extends TestCase {
 			new DefaultPolicyOperationCombinationValidator().validate(policyOperations);
 			fail();
 		} catch (PolicyViolationException e) {
-			assertEquals("Not in subset_of [openid, email, profile]: [address]", e.getMessage());
+			assertEquals("Policy operation value must not be combined with: [subset_of]", e.getMessage());
 		}
 	}
 	
@@ -353,15 +257,12 @@ public class DefaultPolicyOperationCombinationValidatorTest extends TestCase {
 			new DefaultPolicyOperationCombinationValidator().validate(policyOperations);
 			fail();
 		} catch (PolicyViolationException e) {
-			assertEquals("Not in superset_of [openid]: [email]", e.getMessage());
+			assertEquals("Policy operation value must not be combined with: [superset_of]", e.getMessage());
 		}
 	}
 	
 	
-	
-	
-	
-	public void testValueWithOneOf() throws PolicyViolationException {
+	public void testValueWithOneOf_violation() {
 		//        "one_of": ["RS256", "RS384", "RS512"]
 		//        "value": "RS256"
 		
@@ -375,29 +276,11 @@ public class DefaultPolicyOperationCombinationValidatorTest extends TestCase {
 		policyOperations.add(oneOfOperation);
 		policyOperations.add(valueOperation);
 		
-		assertEquals(policyOperations, new DefaultPolicyOperationCombinationValidator().validate(policyOperations));
-	}
-	
-	
-	public void testValueWithOneOf_violation() {
-		//        "one_of": ["RS256", "RS384", "RS512"]
-		//        "value": "RS256"
-		
-		OneOfOperation oneOfOperation = new OneOfOperation();
-		oneOfOperation.configure(Arrays.asList("RS256", "RS384", "RS512"));
-		
-		ValueOperation valueOperation = new ValueOperation();
-		valueOperation.configure("ES256");
-		
-		List<PolicyOperation> policyOperations = new LinkedList<>();
-		policyOperations.add(oneOfOperation);
-		policyOperations.add(valueOperation);
-		
 		try {
 			new DefaultPolicyOperationCombinationValidator().validate(policyOperations);
 			fail();
 		} catch (PolicyViolationException e) {
-			assertEquals("Not in one_of [RS256, RS384, RS512]: ES256", e.getMessage());
+			assertEquals("Policy operation value must not be combined with: [one_of]", e.getMessage());
 		}
 	}
 }

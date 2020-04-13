@@ -18,10 +18,11 @@
 package com.nimbusds.openid.connect.sdk.federation.policy;
 
 
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
@@ -167,19 +168,19 @@ public class MetadataPolicyEntry implements Map.Entry<String, List<PolicyOperati
 	 *
 	 * @return The JSON object keeping the ordering of the members.
 	 */
-	public LinkedHashMap<String,Object> toJSONObject() {
+	public JSONObject toJSONObject() {
 		
 		if (CollectionUtils.isEmpty(getValue())) {
 			return null;
 		}
 		
-		LinkedHashMap<String,Object> orderedMap = new LinkedHashMap<>();
+		JSONObject jsonObject = new JSONObject();
 		for (PolicyOperation operation: getValue()) {
 			// E.g. "subset_of": ["code", "code token", "code id_token"]}
-			orderedMap.put(operation.getOperationName().getValue(), configToJSONEntity(operation));
+			jsonObject.put(operation.getOperationName().getValue(), configToJSONEntity(operation));
 		}
 		
-		return orderedMap;
+		return jsonObject;
 	}
 	
 	
@@ -230,7 +231,7 @@ public class MetadataPolicyEntry implements Map.Entry<String, List<PolicyOperati
 	 * @throws PolicyViolationException On a policy violation.
 	 */
 	public static MetadataPolicyEntry parse(final String parameterName,
-						final Map<String,Object> entrySpec,
+						final JSONObject entrySpec,
 						final PolicyOperationFactory factory,
 						final PolicyOperationCombinationValidator combinationValidator)
 		throws ParseException, PolicyViolationException {
@@ -266,7 +267,7 @@ public class MetadataPolicyEntry implements Map.Entry<String, List<PolicyOperati
 	 * @throws PolicyViolationException On a policy violation.
 	 */
 	public static MetadataPolicyEntry parse(final String parameterName,
-						final Map<String,Object> entrySpec)
+						final JSONObject entrySpec)
 		throws ParseException, PolicyViolationException {
 		
 		return parse(parameterName, entrySpec, DEFAULT_POLICY_OPERATION_FACTORY, DEFAULT_POLICY_COMBINATION_VALIDATOR);

@@ -24,6 +24,7 @@ import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyOperation;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
 import com.nimbusds.openid.connect.sdk.federation.policy.operations.*;
@@ -115,26 +116,36 @@ public class MetadataPolicyTest extends TestCase {
 		
 		MetadataPolicy metadataPolicy = MetadataPolicy.parse(json);
 		
-		Iterator<MetadataPolicyEntry> it = metadataPolicy.entrySet().iterator();
-		
 		// scopes
-		MetadataPolicyEntry en = it.next();
+		MetadataPolicyEntry en = metadataPolicy.getEntry("scopes");
 		assertEquals("scopes", en.getParameterName());
 		List<PolicyOperation> ops = en.getPolicyOperations();
-		
-		SubsetOfOperation subsetOfOperation = (SubsetOfOperation) ops.get(0);
-		assertEquals(Arrays.asList("openid", "eduperson", "phone"), subsetOfOperation.getStringListConfiguration());
-		
-		SupersetOfOperation supersetOfOperation = (SupersetOfOperation) ops.get(1);
-		assertEquals(Collections.singletonList("openid"), supersetOfOperation.getStringListConfiguration());
-		
-		DefaultOperation defaultOperation = (DefaultOperation) ops.get(2);
-		assertEquals(Arrays.asList("openid", "eduperson"), defaultOperation.getStringListConfiguration());
-		
 		assertEquals(3, ops.size());
 		
+		for (PolicyOperation op: ops) {
+			
+			if (op instanceof SubsetOfOperation) {
+				
+				SubsetOfOperation subsetOfOperation = (SubsetOfOperation)op;
+				assertEquals(Arrays.asList("openid", "eduperson", "phone"), subsetOfOperation.getStringListConfiguration());
+				
+			} else if (op instanceof SupersetOfOperation) {
+				
+				SupersetOfOperation supersetOfOperation = (SupersetOfOperation)op;
+				assertEquals(Collections.singletonList("openid"), supersetOfOperation.getStringListConfiguration());
+				
+			} else if (op instanceof DefaultOperation) {
+				
+				DefaultOperation defaultOperation = (DefaultOperation)op;
+				assertEquals(Arrays.asList("openid", "eduperson"), defaultOperation.getStringListConfiguration());
+				
+			} else {
+				fail();
+			}
+		}
+		
 		// id_token_signed_response_alg
-		en = it.next();
+		en = metadataPolicy.getEntry("id_token_signed_response_alg");
 		assertEquals("id_token_signed_response_alg", en.getParameterName());
 		ops = en.getPolicyOperations();
 		
@@ -144,7 +155,7 @@ public class MetadataPolicyTest extends TestCase {
 		assertEquals(1, ops.size());
 		
 		// contacts
-		en = it.next();
+		en = metadataPolicy.getEntry("contacts");
 		assertEquals("contacts", en.getParameterName());
 		ops = en.getPolicyOperations();
 		
@@ -154,7 +165,7 @@ public class MetadataPolicyTest extends TestCase {
 		assertEquals(1, ops.size());
 		
 		// application_type
-		en = it.next();
+		en = metadataPolicy.getEntry("application_type");
 		assertEquals("application_type", en.getParameterName());
 		ops = en.getPolicyOperations();
 		
@@ -163,7 +174,17 @@ public class MetadataPolicyTest extends TestCase {
 		
 		assertEquals(1, ops.size());
 		
+		// Iterator test
+		Iterator<MetadataPolicyEntry> it = metadataPolicy.entrySet().iterator();
+		
+		Set<String> paramNamesToIterate = new HashSet<>(Arrays.asList("scopes", "id_token_signed_response_alg", "contacts", "application_type"));
+		while (it.hasNext()) {
+			MetadataPolicyEntry entry = it.next();
+			paramNamesToIterate.remove(entry.getParameterName());
+		}
+		assertTrue(paramNamesToIterate.isEmpty());
+		
 		// Back to JSON object
-		assertEquals(json, metadataPolicy.toJSONString());
+		assertEquals(JSONObjectUtils.parse(json), metadataPolicy.toJSONObject());
 	}
 }
