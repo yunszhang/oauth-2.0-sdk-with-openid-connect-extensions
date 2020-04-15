@@ -81,10 +81,10 @@ public final class TrustChainConstraints implements JSONAware {
 	 * @param maxPathLength     The maximum number of entities between this
 	 *                          and the last one in the chain, -1 if not
 	 *                          specified.
-	 * @param permittedEntities The permitted subordinate entities,
-	 *                          {@code null} if not specified.
-	 * @param excludedEntities  The excluded subordinate entities,
-	 *                          {@code null} if not specified.
+	 * @param permittedEntities The permitted entities, {@code null} if not
+	 *                          specified.
+	 * @param excludedEntities  The excluded entities, {@code null} if not
+	 *                          specified.
 	 */
 	public TrustChainConstraints(final int maxPathLength, final List<EntityIDConstraint> permittedEntities, final List<EntityIDConstraint> excludedEntities) {
 		this.maxPathLength = maxPathLength;
@@ -106,11 +106,9 @@ public final class TrustChainConstraints implements JSONAware {
 	
 	
 	/**
-	 * Returns the permitted subordinate entities, {@code null} if not
-	 * specified.
+	 * Returns the permitted entities, {@code null} if not specified.
 	 *
-	 * @return The permitted subordinate entities, {@code null} if not
-	 *         specified.
+	 * @return The permitted entities, {@code null} if not specified.
 	 */
 	public List<EntityIDConstraint> getPermittedEntities() {
 		return permittedEntities;
@@ -118,11 +116,9 @@ public final class TrustChainConstraints implements JSONAware {
 	
 	
 	/**
-	 * Returns the excluded subordinate entities, {@code null} if not
-	 * specified.
+	 * Returns the excluded entities, {@code null} if not specified.
 	 *
-	 * @return The excluded subordinate entities, {@code null} if not
-	 *         specified.
+	 * @return The excluded entities, {@code null} if not specified.
 	 */
 	public List<EntityIDConstraint> getExcludedEntities() {
 		return excludedEntities;
