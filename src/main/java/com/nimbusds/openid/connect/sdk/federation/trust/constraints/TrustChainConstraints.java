@@ -18,6 +18,7 @@
 package com.nimbusds.openid.connect.sdk.federation.trust.constraints;
 
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -76,6 +77,14 @@ public final class TrustChainConstraints implements JSONAware {
 	
 	
 	/**
+	 * Creates a new no constraints instance.
+	 */
+	public TrustChainConstraints() {
+		this(-1, null, null);
+	}
+	
+	
+	/**
 	 * Creates a new trust chain constraints instance.
 	 *
 	 * @param maxPathLength     The maximum number of entities between this
@@ -88,8 +97,8 @@ public final class TrustChainConstraints implements JSONAware {
 	 */
 	public TrustChainConstraints(final int maxPathLength, final List<EntityIDConstraint> permittedEntities, final List<EntityIDConstraint> excludedEntities) {
 		this.maxPathLength = maxPathLength;
-		this.permittedEntities = permittedEntities;
-		this.excludedEntities = excludedEntities;
+		this.permittedEntities = permittedEntities != null ? permittedEntities : Collections.<EntityIDConstraint>emptyList();
+		this.excludedEntities = excludedEntities != null ? excludedEntities : Collections.<EntityIDConstraint>emptyList();
 	}
 	
 	
@@ -106,9 +115,9 @@ public final class TrustChainConstraints implements JSONAware {
 	
 	
 	/**
-	 * Returns the permitted entities, {@code null} if not specified.
+	 * Returns the permitted entities.
 	 *
-	 * @return The permitted entities, {@code null} if not specified.
+	 * @return The permitted entities, empty list if not specified.
 	 */
 	public List<EntityIDConstraint> getPermittedEntities() {
 		return permittedEntities;
@@ -116,9 +125,9 @@ public final class TrustChainConstraints implements JSONAware {
 	
 	
 	/**
-	 * Returns the excluded entities, {@code null} if not specified.
+	 * Returns the excluded entities.
 	 *
-	 * @return The excluded entities, {@code null} if not specified.
+	 * @return The excluded entities, empty list if not specified.
 	 */
 	public List<EntityIDConstraint> getExcludedEntities() {
 		return excludedEntities;

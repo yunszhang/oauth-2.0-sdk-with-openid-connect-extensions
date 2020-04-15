@@ -34,22 +34,26 @@ import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 public class TrustChainConstraintsTest extends TestCase {
 	
 	
-	public void testEmpty() throws ParseException {
+	public void testDefaultConstructorSameAsEmpty() throws ParseException {
 		
-		TrustChainConstraints c = new TrustChainConstraints(-1, null,  null);
-		assertEquals(-1, c.getMaxPathLength());
-		assertNull(c.getPermittedEntities());
-		assertNull(c.getExcludedEntities());
-		
-		JSONObject jsonObject = c.toJSONObject();
-		assertTrue(jsonObject.isEmpty());
-		String json = c.toJSONString();
-		assertEquals("{}", json);
-		
-		c = TrustChainConstraints.parse(jsonObject);
-		assertEquals(-1, c.getMaxPathLength());
-		assertNull(c.getPermittedEntities());
-		assertNull(c.getExcludedEntities());
+		for (TrustChainConstraints c: Arrays.asList(
+			new TrustChainConstraints(),
+			new TrustChainConstraints(-1, null,  null))) {
+			
+			assertEquals(-1, c.getMaxPathLength());
+			assertTrue(c.getPermittedEntities().isEmpty());
+			assertTrue(c.getExcludedEntities().isEmpty());
+			
+			JSONObject jsonObject = c.toJSONObject();
+			assertTrue(jsonObject.isEmpty());
+			String json = c.toJSONString();
+			assertEquals("{}", json);
+			
+			c = TrustChainConstraints.parse(jsonObject);
+			assertEquals(-1, c.getMaxPathLength());
+			assertTrue(c.getPermittedEntities().isEmpty());
+			assertTrue(c.getExcludedEntities().isEmpty());
+		}
 	}
 	
 	
@@ -95,8 +99,8 @@ public class TrustChainConstraintsTest extends TestCase {
 		
 		TrustChainConstraints c = TrustChainConstraints.parse(jsonObject);
 		assertEquals(10, c.getMaxPathLength());
-		assertNull(c.getPermittedEntities());
-		assertNull(c.getExcludedEntities());
+		assertTrue(c.getPermittedEntities().isEmpty());
+		assertTrue(c.getExcludedEntities().isEmpty());
 	}
 	
 	
@@ -108,8 +112,8 @@ public class TrustChainConstraintsTest extends TestCase {
 		
 		TrustChainConstraints c = TrustChainConstraints.parse(jsonObject);
 		assertEquals(10, c.getMaxPathLength());
-		assertNull(c.getPermittedEntities());
-		assertNull(c.getExcludedEntities());
+		assertTrue(c.getPermittedEntities().isEmpty());
+		assertTrue(c.getExcludedEntities().isEmpty());
 	}
 	
 	
@@ -125,8 +129,8 @@ public class TrustChainConstraintsTest extends TestCase {
 		
 		TrustChainConstraints c = TrustChainConstraints.parse(jsonObject);
 		assertEquals(10, c.getMaxPathLength());
-		assertNull(c.getPermittedEntities());
-		assertNull(c.getExcludedEntities());
+		assertTrue(c.getPermittedEntities().isEmpty());
+		assertTrue(c.getExcludedEntities().isEmpty());
 	}
 	
 	
