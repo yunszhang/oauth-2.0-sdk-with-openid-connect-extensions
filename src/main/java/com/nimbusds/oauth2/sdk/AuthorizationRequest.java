@@ -68,7 +68,7 @@ import com.nimbusds.openid.connect.sdk.Prompt;
  *     <li>OAuth 2.0 Incremental Authorization
  *         (draft-ietf-oauth-incremental-authz-00)
  *     <li>The OAuth 2.0 Authorization Framework: JWT Secured Authorization
- *         Request (JAR) draft-ietf-oauth-jwsreq-17
+ *         Request (JAR) draft-ietf-oauth-jwsreq-21
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
  * </ul>
@@ -210,7 +210,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		/**
 		 * The client identifier (required unless in JAR).
 		 */
-		private ClientID clientID;
+		private final ClientID clientID;
 
 
 		/**
@@ -313,32 +313,47 @@ public class AuthorizationRequest extends AbstractRequest {
 		
 		
 		/**
-		 * Creates a new JWT secured authorisation request builder.
+		 * Creates a new JWT secured authorisation request (JAR)
+		 * builder.
 		 *
 		 * @param requestObject The request object. Must not be
+		 *                      {@code null}.'
+		 * @param clientID      The client ID. Must not be
 		 *                      {@code null}.
 		 */
-		public Builder(final JWT requestObject) {
+		public Builder(final JWT requestObject, final ClientID clientID) {
 			
 			if (requestObject == null)
 				throw new IllegalArgumentException("The request object must not be null");
 			
 			this.requestObject = requestObject;
+			
+			if (clientID == null)
+				throw new IllegalArgumentException("The client ID must not be null");
+			
+			this.clientID = clientID;
 		}
 		
 		
 		/**
-		 * Creates a new JWT secured authorisation request builder.
+		 * Creates a new JWT secured authorisation request (JAR)
+		 * builder.
 		 *
 		 * @param requestURI The request object URI. Must not be
 		 *                   {@code null}.
+		 * @param clientID   The client ID. Must not be {@code null}.
 		 */
-		public Builder(final URI requestURI) {
+		public Builder(final URI requestURI, final ClientID clientID) {
 			
 			if (requestURI == null)
 				throw new IllegalArgumentException("The request URI must not be null");
 			
 			this.requestURI = requestURI;
+			
+			if (clientID == null)
+				throw new IllegalArgumentException("The client ID must not be null");
+			
+			this.clientID = clientID;
 		}
 		
 		
@@ -383,25 +398,6 @@ public class AuthorizationRequest extends AbstractRequest {
 				throw new IllegalArgumentException("The response type must not be null");
 			
 			this.rt = rt;
-			return this;
-		}
-		
-		
-		/**
-		 * Sets the client identifier. Corresponds to the
-		 * {@code client_id} parameter.
-		 *
-		 * @param clientID The client identifier. Must not be
-		 *                 {@code null}.
-		 *
-		 * @return This builder.
-		 */
-		public Builder clientID(final ClientID clientID) {
-			
-			if (clientID == null)
-				throw new IllegalArgumentException("The client ID must not be null");
-			
-			this.clientID = clientID;
 			return this;
 		}
 
@@ -799,7 +795,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		this.rm = rm;
 
 
-		if (clientID == null && requestObject == null && requestURI == null)
+		if (clientID == null)
 			throw new IllegalArgumentException("The client ID must not be null");
 
 		this.clientID = clientID;
@@ -1083,11 +1079,10 @@ public class AuthorizationRequest extends AbstractRequest {
 		// Put custom params first, so they may be overwritten by std params
 		Map<String, List<String>> params = new LinkedHashMap<>(customParams);
 		
+		params.put("client_id", Collections.singletonList(clientID.getValue()));
+		
 		if (rt != null)
 			params.put("response_type", Collections.singletonList(rt.toString()));
-		
-		if (clientID != null)
-			params.put("client_id", Collections.singletonList(clientID.getValue()));
 
 		if (rm != null)
 			params.put("response_mode", Collections.singletonList(rm.getValue()));
@@ -1325,7 +1320,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		
 		// Parse response_mode, response_type, client_id, redirect_uri and state first,
 		// needed if parsing results in a error response
-		ClientID clientID = null;
+		final ClientID clientID;
 		URI redirectURI = null;
 		State state = State.parse(MultivaluedMapUtils.getFirstValue(params, "state"));
 		ResponseMode rm = null;
@@ -1337,10 +1332,14 @@ public class AuthorizationRequest extends AbstractRequest {
 			rm = new ResponseMode(v);
 		}
 		
-		// Mandatory client_id, unless in JAR
+		// Mandatory client_id
 		v = MultivaluedMapUtils.getFirstValue(params, "client_id");
-		if (StringUtils.isNotBlank(v))
-			clientID = new ClientID(v);
+		if (StringUtils.isBlank(v)) {
+			// No automatic redirection https://tools.ietf.org/html/rfc6749#section-4.1.2.1
+			String msg = "Missing \"client_id\" parameter";
+			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
+		}
+		clientID = new ClientID(v);
 		
 		// Optional redirect_uri
 		v = MultivaluedMapUtils.getFirstValue(params, "redirect_uri");
@@ -1401,13 +1400,6 @@ public class AuthorizationRequest extends AbstractRequest {
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 					clientID, redirectURI, ResponseMode.resolve(rm, rt), state, e);
 			}
-		}
-
-		// Client ID mandatory, unless in JAR
-		if (clientID == null && requestObject == null && requestURI == null) {
-			// No automatic redirection https://tools.ietf.org/html/rfc6749#section-4.1.2.1
-			String msg = "Missing \"client_id\" parameter";
-			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 		}
 
 		// Response type mandatory, unless in JAR

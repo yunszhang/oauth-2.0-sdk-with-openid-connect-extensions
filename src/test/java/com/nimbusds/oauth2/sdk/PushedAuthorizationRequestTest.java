@@ -294,7 +294,8 @@ public class PushedAuthorizationRequestTest extends TestCase {
 		Secret clientSecret = new Secret();
 		ClientAuthentication clientAuth = new ClientSecretBasic(clientID, clientSecret);
 		AuthorizationRequest authzRequest = new AuthorizationRequest.Builder(
-			URI.create("https://example.com/eimeeph8"))
+			URI.create("https://example.com/eimeeph8"),
+			clientID)
 			.build();
 		
 		try {
@@ -320,7 +321,8 @@ public class PushedAuthorizationRequestTest extends TestCase {
 		Secret clientSecret = new Secret();
 		ClientAuthentication clientAuth = new ClientSecretBasic(clientID, clientSecret);
 		AuthorizationRequest authzRequest = new AuthorizationRequest.Builder(
-			URI.create("https://example.com/eimeeph8"))
+			URI.create("https://example.com/eimeeph8"),
+			clientID)
 			.build();
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, endpoint.toURL());

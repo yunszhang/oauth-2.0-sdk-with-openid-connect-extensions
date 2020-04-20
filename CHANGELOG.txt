@@ -1290,3 +1290,8 @@ version 7.3 (2020-03-23)
       must be false, for request_uri_parameter_supported true (iss #293).
     * Don't output default ClientMetadata value for
       tls_client_certificate_bound_access_tokens.
+
+
+version 7.4 (2020-04-20)
+    * Updates JAR support in AuthorizationRequest and AuthenticationRequest to
+      draft-ietf-oauth-jwsreq-21.

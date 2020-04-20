@@ -65,7 +65,7 @@ import com.nimbusds.openid.connect.sdk.claims.ACR;
  *     <li>Proof Key for Code Exchange by OAuth Public Clients (RFC 7636).
  *     <li>Resource Indicators for OAuth 2.0 (RFC 8707)
  *     <li>The OAuth 2.0 Authorization Framework: JWT Secured Authorization
- *         Request (JAR) draft-ietf-oauth-jwsreq-17
+ *         Request (JAR) draft-ietf-oauth-jwsreq-21
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
  *     <li>OpenID Connect for Identity Assurance 1.0, section 8.
@@ -202,7 +202,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		/**
 		 * The client identifier (required unless in JAR).
 		 */
-		private ClientID clientID;
+		private final ClientID clientID;
 
 
 		/**
@@ -400,33 +400,46 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 		/**
 		 * Creates a new JWT secured OpenID Connect authentication
-		 * request builder.
+		 * request (JAR) builder.
 		 *
 		 * @param requestObject The request object. Must not be
 		 *                      {@code null}.
+		 * @param clientID      The client ID. Must not be
+		 *                      {@code null}.
 		 */
-		public Builder(final JWT requestObject) {
+		public Builder(final JWT requestObject, final ClientID clientID) {
 			
 			if (requestObject == null)
 				throw new IllegalArgumentException("The request object must not be null");
 
 			this.requestObject = requestObject;
+			
+			if (clientID == null)
+				throw new IllegalArgumentException("The client ID must not be null");
+			
+			this.clientID = clientID;
 		}
 
 
 		/**
 		 * Creates a new JWT secured OpenID Connect authentication
-		 * request builder.
+		 * request (JAR) builder.
 		 *
 		 * @param requestURI The request object URI. Must not be
 		 *                   {@code null}.
+		 * @param clientID   The client ID. Must not be {@code null}.
 		 */
-		public Builder(final URI requestURI) {
+		public Builder(final URI requestURI, final ClientID clientID) {
 			
 			if (requestURI == null)
 				throw new IllegalArgumentException("The request URI must not be null");
 
 			this.requestURI = requestURI;
+			
+			if (clientID == null)
+				throw new IllegalArgumentException("The client ID must not be null");
+			
+			this.clientID = clientID;
 		}
 		
 		
@@ -501,25 +514,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				throw new IllegalArgumentException("The scope must include an \"openid\" value");
 			
 			this.scope = scope;
-			return this;
-		}
-		
-		
-		/**
-		 * Sets the client identifier. Corresponds to the
-		 * {@code client_id} parameter.
-		 *
-		 * @param clientID The client identifier. Must not be
-		 *                 {@code null}.
-		 *
-		 * @return This builder.
-		 */
-		public Builder clientID(final ClientID clientID) {
-			
-			if (clientID == null)
-				throw new IllegalArgumentException("The client ID must not be null");
-			
-			this.clientID = clientID;
 			return this;
 		}
 		

@@ -1216,6 +1216,30 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(request.getScope(), Scope.parse("openid"));
 		assertEquals(-1, request.getMaxAge());
 	}
+	
+	
+	public void testParseRequestURI_missingClientID() {
+		
+		try {
+			AuthenticationRequest.parse(URI.create("https://c2id.com/login?request_uri=https%3A%2F%2Fexample.org%2Frequest.jwt"));
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing \"client_id\" parameter", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
+		}
+	}
+	
+	
+	public void testParseRequestObject_missingClientID() {
+		
+		try {
+			AuthenticationRequest.parse(URI.create("https://c2id.com/login?request=eyJhbGciOiJub25lIn0.eyJyZXNwb25zZV90eXBlIjoiY29kZSIsImNsaWVudF9pZCI6IjEyMyJ9."));
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing \"client_id\" parameter", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
+		}
+	}
 
 
 	public void testBuilderWithRedirectURIInRequestURI()
@@ -1814,22 +1838,27 @@ public class AuthenticationRequestTest extends TestCase {
 		
 		URI endpointURI = URI.create("https://c2id.com/login");
 		URI requestURI = URI.create("urn:requests:ahy4ohgo");
+		ClientID clientID = new ClientID("123");
 		
-		AuthenticationRequest ar = new AuthenticationRequest.Builder(requestURI)
+		AuthenticationRequest ar = new AuthenticationRequest.Builder(requestURI, clientID)
 			.endpointURI(endpointURI)
 			.build();
 		
 		assertEquals(endpointURI, ar.getEndpointURI());
 		assertEquals(requestURI, ar.getRequestURI());
+		assertEquals(clientID, ar.getClientID());
 		
 		assertTrue(ar.specifiesRequestObject());
 		
-		assertEquals("https://c2id.com/login?request_uri=urn%3Arequests%3Aahy4ohgo", ar.toURI().toString());
+		assertEquals(Collections.singletonList(requestURI.toString()), ar.toParameters().get("request_uri"));
+		assertEquals(Collections.singletonList(clientID.getValue()), ar.toParameters().get("client_id"));
+		assertEquals(2, ar.toParameters().size());
 		
 		ar = AuthenticationRequest.parse(ar.toURI());
 		
 		assertEquals(endpointURI, ar.getEndpointURI());
 		assertEquals(requestURI, ar.getRequestURI());
+		assertEquals(clientID, ar.getClientID());
 	}
 	
 	
@@ -1841,10 +1870,9 @@ public class AuthenticationRequestTest extends TestCase {
 		ClientID clientID = new ClientID("123");
 		URI redirectURI = URI.create("https://example.com/cb");
 		
-		AuthenticationRequest ar = new AuthenticationRequest.Builder(requestURI)
+		AuthenticationRequest ar = new AuthenticationRequest.Builder(requestURI, clientID)
 			.responseType(rt)
 			.scope(scope)
-			.clientID(clientID)
 			.redirectionURI(redirectURI)
 			.build();
 		
@@ -1857,35 +1885,28 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(redirectURI, ar.getRedirectionURI());
 		
 		try {
-			new AuthenticationRequest.Builder(requestURI).responseType(null);
+			new AuthenticationRequest.Builder(requestURI, clientID).responseType(null);
 			fail("Core response_type when set not null");
 		} catch (IllegalArgumentException e) {
 			assertEquals("The response type must not be null", e.getMessage());
 		}
 		
 		try {
-			new AuthenticationRequest.Builder(requestURI).scope(null);
+			new AuthenticationRequest.Builder(requestURI, clientID).scope(null);
 			fail("Core scope when set not null");
 		} catch (IllegalArgumentException e) {
 			assertEquals("The scope must not be null", e.getMessage());
 		}
 		
 		try {
-			new AuthenticationRequest.Builder(requestURI).scope(new Scope("email"));
+			new AuthenticationRequest.Builder(requestURI, clientID).scope(new Scope("email"));
 			fail("Core scope when set must contain openid");
 		} catch (IllegalArgumentException e) {
 			assertEquals("The scope must include an \"openid\" value", e.getMessage());
 		}
 		
 		try {
-			new AuthenticationRequest.Builder(requestURI).clientID(null);
-			fail("Core client ID when set not null");
-		} catch (IllegalArgumentException e) {
-			assertEquals("The client ID must not be null", e.getMessage());
-		}
-		
-		try {
-			new AuthenticationRequest.Builder(requestURI).redirectionURI(null);
+			new AuthenticationRequest.Builder(requestURI, clientID).redirectionURI(null);
 			fail("Core redirection URI when set not null");
 		} catch (IllegalArgumentException e) {
 			assertEquals("The redirection URI must not be null", e.getMessage());
@@ -1907,49 +1928,22 @@ public class AuthenticationRequestTest extends TestCase {
 		
 		JWT requestObject = new PlainJWT(ar.toJWTClaimsSet());
 		
-		ar = new AuthenticationRequest.Builder(requestObject)
+		ar = new AuthenticationRequest.Builder(requestObject, clientID)
 			.endpointURI(endpointURI)
 			.build();
 		
 		assertEquals(endpointURI, ar.getEndpointURI());
 		assertEquals(requestObject, ar.getRequestObject());
+		assertEquals(clientID, ar.getClientID());
 		
-		assertEquals("https://c2id.com/login?request=eyJhbGciOiJub25lIn0.eyJzY29wZSI6Im9wZW5pZCIsInJlc3BvbnNlX3R5cGUiOiJjb2RlIiwicmVkaXJlY3RfdXJpIjoiaHR0cHM6XC9cL2V4YW1wbGUuY29tXC9jYiIsImNsaWVudF9pZCI6IjEyMyJ9.", ar.toURI().toString());
-		
-		ar = AuthenticationRequest.parse(ar.toURI());
-		
-		assertEquals(endpointURI, ar.getEndpointURI());
-		assertEquals(requestObject.serialize(), ar.getRequestObject().serialize());
-	}
-	
-	
-	public void testBuilder_requestObject_minimalTopLevelParams() throws ParseException {
-		
-		URI endpointURI = URI.create("https://c2id.com/login");
-		ResponseType rt = new ResponseType("code");
-		Scope scope = new Scope("openid");
-		ClientID clientID = new ClientID("123");
-		URI redirectURI = URI.create("https://example.com/cb");
-		
-		AuthenticationRequest ar = new AuthenticationRequest.Builder(rt, scope, clientID, redirectURI)
-			.endpointURI(endpointURI)
-			.build();
-		
-		JWT requestObject = new PlainJWT(ar.toJWTClaimsSet());
-		
-		ar = new AuthenticationRequest.Builder(requestObject)
-			.endpointURI(endpointURI)
-			.build();
-		
-		assertEquals(endpointURI, ar.getEndpointURI());
-		assertEquals(requestObject, ar.getRequestObject());
-		
-		assertEquals("https://c2id.com/login?request=eyJhbGciOiJub25lIn0.eyJzY29wZSI6Im9wZW5pZCIsInJlc3BvbnNlX3R5cGUiOiJjb2RlIiwicmVkaXJlY3RfdXJpIjoiaHR0cHM6XC9cL2V4YW1wbGUuY29tXC9jYiIsImNsaWVudF9pZCI6IjEyMyJ9.", ar.toURI().toString());
+		assertEquals(Collections.singletonList(requestObject.serialize()), ar.toParameters().get("request"));
+		assertEquals(Collections.singletonList(clientID.getValue()), ar.toParameters().get("client_id"));
 		
 		ar = AuthenticationRequest.parse(ar.toURI());
 		
 		assertEquals(endpointURI, ar.getEndpointURI());
 		assertEquals(requestObject.serialize(), ar.getRequestObject().serialize());
+		assertEquals(clientID, ar.getClientID());
 	}
 	
 	
@@ -1982,7 +1976,7 @@ public class AuthenticationRequestTest extends TestCase {
 		SignedJWT jar = new SignedJWT(new JWSHeader.Builder((JWSAlgorithm) rsaJWK.getAlgorithm()).keyID(rsaJWK.getKeyID()).build(), jarClaims);
 		jar.sign(new RSASSASigner(rsaJWK));
 		
-		AuthenticationRequest jarRequest = new AuthenticationRequest.Builder(jar).build();
+		AuthenticationRequest jarRequest = new AuthenticationRequest.Builder(jar, clientID).build();
 		
 		Map<String,List<String>> params = jarRequest.toParameters();
 		
