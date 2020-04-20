@@ -95,19 +95,19 @@
 		<dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>opensaml-core</artifactId>
-			<version>3.4.3</version>
+			<version>3.4.5</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>opensaml-saml-api</artifactId>
-			<version>3.4.3</version>
+			<version>3.4.5</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>opensaml-saml-impl</artifactId>
-			<version>3.4.3</version>
+			<version>3.4.5</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
