@@ -25,9 +25,16 @@ import java.util.*;
 
 import junit.framework.TestCase;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
+import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
@@ -1083,6 +1090,42 @@ public class AuthorizationRequestTest extends TestCase {
 		assertNull(ar.getRequestURI());
 		assertEquals(requestObject.serialize(), ar.getRequestObject().serialize());
 		assertTrue(ar.specifiesRequestObject());
+	}
+	
+	
+	// docs example
+	public void testJAR_requestObject_example()
+		throws Exception {
+		
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.keyIDFromThumbprint(true)
+			.keyUse(KeyUse.SIGNATURE)
+			.generate();
+		
+		URI endpointURI = URI.create("https://c2id.com/login");
+		ResponseType rt = new ResponseType("code");
+		ClientID clientID = new ClientID("123");
+		URI redirectURI = new URI("https://example.com");
+		Scope scope = new Scope("read", "write");
+		State state = new State("81c33d57-59c7-4b41-9a15-80e2ed1482e2");
+		
+		SignedJWT jar = new SignedJWT(
+			new JWSHeader.Builder(JWSAlgorithm.RS256)
+				.keyID(rsaJWK.getKeyID())
+				.build(),
+			new AuthorizationRequest.Builder(rt, clientID)
+				.redirectionURI(redirectURI)
+				.scope(scope)
+				.state(state)
+				.build()
+				.toJWTClaimsSet()
+		);
+		
+		jar.sign(new RSASSASigner(rsaJWK));
+		
+		AuthorizationRequest ar = new AuthorizationRequest.Builder(jar, clientID)
+			.endpointURI(endpointURI)
+			.build();
 	}
 	
 	
