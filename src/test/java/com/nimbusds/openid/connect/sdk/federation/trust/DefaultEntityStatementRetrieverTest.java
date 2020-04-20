@@ -53,7 +53,7 @@ import com.nimbusds.openid.connect.sdk.federation.entities.FederationEntityMetad
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 
-public class EntityStatementRetrieverTest {
+public class DefaultEntityStatementRetrieverTest {
 	
 	
 	private static final RSAKey OP_JWK;
@@ -170,9 +170,9 @@ public class EntityStatementRetrieverTest {
 	@Test
 	public void testDefaultConstructor() {
 		
-		EntityStatementRetriever retriever = new EntityStatementRetriever();
-		assertEquals(EntityStatementRetriever.DEFAULT_HTTP_CONNECT_TIMEOUT_MS, retriever.getHTTPConnectTimeout());
-		assertEquals(EntityStatementRetriever.DEFAULT_HTTP_READ_TIMEOUT_MS, retriever.getHTTPReadTimeout());
+		DefaultEntityStatementRetriever retriever = new DefaultEntityStatementRetriever();
+		assertEquals(DefaultEntityStatementRetriever.DEFAULT_HTTP_CONNECT_TIMEOUT_MS, retriever.getHTTPConnectTimeout());
+		assertEquals(DefaultEntityStatementRetriever.DEFAULT_HTTP_READ_TIMEOUT_MS, retriever.getHTTPReadTimeout());
 	}
 	
 	
@@ -193,7 +193,7 @@ public class EntityStatementRetrieverTest {
 			.withContentType("application/jose")
 			.withBody(entityStatement.getSignedStatement().serialize());
 		
-		EntityStatementRetriever retriever = new EntityStatementRetriever();
+		DefaultEntityStatementRetriever retriever = new DefaultEntityStatementRetriever();
 		
 		EntityStatement out = retriever.fetchSelfIssuedEntityStatement(new EntityID(issuer.getValue()));
 		
@@ -214,7 +214,7 @@ public class EntityStatementRetrieverTest {
 			.respond()
 			.withStatus(404);
 		
-		EntityStatementRetriever retriever = new EntityStatementRetriever();
+		DefaultEntityStatementRetriever retriever = new DefaultEntityStatementRetriever();
 		try {
 			retriever.fetchSelfIssuedEntityStatement(new EntityID(issuer.getValue()));
 			fail();
@@ -242,7 +242,7 @@ public class EntityStatementRetrieverTest {
 			.withContentType("application/jose")
 			.withBody(entityStatement.getSignedStatement().serialize());
 		
-		EntityStatementRetriever retriever = new EntityStatementRetriever();
+		DefaultEntityStatementRetriever retriever = new DefaultEntityStatementRetriever();
 		
 		URI federationAPIURI = retriever.resolveFederationAPIURI(new EntityID(issuer.getValue()));
 		
@@ -280,7 +280,7 @@ public class EntityStatementRetrieverTest {
 			.withContentType("application/jose")
 			.withBody(intermediateStatementAboutOP.getSignedStatement().serialize());
 		
-		EntityStatementRetriever retriever = new EntityStatementRetriever();
+		DefaultEntityStatementRetriever retriever = new DefaultEntityStatementRetriever();
 		
 		EntityStatement out = retriever.fetchEntityStatement(URI.create(issuer + "/federation"), new EntityID(issuer.getValue()), new EntityID(opIssuer.getValue()));
 		
@@ -316,7 +316,7 @@ public class EntityStatementRetrieverTest {
 			.withContentType("application/json")
 			.withBody(new FederationAPIError(OperationType.FETCH, "invalid_subject", "Invalid subject").toJSONObject().toJSONString());
 		
-		EntityStatementRetriever retriever = new EntityStatementRetriever();
+		DefaultEntityStatementRetriever retriever = new DefaultEntityStatementRetriever();
 		
 		try {
 			retriever.fetchEntityStatement(URI.create(issuer + "/federation"), new EntityID(issuer.getValue()), new EntityID(opIssuer.getValue()));
