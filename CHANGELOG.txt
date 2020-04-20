@@ -1295,3 +1295,4 @@ version 7.3 (2020-03-23)
 version 7.4 (2020-04-20)
     * Updates JAR support in AuthorizationRequest and AuthenticationRequest to
       draft-ietf-oauth-jwsreq-21.
+    * Bumps to com.nimbusds:nimbus-jose-jwt:8.14.1
