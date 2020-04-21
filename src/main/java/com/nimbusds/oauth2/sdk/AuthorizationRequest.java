@@ -111,7 +111,7 @@ public class AuthorizationRequest extends AbstractRequest {
 
 
 	/**
-	 * The client identifier (required unless in JAR).
+	 * The client identifier (required).
 	 */
 	private final ClientID clientID;
 
@@ -208,7 +208,7 @@ public class AuthorizationRequest extends AbstractRequest {
 
 
 		/**
-		 * The client identifier (required unless in JAR).
+		 * The client identifier (required).
 		 */
 		private final ClientID clientID;
 
@@ -892,10 +892,7 @@ public class AuthorizationRequest extends AbstractRequest {
 	 * Gets the client identifier. Corresponds to the {@code client_id} 
 	 * parameter.
 	 *
-	 * @return The client identifier, may be {@code null} for a
-	 *         {@link #specifiesRequestObject() JWT secured authorisation
-	 *         request} with a {@link #getRequestObject() request} or
-	 *         {@link #getRequestURI() request_uri} parameter.
+	 * @return The client identifier.
 	 */
 	public ClientID getClientID() {
 	
