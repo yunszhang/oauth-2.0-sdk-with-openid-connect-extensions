@@ -30,6 +30,7 @@ import net.minidev.json.JSONObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 
 
 /**
@@ -99,6 +100,58 @@ public final class TrustChainConstraints implements JSONAware {
 		this.maxPathLength = maxPathLength;
 		this.permittedEntities = permittedEntities != null ? permittedEntities : Collections.<EntityIDConstraint>emptyList();
 		this.excludedEntities = excludedEntities != null ? excludedEntities : Collections.<EntityIDConstraint>emptyList();
+	}
+	
+	
+	/**
+	 * Checks if the entity ID with the given number of intermediates is
+	 * permitted.
+	 *
+	 * @param numIntermediatesInPath The number of intermediate entities
+	 *                               between the entity specifying the
+	 *                               constraints and the specified entity.
+	 *                               Must be zero or greater.
+	 *
+	 * @param entityID               The entity ID. Must not be
+	 *                               {@code null}.
+	 * @return {@code true} if permitted, else {@code false}.
+	 */
+	public boolean isPermitted(final int numIntermediatesInPath, final EntityID entityID) {
+		
+		if (numIntermediatesInPath < 0) {
+			throw new IllegalArgumentException("The path length must not be negative");
+		}
+	
+		if (getMaxPathLength() > -1 && numIntermediatesInPath > getMaxPathLength()) {
+			return false;
+		}
+		
+		if (getExcludedEntities().isEmpty() && getPermittedEntities().isEmpty()) {
+			return true;
+		}
+		
+		if (! getExcludedEntities().isEmpty()) {
+			
+			for (EntityIDConstraint constraint: getExcludedEntities()) {
+				if (constraint.matches(entityID)) {
+					return false;
+				}
+			}
+		}
+		
+		if (! getPermittedEntities().isEmpty()) {
+			
+			for (EntityIDConstraint constraint: getPermittedEntities()) {
+				if (constraint.matches(entityID)) {
+					return true;
+				}
+			}
+		} else {
+			// If passed so far - always permitted
+			return true;
+		}
+		
+		return false;
 	}
 	
 	
