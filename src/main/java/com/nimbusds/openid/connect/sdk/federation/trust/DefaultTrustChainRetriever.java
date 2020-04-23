@@ -20,41 +20,32 @@ package com.nimbusds.openid.connect.sdk.federation.trust;
 
 import java.net.URI;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
-import com.nimbusds.openid.connect.sdk.federation.trust.constraints.TrustChainConstraints;
 
 
 /**
- * A trust chain fetch run.
+ * The default trust chain retriever.
  */
-class TrustChainFetch {
-	
-	
-	private final TrustChainConstraints constraints;
+class DefaultTrustChainRetriever implements TrustChainRetriever {
 	
 	
 	private final EntityStatementRetriever retriever;
 	
 	
-	private final AtomicInteger depth = new AtomicInteger(0);
+	private final List<Exception> accumulatedExceptions = new LinkedList<>();
 	
 	
-	private final List<Exception> exceptions = new LinkedList<>();
-	
-	
-	TrustChainFetch(final EntityStatementRetriever retriever,
-			final TrustChainConstraints constraints) {
-		
-		if (constraints == null) {
-			throw new IllegalArgumentException("The trust chain constraints must not be null");
-		}
-		this.constraints = constraints;
-		
+	/**
+	 * Creates a new trust chain retriever.
+	 *
+	 * @param retriever The entity statement retriever. Must not be
+	 *                  {@code null}.
+	 */
+	DefaultTrustChainRetriever(final EntityStatementRetriever retriever) {
 		if (retriever == null) {
 			throw new IllegalArgumentException("The entity statement retriever must not be null");
 		}
@@ -62,13 +53,20 @@ class TrustChainFetch {
 	}
 	
 	
-	Set<TrustChain> fetch(final EntityID target) {
+	@Override
+	public Set<TrustChain> fetch(final EntityID target, final Set<EntityID> trustAnchors) {
+		
+		if (CollectionUtils.isEmpty(trustAnchors)) {
+			throw new IllegalArgumentException("The trust anchors must not be empty");
+		}
+		
+		accumulatedExceptions.clear();
 		
 		EntityStatement targetStatement;
 		try {
 			targetStatement = retriever.fetchSelfIssuedEntityStatement(target);
 		} catch (ResolveException e) {
-			exceptions.add(e);
+			accumulatedExceptions.add(e);
 			return Collections.emptySet();
 		}
 		
@@ -76,7 +74,7 @@ class TrustChainFetch {
 		
 		if (CollectionUtils.isEmpty(authorityHints)) {
 			// Dead end
-			exceptions.add(new ResolveException("Entity " + target + " has no authorities listed (authority_hints)"));
+			accumulatedExceptions.add(new ResolveException("Entity " + target + " has no authorities listed (authority_hints)"));
 			return Collections.emptySet();
 		}
 		
@@ -84,13 +82,11 @@ class TrustChainFetch {
 		try {
 			subject = EntityID.parse(targetStatement.getClaimsSet().getSubject());
 		} catch (ParseException e) {
-			exceptions.add(new ResolveException("Entity " + target + " subject is illegal: " + e.getMessage(), e));
+			accumulatedExceptions.add(new ResolveException("Entity " + target + " subject is illegal: " + e.getMessage(), e));
 			return Collections.emptySet();
 		}
 		
-		Set<List<EntityStatement>> anchoredChains = getStatementsFromSuperiors(subject, authorityHints, Collections.<EntityStatement>emptyList());
-		
-		assert Utils.allChainsAnchored(anchoredChains);
+		Set<List<EntityStatement>> anchoredChains = fetchStatementsFromSuperiors(subject, trustAnchors, authorityHints, Collections.<EntityStatement>emptyList());
 		
 		Set<TrustChain> trustChains = new HashSet<>();
 		
@@ -102,9 +98,10 @@ class TrustChainFetch {
 	}
 	
 	
-	private Set<List<EntityStatement>> getStatementsFromSuperiors(final EntityID subject,
-								      final List<EntityID> authorityHints,
-								      final List<EntityStatement> partialChain) {
+	private Set<List<EntityStatement>> fetchStatementsFromSuperiors(final EntityID subject,
+									final Set<EntityID> trustAnchors,
+									final List<EntityID> authorityHints,
+									final List<EntityStatement> partialChain) {
 		
 		// Number of updated chains equals number of authority_hints
 		Set<List<EntityStatement>> updatedChains = new HashSet<>();
@@ -119,12 +116,12 @@ class TrustChainFetch {
 			try {
 				federationAPIURI = retriever.resolveFederationAPIURI(superior);
 			} catch (ResolveException e) {
-				exceptions.add(new ResolveException("Couldn't resolve federation API URI for " + superior + ": " + e.getMessage(), e));
+				accumulatedExceptions.add(new ResolveException("Couldn't resolve federation API URI for " + superior + ": " + e.getMessage(), e));
 				continue;
 				
 			}
 			if (federationAPIURI == null) {
-				exceptions.add(new ResolveException("No federation API URI for " + superior));
+				accumulatedExceptions.add(new ResolveException("No federation API URI for " + superior));
 				continue;
 			}
 			
@@ -135,7 +132,7 @@ class TrustChainFetch {
 					superior,
 					subject);
 			} catch (ResolveException e) {
-				exceptions.add(new ResolveException("Couldn't fetch entity statement from " + superior + ": " + e.getMessage(), e));
+				accumulatedExceptions.add(new ResolveException("Couldn't fetch entity statement from " + federationAPIURI + ": " + e.getMessage(), e));
 				continue;
 			}
 			
@@ -150,9 +147,11 @@ class TrustChainFetch {
 		
 		for (List<EntityStatement> chain: updatedChains) {
 			EntityStatement last = chain.get(chain.size() - 1);
-			if (last.isTrustAnchor()) {
+			if (trustAnchors.contains(last.getClaimsSet().getIssuerEntityID())) {
+				// Reached statement from trust anchor about leaf or intermediate
 				anchoredChains.add(chain);
 			} else {
+				// More statements remain
 				remainingPartialChains.add(chain);
 			}
 		}
@@ -162,8 +161,9 @@ class TrustChainFetch {
 			EntityStatement last = chain.get(chain.size() - 1);
 			
 			// Recursion
-			anchoredChains.addAll(getStatementsFromSuperiors(
+			anchoredChains.addAll(fetchStatementsFromSuperiors(
 				last.getClaimsSet().getSubjectEntityID(),
+				trustAnchors,
 				last.getClaimsSet().getAuthorityHints(),
 				chain));
 			
@@ -173,7 +173,8 @@ class TrustChainFetch {
 	}
 	
 	
-	public List<Exception> getExceptions() {
-		return exceptions;
+	@Override
+	public List<Exception> getAccumulatedExceptions() {
+		return accumulatedExceptions;
 	}
 }

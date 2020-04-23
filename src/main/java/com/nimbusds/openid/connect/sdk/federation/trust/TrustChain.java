@@ -116,7 +116,7 @@ public final class TrustChain {
 	 *
 	 * @return The leaf entity self-statement.
 	 */
-	public EntityStatement getLeafStatement() {
+	public EntityStatement getLeafSelfStatement() {
 		return leaf;
 	}
 	
@@ -157,7 +157,7 @@ public final class TrustChain {
 	public Iterator<EntityStatement> iteratorFromLeaf() {
 		
 		// Init
-		final AtomicReference<EntityStatement> next = new AtomicReference<>(getLeafStatement());
+		final AtomicReference<EntityStatement> next = new AtomicReference<>(getLeafSelfStatement());
 		final Iterator<EntityStatement> superiorsIterator = getSuperiorStatements().iterator();
 		
 		return new Iterator<EntityStatement>() {
@@ -175,7 +175,7 @@ public final class TrustChain {
 				}
 				
 				// Set statement to return on next iteration
-				if (toReturn.equals(getLeafStatement())) {
+				if (toReturn.equals(getLeafSelfStatement())) {
 					// Return first superior
 					next.set(superiorsIterator.next());
 				} else {

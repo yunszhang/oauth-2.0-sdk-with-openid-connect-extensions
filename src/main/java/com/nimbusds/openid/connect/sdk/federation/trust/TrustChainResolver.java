@@ -18,14 +18,15 @@
 package com.nimbusds.openid.connect.sdk.federation.trust;
 
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.MapUtils;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
-import com.nimbusds.openid.connect.sdk.federation.trust.constraints.TrustChainConstraints;
 
 
 /**
@@ -43,35 +44,34 @@ public class TrustChainResolver {
 	private final Map<EntityID, JWKSet> trustAnchors;
 	
 	
-	private final TrustChainConstraints constraints;
-	
-	
-	private final DefaultEntityStatementRetriever entityStatementRetriever;
+	private final EntityStatementRetriever statementRetriever;
 	
 	
 	public TrustChainResolver(final EntityID trustAnchor,
 				  final JWKSet trustAnchorJWKSet) {
-		trustAnchors = new HashMap<>();
-		trustAnchors.put(trustAnchor, trustAnchorJWKSet);
-		constraints = new TrustChainConstraints();
-		entityStatementRetriever = new DefaultEntityStatementRetriever();
+		this(Collections.singletonMap(trustAnchor, trustAnchorJWKSet), new DefaultEntityStatementRetriever());
 	}
 	
 	
 	public TrustChainResolver(final Map<EntityID, JWKSet> trustAnchors,
-				  final TrustChainConstraints constraints,
 				  final int httpConnectTimeoutMs,
 				  final int httpReadTimeoutMs) {
+		
+		this(trustAnchors, new DefaultEntityStatementRetriever(httpConnectTimeoutMs, httpReadTimeoutMs));
+	}
+	
+	
+	public TrustChainResolver(final Map<EntityID, JWKSet> trustAnchors,
+				  final EntityStatementRetriever statementRetriever) {
 		if (MapUtils.isEmpty(trustAnchors)) {
 			throw new IllegalArgumentException("The trust anchors map must not be empty or null");
 		}
 		this.trustAnchors = trustAnchors;
-		if (constraints != null) {
-			this.constraints = constraints;
-		} else {
-			this.constraints = new TrustChainConstraints();
+		
+		if (statementRetriever == null) {
+			throw new IllegalArgumentException("The entity statement retriever must not be null");
 		}
-		entityStatementRetriever = new DefaultEntityStatementRetriever(httpConnectTimeoutMs, httpReadTimeoutMs);
+		this.statementRetriever = statementRetriever;
 	}
 	
 	
@@ -93,9 +93,9 @@ public class TrustChainResolver {
 			throw new ResolveException("Target is trust anchor");
 		}
 		
-		TrustChainFetch trustChainFetch = new TrustChainFetch(entityStatementRetriever, constraints);
+		TrustChainRetriever trustChainFetch = new DefaultTrustChainRetriever(statementRetriever);
 		
-		Set<TrustChain> fetchedTrustChains = trustChainFetch.fetch(target);
+		Set<TrustChain> fetchedTrustChains = trustChainFetch.fetch(target, trustAnchors.keySet());
 		
 		if (fetchedTrustChains.isEmpty()) {
 		

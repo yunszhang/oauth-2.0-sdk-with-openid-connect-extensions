@@ -165,7 +165,7 @@ public class TrustChainTest extends TestCase {
 		List<EntityStatement> superiorStatements = Collections.singletonList(anchorStmtAboutLeaf);
 		TrustChain trustChain = new TrustChain(leafStmt, superiorStatements);
 		
-		assertEquals(leafStmt, trustChain.getLeafStatement());
+		assertEquals(leafStmt, trustChain.getLeafSelfStatement());
 		assertEquals(superiorStatements, trustChain.getSuperiorStatements());
 		
 		assertEquals(ANCHOR_ENTITY_ID, trustChain.getTrustAnchorEntityID());
@@ -201,7 +201,7 @@ public class TrustChainTest extends TestCase {
 		List<EntityStatement> superiorStatements = Arrays.asList(intermediateStmtAboutLeaf, anchorStmtAboutIntermediate);
 		TrustChain trustChain = new TrustChain(leafStmt, superiorStatements);
 		
-		assertEquals(leafStmt, trustChain.getLeafStatement());
+		assertEquals(leafStmt, trustChain.getLeafSelfStatement());
 		assertEquals(superiorStatements, trustChain.getSuperiorStatements());
 		
 		assertEquals(ANCHOR_ENTITY_ID, trustChain.getTrustAnchorEntityID());
