@@ -2265,9 +2265,9 @@ public class AuthenticationRequestTest extends TestCase {
 	public void testWithClientPrivateKeyJWTAuth()
 		throws Exception {
 		
-		URI uri = new URI("https://c2ic.com/login");
+		URI uri = new URI("https://c2id.com/login");
 		
-		ClientID clientID = new ClientID();
+		ClientID clientID = new ClientID("https://rp.example.com");
 		
 		RSAKey rsaJWK = new RSAKeyGenerator(2048)
 			.keyUse(KeyUse.SIGNATURE)
