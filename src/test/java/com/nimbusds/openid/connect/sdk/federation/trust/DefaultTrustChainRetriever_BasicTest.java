@@ -38,7 +38,7 @@ import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaims
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 
-public class DefaultTrustChainRetriever_BaseTest extends TestCase {
+public class DefaultTrustChainRetriever_BasicTest extends TestCase {
 	
 	// Anchor
 	private static final Issuer ANCHOR_ISSUER = new Issuer("https://federation.com");
@@ -101,8 +101,6 @@ public class DefaultTrustChainRetriever_BaseTest extends TestCase {
 				DateUtils.fromSecondsSinceEpoch(nowTs),
 				DateUtils.fromSecondsSinceEpoch(nowTs + 3600),
 				OP_JWK_SET.toPublicJWKSet());
-			OP_SELF_STMT_CLAIMS.setOPMetadata(OP_METADATA);
-			OP_SELF_STMT_CLAIMS.setAuthorityHints(Collections.singletonList(new EntityID(ANCHOR_ISSUER.getValue())));
 			
 			ANCHOR_STMT_ABOUT_OP = EntityStatement.sign(ANCHOR_STMT_ABOUT_OP_CLAIMS, ANCHOR_JWK_SET.getKeyByKeyId("a1"));
 		} catch (Exception e) {
