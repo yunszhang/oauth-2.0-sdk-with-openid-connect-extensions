@@ -25,7 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import static net.jadler.Jadler.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -222,31 +223,6 @@ public class DefaultEntityStatementRetrieverTest {
 			assertEquals("Entity configuration error response from " + issuer + ": 404", e.getMessage());
 			assertEquals(404, e.getErrorObject().getHTTPStatusCode());
 		}
-	}
-	
-	
-	@Test
-	public void testResolveFederationAPIURI()
-		throws Exception {
-		
-		Issuer issuer = new Issuer("http://localhost:" + port());
-		
-		EntityStatementClaimsSet claimsSet = createIntermediateStatementClaimsSet(issuer);
-		EntityStatement entityStatement = EntityStatement.sign(claimsSet, INTERMEDIATE_JWK);
-		
-		onRequest()
-			.havingMethodEqualTo("GET")
-			.havingPathEqualTo(FederationEntityConfigurationRequest.OPENID_FEDERATION_ENTITY_WELL_KNOWN_PATH)
-			.respond()
-			.withStatus(200)
-			.withContentType("application/jose")
-			.withBody(entityStatement.getSignedStatement().serialize());
-		
-		DefaultEntityStatementRetriever retriever = new DefaultEntityStatementRetriever();
-		
-		URI federationAPIURI = retriever.resolveFederationAPIURI(new EntityID(issuer.getValue()));
-		
-		assertEquals(URI.create("http://localhost:" + port() + "/federation"), federationAPIURI);
 	}
 	
 	

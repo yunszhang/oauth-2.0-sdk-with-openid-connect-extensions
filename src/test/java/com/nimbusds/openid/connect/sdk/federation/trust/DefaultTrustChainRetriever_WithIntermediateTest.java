@@ -39,9 +39,9 @@ import com.nimbusds.openid.connect.sdk.federation.entities.FederationEntityMetad
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 
-public class DefaultTrustChainRetriever_KnownAndUnknownAnchorsTest extends TestCase {
+public class DefaultTrustChainRetriever_WithIntermediateTest extends TestCase {
 	
-	// Known anchor
+	// Anchor
 	private static final Issuer ANCHOR_ISSUER = new Issuer("https://federation.com");
 	
 	private static final URI ANCHOR_FEDERATION_API_URI = URI.create(ANCHOR_ISSUER + "/api");
@@ -52,12 +52,20 @@ public class DefaultTrustChainRetriever_KnownAndUnknownAnchorsTest extends TestC
 	
 	private static final EntityStatement ANCHOR_SELF_STMT;
 	
-	// Unknown anchor
-	private static final Issuer UNKNOWN_ANCHOR_ISSUER = new Issuer("https://unknown.federation.com");
+	// Intermediate
+	private static final Issuer INTERMEDIATE_ISSUER = new Issuer("https://intermediate.com");
 	
-	private static final URI UNKNOWN_ANCHOR_FEDERATION_API_URI = URI.create(ANCHOR_ISSUER + "/api");
+	private static final URI INTERMEDIATE_FEDERATION_API_URI = URI.create(INTERMEDIATE_ISSUER + "/api");
 	
-	private static final JWKSet UNKNOWN_ANCHOR_JWK_SET;
+	private static final JWKSet INTERMEDIATE_JWK_SET;
+	
+	private static final EntityStatementClaimsSet INTERMEDIATE_SELF_STMT_CLAIMS;
+	
+	private static final EntityStatement INTERMEDIATE_SELF_STMT;
+	
+	private static final EntityStatementClaimsSet ANCHOR_STMT_ABOUT_INTERMEDIATE_CLAIMS;
+	
+	private static final EntityStatement ANCHOR_STMT_ABOUT_INTERMEDIATE;
 	
 	// Leaf
 	private static final Issuer OP_ISSUER = new Issuer("https://c2id.com");
@@ -70,13 +78,9 @@ public class DefaultTrustChainRetriever_KnownAndUnknownAnchorsTest extends TestC
 	
 	private static final EntityStatement OP_SELF_STMT;
 	
-	private static final EntityStatementClaimsSet ANCHOR_STMT_ABOUT_OP_CLAIMS;
+	private static final EntityStatementClaimsSet INTERMEDIATE_STMT_ABOUT_OP_CLAIMS;
 	
-	private static final EntityStatement ANCHOR_STMT_ABOUT_OP;
-	
-	private static final EntityStatementClaimsSet UNKNOWN_ANCHOR_STMT_ABOUT_OP_CLAIMS;
-	
-	private static final EntityStatement UNKNOWN_ANCHOR_STMT_ABOUT_OP;
+	private static final EntityStatement INTERMEDIATE_STMT_ABOUT_OP;
 	
 	
 	static {
@@ -90,10 +94,10 @@ public class DefaultTrustChainRetriever_KnownAndUnknownAnchorsTest extends TestC
 					.generate()
 			);
 			
-			UNKNOWN_ANCHOR_JWK_SET = new JWKSet(
+			INTERMEDIATE_JWK_SET = new JWKSet(
 				new RSAKeyGenerator(2048)
 					.keyUse(KeyUse.SIGNATURE)
-					.keyID("u1")
+					.keyID("i1")
 					.generate()
 			);
 			
@@ -114,9 +118,30 @@ public class DefaultTrustChainRetriever_KnownAndUnknownAnchorsTest extends TestC
 				DateUtils.fromSecondsSinceEpoch(nowTs + 3600),
 				OP_JWK_SET.toPublicJWKSet());
 			OP_SELF_STMT_CLAIMS.setOPMetadata(OP_METADATA);
-			OP_SELF_STMT_CLAIMS.setAuthorityHints(Collections.singletonList(new EntityID(ANCHOR_ISSUER.getValue())));
+			OP_SELF_STMT_CLAIMS.setAuthorityHints(Collections.singletonList(new EntityID(INTERMEDIATE_ISSUER.getValue())));
 			
 			OP_SELF_STMT = EntityStatement.sign(OP_SELF_STMT_CLAIMS, OP_JWK_SET.getKeyByKeyId("op1"));
+			
+			INTERMEDIATE_SELF_STMT_CLAIMS = new EntityStatementClaimsSet(
+				INTERMEDIATE_ISSUER,
+				new Subject(INTERMEDIATE_ISSUER.getValue()),
+				DateUtils.fromSecondsSinceEpoch(nowTs),
+				DateUtils.fromSecondsSinceEpoch(nowTs + 3600),
+				INTERMEDIATE_JWK_SET.toPublicJWKSet());
+			INTERMEDIATE_SELF_STMT_CLAIMS.setFederationEntityMetadata(new FederationEntityMetadata(INTERMEDIATE_FEDERATION_API_URI));
+			INTERMEDIATE_SELF_STMT_CLAIMS.setAuthorityHints(Collections.singletonList(new EntityID(ANCHOR_ISSUER.getValue())));
+			
+			INTERMEDIATE_SELF_STMT = EntityStatement.sign(INTERMEDIATE_SELF_STMT_CLAIMS, INTERMEDIATE_JWK_SET.getKeyByKeyId("i1"));
+			
+			INTERMEDIATE_STMT_ABOUT_OP_CLAIMS = new EntityStatementClaimsSet(
+				INTERMEDIATE_ISSUER,
+				new Subject(OP_ISSUER.getValue()),
+				DateUtils.fromSecondsSinceEpoch(nowTs),
+				DateUtils.fromSecondsSinceEpoch(nowTs + 3600),
+				OP_JWK_SET.toPublicJWKSet());
+			INTERMEDIATE_STMT_ABOUT_OP_CLAIMS.setAuthorityHints(Collections.singletonList(new EntityID(INTERMEDIATE_ISSUER.getValue())));
+			
+			INTERMEDIATE_STMT_ABOUT_OP = EntityStatement.sign(INTERMEDIATE_STMT_ABOUT_OP_CLAIMS, INTERMEDIATE_JWK_SET.getKeyByKeyId("i1"));
 			
 			ANCHOR_SELF_STMT_CLAIMS = new EntityStatementClaimsSet(
 				ANCHOR_ISSUER,
@@ -128,21 +153,16 @@ public class DefaultTrustChainRetriever_KnownAndUnknownAnchorsTest extends TestC
 			
 			ANCHOR_SELF_STMT = EntityStatement.sign(ANCHOR_SELF_STMT_CLAIMS, ANCHOR_JWK_SET.getKeyByKeyId("a1"));
 			
-			ANCHOR_STMT_ABOUT_OP_CLAIMS = new EntityStatementClaimsSet(
+			ANCHOR_STMT_ABOUT_INTERMEDIATE_CLAIMS = new EntityStatementClaimsSet(
 				ANCHOR_ISSUER,
-				new Subject(OP_ISSUER.getValue()),
+				new Subject(INTERMEDIATE_ISSUER.getValue()),
 				DateUtils.fromSecondsSinceEpoch(nowTs),
 				DateUtils.fromSecondsSinceEpoch(nowTs + 3600),
-				OP_JWK_SET.toPublicJWKSet());
-			UNKNOWN_ANCHOR_STMT_ABOUT_OP_CLAIMS = new EntityStatementClaimsSet(
-				UNKNOWN_ANCHOR_ISSUER,
-				new Subject(OP_ISSUER.getValue()),
-				DateUtils.fromSecondsSinceEpoch(nowTs),
-				DateUtils.fromSecondsSinceEpoch(nowTs + 3600),
-				OP_JWK_SET.toPublicJWKSet());
+				ANCHOR_JWK_SET.toPublicJWKSet());
+			ANCHOR_STMT_ABOUT_INTERMEDIATE_CLAIMS.setAuthorityHints(Collections.singletonList(new EntityID(ANCHOR_ISSUER.getValue())));
 			
-			ANCHOR_STMT_ABOUT_OP = EntityStatement.sign(ANCHOR_STMT_ABOUT_OP_CLAIMS, ANCHOR_JWK_SET.getKeyByKeyId("a1"));
-			UNKNOWN_ANCHOR_STMT_ABOUT_OP = EntityStatement.sign(UNKNOWN_ANCHOR_STMT_ABOUT_OP_CLAIMS, UNKNOWN_ANCHOR_JWK_SET.getKeyByKeyId("u1"));
+			ANCHOR_STMT_ABOUT_INTERMEDIATE = EntityStatement.sign(ANCHOR_STMT_ABOUT_INTERMEDIATE_CLAIMS, ANCHOR_JWK_SET.getKeyByKeyId("a1"));
+			
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -157,6 +177,8 @@ public class DefaultTrustChainRetriever_KnownAndUnknownAnchorsTest extends TestC
 				public EntityStatement fetchSelfIssuedEntityStatement(EntityID target) throws ResolveException {
 					if (OP_ISSUER.getValue().equals(target.getValue())) {
 						return OP_SELF_STMT;
+					} else if (INTERMEDIATE_ISSUER.getValue().equals(target.getValue())) {
+						return INTERMEDIATE_SELF_STMT;
 					} else if (ANCHOR_ISSUER.getValue().equals(target.getValue())) {
 						return ANCHOR_SELF_STMT;
 					} else {
@@ -168,32 +190,33 @@ public class DefaultTrustChainRetriever_KnownAndUnknownAnchorsTest extends TestC
 				@Override
 				public EntityStatement fetchEntityStatement(URI federationAPIEndpoint, EntityID issuer, EntityID subject) throws ResolveException {
 					if (ANCHOR_FEDERATION_API_URI.equals(federationAPIEndpoint)) {
-						if (ANCHOR_ISSUER.getValue().equals(issuer.getValue()) && OP_ISSUER.getValue().equals(subject.getValue())) {
-							return ANCHOR_STMT_ABOUT_OP;
+						if (ANCHOR_ISSUER.getValue().equals(issuer.getValue()) && INTERMEDIATE_ISSUER.getValue().equals(subject.getValue())) {
+							return ANCHOR_STMT_ABOUT_INTERMEDIATE;
 						}
 						throw new ResolveException("Unknown subject: " + subject);
-					}
-					if (UNKNOWN_ANCHOR_FEDERATION_API_URI.equals(federationAPIEndpoint)) {
-						if (UNKNOWN_ANCHOR_ISSUER.getValue().equals(issuer.getValue()) && OP_ISSUER.getValue().equals(subject.getValue())) {
-							return UNKNOWN_ANCHOR_STMT_ABOUT_OP;
+					} else if (INTERMEDIATE_FEDERATION_API_URI.equals(federationAPIEndpoint)) {
+						if (INTERMEDIATE_ISSUER.getValue().equals(issuer.getValue()) && OP_ISSUER.getValue().equals(subject.getValue())) {
+							return INTERMEDIATE_STMT_ABOUT_OP;
 						}
 						throw new ResolveException("Unknown subject: " + subject);
+					} else {
+						throw new ResolveException("Exception");
 					}
-					throw new ResolveException("Exception");
 				}
 			}
 		);
 		
-		Set<TrustChain> trustChains = fetch.fetch(new EntityID(OP_ISSUER.getValue()), Collections.singleton(new EntityID("https://federation.com")));
+		Set<TrustChain> trustChains = fetch.fetch(new EntityID(OP_ISSUER.getValue()), Collections.singleton(new EntityID(ANCHOR_ISSUER.getValue())));
+		
+		assertTrue(fetch.getAccumulatedExceptions().isEmpty());
 		
 		assertEquals(1, trustChains.size());
 		
 		TrustChain chain = trustChains.iterator().next();
 		
 		assertEquals(OP_SELF_STMT, chain.getLeafSelfStatement());
-		assertEquals(ANCHOR_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));
-		assertEquals(1, chain.getSuperiorStatements().size());
-		
-		assertTrue(fetch.getAccumulatedExceptions().isEmpty());
+		assertEquals(INTERMEDIATE_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));
+		assertEquals(ANCHOR_STMT_ABOUT_INTERMEDIATE, chain.getSuperiorStatements().get(1));
+		assertEquals(2, chain.getSuperiorStatements().size());
 	}
 }

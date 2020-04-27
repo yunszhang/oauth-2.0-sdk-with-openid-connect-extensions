@@ -42,20 +42,6 @@ interface EntityStatementRetriever {
 	
 	
 	/**
-	 * Resolves an entity's federation API URI by fetching its self-issued
-	 * statement from the federation entity configuration endpoint.
-	 *
-	 * @param entityID The entity ID. Must not be {@code null}.
-	 *
-	 * @return The federation API URI, {@code null} if not advertised.
-	 *
-	 * @throws ResolveException If fetching failed.
-	 */
-	URI resolveFederationAPIURI(final EntityID entityID)
-		throws ResolveException;
-	
-	
-	/**
 	 * Fetches an entity statement from a federation API endpoint.
 	 *
 	 * @param federationAPIEndpoint The federation API endpoint. Must not

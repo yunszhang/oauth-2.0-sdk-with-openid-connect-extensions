@@ -25,6 +25,7 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
+import com.nimbusds.openid.connect.sdk.federation.entities.FederationEntityMetadata;
 
 
 /**
@@ -86,7 +87,7 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 			return Collections.emptySet();
 		}
 		
-		Set<List<EntityStatement>> anchoredChains = fetchStatementsFromSuperiors(subject, trustAnchors, authorityHints, Collections.<EntityStatement>emptyList());
+		Set<List<EntityStatement>> anchoredChains = fetchStatementsFromAuthorities(subject, authorityHints, trustAnchors, Collections.<EntityStatement>emptyList());
 		
 		Set<TrustChain> trustChains = new HashSet<>();
 		
@@ -98,30 +99,58 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 	}
 	
 	
-	private Set<List<EntityStatement>> fetchStatementsFromSuperiors(final EntityID subject,
-									final Set<EntityID> trustAnchors,
-									final List<EntityID> authorityHints,
-									final List<EntityStatement> partialChain) {
+	/**
+	 * Fetches the entity statement(a) about the given subject from its
+	 * authorities.
+	 *
+	 * @param subject      The subject entity. Must not be {@code null}.
+	 * @param authorities  The authorities from which to fetch entity
+	 *                     statements about the subject. Must contain at
+	 *                     least one.
+	 * @param trustAnchors The configured trust anchors. Immutable. Must
+	 *                     contain at least one.
+	 * @param partialChain The current partial (non-anchored) entity
+	 *                     statement chains where newly fetched matching
+	 *                     entity statements can be appended. Empty for a
+	 *                     first iteration. Must not be {@code null}.
+	 *
+	 * @return The anchored entity statement chains.
+	 */
+	private Set<List<EntityStatement>> fetchStatementsFromAuthorities(final EntityID subject,
+									  final List<EntityID> authorities,
+									  final Set<EntityID> trustAnchors,
+									  final List<EntityStatement> partialChain) {
 		
 		// Number of updated chains equals number of authority_hints
 		Set<List<EntityStatement>> updatedChains = new HashSet<>();
 		
-		for (EntityID superior: authorityHints) {
+		// The next level of authority hints, keyed by superior entity ID
+		Map<EntityID,List<EntityID>> nextLevelAuthorityHints = new HashMap<>();
+		
+		for (EntityID authority: authorities) {
 			
-			if (superior == null) {
+			if (authority == null) {
 				continue; // skip
 			}
 			
-			URI federationAPIURI;
+			EntityStatement superiorSelfStmt;
 			try {
-				federationAPIURI = retriever.resolveFederationAPIURI(superior);
+				superiorSelfStmt = retriever.fetchSelfIssuedEntityStatement(authority);
+				nextLevelAuthorityHints.put(authority, superiorSelfStmt.getClaimsSet().getAuthorityHints());
 			} catch (ResolveException e) {
-				accumulatedExceptions.add(new ResolveException("Couldn't resolve federation API URI for " + superior + ": " + e.getMessage(), e));
+				accumulatedExceptions.add(new ResolveException("Couldn't fetch self-issued entity statement from " + authority + ": " + e.getMessage(), e));
 				continue;
-				
 			}
+			
+			FederationEntityMetadata metadata = superiorSelfStmt.getClaimsSet().getFederationEntityMetadata();
+			if (metadata == null) {
+				accumulatedExceptions.add(new ResolveException("No federation entity metadata for " + authority));
+				continue;
+			}
+			
+			URI federationAPIURI = metadata.getFederationAPIEndpointURI();
 			if (federationAPIURI == null) {
-				accumulatedExceptions.add(new ResolveException("No federation API URI for " + superior));
+				accumulatedExceptions.add(new ResolveException("No federation API URI in metadata for " + authority));
 				continue;
 			}
 			
@@ -129,7 +158,7 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 			try {
 				entityStatement = retriever.fetchEntityStatement(
 					federationAPIURI,
-					superior,
+					authority,
 					subject);
 			} catch (ResolveException e) {
 				accumulatedExceptions.add(new ResolveException("Couldn't fetch entity statement from " + federationAPIURI + ": " + e.getMessage(), e));
@@ -154,7 +183,7 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 				// Reached unknown trust anchor
 				continue;
 			} else {
-				// More statements remain
+				// Add to incomplete chains
 				remainingPartialChains.add(chain);
 			}
 		}
@@ -163,13 +192,17 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 			
 			EntityStatement last = chain.get(chain.size() - 1);
 			
-			// Recursion
-			anchoredChains.addAll(fetchStatementsFromSuperiors(
-				last.getClaimsSet().getSubjectEntityID(),
-				trustAnchors,
-				last.getClaimsSet().getAuthorityHints(),
-				chain));
+			List<EntityID> nextAuthorities = nextLevelAuthorityHints.get(last.getClaimsSet().getIssuerEntityID());
+			if (CollectionUtils.isEmpty(nextAuthorities)) {
+				continue;
+			}
 			
+			// Recursion
+			anchoredChains.addAll(fetchStatementsFromAuthorities(
+				last.getClaimsSet().getIssuerEntityID(),
+				nextAuthorities,
+				trustAnchors,
+				chain));
 		}
 		
 		return anchoredChains;

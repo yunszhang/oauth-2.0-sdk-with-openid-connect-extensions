@@ -35,6 +35,7 @@ import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
+import com.nimbusds.openid.connect.sdk.federation.entities.FederationEntityMetadata;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 
@@ -46,6 +47,10 @@ public class DefaultTrustChainRetriever_UnknownAnchorTest extends TestCase {
 	private static final URI ANCHOR_FEDERATION_API_URI = URI.create(ANCHOR_ISSUER + "/api");
 	
 	private static final JWKSet ANCHOR_JWK_SET;
+	
+	private static final EntityStatementClaimsSet ANCHOR_SELF_STMT_CLAIMS;
+	
+	private static final EntityStatement ANCHOR_SELF_STMT;
 	
 	// Leaf
 	private static final Issuer OP_ISSUER = new Issuer("https://c2id.com");
@@ -95,6 +100,16 @@ public class DefaultTrustChainRetriever_UnknownAnchorTest extends TestCase {
 			
 			OP_SELF_STMT = EntityStatement.sign(OP_SELF_STMT_CLAIMS, OP_JWK_SET.getKeyByKeyId("op1"));
 			
+			ANCHOR_SELF_STMT_CLAIMS = new EntityStatementClaimsSet(
+				ANCHOR_ISSUER,
+				new Subject(ANCHOR_ISSUER.getValue()),
+				DateUtils.fromSecondsSinceEpoch(nowTs),
+				DateUtils.fromSecondsSinceEpoch(nowTs + 3600),
+				ANCHOR_JWK_SET.toPublicJWKSet());
+			ANCHOR_SELF_STMT_CLAIMS.setFederationEntityMetadata(new FederationEntityMetadata(ANCHOR_FEDERATION_API_URI));
+			
+			ANCHOR_SELF_STMT = EntityStatement.sign(ANCHOR_SELF_STMT_CLAIMS, ANCHOR_JWK_SET.getKeyByKeyId("a1"));
+			
 			ANCHOR_STMT_ABOUT_OP_CLAIMS = new EntityStatementClaimsSet(
 				ANCHOR_ISSUER,
 				new Subject(OP_ISSUER.getValue()),
@@ -109,7 +124,7 @@ public class DefaultTrustChainRetriever_UnknownAnchorTest extends TestCase {
 	}
 	
 	
-	public void testFetch_simple_oneStep() {
+	public void testFetch() {
 		
 		DefaultTrustChainRetriever fetch = new DefaultTrustChainRetriever(
 			new EntityStatementRetriever() {
@@ -117,18 +132,11 @@ public class DefaultTrustChainRetriever_UnknownAnchorTest extends TestCase {
 				public EntityStatement fetchSelfIssuedEntityStatement(EntityID target) throws ResolveException {
 					if (OP_ISSUER.getValue().equals(target.getValue())) {
 						return OP_SELF_STMT;
+					} else if (ANCHOR_ISSUER.getValue().equals(target.getValue())) {
+						return ANCHOR_SELF_STMT;
 					} else {
 						throw new ResolveException("Invalid target");
 					}
-				}
-				
-				
-				@Override
-				public URI resolveFederationAPIURI(EntityID entityID) throws ResolveException {
-					if (ANCHOR_ISSUER.getValue().equals(entityID.getValue())) {
-						return ANCHOR_FEDERATION_API_URI;
-					}
-					throw new ResolveException("Invalid entity ID");
 				}
 				
 				

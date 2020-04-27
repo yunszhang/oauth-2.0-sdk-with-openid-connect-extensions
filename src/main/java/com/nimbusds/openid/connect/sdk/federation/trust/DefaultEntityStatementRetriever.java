@@ -31,7 +31,6 @@ import com.nimbusds.openid.connect.sdk.federation.config.FederationEntityConfigu
 import com.nimbusds.openid.connect.sdk.federation.config.FederationEntityConfigurationResponse;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
-import com.nimbusds.openid.connect.sdk.federation.entities.FederationEntityMetadata;
 
 
 /**
@@ -150,22 +149,6 @@ class DefaultEntityStatementRetriever implements EntityStatementRetriever {
 		}
 		
 		return response.toSuccessResponse().getEntityStatement();
-	}
-	
-	
-	@Override
-	public URI resolveFederationAPIURI(final EntityID entityID)
-		throws ResolveException {
-		
-		EntityStatement entityStatement = fetchSelfIssuedEntityStatement(entityID);
-		
-		FederationEntityMetadata metadata = entityStatement.getClaimsSet().getFederationEntityMetadata();
-		
-		if (metadata == null) {
-			return null;
-		}
-		
-		return metadata.getFederationAPIEndpointURI();
 	}
 	
 	

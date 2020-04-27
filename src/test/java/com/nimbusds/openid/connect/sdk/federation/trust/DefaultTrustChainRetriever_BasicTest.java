@@ -25,16 +25,19 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.util.DateUtils;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
+import com.nimbusds.openid.connect.sdk.federation.entities.FederationEntityMetadata;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 
@@ -46,6 +49,10 @@ public class DefaultTrustChainRetriever_BasicTest extends TestCase {
 	private static final URI ANCHOR_FEDERATION_API_URI = URI.create(ANCHOR_ISSUER + "/api");
 	
 	private static final JWKSet ANCHOR_JWK_SET;
+	
+	private static final EntityStatementClaimsSet ANCHOR_SELF_STMT_CLAIMS;
+	
+	private static final EntityStatement ANCHOR_SELF_STMT;
 	
 	// Leaf
 	private static final Issuer OP_ISSUER = new Issuer("https://c2id.com");
@@ -95,6 +102,16 @@ public class DefaultTrustChainRetriever_BasicTest extends TestCase {
 			
 			OP_SELF_STMT = EntityStatement.sign(OP_SELF_STMT_CLAIMS, OP_JWK_SET.getKeyByKeyId("op1"));
 			
+			ANCHOR_SELF_STMT_CLAIMS = new EntityStatementClaimsSet(
+				ANCHOR_ISSUER,
+				new Subject(ANCHOR_ISSUER.getValue()),
+				DateUtils.fromSecondsSinceEpoch(nowTs),
+				DateUtils.fromSecondsSinceEpoch(nowTs + 3600),
+				ANCHOR_JWK_SET.toPublicJWKSet());
+			ANCHOR_SELF_STMT_CLAIMS.setFederationEntityMetadata(new FederationEntityMetadata(ANCHOR_FEDERATION_API_URI));
+			
+			ANCHOR_SELF_STMT = EntityStatement.sign(ANCHOR_SELF_STMT_CLAIMS, ANCHOR_JWK_SET.getKeyByKeyId("a1"));
+			
 			ANCHOR_STMT_ABOUT_OP_CLAIMS = new EntityStatementClaimsSet(
 				ANCHOR_ISSUER,
 				new Subject(OP_ISSUER.getValue()),
@@ -129,18 +146,11 @@ public class DefaultTrustChainRetriever_BasicTest extends TestCase {
 				public EntityStatement fetchSelfIssuedEntityStatement(EntityID target) throws ResolveException {
 					if (OP_ISSUER.getValue().equals(target.getValue())) {
 						return OP_SELF_STMT;
+					} else if (ANCHOR_ISSUER.getValue().equals(target.getValue())) {
+						return ANCHOR_SELF_STMT;
 					} else {
 						throw new ResolveException("Invalid target");
 					}
-				}
-				
-				
-				@Override
-				public URI resolveFederationAPIURI(EntityID entityID) throws ResolveException {
-					if (ANCHOR_ISSUER.getValue().equals(entityID.getValue())) {
-						return ANCHOR_FEDERATION_API_URI;
-					}
-					throw new ResolveException("Invalid entity ID");
 				}
 				
 				
@@ -182,13 +192,6 @@ public class DefaultTrustChainRetriever_BasicTest extends TestCase {
 				
 				
 				@Override
-				public URI resolveFederationAPIURI(EntityID entityID) {
-					fail();
-					return null;
-				}
-				
-				
-				@Override
 				public EntityStatement fetchEntityStatement(URI federationAPIEndpoint, EntityID issuer, EntityID subject) {
 					fail();
 					return null;
@@ -211,17 +214,19 @@ public class DefaultTrustChainRetriever_BasicTest extends TestCase {
 		DefaultTrustChainRetriever fetch = new DefaultTrustChainRetriever(
 			new EntityStatementRetriever() {
 				@Override
-				public EntityStatement fetchSelfIssuedEntityStatement(EntityID target) throws ResolveException {
+				public EntityStatement fetchSelfIssuedEntityStatement(EntityID target) {
 					if (OP_ISSUER.getValue().equals(target.getValue())) {
 						return OP_SELF_STMT;
+					} else if (ANCHOR_ISSUER.getValue().equals(target.getValue())) {
+						try {
+							EntityStatementClaimsSet claims = new EntityStatementClaimsSet(ANCHOR_SELF_STMT_CLAIMS.toJWTClaimsSet());
+							claims.setFederationEntityMetadata(new FederationEntityMetadata(null));
+							return EntityStatement.sign(claims, ANCHOR_JWK_SET.getKeyByKeyId("a1"));
+						} catch (ParseException | JOSEException e) {
+							fail(e.getMessage());
+						}
 					}
 					fail();
-					return null;
-				}
-				
-				
-				@Override
-				public URI resolveFederationAPIURI(EntityID entityID) {
 					return null;
 				}
 				
@@ -238,7 +243,7 @@ public class DefaultTrustChainRetriever_BasicTest extends TestCase {
 		assertTrue(trustChains.isEmpty());
 		
 		ResolveException e1 = (ResolveException) fetch.getAccumulatedExceptions().get(0);
-		assertEquals("No federation API URI for https://federation.com", e1.getMessage());
+		assertEquals("No federation API URI in metadata for https://federation.com", e1.getMessage());
 		
 		assertEquals(1, fetch.getAccumulatedExceptions().size());
 	}
@@ -249,19 +254,11 @@ public class DefaultTrustChainRetriever_BasicTest extends TestCase {
 		DefaultTrustChainRetriever fetch = new DefaultTrustChainRetriever(
 			new EntityStatementRetriever() {
 				@Override
-				public EntityStatement fetchSelfIssuedEntityStatement(EntityID target) throws ResolveException {
+				public EntityStatement fetchSelfIssuedEntityStatement(EntityID target) {
 					if (OP_ISSUER.getValue().equals(target.getValue())) {
 						return OP_SELF_STMT;
-					}
-					fail();
-					return null;
-				}
-				
-				
-				@Override
-				public URI resolveFederationAPIURI(EntityID entityID) {
-					if (ANCHOR_ISSUER.getValue().equals(entityID.getValue())) {
-						return ANCHOR_FEDERATION_API_URI;
+					} else if (ANCHOR_ISSUER.getValue().equals(target.getValue())) {
+						return ANCHOR_SELF_STMT;
 					}
 					fail();
 					return null;
