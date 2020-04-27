@@ -18,6 +18,9 @@
 package com.nimbusds.openid.connect.sdk.federation.trust;
 
 
+import java.util.Collections;
+import java.util.List;
+
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.GeneralException;
 
@@ -28,17 +31,68 @@ import com.nimbusds.oauth2.sdk.GeneralException;
 public class ResolveException extends GeneralException {
 	
 	
+	/**
+	 * For multiple causes.
+	 */
+	private List<Throwable> causes;
+	
+	
+	/**
+	 * Creates a new resolve exception.
+	 *
+	 * @param message The message.
+	 */
 	public ResolveException(final String message) {
 		super(message);
 	}
 	
 	
+	/**
+	 * Creates a new resolve exception.
+	 *
+	 * @param message The message.
+	 * @param cause   The cause.
+	 */
 	public ResolveException(final String message, final Throwable cause) {
 		super(message, cause);
 	}
 	
 	
+	/**
+	 * Creates a new resolve exception with potentially multiple causes.
+	 *
+	 * @param message The message.
+	 * @param causes  The causes, empty list or {@code null} if none.
+	 */
+	public ResolveException(final String message, final List<Throwable> causes) {
+		super(message);
+		this.causes = causes;
+	}
+	
+	
+	/**
+	 * Creates a new resolve exception.
+	 *
+	 * @param message     The message.
+	 * @param errorObject The error object.
+	 */
 	public ResolveException(final String message, final ErrorObject errorObject) {
 		super(message, errorObject);
+	}
+	
+	
+	/**
+	 * Returns the exception causes.
+	 *
+	 * @return The exception causes, empty list if none.
+	 */
+	public List<Throwable> getCauses() {
+		if (causes != null) {
+			return causes;
+		} else if (getCause() != null){
+			return Collections.singletonList(getCause());
+		} else {
+			return Collections.emptyList();
+		}
 	}
 }

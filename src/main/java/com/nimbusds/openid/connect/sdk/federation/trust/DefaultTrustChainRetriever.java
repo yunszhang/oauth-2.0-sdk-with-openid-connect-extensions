@@ -37,7 +37,7 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 	private final EntityStatementRetriever retriever;
 	
 	
-	private final List<Exception> accumulatedExceptions = new LinkedList<>();
+	private final List<Throwable> accumulatedExceptions = new LinkedList<>();
 	
 	
 	/**
@@ -210,7 +210,7 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 	
 	
 	@Override
-	public List<Exception> getAccumulatedExceptions() {
+	public List<Throwable> getAccumulatedExceptions() {
 		return accumulatedExceptions;
 	}
 }

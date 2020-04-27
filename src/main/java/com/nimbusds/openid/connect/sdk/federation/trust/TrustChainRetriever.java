@@ -51,5 +51,5 @@ interface TrustChainRetriever {
 	 *
 	 * @return The accumulated exceptions, empty list if none.
 	 */
-	List<Exception> getAccumulatedExceptions();
+	List<Throwable> getAccumulatedExceptions();
 }

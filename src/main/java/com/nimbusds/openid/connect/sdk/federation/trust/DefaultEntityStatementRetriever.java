@@ -76,7 +76,7 @@ class DefaultEntityStatementRetriever implements EntityStatementRetriever {
 	 * Creates a new entity statement retriever.
 	 *
 	 * @param httpConnectTimeoutMs The HTTP connect timeout in
-	 *                             milliseconds, zero means timout
+	 *                             milliseconds, zero means timeout
 	 *                             determined by the underlying HTTP client.
 	 * @param httpReadTimeoutMs    The HTTP read timeout in milliseconds,
 	 *                             zero means timeout determined by the
