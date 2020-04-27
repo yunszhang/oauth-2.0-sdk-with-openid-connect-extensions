@@ -150,6 +150,9 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 			if (trustAnchors.contains(last.getClaimsSet().getIssuerEntityID())) {
 				// Reached statement from trust anchor about leaf or intermediate
 				anchoredChains.add(chain);
+			} else if (CollectionUtils.isEmpty(last.getClaimsSet().getAuthorityHints())) {
+				// Reached unknown trust anchor
+				continue;
 			} else {
 				// More statements remain
 				remainingPartialChains.add(chain);

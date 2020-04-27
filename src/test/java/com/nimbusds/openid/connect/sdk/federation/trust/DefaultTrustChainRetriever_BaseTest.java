@@ -38,7 +38,7 @@ import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaims
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 
-public class DefaultTrustChainRetrieverTest extends TestCase {
+public class DefaultTrustChainRetriever_BaseTest extends TestCase {
 	
 	// Anchor
 	private static final Issuer ANCHOR_ISSUER = new Issuer("https://federation.com");
