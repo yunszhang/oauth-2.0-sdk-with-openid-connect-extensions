@@ -118,6 +118,16 @@ public class TrustChainResolver {
 	
 	
 	/**
+	 * Returns the configured entity statement retriever.
+	 *
+	 * @return The configured entity statement retriever.
+	 */
+	public EntityStatementRetriever getEntityStatementRetriever() {
+		return statementRetriever;
+	}
+	
+	
+	/**
 	 * Resolves the trust chains for the specified target.
 	 *
 	 * @param target The target. Must not be {@code null}.
