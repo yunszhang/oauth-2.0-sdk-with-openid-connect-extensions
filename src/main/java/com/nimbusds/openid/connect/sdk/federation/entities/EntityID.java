@@ -53,6 +53,29 @@ public final class EntityID extends Identifier {
 	}
 	
 	
+	/**
+	 * Creates a new entity identifier from the specified issuer
+	 * identifier.
+	 *
+	 * @param issuer The issuer. Must represent an URI and must not be
+	 *               {@code null}.
+	 */
+	public EntityID(final Issuer issuer) {
+		this(issuer.getValue());
+	}
+	
+	
+	/**
+	 * Creates a new entity identifier from the specified subject
+	 * identifier.
+	 *
+	 * @param subject The subject. Must represent an URI and must not be
+	 *                {@code null}.
+	 */
+	public EntityID(final Subject subject) {
+		this(subject.getValue());
+	}
+	
 	
 	/**
 	 * Creates a new entity identifier with the specified value.

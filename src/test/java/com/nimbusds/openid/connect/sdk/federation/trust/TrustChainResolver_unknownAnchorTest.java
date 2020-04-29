@@ -39,10 +39,10 @@ import com.nimbusds.openid.connect.sdk.federation.entities.FederationEntityMetad
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 
-public class DefaultTrustChainRetriever_KnownAndUnknownAnchorsTest extends TestCase {
+public class TrustChainResolver_unknownAnchorTest extends TestCase {
 	
-	// Known anchor
-	private static final Issuer ANCHOR_ISSUER = new Issuer("https://federation.com");
+	// Anchor
+	private static final Issuer ANCHOR_ISSUER = new Issuer("https://unknown.federation.com");
 	
 	private static final URI ANCHOR_FEDERATION_API_URI = URI.create(ANCHOR_ISSUER + "/api");
 	
@@ -51,13 +51,6 @@ public class DefaultTrustChainRetriever_KnownAndUnknownAnchorsTest extends TestC
 	private static final EntityStatementClaimsSet ANCHOR_SELF_STMT_CLAIMS;
 	
 	private static final EntityStatement ANCHOR_SELF_STMT;
-	
-	// Unknown anchor
-	private static final Issuer UNKNOWN_ANCHOR_ISSUER = new Issuer("https://unknown.federation.com");
-	
-	private static final URI UNKNOWN_ANCHOR_FEDERATION_API_URI = URI.create(ANCHOR_ISSUER + "/api");
-	
-	private static final JWKSet UNKNOWN_ANCHOR_JWK_SET;
 	
 	// Leaf
 	private static final Issuer OP_ISSUER = new Issuer("https://c2id.com");
@@ -74,10 +67,6 @@ public class DefaultTrustChainRetriever_KnownAndUnknownAnchorsTest extends TestC
 	
 	private static final EntityStatement ANCHOR_STMT_ABOUT_OP;
 	
-	private static final EntityStatementClaimsSet UNKNOWN_ANCHOR_STMT_ABOUT_OP_CLAIMS;
-	
-	private static final EntityStatement UNKNOWN_ANCHOR_STMT_ABOUT_OP;
-	
 	
 	static {
 		try {
@@ -87,13 +76,6 @@ public class DefaultTrustChainRetriever_KnownAndUnknownAnchorsTest extends TestC
 				new RSAKeyGenerator(2048)
 					.keyUse(KeyUse.SIGNATURE)
 					.keyID("a1")
-					.generate()
-			);
-			
-			UNKNOWN_ANCHOR_JWK_SET = new JWKSet(
-				new RSAKeyGenerator(2048)
-					.keyUse(KeyUse.SIGNATURE)
-					.keyID("u1")
 					.generate()
 			);
 			
@@ -134,66 +116,56 @@ public class DefaultTrustChainRetriever_KnownAndUnknownAnchorsTest extends TestC
 				DateUtils.fromSecondsSinceEpoch(nowTs),
 				DateUtils.fromSecondsSinceEpoch(nowTs + 3600),
 				OP_JWK_SET.toPublicJWKSet());
-			UNKNOWN_ANCHOR_STMT_ABOUT_OP_CLAIMS = new EntityStatementClaimsSet(
-				UNKNOWN_ANCHOR_ISSUER,
-				new Subject(OP_ISSUER.getValue()),
-				DateUtils.fromSecondsSinceEpoch(nowTs),
-				DateUtils.fromSecondsSinceEpoch(nowTs + 3600),
-				OP_JWK_SET.toPublicJWKSet());
 			
 			ANCHOR_STMT_ABOUT_OP = EntityStatement.sign(ANCHOR_STMT_ABOUT_OP_CLAIMS, ANCHOR_JWK_SET.getKeyByKeyId("a1"));
-			UNKNOWN_ANCHOR_STMT_ABOUT_OP = EntityStatement.sign(UNKNOWN_ANCHOR_STMT_ABOUT_OP_CLAIMS, UNKNOWN_ANCHOR_JWK_SET.getKeyByKeyId("u1"));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
 	
-	public void testFetch() {
+	public void testResolve() {
 		
-		DefaultTrustChainRetriever fetch = new DefaultTrustChainRetriever(
-			new EntityStatementRetriever() {
-				@Override
-				public EntityStatement fetchSelfIssuedEntityStatement(EntityID target) throws ResolveException {
-					if (OP_ISSUER.getValue().equals(target.getValue())) {
-						return OP_SELF_STMT;
-					} else if (ANCHOR_ISSUER.getValue().equals(target.getValue())) {
-						return ANCHOR_SELF_STMT;
-					} else {
-						throw new ResolveException("Invalid target");
-					}
-				}
-				
-				
-				@Override
-				public EntityStatement fetchEntityStatement(URI federationAPIEndpoint, EntityID issuer, EntityID subject) throws ResolveException {
-					if (ANCHOR_FEDERATION_API_URI.equals(federationAPIEndpoint)) {
-						if (ANCHOR_ISSUER.getValue().equals(issuer.getValue()) && OP_ISSUER.getValue().equals(subject.getValue())) {
-							return ANCHOR_STMT_ABOUT_OP;
-						}
-						throw new ResolveException("Unknown subject: " + subject);
-					}
-					if (UNKNOWN_ANCHOR_FEDERATION_API_URI.equals(federationAPIEndpoint)) {
-						if (UNKNOWN_ANCHOR_ISSUER.getValue().equals(issuer.getValue()) && OP_ISSUER.getValue().equals(subject.getValue())) {
-							return UNKNOWN_ANCHOR_STMT_ABOUT_OP;
-						}
-						throw new ResolveException("Unknown subject: " + subject);
-					}
-					throw new ResolveException("Exception");
+		EntityStatementRetriever statementRetriever = new EntityStatementRetriever() {
+			@Override
+			public EntityStatement fetchSelfIssuedEntityStatement(EntityID target) throws ResolveException {
+				if (OP_ISSUER.getValue().equals(target.getValue())) {
+					return OP_SELF_STMT;
+				} else if (ANCHOR_ISSUER.getValue().equals(target.getValue())) {
+					return ANCHOR_SELF_STMT;
+				} else {
+					throw new ResolveException("Invalid target");
 				}
 			}
-		);
+			
+			
+			@Override
+			public EntityStatement fetchEntityStatement(URI federationAPIEndpoint, EntityID issuer, EntityID subject) throws ResolveException {
+				if (ANCHOR_FEDERATION_API_URI.equals(federationAPIEndpoint)) {
+					if (ANCHOR_ISSUER.getValue().equals(issuer.getValue()) && OP_ISSUER.getValue().equals(subject.getValue())) {
+						return ANCHOR_STMT_ABOUT_OP;
+					}
+					throw new ResolveException("Unknown subject: " + subject);
+				}
+				throw new ResolveException("Exception");
+			}
+		};
 		
-		Set<TrustChain> trustChains = fetch.fetch(new EntityID(OP_ISSUER.getValue()), Collections.singleton(new EntityID("https://federation.com")));
+		// Test the retriever
+		DefaultTrustChainRetriever retriever = new DefaultTrustChainRetriever(statementRetriever);
+		Set<TrustChain> trustChains = retriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID("https://federation.com")));
+		assertTrue(trustChains.isEmpty());
+		assertTrue(retriever.getAccumulatedExceptions().isEmpty());
 		
-		assertEquals(1, trustChains.size());
+		// Test the resolver
+		TrustChainResolver resolver = new TrustChainResolver(Collections.singletonMap(new EntityID("https://federation.com"), new JWKSet()), statementRetriever);
 		
-		TrustChain chain = trustChains.iterator().next();
-		
-		assertEquals(OP_SELF_STMT, chain.getLeafSelfStatement());
-		assertEquals(ANCHOR_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));
-		assertEquals(1, chain.getSuperiorStatements().size());
-		
-		assertTrue(fetch.getAccumulatedExceptions().isEmpty());
+		try {
+			resolver.resolveTrustChains(new EntityID(OP_ISSUER));
+			fail();
+		} catch (ResolveException e) {
+			assertEquals("No trust chain leading up to a trust anchor", e.getMessage());
+			assertEquals(0, e.getCauses().size());
+		}
 	}
 }

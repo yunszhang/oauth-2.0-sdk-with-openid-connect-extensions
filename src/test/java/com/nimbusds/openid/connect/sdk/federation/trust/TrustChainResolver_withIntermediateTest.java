@@ -39,7 +39,7 @@ import com.nimbusds.openid.connect.sdk.federation.entities.FederationEntityMetad
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 
-public class DefaultTrustChainRetriever_WithIntermediateTest extends TestCase {
+public class TrustChainResolver_withIntermediateTest extends TestCase {
 	
 	// Anchor
 	private static final Issuer ANCHOR_ISSUER = new Issuer("https://federation.com");
@@ -158,7 +158,7 @@ public class DefaultTrustChainRetriever_WithIntermediateTest extends TestCase {
 				new Subject(INTERMEDIATE_ISSUER.getValue()),
 				DateUtils.fromSecondsSinceEpoch(nowTs),
 				DateUtils.fromSecondsSinceEpoch(nowTs + 3600),
-				ANCHOR_JWK_SET.toPublicJWKSet());
+				INTERMEDIATE_JWK_SET.toPublicJWKSet());
 			ANCHOR_STMT_ABOUT_INTERMEDIATE_CLAIMS.setAuthorityHints(Collections.singletonList(new EntityID(ANCHOR_ISSUER.getValue())));
 			
 			ANCHOR_STMT_ABOUT_INTERMEDIATE = EntityStatement.sign(ANCHOR_STMT_ABOUT_INTERMEDIATE_CLAIMS, ANCHOR_JWK_SET.getKeyByKeyId("a1"));
@@ -169,50 +169,65 @@ public class DefaultTrustChainRetriever_WithIntermediateTest extends TestCase {
 	}
 	
 	
-	public void testFetch() {
+	public void testResolve() throws ResolveException {
 		
-		DefaultTrustChainRetriever fetch = new DefaultTrustChainRetriever(
-			new EntityStatementRetriever() {
-				@Override
-				public EntityStatement fetchSelfIssuedEntityStatement(EntityID target) throws ResolveException {
-					if (OP_ISSUER.getValue().equals(target.getValue())) {
-						return OP_SELF_STMT;
-					} else if (INTERMEDIATE_ISSUER.getValue().equals(target.getValue())) {
-						return INTERMEDIATE_SELF_STMT;
-					} else if (ANCHOR_ISSUER.getValue().equals(target.getValue())) {
-						return ANCHOR_SELF_STMT;
-					} else {
-						throw new ResolveException("Invalid target");
-					}
-				}
-				
-				
-				@Override
-				public EntityStatement fetchEntityStatement(URI federationAPIEndpoint, EntityID issuer, EntityID subject) throws ResolveException {
-					if (ANCHOR_FEDERATION_API_URI.equals(federationAPIEndpoint)) {
-						if (ANCHOR_ISSUER.getValue().equals(issuer.getValue()) && INTERMEDIATE_ISSUER.getValue().equals(subject.getValue())) {
-							return ANCHOR_STMT_ABOUT_INTERMEDIATE;
-						}
-						throw new ResolveException("Unknown subject: " + subject);
-					} else if (INTERMEDIATE_FEDERATION_API_URI.equals(federationAPIEndpoint)) {
-						if (INTERMEDIATE_ISSUER.getValue().equals(issuer.getValue()) && OP_ISSUER.getValue().equals(subject.getValue())) {
-							return INTERMEDIATE_STMT_ABOUT_OP;
-						}
-						throw new ResolveException("Unknown subject: " + subject);
-					} else {
-						throw new ResolveException("Exception");
-					}
+		EntityStatementRetriever statementRetriever = new EntityStatementRetriever() {
+			@Override
+			public EntityStatement fetchSelfIssuedEntityStatement(EntityID target) throws ResolveException {
+				if (OP_ISSUER.getValue().equals(target.getValue())) {
+					return OP_SELF_STMT;
+				} else if (INTERMEDIATE_ISSUER.getValue().equals(target.getValue())) {
+					return INTERMEDIATE_SELF_STMT;
+				} else if (ANCHOR_ISSUER.getValue().equals(target.getValue())) {
+					return ANCHOR_SELF_STMT;
+				} else {
+					throw new ResolveException("Invalid target");
 				}
 			}
-		);
+			
+			
+			@Override
+			public EntityStatement fetchEntityStatement(URI federationAPIEndpoint, EntityID issuer, EntityID subject) throws ResolveException {
+				if (ANCHOR_FEDERATION_API_URI.equals(federationAPIEndpoint)) {
+					if (ANCHOR_ISSUER.getValue().equals(issuer.getValue()) && INTERMEDIATE_ISSUER.getValue().equals(subject.getValue())) {
+						return ANCHOR_STMT_ABOUT_INTERMEDIATE;
+					}
+					throw new ResolveException("Unknown subject: " + subject);
+				} else if (INTERMEDIATE_FEDERATION_API_URI.equals(federationAPIEndpoint)) {
+					if (INTERMEDIATE_ISSUER.getValue().equals(issuer.getValue()) && OP_ISSUER.getValue().equals(subject.getValue())) {
+						return INTERMEDIATE_STMT_ABOUT_OP;
+					}
+					throw new ResolveException("Unknown subject: " + subject);
+				} else {
+					throw new ResolveException("Exception");
+				}
+			}
+		};
 		
-		Set<TrustChain> trustChains = fetch.fetch(new EntityID(OP_ISSUER.getValue()), Collections.singleton(new EntityID(ANCHOR_ISSUER.getValue())));
+		// Test the chain retriever
+		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		assertTrue(fetch.getAccumulatedExceptions().isEmpty());
+		Set<TrustChain> trustChains = chainRetriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		
+		assertTrue(chainRetriever.getAccumulatedExceptions().isEmpty());
 		
 		assertEquals(1, trustChains.size());
 		
 		TrustChain chain = trustChains.iterator().next();
+		
+		assertEquals(OP_SELF_STMT, chain.getLeafSelfStatement());
+		assertEquals(INTERMEDIATE_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));
+		assertEquals(ANCHOR_STMT_ABOUT_INTERMEDIATE, chain.getSuperiorStatements().get(1));
+		assertEquals(2, chain.getSuperiorStatements().size());
+		
+		// Test the chain resolver
+		TrustChainResolver resolver = new TrustChainResolver(Collections.singletonMap(new EntityID(ANCHOR_ISSUER), ANCHOR_JWK_SET), statementRetriever);
+		
+		Set<TrustChain> resolvedChains = resolver.resolveTrustChains(new EntityID(OP_ISSUER));
+		
+		assertEquals(1, resolvedChains.size());
+		
+		chain = resolvedChains.iterator().next();
 		
 		assertEquals(OP_SELF_STMT, chain.getLeafSelfStatement());
 		assertEquals(INTERMEDIATE_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));

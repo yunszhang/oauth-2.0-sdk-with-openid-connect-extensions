@@ -39,6 +39,26 @@ public class EntityIDTest extends TestCase {
 	}
 	
 	
+	public void testIssuerConstructor() {
+		
+		URI uri = URI.create("https://c2id.com");
+		Issuer issuer = new Issuer(uri);
+		EntityID entityID = new EntityID(issuer);
+		assertEquals(issuer.getValue(), entityID.getValue());
+		assertEquals(uri, entityID.toURI());
+	}
+	
+	
+	public void testSubjectConstructor() {
+		
+		URI uri = URI.create("https://c2id.com");
+		Subject subject = new Subject(uri.toString());
+		EntityID entityID = new EntityID(subject);
+		assertEquals(subject.getValue(), entityID.getValue());
+		assertEquals(uri, entityID.toURI());
+	}
+	
+	
 	public void testStringConstructor() {
 		
 		String value = "https://c2id.com";
