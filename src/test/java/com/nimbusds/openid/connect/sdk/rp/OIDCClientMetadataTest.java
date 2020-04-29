@@ -21,7 +21,6 @@ package com.nimbusds.openid.connect.sdk.rp;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
-import javax.mail.internet.InternetAddress;
 
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
@@ -153,12 +152,6 @@ public class OIDCClientMetadataTest extends TestCase {
 		
 		assertEquals(JWEAlgorithm.RSA1_5, clientMetadata.getUserInfoJWEAlg());
 		assertEquals(EncryptionMethod.A128CBC_HS256, clientMetadata.getUserInfoJWEEnc());
-		
-		List<InternetAddress> contacts = clientMetadata.getContacts();
-		
-		assertEquals(new InternetAddress("ve7jtb@example.org"), contacts.get(0));
-		assertEquals(new InternetAddress("mary@example.org"), contacts.get(1));
-		assertEquals(2, contacts.size());
 		
 		Set<URI> requestURIs = clientMetadata.getRequestObjectURIs();
 		

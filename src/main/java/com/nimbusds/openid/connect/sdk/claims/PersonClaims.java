@@ -20,7 +20,6 @@ package com.nimbusds.openid.connect.sdk.claims;
 
 import java.net.URI;
 import java.util.*;
-import javax.mail.internet.InternetAddress;
 
 import net.minidev.json.JSONObject;
 
@@ -729,37 +728,6 @@ public class PersonClaims extends ClaimsSet {
 	
 	
 	// email
-	
-	
-	/**
-	 * Gets the preferred email address. Corresponds to the {@code email}
-	 * claim.
-	 *
-	 * <p>Use {@link #getEmailAddress()} instead.
-	 *
-	 * @return The preferred email address, {@code null} if not specified.
-	 */
-	@Deprecated
-	public InternetAddress getEmail() {
-	
-		return getEmailClaim(EMAIL_CLAIM_NAME);
-	}
-	
-	
-	/**
-	 * Sets the preferred email address. Corresponds to the {@code email}
-	 * claim.
-	 *
-	 * <p>Use {@link #setEmailAddress(String)} instead.
-	 *
-	 * @param email The preferred email address. If {@code null} the claim
-	 *              will be removed.
-	 */
-	@Deprecated
-	public void setEmail(final InternetAddress email) {
-	
-		setEmailClaim(EMAIL_CLAIM_NAME, email);
-	}
 	
 	
 	/**

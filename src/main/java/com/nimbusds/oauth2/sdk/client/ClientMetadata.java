@@ -21,8 +21,9 @@ package com.nimbusds.oauth2.sdk.client;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
+
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
@@ -38,8 +39,6 @@ import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.id.SoftwareID;
 import com.nimbusds.oauth2.sdk.id.SoftwareVersion;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -559,61 +558,6 @@ public class ClientMetadata {
 	public void setGrantTypes(final Set<GrantType> grantTypes) {
 
 		this.grantTypes = grantTypes;
-	}
-
-
-	/**
-	 * Gets the administrator email contacts for the client. Corresponds to
-	 * the {@code contacts} client metadata field.
-	 *
-	 * <p>Use {@link #getEmailContacts()} instead.
-	 *
-	 * @return The administrator email contacts, {@code null} if not
-	 *         specified.
-	 */
-	@Deprecated
-	public List<InternetAddress> getContacts() {
-
-		if (contacts == null)
-			return null;
-		
-		List<InternetAddress> addresses = new LinkedList<>();
-		for (String s: contacts) {
-			if (s == null) continue;
-			try {
-				addresses.add(new InternetAddress(s, false));
-			} catch (AddressException e) {
-				// ignore
-			}
-		}
-		return addresses;
-	}
-
-
-	/**
-	 * Sets the administrator email contacts for the client. Corresponds to
-	 * the {@code contacts} client metadata field.
-	 *
-	 * <p>Use {@link #setEmailContacts(List)} instead.
-	 *
-	 * @param contacts The administrator email contacts, {@code null} if
-	 *                 not specified.
-	 */
-	@Deprecated
-	public void setContacts(final List<InternetAddress> contacts) {
-
-		if (contacts == null) {
-			this.contacts = null;
-			return;
-		}
-		
-		List<String> addresses = new LinkedList<>();
-		for (InternetAddress a: contacts) {
-			if (a != null) {
-				addresses.add(a.toString());
-			}
-		}
-		this.contacts = addresses;
 	}
 
 

@@ -24,7 +24,6 @@ import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.common.contenttype.ContentType;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 
 

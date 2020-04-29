@@ -123,26 +123,6 @@ public class HTTPRequestTest {
 		request.setFollowRedirects(false);
 		assertFalse(request.getFollowRedirects());
 	}
-	
-	
-	@Test
-	public void testDeprecatedContentTypeMethods()
-		throws Exception {
-		
-		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
-		httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
-		assertEquals(CommonContentTypes.APPLICATION_URLENCODED.toString(), httpRequest.getContentType().toString());
-		
-		httpRequest.ensureContentType();
-		httpRequest.ensureContentType(CommonContentTypes.APPLICATION_URLENCODED);
-		
-		try {
-			httpRequest.ensureContentType(CommonContentTypes.APPLICATION_JSON);
-			fail();
-		} catch (ParseException e) {
-			assertEquals("The HTTP Content-Type header must be application/json; charset=UTF-8", e.getMessage());
-		}
-	}
 
 
 	@Test

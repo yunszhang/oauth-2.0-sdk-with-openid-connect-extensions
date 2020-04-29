@@ -22,7 +22,6 @@ import java.net.URI;
 import java.util.Set;
 
 import com.nimbusds.common.contenttype.ContentType;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import junit.framework.TestCase;

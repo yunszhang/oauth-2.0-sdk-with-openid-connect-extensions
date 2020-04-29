@@ -20,7 +20,6 @@ package com.nimbusds.openid.connect.sdk.claims;
 
 import java.net.URI;
 import java.util.*;
-import javax.mail.internet.InternetAddress;
 
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
@@ -120,7 +119,7 @@ public class UserInfoTest extends TestCase {
 		assertEquals("Jane", userInfo.getGivenName());
 		assertEquals("Doe", userInfo.getFamilyName());
 		assertEquals("j.doe", userInfo.getPreferredUsername());
-		assertEquals("janedoe@example.com", userInfo.getEmail().getAddress());
+		assertEquals("janedoe@example.com", userInfo.getEmailAddress());
 		assertEquals("http://example.com/janedoe/me.jpg", userInfo.getPicture().toString());
 
 		json = userInfo.toJSONObject().toJSONString();
@@ -132,7 +131,7 @@ public class UserInfoTest extends TestCase {
 		assertEquals("Jane", userInfo.getGivenName());
 		assertEquals("Doe", userInfo.getFamilyName());
 		assertEquals("j.doe", userInfo.getPreferredUsername());
-		assertEquals("janedoe@example.com", userInfo.getEmail().getAddress());
+		assertEquals("janedoe@example.com", userInfo.getEmailAddress());
 		assertEquals("http://example.com/janedoe/me.jpg", userInfo.getPicture().toString());
 		
 		// No external claims
@@ -162,7 +161,7 @@ public class UserInfoTest extends TestCase {
 
 		assertEquals("248289761001", userInfo.getSubject().getValue());
 		assertEquals("Jane Doe", userInfo.getName());
-		assertEquals("janedoe@example.com", userInfo.getEmail().getAddress());
+		assertEquals("janedoe@example.com", userInfo.getEmailAddress());
 
 		Address address = userInfo.getAddress();
 
@@ -179,7 +178,7 @@ public class UserInfoTest extends TestCase {
 
 		assertEquals("248289761001", userInfo.getSubject().getValue());
 		assertEquals("Jane Doe", userInfo.getName());
-		assertEquals("janedoe@example.com", userInfo.getEmail().getAddress());
+		assertEquals("janedoe@example.com", userInfo.getEmailAddress());
 
 		address = userInfo.getAddress();
 
@@ -208,7 +207,6 @@ public class UserInfoTest extends TestCase {
 		assertNull(userInfo.getProfile());
 		assertNull(userInfo.getPicture());
 		assertNull(userInfo.getWebsite());
-		assertNull(userInfo.getEmail());
 		assertNull(userInfo.getEmailAddress());
 		assertNull(userInfo.getEmailVerified());
 		assertNull(userInfo.getGender());
@@ -343,7 +341,7 @@ public class UserInfoTest extends TestCase {
 		userInfo.setProfile(new URI("https://profile.com"));
 		userInfo.setPicture(new URI("https://picture.com"));
 		userInfo.setWebsite(new URI("https://website.com"));
-		userInfo.setEmail(new InternetAddress("name@domain.com"));
+		userInfo.setEmailAddress("name@domain.com");
 		userInfo.setEmailVerified(true);
 		userInfo.setGender(Gender.FEMALE);
 		userInfo.setBirthdate("1992-01-31");
@@ -362,7 +360,7 @@ public class UserInfoTest extends TestCase {
 
 		userInfo.setAddress(address);
 
-		userInfo.setUpdatedTime(DateUtils.fromSecondsSinceEpoch(100000l));
+		userInfo.setUpdatedTime(DateUtils.fromSecondsSinceEpoch(100000L));
 
 		assertEquals("sub", userInfo.getSubject().getValue());
 		assertEquals("given_name", userInfo.getGivenName());
@@ -373,7 +371,7 @@ public class UserInfoTest extends TestCase {
 		assertEquals("https://profile.com", userInfo.getProfile().toString());
 		assertEquals("https://picture.com", userInfo.getPicture().toString());
 		assertEquals("https://website.com", userInfo.getWebsite().toString());
-		assertEquals("name@domain.com", userInfo.getEmail().getAddress());
+		assertEquals("name@domain.com", userInfo.getEmailAddress());
 		assertTrue(userInfo.getEmailVerified());
 		assertEquals(Gender.FEMALE, userInfo.getGender());
 		assertEquals("1992-01-31", userInfo.getBirthdate());
@@ -403,7 +401,7 @@ public class UserInfoTest extends TestCase {
 		assertEquals("https://profile.com", userInfo.getProfile().toString());
 		assertEquals("https://picture.com", userInfo.getPicture().toString());
 		assertEquals("https://website.com", userInfo.getWebsite().toString());
-		assertEquals("name@domain.com", userInfo.getEmail().getAddress());
+		assertEquals("name@domain.com", userInfo.getEmailAddress());
 		assertTrue(userInfo.getEmailVerified());
 		assertEquals(Gender.FEMALE, userInfo.getGender());
 		assertEquals("1992-01-31", userInfo.getBirthdate());
@@ -574,7 +572,7 @@ public class UserInfoTest extends TestCase {
 		
 		assertEquals("invalid-email", userInfo.getEmailAddress());
 		
-		assertNull(userInfo.getEmail()); // exception swallowed
+		assertEquals("invalid-email", userInfo.getEmailAddress());
 	}
 	
 	

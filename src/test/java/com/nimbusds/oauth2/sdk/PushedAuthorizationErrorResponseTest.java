@@ -23,7 +23,6 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import com.nimbusds.common.contenttype.ContentType;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 
 

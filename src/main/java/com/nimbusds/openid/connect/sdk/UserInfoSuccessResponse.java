@@ -25,7 +25,6 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.SuccessResponse;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
@@ -129,19 +128,6 @@ public class UserInfoSuccessResponse
 			return ContentType.APPLICATION_JSON;
 		else
 			return ContentType.APPLICATION_JWT;
-	}
-	
-	
-	/**
-	 * @see #getEntityContentType()
-	 */
-	@Deprecated
-	public javax.mail.internet.ContentType getContentType() {
-	
-		if (claimsSet != null)
-			return CommonContentTypes.APPLICATION_JSON;
-		else
-			return CommonContentTypes.APPLICATION_JWT;
 	}
 	
 	

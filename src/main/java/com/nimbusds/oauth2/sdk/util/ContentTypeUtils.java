@@ -50,21 +50,6 @@ public final class ContentTypeUtils {
 		if (! expected.matches(found))
 			throw new ParseException("The HTTP Content-Type header must be " + expected);
 	}
-
-
-	/**
-	 * @see #ensureContentType(ContentType, ContentType)
-	 */
-	@Deprecated
-	public static void ensureContentType(final javax.mail.internet.ContentType expected, final javax.mail.internet.ContentType found)
-		throws ParseException {
-	
-		if (found == null)
-			throw new ParseException("Missing HTTP Content-Type header");
-		
-		if (! expected.match(found))
-			throw new ParseException("The HTTP Content-Type header must be " + expected);
-	}
 	
 
 	/**

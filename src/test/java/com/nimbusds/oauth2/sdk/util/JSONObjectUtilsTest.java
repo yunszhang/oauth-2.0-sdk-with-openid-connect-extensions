@@ -190,7 +190,7 @@ public class JSONObjectUtilsTest extends TestCase {
 		assertEquals("Alice", JSONObjectUtils.getString(o, "string"));
 		assertEquals("http://server.example.com/cb/", JSONObjectUtils.getURL(o, "url").toString());
 		assertEquals("http://server.example.com/cb/", JSONObjectUtils.getURI(o, "url").toString());
-		assertEquals("alice@wonderland.net", JSONObjectUtils.getEmail(o, "email").toString());
+		assertEquals("alice@wonderland.net", JSONObjectUtils.getString(o, "email"));
 		assertEquals(ClientType.PUBLIC, JSONObjectUtils.getEnum(o, "client_type", ClientType.class));
 
 		assertTrue(Arrays.asList("client-1", "client-2").containsAll(JSONObjectUtils.getList(o, "aud")));

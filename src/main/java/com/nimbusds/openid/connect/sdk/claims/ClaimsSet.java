@@ -21,7 +21,6 @@ package com.nimbusds.openid.connect.sdk.claims;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
-import javax.mail.internet.InternetAddress;
 
 import net.minidev.json.JSONAware;
 import net.minidev.json.JSONObject;
@@ -380,42 +379,6 @@ public class ClaimsSet implements JSONAware {
 
 		if (value != null)
 			setClaim(name, value.toString());
-		else
-			claims.remove(name);
-	}
-
-
-	/**
-	 * Gets an email string based claim.
-	 *
-	 * @param name The claim name. Must not be {@code null}.
-	 *
-	 * @return The claim value, {@code null} if not specified or parsing
-	 *         failed.
-	 */
-	@Deprecated
-	public InternetAddress getEmailClaim(final String name) {
-
-		try {
-			return JSONObjectUtils.getEmail(claims, name);
-		} catch (ParseException e) {
-			return null;
-		}
-	}
-
-
-	/**
-	 * Sets an email string based claim.
-	 *
-	 * @param name  The claim name. Must not be {@code null}.
-	 * @param value The claim value. If {@code null} any existing claim
-	 *              with the same name will be removed.
-	 */
-	@Deprecated
-	public void setEmailClaim(final String name, final InternetAddress value) {
-
-		if (value != null)
-			setClaim(name, value.getAddress());
 		else
 			claims.remove(name);
 	}

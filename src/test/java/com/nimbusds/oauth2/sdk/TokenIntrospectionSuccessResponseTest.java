@@ -25,7 +25,6 @@ import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.auth.X509CertificateConfirmation;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.*;
 import com.nimbusds.oauth2.sdk.token.AccessTokenType;

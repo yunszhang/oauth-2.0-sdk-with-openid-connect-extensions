@@ -24,7 +24,6 @@ import javax.net.ssl.SSLSocketFactory;
 
 import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.X509CertificateGenerator;
 import com.nimbusds.oauth2.sdk.id.ClientID;

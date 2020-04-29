@@ -20,7 +20,6 @@ package com.nimbusds.oauth2.sdk.client;
 
 import java.net.URI;
 import java.util.*;
-import javax.mail.internet.InternetAddress;
 
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
@@ -329,10 +328,10 @@ public class ClientMetadataTest extends TestCase {
 		grantTypes.add(GrantType.REFRESH_TOKEN);
 		meta.setGrantTypes(grantTypes);
 		
-		List<InternetAddress> contacts = new LinkedList<>();
-		contacts.add(new InternetAddress("alice@wonderland.net"));
-		contacts.add(new InternetAddress("admin@wonderland.net"));
-		meta.setContacts(contacts);
+		List<String> contacts = new LinkedList<>();
+		contacts.add("alice@wonderland.net");
+		contacts.add("admin@wonderland.net");
+		meta.setEmailContacts(contacts);
 		
 		String name = "My Example App";
 		meta.setName(name);
@@ -387,7 +386,7 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(redirectURIs, meta.getRedirectionURIs());
 		assertEquals(scope, meta.getScope());
 		assertEquals(grantTypes, meta.getGrantTypes());
-		assertEquals(contacts, meta.getContacts());
+		assertEquals(contacts, meta.getEmailContacts());
 		assertEquals(name, meta.getName());
 		assertEquals(nameDE, meta.getName(LangTag.parse("de")));
 		assertEquals(2, meta.getNameEntries().size());
@@ -425,7 +424,7 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(meta.hasScopeValue(new Scope.Value("read")));
 		assertTrue(meta.hasScopeValue(new Scope.Value("write")));
 		assertEquals(grantTypes, meta.getGrantTypes());
-		assertEquals(contacts, meta.getContacts());
+		assertEquals(contacts, meta.getEmailContacts());
 		assertEquals(name, meta.getName());
 		assertEquals(nameDE, meta.getName(LangTag.parse("de")));
 		assertEquals(2, meta.getNameEntries().size());
@@ -1029,38 +1028,6 @@ public class ClientMetadataTest extends TestCase {
 		}
 		
 		ClientMetadata.parse(jsonObject);
-	}
-	
-	
-	public void testIgnoreInvalidEmailOnGetContacts()
-		throws Exception {
-		
-		ClientMetadata clientMetadata = new ClientMetadata();
-		List<String> invalidEmail = Collections.singletonList("invalid-email-address");
-		clientMetadata.setEmailContacts(invalidEmail);
-		assertEquals(invalidEmail.get(0), clientMetadata.getContacts().get(0).toString());
-		assertEquals(invalidEmail.size(), clientMetadata.getContacts().size());
-	}
-	
-	
-	public void testSetContactsNull_deprecated() {
-		
-		ClientMetadata clientMetadata = new ClientMetadata();
-		clientMetadata.setContacts(null);
-		assertNull(clientMetadata.getContacts());
-		assertNull(clientMetadata.getEmailContacts());
-	}
-	
-	
-	public void testGetContactsNullItem_deprecated() {
-		
-		ClientMetadata clientMetadata = new ClientMetadata();
-		clientMetadata.setEmailContacts(Arrays.asList("alice@wonderland.net", "bob@wonderland.net", null));
-		
-		List<InternetAddress> emails = clientMetadata.getContacts();
-		assertEquals("alice@wonderland.net", emails.get(0).getAddress());
-		assertEquals("bob@wonderland.net", emails.get(1).getAddress());
-		assertEquals(2, emails.size());
 	}
 	
 	

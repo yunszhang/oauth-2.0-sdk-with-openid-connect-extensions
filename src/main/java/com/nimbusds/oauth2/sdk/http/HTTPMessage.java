@@ -105,37 +105,6 @@ abstract class HTTPMessage {
 	
 	
 	/**
-	 * @see #getEntityContentType()
-	 */
-	@Deprecated
-	public javax.mail.internet.ContentType getContentType() {
-
-		final String value = getHeaderValue("Content-Type");
-
-		if (value == null) {
-			return null;
-		}
-
-		try {
-			return new javax.mail.internet.ContentType(value);
-
-		} catch (javax.mail.internet.ParseException e) {
-			return null;
-		}
-	}
-	
-	
-	/**
-	 * @see #setEntityContentType(ContentType)
-	 */
-	@Deprecated
-	public void setContentType(final javax.mail.internet.ContentType ct) {
-
-		setHeader("Content-Type", ct != null ? ct.toString() : null);
-	}
-	
-	
-	/**
 	 * Ensures this HTTP message has a {@code Content-Type} header value.
 	 *
 	 * @throws ParseException If the {@code Content-Type} header is 
@@ -147,17 +116,6 @@ abstract class HTTPMessage {
 		if (getEntityContentType() == null) {
 			throw new ParseException("Missing HTTP Content-Type header");
 		}
-	}
-	
-	
-	/**
-	 * @see #ensureEntityContentType()
-	 */
-	@Deprecated
-	public void ensureContentType()
-		throws ParseException {
-		
-		ensureEntityContentType();
 	}
 
 
@@ -177,17 +135,6 @@ abstract class HTTPMessage {
 		throws ParseException {
 		
 		ContentTypeUtils.ensureContentType(contentType, getEntityContentType());
-	}
-
-
-	/**
-	 * @see #ensureEntityContentType(ContentType)
-	 */
-	@Deprecated
-	public void ensureContentType(final javax.mail.internet.ContentType contentType)
-		throws ParseException {
-		
-		ContentTypeUtils.ensureContentType(contentType, getContentType());
 	}
 
 
