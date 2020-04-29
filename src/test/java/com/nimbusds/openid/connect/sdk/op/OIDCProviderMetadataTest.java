@@ -1247,52 +1247,64 @@ public class OIDCProviderMetadataTest extends TestCase {
 		throws Exception {
 		
 		String json = "{" +
-			"    \"issuer\":\"https://op.umu.se/openid\"," +
-			"    \"jwks_uri\":\"https://op.umu.se/jwks.json\"," +
-			"    \"authorization_endpoint\":" +
-			"      \"https://op.umu.se/openid/authorization\"," +
-			"    \"contacts\": \"ops@edugain.geant.org\"," + // fixme ?
-			"    \"federation_types_supported\": [" +
-			"        \"automatic\"," +
-			"        \"explicit\"" +
-			"    ]," +
-			"    \"grant_types_supported\": [" +
-			"        \"authorization_code\"," +
-			"        \"implicit\"," +
-			"        \"urn:ietf:params:oauth:grant-type:jwt-bearer\"" +
-			"    ]," +
-			"    \"id_token_signing_alg_values_supported\": [" +
-			"        \"ES256\"" +
-			"    ]," +
-			"    \"logo_uri\":" +
-			"      \"https://www.umu.se/img/umu-logo-left-neg-SE.svg\"," + // fixme RP metadata?
-			"    \"policy_uri\":" +
-			"      \"https://www.umu.se/en/website/legal-information/\"," + // fixme federation entity or OP metadata?
-			"    \"response_types_supported\": [" +
-			"        \"code\"," +
-			"        \"code id_token\"," +
-			"        \"token\"" +
-			"    ]," +
-			"    \"subject_types_supported\": [" +
-			"        \"pairwise\"," +
-			"        \"public\"" +
-			"    ]," +
-			"    \"token_endpoint\": \"https://op.umu.se/openid/token\"," +
-			"    \"federation_registration_endpoint\":" +
-			"        \"https://op.umu.se/openid/fedreg\"" +
+			"  \"authorization_endpoint\":" +
+			"    \"https://op.umu.se/openid/authorization\"," +
+			"  \"claims_parameter_supported\": false," +
+			"  \"contacts\": [" +
+			"    \"ops@swamid.se\"" +
+			"  ]," +
+			"  \"federation_registration_endpoint\":" +
+			"    \"https://op.umu.se/openid/fedreg\"," +
+			"  \"federation_types_supported\": [" +
+			"    \"automatic\"," +
+			"    \"explicit\"" +
+			"  ]," +
+			"  \"grant_types_supported\": [" +
+			"    \"authorization_code\"," +
+			"    \"implicit\"," +
+			"    \"urn:ietf:params:oauth:grant-type:jwt-bearer\"" +
+			"  ]," +
+			"  \"id_token_signing_alg_values_supported\": [" +
+			"    \"RS256\"," +
+			"    \"ES256\"" +
+			"  ]," +
+			"  \"issuer\": \"https://op.umu.se/openid\"," +
+			"  \"jwks_uri\": \"https://op.umu.se/openid/jwks_uri.json\"," +
+			"  \"logo_uri\":" +
+			"    \"https://www.umu.se/img/umu-logo-left-neg-SE.svg\"," +
+			"  \"organization\": \"University of Ume\\u00e5\"," +
+			"  \"policy_uri\":" +
+			"    \"https://www.umu.se/en/website/legal-information/\"," + // TODO op_policy_uri?
+			"  \"request_parameter_supported\": false," +
+			"  \"request_uri_parameter_supported\": true," +
+			"  \"require_request_uri_registration\": true," +
+			"  \"response_types_supported\": [" +
+			"    \"code\"," +
+			"    \"code id_token\"," +
+			"    \"token\"" +
+			"  ]," +
+			"  \"subject_types_supported\": [" +
+			"    \"pairwise\"" +
+			"  ]," +
+			"  \"token_endpoint\": \"https://op.umu.se/openid/token\"," +
+			"  \"token_endpoint_auth_methods_supported\": [" +
+			"    \"private_key_jwt\"," +
+			"    \"client_secret_jwt\"" +
+			"  ]," +
+			"  \"version\": \"3.0\"" +
 			"}";
 		
 		OIDCProviderMetadata meta = OIDCProviderMetadata.parse(json);
 		
 		assertEquals(new Issuer("https://op.umu.se/openid"), meta.getIssuer());
-		assertEquals(URI.create("https://op.umu.se/jwks.json"), meta.getJWKSetURI());
+		assertEquals(URI.create("https://op.umu.se/openid/jwks_uri.json"), meta.getJWKSetURI());
 		assertEquals(URI.create("https://op.umu.se/openid/authorization"), meta.getAuthorizationEndpointURI());
 		assertEquals(Arrays.asList(FederationType.AUTOMATIC, FederationType.EXPLICIT), meta.getFederationTypes());
 		assertEquals(Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.IMPLICIT, GrantType.JWT_BEARER), meta.getGrantTypes());
-		assertEquals(Collections.singletonList(JWSAlgorithm.ES256), meta.getIDTokenJWSAlgs());
-		assertEquals(URI.create("https://www.umu.se/en/website/legal-information/"), meta.getPolicyURI());
+		assertEquals(Arrays.asList(JWSAlgorithm.RS256, JWSAlgorithm.ES256), meta.getIDTokenJWSAlgs());
+		assertEquals(URI.create("https://www.umu.se/en/website/legal-information/"), meta.getCustomURIParameter("policy_uri"));
 		assertEquals(Arrays.asList(new ResponseType("code"), new ResponseType("code", "id_token"), new ResponseType("token")), meta.getResponseTypes());
-		assertEquals(Arrays.asList(SubjectType.PAIRWISE, SubjectType.PUBLIC), meta.getSubjectTypes());
+		assertEquals(Collections.singletonList(SubjectType.PAIRWISE), meta.getSubjectTypes());
 		assertEquals(URI.create("https://op.umu.se/openid/token"), meta.getTokenEndpointURI());
 		assertEquals(URI.create("https://op.umu.se/openid/fedreg"), meta.getFederationRegistrationEndpointURI());
 	}
