@@ -18,26 +18,20 @@
 package com.nimbusds.openid.connect.sdk.claims;
 
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.nimbusds.oauth2.sdk.id.Audience;
-import com.nimbusds.oauth2.sdk.id.Issuer;
-import com.nimbusds.oauth2.sdk.id.Subject;
 import net.minidev.json.JSONObject;
+
+import com.nimbusds.oauth2.sdk.id.Subject;
 
 
 /**
  * Common claims set.
  */
-abstract class CommonClaimsSet extends ClaimsSet {
-	
-	
-	/**
-	 * The issuer claim name.
-	 */
-	public static final String ISS_CLAIM_NAME = "iss";
+public abstract class CommonClaimsSet extends ClaimsSet {
 	
 	
 	/**
@@ -47,21 +41,34 @@ abstract class CommonClaimsSet extends ClaimsSet {
 	
 	
 	/**
-	 * The audience claim name.
-	 */
-	public static final String AUD_CLAIM_NAME = "aud";
-	
-	
-	/**
 	 * The issue time claim name.
 	 */
 	public static final String IAT_CLAIM_NAME = "iat";
 	
 	
 	/**
-	 * The session identifier claim name.
+	 * The names of the standard top-level claims.
 	 */
-	public static final String SID_CLAIM_NAME = "sid";
+	private static final Set<String> STD_CLAIM_NAMES;
+	
+	
+	static {
+		Set<String> claimNames = new HashSet<>(ClaimsSet.getStandardClaimNames());
+		claimNames.add(SUB_CLAIM_NAME);
+		claimNames.add(IAT_CLAIM_NAME);
+		STD_CLAIM_NAMES = Collections.unmodifiableSet(claimNames);
+	}
+	
+	
+	/**
+	 * Gets the names of the standard top-level claims.
+	 *
+	 * @return The names of the standard top-level claims (read-only set).
+	 */
+	public static Set<String> getStandardClaimNames() {
+		
+		return STD_CLAIM_NAMES;
+	}
 	
 	
 	/**
@@ -85,18 +92,6 @@ abstract class CommonClaimsSet extends ClaimsSet {
 	
 	
 	/**
-	 * Gets the issuer. Corresponds to the {@code iss} claim.
-	 *
-	 * @return The issuer, {@code null} if not specified.
-	 */
-	public Issuer getIssuer() {
-		
-		String val = getStringClaim(ISS_CLAIM_NAME);
-		return val != null ? new Issuer(val) : null;
-	}
-	
-	
-	/**
 	 * Gets the subject. Corresponds to the {@code sub} claim.
 	 *
 	 * @return The subject.
@@ -109,34 +104,6 @@ abstract class CommonClaimsSet extends ClaimsSet {
 	
 	
 	/**
-	 * Gets the audience. Corresponds to the {@code aud} claim.
-	 *
-	 * @return The audience, {@code null} if not specified.
-	 */
-	public List<Audience> getAudience() {
-		
-		if (getClaim(AUD_CLAIM_NAME) instanceof String) {
-			// Special case - aud is a string
-			return new Audience(getStringClaim(AUD_CLAIM_NAME)).toSingleAudienceList();
-		}
-		
-		// General case - JSON string array
-		List<String> rawList = getStringListClaim(AUD_CLAIM_NAME);
-		
-		if (rawList == null) {
-			return null;
-		}
-		
-		List<Audience> audList = new ArrayList<>(rawList.size());
-		
-		for (String s: rawList)
-			audList.add(new Audience(s));
-		
-		return audList;
-	}
-	
-	
-	/**
 	 * Gets the issue time. Corresponds to the {@code iss} claim.
 	 *
 	 * @return The issue time, {@code null} if not specified.
@@ -144,29 +111,5 @@ abstract class CommonClaimsSet extends ClaimsSet {
 	public Date getIssueTime() {
 		
 		return getDateClaim(IAT_CLAIM_NAME);
-	}
-	
-	
-	/**
-	 * Gets the session ID. Corresponds to the {@code sid} claim.
-	 *
-	 * @return The session ID, {@code null} if not specified.
-	 */
-	public SessionID getSessionID() {
-		
-		String val = getStringClaim(SID_CLAIM_NAME);
-		
-		return val != null ? new SessionID(val) : null;
-	}
-	
-	
-	/**
-	 * Sets the session ID. Corresponds to the {@code sid} claim.
-	 *
-	 * @param sid The session ID, {@code null} if not specified.
-	 */
-	public void setSessionID(final SessionID sid) {
-		
-		setClaim(SID_CLAIM_NAME, sid != null ? sid.getValue() : null);
 	}
 }

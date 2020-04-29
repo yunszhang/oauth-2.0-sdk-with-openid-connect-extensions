@@ -476,6 +476,24 @@ public class ClaimsSet implements JSONAware {
 	
 	
 	/**
+	 * Gets a JSON object based claim.
+	 *
+	 * @param name The claim name. Must not be {@code null}.
+	 *
+	 * @return The claim value, {@code null} if not specified or parsing
+	 *         failed.
+	 */
+	public JSONObject getJSONObjectClaim(final String name) {
+		
+		try {
+			return JSONObjectUtils.getJSONObject(claims, name);
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+	
+	
+	/**
 	 * Gets the issuer. Corresponds to the {@code iss} claim.
 	 *
 	 * @return The issuer, {@code null} if not specified.
@@ -505,13 +523,28 @@ public class ClaimsSet implements JSONAware {
 	/**
 	 * Gets the audience. Corresponds to the {@code aud} claim.
 	 *
-	 * @return The audience list, {@code null} if not specified.
+	 * @return The audience, {@code null} if not specified.
 	 */
 	public List<Audience> getAudience() {
 		
-		List<String> list = getStringListClaim(AUD_CLAIM_NAME);
+		if (getClaim(AUD_CLAIM_NAME) instanceof String) {
+			// Special case - aud is a string
+			return new Audience(getStringClaim(AUD_CLAIM_NAME)).toSingleAudienceList();
+		}
 		
-		return list != null && ! list.isEmpty() ? Audience.create(list) : null;
+		// General case - JSON string array
+		List<String> rawList = getStringListClaim(AUD_CLAIM_NAME);
+		
+		if (rawList == null) {
+			return null;
+		}
+		
+		List<Audience> audList = new ArrayList<>(rawList.size());
+		
+		for (String s: rawList)
+			audList.add(new Audience(s));
+		
+		return audList;
 	}
 	
 	
@@ -584,7 +617,9 @@ public class ClaimsSet implements JSONAware {
 		throws ParseException {
 
 		try {
-			return JWTClaimsSet.parse(claims);
+			// Parse from JSON string to handle nested JSONArray & JSONObject properly
+			// Work around https://bitbucket.org/connect2id/nimbus-jose-jwt/issues/347/revise-nested-jsonarray-and-jsonobject
+			return JWTClaimsSet.parse(claims.toJSONString());
 
 		} catch (java.text.ParseException e) {
 

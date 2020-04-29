@@ -33,6 +33,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jose.util.Base64URL;
@@ -41,6 +42,7 @@ import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.langtag.LangTagUtils;
 import com.nimbusds.oauth2.sdk.*;
+import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
@@ -86,10 +88,13 @@ public class AuthenticationRequestTest extends TestCase {
 		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("acr_values"));
 		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("claims"));
 		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("purpose"));
+		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("purpose"));
+		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("client_assertion_type"));
+		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("client_assertion"));
 		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("request_uri"));
 		assertTrue(AuthenticationRequest.getRegisteredParameterNames().contains("request"));
 
-		assertEquals(23, AuthenticationRequest.getRegisteredParameterNames().size());
+		assertEquals(25, AuthenticationRequest.getRegisteredParameterNames().size());
 	}
 
 	
@@ -318,6 +323,21 @@ public class AuthenticationRequestTest extends TestCase {
 		claims.addUserInfoClaim("family_name");
 		
 		String purpose = "Some identity assurance purpose";
+		
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.keyUse(KeyUse.SIGNATURE)
+			.algorithm(JWSAlgorithm.RS256)
+			.keyIDFromThumbprint(true)
+			.generate();
+		
+		PrivateKeyJWT privateKeyJWTAuth = new PrivateKeyJWT(
+			clientID,
+			uri,
+			new JWSAlgorithm(rsaJWK.getAlgorithm().getName()),
+			rsaJWK.toRSAPrivateKey(),
+			rsaJWK.getKeyID(),
+			null
+		);
 
 		CodeVerifier codeVerifier = new CodeVerifier();
 		CodeChallengeMethod codeChallengeMethod = CodeChallengeMethod.S256;
@@ -333,7 +353,7 @@ public class AuthenticationRequestTest extends TestCase {
 		AuthenticationRequest request = new AuthenticationRequest(
 			uri, rts, rm, scope, clientID, redirectURI, state, nonce,
 			display, prompt, maxAge, uiLocales, claimsLocales,
-			idTokenHint, loginHint, acrValues, claims, purpose, null, null,
+			idTokenHint, loginHint, acrValues, claims, purpose, privateKeyJWTAuth, null, null,
 			codeChallenge, codeChallengeMethod,
 			resources,
 			true,
@@ -398,6 +418,8 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(2, claimsOut.getUserInfoClaims().size());
 		
 		assertEquals(purpose, request.getPurpose());
+		
+		assertEquals(privateKeyJWTAuth.getClientAssertion().serialize(), request.getPrivateKeyJWTAuthentication().getClientAssertion().serialize());
 
 		assertEquals(codeChallenge, request.getCodeChallenge());
 		assertEquals(codeChallengeMethod, request.getCodeChallengeMethod());
@@ -475,6 +497,8 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(2, claimsOut.getUserInfoClaims().size());
 		
 		assertEquals(purpose, request.getPurpose());
+		
+		assertEquals(privateKeyJWTAuth.getClientAssertion().serialize(), request.getPrivateKeyJWTAuthentication().getClientAssertion().getParsedString());
 
 		assertEquals(codeChallenge, request.getCodeChallenge());
 		assertEquals(codeChallengeMethod, request.getCodeChallengeMethod());
@@ -544,7 +568,7 @@ public class AuthenticationRequestTest extends TestCase {
 		AuthenticationRequest request = new AuthenticationRequest(
 			uri, rts, null, scope, clientID, redirectURI, state, nonce,
 			display, prompt, maxAge, uiLocales, claimsLocales,
-			idTokenHint, loginHint, acrValues, claims, null, requestObject, null,
+			idTokenHint, loginHint, acrValues, claims, null, null, requestObject, null,
 			null, null, null, false, null);
 
 		assertEquals(uri, request.getEndpointURI());
@@ -730,7 +754,7 @@ public class AuthenticationRequestTest extends TestCase {
 		AuthenticationRequest request = new AuthenticationRequest(
 			uri, rts, null, scope, clientID, redirectURI, state, nonce,
 			display, prompt, maxAge, uiLocales, claimsLocales,
-			idTokenHint, loginHint, acrValues, claims, null, null, requestURI,
+			idTokenHint, loginHint, acrValues, claims, null, null, null, requestURI,
 			null, null, null, false, null);
 
 		assertEquals(uri, request.getEndpointURI());
@@ -2290,6 +2314,101 @@ public class AuthenticationRequestTest extends TestCase {
 			assertEquals("Invalid claims object: Empty verification claims object", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
 			assertEquals("Invalid request: Invalid claims object: Empty verification claims object", e.getErrorObject().getDescription());
+		}
+	}
+	
+	
+	// OIDC federation
+	public void testWithClientPrivateKeyJWTAuth()
+		throws Exception {
+		
+		URI uri = new URI("https://c2id.com/login");
+		
+		ClientID clientID = new ClientID("https://rp.example.com");
+		
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.keyUse(KeyUse.SIGNATURE)
+			.algorithm(JWSAlgorithm.RS256)
+			.keyIDFromThumbprint(true)
+			.generate();
+		
+		PrivateKeyJWT privateKeyJWTAuth = new PrivateKeyJWT(
+			clientID,
+			uri,
+			new JWSAlgorithm(rsaJWK.getAlgorithm().getName()),
+			rsaJWK.toRSAPrivateKey(),
+			rsaJWK.getKeyID(),
+			null);
+		
+		AuthenticationRequest request = new AuthenticationRequest.Builder(
+			new ResponseType("code"),
+			new Scope("openid"),
+			clientID,
+			new URI("https://example.com/cb"))
+			.privateKeyJWTAuthentication(privateKeyJWTAuth)
+			.endpointURI(uri)
+			.build();
+		
+		assertEquals(privateKeyJWTAuth, request.getPrivateKeyJWTAuthentication());
+		
+		Map<String,List<String>> params = request.toParameters();
+		
+		PrivateKeyJWT parsedAuth = PrivateKeyJWT.parse(params);
+		assertEquals(privateKeyJWTAuth.getClientAssertion().serialize(), parsedAuth.getClientAssertion().getParsedString());
+		
+		request = AuthenticationRequest.parse(request.toURI());
+		
+		assertEquals(privateKeyJWTAuth.getClientAssertion().serialize(), request.getPrivateKeyJWTAuthentication().getClientAssertion().getParsedString());
+	}
+	
+	
+	public void testWithClientPrivateKeyJWTAuth_invalidJWT()
+		throws Exception {
+		
+		URI uri = new URI("https://c2ic.com/login");
+		
+		ClientID clientID = new ClientID();
+		
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.keyUse(KeyUse.SIGNATURE)
+			.algorithm(JWSAlgorithm.RS256)
+			.keyIDFromThumbprint(true)
+			.generate();
+		
+		PrivateKeyJWT privateKeyJWTAuth = new PrivateKeyJWT(
+			clientID,
+			uri,
+			new JWSAlgorithm(rsaJWK.getAlgorithm().getName()),
+			rsaJWK.toRSAPrivateKey(),
+			rsaJWK.getKeyID(),
+			null);
+		
+		AuthenticationRequest request = new AuthenticationRequest.Builder(
+			new ResponseType("code"),
+			new Scope("openid"),
+			clientID,
+			new URI("https://example.com/cb"))
+			.privateKeyJWTAuthentication(privateKeyJWTAuth)
+			.state(new State())
+			.endpointURI(uri)
+			.build();
+		
+		assertEquals(privateKeyJWTAuth, request.getPrivateKeyJWTAuthentication());
+		
+		Map<String,List<String>> params = request.toParameters();
+		
+		params.put("client_assertion", Collections.singletonList("invalid-jwt-xxx"));
+		
+		try {
+			AuthenticationRequest.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid client private_key_jwt authentication: Invalid \"client_assertion\" JWT: Invalid serialized unsecured/JWS/JWE object: Missing part delimiters", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
+			assertEquals("Invalid request: Invalid client private_key_jwt authentication: Invalid \"client_assertion\" JWT: Invalid serialized unsecured/JWS/JWE object: Missing part delimiters", e.getErrorObject().getDescription());
+			assertEquals(clientID, e.getClientID());
+			assertEquals(request.getRedirectionURI(), e.getRedirectionURI());
+			assertEquals(request.getState(), e.getState());
 		}
 	}
 }

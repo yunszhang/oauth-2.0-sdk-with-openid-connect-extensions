@@ -156,6 +156,26 @@ public final class OAuth2Error {
 		new ErrorObject("invalid_resource", "Invalid or unaccepted resource", HTTPResponse.SC_BAD_REQUEST);
 	
 	
+	// OpenID Connect Federation 1.0
+	
+	
+	/**
+	 * No trusted anchor could be found to process an OpenID Connect
+	 * Federation 1.0 authorisation request using automatic client
+	 * registration.
+	 */
+	public static final ErrorObject MISSING_TRUST_ANCHOR =
+		new ErrorObject("missing_trust_anchor", "No trusted anchor could be found", HTTPResponse.SC_BAD_REQUEST);
+	
+	
+	/**
+	 * The trust chain validation for an OpenID Connect Federation 1.0
+	 * authorisation request using automatic client registration failed.
+	 */
+	public static final ErrorObject VALIDATION_FAILED =
+		new ErrorObject("validation_failed", "Trust chain validation failed", HTTPResponse.SC_BAD_REQUEST);
+	
+	
 	/**
 	 * Prevents public instantiation.
 	 */

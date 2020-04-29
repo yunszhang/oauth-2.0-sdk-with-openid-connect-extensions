@@ -40,6 +40,8 @@ public class OAuth2ErrorTest extends TestCase {
 		assertEquals(400, OAuth2Error.UNSUPPORTED_GRANT_TYPE.getHTTPStatusCode());
 		assertEquals(400, OAuth2Error.UNSUPPORTED_RESPONSE_TYPE.getHTTPStatusCode());
 		assertEquals(400, OAuth2Error.INVALID_RESOURCE.getHTTPStatusCode());
+		assertEquals(400, OAuth2Error.MISSING_TRUST_ANCHOR.getHTTPStatusCode());
+		assertEquals(400, OAuth2Error.VALIDATION_FAILED.getHTTPStatusCode());
 	}
 	
 	
@@ -72,5 +74,17 @@ public class OAuth2ErrorTest extends TestCase {
 		assertEquals("invalid_resource", OAuth2Error.INVALID_RESOURCE.getCode());
 		assertEquals("Invalid or unaccepted resource", OAuth2Error.INVALID_RESOURCE.getDescription());
 		assertEquals(400, OAuth2Error.INVALID_RESOURCE.getHTTPStatusCode());
+	}
+	
+	
+	public void testOpenIDConnectFederationErrors() {
+		
+		assertEquals("missing_trust_anchor", OAuth2Error.MISSING_TRUST_ANCHOR.getCode());
+		assertEquals("No trusted anchor could be found", OAuth2Error.MISSING_TRUST_ANCHOR.getDescription());
+		assertEquals(400, OAuth2Error.MISSING_TRUST_ANCHOR.getHTTPStatusCode());
+		
+		assertEquals("validation_failed", OAuth2Error.VALIDATION_FAILED.getCode());
+		assertEquals("Trust chain validation failed", OAuth2Error.VALIDATION_FAILED.getDescription());
+		assertEquals(400, OAuth2Error.VALIDATION_FAILED.getHTTPStatusCode());
 	}
 }

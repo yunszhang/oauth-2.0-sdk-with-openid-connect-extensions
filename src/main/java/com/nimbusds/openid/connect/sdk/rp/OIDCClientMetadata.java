@@ -28,10 +28,12 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.oauth2.sdk.client.RegistrationError;
+import com.nimbusds.oauth2.sdk.id.Identifier;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
+import com.nimbusds.openid.connect.sdk.federation.FederationType;
 import com.nimbusds.openid.connect.sdk.id.SectorID;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -47,6 +49,7 @@ import net.minidev.json.JSONObject;
  *     <li>OpenID Connect Session Management 1.0, section 5.1.1 (draft 28).
  *     <li>OpenID Connect Front-Channel Logout 1.0, section 2 (draft 02).
  *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.2 (draft 04).
+ *     <li>OpenID Connect Federation 1.0 (draft 10).
  *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section
  *         2.
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
@@ -91,6 +94,10 @@ public class OIDCClientMetadata extends ClientMetadata {
 		p.add("frontchannel_logout_session_required");
 		p.add("backchannel_logout_uri");
 		p.add("backchannel_logout_session_required");
+		
+		// OIDC federation
+		p.add("federation_type");
+		p.add("organization_name");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -212,6 +219,18 @@ public class OIDCClientMetadata extends ClientMetadata {
 	 * logout.
 	 */
 	private boolean backChannelLogoutSessionRequired = false;
+	
+	
+	/**
+	 * The supported federation types.
+	 */
+	private List<FederationType> federationTypes;
+	
+	
+	/**
+	 * The organisation name (in federation).
+	 */
+	private String organizationName;
 
 
 	/** 
@@ -757,12 +776,63 @@ public class OIDCClientMetadata extends ClientMetadata {
 	 * the {@code backchannel_logout_session_required} client metadata
 	 * field.
 	 *
-	 * @param requiresSession  {@code true} if a session identifier is
-	 *                         required, else {@code false}.
+	 * @param requiresSession {@code true} if a session identifier is
+	 *                        required, else {@code false}.
 	 */
 	public void requiresBackChannelLogoutSession(final boolean requiresSession) {
 		
 		backChannelLogoutSessionRequired = requiresSession;
+	}
+	
+	
+	/**
+	 * Gets the supported federation types. Corresponds to the
+	 * {@code federation_type} metadata field.
+	 *
+	 * @return The supported federation types, {@code null} if not
+	 *         specified.
+	 */
+	public List<FederationType> getFederationTypes() {
+		
+		return federationTypes;
+	}
+	
+	
+	/**
+	 * Sets the supported federation types. Corresponds to the
+	 * {@code federation_type} metadata field.
+	 *
+	 * @param federationTypes The supported federation types, {@code null}
+	 *                        if not specified.
+	 */
+	public void setFederationTypes(final List<FederationType> federationTypes) {
+		
+		this.federationTypes = federationTypes;
+	}
+	
+	
+	/**
+	 * Gets the organisation name (in federation). Corresponds to the
+	 * {@code organization_name} metadata field.
+	 *
+	 * @return The organisation name, {@code null} if not specified.
+	 */
+	public String getOrganizationName() {
+		
+		return organizationName;
+	}
+	
+	
+	/**
+	 * Sets the organisation name (in federation). Corresponds to the
+	 * {@code organization_name} metadata field.
+	 *
+	 * @param organizationName The organisation name, {@code null} if not
+	 *                         specified.
+	 */
+	public void setOrganizationName(final String organizationName) {
+		
+		this.organizationName = organizationName;
 	}
 	
 	
@@ -875,6 +945,15 @@ public class OIDCClientMetadata extends ClientMetadata {
 		if (backChannelLogoutURI != null) {
 			o.put("backchannel_logout_uri", backChannelLogoutURI.toString());
 			o.put("backchannel_logout_session_required", backChannelLogoutSessionRequired);
+		}
+		
+		// Federation
+		
+		if (CollectionUtils.isNotEmpty(federationTypes)) {
+			o.put("federation_type", Identifier.toStringList(federationTypes));
+		}
+		if (organizationName != null) {
+			o.put("organization_name", organizationName);
 		}
 
 		return o;
@@ -1030,6 +1109,22 @@ public class OIDCClientMetadata extends ClientMetadata {
 					metadata.requiresBackChannelLogoutSession(JSONObjectUtils.getBoolean(jsonObject, "backchannel_logout_session_required"));
 					oidcFields.remove("backchannel_logout_session_required");
 				}
+			}
+			
+			// Federation
+			
+			if (jsonObject.get("federation_type") != null) {
+				List<FederationType> types = new LinkedList<>();
+				for (String v: JSONObjectUtils.getStringList(jsonObject, "federation_type")) {
+					types.add(new FederationType(v));
+				}
+				metadata.setFederationTypes(types);
+				oidcFields.remove("federation_type");
+			}
+			
+			if (jsonObject.get("organization_name") != null) {
+				metadata.setOrganizationName(JSONObjectUtils.getString(jsonObject, "organization_name"));
+				oidcFields.remove("organization_name");
 			}
 			
 			

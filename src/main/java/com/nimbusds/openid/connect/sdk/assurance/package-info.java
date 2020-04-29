@@ -15,6 +15,6 @@
  * specific language governing permissions and limitations under the License.
  */
 /**
- * OpenID Connect for identity assurance.
+ * OpenID Connect for Identity Assurance 1.0 classes.
  */
 package com.nimbusds.openid.connect.sdk.assurance;

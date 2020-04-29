@@ -22,16 +22,14 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
-import com.nimbusds.oauth2.sdk.ParseException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+
+import com.nimbusds.oauth2.sdk.ParseException;
 
 
 /**
@@ -84,6 +82,36 @@ public final class JSONObjectUtils {
 		else
 			throw new ParseException("The JSON entity is not an object");
 	}
+	
+	
+	/**
+	 * Parses a JSON object while keeping the order of JSON object members.
+	 *
+	 * <p>Specific JSON to Java entity mapping (as per JSON Simple):
+	 *
+	 * <ul>
+	 *     <li>JSON numbers mapped to {@code java.lang.Number}.
+	 *     <li>JSON integer numbers mapped to {@code long}.
+	 *     <li>JSON fraction numbers mapped to {@code double}.
+	 * </ul>
+	 *
+	 * @param s The JSON object string to parse. Must not be {@code null}.
+	 *
+	 * @return The JSON object as linked hash map.
+	 *
+	 * @throws ParseException If the string cannot be parsed to a JSON
+	 *                        object.
+	 */
+	public static LinkedHashMap<String,Object> parseKeepingOrder(final String s)
+		throws ParseException {
+		
+		Object o = JSONUtils.parseJSONKeepingOrder(s);
+		
+		if (o instanceof LinkedHashMap)
+			return (LinkedHashMap<String,Object>)o;
+		else
+			throw new ParseException("The JSON entity is not an object");
+	}
 
 
 	/**
@@ -117,22 +145,23 @@ public final class JSONObjectUtils {
 	 * @throws ParseException If the value is missing, {@code null} or not
 	 *                        of the expected type.
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T> T getGeneric(final JSONObject o, final String key, final Class<T> clazz)
 		throws ParseException {
 	
 		if (! o.containsKey(key))
 			throw new ParseException("Missing JSON object member with key \"" + key + "\"");
 		
-		if (o.get(key) == null)
-			throw new ParseException("JSON object member with key \"" + key + "\" has null value");
-		
 		Object value = o.get(key);
 		
-		if (! clazz.isAssignableFrom(value.getClass()))
-			throw new ParseException("Unexpected type of JSON object member with key \"" + key + "\"");
+		if (value == null) {
+			throw new ParseException("JSON object member with key \"" + key + "\" has null value");
+		}
 		
-		return (T)value;
+		try {
+			return JSONUtils.to(value, clazz);
+		} catch (ParseException e) {
+			throw new ParseException("Unexpected type of JSON object member with key \"" + key + "\"", e);
+		}
 	}
 
 

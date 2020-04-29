@@ -20,6 +20,9 @@ package com.nimbusds.openid.connect.sdk.claims;
 
 import java.util.*;
 
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Audience;
@@ -27,8 +30,6 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.JWTID;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -36,7 +37,7 @@ import net.minidev.json.JSONObject;
  *
  * <p>Example logout token claims set:
  *
- * <pre>o
+ * <pre>
  * {
  *   "iss"    : "https://server.example.com",
  *   "sub"    : "248289761001",
@@ -52,10 +53,10 @@ import net.minidev.json.JSONObject;
  *
  * <ul>
  *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.4 (draft 04).
- *     <li>Security Event Token (SET) (RFC 8417)
+ *     <li>Security Event Token (SET) (RFC 8417).
  * </ul>
  */
-public class LogoutTokenClaimsSet extends CommonClaimsSet {
+public class LogoutTokenClaimsSet extends CommonOIDCTokenClaimsSet {
 	
 	
 	/**
@@ -79,17 +80,14 @@ public class LogoutTokenClaimsSet extends CommonClaimsSet {
 	/**
 	 * The names of the standard top-level ID token claims.
 	 */
-	private static final Set<String> stdClaimNames = new LinkedHashSet<>();
+	private static final Set<String> STD_CLAIM_NAMES;
 	
 	
 	static {
-		stdClaimNames.add(ISS_CLAIM_NAME);
-		stdClaimNames.add(SUB_CLAIM_NAME);
-		stdClaimNames.add(AUD_CLAIM_NAME);
-		stdClaimNames.add(IAT_CLAIM_NAME);
-		stdClaimNames.add(JTI_CLAIM_NAME);
-		stdClaimNames.add(EVENTS_CLAIM_NAME);
-		stdClaimNames.add(SID_CLAIM_NAME);
+		Set<String> claimNames = new HashSet<>(CommonOIDCTokenClaimsSet.getStandardClaimNames());
+		claimNames.add(JTI_CLAIM_NAME);
+		claimNames.add(EVENTS_CLAIM_NAME);
+		STD_CLAIM_NAMES = Collections.unmodifiableSet(claimNames);
 	}
 	
 	
@@ -101,7 +99,7 @@ public class LogoutTokenClaimsSet extends CommonClaimsSet {
 	 */
 	public static Set<String> getStandardClaimNames() {
 		
-		return Collections.unmodifiableSet(stdClaimNames);
+		return STD_CLAIM_NAMES;
 	}
 	
 	

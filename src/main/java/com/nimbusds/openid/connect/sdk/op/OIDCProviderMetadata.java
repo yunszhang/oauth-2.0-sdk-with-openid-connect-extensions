@@ -39,6 +39,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.Identifier;
 import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.Display;
 import com.nimbusds.openid.connect.sdk.SubjectType;
@@ -48,6 +49,7 @@ import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
 import com.nimbusds.openid.connect.sdk.assurance.evidences.IdentityVerificationMethod;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimType;
+import com.nimbusds.openid.connect.sdk.federation.FederationType;
 
 
 /**
@@ -61,6 +63,7 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimType;
  *     <li>OpenID Connect Front-Channel Logout 1.0, section 3 (draft 02).
  *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.1 (draft 04).
  *     <li>OpenID Connect for Identity Assurance 1.0 (draft 08).
+ *     <li>OpenID Connect Federation 1.0 (draft 10).
  *     <li>OAuth 2.0 Authorization Server Metadata (RFC 8414)
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
  *         Access Tokens (RFC 8705)
@@ -105,6 +108,8 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		p.add("id_documents_supported");
 		p.add("id_documents_verification_methods_supported");
 		p.add("claims_in_verified_claims_supported");
+		p.add("federation_types_supported");
+		p.add("organization_name");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 
@@ -267,6 +272,24 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	 * The supported verified claims.
 	 */
 	private List<String> verifiedClaims;
+	
+	
+	/**
+	 * The supported federation types.
+	 */
+	private List<FederationType> federationTypes;
+	
+	
+	/**
+	 * The organisation name (in federation).
+	 */
+	private String organizationName;
+	
+	
+	/**
+	 * The federation registration endpoint.
+	 */
+	private URI federationRegistrationEndpoint;
 
 
 	/**
@@ -973,7 +996,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	
 	
 	/**
-	 * Gets the supported verified claims names. Corresponds to the
+	 * Sets the supported verified claims names. Corresponds to the
 	 * {@code claims_in_verified_claims_supported} metadata field.
 	 *
 	 * @param verifiedClaims The supported verified claims names,
@@ -981,6 +1004,80 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	 */
 	public void setVerifiedClaims(final List<String> verifiedClaims) {
 		this.verifiedClaims = verifiedClaims;
+	}
+	
+	
+	/**
+	 * Gets the supported federation types. Corresponds to the
+	 * {@code federation_types_supported} metadata field.
+	 *
+	 * @return The supported federation types, {@code null} if not
+	 *         specified.
+	 */
+	public List<FederationType> getFederationTypes() {
+		return federationTypes;
+	}
+	
+	
+	/**
+	 * Sets the supported federation types. Corresponds to the
+	 * {@code federation_types_supported} metadata field.
+	 *
+	 * @param federationTypes The supported federation types, {@code null}
+	 *                        if not specified.
+	 */
+	public void setFederationTypes(final List<FederationType> federationTypes) {
+		this.federationTypes = federationTypes;
+	}
+	
+	
+	/**
+	 * Gets the organisation name (in federation). Corresponds to the
+	 * {@code organization_name} metadata field.
+	 *
+	 * @return The organisation name, {@code null} if not specified.
+	 */
+	public String getOrganizationName() {
+		return organizationName;
+	}
+	
+	
+	/**
+	 * Sets the organisation name (in federation). Corresponds to the
+	 * {@code organization_name} metadata field.
+	 *
+	 * @param organizationName The organisation name, {@code null} if not
+	 *                         specified.
+	 */
+	public void setOrganizationName(final String organizationName) {
+		this.organizationName = organizationName;
+	}
+	
+	
+	/**
+	 * Gets the federation registration endpoint URI. Corresponds to the
+	 * {@code federation_registration_endpoint} metadata field.
+	 *
+	 * @return The federation registration endpoint URI, {@code null} if
+	 *         not specified.
+	 */
+	public URI getFederationRegistrationEndpointURI() {
+		
+		return federationRegistrationEndpoint;
+	}
+	
+	
+	/**
+	 * Sets the federation registration endpoint URI. Corresponds to the
+	 * {@code federation_registration_endpoint} metadata field.
+	 *
+	 * @param federationRegistrationEndpoint The federation registration
+	 *                                       endpoint URI, {@code null} if
+	 *                                       not specified.
+	 */
+	public void setFederationRegistrationEndpointURI(final URI federationRegistrationEndpoint) {
+		
+		this.federationRegistrationEndpoint = federationRegistrationEndpoint;
 	}
 	
 	
@@ -1163,6 +1260,8 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 			o.put("backchannel_logout_session_supported", backChannelLogoutSessionSupported);
 		}
 		
+		// identity assurance
+		
 		if (verifiedClaimsSupported) {
 			o.put("verified_claims_supported", true);
 			if (trustFrameworks != null) {
@@ -1180,6 +1279,18 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 			if (verifiedClaims != null) {
 				o.put("claims_in_verified_claims_supported", verifiedClaims);
 			}
+		}
+		
+		// federation
+		
+		if (CollectionUtils.isNotEmpty(federationTypes)) {
+			o.put("federation_types_supported", Identifier.toStringList(federationTypes));
+		}
+		if (organizationName != null) {
+			o.put("organization_name", organizationName);
+		}
+		if (federationRegistrationEndpoint != null) {
+			o.put("federation_registration_endpoint", federationRegistrationEndpoint.toString());
 		}
 		
 		return o;
@@ -1219,6 +1330,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		op.setIntrospectionEndpointURI(as.getIntrospectionEndpointURI());
 		op.setRevocationEndpointURI(as.getRevocationEndpointURI());
 		op.setRequestObjectEndpoint(as.getRequestObjectEndpoint());
+		op.setPushedAuthorizationRequestEndpointURI(as.getPushedAuthorizationRequestEndpointURI());
 		op.userInfoEndpoint = JSONObjectUtils.getURI(jsonObject, "userinfo_endpoint", null);
 		op.checkSessionIframe = JSONObjectUtils.getURI(jsonObject, "check_session_iframe", null);
 		op.endSessionEndpoint = JSONObjectUtils.getURI(jsonObject, "end_session_endpoint", null);
@@ -1457,6 +1569,19 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 				}
 			}
 		}
+		
+		// Federation
+		
+		if (jsonObject.get("federation_types_supported") != null) {
+			op.federationTypes = new LinkedList<>();
+			for (String v: JSONObjectUtils.getStringList(jsonObject, "federation_types_supported")) {
+				op.federationTypes.add(new FederationType(v));
+			}
+		}
+		
+		op.organizationName = JSONObjectUtils.getString(jsonObject, "organization_name", null);
+		
+		op.federationRegistrationEndpoint = JSONObjectUtils.getURI(jsonObject, "federation_registration_endpoint", null);
 		
 		// Parse custom (not registered) parameters
 		for (Map.Entry<String,?> entry: as.getCustomParameters().entrySet()) {
