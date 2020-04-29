@@ -185,11 +185,11 @@ public class TrustChainResolver_knownAndUnknownAnchorsTest extends TestCase {
 		// Test the retriever
 		DefaultTrustChainRetriever retriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		Set<TrustChain> trustChains = retriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID("https://federation.com")));
+		TrustChainSet trustChains = retriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID("https://federation.com")));
 		
 		assertEquals(1, trustChains.size());
 		
-		TrustChain chain = trustChains.iterator().next();
+		TrustChain chain = trustChains.getShortest();
 		
 		assertEquals(OP_SELF_STMT, chain.getLeafSelfStatement());
 		assertEquals(ANCHOR_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));
@@ -200,11 +200,11 @@ public class TrustChainResolver_knownAndUnknownAnchorsTest extends TestCase {
 		// Test the resolver
 		TrustChainResolver resolver = new TrustChainResolver(Collections.singletonMap(new EntityID("https://federation.com"), ANCHOR_JWK_SET), statementRetriever);
 		
-		Set<TrustChain> resolvedChains = resolver.resolveTrustChains(new EntityID(OP_ISSUER));
+		TrustChainSet resolvedChains = resolver.resolveTrustChains(new EntityID(OP_ISSUER));
 		
 		assertEquals(1, trustChains.size());
 		
-		chain = resolvedChains.iterator().next();
+		chain = resolvedChains.getShortest();
 		
 		assertEquals(OP_SELF_STMT, chain.getLeafSelfStatement());
 		assertEquals(ANCHOR_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));

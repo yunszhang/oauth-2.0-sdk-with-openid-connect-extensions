@@ -55,7 +55,7 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 	
 	
 	@Override
-	public Set<TrustChain> fetch(final EntityID target, final Set<EntityID> trustAnchors) {
+	public TrustChainSet fetch(final EntityID target, final Set<EntityID> trustAnchors) {
 		
 		if (CollectionUtils.isEmpty(trustAnchors)) {
 			throw new IllegalArgumentException("The trust anchors must not be empty");
@@ -63,12 +63,14 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 		
 		accumulatedExceptions.clear();
 		
+		TrustChainSet trustChains = new TrustChainSet();
+		
 		EntityStatement targetStatement;
 		try {
 			targetStatement = retriever.fetchSelfIssuedEntityStatement(target);
 		} catch (ResolveException e) {
 			accumulatedExceptions.add(e);
-			return Collections.emptySet();
+			return trustChains;
 		}
 		
 		List<EntityID> authorityHints = targetStatement.getClaimsSet().getAuthorityHints();
@@ -76,7 +78,7 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 		if (CollectionUtils.isEmpty(authorityHints)) {
 			// Dead end
 			accumulatedExceptions.add(new ResolveException("Entity " + target + " has no authorities listed (authority_hints)"));
-			return Collections.emptySet();
+			return trustChains;
 		}
 		
 		EntityID subject;
@@ -84,12 +86,12 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 			subject = EntityID.parse(targetStatement.getClaimsSet().getSubject());
 		} catch (ParseException e) {
 			accumulatedExceptions.add(new ResolveException("Entity " + target + " subject is illegal: " + e.getMessage(), e));
-			return Collections.emptySet();
+			return trustChains;
 		}
 		
 		Set<List<EntityStatement>> anchoredChains = fetchStatementsFromAuthorities(subject, authorityHints, trustAnchors, Collections.<EntityStatement>emptyList());
 		
-		Set<TrustChain> trustChains = new HashSet<>();
+		
 		
 		for (List<EntityStatement> chain: anchoredChains) {
 			trustChains.add(new TrustChain(targetStatement, chain));

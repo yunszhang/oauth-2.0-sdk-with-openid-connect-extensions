@@ -137,7 +137,7 @@ public class TrustChainResolver {
 	 *
 	 * @throws ResolveException If no trust chain could be resolved.
 	 */
-	public Set<TrustChain> resolveTrustChains(final EntityID target)
+	public TrustChainSet resolveTrustChains(final EntityID target)
 		throws ResolveException {
 		
 		if (trustAnchors.get(target) != null) {
@@ -162,7 +162,7 @@ public class TrustChainResolver {
 		
 		List<Throwable> verificationExceptions = new LinkedList<>();
 		
-		Set<TrustChain> verifiedTrustChains = new HashSet<>();
+		TrustChainSet verifiedTrustChains = new TrustChainSet();
 		
 		for (TrustChain chain: fetchedTrustChains) {
 			

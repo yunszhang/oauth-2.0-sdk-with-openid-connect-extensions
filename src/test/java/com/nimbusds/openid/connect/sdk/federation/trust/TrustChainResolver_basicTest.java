@@ -19,7 +19,9 @@ package com.nimbusds.openid.connect.sdk.federation.trust;
 
 
 import java.net.URI;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -166,11 +168,11 @@ public class TrustChainResolver_basicTest extends TestCase {
 		// Test the retriever
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		Set<TrustChain> trustChains = chainRetriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		TrustChainSet trustChains = chainRetriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
 		
 		assertEquals(1, trustChains.size());
 		
-		TrustChain chain = trustChains.iterator().next();
+		TrustChain chain = trustChains.getShortest();
 		
 		assertEquals(OP_SELF_STMT, chain.getLeafSelfStatement());
 		assertEquals(ANCHOR_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));
@@ -183,9 +185,9 @@ public class TrustChainResolver_basicTest extends TestCase {
 		TrustChainResolver resolver = new TrustChainResolver(anchors, statementRetriever);
 		assertEquals(anchors, resolver.getTrustAnchors());
 		
-		Set<TrustChain> resolvedChains = resolver.resolveTrustChains(new EntityID(OP_ISSUER));
+		TrustChainSet resolvedChains = resolver.resolveTrustChains(new EntityID(OP_ISSUER));
 		
-		chain = resolvedChains.iterator().next();
+		chain = resolvedChains.getShortest();
 		assertEquals(OP_SELF_STMT, chain.getLeafSelfStatement());
 		assertEquals(ANCHOR_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));
 		assertEquals(1, chain.getSuperiorStatements().size());
@@ -213,7 +215,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 		// Test the retriever
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		Set<TrustChain> trustChains = chainRetriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		TrustChainSet trustChains = chainRetriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
 		assertTrue(trustChains.isEmpty());
 		
 		ResolveException e1 = (ResolveException) chainRetriever.getAccumulatedExceptions().get(0);
@@ -265,7 +267,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 		// Test the retriever
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		Set<TrustChain> trustChains = chainRetriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		TrustChainSet trustChains = chainRetriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
 		assertTrue(trustChains.isEmpty());
 		
 		ResolveException e1 = (ResolveException) chainRetriever.getAccumulatedExceptions().get(0);
@@ -311,7 +313,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 		// Test the retriever
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		Set<TrustChain> trustChains = chainRetriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER.getValue())));
+		TrustChainSet trustChains = chainRetriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER.getValue())));
 		assertTrue(trustChains.isEmpty());
 		
 		ResolveException e1 = (ResolveException) chainRetriever.getAccumulatedExceptions().get(0);

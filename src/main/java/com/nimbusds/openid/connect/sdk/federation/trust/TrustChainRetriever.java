@@ -43,7 +43,7 @@ interface TrustChainRetriever {
 	 *
 	 * @return The successfully fetched trust chains, empty set if none.
 	 */
-	Set<TrustChain> fetch(final EntityID target, final Set<EntityID> trustAnchors);
+	TrustChainSet fetch(final EntityID target, final Set<EntityID> trustAnchors);
 	
 	
 	/**

@@ -21,7 +21,6 @@ package com.nimbusds.openid.connect.sdk.federation.trust;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -207,7 +206,7 @@ public class TrustChainResolver_withIntermediateTest extends TestCase {
 		// Test the chain retriever
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		Set<TrustChain> trustChains = chainRetriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		TrustChainSet trustChains = chainRetriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
 		
 		assertTrue(chainRetriever.getAccumulatedExceptions().isEmpty());
 		
@@ -223,7 +222,7 @@ public class TrustChainResolver_withIntermediateTest extends TestCase {
 		// Test the chain resolver
 		TrustChainResolver resolver = new TrustChainResolver(Collections.singletonMap(new EntityID(ANCHOR_ISSUER), ANCHOR_JWK_SET), statementRetriever);
 		
-		Set<TrustChain> resolvedChains = resolver.resolveTrustChains(new EntityID(OP_ISSUER));
+		TrustChainSet resolvedChains = resolver.resolveTrustChains(new EntityID(OP_ISSUER));
 		
 		assertEquals(1, resolvedChains.size());
 		

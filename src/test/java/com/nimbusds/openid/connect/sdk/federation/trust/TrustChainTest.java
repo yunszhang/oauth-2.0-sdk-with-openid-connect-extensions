@@ -47,23 +47,23 @@ import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 public class TrustChainTest extends TestCase {
 	
 	
-	private static final EntityID ANCHOR_ENTITY_ID = new EntityID("https://federation.example.com");
+	static final EntityID ANCHOR_ENTITY_ID = new EntityID("https://federation.example.com");
 	
-	private static final RSAKey ANCHOR_RSA_JWK;
+	static final RSAKey ANCHOR_RSA_JWK;
 	
-	private static final JWKSet ANCHOR_JWK_SET;
+	static final JWKSet ANCHOR_JWK_SET;
 	
-	private static final EntityID INTERMEDIATE_ENTITY_ID = new EntityID("https://some-org.example.com");
+	static final EntityID INTERMEDIATE_ENTITY_ID = new EntityID("https://some-org.example.com");
 	
-	private static final RSAKey INTERMEDIATE_RSA_JWK;
+	static final RSAKey INTERMEDIATE_RSA_JWK;
 	
-	private static final JWKSet INTERMEDIATE_JWK_SET;
+	static final JWKSet INTERMEDIATE_JWK_SET;
 	
-	private static final RSAKey OP_RSA_JWK;
+	static final RSAKey OP_RSA_JWK;
 	
-	private static final JWKSet OP_JWK_SET;
+	static final JWKSet OP_JWK_SET;
 	
-	private static final OIDCProviderMetadata OP_METADATA;
+	static final OIDCProviderMetadata OP_METADATA;
 	
 	static {
 		try {
@@ -102,8 +102,8 @@ public class TrustChainTest extends TestCase {
 	}
 	
 	
-	private static EntityStatementClaimsSet createOPStatementClaimsSet(final Issuer iss,
-									   final EntityID authority) {
+	static EntityStatementClaimsSet createOPStatementClaimsSet(final Issuer iss,
+								   final EntityID authority) {
 		
 		Date now = new Date();
 		long nowTS = DateUtils.toSecondsSinceEpoch(now);
@@ -125,13 +125,13 @@ public class TrustChainTest extends TestCase {
 	}
 	
 	
-	private static EntityStatementClaimsSet createOPSelfStatementClaimsSet(final EntityID authority) {
+	static EntityStatementClaimsSet createOPSelfStatementClaimsSet(final EntityID authority) {
 		
 		return createOPStatementClaimsSet(OP_METADATA.getIssuer(), authority);
 	}
 	
 	
-	private static EntityStatementClaimsSet createIntermediateStatementClaimsSet(final EntityID authority) {
+	static EntityStatementClaimsSet createIntermediateStatementClaimsSet(final EntityID authority) {
 		
 		Date now = new Date();
 		long nowTS = DateUtils.toSecondsSinceEpoch(now);
@@ -183,6 +183,8 @@ public class TrustChainTest extends TestCase {
 		
 		assertFalse(it.hasNext());
 		assertNull(it.next());
+		
+		assertEquals(1, trustChain.length());
 	}
 	
 	
@@ -224,6 +226,8 @@ public class TrustChainTest extends TestCase {
 		
 		assertFalse(it.hasNext());
 		assertNull(it.next());
+		
+		assertEquals(2, trustChain.length());
 	}
 	
 	

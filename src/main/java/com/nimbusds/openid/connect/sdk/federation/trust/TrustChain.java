@@ -150,6 +150,18 @@ public final class TrustChain {
 	
 	
 	/**
+	 * Returns the length of this trust chain. A minimal trust chain with a
+	 * leaf and anchor has a length of one.
+	 *
+	 * @return The trust chain length.
+	 */
+	public int length() {
+		
+		return getSuperiorStatements().size();
+	}
+	
+	
+	/**
 	 * Return an iterator starting from the leaf entity statement.
 	 *
 	 * @return The iterator.

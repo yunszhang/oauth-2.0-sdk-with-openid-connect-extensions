@@ -88,6 +88,17 @@ public final class TrustChainConstraints implements JSONAware {
 	/**
 	 * Creates a new trust chain constraints instance.
 	 *
+	 * @param maxPathLength The maximum number of entities between this and
+	 *                      the last one in the chain, -1 if not specified.
+	 */
+	public TrustChainConstraints(final int maxPathLength) {
+		this(maxPathLength, null, null);
+	}
+	
+	
+	/**
+	 * Creates a new trust chain constraints instance.
+	 *
 	 * @param maxPathLength     The maximum number of entities between this
 	 *                          and the last one in the chain, -1 if not
 	 *                          specified.
@@ -104,27 +115,13 @@ public final class TrustChainConstraints implements JSONAware {
 	
 	
 	/**
-	 * Checks if the entity ID with the given number of intermediates is
-	 * permitted.
+	 * Checks if the entity ID is permitted.
 	 *
-	 * @param numIntermediatesInPath The number of intermediate entities
-	 *                               between the entity specifying the
-	 *                               constraints and the specified entity.
-	 *                               Must be zero or greater.
+	 * @param entityID The entity ID. Must not be {@code null}.
 	 *
-	 * @param entityID               The entity ID. Must not be
-	 *                               {@code null}.
 	 * @return {@code true} if permitted, else {@code false}.
 	 */
-	public boolean isPermitted(final int numIntermediatesInPath, final EntityID entityID) {
-		
-		if (numIntermediatesInPath < 0) {
-			throw new IllegalArgumentException("The path length must not be negative");
-		}
-	
-		if (getMaxPathLength() > -1 && numIntermediatesInPath > getMaxPathLength()) {
-			return false;
-		}
+	public boolean isPermitted(final EntityID entityID) {
 		
 		if (getExcludedEntities().isEmpty() && getPermittedEntities().isEmpty()) {
 			return true;
@@ -152,6 +149,33 @@ public final class TrustChainConstraints implements JSONAware {
 		}
 		
 		return false;
+	}
+	
+	
+	/**
+	 * Checks if the entity ID with the given number of intermediates is
+	 * permitted.
+	 *
+	 * @param numIntermediatesInPath The number of intermediate entities
+	 *                               between the entity specifying the
+	 *                               constraints and the specified entity.
+	 *                               Must be zero or greater.
+	 *
+	 * @param entityID               The entity ID. Must not be
+	 *                               {@code null}.
+	 * @return {@code true} if permitted, else {@code false}.
+	 */
+	public boolean isPermitted(final int numIntermediatesInPath, final EntityID entityID) {
+		
+		if (numIntermediatesInPath < 0) {
+			throw new IllegalArgumentException("The path length must not be negative");
+		}
+	
+		if (getMaxPathLength() > -1 && numIntermediatesInPath > getMaxPathLength()) {
+			return false;
+		}
+		
+		return isPermitted(entityID);
 	}
 	
 	

@@ -153,7 +153,7 @@ public class TrustChainResolver_unknownAnchorTest extends TestCase {
 		
 		// Test the retriever
 		DefaultTrustChainRetriever retriever = new DefaultTrustChainRetriever(statementRetriever);
-		Set<TrustChain> trustChains = retriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID("https://federation.com")));
+		TrustChainSet trustChains = retriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID("https://federation.com")));
 		assertTrue(trustChains.isEmpty());
 		assertTrue(retriever.getAccumulatedExceptions().isEmpty());
 		
