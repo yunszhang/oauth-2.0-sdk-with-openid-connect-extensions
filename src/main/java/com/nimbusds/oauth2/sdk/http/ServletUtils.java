@@ -42,6 +42,12 @@ import com.nimbusds.oauth2.sdk.util.X509CertificateUtils;
 
 /**
  * HTTP servlet utilities.
+ *
+ * <p>Require the optional javax.servlet dependency (or newer):
+ *
+ * <pre>
+ * javax.servlet:javax.servlet-api:3.0.1
+ * </pre>
  */
 @ThreadSafe
 public class ServletUtils {
