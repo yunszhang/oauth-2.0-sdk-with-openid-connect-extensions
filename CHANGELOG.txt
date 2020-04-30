@@ -1305,4 +1305,6 @@ version 8.0 (2020-04-29)
       JSONUtils.parseJSONKeepingOrder methods.
     * Adds new ErrorObject.toHTTPResponse helper method.
     * Removes javax.mail dependency and all deprecated API calls relying on it.
+    * The com.nimbusds.oauth2.sdk.http.ServletUtils class is the sole user of
+      optional javax.servlet dependency.
     * Updates optional BouncyCastle dependency to 1.65.
