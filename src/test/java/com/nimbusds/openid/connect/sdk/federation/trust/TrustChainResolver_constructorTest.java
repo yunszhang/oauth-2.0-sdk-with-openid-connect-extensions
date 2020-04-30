@@ -65,6 +65,21 @@ public class TrustChainResolver_constructorTest extends TestCase {
 	
 	public void testMinimalConstructor() {
 		
+		TrustChainResolver resolver = new TrustChainResolver(new EntityID(ANCHOR_ISSUER));
+		
+		Map<EntityID,JWKSet> anchors = resolver.getTrustAnchors();
+		assertNull(anchors.get(new EntityID(ANCHOR_ISSUER)));
+		assertTrue(anchors.keySet().contains(new EntityID(ANCHOR_ISSUER)));
+		assertEquals(1, anchors.size());
+		
+		DefaultEntityStatementRetriever retriever = (DefaultEntityStatementRetriever)resolver.getEntityStatementRetriever();
+		assertEquals(DefaultEntityStatementRetriever.DEFAULT_HTTP_CONNECT_TIMEOUT_MS, retriever.getHTTPConnectTimeout());
+		assertEquals(DefaultEntityStatementRetriever.DEFAULT_HTTP_READ_TIMEOUT_MS, retriever.getHTTPReadTimeout());
+	}
+	
+	
+	public void testAnchorWithJWKSetConstructor() {
+		
 		TrustChainResolver resolver = new TrustChainResolver(new EntityID(ANCHOR_ISSUER), ANCHOR_JWK_SET);
 		
 		Map<EntityID,JWKSet> anchors = resolver.getTrustAnchors();

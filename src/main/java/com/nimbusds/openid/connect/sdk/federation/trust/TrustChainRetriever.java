@@ -19,10 +19,12 @@ package com.nimbusds.openid.connect.sdk.federation.trust;
 
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import net.jcip.annotations.NotThreadSafe;
 
+import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 
 
@@ -43,11 +45,20 @@ interface TrustChainRetriever {
 	 *
 	 * @return The successfully fetched trust chains, empty set if none.
 	 */
-	TrustChainSet fetch(final EntityID target, final Set<EntityID> trustAnchors);
+	TrustChainSet retrieve(final EntityID target, final Set<EntityID> trustAnchors);
 	
 	
 	/**
-	 * Returns the accumulated exceptions during the last fetch.
+	 * Returns the accumulated trust anchor JWK sets from self-issued
+	 * entity statements during the last retrieve.
+	 *
+	 * @return The JWK set map, empty if none.
+	 */
+	Map<EntityID, JWKSet> getAccumulatedTrustAnchorJWKSets();
+	
+	
+	/**
+	 * Returns the accumulated exceptions during the last retrieval.
 	 *
 	 * @return The accumulated exceptions, empty list if none.
 	 */

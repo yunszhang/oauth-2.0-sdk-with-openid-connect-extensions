@@ -21,6 +21,7 @@ package com.nimbusds.openid.connect.sdk.federation.trust;
 import java.net.URI;
 import java.util.*;
 
+import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
@@ -40,6 +41,9 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 	private final List<Throwable> accumulatedExceptions = new LinkedList<>();
 	
 	
+	private final Map<EntityID, JWKSet> accumulatedTrustAnchorJWKSets = new HashMap<>();
+	
+	
 	/**
 	 * Creates a new trust chain retriever.
 	 *
@@ -55,13 +59,14 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 	
 	
 	@Override
-	public TrustChainSet fetch(final EntityID target, final Set<EntityID> trustAnchors) {
+	public TrustChainSet retrieve(final EntityID target, final Set<EntityID> trustAnchors) {
 		
 		if (CollectionUtils.isEmpty(trustAnchors)) {
 			throw new IllegalArgumentException("The trust anchors must not be empty");
 		}
 		
 		accumulatedExceptions.clear();
+		accumulatedTrustAnchorJWKSets.clear();
 		
 		TrustChainSet trustChains = new TrustChainSet();
 		
@@ -90,8 +95,6 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 		}
 		
 		Set<List<EntityStatement>> anchoredChains = fetchStatementsFromAuthorities(subject, authorityHints, trustAnchors, Collections.<EntityStatement>emptyList());
-		
-		
 		
 		for (List<EntityStatement> chain: anchoredChains) {
 			trustChains.add(new TrustChain(targetStatement, chain));
@@ -142,6 +145,10 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 			} catch (ResolveException e) {
 				accumulatedExceptions.add(new ResolveException("Couldn't fetch self-issued entity statement from " + authority + ": " + e.getMessage(), e));
 				continue;
+			}
+			
+			if (trustAnchors.contains(superiorSelfStmt.getEntityID())) {
+				accumulatedTrustAnchorJWKSets.put(superiorSelfStmt.getEntityID(), superiorSelfStmt.getClaimsSet().getJWKSet());
 			}
 			
 			FederationEntityMetadata metadata = superiorSelfStmt.getClaimsSet().getFederationEntityMetadata();
@@ -208,6 +215,12 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 		}
 		
 		return anchoredChains;
+	}
+	
+	
+	@Override
+	public Map<EntityID, JWKSet> getAccumulatedTrustAnchorJWKSets() {
+		return accumulatedTrustAnchorJWKSets;
 	}
 	
 	

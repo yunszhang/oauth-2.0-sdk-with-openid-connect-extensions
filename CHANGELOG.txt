@@ -1308,3 +1308,6 @@ version 8.0 (2020-04-30)
     * The com.nimbusds.oauth2.sdk.http.ServletUtils class is the sole user of
       optional javax.servlet dependency.
     * Updates optional BouncyCastle dependency to 1.65.
+
+version 8.1 (2020-04-30)
+    * Adds new TrustChainResolver(EntityID) constructor.

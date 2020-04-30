@@ -54,9 +54,19 @@ public class TrustChainResolver {
 	/**
 	 * Creates a new trust chain resolver with a single trust anchor.
 	 *
+	 * @param trustAnchor The trust anchor. Must not be {@code null}.
+	 */
+	public TrustChainResolver(final EntityID trustAnchor) {
+		this(trustAnchor, null);
+	}
+	
+	
+	/**
+	 * Creates a new trust chain resolver with a single trust anchor.
+	 *
 	 * @param trustAnchor       The trust anchor. Must not be {@code null}.
-	 * @param trustAnchorJWKSet The trust anchor public JWK set. Must not
-	 *                          be {@code null}.
+	 * @param trustAnchorJWKSet The trust anchor public JWK set,
+	 *                          {@code null} if not available.
 	 */
 	public TrustChainResolver(final EntityID trustAnchor,
 				  final JWKSet trustAnchorJWKSet) {
@@ -68,7 +78,8 @@ public class TrustChainResolver {
 	 * Creates a new trust chain resolver with multiple trust anchors.
 	 *
 	 * @param trustAnchors         The trust anchors with their public JWK
-	 *                             sets. Must contain at least one anchor.
+	 *                             sets (if available). Must contain at
+	 *                             least one anchor.
 	 * @param httpConnectTimeoutMs The HTTP connect timeout in
 	 *                             milliseconds, zero means timeout
 	 *                             determined by the underlying HTTP
@@ -109,8 +120,8 @@ public class TrustChainResolver {
 	/**
 	 * Returns the configured trust anchors.
 	 *
-	 * @return The trust anchors with their public JWK sets. Contains at
-	 *         least one anchor.
+	 * @return The trust anchors with their public JWK sets (if available).
+	 *         Contains at least one anchor.
 	 */
 	public Map<EntityID, JWKSet> getTrustAnchors() {
 		return Collections.unmodifiableMap(trustAnchors);
@@ -146,7 +157,7 @@ public class TrustChainResolver {
 		
 		TrustChainRetriever retriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		Set<TrustChain> fetchedTrustChains = retriever.fetch(target, trustAnchors.keySet());
+		Set<TrustChain> fetchedTrustChains = retriever.retrieve(target, trustAnchors.keySet());
 		
 		if (fetchedTrustChains.isEmpty()) {
 		
@@ -169,7 +180,7 @@ public class TrustChainResolver {
 			EntityID anchor = chain.getTrustAnchorEntityID();
 			JWKSet anchorJWKSet = trustAnchors.get(anchor);
 			if (anchorJWKSet == null) {
-				continue;
+				anchorJWKSet = retriever.getAccumulatedTrustAnchorJWKSets().get(anchor);
 			}
 			
 			try {

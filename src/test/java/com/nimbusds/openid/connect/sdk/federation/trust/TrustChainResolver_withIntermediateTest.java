@@ -206,7 +206,7 @@ public class TrustChainResolver_withIntermediateTest extends TestCase {
 		// Test the chain retriever
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		TrustChainSet trustChains = chainRetriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
 		
 		assertTrue(chainRetriever.getAccumulatedExceptions().isEmpty());
 		

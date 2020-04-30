@@ -21,7 +21,6 @@ package com.nimbusds.openid.connect.sdk.federation.trust;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -185,7 +184,7 @@ public class TrustChainResolver_knownAndUnknownAnchorsTest extends TestCase {
 		// Test the retriever
 		DefaultTrustChainRetriever retriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		TrustChainSet trustChains = retriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID("https://federation.com")));
+		TrustChainSet trustChains = retriever.retrieve(new EntityID(OP_ISSUER), Collections.singleton(new EntityID("https://federation.com")));
 		
 		assertEquals(1, trustChains.size());
 		

@@ -130,7 +130,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 		
 		try {
 			new DefaultTrustChainRetriever(new DefaultEntityStatementRetriever())
-				.fetch(new EntityID("https://example.com"), Collections.<EntityID>emptySet());
+				.retrieve(new EntityID("https://example.com"), Collections.<EntityID>emptySet());
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("The trust anchors must not be empty", e.getMessage());
@@ -168,7 +168,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 		// Test the retriever
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		TrustChainSet trustChains = chainRetriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
 		
 		assertEquals(1, trustChains.size());
 		
@@ -178,6 +178,9 @@ public class TrustChainResolver_basicTest extends TestCase {
 		assertEquals(ANCHOR_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));
 		assertEquals(1, chain.getSuperiorStatements().size());
 		
+		assertEquals(ANCHOR_JWK_SET.toJSONObject(), chainRetriever.getAccumulatedTrustAnchorJWKSets().get(new EntityID(ANCHOR_ISSUER)).toJSONObject());
+		assertEquals(1, chainRetriever.getAccumulatedTrustAnchorJWKSets().size());
+		
 		assertTrue(chainRetriever.getAccumulatedExceptions().isEmpty());
 		
 		// Test the resolver
@@ -186,6 +189,20 @@ public class TrustChainResolver_basicTest extends TestCase {
 		assertEquals(anchors, resolver.getTrustAnchors());
 		
 		TrustChainSet resolvedChains = resolver.resolveTrustChains(new EntityID(OP_ISSUER));
+		
+		chain = resolvedChains.getShortest();
+		assertEquals(OP_SELF_STMT, chain.getLeafSelfStatement());
+		assertEquals(ANCHOR_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));
+		assertEquals(1, chain.getSuperiorStatements().size());
+		
+		assertEquals(1, resolvedChains.size());
+		
+		// Test the resolver, no configured anchor JWK set
+		anchors = Collections.singletonMap(new EntityID(ANCHOR_ISSUER), null);
+		resolver = new TrustChainResolver(anchors, statementRetriever);
+		assertEquals(anchors, resolver.getTrustAnchors());
+		
+		resolvedChains = resolver.resolveTrustChains(new EntityID(OP_ISSUER));
 		
 		chain = resolvedChains.getShortest();
 		assertEquals(OP_SELF_STMT, chain.getLeafSelfStatement());
@@ -215,7 +232,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 		// Test the retriever
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		TrustChainSet trustChains = chainRetriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
 		assertTrue(trustChains.isEmpty());
 		
 		ResolveException e1 = (ResolveException) chainRetriever.getAccumulatedExceptions().get(0);
@@ -267,7 +284,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 		// Test the retriever
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		TrustChainSet trustChains = chainRetriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
 		assertTrue(trustChains.isEmpty());
 		
 		ResolveException e1 = (ResolveException) chainRetriever.getAccumulatedExceptions().get(0);
@@ -313,7 +330,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 		// Test the retriever
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		TrustChainSet trustChains = chainRetriever.fetch(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER.getValue())));
+		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER.getValue())));
 		assertTrue(trustChains.isEmpty());
 		
 		ResolveException e1 = (ResolveException) chainRetriever.getAccumulatedExceptions().get(0);
