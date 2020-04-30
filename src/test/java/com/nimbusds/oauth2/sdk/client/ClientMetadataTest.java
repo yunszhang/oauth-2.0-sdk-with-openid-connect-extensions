@@ -40,7 +40,9 @@ import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.id.SoftwareID;
 import com.nimbusds.oauth2.sdk.id.SoftwareVersion;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.openid.connect.sdk.federation.FederationType;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 
 public class ClientMetadataTest extends TestCase {
@@ -79,9 +81,11 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_signed_response_alg"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
+		assertTrue(paramNames.contains("federation_type"));
+		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(30, ClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(32, ClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -1166,27 +1170,46 @@ public class ClientMetadataTest extends TestCase {
 	}
 	
 	
-	public void testTrustAnchorID() throws ParseException {
+	public void testFederationFields()
+		throws Exception {
 		
 		EntityID trustAnchor = new EntityID("https://federation.c2id.com");
 		
-		ClientMetadata clientMetadata = new ClientMetadata();
-		clientMetadata.setRedirectionURI(URI.create("https://example.com/cb"));
-		assertNull(clientMetadata.getTrustAnchorID());
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
 		
+		URI redirectionURI = URI.create("https://example.com/cb");
+		clientMetadata.setRedirectionURI(redirectionURI);
+		
+		assertNull(clientMetadata.getFederationTypes());
+		List<FederationType> federationTypes = Arrays.asList(FederationType.EXPLICIT, FederationType.AUTOMATIC);
+		clientMetadata.setFederationTypes(federationTypes);
+		assertEquals(federationTypes, clientMetadata.getFederationTypes());
+		
+		assertNull(clientMetadata.getOrganizationName());
+		String orgName = "Example Org";
+		clientMetadata.setOrganizationName(orgName);
+		assertEquals(orgName, clientMetadata.getOrganizationName());
+		
+		assertNull(clientMetadata.getTrustAnchorID());
 		clientMetadata.setTrustAnchorID(trustAnchor);
 		assertEquals(trustAnchor, clientMetadata.getTrustAnchorID());
 		
-		clientMetadata.applyDefaults();
-		
 		JSONObject jsonObject = clientMetadata.toJSONObject();
+		
+		assertEquals(Arrays.asList("explicit", "automatic"), JSONObjectUtils.getStringList(jsonObject, "federation_type"));
+		assertEquals(orgName, JSONObjectUtils.getString(jsonObject, "organization_name"));
 		assertEquals(trustAnchor.getValue(), jsonObject.get("trust_anchor_id"));
 		
-		clientMetadata = ClientMetadata.parse(jsonObject);
+		clientMetadata = OIDCClientMetadata.parse(jsonObject);
 		
+		assertEquals(redirectionURI, clientMetadata.getRedirectionURI());
+		assertEquals(federationTypes, clientMetadata.getFederationTypes());
+		assertEquals(orgName, clientMetadata.getOrganizationName());
 		assertEquals(trustAnchor, clientMetadata.getTrustAnchorID());
 		
 		ClientMetadata copy = new ClientMetadata(clientMetadata);
+		assertEquals(federationTypes, copy.getFederationTypes());
+		assertEquals(orgName, copy.getOrganizationName());
 		assertEquals(trustAnchor, copy.getTrustAnchorID());
 	}
 }

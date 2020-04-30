@@ -33,9 +33,6 @@ import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
 
-/**
- * Tests the client information class.
- */
 public class ClientInformationTest extends TestCase {
 
 
@@ -79,9 +76,11 @@ public class ClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_signed_response_alg"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
+		assertTrue(paramNames.contains("federation_type"));
+		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(36, paramNames.size());
+		assertEquals(38, paramNames.size());
 	}
 
 

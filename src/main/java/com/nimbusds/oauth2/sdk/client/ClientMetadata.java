@@ -36,9 +36,12 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.id.Identifier;
 import com.nimbusds.oauth2.sdk.id.SoftwareID;
 import com.nimbusds.oauth2.sdk.id.SoftwareVersion;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.openid.connect.sdk.federation.FederationType;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 
 
@@ -113,6 +116,10 @@ public class ClientMetadata {
 		p.add("authorization_signed_response_alg");
 		p.add("authorization_encrypted_response_alg");
 		p.add("authorization_encrypted_response_enc");
+		
+		// OIDC federation
+		p.add("federation_type");
+		p.add("organization_name");
 		p.add("trust_anchor_id");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
@@ -309,6 +316,18 @@ public class ClientMetadata {
 	
 	
 	/**
+	 * The supported OpenID Connect Federation 1.0 types.
+	 */
+	private List<FederationType> federationTypes;
+	
+	
+	/**
+	 * The organisation name in OpenID Connect Federation 1.0.
+	 */
+	private String organizationName;
+	
+	
+	/**
 	 * The used trust anchor in a explicit client registration in OpenID
 	 * Connect Federation 1.0.
 	 */
@@ -374,6 +393,8 @@ public class ClientMetadata {
 		authzJWSAlg = metadata.authzJWSAlg;
 		authzJWEAlg = metadata.authzJWEAlg;
 		authzJWEEnc = metadata.authzJWEEnc;
+		federationTypes = metadata.federationTypes;
+		organizationName = metadata.organizationName;
 		trustAnchorID = metadata.trustAnchorID;
 		customFields = metadata.customFields;
 	}
@@ -1535,6 +1556,57 @@ public class ClientMetadata {
 	
 	
 	/**
+	 * Gets the supported OpenID Connect Federation 1.0 types. Corresponds
+	 * to the {@code federation_type} metadata field.
+	 *
+	 * @return The supported federation types, {@code null} if not
+	 *         specified.
+	 */
+	public List<FederationType> getFederationTypes() {
+		
+		return federationTypes;
+	}
+	
+	
+	/**
+	 * Sets the supported OpenID Connect Federation 1.0 types. Corresponds
+	 * to the {@code federation_type} metadata field.
+	 *
+	 * @param federationTypes The supported federation types, {@code null}
+	 *                        if not specified.
+	 */
+	public void setFederationTypes(final List<FederationType> federationTypes) {
+		
+		this.federationTypes = federationTypes;
+	}
+	
+	
+	/**
+	 * Gets the organisation name in OpenID Connect Federation 1.0.
+	 * Corresponds to the {@code organization_name} metadata field.
+	 *
+	 * @return The organisation name, {@code null} if not specified.
+	 */
+	public String getOrganizationName() {
+		
+		return organizationName;
+	}
+	
+	
+	/**
+	 * Sets the organisation name in OpenID Connect Federation 1.0.
+	 * Corresponds to the {@code organization_name} metadata field.
+	 *
+	 * @param organizationName The organisation name, {@code null} if not
+	 *                         specified.
+	 */
+	public void setOrganizationName(final String organizationName) {
+		
+		this.organizationName = organizationName;
+	}
+	
+	
+	/**
 	 * Gets the used trust anchor in a explicit client registration in
 	 * OpenID Connect Federation 1.0. Corresponds to the
 	 * {@code trust_anchor_id} client metadata field.
@@ -1893,6 +1965,15 @@ public class ClientMetadata {
 			o.put("authorization_encrypted_response_enc", authzJWEEnc.getName());
 		}
 		
+		// Federation
+		
+		if (CollectionUtils.isNotEmpty(federationTypes)) {
+			o.put("federation_type", Identifier.toStringList(federationTypes));
+		}
+		if (organizationName != null) {
+			o.put("organization_name", organizationName);
+		}
+		
 		if (trustAnchorID != null) {
 			o.put("trust_anchor_id", trustAnchorID.getValue());
 		}
@@ -2226,6 +2307,22 @@ public class ClientMetadata {
 			if (jsonObject.get("authorization_encrypted_response_enc") != null) {
 				metadata.setAuthorizationJWEEnc(EncryptionMethod.parse(JSONObjectUtils.getString(jsonObject, "authorization_encrypted_response_enc")));
 				jsonObject.remove("authorization_encrypted_response_enc");
+			}
+			
+			// Federation
+			
+			if (jsonObject.get("federation_type") != null) {
+				List<FederationType> types = new LinkedList<>();
+				for (String v: JSONObjectUtils.getStringList(jsonObject, "federation_type")) {
+					types.add(new FederationType(v));
+				}
+				metadata.setFederationTypes(types);
+				jsonObject.remove("federation_type");
+			}
+			
+			if (jsonObject.get("organization_name") != null) {
+				metadata.setOrganizationName(JSONObjectUtils.getString(jsonObject, "organization_name"));
+				jsonObject.remove("organization_name");
 			}
 			
 			if (jsonObject.get("trust_anchor_id") != null) {
