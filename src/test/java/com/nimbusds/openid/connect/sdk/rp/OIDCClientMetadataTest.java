@@ -100,8 +100,9 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("backchannel_logout_session_required"));
 		assertTrue(paramNames.contains("federation_type"));
 		assertTrue(paramNames.contains("organization_name"));
+		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(49, OIDCClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(50, OIDCClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	

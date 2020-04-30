@@ -40,11 +40,9 @@ import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.id.SoftwareID;
 import com.nimbusds.oauth2.sdk.id.SoftwareVersion;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 
 
-/**
- * Tests the OAuth 2.0 client metadata class.
- */
 public class ClientMetadataTest extends TestCase {
 
 
@@ -81,8 +79,9 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_signed_response_alg"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
+		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(29, ClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(30, ClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -1164,5 +1163,30 @@ public class ClientMetadataTest extends TestCase {
 				}
 			}
 		}
+	}
+	
+	
+	public void testTrustAnchorID() throws ParseException {
+		
+		EntityID trustAnchor = new EntityID("https://federation.c2id.com");
+		
+		ClientMetadata clientMetadata = new ClientMetadata();
+		clientMetadata.setRedirectionURI(URI.create("https://example.com/cb"));
+		assertNull(clientMetadata.getTrustAnchorID());
+		
+		clientMetadata.setTrustAnchorID(trustAnchor);
+		assertEquals(trustAnchor, clientMetadata.getTrustAnchorID());
+		
+		clientMetadata.applyDefaults();
+		
+		JSONObject jsonObject = clientMetadata.toJSONObject();
+		assertEquals(trustAnchor.getValue(), jsonObject.get("trust_anchor_id"));
+		
+		clientMetadata = ClientMetadata.parse(jsonObject);
+		
+		assertEquals(trustAnchor, clientMetadata.getTrustAnchorID());
+		
+		ClientMetadata copy = new ClientMetadata(clientMetadata);
+		assertEquals(trustAnchor, copy.getTrustAnchorID());
 	}
 }

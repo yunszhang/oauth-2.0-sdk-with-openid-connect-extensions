@@ -49,7 +49,7 @@ import net.minidev.json.JSONObject;
  *     <li>OpenID Connect Session Management 1.0, section 5.1.1 (draft 28).
  *     <li>OpenID Connect Front-Channel Logout 1.0, section 2 (draft 02).
  *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.2 (draft 04).
- *     <li>OpenID Connect Federation 1.0 (draft 10).
+ *     <li>OpenID Connect Federation 1.0 (draft 11).
  *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section
  *         2.
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound

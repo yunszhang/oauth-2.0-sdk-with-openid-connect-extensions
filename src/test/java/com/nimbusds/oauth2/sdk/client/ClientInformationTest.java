@@ -79,8 +79,9 @@ public class ClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_signed_response_alg"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
+		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(35, paramNames.size());
+		assertEquals(36, paramNames.size());
 	}
 
 

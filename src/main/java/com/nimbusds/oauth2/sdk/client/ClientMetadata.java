@@ -39,6 +39,7 @@ import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.id.SoftwareID;
 import com.nimbusds.oauth2.sdk.id.SoftwareVersion;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 
 
 /**
@@ -68,6 +69,7 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  *         Access Tokens (RFC 8705), sections 2.1.2 and 3.4.
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM).
+ *     <li>OpenID Connect Federation 1.0 (draft 11)
  * </ul>
  */
 public class ClientMetadata {
@@ -111,6 +113,7 @@ public class ClientMetadata {
 		p.add("authorization_signed_response_alg");
 		p.add("authorization_encrypted_response_alg");
 		p.add("authorization_encrypted_response_enc");
+		p.add("trust_anchor_id");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -303,6 +306,13 @@ public class ClientMetadata {
 	 * The encryption method for JWT-encoded authorisation responses.
 	 */
 	private EncryptionMethod authzJWEEnc;
+	
+	
+	/**
+	 * The used trust anchor in a explicit client registration in OpenID
+	 * Connect Federation 1.0.
+	 */
+	private EntityID trustAnchorID;
 
 
 	/**
@@ -364,6 +374,7 @@ public class ClientMetadata {
 		authzJWSAlg = metadata.authzJWSAlg;
 		authzJWEAlg = metadata.authzJWEAlg;
 		authzJWEEnc = metadata.authzJWEEnc;
+		trustAnchorID = metadata.trustAnchorID;
 		customFields = metadata.customFields;
 	}
 
@@ -1524,6 +1535,33 @@ public class ClientMetadata {
 	
 	
 	/**
+	 * Gets the used trust anchor in a explicit client registration in
+	 * OpenID Connect Federation 1.0. Corresponds to the
+	 * {@code trust_anchor_id} client metadata field.
+	 *
+	 * @return The trust anchor ID, {@code null} if not specified.
+	 */
+	public EntityID getTrustAnchorID() {
+		
+		return trustAnchorID;
+	}
+	
+	
+	/**
+	 * Sets the used trust anchor in a explicit client registration in
+	 * OpenID Connect Federation 1.0. Corresponds to the
+	 * {@code trust_anchor_id} client metadata field.
+	 *
+	 * @param trustAnchorID The trust anchor ID, {@code null} if not
+	 *                      specified.
+	 */
+	public void setTrustAnchorID(final EntityID trustAnchorID) {
+		
+		this.trustAnchorID = trustAnchorID;
+	}
+	
+	
+	/**
 	 * Gets the specified custom metadata field.
 	 *
 	 * @param name The field name. Must not be {@code null}.
@@ -1853,6 +1891,10 @@ public class ClientMetadata {
 		
 		if (authzJWEEnc != null) {
 			o.put("authorization_encrypted_response_enc", authzJWEEnc.getName());
+		}
+		
+		if (trustAnchorID != null) {
+			o.put("trust_anchor_id", trustAnchorID.getValue());
 		}
 
 		return o;
@@ -2184,6 +2226,11 @@ public class ClientMetadata {
 			if (jsonObject.get("authorization_encrypted_response_enc") != null) {
 				metadata.setAuthorizationJWEEnc(EncryptionMethod.parse(JSONObjectUtils.getString(jsonObject, "authorization_encrypted_response_enc")));
 				jsonObject.remove("authorization_encrypted_response_enc");
+			}
+			
+			if (jsonObject.get("trust_anchor_id") != null) {
+				metadata.setTrustAnchorID(EntityID.parse(JSONObjectUtils.getString(jsonObject, "trust_anchor_id")));
+				jsonObject.remove("trust_anchor_id");
 			}
 
 		} catch (ParseException | IllegalStateException e) {
