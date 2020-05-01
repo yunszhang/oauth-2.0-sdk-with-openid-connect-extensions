@@ -158,6 +158,80 @@ public class MetadataPolicyEntry implements Map.Entry<String, List<PolicyOperati
 	
 	
 	/**
+	 * Combines this policy entry with another one for the same parameter
+	 * name. Uses the {@link DefaultPolicyOperationCombinationValidator
+	 * default policy combination validator}.
+	 *
+	 * @param other The other policy entry. Must not be {@code null}.
+	 *
+	 * @return The new combined policy entry.
+	 *
+	 * @throws PolicyViolationException If the parameter names don't match
+	 *                                  or another violation was
+	 *                                  encountered.
+	 */
+	public MetadataPolicyEntry combine(final MetadataPolicyEntry other)
+		throws PolicyViolationException {
+		
+		return combine(other, DEFAULT_POLICY_COMBINATION_VALIDATOR);
+	}
+	
+	
+	/**
+	 * Combines this policy entry with another one for the same parameter
+	 * name.
+	 *
+	 * @param other                The other policy entry. Must not be
+	 *                             {@code null}.
+	 * @param combinationValidator The policy operation combination
+	 *                             validator. Must not be {@code null}.
+	 *
+	 * @return The new combined policy entry.
+	 *
+	 * @throws PolicyViolationException If the parameter names don't match
+	 *                                  or another violation was
+	 *                                  encountered.
+	 */
+	public MetadataPolicyEntry combine(final MetadataPolicyEntry other,
+					   final PolicyOperationCombinationValidator combinationValidator)
+		throws PolicyViolationException {
+		
+		if (! getParameterName().equals(other.getParameterName())) {
+			throw new PolicyViolationException("The parameter name of the other policy doesn't match: " + other.getParameterName());
+		}
+		
+		List<PolicyOperation> combinedOperations = new LinkedList<>();
+		
+		Map<OperationName,PolicyOperation> en1Map = getOperationsMap();
+		Map<OperationName,PolicyOperation> en2Map = other.getOperationsMap();
+		
+		// Copy operations not present in either
+		for (OperationName name: en1Map.keySet()) {
+			if (! en2Map.containsKey(name)) {
+				combinedOperations.add(en1Map.get(name));
+			}
+		}
+		for (OperationName name: en2Map.keySet()) {
+			if (! en1Map.containsKey(name)) {
+				combinedOperations.add(en2Map.get(name));
+			}
+		}
+		
+		// Merge operations present in both entries
+		for (OperationName opName: en1Map.keySet()) {
+			if (en2Map.containsKey(opName)) {
+				PolicyOperation op1 = en1Map.get(opName);
+				combinedOperations.add(op1.merge(en2Map.get(opName)));
+			}
+		}
+		
+		List<PolicyOperation> validatedOperations = combinationValidator.validate(combinedOperations);
+		
+		return new MetadataPolicyEntry(getParameterName(), validatedOperations);
+	}
+	
+	
+	/**
 	 * Applies this policy entry for a metadata parameter to the specified
 	 * value.
 	 *
@@ -235,6 +309,30 @@ public class MetadataPolicyEntry implements Map.Entry<String, List<PolicyOperati
 	
 	/**
 	 * Parses a policy entry for a metadata parameter. This method is
+	 * intended for policies with standard {@link PolicyOperation}s only.
+	 * Uses the default {@link DefaultPolicyOperationFactory policy
+	 * operation} and {@link DefaultPolicyOperationCombinationValidator
+	 * policy combination validator} factories.
+	 *
+	 * @param parameterName The parameter name. Must not be {@code null}.
+	 * @param entrySpec     The JSON object entry specification, must not
+	 *                      be {@code null}.
+	 *
+	 * @return The policy entry for the metadata parameter.
+	 *
+	 * @throws ParseException           On JSON parsing exception.
+	 * @throws PolicyViolationException On a policy violation.
+	 */
+	public static MetadataPolicyEntry parse(final String parameterName,
+						final JSONObject entrySpec)
+		throws ParseException, PolicyViolationException {
+		
+		return parse(parameterName, entrySpec, DEFAULT_POLICY_OPERATION_FACTORY, DEFAULT_POLICY_COMBINATION_VALIDATOR);
+	}
+	
+	
+	/**
+	 * Parses a policy entry for a metadata parameter. This method is
 	 * intended for policies including non-standard
 	 * {@link PolicyOperation}s.
 	 *
@@ -269,29 +367,5 @@ public class MetadataPolicyEntry implements Map.Entry<String, List<PolicyOperati
 		List<PolicyOperation> validatedPolicyOperations = combinationValidator.validate(policyOperations);
 		
 		return new MetadataPolicyEntry(parameterName, validatedPolicyOperations);
-	}
-	
-	
-	/**
-	 * Parses a policy entry for a metadata parameter. This method is
-	 * intended for policies with standard {@link PolicyOperation}s only.
-	 * Uses the default {@link DefaultPolicyOperationFactory policy
-	 * operation} and {@link DefaultPolicyOperationCombinationValidator
-	 * policy combination validator} factories.
-	 *
-	 * @param parameterName The parameter name. Must not be {@code null}.
-	 * @param entrySpec     The JSON object entry specification, must not
-	 *                      be {@code null}.
-	 *
-	 * @return The policy entry for the metadata parameter.
-	 *
-	 * @throws ParseException           On JSON parsing exception.
-	 * @throws PolicyViolationException On a policy violation.
-	 */
-	public static MetadataPolicyEntry parse(final String parameterName,
-						final JSONObject entrySpec)
-		throws ParseException, PolicyViolationException {
-		
-		return parse(parameterName, entrySpec, DEFAULT_POLICY_OPERATION_FACTORY, DEFAULT_POLICY_COMBINATION_VALIDATOR);
 	}
 }

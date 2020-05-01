@@ -31,9 +31,7 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.OperationName;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyOperation;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
-import com.nimbusds.openid.connect.sdk.federation.policy.operations.DefaultOperation;
-import com.nimbusds.openid.connect.sdk.federation.policy.operations.SubsetOfOperation;
-import com.nimbusds.openid.connect.sdk.federation.policy.operations.SupersetOfOperation;
+import com.nimbusds.openid.connect.sdk.federation.policy.operations.*;
 
 
 public class MetadataPolicyEntryTest extends TestCase {
@@ -108,5 +106,149 @@ public class MetadataPolicyEntryTest extends TestCase {
 		}
 		
 		assertEquals(3, policyEntry.getValue().size());
+	}
+	
+	
+	// https://openid.net/specs/openid-connect-federation-1_0.html#rfc.section.4.1.3.1
+	public void testExampleCombineScope() throws ParseException, PolicyViolationException {
+		
+		MetadataPolicyEntry entry = MetadataPolicyEntry.parse(
+			"scopes",
+			JSONObjectUtils.parse(
+				"{" +
+					"    \"subset_of\": [" +
+					"      \"openid\"," +
+					"      \"eduperson\"," +
+					"      \"phone\"" +
+					"    ]," +
+					"    \"superset_of\": [" +
+					"      \"openid\"" +
+					"    ]," +
+					"    \"default\": [" +
+					"      \"openid\"," +
+					"      \"eduperson\"" +
+					"    ]" +
+					"  }"
+			)
+		);
+		
+		MetadataPolicyEntry other = MetadataPolicyEntry.parse(
+			"scopes",
+			JSONObjectUtils.parse(
+				"{" +
+					"    \"subset_of\": [" +
+					"      \"openid\"," +
+					"      \"eduperson\"," +
+					"      \"address\"" +
+					"    ]," +
+					"    \"default\": [" +
+					"      \"openid\"," +
+					"      \"eduperson\"" +
+					"    ]" +
+					"  }"
+			)
+		);
+		
+		MetadataPolicyEntry combined = entry.combine(other);
+		
+		assertEquals("scopes", combined.getParameterName());
+		
+		SubsetOfOperation subsetOfOperation = (SubsetOfOperation) combined.getOperationsMap().get(SubsetOfOperation.NAME);
+		assertEquals(Arrays.asList("openid", "eduperson"), subsetOfOperation.getStringListConfiguration());
+		
+		SupersetOfOperation supersetOfOperation = (SupersetOfOperation) combined.getOperationsMap().get(SupersetOfOperation.NAME);
+		assertEquals(Collections.singletonList("openid"), supersetOfOperation.getStringListConfiguration());
+		
+		DefaultOperation defaultOperation = (DefaultOperation) combined.getOperationsMap().get(DefaultOperation.NAME);
+		assertEquals(Arrays.asList("openid", "eduperson"), defaultOperation.getStringListConfiguration());
+		
+		assertEquals(3, combined.getPolicyOperations().size());
+	}
+	
+	
+	// https://openid.net/specs/openid-connect-federation-1_0.html#rfc.section.4.1.3.1
+	public void testExampleCombineIDTokenJWSAlg() throws ParseException, PolicyViolationException {
+		
+		MetadataPolicyEntry entry = MetadataPolicyEntry.parse(
+			"id_token_signed_response_alg",
+			JSONObjectUtils.parse(
+				"{" +
+					"    \"one_of\": [" +
+					"      \"ES256\"," +
+					"      \"ES384\"," +
+					"      \"ES512\"" +
+					"    ]" +
+					"  }"
+			)
+		);
+		
+		MetadataPolicyEntry other = MetadataPolicyEntry.parse(
+			"id_token_signed_response_alg",
+			JSONObjectUtils.parse(
+				"{" +
+					"    \"one_of\": [" +
+					"      \"ES256\"," +
+					"      \"ES384\"" +
+					"    ]," +
+					"    \"default\": \"ES256\"" +
+					"  }"
+			)
+		);
+		
+		MetadataPolicyEntry combined = entry.combine(other);
+		
+		assertEquals("id_token_signed_response_alg", combined.getParameterName());
+		
+		OneOfOperation oneOfOperation = (OneOfOperation) combined.getOperationsMap().get(OneOfOperation.NAME);
+		assertEquals(Arrays.asList("ES256", "ES384"), oneOfOperation.getStringListConfiguration());
+		
+		DefaultOperation defaultOperation = (DefaultOperation) combined.getOperationsMap().get(DefaultOperation.NAME);
+		assertEquals("ES256", defaultOperation.getStringConfiguration());
+		
+		assertEquals(2, combined.getPolicyOperations().size());
+	}
+	
+	
+	// https://openid.net/specs/openid-connect-federation-1_0.html#rfc.section.4.1.3.1
+	public void testExampleCombineContacts() throws ParseException, PolicyViolationException {
+		
+		MetadataPolicyEntry entry = MetadataPolicyEntry.parse(
+			"contacts",
+			JSONObjectUtils.parse(
+				"{" +
+					"    \"add\": \"helpdesk@federation.example.org\"" +
+					"  }"
+			)
+		);
+		
+		MetadataPolicyEntry other = MetadataPolicyEntry.parse(
+			"contacts",
+			JSONObjectUtils.parse(
+				"{\n" +
+					"    \"add\": \"helpdesk@org.example.org\"\n" +
+					"  }"
+			)
+		);
+		
+		MetadataPolicyEntry combined = entry.combine(other);
+		
+		assertEquals("contacts", combined.getParameterName());
+		
+		AddOperation addOperation = (AddOperation) combined.getOperationsMap().get(AddOperation.NAME);
+		assertEquals(Arrays.asList("helpdesk@federation.example.org", "helpdesk@org.example.org"), addOperation.getStringListConfiguration());
+		
+		assertEquals(1, combined.getPolicyOperations().size());
+	}
+	
+	
+	public void testCombine_paramNamesMismatch() {
+		
+		try {
+			new MetadataPolicyEntry("scopes", null)
+				.combine(new MetadataPolicyEntry("contacts", null));
+			fail();
+		} catch (PolicyViolationException e) {
+			assertEquals("The parameter name of the other policy doesn't match: contacts", e.getMessage());
+		}
 	}
 }
