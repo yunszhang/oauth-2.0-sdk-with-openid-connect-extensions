@@ -187,4 +187,70 @@ public class MetadataPolicyTest extends TestCase {
 		// Back to JSON object
 		assertEquals(JSONObjectUtils.parse(json), metadataPolicy.toJSONObject());
 	}
+	
+	
+	// https://openid.net/specs/openid-connect-federation-1_0.html#rfc.section.4.1.6
+	public void testApply_example() throws ParseException, PolicyViolationException {
+		
+		String policyJSON = "{" +
+			"  \"contacts\": {" +
+			"    \"add\": \"helpdesk@example.com\"" +
+			"  }," +
+			"  \"logo_uri\": {" +
+			"    \"one_of\": [" +
+			"      \"https://example.com/logo_small.jpg\"," +
+			"      \"https://example.com/logo_big.jpg\"" +
+			"    ]," +
+			"    \"default\": \"https://example.com/logo_small.jpg\"" +
+			"  }," +
+			"  \"policy_uri\": {" +
+			"    \"value\": \"https://example.com/policy.html\"" +
+			"  }," +
+			"  \"tos_uri\": {" +
+			"    \"value\": \"https://example.com/tos.html\"" +
+			"  }" +
+			"}";
+		
+		String rpMetadataJSON = "{" +
+			"  \"contacts\": [" +
+			"    \"rp_admins@cs.example.com\"" +
+			"  ]," +
+			"  \"redirect_uris\": [" +
+			"    \"https://cs.example.com/rp1\"" +
+			"  ]," +
+			"  \"response_types\": [" +
+			"    \"code\"" +
+			"  ]" +
+			"}";
+		
+		String expectedEndMetadataJSON = "{" +
+			"  \"contacts\": [" +
+			"    \"rp_admins@cs.example.com\"," +
+			"    \"helpdesk@example.com\"" +
+			"  ]," +
+			"  \"logo_uri\": \"https://example.com/logo_small.jpg\"," +
+			"  \"policy_uri\": \"https://example.com/policy.html\"," +
+			"  \"tos_uri\": \"https://example.com/tos.html\"," +
+// TODO bug?		"  \"scopes\": [" +
+//			"    \"openid\"," +
+//			"    \"eduperson\"" +
+//			"  ]," +
+			"  \"response_types\": [" +
+			"    \"code\"" +
+			"  ]," +
+			"  \"redirect_uris\": [" +
+			"    \"https://cs.example.com/rp1\"" +
+			"  ]" +
+			"}";
+		
+		MetadataPolicy policy = MetadataPolicy.parse(policyJSON);
+		
+		JSONObject metadata = JSONObjectUtils.parse(rpMetadataJSON);
+		
+		JSONObject endMetadata = policy.apply(metadata);
+		
+		JSONObject expectedEndMetadata = JSONObjectUtils.parse(expectedEndMetadataJSON);
+		
+		assertEquals(expectedEndMetadata, endMetadata);
+	}
 }

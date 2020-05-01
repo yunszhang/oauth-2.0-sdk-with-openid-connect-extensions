@@ -72,6 +72,48 @@ public class MetadataPolicy implements JSONAware {
 	
 	
 	/**
+	 * Applies this policy to the specified metadata.
+	 *
+	 * @param metadata The metadata as JSON object. May be {@code null}.
+	 *
+	 * @return The resulting metadata, {@code null} if not specified.
+	 *
+	 * @throws PolicyViolationException On a policy violation.
+	 */
+	public JSONObject apply(final JSONObject metadata)
+		throws PolicyViolationException {
+		
+		if (metadata == null) {
+			return null;
+		}
+		
+		JSONObject out = new JSONObject();
+		
+		// Copy params not subject by policy
+		for (String key: metadata.keySet()) {
+			if (! entries.containsKey(key)) {
+				out.put(key, metadata.get(key));
+			}
+		}
+		
+		// Apply policy
+		for (String key: entries.keySet()) {
+			
+			Object metadataValue = metadata.get(key);
+			MetadataPolicyEntry en = getEntry(key);
+			
+			Object outputValue = en.apply(metadataValue);
+			
+			if (outputValue != null) {
+				out.put(key, outputValue);
+			}
+		}
+		
+		return out;
+	}
+	
+	
+	/**
 	 * Puts a policy entry for a metadata parameter.
 	 *
 	 * @param parameterName   The parameter name. Must not be {@code null}.
