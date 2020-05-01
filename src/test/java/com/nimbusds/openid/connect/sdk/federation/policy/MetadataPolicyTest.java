@@ -18,16 +18,19 @@
 package com.nimbusds.openid.connect.sdk.federation.policy;
 
 
+import java.net.URI;
 import java.util.*;
 
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyOperation;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
 import com.nimbusds.openid.connect.sdk.federation.policy.operations.*;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 
 public class MetadataPolicyTest extends TestCase {
@@ -186,6 +189,41 @@ public class MetadataPolicyTest extends TestCase {
 		
 		// Back to JSON object
 		assertEquals(JSONObjectUtils.parse(json), metadataPolicy.toJSONObject());
+	}
+	
+	
+	public void testApply_copyOnly() throws PolicyViolationException {
+		
+		
+		MetadataPolicy policy = new MetadataPolicy();
+		
+		OIDCClientMetadata metadata = new OIDCClientMetadata();
+		metadata.setRedirectionURI(URI.create("https://example.com/cb"));
+		metadata.setEmailContacts(Collections.singletonList("admin@example.com"));
+		metadata.applyDefaults();
+		
+		assertEquals(metadata.toJSONObject(), policy.apply(metadata.toJSONObject()));
+	}
+	
+	
+	public void testApply_copyAndApply() throws PolicyViolationException {
+		
+		
+		MetadataPolicy policy = new MetadataPolicy();
+		DefaultOperation defaultOperation = new DefaultOperation();
+		defaultOperation.configure(URI.create("https://example.com/policy.html").toString());
+		policy.put("policy_uri", defaultOperation);
+		
+		OIDCClientMetadata metadata = new OIDCClientMetadata();
+		metadata.setRedirectionURI(URI.create("https://example.com/cb"));
+		metadata.setEmailContacts(Collections.singletonList("admin@example.com"));
+		metadata.applyDefaults();
+		JSONObject in = metadata.toJSONObject();
+		
+		metadata.setPolicyURI(URI.create("https://example.com/policy.html"));
+		JSONObject expectedOut = metadata.toJSONObject();
+		
+		assertEquals(expectedOut, policy.apply(in));
 	}
 	
 	
