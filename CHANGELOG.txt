@@ -1313,4 +1313,4 @@ version 8.1 (2020-04-30)
     * Adds new TrustChainResolver(EntityID) constructor.
 
 version 8.2 (2020-05-01)
-    * Adds new MetadataPolicyEntry.getOperationsMap method.
+    * Adds new MetadataPolicyEntry.getOperationsMap and combine methods.
