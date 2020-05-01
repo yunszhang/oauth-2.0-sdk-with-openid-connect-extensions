@@ -18,6 +18,7 @@
 package com.nimbusds.openid.connect.sdk.federation.policy;
 
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -132,6 +133,27 @@ public class MetadataPolicyEntry implements Map.Entry<String, List<PolicyOperati
 	@Override
 	public List<PolicyOperation> setValue(final List<PolicyOperation> policyOperations) {
 		throw new UnsupportedOperationException();
+	}
+	
+	
+	/**
+	 * Returns a map of the operations for this policy entry.
+	 *
+	 * @return The map, empty if no operations.
+	 */
+	public Map<OperationName,PolicyOperation> getOperationsMap() {
+		
+		Map<OperationName,PolicyOperation> map = new HashMap<>();
+		
+		if (getPolicyOperations() == null) {
+			return map;
+		}
+		
+		for (PolicyOperation op: getPolicyOperations()) {
+			map.put(op.getOperationName(), op);
+		}
+		
+		return map;
 	}
 	
 	

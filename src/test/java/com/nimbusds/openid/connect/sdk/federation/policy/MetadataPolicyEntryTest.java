@@ -21,12 +21,14 @@ package com.nimbusds.openid.connect.sdk.federation.policy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.OperationName;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyOperation;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
 import com.nimbusds.openid.connect.sdk.federation.policy.operations.DefaultOperation;
@@ -52,9 +54,27 @@ public class MetadataPolicyEntryTest extends TestCase {
 		assertEquals(ops, entry.getValue());
 		assertEquals(ops, entry.getPolicyOperations());
 		
+		Map<OperationName,PolicyOperation> map = entry.getOperationsMap();
+		assertEquals(op1, map.get(op1.getOperationName()));
+		assertEquals(1, map.size());
+		
 		List<String> input = Arrays.asList("openid", "email");
 		List<String> output = (List<String>)entry.apply(input);
 		assertEquals(Collections.singletonList("openid"), output);
+	}
+	
+	
+	public void testEmpty() {
+		
+		MetadataPolicyEntry entry = new MetadataPolicyEntry("scope", null);
+		
+		assertEquals("scope", entry.getKey());
+		assertEquals("scope", entry.getParameterName());
+		
+		assertNull(entry.getValue());
+		assertNull(entry.getPolicyOperations());
+		
+		assertTrue(entry.getOperationsMap().isEmpty());
 	}
 	
 	
