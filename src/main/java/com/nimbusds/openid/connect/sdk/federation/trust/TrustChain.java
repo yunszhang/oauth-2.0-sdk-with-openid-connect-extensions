@@ -20,18 +20,26 @@ package com.nimbusds.openid.connect.sdk.federation.trust;
 
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.proc.BadJOSEException;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
+import com.nimbusds.openid.connect.sdk.federation.policy.MetadataPolicy;
+import com.nimbusds.openid.connect.sdk.federation.policy.MetadataPolicyEntry;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
+import com.nimbusds.openid.connect.sdk.federation.policy.operations.DefaultPolicyOperationCombinationValidator;
+import com.nimbusds.openid.connect.sdk.federation.policy.operations.PolicyOperationCombinationValidator;
 
 
 /**
@@ -40,7 +48,7 @@ import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OpenID Connect Federation 1.0, section 2.2.
+ *     <li>OpenID Connect Federation 1.0, sections 2.2 and 7.
  * </ul>
  */
 @Immutable
@@ -158,6 +166,56 @@ public final class TrustChain {
 	public int length() {
 		
 		return getSuperiorStatements().size();
+	}
+	
+	
+	/**
+	 * Resolves the combined metadata policy for this trust chain. Uses the
+	 * {@link DefaultPolicyOperationCombinationValidator default policy
+	 * combination validator}.
+	 *
+	 * @return The combined metadata policy, with no policy operations if
+	 *         no policies were found.
+	 *
+	 * @throws ParseException           On a policy parse exception.
+	 * @throws PolicyViolationException On a policy violation exception.
+	 */
+	public MetadataPolicy resolveCombinedMetadataPolicy()
+		throws ParseException, PolicyViolationException {
+		
+		return resolveCombinedMetadataPolicy(MetadataPolicyEntry.DEFAULT_POLICY_COMBINATION_VALIDATOR);
+	}
+	
+	
+	/**
+	 * Resolves the combined metadata policy for this trust chain.
+	 *
+	 * @param combinationValidator The policy operation combination
+	 *                             validator. Must not be {@code null}.
+	 *
+	 * @return The combined metadata policy, with no policy operations if
+	 *         no policies were found.
+	 *
+	 * @throws ParseException           On a policy parse exception.
+	 * @throws PolicyViolationException On a policy violation exception.
+	 */
+	public MetadataPolicy resolveCombinedMetadataPolicy(final PolicyOperationCombinationValidator combinationValidator)
+		throws ParseException, PolicyViolationException {
+		
+		List<MetadataPolicy> policies = new LinkedList<>();
+		
+		for (EntityStatement stmt: getSuperiorStatements()) {
+			
+			JSONObject jsonObject = stmt.getClaimsSet().getMetadataPolicyJSONObject();
+			
+			if (jsonObject == null) {
+				continue;
+			}
+			
+			policies.add(MetadataPolicy.parse(jsonObject));
+		}
+		
+		return MetadataPolicy.combine(policies, combinationValidator);
 	}
 	
 	

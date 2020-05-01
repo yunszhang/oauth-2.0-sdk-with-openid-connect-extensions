@@ -52,13 +52,13 @@ public class MetadataPolicyEntry implements Map.Entry<String, List<PolicyOperati
 	/**
 	 * The default policy operation factory.
 	 */
-	protected final static PolicyOperationFactory DEFAULT_POLICY_OPERATION_FACTORY = new DefaultPolicyOperationFactory();
+	public final static PolicyOperationFactory DEFAULT_POLICY_OPERATION_FACTORY = new DefaultPolicyOperationFactory();
 	
 	
 	/**
 	 * The default policy operation combination validator.
 	 */
-	protected final static PolicyOperationCombinationValidator DEFAULT_POLICY_COMBINATION_VALIDATOR = new DefaultPolicyOperationCombinationValidator();
+	public final static PolicyOperationCombinationValidator DEFAULT_POLICY_COMBINATION_VALIDATOR = new DefaultPolicyOperationCombinationValidator();
 	
 	
 	/**

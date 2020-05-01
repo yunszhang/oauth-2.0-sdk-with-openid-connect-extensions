@@ -185,6 +185,8 @@ public class TrustChainTest extends TestCase {
 		assertNull(it.next());
 		
 		assertEquals(1, trustChain.length());
+		
+		assertTrue(trustChain.resolveCombinedMetadataPolicy().entrySet().isEmpty());
 	}
 	
 	
@@ -228,6 +230,8 @@ public class TrustChainTest extends TestCase {
 		assertNull(it.next());
 		
 		assertEquals(2, trustChain.length());
+		
+		assertTrue(trustChain.resolveCombinedMetadataPolicy().entrySet().isEmpty());
 	}
 	
 	
