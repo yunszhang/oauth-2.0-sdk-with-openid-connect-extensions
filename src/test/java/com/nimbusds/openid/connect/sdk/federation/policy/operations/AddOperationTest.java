@@ -108,7 +108,19 @@ public class AddOperationTest extends TestCase {
 	}
 	
 	
-	public void testMerge() throws PolicyViolationException {
+	public void testMerge_string_string() throws PolicyViolationException {
+		
+		AddOperation o1 = new AddOperation();
+		o1.configure("a");
+		
+		AddOperation o2 = new AddOperation();
+		o2.configure("b");
+		
+		assertEquals(Arrays.asList("a", "b"), ((AddOperation)o1.merge(o2)).getStringListConfiguration());
+	}
+	
+	
+	public void testMerge_string_stringList() throws PolicyViolationException {
 		
 		AddOperation o1 = new AddOperation();
 		o1.configure("a");
@@ -117,5 +129,17 @@ public class AddOperationTest extends TestCase {
 		o2.configure(Arrays.asList("b", "c"));
 		
 		assertEquals(Arrays.asList("a", "b", "c"), ((AddOperation)o1.merge(o2)).getStringListConfiguration());
+	}
+	
+	
+	public void testMerge_stringList_stringList() throws PolicyViolationException {
+		
+		AddOperation o1 = new AddOperation();
+		o1.configure(Arrays.asList("a", "b"));
+		
+		AddOperation o2 = new AddOperation();
+		o2.configure(Arrays.asList("c", "d"));
+		
+		assertEquals(Arrays.asList("a", "b", "c", "d"), ((AddOperation)o1.merge(o2)).getStringListConfiguration());
 	}
 }
