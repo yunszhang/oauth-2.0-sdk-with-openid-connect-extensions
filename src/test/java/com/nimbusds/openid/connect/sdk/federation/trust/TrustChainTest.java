@@ -35,12 +35,16 @@ import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
+import com.nimbusds.openid.connect.sdk.federation.policy.MetadataPolicy;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
+import com.nimbusds.openid.connect.sdk.federation.policy.operations.SubsetOfOperation;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 
@@ -367,5 +371,33 @@ public class TrustChainTest extends TestCase {
 		} catch (BadJOSEException e) {
 			assertEquals("Invalid statement from https://federation.example.com: Signed JWT rejected: Invalid signature", e.getMessage());
 		}
+	}
+	
+	
+	public void testResolveMetadataPolicy() throws JOSEException, BadJOSEException, ParseException, PolicyViolationException {
+		
+		MetadataPolicy policy = new MetadataPolicy();
+		SubsetOfOperation subsetOfOperation = new SubsetOfOperation();
+		subsetOfOperation.configure(Collections.singletonList("scopes"));
+		policy.put("scopes", subsetOfOperation);
+		
+		EntityStatementClaimsSet leafClaims = createOPSelfStatementClaimsSet(ANCHOR_ENTITY_ID);
+		EntityStatement leafStmt = EntityStatement.sign(leafClaims, OP_RSA_JWK);
+		
+		EntityStatementClaimsSet anchorClaimsAboutLeaf = createOPStatementClaimsSet(new Issuer(ANCHOR_ENTITY_ID.getValue()), ANCHOR_ENTITY_ID);
+		anchorClaimsAboutLeaf.setMetadataPolicyJSONObject(policy.toJSONObject());
+		EntityStatement anchorStmtAboutLeaf = EntityStatement.sign(anchorClaimsAboutLeaf, ANCHOR_RSA_JWK);
+		
+		List<EntityStatement> superiorStatements = Collections.singletonList(anchorStmtAboutLeaf);
+		TrustChain trustChain = new TrustChain(leafStmt, superiorStatements);
+		
+		assertEquals(leafStmt, trustChain.getLeafSelfStatement());
+		assertEquals(superiorStatements, trustChain.getSuperiorStatements());
+		
+		assertEquals(ANCHOR_ENTITY_ID, trustChain.getTrustAnchorEntityID());
+		
+		trustChain.verifySignatures(ANCHOR_JWK_SET);
+		
+		assertEquals(policy.toJSONObject(), trustChain.resolveCombinedMetadataPolicy().toJSONObject());
 	}
 }
