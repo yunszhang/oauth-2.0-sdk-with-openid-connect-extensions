@@ -173,9 +173,9 @@ public class MetadataPolicy implements JSONAware {
 	 *
 	 * @return The JSON object.
 	 */
-	public Map<String,Object> toJSONObject() {
+	public JSONObject toJSONObject() {
 		
-		Map<String,Object> jsonObject = new LinkedHashMap<>();
+		JSONObject jsonObject = new JSONObject();
 		
 		for (MetadataPolicyEntry en: entrySet()) {
 			jsonObject.put(en.getKey(), en.toJSONObject());
@@ -187,7 +187,85 @@ public class MetadataPolicy implements JSONAware {
 	
 	@Override
 	public String toJSONString() {
-		return JSONObject.toJSONString(toJSONObject());
+		return toJSONObject().toJSONString();
+	}
+	
+	
+	/**
+	 * Combines the specified list of metadata policies. Uses the
+	 * {@link DefaultPolicyOperationCombinationValidator default policy
+	 * combination validator}.
+	 *
+	 * @param policies The metadata policies. Must not be empty or
+	 *                 {@code null}.
+	 *
+	 * @return The new combined metadata policy.
+	 *
+	 * @throws PolicyViolationException On a policy violation.
+	 */
+	public static MetadataPolicy combine(final List<MetadataPolicy> policies)
+		throws PolicyViolationException {
+		
+		return combine(policies, MetadataPolicyEntry.DEFAULT_POLICY_COMBINATION_VALIDATOR);
+	}
+	
+	
+	/**
+	 * Combines the specified list of metadata policies.
+	 *
+	 * @param policies             The metadata policies. Must not be empty
+	 *                             or {@code null}.
+	 * @param combinationValidator The policy operation combination
+	 *                             validator. Must not be {@code null}.
+	 *
+	 * @return The new combined metadata policy.
+	 *
+	 * @throws PolicyViolationException On a policy violation.
+	 */
+	public static MetadataPolicy combine(final List<MetadataPolicy> policies,
+					     final PolicyOperationCombinationValidator combinationValidator)
+		throws PolicyViolationException {
+		
+		MetadataPolicy out = new MetadataPolicy();
+		
+		for (MetadataPolicy p: policies) {
+			for (MetadataPolicyEntry entry: p.entrySet()) {
+				MetadataPolicyEntry existingEntry = out.getEntry(entry.getParameterName());
+				if (existingEntry == null) {
+					// add
+					out.put(entry);
+				} else {
+					// merge
+					out.put(existingEntry.combine(entry, combinationValidator));
+				}
+			}
+		}
+		
+		return out;
+	}
+	
+	
+	/**
+	 * Parses a policy for a federation entity metadata. This method is
+	 * intended for policies with standard {@link PolicyOperation}s only.
+	 * Uses the default {@link DefaultPolicyOperationFactory policy
+	 * operation} and {@link DefaultPolicyOperationCombinationValidator
+	 * policy combination validator} factories.
+	 *
+	 * @param policySpec The JSON object string for the policy
+	 *                   specification. Must not be {@code null}.
+	 *
+	 * @return The metadata policy.
+	 *
+	 * @throws ParseException           On JSON parsing exception.
+	 * @throws PolicyViolationException On a policy violation.
+	 */
+	public static MetadataPolicy parse(final JSONObject policySpec)
+		throws ParseException, PolicyViolationException {
+		
+		return parse(policySpec,
+			MetadataPolicyEntry.DEFAULT_POLICY_OPERATION_FACTORY,
+			MetadataPolicyEntry.DEFAULT_POLICY_COMBINATION_VALIDATOR);
 	}
 	
 	
@@ -239,7 +317,7 @@ public class MetadataPolicy implements JSONAware {
 	 * @throws ParseException           On JSON parsing exception.
 	 * @throws PolicyViolationException On a policy violation.
 	 */
-	public static MetadataPolicy parse(final JSONObject policySpec)
+	public static MetadataPolicy parse(final String policySpec)
 		throws ParseException, PolicyViolationException {
 		
 		return parse(policySpec,
@@ -271,29 +349,5 @@ public class MetadataPolicy implements JSONAware {
 		throws ParseException, PolicyViolationException {
 		
 		return parse(JSONObjectUtils.parse(policySpec), factory, combinationValidator);
-	}
-	
-	
-	/**
-	 * Parses a policy for a federation entity metadata. This method is
-	 * intended for policies with standard {@link PolicyOperation}s only.
-	 * Uses the default {@link DefaultPolicyOperationFactory policy
-	 * operation} and {@link DefaultPolicyOperationCombinationValidator
-	 * policy combination validator} factories.
-	 *
-	 * @param policySpec The JSON object string for the policy
-	 *                   specification. Must not be {@code null}.
-	 *
-	 * @return The metadata policy.
-	 *
-	 * @throws ParseException           On JSON parsing exception.
-	 * @throws PolicyViolationException On a policy violation.
-	 */
-	public static MetadataPolicy parse(final String policySpec)
-		throws ParseException, PolicyViolationException {
-		
-		return parse(policySpec,
-			MetadataPolicyEntry.DEFAULT_POLICY_OPERATION_FACTORY,
-			MetadataPolicyEntry.DEFAULT_POLICY_COMBINATION_VALIDATOR);
 	}
 }

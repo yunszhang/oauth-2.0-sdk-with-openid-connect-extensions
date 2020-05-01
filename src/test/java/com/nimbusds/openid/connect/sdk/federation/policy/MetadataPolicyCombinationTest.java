@@ -18,6 +18,8 @@
 package com.nimbusds.openid.connect.sdk.federation.policy;
 
 
+import java.util.Arrays;
+
 import junit.framework.TestCase;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -88,8 +90,40 @@ public class MetadataPolicyCombinationTest extends TestCase {
 		MetadataPolicy federationPolicy = MetadataPolicy.parse(federationPolicyJSON);
 		MetadataPolicy rpPolicy = MetadataPolicy.parse(rpPolicyJSON);
 		
-		MetadataPolicy combinedPolicy = MetadataPolicyCombination.combine(federationPolicy, rpPolicy);
+		MetadataPolicy combinedPolicy = MetadataPolicy.combine(Arrays.asList(federationPolicy, rpPolicy));
 		
-		System.out.println(combinedPolicy.toJSONObject());
+		String expectedCombinedJSON = "{" +
+			"  \"scopes\": {" +
+			"    \"subset_of\": [" +
+			"      \"openid\"," +
+			"      \"eduperson\"" +
+			"    ]," +
+			"    \"superset_of\": [" +
+			"      \"openid\"" +
+			"    ]," +
+			"    \"default\": [" +
+			"      \"openid\"," +
+			"      \"eduperson\"" +
+			"    ]" +
+			"  }," +
+			"  \"id_token_signed_response_alg\": {" +
+			"    \"one_of\": [" +
+			"      \"ES256\"," +
+			"      \"ES384\"" +
+			"    ]," +
+			"    \"default\": \"ES256\"" +
+			"  }," +
+			"  \"contacts\": {" +
+			"    \"add\": [" +
+			"      \"helpdesk@federation.example.org\"," +
+			"      \"helpdesk@org.example.org\"" +
+			"    ]" +
+			"  }," +
+			"  \"application_type\": {" +
+			"    \"value\": \"web\"" +
+			"  }" +
+			"}";
+		
+		assertEquals(JSONObjectUtils.parse(expectedCombinedJSON), combinedPolicy.toJSONObject());
 	}
 }

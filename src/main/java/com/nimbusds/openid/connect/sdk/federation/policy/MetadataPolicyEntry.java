@@ -284,6 +284,16 @@ public class MetadataPolicyEntry implements Map.Entry<String, List<PolicyOperati
 		
 		// The order matters
 		
+		if (op instanceof StringConfiguration && op instanceof StringListConfiguration) {
+			Object stringValue = ((StringConfiguration)op).getStringConfiguration();
+			List<String> stringListValue = ((StringListConfiguration)op).getStringListConfiguration();
+			if (stringListValue != null && stringListValue.size() > 1) {
+				return stringListValue;
+			} else {
+				return stringValue;
+			}
+		}
+		
 		if (op instanceof StringConfiguration) {
 			Object value = ((StringConfiguration)op).getStringConfiguration();
 			if (value != null) {
