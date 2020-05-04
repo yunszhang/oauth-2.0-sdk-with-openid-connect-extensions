@@ -24,12 +24,13 @@ import java.util.*;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyOperation;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
 import com.nimbusds.openid.connect.sdk.federation.policy.operations.*;
+import com.nimbusds.openid.connect.sdk.rp.ApplicationType;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 
@@ -100,6 +101,83 @@ public class MetadataPolicyTest extends TestCase {
 		assertEquals(op.getOperationName(), en.getPolicyOperations().get(0).getOperationName());
 		assertEquals(op.getStringListConfiguration(), ((OneOfOperation)en.getPolicyOperations().get(0)).getStringListConfiguration());
 		assertFalse(it.hasNext());
+	}
+	
+	
+	public void testExampleCreate() throws ParseException, PolicyViolationException {
+		
+		String expected = "{" +
+			"  \"scopes\": {" +
+			"    \"subset_of\": [" +
+			"      \"openid\"," +
+			"      \"eduperson\"," +
+			"      \"phone\"" +
+			"    ]," +
+			"    \"superset_of\": [" +
+			"      \"openid\"" +
+			"    ]," +
+			"    \"default\": [" +
+			"      \"openid\"," +
+			"      \"eduperson\"" +
+			"    ]" +
+			"  }," +
+			"  \"id_token_signed_response_alg\": {" +
+			"    \"one_of\": [" +
+			"      \"ES256\"," +
+			"      \"ES384\"," +
+			"      \"ES512\"" +
+			"    ]" +
+			"  }," +
+			"  \"contacts\": {" +
+			"    \"add\": \"helpdesk@federation.example.org\"" +
+			"  }," +
+			"  \"application_type\": {" +
+			"    \"value\": \"web\"" +
+			"  }" +
+			"}";
+		
+		MetadataPolicy policy = new MetadataPolicy();
+		
+		// Policy for the scope values
+		SubsetOfOperation subsetOf = new SubsetOfOperation();
+		subsetOf.configure(Arrays.asList("openid", "eduperson", "phone"));
+		SupersetOfOperation supersetOf = new SupersetOfOperation();
+		supersetOf.configure(Collections.singletonList("openid"));
+		DefaultOperation defaultOp = new DefaultOperation();
+		defaultOp.configure(Arrays.asList("openid", "eduperson"));
+		
+		List<PolicyOperation> ops = new LinkedList<>();
+		ops.add(subsetOf);
+		ops.add(supersetOf);
+		ops.add(defaultOp);
+		
+		policy.put("scopes", ops);
+		
+		// Policy for the ID token JWS algs
+		OneOfOperation oneOf = new OneOfOperation();
+		oneOf.configure(Arrays.asList(JWSAlgorithm.ES256.getName(), JWSAlgorithm.ES384.getName(), JWSAlgorithm.ES512.getName()));
+		
+		policy.put("id_token_signed_response_alg", oneOf);
+		
+		// Policy for the contacts
+		AddOperation addOp = new AddOperation();
+		addOp.configure("helpdesk@federation.example.org");
+		
+		policy.put("contacts", addOp);
+		
+		// Policy for the application type
+		ValueOperation valueOp = new ValueOperation();
+		valueOp.configure(ApplicationType.WEB.toString());
+		
+		policy.put("application_type", valueOp);
+		
+		// To print the metadata policy
+		String json = policy.toJSONString();
+		assertEquals(JSONObjectUtils.parse(expected), JSONObjectUtils.parse(json));
+		
+		// To parse a metadata policy
+		policy = MetadataPolicy.parse(json);
+		assertEquals(JSONObjectUtils.parse(expected), policy.toJSONObject());
 	}
 	
 	
