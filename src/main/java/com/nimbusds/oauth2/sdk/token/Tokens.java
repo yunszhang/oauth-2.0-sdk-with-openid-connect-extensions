@@ -18,9 +18,10 @@
 package com.nimbusds.oauth2.sdk.token;
 
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
-
-import net.jcip.annotations.Immutable;
 
 import net.minidev.json.JSONObject;
 
@@ -31,7 +32,6 @@ import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 /**
  * Access and optional refresh token.
  */
-@Immutable
 public class Tokens {
 
 
@@ -45,6 +45,13 @@ public class Tokens {
 	 * Refresh token, {@code null} if not specified.
 	 */
 	private final RefreshToken refreshToken;
+	
+	
+	/**
+	 * Optional token metadata, intended for server environments.
+	 */
+
+	private final Map<String,Object> metadata = new HashMap<>();
 
 
 	/**
@@ -115,7 +122,19 @@ public class Tokens {
 		if (refreshToken != null)
 			paramNames.addAll(refreshToken.getParameterNames());
 
-		return paramNames;
+		return Collections.unmodifiableSet(paramNames);
+	}
+	
+	
+	/**
+	 * Returns the optional modifiable token metadata. Intended for server
+	 * environments.
+	 *
+	 * @return The token metadata.
+	 */
+	public Map<String, Object> getMetadata() {
+
+		return metadata;
 	}
 
 

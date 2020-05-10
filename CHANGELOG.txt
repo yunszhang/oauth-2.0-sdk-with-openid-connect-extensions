@@ -1317,3 +1317,7 @@ version 8.2 (2020-05-01)
     * Adds new static MetadataPolicy.combine method.
     * Adds new MetadataPolicyEntry.getOperationsMap and combine methods.
     * Adds new TrustChain.resolveCombinedMetadataPolicy method.
+
+version 8.3 (2020-05-10)
+    * Adds new Tokens.getMetadata for optional token metadata, intended for
+      server environments.

@@ -18,7 +18,11 @@
 package com.nimbusds.openid.connect.sdk.token;
 
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
+
+import net.minidev.json.JSONObject;
 
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
@@ -27,14 +31,11 @@ import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.token.Tokens;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import net.jcip.annotations.Immutable;
-import net.minidev.json.JSONObject;
 
 
 /**
  * ID token, access token and optional refresh token.
  */
-@Immutable
 public final class OIDCTokens extends Tokens {
 
 
@@ -166,11 +167,11 @@ public final class OIDCTokens extends Tokens {
 	@Override
 	public Set<String> getParameterNames() {
 
-		Set<String> paramNames = super.getParameterNames();
+		Set<String> paramNames = new HashSet<>(super.getParameterNames());
 		if (idToken != null || idTokenString != null) {
 			paramNames.add("id_token");
 		}
-		return paramNames;
+		return Collections.unmodifiableSet(paramNames);
 	}
 
 

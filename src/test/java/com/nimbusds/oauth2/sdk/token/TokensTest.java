@@ -18,6 +18,8 @@
 package com.nimbusds.oauth2.sdk.token;
 
 
+import java.util.Collections;
+
 import junit.framework.TestCase;
 
 import net.minidev.json.JSONObject;
@@ -35,7 +37,7 @@ public class TokensTest extends TestCase {
 	public void testAllDefined()
 		throws ParseException {
 
-		AccessToken accessToken = new BearerAccessToken(60l, Scope.parse("openid email"));
+		AccessToken accessToken = new BearerAccessToken(60L, Scope.parse("openid email"));
 		RefreshToken refreshToken = new RefreshToken();
 
 		Tokens tokens = new Tokens(accessToken, refreshToken);
@@ -54,7 +56,7 @@ public class TokensTest extends TestCase {
 		JSONObject jsonObject = tokens.toJSONObject();
 		assertEquals("Bearer", jsonObject.get("token_type"));
 		assertEquals(accessToken.getValue(), jsonObject.get("access_token"));
-		assertEquals(60l, jsonObject.get("expires_in"));
+		assertEquals(60L, jsonObject.get("expires_in"));
 		assertEquals("openid email", jsonObject.get("scope"));
 		assertEquals(refreshToken.getValue(), jsonObject.get("refresh_token"));
 		assertEquals(5, jsonObject.size());
@@ -94,6 +96,16 @@ public class TokensTest extends TestCase {
 		assertEquals(accessToken.getLifetime(), tokens.getAccessToken().getLifetime());
 		assertEquals(accessToken.getScope(), tokens.getAccessToken().getScope());
 		assertNull(tokens.getRefreshToken());
+	}
+	
+	
+	public void testMetadata() {
+		Tokens tokens = new Tokens(new BearerAccessToken(), new RefreshToken());
+		assertTrue(tokens.getMetadata().isEmpty());
+		tokens.getMetadata().put("key", "value");
+		assertEquals(Collections.singletonMap("key", "value"), tokens.getMetadata());
+		tokens.getMetadata().clear();
+		assertTrue(tokens.getMetadata().isEmpty());
 	}
 
 
