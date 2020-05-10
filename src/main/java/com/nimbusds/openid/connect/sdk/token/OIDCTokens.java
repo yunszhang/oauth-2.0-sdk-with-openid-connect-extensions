@@ -18,6 +18,8 @@
 package com.nimbusds.openid.connect.sdk.token;
 
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import net.minidev.json.JSONObject;
@@ -165,11 +167,11 @@ public final class OIDCTokens extends Tokens {
 	@Override
 	public Set<String> getParameterNames() {
 
-		Set<String> paramNames = super.getParameterNames();
+		Set<String> paramNames = new HashSet<>(super.getParameterNames());
 		if (idToken != null || idTokenString != null) {
 			paramNames.add("id_token");
 		}
-		return paramNames;
+		return Collections.unmodifiableSet(paramNames);
 	}
 
 
