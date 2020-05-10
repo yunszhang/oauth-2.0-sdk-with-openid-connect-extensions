@@ -18,6 +18,8 @@
 package com.nimbusds.openid.connect.sdk.token;
 
 
+import java.util.Collections;
+
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -316,5 +318,20 @@ public class OIDCTokensTest extends TestCase {
 		OIDCTokens oidcTokens = tokens.toOIDCTokens();
 		
 		assertEquals(tokens, oidcTokens);
+	}
+	
+	
+	public void testMetadata() {
+		
+		OIDCTokens tokens = new OIDCTokens(new BearerAccessToken(), new RefreshToken());
+		
+		assertTrue(tokens.getMetadata().isEmpty());
+		
+		tokens.getMetadata().put("key", "value");
+		assertEquals(Collections.singletonMap("key", "value"), tokens.getMetadata());
+		
+		tokens.getMetadata().clear();
+		
+		assertTrue(tokens.getMetadata().isEmpty());
 	}
 }

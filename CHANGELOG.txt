@@ -1297,3 +1297,7 @@ version 7.4 (2020-04-20)
     * Restored dep range net.minidev:json-smart:[1.3.1,2.3]
     * Bumps to com.nimbusds:nimbus-jose-jwt:8.14.1
     * Bumps optional OpenSAML dep to 3.4.5
+
+version 7.5 (2020-05-10)
+    * Adds new Tokens.getMetadata for optional token metadata, intended for
+      server environments.
