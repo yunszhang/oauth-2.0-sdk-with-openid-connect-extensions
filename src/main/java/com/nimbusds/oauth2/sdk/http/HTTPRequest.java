@@ -137,6 +137,10 @@ public class HTTPRequest extends HTTPMessage {
 	 */
 	private int readTimeout = 0;
 
+	/**
+	 * Do not use a connection specific proxy by default.
+	 */
+	private Proxy proxy = null;
 
 	/**
 	 * Controls HTTP 3xx redirections.
@@ -489,6 +493,25 @@ public class HTTPRequest extends HTTPMessage {
 		this.readTimeout = readTimeout;
 	}
 
+	/**
+	 * @return The connection specific proxy for this request
+	 */
+	public Proxy getProxy() {
+		return this.proxy;
+	}
+
+	/**
+	 * Tunnels this {@link HTTPRequest} via the specified {@link Proxy} by directly configuring the proxy on the {@link java.net.URLConnection}.
+	 * The proxy is only used for this instance and bypasses all other proxy settings (such as set via System properties or {@link java.net.ProxySelector}).
+	 * Supplying null (the default) reverts to the default proxy strategy of {@link java.net.URLConnection}. If the goal is to avoid using a proxy at all supply
+	 * {@link Proxy#NO_PROXY}.
+	 *
+	 * @param proxy the connection specific proxy to use
+	 * @see URL#openConnection(Proxy)
+	 */
+	public void setProxy(final Proxy proxy) {
+		this.proxy = proxy;
+	}
 
 	/**
 	 * Gets the boolean setting whether HTTP redirects (requests with
@@ -792,7 +815,7 @@ public class HTTPRequest extends HTTPMessage {
 			}
 		}
 
-		HttpURLConnection conn = (HttpURLConnection)finalURL.openConnection();
+		HttpURLConnection conn = (HttpURLConnection) (proxy == null ? finalURL.openConnection() : finalURL.openConnection(proxy));
 
 		if (conn instanceof HttpsURLConnection) {
 			HttpsURLConnection sslConn = (HttpsURLConnection)conn;
