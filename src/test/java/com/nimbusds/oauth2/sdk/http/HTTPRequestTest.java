@@ -18,8 +18,12 @@
 package com.nimbusds.oauth2.sdk.http;
 
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Proxy;
+import java.net.Proxy.Type;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
@@ -505,5 +509,37 @@ public class HTTPRequestTest {
 		assertEquals(headerValues, httpRequest.getHeaderValues("X-Header"));
 		
 		assertEquals("V1", httpRequest.getHeaderValue("X-Header"));
+	}
+
+	@Test
+	public void testProxy() throws IOException {
+		onRequest()
+				.havingMethodEqualTo("POST")
+				.havingHeaderEqualTo("Host", "localhost:0")
+				.respond()
+				.withStatus(999);
+
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("http://localhost:0/c2id/token"));
+
+		//Set proxy to use on this request
+		httpRequest.setProxy(new Proxy(Type.HTTP, new InetSocketAddress("localhost", port())));
+
+		HTTPResponse httpResponse = httpRequest.send();
+		assertEquals(999, httpResponse.getStatusCode());
+	}
+
+	@Test
+	public void testNoProxy() throws MalformedURLException, IOException{
+		onRequest()
+				.havingMethodEqualTo("POST")
+				.havingHeaderEqualTo("Host","localhost:" + port())
+				.respond()
+				.withStatus(999);
+
+		//No proxy set, default should be to not use a proxy (if none was set either via System properties or ProxySelector)
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("http://localhost:" + port() + "/c2id/token"));
+
+		HTTPResponse httpResponse = httpRequest.send();
+		assertEquals(999, httpResponse.getStatusCode());
 	}
 }
