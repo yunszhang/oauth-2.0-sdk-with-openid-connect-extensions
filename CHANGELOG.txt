@@ -1321,3 +1321,7 @@ version 8.2 (2020-05-01)
 version 8.3 (2020-05-10)
     * Adds new Tokens.getMetadata for optional token metadata, intended for
       server environments.
+
+version 8.4 (2020-05-20)
+    * Adds proxy support to HTTPRequest.
+

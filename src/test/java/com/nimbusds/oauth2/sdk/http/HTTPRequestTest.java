@@ -510,6 +510,7 @@ public class HTTPRequestTest {
 		
 		assertEquals("V1", httpRequest.getHeaderValue("X-Header"));
 	}
+	
 
 	@Test
 	public void testProxy() throws IOException {
@@ -521,12 +522,18 @@ public class HTTPRequestTest {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("http://localhost:0/c2id/token"));
 
-		//Set proxy to use on this request
-		httpRequest.setProxy(new Proxy(Type.HTTP, new InetSocketAddress("localhost", port())));
+		assertNull(httpRequest.getProxy());
+		
+		// Set proxy to use on this request
+		Proxy proxy = new Proxy(Type.HTTP, new InetSocketAddress("localhost", port()));
+		httpRequest.setProxy(proxy);
+		
+		assertEquals(proxy, httpRequest.getProxy());
 
 		HTTPResponse httpResponse = httpRequest.send();
 		assertEquals(999, httpResponse.getStatusCode());
 	}
+	
 
 	@Test
 	public void testNoProxy() throws MalformedURLException, IOException{
