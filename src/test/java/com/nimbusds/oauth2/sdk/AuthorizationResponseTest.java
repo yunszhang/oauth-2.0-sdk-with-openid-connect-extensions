@@ -468,4 +468,30 @@ public class AuthorizationResponseTest extends TestCase {
 		assertEquals(errorResponse.getErrorObject(), validatedResponse.getErrorObject());
 		assertEquals(errorResponse.getState(), validatedResponse.getState());
 	}
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/297/redirecturi-containing-without-actual
+	public void testEmptyQuery() {
+	
+		AuthorizationSuccessResponse successResponse = new AuthorizationSuccessResponse(
+			URI.create("https://example.com/cb"),
+			null,
+			null,
+			null,
+			ResponseMode.QUERY);
+		
+		assertEquals(successResponse.getRedirectionURI(), successResponse.toURI());
+	}
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/297/redirecturi-containing-without-actual
+	public void testEmptyFragment() {
+	
+		AuthorizationSuccessResponse successResponse = new AuthorizationSuccessResponse(
+			URI.create("https://example.com/cb"),
+			null,
+			null,
+			null,
+			ResponseMode.FRAGMENT);
+		
+		assertEquals(successResponse.getRedirectionURI(), successResponse.toURI());
+	}
 }

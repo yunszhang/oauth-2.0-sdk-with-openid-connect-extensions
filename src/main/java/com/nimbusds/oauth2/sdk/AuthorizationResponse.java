@@ -224,27 +224,30 @@ public abstract class AuthorizationResponse implements Response {
 
 		StringBuilder sb = new StringBuilder(getRedirectionURI().toString());
 
-		if (ResponseMode.QUERY.equals(rm) || ResponseMode.QUERY_JWT.equals(rm)) {
-			if (StringUtils.isBlank(getRedirectionURI().getRawQuery())) {
-				sb.append('?');
+		String serializedParameters = URLUtils.serializeParameters(toParameters());
+		
+		if (StringUtils.isNotBlank(serializedParameters)) {
+			
+			if (ResponseMode.QUERY.equals(rm) || ResponseMode.QUERY_JWT.equals(rm)) {
+				if (StringUtils.isBlank(getRedirectionURI().getRawQuery())) {
+					sb.append('?');
+				} else {
+					// The original redirect_uri may contain query params,
+					// see http://tools.ietf.org/html/rfc6749#section-3.1.2
+					sb.append('&');
+				}
+			} else if (ResponseMode.FRAGMENT.equals(rm) || ResponseMode.FRAGMENT_JWT.equals(rm)) {
+				sb.append('#');
 			} else {
-				// The original redirect_uri may contain query params,
-				// see http://tools.ietf.org/html/rfc6749#section-3.1.2
-				sb.append('&');
+				throw new SerializeException("The (implied) response mode must be query or fragment");
 			}
-		} else if (ResponseMode.FRAGMENT.equals(rm) || ResponseMode.FRAGMENT_JWT.equals(rm)) {
-			sb.append('#');
-		} else {
-			throw new SerializeException("The (implied) response mode must be query or fragment");
+			
+			sb.append(serializedParameters);
 		}
-
-		sb.append(URLUtils.serializeParameters(toParameters()));
 
 		try {
 			return new URI(sb.toString());
-
 		} catch (URISyntaxException e) {
-
 			throw new SerializeException("Couldn't serialize response: " + e.getMessage(), e);
 		}
 	}
