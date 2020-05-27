@@ -494,4 +494,16 @@ public class AuthorizationResponseTest extends TestCase {
 		
 		assertEquals(successResponse.getRedirectionURI(), successResponse.toURI());
 	}
+	
+	public void testRedirectURIWithAppendedQuerySign() {
+	
+		AuthorizationSuccessResponse successResponse = new AuthorizationSuccessResponse(
+			URI.create("https://example.com/cb?"),
+			new AuthorizationCode(),
+			null,
+			null,
+			ResponseMode.QUERY);
+		
+		assertEquals(successResponse.getRedirectionURI().toString() + "code=" + successResponse.getAuthorizationCode(), successResponse.toURI().toString());
+	}
 }

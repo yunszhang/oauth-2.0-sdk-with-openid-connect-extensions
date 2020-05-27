@@ -229,7 +229,9 @@ public abstract class AuthorizationResponse implements Response {
 		if (StringUtils.isNotBlank(serializedParameters)) {
 			
 			if (ResponseMode.QUERY.equals(rm) || ResponseMode.QUERY_JWT.equals(rm)) {
-				if (StringUtils.isBlank(getRedirectionURI().getRawQuery())) {
+				if (getRedirectionURI().toString().endsWith("?")) {
+					// '?' present
+				} else if (StringUtils.isBlank(getRedirectionURI().getRawQuery())) {
 					sb.append('?');
 				} else {
 					// The original redirect_uri may contain query params,
