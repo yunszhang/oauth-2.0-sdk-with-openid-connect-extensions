@@ -224,7 +224,20 @@ public class UserInfoErrorResponse
 		
 		if (StringUtils.isNotBlank(wwwAuth)) {
 			// Bearer token error?
-			return parse(wwwAuth);
+			try {
+				BearerTokenError bte = BearerTokenError.parse(wwwAuth);
+				
+				return new UserInfoErrorResponse(
+					new BearerTokenError(
+						bte.getCode(),
+						bte.getDescription(),
+						httpResponse.getStatusCode(), // override HTTP status code
+						bte.getURI(),
+						bte.getRealm(),
+						bte.getScope()));
+			} catch (ParseException e) {
+				// Ignore parse exception for WWW-auth header and continue
+			}
 		}
 		
 		// Other error?

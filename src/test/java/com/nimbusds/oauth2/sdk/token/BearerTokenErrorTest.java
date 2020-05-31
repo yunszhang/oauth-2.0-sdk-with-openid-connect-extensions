@@ -227,4 +227,18 @@ public class BearerTokenErrorTest extends TestCase {
 		assertEquals(BearerTokenError.INVALID_TOKEN.getCode(), error.getCode());
 		assertNull(error.getURI());
 	}
+	
+	
+	// Test lenient parsing with comma after Bearer
+	//  https://tools.ietf.org/html/rfc6750#section-3.1
+	public void testParseWithCommaAfterBearer() throws ParseException {
+		
+		BearerTokenError error = BearerTokenError.parse("Bearer, error=\"invalid_token\", error_description=\"The Token was expired\"");
+		System.out.println(error.getHTTPStatusCode());
+		assertEquals("invalid_token", error.getCode());
+		assertEquals("The Token was expired", error.getDescription());
+		assertNull(error.getRealm());
+		assertNull(error.getScope());
+		assertEquals("HTTP status code not known", 0, error.getHTTPStatusCode()); // Not known
+	}
 }

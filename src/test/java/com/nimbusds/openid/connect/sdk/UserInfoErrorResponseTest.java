@@ -19,6 +19,7 @@ package com.nimbusds.openid.connect.sdk;
 
 
 import com.nimbusds.oauth2.sdk.ErrorObject;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.token.BearerTokenError;
 import junit.framework.TestCase;
@@ -86,5 +87,26 @@ public class UserInfoErrorResponseTest extends TestCase {
 		assertEquals(error.getDescription(), errorResponse.getErrorObject().getDescription());
 		assertNull(errorResponse.getErrorObject().getURI());
 		assertEquals(error.getHTTPStatusCode(), errorResponse.getErrorObject().getHTTPStatusCode());
+	}
+	
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/299/http-status-code-missing-in-case-userinfo
+	public void testBearerTokenErrorOverrideHTTPStatusCode()
+		throws ParseException {
+	
+		// HTTP/1.1 401 Unauthorized
+		// WWW-Authenticate: Bearer, error="invalid_token", error_description="The Token was expired"
+		
+		HTTPResponse httpResponse = new HTTPResponse(401);
+		httpResponse.setWWWAuthenticate("Bearer, error=\"invalid_token\", error_description=\"The Token was expired\"");
+		
+		UserInfoErrorResponse errorResponse = UserInfoErrorResponse.parse(httpResponse);
+		
+		BearerTokenError bte = (BearerTokenError)errorResponse.getErrorObject();
+		assertEquals(401, bte.getHTTPStatusCode());
+		assertEquals("invalid_token", bte.getCode());
+		assertEquals("The Token was expired", bte.getDescription());
+		assertNull(bte.getRealm());
+		assertNull(bte.getScope());
 	}
 }
