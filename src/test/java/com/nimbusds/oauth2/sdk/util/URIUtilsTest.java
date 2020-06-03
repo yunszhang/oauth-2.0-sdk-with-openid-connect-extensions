@@ -79,4 +79,114 @@ public class URIUtilsTest extends TestCase {
 		out = URIUtils.stripQueryString(URI.create("https://c2id.com:8080/login?param1=one&param2=two"));
 		assertEquals("https://c2id.com:8080/login", out.toString());
 	}
+	
+	
+	public void testPrependSlashIfMissing() {
+		
+		assertNull(URIUtils.prependLeadingSlashIfMissing(null));
+		
+		assertEquals("/", URIUtils.prependLeadingSlashIfMissing(""));
+		assertEquals("/ ", URIUtils.prependLeadingSlashIfMissing(" "));
+		assertEquals("/  ", URIUtils.prependLeadingSlashIfMissing("  "));
+		
+		assertEquals("/abc", URIUtils.prependLeadingSlashIfMissing("abc"));
+		assertEquals("/abc/def", URIUtils.prependLeadingSlashIfMissing("abc/def"));
+		
+		assertEquals("/abc", URIUtils.prependLeadingSlashIfMissing("/abc"));
+		assertEquals("/abc/def", URIUtils.prependLeadingSlashIfMissing("/abc/def"));
+	}
+	
+	
+	public void testStringLeadingSlashIfPresent() {
+		
+		assertNull(URIUtils.stripLeadingSlashIfPresent(null));
+		
+		assertEquals("", URIUtils.stripLeadingSlashIfPresent(""));
+		assertEquals(" ", URIUtils.stripLeadingSlashIfPresent(" "));
+		assertEquals("  ", URIUtils.stripLeadingSlashIfPresent("  "));
+		
+		assertEquals("", URIUtils.stripLeadingSlashIfPresent("/"));
+		assertEquals(" ", URIUtils.stripLeadingSlashIfPresent("/ "));
+		assertEquals("  ", URIUtils.stripLeadingSlashIfPresent("/  "));
+		
+		assertEquals("abc", URIUtils.stripLeadingSlashIfPresent("/abc"));
+		assertEquals("abc/def", URIUtils.stripLeadingSlashIfPresent("/abc/def"));
+		
+		assertEquals("abc", URIUtils.stripLeadingSlashIfPresent("//abc"));
+		assertEquals("abc/def", URIUtils.stripLeadingSlashIfPresent("//abc/def"));
+		
+		assertEquals("abc", URIUtils.stripLeadingSlashIfPresent("///abc"));
+		assertEquals("abc/def", URIUtils.stripLeadingSlashIfPresent("///abc/def"));
+		
+		assertEquals("abc", URIUtils.stripLeadingSlashIfPresent("abc"));
+		assertEquals("abc/def", URIUtils.stripLeadingSlashIfPresent("abc/def"));
+	}
+	
+	
+	public void testJoinPathComponents() {
+		
+		assertEquals("", URIUtils.joinPathComponents(null, null));
+		
+		assertEquals("/", URIUtils.joinPathComponents("/", "/"));
+		assertEquals("/", URIUtils.joinPathComponents("/", null));
+		assertEquals("/", URIUtils.joinPathComponents(null, "/"));
+		
+		assertEquals("/abc/def", URIUtils.joinPathComponents("/abc", "/def"));
+		assertEquals("/abc/def", URIUtils.joinPathComponents("abc", "/def"));
+		assertEquals("/abc/def", URIUtils.joinPathComponents("/abc", "def"));
+		assertEquals("/abc/def", URIUtils.joinPathComponents("abc", "def"));
+		
+		assertEquals("/abc/def/ghi", URIUtils.joinPathComponents("/abc", "/def/ghi"));
+		assertEquals("/abc/def/ghi", URIUtils.joinPathComponents("abc", "/def/ghi"));
+		assertEquals("/abc/def/ghi", URIUtils.joinPathComponents("/abc", "def/ghi"));
+		assertEquals("/abc/def/ghi", URIUtils.joinPathComponents("abc", "def/ghi"));
+	}
+	
+	
+	public void testPrependPath() {
+	
+		assertNull(URIUtils.prependPath(null, "/"));
+		assertNull(URIUtils.prependPath(null, null));
+		
+		URI uri = URI.create("https://c2id.com/abc/def");
+		
+		assertEquals(uri, URIUtils.prependPath(uri, null));
+		
+		assertEquals(uri, URIUtils.prependPath(uri, ""));
+		assertEquals(uri, URIUtils.prependPath(uri, " "));
+		assertEquals(uri, URIUtils.prependPath(uri, "  "));
+		assertEquals(uri, URIUtils.prependPath(uri, "   "));
+		
+		assertEquals(uri, URIUtils.prependPath(uri, "/"));
+		
+		assertEquals(
+			URI.create("https://c2id.com/abc/def"),
+			URIUtils.prependPath(uri, "/")
+		);
+		
+		assertEquals(
+			URI.create("https://c2id.com/xyz/abc/def"),
+			URIUtils.prependPath(uri, "/xyz/")
+		);
+		
+		assertEquals(
+			URI.create("https://c2id.com/xyz/abc/def"),
+			URIUtils.prependPath(uri, "/xyz")
+		);
+		
+		assertEquals(
+			URI.create("https://c2id.com/xyz/abc/def"),
+			URIUtils.prependPath(uri, "xyz")
+		);
+		
+		assertEquals(
+			URI.create("https://c2id.com/.well-known/oauth-authorization-server/abc/def"),
+			URIUtils.prependPath(uri, "/.well-known/oauth-authorization-server")
+		);
+		
+		assertEquals(
+			URI.create("https://c2id.com/.well-known/oauth-authorization-server/abc/def"),
+			URIUtils.prependPath(uri, ".well-known/oauth-authorization-server")
+		);
+	}
 }

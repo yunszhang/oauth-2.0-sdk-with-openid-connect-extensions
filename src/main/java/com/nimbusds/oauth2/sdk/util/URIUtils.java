@@ -53,6 +53,110 @@ public final class URIUtils {
 	
 	
 	/**
+	 * Prepends the specified path component to a URI. The prepended and
+	 * any existing path component are always joined with a single slash
+	 * ('/') between them
+	 *
+	 * @param uri           The URI, {@code null} if not specified.
+	 * @param pathComponent The path component to prepend, {@code null} if
+	 *                      not specified.
+	 *
+	 * @return The URI with prepended path component, {@code null} if the
+	 *         original URI wasn't specified.
+	 */
+	public static URI prependPath(final URI uri, final String pathComponent) {
+		
+		if (uri == null) {
+			return null;
+		}
+		
+		if (StringUtils.isBlank(pathComponent)) {
+			return uri;
+		}
+		
+		try {
+			return new URI(
+				uri.getScheme(), null, uri.getHost(), uri.getPort(),
+				joinPathComponents(pathComponent, uri.getPath()),
+				uri.getQuery(), uri.getFragment());
+		} catch (URISyntaxException e) {
+			// should never happen when starting from legal URI
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Prepends a leading slash `/` if missing to the specified string.
+	 *
+	 * @param s The string, {@code null} if not specified.
+	 *
+	 * @return The string with leading slash, {@code null} if not
+	 *         originally specified.
+	 */
+	public static String prependLeadingSlashIfMissing(String s) {
+		if (s == null) {
+			return null;
+		}
+		if (s.startsWith("/")) {
+			return s;
+		}
+		return "/" + s;
+	}
+	
+	
+	/**
+	 * Strips any leading slashes '/' if present from the specified string.
+	 *
+	 * @param s The string, {@code null} if not specified.
+	 *
+	 * @return The string with no leading slash, {@code null} if not
+	 *         originally specified.
+	 */
+	public static String stripLeadingSlashIfPresent(final String s) {
+		if (StringUtils.isBlank(s)) {
+			return s;
+		}
+		if (s.startsWith("/")) {
+			String tmp = s;
+			while (tmp.startsWith("/")) {
+				tmp = tmp.substring(1);
+			}
+			return tmp;
+		}
+		return s;
+	}
+	
+	
+	/**
+	 * Joins two path components. The two path components are always joined
+	 * with a single slash ('/') between them and the resulting path always
+	 * starts with a slash ('/').
+	 *
+	 * @param c1 The first path component, {@code null} if not specified.
+	 * @param c2 The second path component, {@code null} if not specified.
+	 *
+	 * @return The joined path components, always with a leading slash
+	 *         ('/').
+	 */
+	public static String joinPathComponents(final String c1, final String c2) {
+		
+		String out = "";
+		if (c1 != null) {
+			out += prependLeadingSlashIfMissing(c1);
+		}
+		if (c2 != null) {
+			if (out.endsWith("/")) {
+				out+= stripLeadingSlashIfPresent(c2);
+			} else {
+				out += prependLeadingSlashIfMissing(c2);
+			}
+		}
+		return out;
+	}
+	
+	
+	/**
 	 * Strips the query string from the specified URI.
 	 *
 	 * @param uri The URI. May be {@code null}.'

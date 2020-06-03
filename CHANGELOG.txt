@@ -1337,3 +1337,8 @@ version 8.4.3 (2020-05-31)
     * Fixes HTTP status code parsing in
       UserInfoErrorResponse.parse(HTTPResponse) when a bearer token error is
       present in the WWW-Authenticate header (iss #299).
+
+version 8.5 (2020-06-03)
+    * Adds new static StringUtils methods prependPath,
+      prependLeadingSlashIfMissing, stripLeadingSlashIfPresent and
+      joinPathComponents.
