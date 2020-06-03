@@ -37,12 +37,13 @@ public abstract class AbstractConfigurationRequest extends AbstractRequest {
 	 * Creates a new base abstract request.
 	 *
 	 * @param baseURI       The base URI. Must not be {@code null}.
-	 * @param wellKnownPath The well known path to append to the base URI.
-	 *                      Must not be {@code null}.
+	 * @param wellKnownPath The well known path to prepend to any existing
+	 *                      path component in the base URI. Must not be
+	 *                      {@code null}.
 	 */
 	public AbstractConfigurationRequest(final URI baseURI, final String wellKnownPath) {
 		
-		super(URI.create(URIUtils.removeTrailingSlash(baseURI) + wellKnownPath));
+		super(URIUtils.prependPath(baseURI, wellKnownPath));
 	}
 	
 	

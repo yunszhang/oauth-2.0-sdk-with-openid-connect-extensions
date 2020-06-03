@@ -1342,3 +1342,5 @@ version 8.5 (2020-06-03)
     * Adds new static StringUtils methods prependPath,
       prependLeadingSlashIfMissing, stripLeadingSlashIfPresent and
       joinPathComponents.
+    * For an AS and OP configuration requests any existing path in the issuer
+      URI must be appended to the .well-known/* component (iss #300).
