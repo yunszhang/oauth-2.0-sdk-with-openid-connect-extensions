@@ -74,10 +74,17 @@ public final class URIUtils {
 			return uri;
 		}
 		
+		String origPath = uri.getPath();
+		if (origPath == null || origPath.isEmpty() || origPath.equals("/")) {
+			origPath = null;
+		}
+		String joinedPath = joinPathComponents(pathComponent, origPath);
+		joinedPath = prependLeadingSlashIfMissing(joinedPath);
+		
 		try {
 			return new URI(
 				uri.getScheme(), null, uri.getHost(), uri.getPort(),
-				joinPathComponents(pathComponent, uri.getPath()),
+				joinedPath,
 				uri.getQuery(), uri.getFragment());
 		} catch (URISyntaxException e) {
 			// should never happen when starting from legal URI
@@ -129,30 +136,40 @@ public final class URIUtils {
 	
 	
 	/**
-	 * Joins two path components. The two path components are always joined
-	 * with a single slash ('/') between them and the resulting path always
-	 * starts with a slash ('/').
+	 * Joins two path components. If the two path components are not
+	 * {@code null} or empty they are joined so that there is only a single
+	 * slash ('/') between them.
 	 *
 	 * @param c1 The first path component, {@code null} if not specified.
 	 * @param c2 The second path component, {@code null} if not specified.
 	 *
-	 * @return The joined path components, always with a leading slash
-	 *         ('/').
+	 * @return The joined path components, {@code null} if both are not
+	 *         specified, or if one is {@code null} the other unmodified.
 	 */
 	public static String joinPathComponents(final String c1, final String c2) {
 		
-		String out = "";
-		if (c1 != null) {
-			out += prependLeadingSlashIfMissing(c1);
+		if (c1 == null && c2 == null) {
+			return null;
 		}
-		if (c2 != null) {
-			if (out.endsWith("/")) {
-				out+= stripLeadingSlashIfPresent(c2);
-			} else {
-				out += prependLeadingSlashIfMissing(c2);
-			}
+		
+		if (c1 == null || c1.isEmpty()) {
+			return c2;
 		}
-		return out;
+		
+		if (c2 == null || c2.isEmpty()) {
+			return c1;
+		}
+		
+		if (c1.endsWith("/") && ! c2.startsWith("/")) {
+			return c1 + c2;
+		}
+		if (! c1.endsWith("/") && c2.startsWith("/")) {
+			return c1 + c2;
+		}
+		if (c1.endsWith("/") && c2.startsWith("/")) {
+			return c1 + stripLeadingSlashIfPresent(c2);
+		}
+		return c1 + "/" + c2;
 	}
 	
 	
