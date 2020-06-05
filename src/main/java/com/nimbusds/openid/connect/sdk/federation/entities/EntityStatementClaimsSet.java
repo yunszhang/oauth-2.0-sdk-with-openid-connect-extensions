@@ -398,12 +398,14 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	
 	
 	/**
-	 * Gets the OpenID relying party metadata if present for this entity.
+	 * Gets the metadata for the specified federation entity type. Use a
+	 * typed getter, such as {@link #getRPMetadata} when available.
 	 *
-	 * @return The RP metadata, {@code null} if not specified or if parsing
-	 *         failed.
+	 * @param type The federation entity type. Must not be {@code null}.
+	 *
+	 * @return The metadata, {@code null} if not specified.
 	 */
-	public OIDCClientMetadata getRPMetadata() {
+	public JSONObject getMetadata(final FederationMetadataType type) {
 		
 		JSONObject o = getJSONObjectClaim(METADATA_CLAIM_NAME);
 		
@@ -412,12 +414,54 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 		}
 		
 		try {
-			JSONObject rpo = JSONObjectUtils.getJSONObject(o, FederationMetadataType.OPENID_RELYING_PARTY.getValue(), null);
-			if (rpo == null) {
-				return null;
+			return JSONObjectUtils.getJSONObject(o, type.getValue(), null);
+		} catch (com.nimbusds.oauth2.sdk.ParseException e) {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Sets the metadata for the specified federation entity type. Use a
+	 * typed setter, such as {@link #setRPMetadata} when available.
+	 *
+	 * @param type     The federation entity type. Must not be
+	 *                 {@code null}.
+	 * @param metadata The metadata, {@code null} if not specified.
+	 */
+	public void setMetadata(final FederationMetadataType type, final JSONObject metadata) {
+		
+		JSONObject o = getJSONObjectClaim(METADATA_CLAIM_NAME);
+		
+		if (o == null) {
+			if (metadata == null) {
+				return; // nothing to clear
 			}
-			return OIDCClientMetadata.parse(rpo);
-			
+			o = new JSONObject();
+		}
+		
+		o.put(type.getValue(), metadata);
+		
+		setClaim(METADATA_CLAIM_NAME, o);
+	}
+	
+	
+	/**
+	 * Gets the OpenID relying party metadata if present for this entity.
+	 *
+	 * @return The RP metadata, {@code null} if not specified or if parsing
+	 *         failed.
+	 */
+	public OIDCClientMetadata getRPMetadata() {
+		
+		JSONObject o = getMetadata(FederationMetadataType.OPENID_RELYING_PARTY);
+		
+		if (o == null) {
+			return null;
+		}
+		
+		try {
+			return OIDCClientMetadata.parse(o);
 		} catch (com.nimbusds.oauth2.sdk.ParseException e) {
 			return null;
 		}
@@ -431,22 +475,8 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	 */
 	public void setRPMetadata(final OIDCClientMetadata rpMetadata) {
 		
-		JSONObject o = getJSONObjectClaim(METADATA_CLAIM_NAME);
-		
-		if (o == null) {
-			if (rpMetadata == null) {
-				return; // nothing to clear
-			}
-			o = new JSONObject();
-		}
-		
-		if (rpMetadata != null) {
-			o.put(FederationMetadataType.OPENID_RELYING_PARTY.getValue(), rpMetadata.toJSONObject());
-		} else {
-			o.put(FederationMetadataType.OPENID_RELYING_PARTY.getValue(), null);
-		}
-		
-		setClaim(METADATA_CLAIM_NAME, o);
+		JSONObject o = rpMetadata != null ? rpMetadata.toJSONObject() : null;
+		setMetadata(FederationMetadataType.OPENID_RELYING_PARTY, o);
 	}
 	
 	
@@ -458,19 +488,14 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	 */
 	public OIDCProviderMetadata getOPMetadata() {
 		
-		JSONObject o = getJSONObjectClaim(METADATA_CLAIM_NAME);
+		JSONObject o = getMetadata(FederationMetadataType.OPENID_PROVIDER);
 		
 		if (o == null) {
 			return null;
 		}
 		
 		try {
-			JSONObject opo = JSONObjectUtils.getJSONObject(o, FederationMetadataType.OPENID_PROVIDER.getValue(), null);
-			if (opo == null) {
-				return null;
-			}
-			return OIDCProviderMetadata.parse(opo);
-			
+			return OIDCProviderMetadata.parse(o);
 		} catch (com.nimbusds.oauth2.sdk.ParseException e) {
 			return null;
 		}
@@ -484,22 +509,8 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	 */
 	public void setOPMetadata(final OIDCProviderMetadata opMetadata) {
 		
-		JSONObject o = getJSONObjectClaim(METADATA_CLAIM_NAME);
-		
-		if (o == null) {
-			if (opMetadata == null) {
-				return; // nothing to clear
-			}
-			o = new JSONObject();
-		}
-		
-		if (opMetadata != null) {
-			o.put(FederationMetadataType.OPENID_PROVIDER.getValue(), opMetadata.toJSONObject());
-		} else {
-			o.put(FederationMetadataType.OPENID_PROVIDER.getValue(), null);
-		}
-		
-		setClaim(METADATA_CLAIM_NAME, o);
+		JSONObject o = opMetadata != null ? opMetadata.toJSONObject() : null;
+		setMetadata(FederationMetadataType.OPENID_PROVIDER, o);
 	}
 	
 	
@@ -511,19 +522,14 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	 */
 	public ClientMetadata getOAuthClientMetadata() {
 		
-		JSONObject o = getJSONObjectClaim(METADATA_CLAIM_NAME);
+		JSONObject o = getMetadata(FederationMetadataType.OAUTH_CLIENT);
 		
 		if (o == null) {
 			return null;
 		}
 		
 		try {
-			JSONObject aco = JSONObjectUtils.getJSONObject(o, FederationMetadataType.OAUTH_CLIENT.getValue(), null);
-			if (aco == null) {
-				return null;
-			}
-			return ClientMetadata.parse(aco);
-			
+			return ClientMetadata.parse(o);
 		} catch (com.nimbusds.oauth2.sdk.ParseException e) {
 			return null;
 		}
@@ -538,22 +544,8 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	 */
 	public void setOAuthClientMetadata(final ClientMetadata clientMetadata) {
 		
-		JSONObject o = getJSONObjectClaim(METADATA_CLAIM_NAME);
-		
-		if (o == null) {
-			if (clientMetadata == null) {
-				return; // nothing to clear
-			}
-			o = new JSONObject();
-		}
-		
-		if (clientMetadata != null) {
-			o.put(FederationMetadataType.OAUTH_CLIENT.getValue(), clientMetadata.toJSONObject());
-		} else {
-			o.put(FederationMetadataType.OAUTH_CLIENT.getValue(), null);
-		}
-		
-		setClaim(METADATA_CLAIM_NAME, o);
+		JSONObject o = clientMetadata != null ? clientMetadata.toJSONObject() : null;
+		setMetadata(FederationMetadataType.OAUTH_CLIENT, o);
 	}
 	
 	
@@ -566,19 +558,14 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	 */
 	public AuthorizationServerMetadata getASMetadata() {
 		
-		JSONObject o = getJSONObjectClaim(METADATA_CLAIM_NAME);
+		JSONObject o = getMetadata(FederationMetadataType.OAUTH_AUTHORIZATION_SERVER);
 		
 		if (o == null) {
 			return null;
 		}
 		
 		try {
-			JSONObject opo = JSONObjectUtils.getJSONObject(o, FederationMetadataType.OAUTH_AUTHORIZATION_SERVER.getValue(), null);
-			if (opo == null) {
-				return null;
-			}
-			return AuthorizationServerMetadata.parse(opo);
-			
+			return AuthorizationServerMetadata.parse(o);
 		} catch (com.nimbusds.oauth2.sdk.ParseException e) {
 			return null;
 		}
@@ -593,22 +580,8 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	 */
 	public void setASMetadata(final AuthorizationServerMetadata asMetadata) {
 		
-		JSONObject o = getJSONObjectClaim(METADATA_CLAIM_NAME);
-		
-		if (o == null) {
-			if (asMetadata == null) {
-				return; // nothing to clear
-			}
-			o = new JSONObject();
-		}
-		
-		if (asMetadata != null) {
-			o.put(FederationMetadataType.OAUTH_AUTHORIZATION_SERVER.getValue(), asMetadata.toJSONObject());
-		} else {
-			o.put(FederationMetadataType.OAUTH_AUTHORIZATION_SERVER.getValue(), null);
-		}
-		
-		setClaim(METADATA_CLAIM_NAME, o);
+		JSONObject o = asMetadata != null ? asMetadata.toJSONObject() : null;
+		setMetadata(FederationMetadataType.OAUTH_AUTHORIZATION_SERVER, o);
 	}
 	
 	
@@ -620,19 +593,14 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	 */
 	public FederationEntityMetadata getFederationEntityMetadata() {
 		
-		JSONObject o = getJSONObjectClaim(METADATA_CLAIM_NAME);
+		JSONObject o = getMetadata(FederationMetadataType.FEDERATION_ENTITY);
 		
 		if (o == null) {
 			return null;
 		}
 		
 		try {
-			JSONObject feo = JSONObjectUtils.getJSONObject(o, FederationMetadataType.FEDERATION_ENTITY.getValue(), null);
-			if (feo == null) {
-				return null;
-			}
-			return FederationEntityMetadata.parse(feo);
-			
+			return FederationEntityMetadata.parse(o);
 		} catch (com.nimbusds.oauth2.sdk.ParseException e) {
 			return null;
 		}
@@ -647,22 +615,8 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	 */
 	public void setFederationEntityMetadata(final FederationEntityMetadata entityMetadata) {
 		
-		JSONObject o = getJSONObjectClaim(METADATA_CLAIM_NAME);
-		
-		if (o == null) {
-			if (entityMetadata == null) {
-				return; // nothing to clear
-			}
-			o = new JSONObject();
-		}
-		
-		if (entityMetadata != null) {
-			o.put(FederationMetadataType.FEDERATION_ENTITY.getValue(), entityMetadata.toJSONObject());
-		} else {
-			o.put(FederationMetadataType.FEDERATION_ENTITY.getValue(), null);
-		}
-		
-		setClaim(METADATA_CLAIM_NAME, o);
+		JSONObject o = entityMetadata != null ? entityMetadata.toJSONObject() : null;
+		setMetadata(FederationMetadataType.FEDERATION_ENTITY, o);
 	}
 	
 	

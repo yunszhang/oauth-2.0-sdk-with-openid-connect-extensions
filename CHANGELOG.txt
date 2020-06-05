@@ -1348,3 +1348,6 @@ version 8.5 (2020-06-03)
 version 8.6 (2020-06-05)
     * Adds OpenID Connect Federation 1.0 trust mark support.
 
+version 8.7 (2020-06-05)
+    * Adds generic EntityStatementClaimsSet setMetadata and setMetadata
+      methods.
