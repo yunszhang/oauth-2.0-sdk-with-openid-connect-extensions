@@ -1344,3 +1344,7 @@ version 8.5 (2020-06-03)
       joinPathComponents.
     * For an AS and OP configuration requests any existing path in the issuer
       URI must be appended to the .well-known/* component (iss #300).
+
+version 8.6 (2020-06-05)
+    * Adds OpenID Connect Federation 1.0 trust mark support.
+

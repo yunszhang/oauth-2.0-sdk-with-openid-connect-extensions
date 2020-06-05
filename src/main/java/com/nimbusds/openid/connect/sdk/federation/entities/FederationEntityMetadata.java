@@ -19,12 +19,17 @@ package com.nimbusds.openid.connect.sdk.federation.entities;
 
 
 import java.net.URI;
+import java.util.LinkedList;
 import java.util.List;
 
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONAware;
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
+import com.nimbusds.oauth2.sdk.util.JSONArrayUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
 
@@ -66,15 +71,21 @@ public class FederationEntityMetadata implements JSONAware {
 	
 	
 	/**
-	 * The policy URI.
+	 * The optional policy URI.
 	 */
 	private URI policyURI;
 	
 	
 	/**
-	 * The homepage URI.
+	 * The optional homepage URI.
 	 */
 	private URI homepageURI;
+	
+	
+	/**
+	 * The optional trust marks.
+	 */
+	private List<SignedJWT> trustMarks;
 	
 	
 	/**
@@ -204,6 +215,26 @@ public class FederationEntityMetadata implements JSONAware {
 	
 	
 	/**
+	 * Gets the trust marks.
+	 *
+	 * @return The trust marks, {@code null} if not specified.
+	 */
+	public List<SignedJWT> getTrustMarks() {
+		return trustMarks;
+	}
+	
+	
+	/**
+	 * Sets the trust marks.
+	 *
+	 * @param trustMarks The trust marks, {@code null} if not specified.
+	 */
+	public void setTrustMarks(final List<SignedJWT> trustMarks) {
+		this.trustMarks = trustMarks;
+	}
+	
+	
+	/**
 	 * Returns a JSON object representation of this federation entity
 	 * metadata.
 	 *
@@ -239,6 +270,13 @@ public class FederationEntityMetadata implements JSONAware {
 		}
 		if (getHomepageURI() != null) {
 			o.put("homepage_uri", getHomepageURI().toString());
+		}
+		if (CollectionUtils.isNotEmpty(trustMarks)) {
+			JSONArray jsonArray = new JSONArray();
+			for (SignedJWT jwt: trustMarks) {
+				jsonArray.add(jwt.serialize());
+			}
+			o.put("trust_marks", jsonArray);
 		}
 		return o;
 	}
@@ -288,6 +326,20 @@ public class FederationEntityMetadata implements JSONAware {
 		metadata.setPolicyURI(JSONObjectUtils.getURI(jsonObject, "policy_uri", null));
 		
 		metadata.setHomepageURI(JSONObjectUtils.getURI(jsonObject, "homepage_uri", null));
+		
+		JSONArray trustMarksArray = JSONObjectUtils.getJSONArray(jsonObject, "trust_marks", null);
+		List<SignedJWT> trustMarks = null;
+		if (CollectionUtils.isNotEmpty(trustMarksArray)) {
+			trustMarks = new LinkedList<>();
+			for (String jwtString: JSONArrayUtils.toStringList(trustMarksArray)) {
+				try {
+					trustMarks.add(SignedJWT.parse(jwtString));
+				} catch (java.text.ParseException e) {
+					throw new ParseException("Invalid trust mark JWT: " + e.getMessage());
+				}
+			}
+		}
+		metadata.setTrustMarks(trustMarks);
 		
 		return metadata;
 	}

@@ -20,16 +20,52 @@ package com.nimbusds.openid.connect.sdk.federation.entities;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.openid.connect.sdk.federation.trust.marks.TrustMarkClaimsSet;
 
 
 public class FederationEntityMetadataTest extends TestCase {
+	
+	
+	static final SignedJWT TRUST_MARK_1;
+	
+	static {
+		try {
+			RSAKey rsaJWK = new RSAKeyGenerator(2048)
+				.keyIDFromThumbprint(true)
+				.generate();
+			
+			String trustMarkClaims = "{" +
+				"\"iss\": \"https://swamid.sunet.se\"," +
+				"\"sub\": \"https://umu.se/op\"," +
+				"\"iat\": 1577833200," +
+				"\"exp\": 1609369200," +
+				"\"id\": \"https://refeds.org/wp-content/uploads/2016/01/Sirtfi-1.0.pdf\"" +
+				"}";
+			
+			TRUST_MARK_1 = new SignedJWT(
+				new JWSHeader(JWSAlgorithm.RS256),
+				new TrustMarkClaimsSet(JWTClaimsSet.parse(trustMarkClaims)).toJWTClaimsSet());
+			TRUST_MARK_1.sign(new RSASSASigner(rsaJWK));
+			
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 	
 	
 	public void testConstructorWithEndpoint() throws ParseException {
@@ -63,6 +99,10 @@ public class FederationEntityMetadataTest extends TestCase {
 		metadata.setHomepageURI(homepageURI);
 		assertEquals(homepageURI, metadata.getHomepageURI());
 		
+		assertNull(metadata.getTrustMarks());
+		metadata.setTrustMarks(Collections.singletonList(TRUST_MARK_1));
+		assertEquals(Collections.singletonList(TRUST_MARK_1), metadata.getTrustMarks());
+		
 		JSONObject jsonObject = metadata.toJSONObject();
 		assertEquals(fedEndpoint.toString(), jsonObject.get("federation_api_endpoint"));
 		assertEquals(anchorID.getValue(), jsonObject.get("trust_anchor_id"));
@@ -70,6 +110,7 @@ public class FederationEntityMetadataTest extends TestCase {
 		assertEquals(contacts, JSONObjectUtils.getStringList(jsonObject, "contacts"));
 		assertEquals(policyURI.toString(), jsonObject.get("policy_uri"));
 		assertEquals(homepageURI.toString(), jsonObject.get("homepage_uri"));
+		assertEquals(Collections.singletonList(TRUST_MARK_1.serialize()), JSONObjectUtils.getJSONArray(jsonObject, "trust_marks"));
 		
 		metadata = FederationEntityMetadata.parse(metadata.toJSONString());
 		
@@ -78,6 +119,7 @@ public class FederationEntityMetadataTest extends TestCase {
 		assertEquals(contacts, metadata.getContacts());
 		assertEquals(policyURI, metadata.getPolicyURI());
 		assertEquals(homepageURI, metadata.getHomepageURI());
+		assertEquals(TRUST_MARK_1.serialize(), metadata.getTrustMarks().get(0).getParsedString());
 	}
 	
 	
