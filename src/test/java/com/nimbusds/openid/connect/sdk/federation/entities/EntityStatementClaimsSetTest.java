@@ -42,6 +42,8 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.SubjectType;
+import com.nimbusds.openid.connect.sdk.federation.policy.MetadataPolicy;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
 import com.nimbusds.openid.connect.sdk.federation.trust.constraints.TrustChainConstraints;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
@@ -456,5 +458,69 @@ public class EntityStatementClaimsSetTest extends TestCase {
 		
 		stmt.setFederationEntityMetadata(null);
 		assertNull(stmt.getFederationEntityMetadata());
+	}
+	
+	
+	public void testTypedMetadataPolicyGetterAndSetter()
+		throws PolicyViolationException, ParseException {
+		
+		Issuer iss = new Issuer("https://fed.c2id.com");
+		Subject sub = new Subject("https://fed.c2id.com");
+		
+		Date iat = DateUtils.fromSecondsSinceEpoch(1000);
+		Date exp = DateUtils.fromSecondsSinceEpoch(2000);
+		
+		EntityStatementClaimsSet stmt = new EntityStatementClaimsSet(
+			iss,
+			sub,
+			iat,
+			exp,
+			JWK_SET);
+		
+		// get null
+		assertNull(stmt.getMetadataPolicy(FederationMetadataType.OPENID_PROVIDER));
+		assertNull(stmt.getMetadataPolicy(FederationMetadataType.OPENID_RELYING_PARTY));
+		
+		String opPolicyJSON = "{" +
+			"    \"contacts\": {" +
+			"      \"add\": \"ops@edugain.geant.org\"" +
+			"    }" +
+			"}";
+		JSONObject opJSONObject = JSONObjectUtils.parse(opPolicyJSON);
+		
+		String rpPolicyJSON = "{" +
+			"    \"contacts\": {" +
+			"      \"add\": \"ops@edugain.geant.org\"" +
+			"   }" +
+			"}";
+		JSONObject rpJSONObject = JSONObjectUtils.parse(rpPolicyJSON);
+		
+		MetadataPolicy opPolicy = MetadataPolicy.parse(rpJSONObject);
+		MetadataPolicy rpPolicy = MetadataPolicy.parse(rpJSONObject);
+		
+		// set
+		stmt.setMetadataPolicy(FederationMetadataType.OPENID_PROVIDER, opPolicy);
+		stmt.setMetadataPolicy(FederationMetadataType.OPENID_RELYING_PARTY, rpPolicy);
+		
+		JSONObject policyJSONObject = stmt.getMetadataPolicyJSONObject();
+		
+		JSONObject expectedPolicyJSONObject = new JSONObject();
+		expectedPolicyJSONObject.put(FederationMetadataType.OPENID_PROVIDER.getValue(), opJSONObject);
+		expectedPolicyJSONObject.put(FederationMetadataType.OPENID_RELYING_PARTY.getValue(), rpJSONObject);
+		assertEquals(expectedPolicyJSONObject, policyJSONObject);
+		
+		// get
+		assertEquals(opJSONObject, stmt.getMetadataPolicy(FederationMetadataType.OPENID_PROVIDER).toJSONObject());
+		assertEquals(rpJSONObject, stmt.getMetadataPolicy(FederationMetadataType.OPENID_RELYING_PARTY).toJSONObject());
+		
+		// delete
+		stmt.setMetadataPolicy(FederationMetadataType.OPENID_PROVIDER, null);
+		stmt.setMetadataPolicy(FederationMetadataType.OPENID_RELYING_PARTY, null);
+		
+		// get null
+		assertNull(stmt.getMetadataPolicy(FederationMetadataType.OPENID_PROVIDER));
+		assertNull(stmt.getMetadataPolicy(FederationMetadataType.OPENID_RELYING_PARTY));
+		
+		assertNull(stmt.getMetadataPolicyJSONObject());
 	}
 }

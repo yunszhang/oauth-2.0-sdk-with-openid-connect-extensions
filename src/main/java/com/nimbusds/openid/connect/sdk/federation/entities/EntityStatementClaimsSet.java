@@ -35,6 +35,8 @@ import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.MapUtils;
 import com.nimbusds.openid.connect.sdk.claims.CommonClaimsSet;
+import com.nimbusds.openid.connect.sdk.federation.policy.MetadataPolicy;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
 import com.nimbusds.openid.connect.sdk.federation.trust.constraints.TrustChainConstraints;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
@@ -398,10 +400,10 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	
 	
 	/**
-	 * Gets the metadata for the specified federation entity type. Use a
-	 * typed getter, such as {@link #getRPMetadata} when available.
+	 * Gets the metadata for the specified type. Use a typed getter, such
+	 * as {@link #getRPMetadata}, when available.
 	 *
-	 * @param type The federation entity type. Must not be {@code null}.
+	 * @param type The type. Must not be {@code null}.
 	 *
 	 * @return The metadata, {@code null} if not specified.
 	 */
@@ -422,11 +424,10 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	
 	
 	/**
-	 * Sets the metadata for the specified federation entity type. Use a
-	 * typed setter, such as {@link #setRPMetadata} when available.
+	 * Sets the metadata for the specified type. Use a typed setter, such
+	 * as {@link #setRPMetadata}, when available.
 	 *
-	 * @param type     The federation entity type. Must not be
-	 *                 {@code null}.
+	 * @param type     The type. Must not be {@code null}.
 	 * @param metadata The metadata, {@code null} if not specified.
 	 */
 	public void setMetadata(final FederationMetadataType type, final JSONObject metadata) {
@@ -621,7 +622,7 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	
 	
 	/**
-	 * Gets the metadata policy JSON object.
+	 * Gets the complete metadata policy JSON object.
 	 *
 	 * @return The metadata policy JSON object, {@code null} if not
 	 *         specified or if parsing failed.
@@ -633,7 +634,7 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	
 	
 	/**
-	 * Sets the metadata policy JSON object.
+	 * Sets the complete metadata policy JSON object.
 	 *
 	 * @param metadataPolicy The metadata policy JSON object, {@code null}
 	 *                       if not specified.
@@ -641,6 +642,67 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	public void setMetadataPolicyJSONObject(final JSONObject metadataPolicy) {
 	
 		setClaim(METADATA_POLICY_CLAIM_NAME, metadataPolicy);
+	}
+	
+	
+	/**
+	 * Gets the metadata policy for the specified type.
+	 *
+	 * @param type The type. Must not be {@code null}.
+	 *
+	 * @return The metadata policy, {@code null} or if JSON parsing failed.
+	 *
+	 * @throws PolicyViolationException On a policy violation.
+	 */
+	public MetadataPolicy getMetadataPolicy(final FederationMetadataType type)
+		throws PolicyViolationException {
+		
+		JSONObject o = getMetadataPolicyJSONObject();
+		
+		if (o == null) {
+			return null;
+		}
+		
+		try {
+			JSONObject policyJSONObject = JSONObjectUtils.getJSONObject(o, type.getValue(), null);
+			if (policyJSONObject == null) {
+				return null;
+			}
+			return MetadataPolicy.parse(policyJSONObject);
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Sets the metadata policy for the specified type.
+	 *
+	 * @param type           The type. Must not be {@code null}.
+	 * @param metadataPolicy The metadata policy, {@code null} if not
+	 *                       specified.
+	 */
+	public void setMetadataPolicy(final FederationMetadataType type, final MetadataPolicy metadataPolicy) {
+		
+		JSONObject o = getMetadataPolicyJSONObject();
+		
+		if (o == null) {
+			if (metadataPolicy == null) {
+				return; // nothing to clear
+			}
+			o = new JSONObject();
+		}
+		
+		if (metadataPolicy != null) {
+			o.put(type.getValue(), metadataPolicy.toJSONObject());
+		} else {
+			o.remove(type.getValue());
+		}
+		
+		if (o.isEmpty()) {
+			o = null;
+		}
+		setMetadataPolicyJSONObject(o);
 	}
 	
 	
@@ -667,7 +729,7 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	
 	
 	/**
-	 * Sets the trust chain constraints for subordinate entities.
+	 * Sets the trust chain constraint for subordinate entities.
 	 *
 	 * @param constraints The trust chain constraints, {@code null} if not
 	 *                    specified.
