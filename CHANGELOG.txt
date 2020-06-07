@@ -1357,6 +1357,7 @@ version 8.7 (2020-06-05)
 version 8.8 (2020-06-07)
     * Federation TrustChainResolver supports TrustChainConstraints during
       entity statement fetch.
+    * Adds federation RPMetadataPolicyFactory and default
+      DefaultRPMetadataPolicyFactory implementation.
     * Federation ValueOperation implements NumberConfiguration.
     * Federation PolicyOperation adds new toJSONObjectEntry method.
-
