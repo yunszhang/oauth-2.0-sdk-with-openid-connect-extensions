@@ -41,8 +41,15 @@ abstract class AbstractSetBasedOperation implements PolicyOperation, StringListC
 	protected Set<String> setConfig;
 	
 	
+	/**
+	 * The configuration type.
+	 */
+	protected ConfigurationType configType;
+	
+	
 	@Override
 	public void configure(final List<String> parameter) {
+		configType = ConfigurationType.STRING_LIST;
 		this.setConfig = new LinkedHashSet<>(parameter);
 	}
 	

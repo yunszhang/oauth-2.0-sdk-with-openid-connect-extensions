@@ -18,6 +18,9 @@
 package com.nimbusds.openid.connect.sdk.federation.policy.operations;
 
 
+import java.util.AbstractMap;
+import java.util.Map;
+
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONUtils;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.*;
@@ -63,6 +66,12 @@ public class EssentialOperation implements PolicyOperation, BooleanConfiguration
 	public void parseConfiguration(final Object jsonEntity) throws ParseException {
 		
 		configure(JSONUtils.toBoolean(jsonEntity));
+	}
+	
+	
+	@Override
+	public Map.Entry<String,Object> toJSONObjectEntry() {
+		return new AbstractMap.SimpleImmutableEntry<>(getOperationName().getValue(), (Object) getBooleanConfiguration());
 	}
 	
 	

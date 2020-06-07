@@ -63,6 +63,15 @@ public class SupersetOfOperation extends AbstractSetBasedOperation implements Po
 	
 	
 	@Override
+	public Map.Entry<String, Object> toJSONObjectEntry() {
+		if (configType == null) {
+			throw new IllegalStateException("The policy is not initialized");
+		}
+		return new AbstractMap.SimpleImmutableEntry<>(getOperationName().getValue(), (Object) getStringListConfiguration());
+	}
+	
+	
+	@Override
 	public PolicyOperation merge(final PolicyOperation other) throws PolicyViolationException {
 		
 		SupersetOfOperation otherTyped = Utils.castForMerge(other, SupersetOfOperation.class);

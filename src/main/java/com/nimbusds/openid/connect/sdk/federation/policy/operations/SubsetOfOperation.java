@@ -66,6 +66,15 @@ public class SubsetOfOperation extends AbstractSetBasedOperation implements Stri
 	
 	
 	@Override
+	public Map.Entry<String, Object> toJSONObjectEntry() {
+		if (configType == null) {
+			throw new IllegalStateException("The policy is not initialized");
+		}
+		return new AbstractMap.SimpleImmutableEntry<>(getOperationName().getValue(), (Object) getStringListConfiguration());
+	}
+	
+	
+	@Override
 	public PolicyOperation merge(final PolicyOperation other) throws PolicyViolationException {
 		
 		SubsetOfOperation otherTyped = Utils.castForMerge(other, SubsetOfOperation.class);

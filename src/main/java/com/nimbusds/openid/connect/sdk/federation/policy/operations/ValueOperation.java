@@ -18,8 +18,9 @@
 package com.nimbusds.openid.connect.sdk.federation.policy.operations;
 
 
+import java.util.AbstractMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONUtils;
@@ -54,17 +55,20 @@ import com.nimbusds.openid.connect.sdk.federation.policy.language.*;
  * </ul>
  */
 public class ValueOperation implements PolicyOperation,
-	BooleanConfiguration, StringConfiguration, StringListConfiguration,
+	BooleanConfiguration, NumberConfiguration, StringConfiguration, StringListConfiguration,
 	UntypedOperation {
 	
 	
 	public static final OperationName NAME = new OperationName("value");
 	
 	
-	private AtomicBoolean isInit = new AtomicBoolean(false);
+	private ConfigurationType configType;
 	
 	
 	private boolean booleanValue;
+	
+	
+	private Number numberValue = null;
 	
 	
 	private String stringValue;
@@ -81,21 +85,28 @@ public class ValueOperation implements PolicyOperation,
 	
 	@Override
 	public void configure(final boolean parameter) {
-		isInit.set(true);
+		configType = ConfigurationType.BOOLEAN;
 		this.booleanValue = parameter;
 	}
 	
 	
 	@Override
+	public void configure(final Number parameter) {
+		configType = ConfigurationType.NUMBER;
+		this.numberValue = parameter;
+	}
+	
+	
+	@Override
 	public void configure(final String parameter) {
-		isInit.set(true);
+		configType = ConfigurationType.STRING;
 		this.stringValue = parameter;
 	}
 	
 	
 	@Override
 	public void configure(final List<String> parameter) {
-		isInit.set(true);
+		configType = ConfigurationType.STRING_LIST;
 		this.stringListValue = parameter;
 	}
 	
@@ -104,6 +115,8 @@ public class ValueOperation implements PolicyOperation,
 	public void parseConfiguration(final Object jsonEntity) throws ParseException {
 		if (jsonEntity instanceof Boolean) {
 			configure(JSONUtils.toBoolean(jsonEntity));
+		} else if (jsonEntity instanceof Number) {
+			configure(JSONUtils.toNumber(jsonEntity));
 		} else if (jsonEntity instanceof String) {
 			configure(JSONUtils.toString(jsonEntity));
 		} else {
@@ -113,8 +126,35 @@ public class ValueOperation implements PolicyOperation,
 	
 	
 	@Override
+	public Map.Entry<String,Object> toJSONObjectEntry() {
+		if (configType == null) {
+			throw new IllegalStateException("The policy is not initialized");
+		}
+		Object value;
+		if (configType.equals(ConfigurationType.BOOLEAN)) {
+			value = getBooleanConfiguration();
+		} else if (configType.equals(ConfigurationType.NUMBER)) {
+			value = getNumberConfiguration();
+		} else if (configType.equals(ConfigurationType.STRING_LIST)) {
+			value = getStringListConfiguration();
+		} else if (configType.equals(ConfigurationType.STRING)) {
+			value = getStringConfiguration();
+		} else {
+			throw new IllegalStateException("Unsupported configuration type: " + configType);
+		}
+		return new AbstractMap.SimpleImmutableEntry<>(getOperationName().getValue(), value);
+	}
+	
+	
+	@Override
 	public boolean getBooleanConfiguration() {
 		return booleanValue;
+	}
+	
+	
+	@Override
+	public Number getNumberConfiguration() {
+		return numberValue;
 	}
 	
 	
@@ -136,58 +176,68 @@ public class ValueOperation implements PolicyOperation,
 		
 		ValueOperation otherTyped = Utils.castForMerge(other, ValueOperation.class);
 		
-		if (! isInit.get() || ! otherTyped.isInit.get()) {
+		if (configType == null ||  otherTyped.configType == null) {
 			throw new PolicyViolationException("The value operation is not initialized");
 		}
 		
-		if (getStringListConfiguration() != null) {
+		if (configType.equals(ConfigurationType.STRING_LIST)) {
 			
-			if (getStringListConfiguration().equals(otherTyped.getStringListConfiguration())) {
-				
+			if (getStringListConfiguration() != null && getStringListConfiguration().equals(otherTyped.getStringListConfiguration())) {
 				ValueOperation copy = new ValueOperation();
 				copy.configure(getStringListConfiguration());
 				return copy;
 			}
+		}
+		
+		if (configType.equals(ConfigurationType.STRING)) {
 			
-			throw new PolicyViolationException("Value mismatch");
-			
-		} else if (getStringConfiguration() != null) {
-			
-			if (getStringConfiguration().equals(otherTyped.getStringConfiguration())) {
-				
+			if (getStringConfiguration() != null && getStringConfiguration().equals(otherTyped.getStringConfiguration())) {
 				ValueOperation copy = new ValueOperation();
 				copy.configure(getStringConfiguration());
 				return copy;
 			}
 			
-			throw new PolicyViolationException("Value mismatch");
-			
-		} else if (getBooleanConfiguration() == otherTyped.getBooleanConfiguration()) {
-			
-			ValueOperation copy = new ValueOperation();
-			copy.configure(getBooleanConfiguration());
-			return copy;
-		} else {
-			throw new PolicyViolationException("Value mismatch");
 		}
+		
+		if (configType.equals(ConfigurationType.BOOLEAN)) {
+			
+			if (getBooleanConfiguration() == otherTyped.getBooleanConfiguration()) {
+				ValueOperation copy = new ValueOperation();
+				copy.configure(getBooleanConfiguration());
+				return copy;
+			}
+			
+		}
+		
+		if (configType.equals(ConfigurationType.NUMBER)) {
+			
+			if (getNumberConfiguration() != null && getNumberConfiguration().equals(otherTyped.getNumberConfiguration())) {
+				ValueOperation copy = new ValueOperation();
+				copy.configure(getNumberConfiguration());
+				return copy;
+			}
+		}
+		
+		throw new PolicyViolationException("Value mismatch");
 	}
 	
 	
 	@Override
 	public Object apply(final Object value) {
 		
-		if (! isInit.get()) {
+		if (configType == null) {
 			throw new IllegalStateException("The policy is not initialized");
 		}
 		
-		if (stringListValue != null) {
-			return stringListValue;
+		if (configType.equals(ConfigurationType.BOOLEAN)) {
+			return booleanValue;
 		}
-		if (stringValue != null) {
+		if (configType.equals(ConfigurationType.NUMBER)) {
+			return numberValue;
+		}
+		if (configType.equals(ConfigurationType.STRING)) {
 			return stringValue;
 		}
-		
-		// boolean last because it cannot be null
-		return booleanValue;
+		return stringListValue;
 	}
 }

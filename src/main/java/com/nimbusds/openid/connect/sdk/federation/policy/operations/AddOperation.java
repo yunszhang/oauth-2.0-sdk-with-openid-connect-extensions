@@ -18,9 +18,7 @@
 package com.nimbusds.openid.connect.sdk.federation.policy.operations;
 
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONUtils;
@@ -68,6 +66,7 @@ public class AddOperation extends AbstractSetBasedOperation implements StringCon
 	
 	@Override
 	public void configure(final String parameter) {
+		configType = ConfigurationType.STRING;
 		configure(Collections.singletonList(parameter));
 	}
 	
@@ -81,6 +80,27 @@ public class AddOperation extends AbstractSetBasedOperation implements StringCon
 			// String list
 			super.parseConfiguration(jsonEntity);
 		}
+	}
+	
+	
+	@Override
+	public Map.Entry<String,Object> toJSONObjectEntry() {
+		if (configType == null) {
+			throw new IllegalStateException("The policy is not initialized");
+		}
+		Object value;
+		if (configType.equals(ConfigurationType.STRING_LIST)) {
+			if (getStringListConfiguration().size() > 1) {
+				value = getStringListConfiguration();
+			} else {
+				value = getStringListConfiguration().get(0);
+			}
+		} else if (configType.equals(ConfigurationType.STRING)) {
+			value = getStringConfiguration();
+		} else {
+			throw new IllegalStateException("Unsupported configuration type: " + configType);
+		}
+		return new AbstractMap.SimpleImmutableEntry<>(getOperationName().getValue(), value);
 	}
 	
 	

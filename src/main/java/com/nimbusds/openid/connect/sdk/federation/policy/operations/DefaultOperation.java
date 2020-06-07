@@ -18,8 +18,9 @@
 package com.nimbusds.openid.connect.sdk.federation.policy.operations;
 
 
+import java.util.AbstractMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONUtils;
@@ -49,7 +50,7 @@ public class DefaultOperation implements PolicyOperation,
 	public static final OperationName NAME = new OperationName("default");
 	
 	
-	private AtomicBoolean isInit = new AtomicBoolean(false);
+	private ConfigurationType configType;
 	
 	
 	private boolean booleanValue;
@@ -69,21 +70,21 @@ public class DefaultOperation implements PolicyOperation,
 	
 	@Override
 	public void configure(final boolean parameter) {
-		isInit.set(true);
+		configType = ConfigurationType.BOOLEAN;
 		this.booleanValue = parameter;
 	}
 	
 	
 	@Override
 	public void configure(final String parameter) {
-		isInit.set(true);
+		configType = ConfigurationType.STRING;
 		this.stringValue = parameter;
 	}
 	
 	
 	@Override
 	public void configure(final List<String> parameter) {
-		isInit.set(true);
+		configType = ConfigurationType.STRING_LIST;
 		this.stringListValue = parameter;
 	}
 	
@@ -97,6 +98,25 @@ public class DefaultOperation implements PolicyOperation,
 		} else {
 			configure(JSONUtils.toStringList(jsonEntity));
 		}
+	}
+	
+	
+	@Override
+	public Map.Entry<String,Object> toJSONObjectEntry() {
+		if (configType == null) {
+			throw new IllegalStateException("The policy is not initialized");
+		}
+		Object value;
+		if (configType.equals(ConfigurationType.BOOLEAN)) {
+			value = getBooleanConfiguration();
+		} else if (configType.equals(ConfigurationType.STRING_LIST)) {
+			value = getStringListConfiguration();
+		} else if (configType.equals(ConfigurationType.STRING)) {
+			value = getStringConfiguration();
+		} else {
+			throw new IllegalStateException("Unsupported configuration type: " + configType);
+		}
+		return new AbstractMap.SimpleImmutableEntry<>(getOperationName().getValue(), value);
 	}
 	
 	
@@ -124,47 +144,46 @@ public class DefaultOperation implements PolicyOperation,
 		
 		DefaultOperation otherTyped = Utils.castForMerge(other, DefaultOperation.class);
 		
-		if (! isInit.get() || ! otherTyped.isInit.get()) {
+		if (configType == null || otherTyped.configType == null) {
 			throw new PolicyViolationException("The default operation is not initialized");
 		}
 		
-		if (getStringListConfiguration() != null) {
+		if (configType.equals(ConfigurationType.STRING_LIST)) {
 			
-			if (getStringListConfiguration().equals(otherTyped.getStringListConfiguration())) {
-				
+			if (getStringListConfiguration() != null && getStringListConfiguration().equals(otherTyped.getStringListConfiguration())) {
 				DefaultOperation copy = new DefaultOperation();
 				copy.configure(getStringListConfiguration());
 				return copy;
 			}
+		}
+		
+		if (configType.equals(ConfigurationType.STRING)) {
 			
-			throw new PolicyViolationException("Default value mismatch");
-			
-		} else if (getStringConfiguration() != null) {
-			
-			if (getStringConfiguration().equals(otherTyped.getStringConfiguration())) {
-				
+			if (getStringConfiguration() != null && getStringConfiguration().equals(otherTyped.getStringConfiguration())) {
 				DefaultOperation copy = new DefaultOperation();
 				copy.configure(getStringConfiguration());
 				return copy;
 			}
 			
-			throw new PolicyViolationException("Default value mismatch");
-			
-		} else if (getBooleanConfiguration() == otherTyped.getBooleanConfiguration()) {
-			
-			DefaultOperation copy = new DefaultOperation();
-			copy.configure(getBooleanConfiguration());
-			return copy;
-		} else {
-			throw new PolicyViolationException("Default value mismatch");
 		}
+		
+		if (configType.equals(ConfigurationType.BOOLEAN)) {
+			
+			if (getBooleanConfiguration() == otherTyped.getBooleanConfiguration()) {
+				DefaultOperation copy = new DefaultOperation();
+				copy.configure(getBooleanConfiguration());
+				return copy;
+			}
+		}
+		
+		throw new PolicyViolationException("Default value mismatch");
 	}
 	
 	
 	@Override
 	public Object apply(final Object value) {
 		
-		if (! isInit.get()) {
+		if (configType == null) {
 			throw new IllegalStateException("The policy is not initialized");
 		}
 		

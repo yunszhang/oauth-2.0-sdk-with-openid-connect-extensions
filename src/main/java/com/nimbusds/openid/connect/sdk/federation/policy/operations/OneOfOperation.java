@@ -18,9 +18,7 @@
 package com.nimbusds.openid.connect.sdk.federation.policy.operations;
 
 
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.*;
 
 import com.nimbusds.openid.connect.sdk.federation.policy.language.OperationName;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyOperation;
@@ -64,6 +62,15 @@ public class OneOfOperation extends AbstractSetBasedOperation implements StringO
 	@Override
 	public OperationName getOperationName() {
 		return NAME;
+	}
+	
+	
+	@Override
+	public Map.Entry<String, Object> toJSONObjectEntry() {
+		if (configType == null) {
+			throw new IllegalStateException("The policy is not initialized");
+		}
+		return new AbstractMap.SimpleImmutableEntry<>(getOperationName().getValue(), (Object) getStringListConfiguration());
 	}
 	
 	
