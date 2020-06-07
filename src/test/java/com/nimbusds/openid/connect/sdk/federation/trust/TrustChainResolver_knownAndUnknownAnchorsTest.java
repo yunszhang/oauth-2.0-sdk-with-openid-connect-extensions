@@ -35,6 +35,7 @@ import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
 import com.nimbusds.openid.connect.sdk.federation.entities.FederationEntityMetadata;
+import com.nimbusds.openid.connect.sdk.federation.trust.constraints.TrustChainConstraints;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 
@@ -197,7 +198,10 @@ public class TrustChainResolver_knownAndUnknownAnchorsTest extends TestCase {
 		assertTrue(retriever.getAccumulatedExceptions().isEmpty());
 		
 		// Test the resolver
-		TrustChainResolver resolver = new TrustChainResolver(Collections.singletonMap(new EntityID("https://federation.com"), ANCHOR_JWK_SET), statementRetriever);
+		TrustChainResolver resolver = new TrustChainResolver(
+			Collections.singletonMap(new EntityID("https://federation.com"), ANCHOR_JWK_SET),
+			TrustChainConstraints.NO_CONSTRAINTS,
+			statementRetriever);
 		
 		TrustChainSet resolvedChains = resolver.resolveTrustChains(new EntityID(OP_ISSUER));
 		

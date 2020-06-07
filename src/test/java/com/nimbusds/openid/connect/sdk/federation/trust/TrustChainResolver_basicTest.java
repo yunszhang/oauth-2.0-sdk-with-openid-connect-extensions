@@ -38,6 +38,7 @@ import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
 import com.nimbusds.openid.connect.sdk.federation.entities.FederationEntityMetadata;
+import com.nimbusds.openid.connect.sdk.federation.trust.constraints.TrustChainConstraints;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 
@@ -167,6 +168,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 		
 		// Test the retriever
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
+		assertEquals(TrustChainConstraints.NO_CONSTRAINTS, chainRetriever.getConstraints());
 		
 		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
 		
@@ -185,8 +187,9 @@ public class TrustChainResolver_basicTest extends TestCase {
 		
 		// Test the resolver
 		Map<EntityID,JWKSet> anchors = Collections.singletonMap(new EntityID(ANCHOR_ISSUER), ANCHOR_JWK_SET);
-		TrustChainResolver resolver = new TrustChainResolver(anchors, statementRetriever);
+		TrustChainResolver resolver = new TrustChainResolver(anchors, TrustChainConstraints.NO_CONSTRAINTS, statementRetriever);
 		assertEquals(anchors, resolver.getTrustAnchors());
+		assertEquals(TrustChainConstraints.NO_CONSTRAINTS, resolver.getConstraints());
 		
 		TrustChainSet resolvedChains = resolver.resolveTrustChains(new EntityID(OP_ISSUER));
 		
@@ -199,7 +202,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 		
 		// Test the resolver, no configured anchor JWK set
 		anchors = Collections.singletonMap(new EntityID(ANCHOR_ISSUER), null);
-		resolver = new TrustChainResolver(anchors, statementRetriever);
+		resolver = new TrustChainResolver(anchors, TrustChainConstraints.NO_CONSTRAINTS, statementRetriever);
 		assertEquals(anchors, resolver.getTrustAnchors());
 		
 		resolvedChains = resolver.resolveTrustChains(new EntityID(OP_ISSUER));
@@ -241,7 +244,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 		assertEquals(1, chainRetriever.getAccumulatedExceptions().size());
 		
 		// Test the resolver
-		TrustChainResolver resolver = new TrustChainResolver(Collections.singletonMap(new EntityID(ANCHOR_ISSUER), ANCHOR_JWK_SET), statementRetriever);
+		TrustChainResolver resolver = new TrustChainResolver(Collections.singletonMap(new EntityID(ANCHOR_ISSUER), ANCHOR_JWK_SET), TrustChainConstraints.NO_CONSTRAINTS, statementRetriever);
 		
 		try {
 			resolver.resolveTrustChains(new EntityID(OP_ISSUER));
@@ -293,7 +296,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 		assertEquals(1, chainRetriever.getAccumulatedExceptions().size());
 		
 		// Test the resolver
-		TrustChainResolver resolver = new TrustChainResolver(Collections.singletonMap(new EntityID(ANCHOR_ISSUER), ANCHOR_JWK_SET), statementRetriever);
+		TrustChainResolver resolver = new TrustChainResolver(Collections.singletonMap(new EntityID(ANCHOR_ISSUER), ANCHOR_JWK_SET), TrustChainConstraints.NO_CONSTRAINTS, statementRetriever);
 		
 		try {
 			resolver.resolveTrustChains(new EntityID(OP_ISSUER));
@@ -339,7 +342,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 		assertEquals(1, chainRetriever.getAccumulatedExceptions().size());
 		
 		// Test the resolver
-		TrustChainResolver resolver = new TrustChainResolver(Collections.singletonMap(new EntityID(ANCHOR_ISSUER), ANCHOR_JWK_SET), statementRetriever);
+		TrustChainResolver resolver = new TrustChainResolver(Collections.singletonMap(new EntityID(ANCHOR_ISSUER), ANCHOR_JWK_SET), TrustChainConstraints.NO_CONSTRAINTS, statementRetriever);
 		
 		try {
 			resolver.resolveTrustChains(new EntityID(OP_ISSUER));

@@ -21,6 +21,7 @@ package com.nimbusds.openid.connect.sdk.federation.trust;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -35,6 +36,9 @@ import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
 import com.nimbusds.openid.connect.sdk.federation.entities.FederationEntityMetadata;
+import com.nimbusds.openid.connect.sdk.federation.trust.constraints.EntityIDConstraint;
+import com.nimbusds.openid.connect.sdk.federation.trust.constraints.ExactMatchEntityIDConstraint;
+import com.nimbusds.openid.connect.sdk.federation.trust.constraints.TrustChainConstraints;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 
@@ -220,7 +224,7 @@ public class TrustChainResolver_withIntermediateTest extends TestCase {
 		assertEquals(2, chain.getSuperiorStatements().size());
 		
 		// Test the chain resolver
-		TrustChainResolver resolver = new TrustChainResolver(Collections.singletonMap(new EntityID(ANCHOR_ISSUER), ANCHOR_JWK_SET), statementRetriever);
+		TrustChainResolver resolver = new TrustChainResolver(Collections.singletonMap(new EntityID(ANCHOR_ISSUER), ANCHOR_JWK_SET), TrustChainConstraints.NO_CONSTRAINTS, statementRetriever);
 		
 		TrustChainSet resolvedChains = resolver.resolveTrustChains(new EntityID(OP_ISSUER));
 		
@@ -232,5 +236,111 @@ public class TrustChainResolver_withIntermediateTest extends TestCase {
 		assertEquals(INTERMEDIATE_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));
 		assertEquals(ANCHOR_STMT_ABOUT_INTERMEDIATE, chain.getSuperiorStatements().get(1));
 		assertEquals(2, chain.getSuperiorStatements().size());
+	}
+	
+	
+	public void testResolve_withMaxPathLengthConstraint() {
+		
+		EntityStatementRetriever statementRetriever = new EntityStatementRetriever() {
+			@Override
+			public EntityStatement fetchSelfIssuedEntityStatement(EntityID target) throws ResolveException {
+				if (OP_ISSUER.getValue().equals(target.getValue())) {
+					return OP_SELF_STMT;
+				} else if (INTERMEDIATE_ISSUER.getValue().equals(target.getValue())) {
+					return INTERMEDIATE_SELF_STMT;
+				} else if (ANCHOR_ISSUER.getValue().equals(target.getValue())) {
+					return ANCHOR_SELF_STMT;
+				} else {
+					throw new ResolveException("Invalid target");
+				}
+			}
+			
+			
+			@Override
+			public EntityStatement fetchEntityStatement(URI federationAPIEndpoint, EntityID issuer, EntityID subject) throws ResolveException {
+				if (ANCHOR_FEDERATION_API_URI.equals(federationAPIEndpoint)) {
+					if (ANCHOR_ISSUER.getValue().equals(issuer.getValue()) && INTERMEDIATE_ISSUER.getValue().equals(subject.getValue())) {
+						return ANCHOR_STMT_ABOUT_INTERMEDIATE;
+					}
+					throw new ResolveException("Unknown subject: " + subject);
+				} else if (INTERMEDIATE_FEDERATION_API_URI.equals(federationAPIEndpoint)) {
+					if (INTERMEDIATE_ISSUER.getValue().equals(issuer.getValue()) && OP_ISSUER.getValue().equals(subject.getValue())) {
+						return INTERMEDIATE_STMT_ABOUT_OP;
+					}
+					throw new ResolveException("Unknown subject: " + subject);
+				} else {
+					throw new ResolveException("Exception");
+				}
+			}
+		};
+		
+		// Test the chain retriever
+		TrustChainConstraints constraints = new TrustChainConstraints(0);
+		assertEquals(0, constraints.getMaxPathLength());
+		
+		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever, constraints);
+		assertEquals(constraints, chainRetriever.getConstraints());
+		
+		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		assertTrue(trustChains.isEmpty());
+		
+		ResolveException resolveException = (ResolveException)chainRetriever.getAccumulatedExceptions().get(0);
+		assertEquals("Reached max number of intermediates in chain at " + INTERMEDIATE_ISSUER, resolveException.getMessage());
+		assertEquals(1, chainRetriever.getAccumulatedExceptions().size());
+	}
+	
+	
+	public void testResolve_withExcludedConstraint() {
+		
+		EntityStatementRetriever statementRetriever = new EntityStatementRetriever() {
+			@Override
+			public EntityStatement fetchSelfIssuedEntityStatement(EntityID target) throws ResolveException {
+				if (OP_ISSUER.getValue().equals(target.getValue())) {
+					return OP_SELF_STMT;
+				} else if (INTERMEDIATE_ISSUER.getValue().equals(target.getValue())) {
+					return INTERMEDIATE_SELF_STMT;
+				} else if (ANCHOR_ISSUER.getValue().equals(target.getValue())) {
+					return ANCHOR_SELF_STMT;
+				} else {
+					throw new ResolveException("Invalid target");
+				}
+			}
+			
+			
+			@Override
+			public EntityStatement fetchEntityStatement(URI federationAPIEndpoint, EntityID issuer, EntityID subject) throws ResolveException {
+				if (ANCHOR_FEDERATION_API_URI.equals(federationAPIEndpoint)) {
+					if (ANCHOR_ISSUER.getValue().equals(issuer.getValue()) && INTERMEDIATE_ISSUER.getValue().equals(subject.getValue())) {
+						return ANCHOR_STMT_ABOUT_INTERMEDIATE;
+					}
+					throw new ResolveException("Unknown subject: " + subject);
+				} else if (INTERMEDIATE_FEDERATION_API_URI.equals(federationAPIEndpoint)) {
+					if (INTERMEDIATE_ISSUER.getValue().equals(issuer.getValue()) && OP_ISSUER.getValue().equals(subject.getValue())) {
+						return INTERMEDIATE_STMT_ABOUT_OP;
+					}
+					throw new ResolveException("Unknown subject: " + subject);
+				} else {
+					throw new ResolveException("Exception");
+				}
+			}
+		};
+		
+		// Test the chain retriever
+		List<EntityIDConstraint> excluded = Collections.singletonList((EntityIDConstraint) new ExactMatchEntityIDConstraint(new EntityID(INTERMEDIATE_ISSUER.getValue())));
+		TrustChainConstraints constraints = new TrustChainConstraints(-1, null, excluded);
+		
+		assertEquals(-1, constraints.getMaxPathLength());
+		assertTrue(constraints.getPermittedEntities().isEmpty());
+		assertEquals(excluded, constraints.getExcludedEntities());
+		
+		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever, constraints);
+		assertEquals(constraints, chainRetriever.getConstraints());
+		
+		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		assertTrue(trustChains.isEmpty());
+		
+		ResolveException resolveException = (ResolveException)chainRetriever.getAccumulatedExceptions().get(0);
+		assertEquals("Reached authority which isn't permitted according to constraints: " + INTERMEDIATE_ISSUER, resolveException.getMessage());
+		assertEquals(1, chainRetriever.getAccumulatedExceptions().size());
 	}
 }

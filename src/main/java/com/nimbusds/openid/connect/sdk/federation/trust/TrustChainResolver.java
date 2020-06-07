@@ -25,6 +25,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.oauth2.sdk.util.MapUtils;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
+import com.nimbusds.openid.connect.sdk.federation.trust.constraints.TrustChainConstraints;
 
 
 /**
@@ -52,7 +53,15 @@ public class TrustChainResolver {
 	
 	
 	/**
-	 * Creates a new trust chain resolver with a single trust anchor.
+	 * The trust chain constraints.
+	 */
+	private final TrustChainConstraints constraints;
+	
+	
+	/**
+	 * Creates a new trust chain resolver with a single trust anchor, with
+	 * {@link TrustChainConstraints#NO_CONSTRAINTS no trust chain
+	 * constraints}.
 	 *
 	 * @param trustAnchor The trust anchor. Must not be {@code null}.
 	 */
@@ -62,7 +71,9 @@ public class TrustChainResolver {
 	
 	
 	/**
-	 * Creates a new trust chain resolver with a single trust anchor.
+	 * Creates a new trust chain resolver with a single trust anchor, with
+	 * {@link TrustChainConstraints#NO_CONSTRAINTS no trust chain
+	 * constraints}.
 	 *
 	 * @param trustAnchor       The trust anchor. Must not be {@code null}.
 	 * @param trustAnchorJWKSet The trust anchor public JWK set,
@@ -70,12 +81,18 @@ public class TrustChainResolver {
 	 */
 	public TrustChainResolver(final EntityID trustAnchor,
 				  final JWKSet trustAnchorJWKSet) {
-		this(Collections.singletonMap(trustAnchor, trustAnchorJWKSet), new DefaultEntityStatementRetriever());
+		this(
+			Collections.singletonMap(trustAnchor, trustAnchorJWKSet),
+			TrustChainConstraints.NO_CONSTRAINTS,
+			new DefaultEntityStatementRetriever()
+		);
 	}
 	
 	
 	/**
-	 * Creates a new trust chain resolver with multiple trust anchors.
+	 * Creates a new trust chain resolver with multiple trust anchors, with
+	 * {@link TrustChainConstraints#NO_CONSTRAINTS no trust chain
+	 * constraints}.
 	 *
 	 * @param trustAnchors         The trust anchors with their public JWK
 	 *                             sets (if available). Must contain at
@@ -91,7 +108,11 @@ public class TrustChainResolver {
 	public TrustChainResolver(final Map<EntityID, JWKSet> trustAnchors,
 				  final int httpConnectTimeoutMs,
 				  final int httpReadTimeoutMs) {
-		this(trustAnchors, new DefaultEntityStatementRetriever(httpConnectTimeoutMs, httpReadTimeoutMs));
+		this(
+			trustAnchors,
+			TrustChainConstraints.NO_CONSTRAINTS,
+			new DefaultEntityStatementRetriever(httpConnectTimeoutMs, httpReadTimeoutMs)
+		);
 	}
 	
 	
@@ -104,11 +125,18 @@ public class TrustChainResolver {
 	 *                           Must not be {@code null}.
 	 */
 	public TrustChainResolver(final Map<EntityID, JWKSet> trustAnchors,
+				  final TrustChainConstraints constraints,
 				  final EntityStatementRetriever statementRetriever) {
+		
 		if (MapUtils.isEmpty(trustAnchors)) {
 			throw new IllegalArgumentException("The trust anchors map must not be empty or null");
 		}
 		this.trustAnchors = trustAnchors;
+		
+		if (constraints == null) {
+			throw new IllegalArgumentException("The trust chain constraints must not be null");
+		}
+		this.constraints = constraints;
 		
 		if (statementRetriever == null) {
 			throw new IllegalArgumentException("The entity statement retriever must not be null");
@@ -131,10 +159,20 @@ public class TrustChainResolver {
 	/**
 	 * Returns the configured entity statement retriever.
 	 *
-	 * @return The configured entity statement retriever.
+	 * @return The entity statement retriever.
 	 */
 	public EntityStatementRetriever getEntityStatementRetriever() {
 		return statementRetriever;
+	}
+	
+	
+	/**
+	 * Returns the configured trust chain constraints.
+	 *
+	 * @return The constraints.
+	 */
+	public TrustChainConstraints getConstraints() {
+		return constraints;
 	}
 	
 	
@@ -155,12 +193,11 @@ public class TrustChainResolver {
 			throw new ResolveException("Target is trust anchor");
 		}
 		
-		TrustChainRetriever retriever = new DefaultTrustChainRetriever(statementRetriever);
+		TrustChainRetriever retriever = new DefaultTrustChainRetriever(statementRetriever, constraints);
 		
 		Set<TrustChain> fetchedTrustChains = retriever.retrieve(target, trustAnchors.keySet());
 		
 		if (fetchedTrustChains.isEmpty()) {
-		
 			if (retriever.getAccumulatedExceptions().isEmpty()) {
 				throw new ResolveException("No trust chain leading up to a trust anchor");
 			} else if (retriever.getAccumulatedExceptions().size() == 1){

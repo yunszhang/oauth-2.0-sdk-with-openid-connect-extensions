@@ -27,6 +27,7 @@ import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 import com.nimbusds.openid.connect.sdk.federation.entities.FederationEntityMetadata;
+import com.nimbusds.openid.connect.sdk.federation.trust.constraints.TrustChainConstraints;
 
 
 /**
@@ -38,6 +39,9 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 	private final EntityStatementRetriever retriever;
 	
 	
+	private final TrustChainConstraints constraints;
+	
+	
 	private final List<Throwable> accumulatedExceptions = new LinkedList<>();
 	
 	
@@ -45,16 +49,47 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 	
 	
 	/**
-	 * Creates a new trust chain retriever.
+	 * Creates a new trust chain retriever, with
+	 * {@link TrustChainConstraints#NO_CONSTRAINTS no trust chain
+	 * constraints}.
 	 *
 	 * @param retriever The entity statement retriever. Must not be
 	 *                  {@code null}.
 	 */
 	DefaultTrustChainRetriever(final EntityStatementRetriever retriever) {
+		this(retriever, TrustChainConstraints.NO_CONSTRAINTS);
+	}
+	
+	
+	/**
+	 * Creates a new trust chain retriever.
+	 *
+	 * @param retriever   The entity statement retriever. Must not be
+	 *                    {@code null}.
+	 * @param constraints The constraints to apply during retrieval. Must
+	 *                    not be {@code null}.
+	 */
+	DefaultTrustChainRetriever(final EntityStatementRetriever retriever,
+				   final TrustChainConstraints constraints) {
 		if (retriever == null) {
 			throw new IllegalArgumentException("The entity statement retriever must not be null");
 		}
 		this.retriever = retriever;
+		
+		if (constraints == null) {
+			throw new IllegalArgumentException("The trust chain constraints must not be null");
+		}
+		this.constraints = constraints;
+	}
+	
+	
+	/**
+	 * Returns the configured trust chain constraints.
+	 *
+	 * @return The constraints.
+	 */
+	public TrustChainConstraints getConstraints() {
+		return constraints;
 	}
 	
 	
@@ -136,6 +171,16 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 			
 			if (authority == null) {
 				continue; // skip
+			}
+			
+			if (! constraints.isPermitted(partialChain.size())) {
+				accumulatedExceptions.add(new ResolveException("Reached max number of intermediates in chain at " + subject));
+				continue;
+			}
+			
+			if (! constraints.isPermitted(authority)) {
+				accumulatedExceptions.add(new ResolveException("Reached authority which isn't permitted according to constraints: " + authority));
+				continue;
 			}
 			
 			EntityStatement superiorSelfStmt;

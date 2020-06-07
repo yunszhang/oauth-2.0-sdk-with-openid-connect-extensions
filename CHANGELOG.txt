@@ -1353,3 +1353,7 @@ version 8.7 (2020-06-05)
       methods.
     * Adds typed EntityStatementClaimsSet getMetadataPolicy and
       setMetadataPolicy methods.
+
+version 8.8 (2020-06-07)
+    * Federation TrustChainResolver supports TrustChainConstraints during
+      entity statement fetch fetch.

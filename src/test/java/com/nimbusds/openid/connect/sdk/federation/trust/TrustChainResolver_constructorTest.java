@@ -39,6 +39,7 @@ import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
 import com.nimbusds.openid.connect.sdk.federation.entities.FederationEntityMetadata;
+import com.nimbusds.openid.connect.sdk.federation.trust.constraints.TrustChainConstraints;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 
@@ -122,7 +123,7 @@ public class TrustChainResolver_constructorTest extends TestCase {
 		};
 		
 		Map<EntityID,JWKSet> anchors = Collections.singletonMap(new EntityID(ANCHOR_ISSUER), ANCHOR_JWK_SET);
-		TrustChainResolver resolver = new TrustChainResolver(anchors, statementRetriever);
+		TrustChainResolver resolver = new TrustChainResolver(anchors, TrustChainConstraints.NO_CONSTRAINTS, statementRetriever);
 		assertEquals(anchors, resolver.getTrustAnchors());
 		assertEquals(statementRetriever, resolver.getEntityStatementRetriever());
 	}
