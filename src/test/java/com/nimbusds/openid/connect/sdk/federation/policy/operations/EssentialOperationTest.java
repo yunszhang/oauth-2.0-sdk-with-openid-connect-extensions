@@ -46,11 +46,14 @@ public class EssentialOperationTest extends TestCase {
 	}
 	
 	
-	public void testBooleanParam() throws PolicyViolationException {
+	public void testBooleanParam_true() throws PolicyViolationException {
 		
 		EssentialOperation operation = new EssentialOperation();
 		assertEquals(new OperationName("essential"), operation.getOperationName());
 		operation.configure(true);
+		
+		assertEquals(operation.getOperationName().getValue(), operation.toJSONObjectEntry().getKey());
+		assertEquals(true, operation.toJSONObjectEntry().getValue());
 		
 		assertTrue((Boolean) operation.apply(true));
 		assertFalse((Boolean) operation.apply(false));
@@ -63,6 +66,12 @@ public class EssentialOperationTest extends TestCase {
 		assertEquals(new OperationName("essential"), operation.getOperationName());
 		operation.configure(true);
 		
+		assertEquals(operation.getOperationName().getValue(), operation.toJSONObjectEntry().getKey());
+		assertEquals(true, operation.toJSONObjectEntry().getValue());
+		
+		assertEquals(operation.getOperationName().getValue(), operation.toJSONObjectEntry().getKey());
+		assertEquals(true, operation.toJSONObjectEntry().getValue());
+		
 		assertEquals("abc", operation.apply("abc"));
 	}
 	
@@ -72,6 +81,9 @@ public class EssentialOperationTest extends TestCase {
 		EssentialOperation operation = new EssentialOperation();
 		assertEquals(new OperationName("essential"), operation.getOperationName());
 		operation.configure(true);
+		
+		assertEquals(operation.getOperationName().getValue(), operation.toJSONObjectEntry().getKey());
+		assertEquals(true, operation.toJSONObjectEntry().getValue());
 		
 		assertEquals(Collections.singletonList("abc"), operation.apply(Collections.singletonList("abc")));
 	}

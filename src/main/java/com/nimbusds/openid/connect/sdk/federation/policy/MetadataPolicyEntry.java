@@ -28,7 +28,10 @@ import net.minidev.json.JSONObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
-import com.nimbusds.openid.connect.sdk.federation.policy.language.*;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.OperationName;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyOperation;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyOperationApplication;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
 import com.nimbusds.openid.connect.sdk.federation.policy.operations.DefaultPolicyOperationCombinationValidator;
 import com.nimbusds.openid.connect.sdk.federation.policy.operations.DefaultPolicyOperationFactory;
 import com.nimbusds.openid.connect.sdk.federation.policy.operations.PolicyOperationCombinationValidator;
@@ -273,47 +276,11 @@ public class MetadataPolicyEntry implements Map.Entry<String, List<PolicyOperati
 		JSONObject jsonObject = new JSONObject();
 		for (PolicyOperation operation: getValue()) {
 			// E.g. "subset_of": ["code", "code token", "code id_token"]}
-			jsonObject.put(operation.getOperationName().getValue(), configToJSONEntity(operation));
+			Map.Entry<String,Object> en = operation.toJSONObjectEntry();
+			jsonObject.put(en.getKey(), en.getValue());
 		}
 		
 		return jsonObject;
-	}
-	
-	
-	private static Object configToJSONEntity(final PolicyOperation op) {
-		
-		// The order matters
-		
-		if (op instanceof StringConfiguration && op instanceof StringListConfiguration) {
-			Object stringValue = ((StringConfiguration)op).getStringConfiguration();
-			List<String> stringListValue = ((StringListConfiguration)op).getStringListConfiguration();
-			if (stringListValue != null && stringListValue.size() > 1) {
-				return stringListValue;
-			} else {
-				return stringValue;
-			}
-		}
-		
-		if (op instanceof StringConfiguration) {
-			Object value = ((StringConfiguration)op).getStringConfiguration();
-			if (value != null) {
-				return value;
-			}
-		}
-		
-		if (op instanceof StringListConfiguration) {
-			Object value = ((StringListConfiguration)op).getStringListConfiguration();
-			if (value != null) {
-				return value;
-			}
-		}
-		
-		if (op instanceof BooleanConfiguration) {
-			return ((BooleanConfiguration)op).getBooleanConfiguration();
-		}
-		
-		throw new IllegalArgumentException("Unsupported policy operation: " + op.getClass());
-		
 	}
 	
 	

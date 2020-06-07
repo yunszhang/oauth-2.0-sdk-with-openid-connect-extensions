@@ -42,6 +42,9 @@ public class AddOperationTest extends TestCase {
 		
 		addOperation.configure(stringParam);
 		
+		assertEquals(addOperation.getOperationName().getValue(), addOperation.toJSONObjectEntry().getKey());
+		assertEquals(stringParam, addOperation.toJSONObjectEntry().getValue());
+		
 		assertEquals(Collections.singletonList(stringParam), addOperation.apply(null));
 		assertEquals(Collections.singletonList(stringParam), addOperation.apply(Collections.<String>emptyList()));
 		assertEquals(Arrays.asList("support@example.com", stringParam), addOperation.apply(Collections.singletonList("support@example.com")));
@@ -57,6 +60,9 @@ public class AddOperationTest extends TestCase {
 		List<String> stringListParam = Arrays.asList("support@federation.example.com", "admin@federation.example.com");
 		
 		addOperation.configure(stringListParam);
+		
+		assertEquals(addOperation.getOperationName().getValue(), addOperation.toJSONObjectEntry().getKey());
+		assertEquals(stringListParam, addOperation.toJSONObjectEntry().getValue());
 		
 		assertEquals(stringListParam, addOperation.apply(null));
 		assertEquals(stringListParam, addOperation.apply(Collections.<String>emptyList()));

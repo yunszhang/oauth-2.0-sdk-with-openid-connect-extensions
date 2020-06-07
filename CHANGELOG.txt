@@ -1356,4 +1356,7 @@ version 8.7 (2020-06-05)
 
 version 8.8 (2020-06-07)
     * Federation TrustChainResolver supports TrustChainConstraints during
-      entity statement fetch fetch.
+      entity statement fetch.
+    * Federation ValueOperation implements NumberConfiguration.
+    * Federation PolicyOperation adds new toJSONObjectEntry method.
+

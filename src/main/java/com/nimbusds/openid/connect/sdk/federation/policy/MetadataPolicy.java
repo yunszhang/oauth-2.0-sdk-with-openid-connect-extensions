@@ -220,6 +220,10 @@ public class MetadataPolicy implements JSONAware {
 		JSONObject jsonObject = new JSONObject();
 		
 		for (MetadataPolicyEntry en: entrySet()) {
+			JSONObject policyEntryJSONObject = en.toJSONObject();
+			if (policyEntryJSONObject == null) {
+				continue; // skip
+			}
 			jsonObject.put(en.getKey(), en.toJSONObject());
 		}
 		
@@ -230,6 +234,12 @@ public class MetadataPolicy implements JSONAware {
 	@Override
 	public String toJSONString() {
 		return toJSONObject().toJSONString();
+	}
+	
+	
+	@Override
+	public String toString() {
+		return toJSONString();
 	}
 	
 	

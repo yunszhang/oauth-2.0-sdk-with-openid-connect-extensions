@@ -105,6 +105,9 @@ public class SubsetOfOperationTest extends TestCase {
 		SubsetOfOperation operation = new SubsetOfOperation();
 		operation.parseConfiguration((Object)param);
 		assertEquals(param, operation.getStringListConfiguration());
+		
+		assertEquals(operation.getOperationName().getValue(), operation.toJSONObjectEntry().getKey());
+		assertEquals(param, operation.toJSONObjectEntry().getValue());
 	}
 	
 	

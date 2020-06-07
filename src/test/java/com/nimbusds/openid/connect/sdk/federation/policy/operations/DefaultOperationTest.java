@@ -38,6 +38,9 @@ public class DefaultOperationTest extends TestCase {
 		valueOperation.configure(true);
 		assertTrue(valueOperation.getBooleanConfiguration());
 		
+		assertEquals(valueOperation.getOperationName().getValue(), valueOperation.toJSONObjectEntry().getKey());
+		assertEquals(true, valueOperation.toJSONObjectEntry().getValue());
+		
 		assertTrue((Boolean) valueOperation.apply(null));
 		assertTrue((Boolean) valueOperation.apply(true));
 		assertFalse((Boolean) valueOperation.apply(false));
@@ -50,6 +53,9 @@ public class DefaultOperationTest extends TestCase {
 		assertEquals(new OperationName("default"), valueOperation.getOperationName());
 		valueOperation.configure(false);
 		assertFalse(valueOperation.getBooleanConfiguration());
+		
+		assertEquals(valueOperation.getOperationName().getValue(), valueOperation.toJSONObjectEntry().getKey());
+		assertEquals(false, valueOperation.toJSONObjectEntry().getValue());
 		
 		assertFalse((Boolean) valueOperation.apply(null));
 		assertTrue((Boolean) valueOperation.apply(true));
@@ -65,6 +71,9 @@ public class DefaultOperationTest extends TestCase {
 		valueOperation.configure(stringParam);
 		assertEquals(stringParam, valueOperation.getStringConfiguration());
 		
+		assertEquals(valueOperation.getOperationName().getValue(), valueOperation.toJSONObjectEntry().getKey());
+		assertEquals(stringParam, valueOperation.toJSONObjectEntry().getValue());
+		
 		assertEquals(stringParam, valueOperation.apply(null));
 		assertEquals("admin@example.com", valueOperation.apply("admin@example.com"));
 	}
@@ -77,6 +86,9 @@ public class DefaultOperationTest extends TestCase {
 		List<String> stringListParam = Arrays.asList("support@federation.example.com", "admin@federation.example.com");
 		valueOperation.configure(stringListParam);
 		assertEquals(stringListParam, valueOperation.getStringListConfiguration());
+		
+		assertEquals(valueOperation.getOperationName().getValue(), valueOperation.toJSONObjectEntry().getKey());
+		assertEquals(stringListParam, valueOperation.toJSONObjectEntry().getValue());
 		
 		assertEquals(stringListParam, valueOperation.apply(null));
 		assertEquals(Arrays.asList("support@example.com", "admin@example.com"), valueOperation.apply(Arrays.asList("support@example.com", "admin@example.com")));

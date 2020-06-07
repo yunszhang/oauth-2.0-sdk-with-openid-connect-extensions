@@ -39,9 +39,27 @@ public class ValueOperationTest extends TestCase {
 		valueOperation.configure(true);
 		assertTrue(valueOperation.getBooleanConfiguration());
 		
+		assertEquals(valueOperation.getOperationName().getValue(), valueOperation.toJSONObjectEntry().getKey());
+		assertEquals(true, valueOperation.toJSONObjectEntry().getValue());
+		
 		assertTrue((Boolean) valueOperation.apply(null));
 		assertTrue((Boolean) valueOperation.apply(true));
 		assertTrue((Boolean) valueOperation.apply(false));
+	}
+	
+
+	public void testNumberParam() {
+		
+		ValueOperation valueOperation = new ValueOperation();
+		assertEquals(new OperationName("value"), valueOperation.getOperationName());
+		valueOperation.configure(200);
+		assertEquals(200, valueOperation.getNumberConfiguration());
+		
+		assertEquals(valueOperation.getOperationName().getValue(), valueOperation.toJSONObjectEntry().getKey());
+		assertEquals(200, valueOperation.toJSONObjectEntry().getValue());
+		
+		assertEquals(200, valueOperation.apply(null));
+		assertEquals(200, valueOperation.apply("abc"));
 	}
 	
 
@@ -52,6 +70,9 @@ public class ValueOperationTest extends TestCase {
 		String stringParam = "support@federation.example.com";
 		valueOperation.configure(stringParam);
 		assertEquals(stringParam, valueOperation.getStringConfiguration());
+		
+		assertEquals(valueOperation.getOperationName().getValue(), valueOperation.toJSONObjectEntry().getKey());
+		assertEquals("support@federation.example.com", valueOperation.toJSONObjectEntry().getValue());
 		
 		assertEquals(stringParam, valueOperation.apply(null));
 		assertEquals(stringParam, valueOperation.apply("abc"));
@@ -65,6 +86,9 @@ public class ValueOperationTest extends TestCase {
 		List<String> stringListParam = Arrays.asList("support@federation.example.com", "admin@federation.example.com");
 		valueOperation.configure(stringListParam);
 		assertEquals(stringListParam, valueOperation.getStringListConfiguration());
+		
+		assertEquals(valueOperation.getOperationName().getValue(), valueOperation.toJSONObjectEntry().getKey());
+		assertEquals(stringListParam, valueOperation.toJSONObjectEntry().getValue());
 		
 		assertEquals(stringListParam, valueOperation.apply(null));
 		assertEquals(stringListParam, valueOperation.apply(Collections.singletonList("abc")));
@@ -120,6 +144,34 @@ public class ValueOperationTest extends TestCase {
 		
 		ValueOperation o3 = new ValueOperation();
 		o3.configure(false);
+		
+		try {
+			o1.merge(o3);
+			fail();
+		} catch (PolicyViolationException e) {
+			assertEquals("Value mismatch", e.getMessage());
+		}
+	}
+	
+	
+	public void testMerge_number() throws PolicyViolationException {
+	
+		ValueOperation o1 = new ValueOperation();
+		o1.configure(400);
+		assertEquals(400, o1.getNumberConfiguration());
+		
+		ValueOperation o2 = new ValueOperation();
+		o2.configure(400);
+		assertEquals(400, o2.getNumberConfiguration());
+		
+		assertEquals(o1.getNumberConfiguration(), o2.getNumberConfiguration());
+		
+		ValueOperation merged = (ValueOperation)o1.merge(o2);
+		
+		assertEquals(400, merged.getNumberConfiguration());
+		
+		ValueOperation o3 = new ValueOperation();
+		o3.configure(100);
 		
 		try {
 			o1.merge(o3);

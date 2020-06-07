@@ -18,6 +18,8 @@
 package com.nimbusds.openid.connect.sdk.federation.policy.language;
 
 
+import java.util.Map;
+
 import com.nimbusds.oauth2.sdk.ParseException;
 
 
@@ -46,6 +48,15 @@ public interface PolicyOperation {
 	 * @throws ParseException On a parse exception.
 	 */
 	void parseConfiguration(final Object jsonEntity) throws ParseException;
+	
+	
+	/**
+	 * Returns a JSON object entry representation of the policy operation.
+	 *
+	 * @return The JSON object entry, with a boolean, number, string, array
+	 *         or object value.
+	 */
+	Map.Entry<String,Object> toJSONObjectEntry();
 	
 	
 	/**
