@@ -161,11 +161,33 @@ public class TrustChainConstraintsTest extends TestCase {
 	public void testIsPermitted_rejectNegativePathLength() {
 		
 		try {
+			new TrustChainConstraints().isPermitted(-1);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The path length must not be negative", e.getMessage());
+		}
+		
+		try {
 			new TrustChainConstraints().isPermitted(-1, new EntityID("https://rp.example.com"));
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("The path length must not be negative", e.getMessage());
 		}
+	}
+	
+	
+	public void testIsPermitted_numIntermediatesInPath() {
+		
+		TrustChainConstraints c = new TrustChainConstraints(5);
+		assertEquals(5, c.getMaxPathLength());
+		
+		assertTrue(c.isPermitted(0));
+		assertTrue(c.isPermitted(1));
+		assertTrue(c.isPermitted(2));
+		assertTrue(c.isPermitted(3));
+		assertTrue(c.isPermitted(4));
+		assertTrue(c.isPermitted(5));
+		assertFalse(c.isPermitted(6));
 	}
 	
 	
