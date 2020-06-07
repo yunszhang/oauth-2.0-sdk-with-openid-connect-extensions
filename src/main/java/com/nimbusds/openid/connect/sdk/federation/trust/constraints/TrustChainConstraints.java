@@ -60,6 +60,12 @@ public final class TrustChainConstraints implements JSONAware {
 	
 	
 	/**
+	 * No constraint instance.
+	 */
+	public static final TrustChainConstraints NO_CONSTRAINTS = new TrustChainConstraints();
+	
+	
+	/**
 	 * The max path length, -1 if not specified.
 	 */
 	private final int maxPathLength;

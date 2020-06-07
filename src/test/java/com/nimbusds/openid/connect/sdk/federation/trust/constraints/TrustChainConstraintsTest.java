@@ -34,6 +34,14 @@ import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 public class TrustChainConstraintsTest extends TestCase {
 	
 	
+	public void testNoConstraintsConstant() {
+		
+		assertEquals(-1, TrustChainConstraints.NO_CONSTRAINTS.getMaxPathLength());
+		assertTrue(TrustChainConstraints.NO_CONSTRAINTS.getPermittedEntities().isEmpty());
+		assertTrue(TrustChainConstraints.NO_CONSTRAINTS.getExcludedEntities().isEmpty());
+	}
+	
+	
 	public void testDefaultConstructorSameAsEmpty() throws ParseException {
 		
 		for (TrustChainConstraints c: Arrays.asList(
