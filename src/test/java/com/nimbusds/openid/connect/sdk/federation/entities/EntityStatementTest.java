@@ -48,13 +48,13 @@ import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 public class EntityStatementTest extends TestCase {
 	
 	
-	private static final RSAKey RSA_JWK;
+	public static final RSAKey RSA_JWK;
 	
 	
-	private static final JWKSet SIMPLE_JWK_SET;
+	public static final JWKSet SIMPLE_JWK_SET;
 	
 	
-	private static final OIDCProviderMetadata OP_METADATA;
+	public static final OIDCProviderMetadata OP_METADATA;
 	
 	
 	static {
@@ -78,7 +78,7 @@ public class EntityStatementTest extends TestCase {
 	}
 	
 	
-	private static EntityStatementClaimsSet createEntityStatementClaimsSet() {
+	public static EntityStatementClaimsSet createEntityStatementClaimsSet() {
 		
 		Date now = new Date();
 		long nowTS = DateUtils.toSecondsSinceEpoch(now);

@@ -1361,3 +1361,6 @@ version 8.8 (2020-06-07)
       DefaultRPMetadataPolicyFactory implementation.
     * Federation ValueOperation implements NumberConfiguration.
     * Federation PolicyOperation adds new toJSONObjectEntry method.
+
+version 8.9 (2020-06-10)
+    * Adds ExplicitClientRegistrationRequest for OpenID Connect Federation 1.0.
