@@ -24,7 +24,10 @@ import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 
 
-interface EntityStatementRetriever {
+/**
+ * Entity statement retriever for resolving trust chains.
+ */
+public interface EntityStatementRetriever {
 	
 	
 	/**

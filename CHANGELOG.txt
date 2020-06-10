@@ -1364,3 +1364,7 @@ version 8.8 (2020-06-07)
 
 version 8.9 (2020-06-10)
     * Adds ExplicitClientRegistrationRequest for OpenID Connect Federation 1.0.
+
+version 8.10 (2020-06-10)
+    * Makes EntityStatementRetriever and DefaultEntityStatementRetriever
+      public.

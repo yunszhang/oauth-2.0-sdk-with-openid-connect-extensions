@@ -34,9 +34,9 @@ import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 
 
 /**
- * Entity statement retriever for resolving trust chains.
+ * The default entity statement retriever for resolving trust chains.
  */
-class DefaultEntityStatementRetriever implements EntityStatementRetriever {
+public class DefaultEntityStatementRetriever implements EntityStatementRetriever {
 	
 	
 	/**
