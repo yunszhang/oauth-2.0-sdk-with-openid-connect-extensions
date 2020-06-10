@@ -19,6 +19,7 @@ package com.nimbusds.openid.connect.sdk.op;
 
 
 import com.nimbusds.oauth2.sdk.SerializeException;
+import com.nimbusds.oauth2.sdk.WellKnownPathComposeStrategy;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import junit.framework.TestCase;
@@ -44,6 +45,51 @@ public class OIDCProviderConfigurationRequestTest extends TestCase {
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
 		assertEquals("https://c2id.com/.well-known/openid-configuration", httpRequest.getURL().toString());
+		assertTrue(httpRequest.getHeaderMap().isEmpty());
+	}
+	
+	
+	public void testConstruct_defaultPostfix() {
+		
+		Issuer issuer = new Issuer("https://c2id.com/op");
+		
+		OIDCProviderConfigurationRequest request = new OIDCProviderConfigurationRequest(issuer);
+		
+		assertEquals("https://c2id.com/op/.well-known/openid-configuration", request.getEndpointURI().toString());
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
+		assertEquals("https://c2id.com/op/.well-known/openid-configuration", httpRequest.getURL().toString());
+		assertTrue(httpRequest.getHeaderMap().isEmpty());
+	}
+	
+	
+	public void testConstruct_postfix() {
+		
+		Issuer issuer = new Issuer("https://c2id.com/op");
+		
+		OIDCProviderConfigurationRequest request = new OIDCProviderConfigurationRequest(issuer, WellKnownPathComposeStrategy.POSTFIX);
+		
+		assertEquals("https://c2id.com/op/.well-known/openid-configuration", request.getEndpointURI().toString());
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
+		assertEquals("https://c2id.com/op/.well-known/openid-configuration", httpRequest.getURL().toString());
+		assertTrue(httpRequest.getHeaderMap().isEmpty());
+	}
+	
+	
+	public void testConstruct_infix() {
+		
+		Issuer issuer = new Issuer("https://c2id.com/op");
+		
+		OIDCProviderConfigurationRequest request = new OIDCProviderConfigurationRequest(issuer, WellKnownPathComposeStrategy.INFIX);
+		
+		assertEquals("https://c2id.com/.well-known/openid-configuration/op", request.getEndpointURI().toString());
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
+		assertEquals("https://c2id.com/.well-known/openid-configuration/op", httpRequest.getURL().toString());
 		assertTrue(httpRequest.getHeaderMap().isEmpty());
 	}
 	

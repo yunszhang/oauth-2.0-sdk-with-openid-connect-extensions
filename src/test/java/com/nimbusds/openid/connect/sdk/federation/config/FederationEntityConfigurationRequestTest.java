@@ -20,12 +20,14 @@ package com.nimbusds.openid.connect.sdk.federation.config;
 
 import junit.framework.TestCase;
 
+import com.nimbusds.oauth2.sdk.WellKnownPathComposeStrategy;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.openid.connect.sdk.federation.config.FederationEntityConfigurationRequest;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 
 
 public class FederationEntityConfigurationRequestTest extends TestCase {
+	
 	
 	public void testWellKnownConstant() {
 		assertEquals("/.well-known/openid-federation", FederationEntityConfigurationRequest.OPENID_FEDERATION_ENTITY_WELL_KNOWN_PATH);
@@ -40,6 +42,39 @@ public class FederationEntityConfigurationRequestTest extends TestCase {
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
 		assertEquals("https://op.c2id.com/.well-known/openid-federation", httpRequest.getURL().toString());
+	}
+	
+	
+	public void testConstruct_defaultPostfix() {
+		
+		EntityID entityID = new EntityID("https://op.c2id.com/server");
+		FederationEntityConfigurationRequest request = new FederationEntityConfigurationRequest(entityID);
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
+		assertEquals("https://op.c2id.com/server/.well-known/openid-federation", httpRequest.getURL().toString());
+	}
+	
+	
+	public void testConstruct_postfix() {
+		
+		EntityID entityID = new EntityID("https://op.c2id.com/server");
+		FederationEntityConfigurationRequest request = new FederationEntityConfigurationRequest(entityID, WellKnownPathComposeStrategy.POSTFIX);
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
+		assertEquals("https://op.c2id.com/server/.well-known/openid-federation", httpRequest.getURL().toString());
+	}
+	
+	
+	public void testConstruct_infix() {
+		
+		EntityID entityID = new EntityID("https://op.c2id.com/server");
+		FederationEntityConfigurationRequest request = new FederationEntityConfigurationRequest(entityID, WellKnownPathComposeStrategy.INFIX);
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
+		assertEquals("https://op.c2id.com/.well-known/openid-federation/server", httpRequest.getURL().toString());
 	}
 	
 	

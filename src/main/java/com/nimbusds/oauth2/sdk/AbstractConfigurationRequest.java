@@ -40,10 +40,14 @@ public abstract class AbstractConfigurationRequest extends AbstractRequest {
 	 * @param wellKnownPath The well known path to prepend to any existing
 	 *                      path component in the base URI. Must not be
 	 *                      {@code null}.
+	 * @param strategy      The well-known path composition strategy. Must
+	 *                      not be {@code null}.
 	 */
-	public AbstractConfigurationRequest(final URI baseURI, final String wellKnownPath) {
+	public AbstractConfigurationRequest(final URI baseURI, final String wellKnownPath, final WellKnownPathComposeStrategy strategy) {
 		
-		super(URIUtils.prependPath(baseURI, wellKnownPath));
+		super(WellKnownPathComposeStrategy.POSTFIX.equals(strategy) ?
+			URI.create(URIUtils.removeTrailingSlash(baseURI) + wellKnownPath) :
+			URIUtils.prependPath(baseURI, wellKnownPath));
 	}
 	
 	

@@ -21,6 +21,7 @@ package com.nimbusds.oauth2.sdk.as;
 import java.util.Arrays;
 
 import com.nimbusds.oauth2.sdk.SerializeException;
+import com.nimbusds.oauth2.sdk.WellKnownPathComposeStrategy;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import junit.framework.TestCase;
@@ -53,17 +54,51 @@ public class AuthorizationServerConfigurationRequestTest extends TestCase {
 	
 	// https://tools.ietf.org/html/rfc8414#section-3.1
 	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/300/rfc8414-oauth-metadata-implement-default
-	public void testConstructWithExistingPathInIssuer() {
+	public void testConstructWithExistingPathInIssuer_infix() {
 		
 		Issuer issuer = new Issuer("https://c2id.com/some/issuer");
 		
-		AuthorizationServerConfigurationRequest request = new AuthorizationServerConfigurationRequest(issuer);
+		AuthorizationServerConfigurationRequest request = new AuthorizationServerConfigurationRequest(issuer, WellKnownPathComposeStrategy.INFIX);
 		
 		assertEquals("https://c2id.com/.well-known/oauth-authorization-server/some/issuer", request.getEndpointURI().toString());
 		
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
 		assertEquals("https://c2id.com/.well-known/oauth-authorization-server/some/issuer", httpRequest.getURL().toString());
+		assertTrue(httpRequest.getHeaderMap().isEmpty());
+	}
+	
+	
+	// https://tools.ietf.org/html/rfc8414#section-3.1
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/300/rfc8414-oauth-metadata-implement-default
+	public void testConstructWithExistingPathInIssuer_postfix() {
+		
+		Issuer issuer = new Issuer("https://c2id.com/some/issuer");
+		
+		AuthorizationServerConfigurationRequest request = new AuthorizationServerConfigurationRequest(issuer, WellKnownPathComposeStrategy.POSTFIX);
+		
+		assertEquals("https://c2id.com/some/issuer/.well-known/oauth-authorization-server", request.getEndpointURI().toString());
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
+		assertEquals("https://c2id.com/some/issuer/.well-known/oauth-authorization-server", httpRequest.getURL().toString());
+		assertTrue(httpRequest.getHeaderMap().isEmpty());
+	}
+	
+	
+	// https://tools.ietf.org/html/rfc8414#section-3.1
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/300/rfc8414-oauth-metadata-implement-default
+	public void testConstructWithExistingPathInIssuer_defaultPostfix() {
+		
+		Issuer issuer = new Issuer("https://c2id.com/some/issuer");
+		
+		AuthorizationServerConfigurationRequest request = new AuthorizationServerConfigurationRequest(issuer);
+		
+		assertEquals("https://c2id.com/some/issuer/.well-known/oauth-authorization-server", request.getEndpointURI().toString());
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
+		assertEquals("https://c2id.com/some/issuer/.well-known/oauth-authorization-server", httpRequest.getURL().toString());
 		assertTrue(httpRequest.getHeaderMap().isEmpty());
 	}
 	

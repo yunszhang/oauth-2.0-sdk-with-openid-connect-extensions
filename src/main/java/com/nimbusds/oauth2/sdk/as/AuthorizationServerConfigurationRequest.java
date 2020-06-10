@@ -23,6 +23,7 @@ import java.net.URI;
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.oauth2.sdk.AbstractConfigurationRequest;
+import com.nimbusds.oauth2.sdk.WellKnownPathComposeStrategy;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 
 
@@ -53,11 +54,25 @@ public class AuthorizationServerConfigurationRequest extends AbstractConfigurati
 	
 	
 	/**
-	 * Creates a new OAuth 2.0 Authorisation Server configuration request.
+	 * Creates a new OAuth 2.0 Authorisation Server configuration request
+	 * using the {@link WellKnownPathComposeStrategy#POSTFIX postfix
+	 * well-known path composition strategy}.
 	 *
 	 * @param issuer The issuer. Must represent a valid URL.
 	 */
 	public AuthorizationServerConfigurationRequest(final Issuer issuer) {
-		super(URI.create(issuer.getValue()), OAUTH_SERVER_WELL_KNOWN_PATH);
+		this(issuer, WellKnownPathComposeStrategy.POSTFIX);
+	}
+	
+	
+	/**
+	 * Creates a new OAuth 2.0 Authorisation Server configuration request.
+	 *
+	 * @param issuer   The issuer. Must represent a valid URL.
+	 * @param strategy The well-known path composition strategy. Must not
+	 *                 be {@code null}.
+	 */
+	public AuthorizationServerConfigurationRequest(final Issuer issuer, final WellKnownPathComposeStrategy strategy) {
+		super(URI.create(issuer.getValue()), OAUTH_SERVER_WELL_KNOWN_PATH, strategy);
 	}
 }

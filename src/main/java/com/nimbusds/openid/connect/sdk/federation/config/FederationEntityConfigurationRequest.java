@@ -21,6 +21,7 @@ package com.nimbusds.openid.connect.sdk.federation.config;
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.oauth2.sdk.AbstractConfigurationRequest;
+import com.nimbusds.oauth2.sdk.WellKnownPathComposeStrategy;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 
 
@@ -51,12 +52,27 @@ public class FederationEntityConfigurationRequest extends AbstractConfigurationR
 	
 	
 	/**
-	 * Creates a new federation entity configuration request.
+	 * Creates a new federation entity configuration request using the
+	 * {@link WellKnownPathComposeStrategy#POSTFIX postfix well-known path
+	 * composition strategy}.
 	 *
 	 * @param entityID The entity ID. Must represent a valid URL. Must not
 	 *                 be {@code null}.
 	 */
 	public FederationEntityConfigurationRequest(final EntityID entityID) {
-		super(entityID.toURI(), OPENID_FEDERATION_ENTITY_WELL_KNOWN_PATH);
+		this(entityID, WellKnownPathComposeStrategy.POSTFIX);
+	}
+	
+	
+	/**
+	 * Creates a new federation entity configuration request.
+	 *
+	 * @param entityID The entity ID. Must represent a valid URL. Must not
+	 *                 be {@code null}.
+	 * @param strategy The well-known path composition strategy. Must not
+	 *                 be {@code null}.
+	 */
+	public FederationEntityConfigurationRequest(final EntityID entityID, final WellKnownPathComposeStrategy strategy) {
+		super(entityID.toURI(), OPENID_FEDERATION_ENTITY_WELL_KNOWN_PATH, strategy);
 	}
 }

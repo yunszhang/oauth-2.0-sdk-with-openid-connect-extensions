@@ -23,6 +23,7 @@ import java.net.URI;
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.oauth2.sdk.AbstractConfigurationRequest;
+import com.nimbusds.oauth2.sdk.WellKnownPathComposeStrategy;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 
 
@@ -53,11 +54,26 @@ public class OIDCProviderConfigurationRequest extends AbstractConfigurationReque
 	
 	
 	/**
-	 * Creates a new OpenID Provider configuration request.
+	 * Creates a new OpenID Provider configuration request using the
+	 * {@link WellKnownPathComposeStrategy#POSTFIX postfix well-known path
+	 * composition strategy}.
 	 *
 	 * @param issuer The issuer. Must represent a valid URL.
 	 */
 	public OIDCProviderConfigurationRequest(final Issuer issuer) {
-		super(URI.create(issuer.getValue()), OPENID_PROVIDER_WELL_KNOWN_PATH);
+		this(issuer, WellKnownPathComposeStrategy.POSTFIX);
+	}
+	
+	
+	/**
+	 * Creates a new OpenID Provider configuration request.
+	 *
+	 * @param issuer   The issuer. Must represent a valid URL.
+	 * @param strategy The well-known path composition strategy. Must not
+	 *                 be {@code null}.
+	 *
+	 */
+	public OIDCProviderConfigurationRequest(final Issuer issuer, final WellKnownPathComposeStrategy strategy) {
+		super(URI.create(issuer.getValue()), OPENID_PROVIDER_WELL_KNOWN_PATH, strategy);
 	}
 }
