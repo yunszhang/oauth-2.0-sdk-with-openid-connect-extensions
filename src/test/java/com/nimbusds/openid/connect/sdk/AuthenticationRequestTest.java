@@ -32,7 +32,9 @@ import org.apache.commons.lang.RandomStringUtils;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
@@ -2410,5 +2412,80 @@ public class AuthenticationRequestTest extends TestCase {
 			assertEquals(request.getRedirectionURI(), e.getRedirectionURI());
 			assertEquals(request.getState(), e.getState());
 		}
+	}
+	
+	
+	public void testFAPIExample()
+		throws Exception {
+		
+		// Create the client RSA public / private key pair and store it securely.
+		// The same key can be used to create the self-signed client certificate
+		// for mTLS client authentication at the token endpoint and receiving
+		// client certificate bound tokens
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.keyUse(KeyUse.SIGNATURE)
+			.algorithm(JWSAlgorithm.PS256)
+			.keyIDFromThumbprint(true)
+			.generate();
+		
+		// The required OpenID provider parameters
+		URI authorizationEndpoint = new URI("https://c2id.com/login");
+		
+		// Required client parameters from the OpenID relying party registration
+		ClientID clientID = new ClientID("123");
+		URI redirectURI = new URI("https://example.com/cb");
+		JWSAlgorithm requestObjectJWSAlg = JWSAlgorithm.PS256;
+		
+		// Construct the OpenID authentication request whose parameters
+		// are going to be signed
+		
+		// Generate unique state to pair the callback to this request
+		State state = new State();
+		
+		// Generate unique nonce for the ID token
+		Nonce nonce = new Nonce();
+		
+		AuthenticationRequest securedRequest = new AuthenticationRequest.Builder(
+			new ResponseType(ResponseType.Value.CODE, OIDCResponseTypeValue.ID_TOKEN),
+			new Scope("openid", "https://scopes.c2id.com/account"),
+			clientID,
+			redirectURI)
+			.nonce(nonce)
+			.state(state)
+			.acrValues(Collections.singletonList(new ACR("https://trust-frameworks.c2id.com/high")))
+			.build();
+		
+		// Convert params to JWT and sign with the client RSA key
+		JWTClaimsSet jwtClaimsSet = securedRequest.toJWTClaimsSet();
+//		System.out.println(jwtClaimsSet.toJSONObject());
+		
+		SignedJWT requestJWT = new SignedJWT(
+			new JWSHeader.Builder(
+				requestObjectJWSAlg)
+				.keyID(rsaJWK.getKeyID())
+			.build(),
+			jwtClaimsSet);
+		
+		JWSSigner jwsSigner = new RSASSASigner(rsaJWK);
+		// May need an alternative JCA provider for JWS PS256 if the
+		// RSA algorithm isn't supported by the default JCA provider
+		jwsSigner.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
+		requestJWT.sign(jwsSigner);
+		
+		// Construct the final OpenID authentication request which
+		// includes the signed parameters in a JWT; some top-level
+		// query parameters are repeated to ensure the request still
+		// parses an OpenID authentication request
+		AuthenticationRequest finalRequest = new AuthenticationRequest.Builder(
+			securedRequest.getResponseType(),
+			new Scope("openid"),
+			securedRequest.getClientID(),
+			securedRequest.getRedirectionURI())
+			.requestObject(requestJWT)
+			.endpointURI(authorizationEndpoint)
+			.build();
+		
+		// Output as URI to send the end-user to the OpenID provider
+//		System.out.println(finalRequest.toURI());
 	}
 }
