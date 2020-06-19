@@ -71,7 +71,6 @@ import com.nimbusds.openid.connect.sdk.claims.ACR;
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
  *     <li>OpenID Connect for Identity Assurance 1.0, section 8.
- *     <li>OpenID Connect Federation 1.0 (draft 10).
  * </ul>
  */
 @Immutable
@@ -110,8 +109,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		p.add("acr_values");
 		p.add("claims");
 		p.add("purpose");
-		p.add("client_assertion_type");
-		p.add("client_assertion");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -184,13 +181,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 	 * Assurance.
 	 */
 	private final String purpose;
-	
-	
-	/**
-	 * Private key JWT authentication for automatic OpenID Connect
-	 * federation.
-	 */
-	private final PrivateKeyJWT privateKeyJWTAuth;
 
 
 	/**
@@ -310,13 +300,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		 * The transaction specific purpose (optional).
 		 */
 		private String purpose;
-		
-		
-		/**
-		 * Private key JWT authentication for automatic OpenID Connect
-		 * federation (optional).
-		 */
-		private PrivateKeyJWT privateKeyJWTAuth;
 
 
 		/**
@@ -488,7 +471,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			acrValues = request.getACRValues();
 			claims = request.getClaims();
 			purpose = request.getPurpose();
-			privateKeyJWTAuth = request.getPrivateKeyJWTAuthentication();
 			requestObject = request.getRequestObject();
 			requestURI = request.getRequestURI();
 			rm = request.getResponseMode();
@@ -762,22 +744,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			this.purpose = purpose;
 			return this;
 		}
-		
-		
-		/**
-		 * Sets the private key JWT authentication for automatic OpenID
-		 * Connect federation.
-		 *
-		 * @param privateKeyJWTAuth The private key JWT authentication,
-		 *                          {@code null} if not specified.
-		 *
-		 * @return This builder.
-		 */
-		public Builder privateKeyJWTAuthentication(final PrivateKeyJWT privateKeyJWTAuth) {
-			
-			this.privateKeyJWTAuth = privateKeyJWTAuth;
-			return this;
-		}
 
 
 		/**
@@ -948,7 +914,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 					display, prompt, maxAge, uiLocales, claimsLocales,
 					idTokenHint, loginHint, acrValues, claims,
 					purpose,
-					privateKeyJWTAuth,
 					requestObject, requestURI,
 					codeChallenge, codeChallengeMethod,
 					resources,
@@ -1000,7 +965,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		// codeChallenge, codeChallengeMethod
 		this(uri, rt, null, scope, clientID, redirectURI, state, nonce,
 			null, null, -1, null, null,
-			null, null, null, null, null, null,
+			null, null, null, null, null,
 			null, null,
 			null, null,
 			null, false, null);
@@ -1082,8 +1047,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 	 *                             if not specified.
 	 * @param purpose              The transaction specific purpose,
 	 *                             {@code null} if not specified.
-	 * @param privateKeyJWTAuth    The private key JWT authentication,
-	 *                             {@code null} if not specified.
 	 * @param requestObject        The request object. Corresponds to the
 	 *                             optional {@code request} parameter. Must
 	 *                             not be specified together with a request
@@ -1123,7 +1086,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				     final List<ACR> acrValues,
 				     final ClaimsRequest claims,
 				     final String purpose,
-				     final PrivateKeyJWT privateKeyJWTAuth,
 				     final JWT requestObject,
 				     final URI requestURI,
 				     final CodeChallenge codeChallenge,
@@ -1190,8 +1152,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		}
 		
 		this.purpose = purpose;
-		
-		this.privateKeyJWTAuth = privateKeyJWTAuth;
 	}
 
 
@@ -1330,19 +1290,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		
 		return purpose;
 	}
-	
-	
-	/**
-	 * Gets the private key JWT authentication for automatic OpenID Connect
-	 * federation.
-	 *
-	 * @return The private key JWT authentication, {@code null} if not
-	 *         specified.
-	 */
-	public PrivateKeyJWT getPrivateKeyJWTAuthentication() {
-		
-		return privateKeyJWTAuth;
-	}
 
 
 	@Override
@@ -1424,10 +1371,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		
 		if (purpose != null)
 			params.put("purpose", Collections.singletonList(purpose));
-		
-		if (privateKeyJWTAuth != null) {
-			params.putAll(privateKeyJWTAuth.toParameters());
-		}
 
 		return params;
 	}
@@ -1741,7 +1684,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		return new AuthenticationRequest(
 			uri, ar.getResponseType(), ar.getResponseMode(), ar.getScope(), ar.getClientID(), ar.getRedirectionURI(), ar.getState(), nonce,
 			display, ar.getPrompt(), maxAge, uiLocales, claimsLocales,
-			idTokenHint, loginHint, acrValues, claims, purpose, privateKeyJWTAuth,
+			idTokenHint, loginHint, acrValues, claims, purpose,
 			ar.getRequestObject(), ar.getRequestURI(),
 			ar.getCodeChallenge(), ar.getCodeChallengeMethod(),
 			ar.getResources(),
