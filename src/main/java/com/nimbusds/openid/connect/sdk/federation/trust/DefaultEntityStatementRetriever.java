@@ -54,20 +54,20 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 	/**
 	 * The default HTTP connect timeout in milliseconds.
 	 */
-	static final int DEFAULT_HTTP_CONNECT_TIMEOUT_MS = 1000;
+	public static final int DEFAULT_HTTP_CONNECT_TIMEOUT_MS = 1000;
 	
 	
 	/**
 	 * The default HTTP read timeout in milliseconds.
 	 */
-	static final int DEFAULT_HTTP_READ_TIMEOUT_MS = 1000;
+	public static final int DEFAULT_HTTP_READ_TIMEOUT_MS = 1000;
 	
 	
 	/**
 	 * Creates a new entity statement retriever using the default HTTP
 	 * timeout settings.
 	 */
-	DefaultEntityStatementRetriever() {
+	public DefaultEntityStatementRetriever() {
 		this(DEFAULT_HTTP_CONNECT_TIMEOUT_MS, DEFAULT_HTTP_READ_TIMEOUT_MS);
 	}
 	
@@ -82,8 +82,8 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 	 *                             zero means timeout determined by the
 	 *                             underlying HTTP client.
 	 */
-	DefaultEntityStatementRetriever(final int httpConnectTimeoutMs,
-					final int httpReadTimeoutMs) {
+	public DefaultEntityStatementRetriever(final int httpConnectTimeoutMs,
+					       final int httpReadTimeoutMs) {
 		this.httpConnectTimeoutMs = httpConnectTimeoutMs;
 		this.httpReadTimeoutMs = httpReadTimeoutMs;
 	}
@@ -95,7 +95,7 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 	 * @return The configured HTTP connect timeout in milliseconds, zero
 	 *         means timeout determined by the underlying HTTP client.
 	 */
-	int getHTTPConnectTimeout() {
+	public int getHTTPConnectTimeout() {
 		return httpConnectTimeoutMs;
 	}
 	
@@ -106,7 +106,7 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 	 * @return The configured HTTP read timeout in milliseconds, zero
 	 *         means timeout determined by the underlying HTTP client.
 	 */
-	int getHTTPReadTimeout() {
+	public int getHTTPReadTimeout() {
 		return httpReadTimeoutMs;
 	}
 	
