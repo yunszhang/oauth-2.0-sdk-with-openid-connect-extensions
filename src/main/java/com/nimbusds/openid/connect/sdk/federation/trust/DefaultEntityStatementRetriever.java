@@ -23,6 +23,7 @@ import java.net.URI;
 
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.WellKnownPathComposeStrategy;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.openid.connect.sdk.federation.api.FetchEntityStatementRequest;
@@ -34,7 +35,10 @@ import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 
 
 /**
- * The default entity statement retriever for resolving trust chains.
+ * The default entity statement retriever for resolving trust chains. Supports
+ * the {@link WellKnownPathComposeStrategy#POSTFIX postfix} and
+ * {@link WellKnownPathComposeStrategy#INFIX infix} well-known path composition
+ * strategies.
  */
 public class DefaultEntityStatementRetriever implements EntityStatementRetriever {
 	
@@ -132,8 +136,20 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 			throw new ResolveException("Couldn't retrieve entity configuration for " + target + ": " + e.getMessage(), e);
 		}
 		
-		FederationEntityConfigurationResponse response;
+		if (HTTPResponse.SC_NOT_FOUND == httpResponse.getStatusCode()) {
+			// Try infix
+			request = new FederationEntityConfigurationRequest(target, WellKnownPathComposeStrategy.INFIX);
+			httpRequest = request.toHTTPRequest();
+			applyTimeouts(httpRequest);
+			
+			try {
+				httpResponse = httpRequest.send();
+			} catch (IOException e) {
+				throw new ResolveException("Couldn't retrieve entity configuration for " + target + ": " + e.getMessage(), e);
+			}
+		}
 		
+		FederationEntityConfigurationResponse response;
 		try {
 			response = FederationEntityConfigurationResponse.parse(httpResponse);
 		} catch (ParseException e) {

@@ -1369,10 +1369,12 @@ version 8.10 (2020-06-10)
     * Makes EntityStatementRetriever and DefaultEntityStatementRetriever
       public.
 
-version 8.11 (2020-06-25)
+version 8.11 (2020-06-26)
     * Adds WellKnownPathComposeStrategy enum and updates the
       AuthorizationServerConfigurationRequest,
       OIDCProviderConfigurationRequest and FederationEntityConfigurationRequest
       to support infix and postfix well-known path composition strategies.
+    * Updates the OpenID Connect Federation 1.0 DefaultEntityStatementRetriever
+      to support the postfix and infix well-known path composition strategies.
     * Makes DefaultEntityStatementRetriever package private methods public.
     * Adds HTTPResponse.SC_NOT_FOUND 404 constant.
