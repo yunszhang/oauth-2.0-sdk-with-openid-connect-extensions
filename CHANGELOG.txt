@@ -1375,3 +1375,4 @@ version 8.11 (2020-06-25)
       OIDCProviderConfigurationRequest and FederationEntityConfigurationRequest
       to support infix and postfix well-known path composition strategies.
     * Makes DefaultEntityStatementRetriever package private methods public.
+    * Adds HTTPResponse.SC_NOT_FOUND 404 constant.

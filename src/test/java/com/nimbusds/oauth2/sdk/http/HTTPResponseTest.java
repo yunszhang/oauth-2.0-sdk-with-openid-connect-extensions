@@ -18,7 +18,6 @@
 package com.nimbusds.oauth2.sdk.http;
 
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -32,10 +31,21 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.ParseException;
 
 
-/**
- * Tests the HTTP response class.
- */
 public class HTTPResponseTest extends TestCase {
+	
+	
+	public void testStatusCodeConstants() {
+		
+		assertEquals(200, HTTPResponse.SC_OK);
+		assertEquals(201, HTTPResponse.SC_CREATED);
+		assertEquals(302, HTTPResponse.SC_FOUND);
+		assertEquals(400, HTTPResponse.SC_BAD_REQUEST);
+		assertEquals(401, HTTPResponse.SC_UNAUTHORIZED);
+		assertEquals(403, HTTPResponse.SC_FORBIDDEN);
+		assertEquals(404, HTTPResponse.SC_NOT_FOUND);
+		assertEquals(500, HTTPResponse.SC_SERVER_ERROR);
+		assertEquals(503, HTTPResponse.SC_SERVICE_UNAVAILABLE);
+	}
 
 
 	public void testConstructorAndAccessors()
@@ -161,14 +171,13 @@ public class HTTPResponseTest extends TestCase {
 
 		assertEquals(new URI("http://example.org"), response.getLocation());
 
-		response.setHeader("LOCATION", null);
+		response.setHeader("LOCATION", (String) null);
 
 		assertNull(response.getLocation());
 	}
 	
 	
-	public void testClientIP()
-		throws MalformedURLException {
+	public void testClientIP() {
 		
 		HTTPResponse httpResponse = new HTTPResponse(200);
 		
