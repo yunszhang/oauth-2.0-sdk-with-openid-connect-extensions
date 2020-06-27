@@ -31,20 +31,23 @@ import com.nimbusds.oauth2.sdk.auth.Secret;
  * </ul>
  */
 public class CodeVerifier extends Secret {
-
-
+	
+	
+	private static final long serialVersionUID = 1L;
+	
+	
 	/**
 	 * The minimum character length of a code verifier.
 	 */
 	public static final int MIN_LENGTH = 43;
-
-
+	
+	
 	/**
 	 * The maximum character length of a code verifier.
 	 */
 	public static final int MAX_LENGTH = 128;
 	
-
+	
 	/**
 	 * Creates a new code verifier with the specified value.
 	 *

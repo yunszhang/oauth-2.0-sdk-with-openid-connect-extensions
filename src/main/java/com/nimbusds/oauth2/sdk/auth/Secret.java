@@ -18,6 +18,7 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -35,7 +36,10 @@ import net.jcip.annotations.Immutable;
  * use.
  */
 @Immutable
-public class Secret {
+public class Secret implements Serializable {
+	
+	
+	private static final long serialVersionUID = 1L;
 	
 	
 	/**
@@ -48,8 +52,8 @@ public class Secret {
 	 * The secure random generator.
 	 */
 	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-
-
+	
+	
 	/**
 	 * The secret value.
 	 */
