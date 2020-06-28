@@ -21,9 +21,6 @@ package com.nimbusds.oauth2.sdk.auth;
 import junit.framework.TestCase;
 
 
-/**
- * Tests client authentication method class.
- */
 public class ClientAuthenticationMethodTest extends TestCase {
 
 
@@ -35,6 +32,7 @@ public class ClientAuthenticationMethodTest extends TestCase {
 		assertEquals("private_key_jwt", ClientAuthenticationMethod.PRIVATE_KEY_JWT.getValue());
 		assertEquals("tls_client_auth", ClientAuthenticationMethod.TLS_CLIENT_AUTH.getValue());
 		assertEquals("self_signed_tls_client_auth", ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH.getValue());
+		assertEquals("request_object", ClientAuthenticationMethod.REQUEST_OBJECT.getValue());
 		assertEquals("none", ClientAuthenticationMethod.NONE.getValue());
 	}
 
@@ -54,6 +52,7 @@ public class ClientAuthenticationMethodTest extends TestCase {
 		assertEquals(ClientAuthenticationMethod.PRIVATE_KEY_JWT, ClientAuthenticationMethod.parse("private_key_jwt"));
 		assertEquals(ClientAuthenticationMethod.TLS_CLIENT_AUTH, ClientAuthenticationMethod.parse("tls_client_auth"));
 		assertEquals(ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH, ClientAuthenticationMethod.parse("self_signed_tls_client_auth"));
+		assertEquals(ClientAuthenticationMethod.REQUEST_OBJECT, ClientAuthenticationMethod.parse("request_object"));
 		assertEquals(ClientAuthenticationMethod.NONE, ClientAuthenticationMethod.parse("none"));
 	}
 
