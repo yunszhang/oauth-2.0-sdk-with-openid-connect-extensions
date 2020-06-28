@@ -1380,3 +1380,5 @@ version 8.11 (2020-06-28)
     * Adds HTTPResponse.SC_NOT_FOUND 404 constant.
     * CodeVerifier and Secret implement Serializable (iss #303).
     * Renames FederationType to ClientRegistrationType.
+    * Updates OIDCProvider metadata for client_registration_types_supported,
+      deprecates federation_types_supported.
