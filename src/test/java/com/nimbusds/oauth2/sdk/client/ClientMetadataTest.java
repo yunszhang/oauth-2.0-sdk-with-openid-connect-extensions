@@ -40,7 +40,7 @@ import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.id.SoftwareID;
 import com.nimbusds.oauth2.sdk.id.SoftwareVersion;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import com.nimbusds.openid.connect.sdk.federation.FederationType;
+import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
@@ -1181,7 +1181,7 @@ public class ClientMetadataTest extends TestCase {
 		clientMetadata.setRedirectionURI(redirectionURI);
 		
 		assertNull(clientMetadata.getFederationTypes());
-		List<FederationType> federationTypes = Arrays.asList(FederationType.EXPLICIT, FederationType.AUTOMATIC);
+		List<ClientRegistrationType> federationTypes = Arrays.asList(ClientRegistrationType.EXPLICIT, ClientRegistrationType.AUTOMATIC);
 		clientMetadata.setFederationTypes(federationTypes);
 		assertEquals(federationTypes, clientMetadata.getFederationTypes());
 		

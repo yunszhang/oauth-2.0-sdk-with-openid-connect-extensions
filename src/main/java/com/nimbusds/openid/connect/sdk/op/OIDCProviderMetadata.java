@@ -49,7 +49,7 @@ import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
 import com.nimbusds.openid.connect.sdk.assurance.evidences.IdentityVerificationMethod;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimType;
-import com.nimbusds.openid.connect.sdk.federation.FederationType;
+import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
 
 
 /**
@@ -277,7 +277,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	/**
 	 * The supported federation types.
 	 */
-	private List<FederationType> federationTypes;
+	private List<ClientRegistrationType> federationTypes;
 	
 	
 	/**
@@ -1014,7 +1014,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	 * @return The supported federation types, {@code null} if not
 	 *         specified.
 	 */
-	public List<FederationType> getFederationTypes() {
+	public List<ClientRegistrationType> getFederationTypes() {
 		return federationTypes;
 	}
 	
@@ -1026,7 +1026,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	 * @param federationTypes The supported federation types, {@code null}
 	 *                        if not specified.
 	 */
-	public void setFederationTypes(final List<FederationType> federationTypes) {
+	public void setFederationTypes(final List<ClientRegistrationType> federationTypes) {
 		this.federationTypes = federationTypes;
 	}
 	
@@ -1575,7 +1575,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		if (jsonObject.get("federation_types_supported") != null) {
 			op.federationTypes = new LinkedList<>();
 			for (String v: JSONObjectUtils.getStringList(jsonObject, "federation_types_supported")) {
-				op.federationTypes.add(new FederationType(v));
+				op.federationTypes.add(new ClientRegistrationType(v));
 			}
 		}
 		

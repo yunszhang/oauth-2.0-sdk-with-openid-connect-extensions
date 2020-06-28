@@ -44,7 +44,7 @@ import com.nimbusds.openid.connect.sdk.assurance.evidences.IdentityEvidenceType;
 import com.nimbusds.openid.connect.sdk.assurance.evidences.IdentityVerificationMethod;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimType;
-import com.nimbusds.openid.connect.sdk.federation.FederationType;
+import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 
@@ -622,7 +622,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		meta.setAuthorizationJWEEncs(authzJWEEncs);
 		assertEquals(authzJWEEncs, meta.getAuthorizationJWEEncs());
 		
-		List<FederationType> federationTypes = Arrays.asList(FederationType.AUTOMATIC, FederationType.EXPLICIT);
+		List<ClientRegistrationType> federationTypes = Arrays.asList(ClientRegistrationType.AUTOMATIC, ClientRegistrationType.EXPLICIT);
 		meta.setFederationTypes(federationTypes);
 		assertEquals(federationTypes, meta.getFederationTypes());
 		
@@ -1299,7 +1299,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertEquals(new Issuer("https://op.umu.se/openid"), meta.getIssuer());
 		assertEquals(URI.create("https://op.umu.se/openid/jwks_uri.json"), meta.getJWKSetURI());
 		assertEquals(URI.create("https://op.umu.se/openid/authorization"), meta.getAuthorizationEndpointURI());
-		assertEquals(Arrays.asList(FederationType.AUTOMATIC, FederationType.EXPLICIT), meta.getFederationTypes());
+		assertEquals(Arrays.asList(ClientRegistrationType.AUTOMATIC, ClientRegistrationType.EXPLICIT), meta.getFederationTypes());
 		assertEquals(Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.IMPLICIT, GrantType.JWT_BEARER), meta.getGrantTypes());
 		assertEquals(Arrays.asList(JWSAlgorithm.RS256, JWSAlgorithm.ES256), meta.getIDTokenJWSAlgs());
 		assertEquals(URI.create("https://www.umu.se/en/website/legal-information/"), meta.getCustomURIParameter("policy_uri"));
@@ -1322,7 +1322,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertNull(meta.getOrganizationName());
 		assertNull(meta.getFederationRegistrationEndpointURI());
 		
-		List<FederationType> federationTypes = Collections.singletonList(FederationType.AUTOMATIC);
+		List<ClientRegistrationType> federationTypes = Collections.singletonList(ClientRegistrationType.AUTOMATIC);
 		meta.setFederationTypes(federationTypes);
 		assertEquals(federationTypes, meta.getFederationTypes());
 		

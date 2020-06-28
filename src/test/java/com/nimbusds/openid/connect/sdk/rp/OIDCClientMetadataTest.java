@@ -37,7 +37,7 @@ import com.nimbusds.oauth2.sdk.client.RegistrationError;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
-import com.nimbusds.openid.connect.sdk.federation.FederationType;
+import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
 import com.nimbusds.openid.connect.sdk.id.SectorID;
 
 
@@ -760,7 +760,7 @@ public class OIDCClientMetadataTest extends TestCase {
 		clientMetadata.setRedirectionURI(redirectionURI);
 		
 		assertNull(clientMetadata.getFederationTypes());
-		List<FederationType> federationTypes = Arrays.asList(FederationType.EXPLICIT, FederationType.AUTOMATIC);
+		List<ClientRegistrationType> federationTypes = Arrays.asList(ClientRegistrationType.EXPLICIT, ClientRegistrationType.AUTOMATIC);
 		clientMetadata.setFederationTypes(federationTypes);
 		assertEquals(federationTypes, clientMetadata.getFederationTypes());
 		

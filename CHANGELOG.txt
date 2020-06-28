@@ -1369,7 +1369,7 @@ version 8.10 (2020-06-10)
     * Makes EntityStatementRetriever and DefaultEntityStatementRetriever
       public.
 
-version 8.11 (2020-06-27)
+version 8.11 (2020-06-28)
     * Adds WellKnownPathComposeStrategy enum and updates the
       AuthorizationServerConfigurationRequest,
       OIDCProviderConfigurationRequest and FederationEntityConfigurationRequest
@@ -1379,3 +1379,4 @@ version 8.11 (2020-06-27)
     * Makes DefaultEntityStatementRetriever package private methods public.
     * Adds HTTPResponse.SC_NOT_FOUND 404 constant.
     * CodeVerifier and Secret implement Serializable (iss #303).
+    * Renames FederationType to ClientRegistrationType.

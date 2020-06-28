@@ -41,7 +41,7 @@ import com.nimbusds.oauth2.sdk.id.SoftwareID;
 import com.nimbusds.oauth2.sdk.id.SoftwareVersion;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import com.nimbusds.openid.connect.sdk.federation.FederationType;
+import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 
 
@@ -318,7 +318,7 @@ public class ClientMetadata {
 	/**
 	 * The supported OpenID Connect Federation 1.0 types.
 	 */
-	private List<FederationType> federationTypes;
+	private List<ClientRegistrationType> federationTypes;
 	
 	
 	/**
@@ -1562,7 +1562,7 @@ public class ClientMetadata {
 	 * @return The supported federation types, {@code null} if not
 	 *         specified.
 	 */
-	public List<FederationType> getFederationTypes() {
+	public List<ClientRegistrationType> getFederationTypes() {
 		
 		return federationTypes;
 	}
@@ -1575,7 +1575,7 @@ public class ClientMetadata {
 	 * @param federationTypes The supported federation types, {@code null}
 	 *                        if not specified.
 	 */
-	public void setFederationTypes(final List<FederationType> federationTypes) {
+	public void setFederationTypes(final List<ClientRegistrationType> federationTypes) {
 		
 		this.federationTypes = federationTypes;
 	}
@@ -2312,9 +2312,9 @@ public class ClientMetadata {
 			// Federation
 			
 			if (jsonObject.get("federation_type") != null) {
-				List<FederationType> types = new LinkedList<>();
+				List<ClientRegistrationType> types = new LinkedList<>();
 				for (String v: JSONObjectUtils.getStringList(jsonObject, "federation_type")) {
-					types.add(new FederationType(v));
+					types.add(new ClientRegistrationType(v));
 				}
 				metadata.setFederationTypes(types);
 				jsonObject.remove("federation_type");

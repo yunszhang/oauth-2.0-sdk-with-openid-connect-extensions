@@ -1,7 +1,7 @@
 /*
  * oauth2-oidc-sdk
  *
- * Copyright 2012-2016, Connect2id Ltd and contributors.
+ * Copyright 2012-2020, Connect2id Ltd and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package com.nimbusds.openid.connect.sdk.federation;
+package com.nimbusds.openid.connect.sdk.federation.registration;
 
 
 import net.jcip.annotations.Immutable;
@@ -24,10 +24,13 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
 
 
 /**
- * OpenID Connect federation type.
+ * OpenID Connect Federation 1.0 client registration type.
  */
 @Immutable
-public final class FederationType extends Identifier {
+public final class ClientRegistrationType extends Identifier {
+	
+	
+	private static final long serialVersionUID = 1L;
 	
 	
 	/**
@@ -37,7 +40,7 @@ public final class FederationType extends Identifier {
 	 * chosen trust chain's metadata policies defines the metadata that is
 	 * to be used.
 	 */
-	public static final FederationType AUTOMATIC = new FederationType("automatic");
+	public static final ClientRegistrationType AUTOMATIC = new ClientRegistrationType("automatic");
 	
 	
 	/**
@@ -47,7 +50,7 @@ public final class FederationType extends Identifier {
 	 * adds restrictions over and above what the trust chain already has
 	 * defined.
 	 */
-	public static final FederationType EXPLICIT = new FederationType("explicit");
+	public static final ClientRegistrationType EXPLICIT = new ClientRegistrationType("explicit");
 	
 	
 	/**
@@ -55,7 +58,7 @@ public final class FederationType extends Identifier {
 	 *
 	 * @param value The identifier value. Must not be {@code null}.
 	 */
-	public FederationType(final String value) {
+	public ClientRegistrationType(final String value) {
 		super(value);
 	}
 	
@@ -63,7 +66,7 @@ public final class FederationType extends Identifier {
 	@Override
 	public boolean equals(final Object object) {
 		
-		return object instanceof FederationType &&
+		return object instanceof ClientRegistrationType &&
 			this.toString().equals(object.toString());
 	}
 }
