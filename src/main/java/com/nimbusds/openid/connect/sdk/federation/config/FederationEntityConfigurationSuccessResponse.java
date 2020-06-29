@@ -24,6 +24,7 @@ import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 
 
@@ -135,6 +136,12 @@ public class FederationEntityConfigurationSuccessResponse extends FederationEnti
 		
 		httpResponse.ensureStatusCode(HTTPResponse.SC_OK);
 		httpResponse.ensureEntityContentType(CONTENT_TYPE);
+		
+		String content = httpResponse.getContent();
+		
+		if (StringUtils.isBlank(content)) {
+			throw new ParseException("Empty HTTP entity body");
+		}
 		
 		SignedJWT signedJWT;
 		try {

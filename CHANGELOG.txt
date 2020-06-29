@@ -1389,3 +1389,7 @@ version 8.11 (2020-06-28)
 
 version 8.12 (2020-06-29)
     * Updates ClientMetadata for client_registration_types.
+
+version 8.12.1 (2020-06-29)
+    * Fixes NPE in FederationEntityConfigurationSuccessResponse.parse with
+      empty entity body.

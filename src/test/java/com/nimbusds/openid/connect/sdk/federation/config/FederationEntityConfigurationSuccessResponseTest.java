@@ -24,6 +24,7 @@ import java.util.Date;
 
 import junit.framework.TestCase;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -35,6 +36,7 @@ import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
@@ -269,6 +271,20 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 			fail();
 		} catch (BadJOSEException e) {
 			assertEquals("JWT issue time after current time", e.getMessage());
+		}
+	}
+	
+	
+	public void testParseEmptyEntityBody() {
+		
+		HTTPResponse httpResponse = new HTTPResponse(200);
+		httpResponse.setEntityContentType(ContentType.APPLICATION_JOSE);
+		
+		try {
+			FederationEntityConfigurationSuccessResponse.parse(httpResponse);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Empty HTTP entity body", e.getMessage());
 		}
 	}
 }
