@@ -20,27 +20,85 @@ package com.nimbusds.openid.connect.sdk.federation.registration;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-
-import static com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementTest.RSA_JWK;
-import static com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementTest.createEntityStatementClaimsSet;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 import junit.framework.TestCase;
 
 import com.nimbusds.common.contenttype.ContentType;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
+import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.id.Subject;
+import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 
 public class ExplicitClientRegistrationRequestTest extends TestCase {
 	
 	
+	public static final RSAKey PR_JWK;
+	
+	
+	public static final JWKSet PR_JWK_SET;
+	
+	
+	static {
+		try {
+			PR_JWK = new RSAKeyGenerator(2048)
+				.keyIDFromThumbprint(true)
+				.keyUse(KeyUse.SIGNATURE)
+				.generate();
+			PR_JWK_SET = new JWKSet(PR_JWK.toPublicJWK());
+		} catch (JOSEException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	
+	public static EntityStatementClaimsSet createRPEntityStatementClaimsSet() {
+		
+		Date now = new Date();
+		long nowTS = DateUtils.toSecondsSinceEpoch(now);
+		Date iat = DateUtils.fromSecondsSinceEpoch(nowTS);
+		Date exp = DateUtils.fromSecondsSinceEpoch(nowTS + 60);
+		
+		Issuer iss = new Issuer("https://example.com");
+		Subject sub = new Subject(iss.getValue());
+		List<EntityID> authorityHints = Collections.singletonList(new EntityID("https://federation.example.com"));
+		
+		EntityStatementClaimsSet stmt = new EntityStatementClaimsSet(
+			iss,
+			sub,
+			iat,
+			exp,
+			PR_JWK_SET);
+		
+		OIDCClientMetadata rpMetadata = new OIDCClientMetadata();
+		rpMetadata.setRedirectionURI(URI.create("https://example.com/cb"));
+		rpMetadata.setClientRegistrationTypes(Collections.singletonList(ClientRegistrationType.EXPLICIT));
+		rpMetadata.applyDefaults();
+		
+		stmt.setRPMetadata(rpMetadata);
+		stmt.setAuthorityHints(authorityHints);
+		return stmt;
+	}
+	
+	
 	public void testLifeCycle()
 		throws Exception {
 		
-		EntityStatementClaimsSet claimsSet = createEntityStatementClaimsSet();
-		EntityStatement entityStatement = EntityStatement.sign(claimsSet, RSA_JWK);
+		EntityStatementClaimsSet claimsSet = createRPEntityStatementClaimsSet();
+		EntityStatement entityStatement = EntityStatement.sign(claimsSet, PR_JWK);
 		
 		URI endpoint = URI.create("https://c2id.com/federation/clients");
 		
@@ -77,8 +135,8 @@ public class ExplicitClientRegistrationRequestTest extends TestCase {
 	public void testParse_contentTypeHeaderMissing()
 		throws Exception {
 		
-		EntityStatementClaimsSet claimsSet = createEntityStatementClaimsSet();
-		EntityStatement entityStatement = EntityStatement.sign(claimsSet, RSA_JWK);
+		EntityStatementClaimsSet claimsSet = createRPEntityStatementClaimsSet();
+		EntityStatement entityStatement = EntityStatement.sign(claimsSet, PR_JWK);
 		
 		URI endpoint = URI.create("https://c2id.com/federation/clients");
 		
@@ -97,8 +155,8 @@ public class ExplicitClientRegistrationRequestTest extends TestCase {
 	public void testParse_contentTypeHeaderNotJOSE()
 		throws Exception {
 		
-		EntityStatementClaimsSet claimsSet = createEntityStatementClaimsSet();
-		EntityStatement entityStatement = EntityStatement.sign(claimsSet, RSA_JWK);
+		EntityStatementClaimsSet claimsSet = createRPEntityStatementClaimsSet();
+		EntityStatement entityStatement = EntityStatement.sign(claimsSet, PR_JWK);
 		
 		URI endpoint = URI.create("https://c2id.com/federation/clients");
 		
