@@ -1386,3 +1386,6 @@ version 8.11 (2020-06-28)
       client_registration_auth_methods_supported.
     * Adds ClientAuthenticationMethod.REQUEST_OBJECT (request_object) for
       OpenID Connect Federation 1.0.
+
+version 8.12 (2020-06-29)
+    * Updates ClientMetadata for client_registration_types.

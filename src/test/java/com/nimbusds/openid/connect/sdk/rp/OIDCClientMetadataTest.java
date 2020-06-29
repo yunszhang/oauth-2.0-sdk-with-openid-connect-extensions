@@ -98,11 +98,12 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("frontchannel_logout_session_required"));
 		assertTrue(paramNames.contains("backchannel_logout_uri"));
 		assertTrue(paramNames.contains("backchannel_logout_session_required"));
-		assertTrue(paramNames.contains("federation_type"));
+		assertTrue(paramNames.contains("client_registration_types"));
+		assertTrue(paramNames.contains("federation_type")); // TODO deprecated
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(50, OIDCClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(51, OIDCClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -759,10 +760,10 @@ public class OIDCClientMetadataTest extends TestCase {
 		URI redirectionURI = URI.create("https://example.com/cb");
 		clientMetadata.setRedirectionURI(redirectionURI);
 		
-		assertNull(clientMetadata.getFederationTypes());
+		assertNull(clientMetadata.getClientRegistrationTypes());
 		List<ClientRegistrationType> federationTypes = Arrays.asList(ClientRegistrationType.EXPLICIT, ClientRegistrationType.AUTOMATIC);
-		clientMetadata.setFederationTypes(federationTypes);
-		assertEquals(federationTypes, clientMetadata.getFederationTypes());
+		clientMetadata.setClientRegistrationTypes(federationTypes);
+		assertEquals(federationTypes, clientMetadata.getClientRegistrationTypes());
 		
 		assertNull(clientMetadata.getOrganizationName());
 		String orgName = "Example Org";
@@ -777,7 +778,7 @@ public class OIDCClientMetadataTest extends TestCase {
 		clientMetadata = OIDCClientMetadata.parse(jsonObject);
 		
 		assertEquals(redirectionURI, clientMetadata.getRedirectionURI());
-		assertEquals(federationTypes, clientMetadata.getFederationTypes());
+		assertEquals(federationTypes, clientMetadata.getClientRegistrationTypes());
 		assertEquals(orgName, clientMetadata.getOrganizationName());
 	}
 }
