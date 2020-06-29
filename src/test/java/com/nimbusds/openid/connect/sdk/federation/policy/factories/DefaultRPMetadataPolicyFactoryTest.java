@@ -19,7 +19,9 @@ package com.nimbusds.openid.connect.sdk.federation.policy.factories;
 
 
 import java.net.URI;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
@@ -38,12 +40,14 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 public class DefaultRPMetadataPolicyFactoryTest extends TestCase {
 	
 	
-	public void testTransform() throws
-		PolicyFormulationException, PolicyViolationException {
+	public void testTransform()
+		throws PolicyFormulationException, PolicyViolationException {
 		
 		OIDCClientMetadata initialMetadata = new OIDCClientMetadata();
 		initialMetadata.setRedirectionURI(URI.create("https://rp.example.com/cb"));
 		initialMetadata.setCustomField("unsupported-param", "xyz"); // to be removed
+		
+		Set<String> initialParamNames = initialMetadata.toJSONObject().keySet();
 		
 		OIDCClientMetadata registeredMetadata = new OIDCClientMetadata(initialMetadata);
 		registeredMetadata.applyDefaults();
@@ -57,9 +61,15 @@ public class DefaultRPMetadataPolicyFactoryTest extends TestCase {
 			null,
 			null);
 		
+		Set<String> finalParamNames = clientInfo.toJSONObject().keySet();
+		
+		Set<String> diffParamNames = new HashSet<>(finalParamNames);
+		diffParamNames.removeAll(initialParamNames);
+		
 		MetadataPolicy policy = new DefaultRPMetadataPolicyFactory().create(initialMetadata, clientInfo);
 		
 		for (MetadataPolicyEntry en: policy.entrySet()) {
+			assertTrue(diffParamNames.contains(en.getParameterName()));
 			List<PolicyOperation> opList = en.getPolicyOperations();
 			PolicyOperation op = opList.get(0);
 			assertTrue(op instanceof ValueOperation);
