@@ -40,12 +40,14 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.*;
+import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.langtag.LangTagUtils;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.id.JWTID;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
@@ -2370,5 +2372,66 @@ public class AuthenticationRequestTest extends TestCase {
 		
 		// Output as URI to send the end-user to the OpenID provider
 //		System.out.println(finalRequest.toURI());
+	}
+	
+	
+	public void testFederation_requestObject()
+		throws Exception {
+		
+		// The OpenID provider authorisation endpoint
+		URI endpoint = new URI("https://op.umu.se/authorize");
+
+		// The client_id must be set to the entity ID of the relying party (RP)
+		ClientID clientID = new ClientID("https://wiki.ligo.org");
+
+		// Key pair belonging to the RP entity
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.keyUse(KeyUse.SIGNATURE)
+			.algorithm(JWSAlgorithm.RS256)
+			.keyIDFromThumbprint(true)
+			.generate();
+
+		// Build the OpenID authentication request
+		AuthenticationRequest request = new AuthenticationRequest.Builder(
+			new ResponseType("code"),
+			new Scope("openid", "profile", "email"),
+			clientID,
+			new URI("https://wiki.ligo.org/openid/callback"))
+			.state(new State("em9Yah2eevathieh"))
+			.nonce(new Nonce("the5Sha1Aeraete1"))
+			.endpointURI(endpoint)
+			.build();
+		
+		// Convert the OpenID authentication request to a JWT claims set
+		// and append the required 'iss', 'aud', 'sub', 'jti' and 'exp'
+		// claims
+		Date now = new Date();
+		Date exp = DateUtils.fromSecondsSinceEpoch(DateUtils.toSecondsSinceEpoch(now) + 60);
+		JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder(request.toJWTClaimsSet())
+			.issuer(clientID.getValue())
+			.audience(endpoint.toString())
+			.subject(clientID.getValue())
+			.jwtID(new JWTID().getValue())
+			.expirationTime(exp)
+			.build();
+		
+		// Sign the request object JWT with the RP entity private key
+		SignedJWT jwt = new SignedJWT(new JWSHeader.Builder(
+			(JWSAlgorithm)rsaJWK.getAlgorithm())
+			.keyID(rsaJWK.getKeyID())
+			.build(),
+			jwtClaimsSet);
+		jwt.sign(new RSASSASigner(rsaJWK));
+		
+		// Compose the final OpenID authentication request with the
+		// request object JWT the minimal other required top-level
+		// parameters
+		request = new AuthenticationRequest.Builder(jwt, clientID)
+			.responseType(request.getResponseType())
+			.scope(request.getScope())
+			.endpointURI(endpoint)
+			.build();
+		
+//		System.out.println(request.toURI());
 	}
 }
