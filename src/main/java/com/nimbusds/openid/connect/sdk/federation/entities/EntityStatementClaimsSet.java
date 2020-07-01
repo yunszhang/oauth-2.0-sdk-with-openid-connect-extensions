@@ -161,7 +161,7 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	 * @param sub  The subject. Must not be {@code null}.
 	 * @param iat  The issue time. Must not be {@code null}.
 	 * @param exp  The expiration time. Must not be {@code null}.
-	 * @param jwks The entity public JWK set. Must not be {@code null}.
+	 * @param jwks The entity public JWK set, {@code null} if not required.
 	 */
 	public EntityStatementClaimsSet(final Issuer iss,
 					final Subject sub,
@@ -181,7 +181,7 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	 * @param sub  The subject. Must not be {@code null}.
 	 * @param iat  The issue time. Must not be {@code null}.
 	 * @param exp  The expiration time. Must not be {@code null}.
-	 * @param jwks The entity public JWK set. Must not be {@code null}.
+	 * @param jwks The entity public JWK set, {@code null} if not required.
 	 */
 	public EntityStatementClaimsSet(final EntityID iss,
 					final EntityID sub,
@@ -193,7 +193,9 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 		setClaim(SUB_CLAIM_NAME, sub.getValue());
 		setDateClaim(IAT_CLAIM_NAME, iat);
 		setDateClaim(EXP_CLAIM_NAME, exp);
-		setClaim(JWKS_CLAIM_NAME, jwks.toJSONObject(true)); // public JWKs only
+		if (jwks != null) {
+			setClaim(JWKS_CLAIM_NAME, jwks.toJSONObject(true)); // public JWKs only
+		}
 	}
 	
 	
@@ -248,7 +250,8 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 			throw new ParseException("Missing exp (expiration) claim");
 		}
 		
-		if (getJWKSet() == null) {
+		// jwks always required for self-statements
+		if (isSelfStatement() && getJWKSet() == null) {
 			throw new ParseException("Missing jwks (JWK set) claim");
 		}
 		
@@ -326,8 +329,12 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	 */
 	public JWKSet getJWKSet() {
 		
+		JSONObject jwkSetJSONObject = getJSONObjectClaim(JWKS_CLAIM_NAME);
+		if (jwkSetJSONObject == null) {
+			return null;
+		}
 		try {
-			return JWKSet.parse(getJSONObjectClaim(JWKS_CLAIM_NAME));
+			return JWKSet.parse(jwkSetJSONObject);
 		} catch (java.text.ParseException e) {
 			return null;
 		}
