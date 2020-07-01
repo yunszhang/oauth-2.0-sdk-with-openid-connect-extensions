@@ -1401,3 +1401,6 @@ version 8.13 (2020-07-01)
     * Updates OIDCProviderMetadata for
       client_registration_authn_methods_supported.
     * Removes old OpenID Connect Federation 1.0 draft 11 fields.
+
+version 8.14 (2020-07-xx)
+    * Updates to Nimbus JOSE +JWT 8.18.
