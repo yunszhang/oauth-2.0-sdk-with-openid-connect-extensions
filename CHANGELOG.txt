@@ -1395,7 +1395,7 @@ version 8.12.1 (2020-06-29)
       empty entity body.
 
 version 8.13 (2020-07-01)
-    * Adds new EndpointName class for OpenID Connect Federation 1.0 (draft 12).
+    * Adds new RequestName class for OpenID Connect Federation 1.0 (draft 12).
     * Federation EntityStatementClaimsSet no longer requires jwks for OP
       statements about an RP in explicit client registration.
     * Updates OIDCProviderMetadata for

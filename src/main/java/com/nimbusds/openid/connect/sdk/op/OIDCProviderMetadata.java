@@ -287,7 +287,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	 * The supported client authentication methods for automatic federation
 	 * client registration.
 	 */
-	private Map<String,List<ClientAuthenticationMethod>> clientRegistrationAuthMethods;
+	private Map<EndpointName,List<ClientAuthenticationMethod>> clientRegistrationAuthMethods;
 	
 	
 	/**
@@ -1050,7 +1050,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	 *         federation client registration, {@code null} if not
 	 *         specified.
 	 */
-	public Map<String,List<ClientAuthenticationMethod>> getClientRegistrationAuthnMethods() {
+	public Map<EndpointName,List<ClientAuthenticationMethod>> getClientRegistrationAuthnMethods() {
 		return clientRegistrationAuthMethods;
 	}
 	
@@ -1064,7 +1064,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	 *                federation client registration, {@code null} if not
 	 *                specified.
 	 */
-	public void setClientRegistrationAuthnMethods(final Map<String,List<ClientAuthenticationMethod>> methods) {
+	public void setClientRegistrationAuthnMethods(final Map<EndpointName,List<ClientAuthenticationMethod>> methods) {
 		clientRegistrationAuthMethods = methods;
 	}
 	
@@ -1326,12 +1326,12 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		}
 		if (MapUtils.isNotEmpty(clientRegistrationAuthMethods)) {
 			JSONObject map = new JSONObject();
-			for (Map.Entry<String,List<ClientAuthenticationMethod>> en: getClientRegistrationAuthnMethods().entrySet()) {
+			for (Map.Entry<EndpointName,List<ClientAuthenticationMethod>> en: getClientRegistrationAuthnMethods().entrySet()) {
 				List<String> methodNames = new LinkedList<>();
 				for (ClientAuthenticationMethod method: en.getValue()) {
 					methodNames.add(method.getValue());
 				}
-				map.put(en.getKey(), methodNames);
+				map.put(en.getKey().getValue(), methodNames);
 			}
 			o.put("client_registration_authn_methods_supported", map);
 		}
@@ -1629,16 +1629,16 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		}
 		
 		if (jsonObject.get("client_registration_authn_methods_supported") != null) {
-			Map<String,List<ClientAuthenticationMethod>> fedClientAuthMethods = new HashMap<>();
+			Map<EndpointName,List<ClientAuthenticationMethod>> fedClientAuthMethods = new HashMap<>();
 			JSONObject spec = JSONObjectUtils.getJSONObject(jsonObject, "client_registration_authn_methods_supported");
 			// ar or rar
-			for (String requestType: spec.keySet()) {
-				List<String> methodNames = JSONObjectUtils.getStringList(spec, requestType, Collections.<String>emptyList());
+			for (String endpointName: spec.keySet()) {
+				List<String> methodNames = JSONObjectUtils.getStringList(spec, endpointName, Collections.<String>emptyList());
 				List<ClientAuthenticationMethod> authMethods = new LinkedList<>();
 				for (String name: methodNames) {
 					authMethods.add(ClientAuthenticationMethod.parse(name));
 				}
-				fedClientAuthMethods.put(requestType, authMethods);
+				fedClientAuthMethods.put(new EndpointName(endpointName), authMethods);
 			}
 			op.setClientRegistrationAuthnMethods(fedClientAuthMethods);
 		}

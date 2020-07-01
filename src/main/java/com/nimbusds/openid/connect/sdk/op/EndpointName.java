@@ -20,7 +20,6 @@ package com.nimbusds.openid.connect.sdk.op;
 
 import net.jcip.annotations.Immutable;
 
-import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Identifier;
 
 

@@ -1348,8 +1348,8 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertEquals(Arrays.asList(JWSAlgorithm.RS256, JWSAlgorithm.ES256), opMetadata.getIDTokenJWSAlgs());
 		assertEquals(Collections.singletonList(ClientAuthenticationMethod.PRIVATE_KEY_JWT), opMetadata.getTokenEndpointAuthMethods());
 		assertEquals(Arrays.asList(ClientRegistrationType.AUTOMATIC, ClientRegistrationType.EXPLICIT), opMetadata.getClientRegistrationTypes());
-		assertEquals(Collections.singletonList(ClientAuthenticationMethod.REQUEST_OBJECT), opMetadata.getClientRegistrationAuthnMethods().get("ar"));
-		assertEquals(Arrays.asList(ClientAuthenticationMethod.PRIVATE_KEY_JWT, ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH), opMetadata.getClientRegistrationAuthnMethods().get("par"));
+		assertEquals(Collections.singletonList(ClientAuthenticationMethod.REQUEST_OBJECT), opMetadata.getClientRegistrationAuthnMethods().get(EndpointName.AR));
+		assertEquals(Arrays.asList(ClientAuthenticationMethod.PRIVATE_KEY_JWT, ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH), opMetadata.getClientRegistrationAuthnMethods().get(EndpointName.PAR));
 		assertEquals(2, opMetadata.getClientRegistrationAuthnMethods().size());
 	}
 	
@@ -1371,9 +1371,9 @@ public class OIDCProviderMetadataTest extends TestCase {
 		meta.setClientRegistrationTypes(clientRegistrationTypes);
 		assertEquals(clientRegistrationTypes, meta.getClientRegistrationTypes());
 		
-		Map<String,List<ClientAuthenticationMethod>> clientAuthMethods = new HashMap<>();
-		clientAuthMethods.put("ar", Collections.singletonList(ClientAuthenticationMethod.REQUEST_OBJECT));
-		clientAuthMethods.put("rar", Arrays.asList(ClientAuthenticationMethod.PRIVATE_KEY_JWT, ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH));
+		Map<EndpointName,List<ClientAuthenticationMethod>> clientAuthMethods = new HashMap<>();
+		clientAuthMethods.put(EndpointName.AR, Collections.singletonList(ClientAuthenticationMethod.REQUEST_OBJECT));
+		clientAuthMethods.put(EndpointName.PAR, Arrays.asList(ClientAuthenticationMethod.PRIVATE_KEY_JWT, ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH));
 		meta.setClientRegistrationAuthnMethods(clientAuthMethods);
 		assertEquals(clientAuthMethods, meta.getClientRegistrationAuthnMethods());
 		
@@ -1391,7 +1391,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		
 		JSONObject clientAuthMethodsJSONObject = JSONObjectUtils.getJSONObject(jsonObject, "client_registration_authn_methods_supported");
 		assertEquals(Collections.singletonList(ClientAuthenticationMethod.REQUEST_OBJECT.getValue()), JSONObjectUtils.getStringList(clientAuthMethodsJSONObject, "ar"));
-		assertEquals(Arrays.asList(ClientAuthenticationMethod.PRIVATE_KEY_JWT.getValue(), ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH.getValue()), JSONObjectUtils.getStringList(clientAuthMethodsJSONObject, "rar"));
+		assertEquals(Arrays.asList(ClientAuthenticationMethod.PRIVATE_KEY_JWT.getValue(), ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH.getValue()), JSONObjectUtils.getStringList(clientAuthMethodsJSONObject, "par"));
 		assertEquals(2, clientAuthMethodsJSONObject.size());
 		
 		assertEquals(orgName, JSONObjectUtils.getString(jsonObject, "organization_name"));
