@@ -119,7 +119,6 @@ public class ClientMetadata {
 		
 		// OIDC federation
 		p.add("client_registration_types");
-		p.add("federation_type"); // TODO deprecated
 		p.add("organization_name");
 		p.add("trust_anchor_id");
 

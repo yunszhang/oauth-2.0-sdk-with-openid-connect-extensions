@@ -95,11 +95,10 @@ public class OIDCClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("backchannel_logout_uri"));
 		assertTrue(paramNames.contains("backchannel_logout_session_required"));
 		assertTrue(paramNames.contains("client_registration_types"));
-		assertTrue(paramNames.contains("federation_type")); // TODO deprecated
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(57, paramNames.size());
+		assertEquals(56, paramNames.size());
 	}
 
 

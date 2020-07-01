@@ -77,11 +77,10 @@ public class ClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("client_registration_types"));
-		assertTrue(paramNames.contains("federation_type")); // TODO deprecated
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(39, paramNames.size());
+		assertEquals(38, paramNames.size());
 	}
 
 

@@ -65,7 +65,7 @@ import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistratio
  *     <li>OpenID Connect Front-Channel Logout 1.0, section 3 (draft 02).
  *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.1 (draft 04).
  *     <li>OpenID Connect for Identity Assurance 1.0 (draft 08).
- *     <li>OpenID Connect Federation 1.0 (draft 10).
+ *     <li>OpenID Connect Federation 1.0 (draft 12).
  *     <li>OAuth 2.0 Authorization Server Metadata (RFC 8414)
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
  *         Access Tokens (RFC 8705)
@@ -110,9 +110,8 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		p.add("id_documents_supported");
 		p.add("id_documents_verification_methods_supported");
 		p.add("claims_in_verified_claims_supported");
-		p.add("federation_types_supported"); // TODO deprecated
 		p.add("client_registration_types_supported");
-		p.add("client_registration_auth_methods_supported");
+		p.add("client_registration_authn_methods_supported");
 		p.add("organization_name");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -1045,13 +1044,13 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	/**
 	 * Gets the supported client authentication methods for automatic
 	 * federation client registration. Corresponds to the
-	 * {@code client_registration_auth_methods_supported} field.
+	 * {@code client_registration_authn_methods_supported} field.
 	 *
 	 * @return The supported authentication methods for automatic
 	 *         federation client registration, {@code null} if not
 	 *         specified.
 	 */
-	public Map<String,List<ClientAuthenticationMethod>> getClientRegistrationAuthMethods() {
+	public Map<String,List<ClientAuthenticationMethod>> getClientRegistrationAuthnMethods() {
 		return clientRegistrationAuthMethods;
 	}
 	
@@ -1059,13 +1058,13 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	/**
 	 * Sets the supported client authentication methods for automatic
 	 * federation client registration. Corresponds to the
-	 * {@code client_registration_auth_methods_supported} field.
+	 * {@code client_registration_authn_methods_supported} field.
 	 *
 	 * @param methods The supported authentication methods for automatic
 	 *                federation client registration, {@code null} if not
 	 *                specified.
 	 */
-	public void setClientRegistrationAuthMethods(final Map<String,List<ClientAuthenticationMethod>> methods) {
+	public void setClientRegistrationAuthnMethods(final Map<String,List<ClientAuthenticationMethod>> methods) {
 		clientRegistrationAuthMethods = methods;
 	}
 	
@@ -1324,18 +1323,17 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		
 		if (CollectionUtils.isNotEmpty(clientRegistrationTypes)) {
 			o.put("client_registration_types_supported", Identifier.toStringList(clientRegistrationTypes));
-			o.put("federation_types_supported", Identifier.toStringList(clientRegistrationTypes)); // TODO deprecated
 		}
 		if (MapUtils.isNotEmpty(clientRegistrationAuthMethods)) {
 			JSONObject map = new JSONObject();
-			for (Map.Entry<String,List<ClientAuthenticationMethod>> en: getClientRegistrationAuthMethods().entrySet()) {
+			for (Map.Entry<String,List<ClientAuthenticationMethod>> en: getClientRegistrationAuthnMethods().entrySet()) {
 				List<String> methodNames = new LinkedList<>();
 				for (ClientAuthenticationMethod method: en.getValue()) {
 					methodNames.add(method.getValue());
 				}
 				map.put(en.getKey(), methodNames);
 			}
-			o.put("client_registration_auth_methods_supported", map);
+			o.put("client_registration_authn_methods_supported", map);
 		}
 		if (organizationName != null) {
 			o.put("organization_name", organizationName);
@@ -1628,17 +1626,11 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 			for (String v: JSONObjectUtils.getStringList(jsonObject, "client_registration_types_supported")) {
 				op.clientRegistrationTypes.add(new ClientRegistrationType(v));
 			}
-		} else if (jsonObject.get("federation_types_supported") != null) {
-			// TODO deprecated
-			op.clientRegistrationTypes = new LinkedList<>();
-			for (String v: JSONObjectUtils.getStringList(jsonObject, "federation_types_supported")) {
-				op.clientRegistrationTypes.add(new ClientRegistrationType(v));
-			}
 		}
 		
-		if (jsonObject.get("client_registration_auth_methods_supported") != null) {
+		if (jsonObject.get("client_registration_authn_methods_supported") != null) {
 			Map<String,List<ClientAuthenticationMethod>> fedClientAuthMethods = new HashMap<>();
-			JSONObject spec = JSONObjectUtils.getJSONObject(jsonObject, "client_registration_auth_methods_supported");
+			JSONObject spec = JSONObjectUtils.getJSONObject(jsonObject, "client_registration_authn_methods_supported");
 			// ar or rar
 			for (String requestType: spec.keySet()) {
 				List<String> methodNames = JSONObjectUtils.getStringList(spec, requestType, Collections.<String>emptyList());
@@ -1648,7 +1640,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 				}
 				fedClientAuthMethods.put(requestType, authMethods);
 			}
-			op.setClientRegistrationAuthMethods(fedClientAuthMethods);
+			op.setClientRegistrationAuthnMethods(fedClientAuthMethods);
 		}
 		
 		op.organizationName = JSONObjectUtils.getString(jsonObject, "organization_name", null);

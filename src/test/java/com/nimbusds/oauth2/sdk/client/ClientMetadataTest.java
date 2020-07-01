@@ -82,11 +82,10 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("client_registration_types"));
-		assertTrue(paramNames.contains("federation_type"));
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(33, ClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(32, ClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	
