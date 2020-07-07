@@ -26,6 +26,7 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.WellKnownPathComposeStrategy;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.openid.connect.sdk.federation.api.FetchEntityStatementRequest;
 import com.nimbusds.openid.connect.sdk.federation.api.FetchEntityStatementResponse;
 import com.nimbusds.openid.connect.sdk.federation.config.FederationEntityConfigurationRequest;
@@ -136,8 +137,8 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 			throw new ResolveException("Couldn't retrieve entity configuration for " + httpRequest.getURL() + ": " + e.getMessage(), e);
 		}
 		
-		if (HTTPResponse.SC_NOT_FOUND == httpResponse.getStatusCode()) {
-			// Try infix
+		if (StringUtils.isNotBlank(target.toURI().getPath()) && HTTPResponse.SC_NOT_FOUND == httpResponse.getStatusCode()) {
+			// We have a path in the entity ID URL, try infix strategy
 			request = new FederationEntityConfigurationRequest(target, WellKnownPathComposeStrategy.INFIX);
 			httpRequest = request.toHTTPRequest();
 			applyTimeouts(httpRequest);

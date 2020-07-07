@@ -1405,4 +1405,6 @@ version 8.13 (2020-07-01)
 version 8.14 (2020-07-07)
     * Updates DefaultEntityStatementRetriever.fetchSelfIssuedEntityStatement to
       include complete URL in error messages.
+    * Fixes DefaultEntityStatementRetriever.fetchSelfIssuedEntityStatement to
+      not attempt INFIX strategy when the entity ID has not path in its URI.
     * Updates to Nimbus JOSE +JWT 8.18.

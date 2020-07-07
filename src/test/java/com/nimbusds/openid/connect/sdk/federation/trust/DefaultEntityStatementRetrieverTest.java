@@ -23,13 +23,15 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.jadler.Jadler.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
+import net.jadler.Request;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -233,13 +235,27 @@ public class DefaultEntityStatementRetrieverTest {
 	
 	
 	@Test
-	public void testFetchSelfIssuedEntityStatement_error_404() {
+	public void testFetchSelfIssuedEntityStatement_error_404_noPathInEntityID() {
 		
 		Issuer issuer = new Issuer("http://localhost:" + port());
+		
+		final AtomicInteger numInvocations = new AtomicInteger();
 		
 		onRequest()
 			.havingMethodEqualTo("GET")
 			.havingPathEqualTo(FederationEntityConfigurationRequest.OPENID_FEDERATION_ENTITY_WELL_KNOWN_PATH)
+			.that(new BaseMatcher<Object>() {
+				@Override
+				public void describeTo(Description description) {
+				
+				}
+				
+				@Override
+				public boolean matches(Object o) {
+					numInvocations.incrementAndGet();
+					return true;
+				}
+			})
 			.respond()
 			.withStatus(404);
 		
@@ -251,6 +267,67 @@ public class DefaultEntityStatementRetrieverTest {
 			assertEquals("Entity configuration error response from " + issuer + "/.well-known/openid-federation: 404", e.getMessage());
 			assertEquals(404, e.getErrorObject().getHTTPStatusCode());
 		}
+		
+		assertEquals("One HTTP GET with no path, postfix / infix strategy doesn't matter", 1, numInvocations.get());
+	}
+	
+	
+	@Test
+	public void testFetchSelfIssuedEntityStatement_error_404_pathInEntityID() {
+		
+		Issuer issuer = new Issuer("http://localhost:" + port() + "/rp");
+		
+		final AtomicInteger numPostfixInvocations = new AtomicInteger();
+		
+		onRequest()
+			.havingMethodEqualTo("GET")
+			.havingPathEqualTo("/rp" + FederationEntityConfigurationRequest.OPENID_FEDERATION_ENTITY_WELL_KNOWN_PATH)
+			.that(new BaseMatcher<Object>() {
+				@Override
+				public void describeTo(Description description) {
+				
+				}
+				
+				@Override
+				public boolean matches(Object o) {
+					numPostfixInvocations.incrementAndGet();
+					return true;
+				}
+			})
+			.respond()
+			.withStatus(404);
+		
+		final AtomicInteger numInfixInvocations = new AtomicInteger();
+		
+		onRequest()
+			.havingMethodEqualTo("GET")
+			.havingPathEqualTo(FederationEntityConfigurationRequest.OPENID_FEDERATION_ENTITY_WELL_KNOWN_PATH + "/rp")
+			.that(new BaseMatcher<Object>() {
+				@Override
+				public void describeTo(Description description) {
+				
+				}
+				
+				@Override
+				public boolean matches(Object o) {
+					numInfixInvocations.incrementAndGet();
+					return true;
+				}
+			})
+			.respond()
+			.withStatus(404);
+		
+		DefaultEntityStatementRetriever retriever = new DefaultEntityStatementRetriever();
+		try {
+			retriever.fetchSelfIssuedEntityStatement(new EntityID(issuer.getValue()));
+			fail();
+		} catch (ResolveException e) {
+			assertEquals("Entity configuration error response from http://localhost:" + port() + "/.well-known/openid-federation/rp: 404", e.getMessage());
+			assertEquals(404, e.getErrorObject().getHTTPStatusCode());
+		}
+		
+		assertEquals(1, numPostfixInvocations.get());
+		assertEquals(1, numInfixInvocations.get());
 	}
 	
 	
