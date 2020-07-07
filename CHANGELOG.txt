@@ -1402,5 +1402,7 @@ version 8.13 (2020-07-01)
       client_registration_authn_methods_supported.
     * Removes old OpenID Connect Federation 1.0 draft 11 fields.
 
-version 8.14 (2020-07-xx)
+version 8.14 (2020-07-07)
+    * Updates DefaultEntityStatementRetriever.fetchSelfIssuedEntityStatement to
+      include complete URL in error messages.
     * Updates to Nimbus JOSE +JWT 8.18.

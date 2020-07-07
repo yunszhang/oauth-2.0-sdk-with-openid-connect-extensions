@@ -248,7 +248,7 @@ public class DefaultEntityStatementRetrieverTest {
 			retriever.fetchSelfIssuedEntityStatement(new EntityID(issuer.getValue()));
 			fail();
 		} catch (ResolveException e) {
-			assertEquals("Entity configuration error response from " + issuer + ": 404", e.getMessage());
+			assertEquals("Entity configuration error response from " + issuer + "/.well-known/openid-federation: 404", e.getMessage());
 			assertEquals(404, e.getErrorObject().getHTTPStatusCode());
 		}
 	}

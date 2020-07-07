@@ -133,7 +133,7 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 		try {
 			httpResponse = httpRequest.send();
 		} catch (IOException e) {
-			throw new ResolveException("Couldn't retrieve entity configuration for " + target + ": " + e.getMessage(), e);
+			throw new ResolveException("Couldn't retrieve entity configuration for " + httpRequest.getURL() + ": " + e.getMessage(), e);
 		}
 		
 		if (HTTPResponse.SC_NOT_FOUND == httpResponse.getStatusCode()) {
@@ -145,7 +145,7 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 			try {
 				httpResponse = httpRequest.send();
 			} catch (IOException e) {
-				throw new ResolveException("Couldn't retrieve entity configuration for " + target + ": " + e.getMessage(), e);
+				throw new ResolveException("Couldn't retrieve entity configuration for " + httpRequest.getURL() + ": " + e.getMessage(), e);
 			}
 		}
 		
@@ -153,12 +153,12 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 		try {
 			response = FederationEntityConfigurationResponse.parse(httpResponse);
 		} catch (ParseException e) {
-			throw new ResolveException("Error parsing entity configuration response from " + target + ": " + e.getMessage(), e);
+			throw new ResolveException("Error parsing entity configuration response from " + httpRequest.getURL() + ": " + e.getMessage(), e);
 		}
 		
 		if (! response.indicatesSuccess()) {
 			ErrorObject errorObject = response.toErrorResponse().getErrorObject();
-			throw new ResolveException("Entity configuration error response from " + target + ": " +
+			throw new ResolveException("Entity configuration error response from " + httpRequest.getURL() + ": " +
 				errorObject.getHTTPStatusCode() +
 				(errorObject.getCode() != null ? " " + errorObject.getCode() : ""),
 				errorObject);
