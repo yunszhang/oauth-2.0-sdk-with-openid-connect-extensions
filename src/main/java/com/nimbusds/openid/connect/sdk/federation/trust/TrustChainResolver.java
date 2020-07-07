@@ -25,6 +25,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.oauth2.sdk.util.MapUtils;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
+import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 import com.nimbusds.openid.connect.sdk.federation.trust.constraints.TrustChainConstraints;
 
 
@@ -187,6 +188,26 @@ public class TrustChainResolver {
 	 * @throws ResolveException If no trust chain could be resolved.
 	 */
 	public TrustChainSet resolveTrustChains(final EntityID target)
+		throws ResolveException {
+		
+		return resolveTrustChains(target, null);
+	}
+	
+	
+	/**
+	 * Resolves the trust chains for the specified target.
+	 *
+	 * @param target          The target. Must not be {@code null}.
+	 * @param targetStatement The target entity statement, {@code null} if
+	 *                        not available.
+	 *
+	 * @return The resolved trust chains, containing at least one valid and
+	 *         verified chain.
+	 *
+	 * @throws ResolveException If no trust chain could be resolved.
+	 */
+	public TrustChainSet resolveTrustChains(final EntityID target,
+						final EntityStatement targetStatement)
 		throws ResolveException {
 		
 		if (trustAnchors.get(target) != null) {

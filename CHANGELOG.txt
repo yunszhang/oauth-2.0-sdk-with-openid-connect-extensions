@@ -1408,3 +1408,7 @@ version 8.14 (2020-07-07)
     * Fixes DefaultEntityStatementRetriever.fetchSelfIssuedEntityStatement to
       not attempt INFIX strategy when the entity ID has not path in its URI.
     * Updates to Nimbus JOSE +JWT 8.18.
+
+version 8.15 (2020-07-07)
+    * Adds new TrustChainRetriever.retrieve method that starts with an
+      EntityStatement instead of an EntityID.
