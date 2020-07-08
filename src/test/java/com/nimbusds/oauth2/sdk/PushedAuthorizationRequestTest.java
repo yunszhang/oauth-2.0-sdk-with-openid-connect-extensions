@@ -251,7 +251,7 @@ public class PushedAuthorizationRequestTest extends TestCase {
 			PushedAuthorizationRequest.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("The HTTP Content-Type header must be application/x-www-form-urlencoded; charset=UTF-8", e.getMessage());
+			assertEquals("The HTTP Content-Type header must be application/x-www-form-urlencoded, received application/json", e.getMessage());
 		}
 	}
 	

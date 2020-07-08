@@ -48,7 +48,7 @@ public final class ContentTypeUtils {
 			throw new ParseException("Missing HTTP Content-Type header");
 		
 		if (! expected.matches(found))
-			throw new ParseException("The HTTP Content-Type header must be " + expected);
+			throw new ParseException("The HTTP Content-Type header must be " + expected.getType() + ", received " + found.getType());
 	}
 	
 

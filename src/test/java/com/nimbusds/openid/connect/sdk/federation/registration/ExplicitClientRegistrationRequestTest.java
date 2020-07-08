@@ -168,7 +168,7 @@ public class ExplicitClientRegistrationRequestTest extends TestCase {
 			ExplicitClientRegistrationRequest.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("The HTTP Content-Type header must be application/jose; charset=UTF-8", e.getMessage());
+			assertEquals("The HTTP Content-Type header must be application/jose, received application/jwt", e.getMessage());
 		}
 	}
 	

@@ -1414,3 +1414,6 @@ version 8.15 (2020-07-08)
       EntityStatement instead of an EntityID.
     * Adds new TrustChainRetriever.retrieve method that starts with an
       EntityStatement instead of an EntityID.
+
+version 8.15.1 (2020-07-08)
+    * Upgrades to com.nimbusds:content-type:2.1

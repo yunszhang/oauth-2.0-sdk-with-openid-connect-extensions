@@ -50,7 +50,7 @@ public class ContentTypeUtilsTest extends TestCase {
 			ContentTypeUtils.ensureContentType(ContentType.APPLICATION_JSON, new ContentType("application", "jwt"));
 			fail();
 		} catch (ParseException e) {
-			assertEquals("The HTTP Content-Type header must be application/json; charset=UTF-8", e.getMessage());
+			assertEquals("The HTTP Content-Type header must be application/json, received application/jwt", e.getMessage());
 		}
 	}
 }
