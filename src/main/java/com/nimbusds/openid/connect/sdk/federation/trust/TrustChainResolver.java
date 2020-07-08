@@ -190,42 +190,74 @@ public class TrustChainResolver {
 	public TrustChainSet resolveTrustChains(final EntityID target)
 		throws ResolveException {
 		
-		return resolveTrustChains(target, null);
+		if (trustAnchors.get(target) != null) {
+			throw new ResolveException("Target is trust anchor");
+		}
+		
+		TrustChainRetriever retriever = new DefaultTrustChainRetriever(statementRetriever, constraints);
+		Set<TrustChain> fetchedTrustChains = retriever.retrieve(target, trustAnchors.keySet());
+		return verifyTrustChains(
+			fetchedTrustChains,
+			retriever.getAccumulatedTrustAnchorJWKSets(),
+			retriever.getAccumulatedExceptions());
 	}
 	
 	
 	/**
 	 * Resolves the trust chains for the specified target.
 	 *
-	 * @param target          The target. Must not be {@code null}.
-	 * @param targetStatement The target entity statement, {@code null} if
-	 *                        not available.
+	 * @param targetStatement The target entity statement. Must not be
+	 *                        {@code null}.
 	 *
 	 * @return The resolved trust chains, containing at least one valid and
 	 *         verified chain.
 	 *
 	 * @throws ResolveException If no trust chain could be resolved.
 	 */
-	public TrustChainSet resolveTrustChains(final EntityID target,
-						final EntityStatement targetStatement)
+	public TrustChainSet resolveTrustChains(final EntityStatement targetStatement)
 		throws ResolveException {
 		
-		if (trustAnchors.get(target) != null) {
+		if (trustAnchors.get(targetStatement.getEntityID()) != null) {
 			throw new ResolveException("Target is trust anchor");
 		}
 		
 		TrustChainRetriever retriever = new DefaultTrustChainRetriever(statementRetriever, constraints);
-		
-		Set<TrustChain> fetchedTrustChains = retriever.retrieve(target, trustAnchors.keySet());
+		Set<TrustChain> fetchedTrustChains = retriever.retrieve(targetStatement, trustAnchors.keySet());
+		return verifyTrustChains(
+			fetchedTrustChains,
+			retriever.getAccumulatedTrustAnchorJWKSets(),
+			retriever.getAccumulatedExceptions());
+	}
+	
+	
+	/**
+	 * Verifies the specified fetched trust chains.
+	 *
+	 * @param fetchedTrustChains            The fetched trust chains. Must
+	 *                                      not be {@code null},
+	 * @param accumulatedTrustAnchorJWKSets The accumulated trust anchor(s)
+	 *                                      JWK sets, empty if none. Must
+	 *                                      not be {@code null}.
+	 * @param accumulatedExceptions         The accumulated exceptions,
+	 *                                      empty if none. Must not be
+	 *                                      {@code null}.
+	 * @return The verified trust chain set.
+	 *
+	 * @throws ResolveException If no trust chain could be verified.
+	 */
+	private TrustChainSet verifyTrustChains(final Set<TrustChain> fetchedTrustChains,
+						final Map<EntityID, JWKSet> accumulatedTrustAnchorJWKSets,
+						final List<Throwable> accumulatedExceptions)
+		throws ResolveException {
 		
 		if (fetchedTrustChains.isEmpty()) {
-			if (retriever.getAccumulatedExceptions().isEmpty()) {
+			if (accumulatedExceptions.isEmpty()) {
 				throw new ResolveException("No trust chain leading up to a trust anchor");
-			} else if (retriever.getAccumulatedExceptions().size() == 1){
-				Throwable cause = retriever.getAccumulatedExceptions().get(0);
+			} else if (accumulatedExceptions.size() == 1){
+				Throwable cause = accumulatedExceptions.get(0);
 				throw new ResolveException("Couldn't resolve trust chain: " + cause.getMessage(), cause);
 			} else {
-				throw new ResolveException("Couldn't resolve trust chain due to multiple causes", retriever.getAccumulatedExceptions());
+				throw new ResolveException("Couldn't resolve trust chain due to multiple causes", accumulatedExceptions);
 			}
 		}
 		
@@ -238,7 +270,7 @@ public class TrustChainResolver {
 			EntityID anchor = chain.getTrustAnchorEntityID();
 			JWKSet anchorJWKSet = trustAnchors.get(anchor);
 			if (anchorJWKSet == null) {
-				anchorJWKSet = retriever.getAccumulatedTrustAnchorJWKSets().get(anchor);
+				anchorJWKSet = accumulatedTrustAnchorJWKSets.get(anchor);
 			}
 			
 			try {
@@ -253,14 +285,14 @@ public class TrustChainResolver {
 		
 		if (verifiedTrustChains.isEmpty()) {
 			
-			List<Throwable> accumulatedExceptions = new LinkedList<>(retriever.getAccumulatedExceptions());
-			accumulatedExceptions.addAll(verificationExceptions);
+			List<Throwable> moreAccumulatedExceptions = new LinkedList<>(accumulatedExceptions);
+			moreAccumulatedExceptions.addAll(verificationExceptions);
 			
 			if (verificationExceptions.size() == 1) {
 				Throwable cause = verificationExceptions.get(0);
-				throw new ResolveException("Couldn't resolve trust chain: " + cause.getMessage(), accumulatedExceptions);
+				throw new ResolveException("Couldn't resolve trust chain: " + cause.getMessage(), moreAccumulatedExceptions);
 			} else {
-				throw new ResolveException("Couldn't resolve trust chain due to multiple causes", accumulatedExceptions);
+				throw new ResolveException("Couldn't resolve trust chain due to multiple causes", moreAccumulatedExceptions);
 			}
 		}
 		
