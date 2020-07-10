@@ -1417,3 +1417,7 @@ version 8.15 (2020-07-08)
 
 version 8.15.1 (2020-07-08)
     * Upgrades to com.nimbusds:content-type:2.1
+
+version 8.16 (2020-07-10)
+    * EntityStatementClaimsVerifier requires jwks for self-issued statements
+      only.
