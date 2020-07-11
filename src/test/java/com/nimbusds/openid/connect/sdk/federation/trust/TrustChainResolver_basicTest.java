@@ -139,7 +139,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 	}
 	
 	
-	public void testSimple_oneStep() throws ResolveException {
+	public void testSimple_fetchStatement_oneStep() throws ResolveException {
 		
 		EntityStatementRetriever statementRetriever = new EntityStatementRetriever() {
 			@Override
@@ -206,6 +206,84 @@ public class TrustChainResolver_basicTest extends TestCase {
 		assertEquals(anchors, resolver.getTrustAnchors());
 		
 		resolvedChains = resolver.resolveTrustChains(new EntityID(OP_ISSUER));
+		
+		chain = resolvedChains.getShortest();
+		assertEquals(OP_SELF_STMT, chain.getLeafSelfStatement());
+		assertEquals(ANCHOR_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));
+		assertEquals(1, chain.getSuperiorStatements().size());
+		
+		assertEquals(1, resolvedChains.size());
+	}
+	
+	
+	public void testSimple_suppliedStatement_oneStep() throws ResolveException {
+		
+		EntityStatementRetriever statementRetriever = new EntityStatementRetriever() {
+			@Override
+			public EntityStatement fetchSelfIssuedEntityStatement(EntityID target) throws ResolveException {
+				if (OP_ISSUER.getValue().equals(target.getValue())) {
+					fail();
+					return null;
+				} else if (ANCHOR_ISSUER.getValue().equals(target.getValue())) {
+					return ANCHOR_SELF_STMT;
+				} else {
+					throw new ResolveException("Invalid target");
+				}
+			}
+			
+			
+			@Override
+			public EntityStatement fetchEntityStatement(URI federationAPIEndpoint, EntityID issuer, EntityID subject) throws ResolveException {
+				if (ANCHOR_FEDERATION_API_URI.equals(federationAPIEndpoint)) {
+					if (ANCHOR_ISSUER.getValue().equals(issuer.getValue()) && OP_ISSUER.getValue().equals(subject.getValue())) {
+						return ANCHOR_STMT_ABOUT_OP;
+					}
+					throw new ResolveException("Unknown subject: " + subject);
+				}
+				throw new ResolveException("Exception");
+			}
+		};
+		
+		// Test the retriever
+		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
+		assertEquals(TrustChainConstraints.NO_CONSTRAINTS, chainRetriever.getConstraints());
+		
+		TrustChainSet trustChains = chainRetriever.retrieve(OP_SELF_STMT, Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		
+		assertEquals(1, trustChains.size());
+		
+		TrustChain chain = trustChains.getShortest();
+		
+		assertEquals(OP_SELF_STMT, chain.getLeafSelfStatement());
+		assertEquals(ANCHOR_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));
+		assertEquals(1, chain.getSuperiorStatements().size());
+		
+		assertEquals(ANCHOR_JWK_SET.toJSONObject(), chainRetriever.getAccumulatedTrustAnchorJWKSets().get(new EntityID(ANCHOR_ISSUER)).toJSONObject());
+		assertEquals(1, chainRetriever.getAccumulatedTrustAnchorJWKSets().size());
+		
+		assertTrue(chainRetriever.getAccumulatedExceptions().isEmpty());
+		
+		// Test the resolver
+		Map<EntityID,JWKSet> anchors = Collections.singletonMap(new EntityID(ANCHOR_ISSUER), ANCHOR_JWK_SET);
+		TrustChainResolver resolver = new TrustChainResolver(anchors, TrustChainConstraints.NO_CONSTRAINTS, statementRetriever);
+		assertEquals(anchors, resolver.getTrustAnchors());
+		assertEquals(TrustChainConstraints.NO_CONSTRAINTS, resolver.getConstraints());
+		
+		TrustChainSet resolvedChains = resolver.resolveTrustChains(OP_SELF_STMT);
+		
+		chain = resolvedChains.getShortest();
+		assertEquals(OP_SELF_STMT, chain.getLeafSelfStatement());
+		assertEquals(ANCHOR_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));
+		assertEquals(1, chain.getSuperiorStatements().size());
+		
+		assertEquals(1, resolvedChains.size());
+		
+		// Test the resolver, no configured anchor JWK set
+		anchors = Collections.singletonMap(new EntityID(ANCHOR_ISSUER), null);
+		resolver = new TrustChainResolver(anchors, TrustChainConstraints.NO_CONSTRAINTS, statementRetriever);
+		assertEquals(anchors, resolver.getTrustAnchors());
+		
+		resolvedChains = resolver.resolveTrustChains(OP_SELF_STMT);
 		
 		chain = resolvedChains.getShortest();
 		assertEquals(OP_SELF_STMT, chain.getLeafSelfStatement());

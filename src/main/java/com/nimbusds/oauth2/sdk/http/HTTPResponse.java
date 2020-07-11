@@ -102,6 +102,12 @@ public class HTTPResponse extends HTTPMessage {
 	 * forbidden.
 	 */
 	public static final int SC_FORBIDDEN = 403;
+	
+	
+	/**
+	 * HTTP status code (404) indicating the resource was not found.
+	 */
+	public static final int SC_NOT_FOUND = 404;
 
 
 	/**

@@ -1,7 +1,7 @@
 /*
  * oauth2-oidc-sdk
  *
- * Copyright 2012-2016, Connect2id Ltd and contributors.
+ * Copyright 2012-2020, Connect2id Ltd and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -15,27 +15,29 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package com.nimbusds.openid.connect.sdk.federation;
+package com.nimbusds.openid.connect.sdk.federation.registration;
 
 
 import junit.framework.TestCase;
 
+import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
 
-public class FederationTypeTest extends TestCase {
+
+public class ClientRegistrationTypeTest extends TestCase {
 	
 	
 	public void testConstants() {
 		
-		assertEquals("automatic", FederationType.AUTOMATIC.getValue());
-		assertEquals("explicit", FederationType.EXPLICIT.getValue());
+		assertEquals("automatic", ClientRegistrationType.AUTOMATIC.getValue());
+		assertEquals("explicit", ClientRegistrationType.EXPLICIT.getValue());
 	}
 	
 	public void testConstructor() {
 		
-		FederationType federationType = new FederationType("automatic");
+		ClientRegistrationType federationType = new ClientRegistrationType("automatic");
 		assertEquals("automatic", federationType.getValue());
 		
-		assertEquals(FederationType.AUTOMATIC, federationType);
-		assertEquals(FederationType.AUTOMATIC.hashCode(), federationType.hashCode());
+		assertEquals(ClientRegistrationType.AUTOMATIC, federationType);
+		assertEquals(ClientRegistrationType.AUTOMATIC.hashCode(), federationType.hashCode());
 	}
 }

@@ -73,7 +73,7 @@ public class MetadataPolicyEntry implements Map.Entry<String, List<PolicyOperati
 	/**
 	 * The policy operations, empty list if none.
 	 */
-	private List<PolicyOperation> policyOperations;
+	private final List<PolicyOperation> policyOperations;
 	
 	
 	/**

@@ -103,34 +103,47 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 		accumulatedExceptions.clear();
 		accumulatedTrustAnchorJWKSets.clear();
 		
-		TrustChainSet trustChains = new TrustChainSet();
-		
 		EntityStatement targetStatement;
 		try {
 			targetStatement = retriever.fetchSelfIssuedEntityStatement(target);
 		} catch (ResolveException e) {
 			accumulatedExceptions.add(e);
-			return trustChains;
+			return new TrustChainSet();
 		}
+		
+		return retrieve(targetStatement, trustAnchors);
+	}
+	
+	
+	@Override
+	public TrustChainSet retrieve(final EntityStatement targetStatement, final Set<EntityID> trustAnchors) {
+		
+		if (CollectionUtils.isEmpty(trustAnchors)) {
+			throw new IllegalArgumentException("The trust anchors must not be empty");
+		}
+		
+		accumulatedExceptions.clear();
+		accumulatedTrustAnchorJWKSets.clear();
 		
 		List<EntityID> authorityHints = targetStatement.getClaimsSet().getAuthorityHints();
 		
 		if (CollectionUtils.isEmpty(authorityHints)) {
 			// Dead end
-			accumulatedExceptions.add(new ResolveException("Entity " + target + " has no authorities listed (authority_hints)"));
-			return trustChains;
+			accumulatedExceptions.add(new ResolveException("Entity " + targetStatement.getEntityID() + " has no authorities listed (authority_hints)"));
+			return new TrustChainSet();
 		}
 		
 		EntityID subject;
 		try {
 			subject = EntityID.parse(targetStatement.getClaimsSet().getSubject());
 		} catch (ParseException e) {
-			accumulatedExceptions.add(new ResolveException("Entity " + target + " subject is illegal: " + e.getMessage(), e));
-			return trustChains;
+			accumulatedExceptions.add(new ResolveException("Entity " + targetStatement.getEntityID() + " subject is illegal: " + e.getMessage(), e));
+			return new TrustChainSet();
 		}
 		
 		Set<List<EntityStatement>> anchoredChains = fetchStatementsFromAuthorities(subject, authorityHints, trustAnchors, Collections.<EntityStatement>emptyList());
 		
+		TrustChainSet trustChains = new TrustChainSet();
 		for (List<EntityStatement> chain: anchoredChains) {
 			trustChains.add(new TrustChain(targetStatement, chain));
 		}

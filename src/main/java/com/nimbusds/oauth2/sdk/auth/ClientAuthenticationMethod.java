@@ -18,8 +18,9 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
-import com.nimbusds.oauth2.sdk.id.Identifier;
 import net.jcip.annotations.Immutable;
+
+import com.nimbusds.oauth2.sdk.id.Identifier;
 
 
 /**
@@ -34,6 +35,7 @@ import net.jcip.annotations.Immutable;
  *     <li>{@link #PRIVATE_KEY_JWT private_key_jwt}
  *     <li>{@link #TLS_CLIENT_AUTH tls_client_auth}
  *     <li>{@link #SELF_SIGNED_TLS_CLIENT_AUTH self_signed_tls_client_auth}
+ *     <li>{@link #REQUEST_OBJECT request_object}
  *     <li>{@link #NONE none}
  * </ul>
  *
@@ -47,10 +49,14 @@ import net.jcip.annotations.Immutable;
  *         2.
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
  *         Access Tokens (RFC 8705), section 2.
+ *     <li>OpenID Connect Federation 1.0.
  * </ul>
  */
 @Immutable
 public final class ClientAuthenticationMethod extends Identifier {
+	
+	
+	private static final long serialVersionUID = 1L;
 
 
 	/**
@@ -112,6 +118,16 @@ public final class ClientAuthenticationMethod extends Identifier {
 	 */
 	public static final ClientAuthenticationMethod SELF_SIGNED_TLS_CLIENT_AUTH =
 		new ClientAuthenticationMethod("self_signed_tls_client_auth");
+	
+	
+	/**
+	 * Client authentication by means of a request object at the
+	 * authorisation or PAR endpoints. Intended for OpenID Connect
+	 * Federation 1.0 clients undertaking automatic registration. See
+	 * OpenID Connect Federation 1.0.
+	 */
+	public static final ClientAuthenticationMethod REQUEST_OBJECT =
+		new ClientAuthenticationMethod("request_object");
 
 
 	/**
@@ -167,6 +183,8 @@ public final class ClientAuthenticationMethod extends Identifier {
 			return TLS_CLIENT_AUTH;
 		} else if (value.equalsIgnoreCase(SELF_SIGNED_TLS_CLIENT_AUTH.getValue())) {
 			return SELF_SIGNED_TLS_CLIENT_AUTH;
+		} else if (value.equalsIgnoreCase(REQUEST_OBJECT.getValue())) {
+			return REQUEST_OBJECT;
 		} else if (value.equals(NONE.getValue())) {
 			return NONE;
 		} else {

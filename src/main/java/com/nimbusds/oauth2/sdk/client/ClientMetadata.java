@@ -42,7 +42,7 @@ import com.nimbusds.oauth2.sdk.id.SoftwareID;
 import com.nimbusds.oauth2.sdk.id.SoftwareVersion;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import com.nimbusds.openid.connect.sdk.federation.FederationType;
+import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 
 
@@ -119,7 +119,7 @@ public class ClientMetadata {
 		p.add("authorization_encrypted_response_enc");
 		
 		// OIDC federation
-		p.add("federation_type");
+		p.add("client_registration_types");
 		p.add("organization_name");
 		p.add("trust_anchor_id");
 		
@@ -323,9 +323,10 @@ public class ClientMetadata {
 	
 	
 	/**
-	 * The supported OpenID Connect Federation 1.0 types.
+	 * The supported OpenID Connect Federation 1.0 client registration
+	 * types.
 	 */
-	private List<FederationType> federationTypes;
+	private List<ClientRegistrationType> clientRegistrationTypes;
 	
 	
 	/**
@@ -427,7 +428,7 @@ public class ClientMetadata {
 		authzJWSAlg = metadata.authzJWSAlg;
 		authzJWEAlg = metadata.authzJWEAlg;
 		authzJWEEnc = metadata.authzJWEEnc;
-		federationTypes = metadata.federationTypes;
+		clientRegistrationTypes = metadata.clientRegistrationTypes;
 		organizationName = metadata.organizationName;
 		trustAnchorID = metadata.trustAnchorID;
 		customFields = metadata.customFields;
@@ -1590,28 +1591,30 @@ public class ClientMetadata {
 	
 	
 	/**
-	 * Gets the supported OpenID Connect Federation 1.0 types. Corresponds
-	 * to the {@code federation_type} metadata field.
+	 * Gets the supported OpenID Connect Federation 1.0 client registration
+	 * types. Corresponds to the {@code client_registration_types} metadata
+	 * field.
 	 *
-	 * @return The supported federation types, {@code null} if not
+	 * @return The supported registration types, {@code null} if not
 	 *         specified.
 	 */
-	public List<FederationType> getFederationTypes() {
+	public List<ClientRegistrationType> getClientRegistrationTypes() {
 		
-		return federationTypes;
+		return clientRegistrationTypes;
 	}
 	
 	
 	/**
-	 * Sets the supported OpenID Connect Federation 1.0 types. Corresponds
-	 * to the {@code federation_type} metadata field.
+	 * Sets the supported OpenID Connect Federation 1.0 client registration
+	 * types. Corresponds to the {@code client_registration_types} metadata
+	 * field.
 	 *
-	 * @param federationTypes The supported federation types, {@code null}
-	 *                        if not specified.
+	 * @param regTypes The supported registration types, {@code null} if
+	 *                 not specified.
 	 */
-	public void setFederationTypes(final List<FederationType> federationTypes) {
+	public void setClientRegistrationTypes(final List<ClientRegistrationType> regTypes) {
 		
-		this.federationTypes = federationTypes;
+		this.clientRegistrationTypes = regTypes;
 	}
 	
 	
@@ -2064,8 +2067,9 @@ public class ClientMetadata {
 		
 		// Federation
 		
-		if (CollectionUtils.isNotEmpty(federationTypes)) {
-			o.put("federation_type", Identifier.toStringList(federationTypes));
+		if (CollectionUtils.isNotEmpty(clientRegistrationTypes)) {
+			o.put("client_registration_types", Identifier.toStringList(clientRegistrationTypes));
+			o.put("federation_type", Identifier.toStringList(clientRegistrationTypes)); // TODO deprecated
 		}
 		if (organizationName != null) {
 			o.put("organization_name", organizationName);
@@ -2420,12 +2424,20 @@ public class ClientMetadata {
 			
 			// Federation
 			
-			if (jsonObject.get("federation_type") != null) {
-				List<FederationType> types = new LinkedList<>();
-				for (String v: JSONObjectUtils.getStringList(jsonObject, "federation_type")) {
-					types.add(new FederationType(v));
+			if (jsonObject.get("client_registration_types") != null) {
+				List<ClientRegistrationType> types = new LinkedList<>();
+				for (String v: JSONObjectUtils.getStringList(jsonObject, "client_registration_types")) {
+					types.add(new ClientRegistrationType(v));
 				}
-				metadata.setFederationTypes(types);
+				metadata.setClientRegistrationTypes(types);
+				jsonObject.remove("client_registration_types");
+			} else if (jsonObject.get("federation_type") != null) {
+				// TODO deprecated
+				List<ClientRegistrationType> types = new LinkedList<>();
+				for (String v: JSONObjectUtils.getStringList(jsonObject, "federation_type")) {
+					types.add(new ClientRegistrationType(v));
+				}
+				metadata.setClientRegistrationTypes(types);
 				jsonObject.remove("federation_type");
 			}
 			

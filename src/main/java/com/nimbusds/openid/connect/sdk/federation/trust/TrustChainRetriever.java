@@ -26,6 +26,7 @@ import net.jcip.annotations.NotThreadSafe;
 
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
+import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 
 
 /**
@@ -37,7 +38,8 @@ interface TrustChainRetriever {
 	
 	
 	/**
-	 * Fetches the trust chains for the specified target entity.
+	 * Fetches the trust chains for the specified target entity. Intended
+	 * for use in automatic federation client registration.
 	 *
 	 * @param target       The target entity ID. Must not be {@code null}.
 	 * @param trustAnchors The trust anchors. Must contain at least one
@@ -46,6 +48,20 @@ interface TrustChainRetriever {
 	 * @return The successfully fetched trust chains, empty set if none.
 	 */
 	TrustChainSet retrieve(final EntityID target, final Set<EntityID> trustAnchors);
+	
+	
+	/**
+	 * Fetches the trust chains for the specified target entity. Intended
+	 * for use in explicit federation client registration.
+	 *
+	 * @param targetStatement The target entity statement. Must not be
+	 *                        {@code null}.
+	 * @param trustAnchors    The trust anchors. Must contain at least one
+	 *                        trust anchor.
+	 *
+	 * @return The successfully fetched trust chains, empty set if none.
+	 */
+	TrustChainSet retrieve(final EntityStatement targetStatement, final Set<EntityID> trustAnchors);
 	
 	
 	/**

@@ -60,7 +60,7 @@ public enum TLSVersion {
 	/**
 	 * The algorithm value.
 	 */
-	private String value;
+	private final String value;
 	
 	
 	TLSVersion(final String value) {

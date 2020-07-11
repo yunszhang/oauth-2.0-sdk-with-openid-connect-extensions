@@ -23,13 +23,15 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.jadler.Jadler.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
+import net.jadler.Request;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -130,32 +132,6 @@ public class DefaultEntityStatementRetrieverTest {
 	}
 	
 	
-	private static EntityStatementClaimsSet createIntermediateStatementClaimsSet(final Issuer issuer) {
-		
-		Date now = new Date();
-		long nowTS = DateUtils.toSecondsSinceEpoch(now);
-		Date iat = DateUtils.fromSecondsSinceEpoch(nowTS);
-		Date exp = DateUtils.fromSecondsSinceEpoch(nowTS + 60);
-		
-		Subject subject = new Subject(issuer.getValue());
-		List<EntityID> authorityHints = Collections.singletonList(new EntityID("https://federation.example.com"));
-		
-		EntityStatementClaimsSet stmt = new EntityStatementClaimsSet(
-			issuer,
-			subject,
-			iat,
-			exp,
-			INTERMEDIATE_JWK_SET);
-		stmt.setAuthorityHints(authorityHints);
-		
-		FederationEntityMetadata federationEntityMetadata = new FederationEntityMetadata(URI.create(issuer + "/federation"));
-		federationEntityMetadata.setName("Some org with multiple subordinate entities");
-		stmt.setFederationEntityMetadata(federationEntityMetadata);
-		
-		return stmt;
-	}
-	
-	
 	@Before
 	public void setUp() {
 		initJadler();
@@ -178,7 +154,7 @@ public class DefaultEntityStatementRetrieverTest {
 	
 	
 	@Test
-	public void testFetchSelfIssuedEntityStatement()
+	public void testFetchSelfIssuedEntityStatement_noPathInIssuer()
 		throws Exception {
 		
 		Issuer issuer = new Issuer("http://localhost:" + port());
@@ -205,13 +181,81 @@ public class DefaultEntityStatementRetrieverTest {
 	
 	
 	@Test
-	public void testFetchSelfIssuedEntityStatement_error_404() {
+	public void testFetchSelfIssuedEntityStatement_wellKnownPostFix()
+		throws Exception {
+		
+		Issuer issuer = new Issuer("http://localhost:" + port() + "/op");
+		
+		EntityStatementClaimsSet claimsSet = createOPStatementClaimsSet(issuer, issuer);
+		EntityStatement entityStatement = EntityStatement.sign(claimsSet, OP_JWK);
+		
+		onRequest()
+			.havingMethodEqualTo("GET")
+			.havingPathEqualTo("/op" + FederationEntityConfigurationRequest.OPENID_FEDERATION_ENTITY_WELL_KNOWN_PATH)
+			.respond()
+			.withStatus(200)
+			.withContentType("application/jose")
+			.withBody(entityStatement.getSignedStatement().serialize());
+		
+		DefaultEntityStatementRetriever retriever = new DefaultEntityStatementRetriever();
+		
+		EntityStatement out = retriever.fetchSelfIssuedEntityStatement(new EntityID(issuer.getValue()));
+		
+		out.verifySignatureOfSelfStatement();
+		
+		assertEquals(entityStatement.getClaimsSet().toJWTClaimsSet().getClaims(), out.getClaimsSet().toJWTClaimsSet().getClaims());
+	}
+	
+	
+	@Test
+	public void testFetchSelfIssuedEntityStatement_wellKnownInFix()
+		throws Exception {
+		
+		Issuer issuer = new Issuer("http://localhost:" + port() + "/op");
+		
+		EntityStatementClaimsSet claimsSet = createOPStatementClaimsSet(issuer, issuer);
+		EntityStatement entityStatement = EntityStatement.sign(claimsSet, OP_JWK);
+		
+		onRequest()
+			.havingMethodEqualTo("GET")
+			.havingPathEqualTo(FederationEntityConfigurationRequest.OPENID_FEDERATION_ENTITY_WELL_KNOWN_PATH + "/op")
+			.respond()
+			.withStatus(200)
+			.withContentType("application/jose")
+			.withBody(entityStatement.getSignedStatement().serialize());
+		
+		DefaultEntityStatementRetriever retriever = new DefaultEntityStatementRetriever();
+		
+		EntityStatement out = retriever.fetchSelfIssuedEntityStatement(new EntityID(issuer.getValue()));
+		
+		out.verifySignatureOfSelfStatement();
+		
+		assertEquals(entityStatement.getClaimsSet().toJWTClaimsSet().getClaims(), out.getClaimsSet().toJWTClaimsSet().getClaims());
+	}
+	
+	
+	@Test
+	public void testFetchSelfIssuedEntityStatement_error_404_noPathInEntityID() {
 		
 		Issuer issuer = new Issuer("http://localhost:" + port());
+		
+		final AtomicInteger numInvocations = new AtomicInteger();
 		
 		onRequest()
 			.havingMethodEqualTo("GET")
 			.havingPathEqualTo(FederationEntityConfigurationRequest.OPENID_FEDERATION_ENTITY_WELL_KNOWN_PATH)
+			.that(new BaseMatcher<Object>() {
+				@Override
+				public void describeTo(Description description) {
+				
+				}
+				
+				@Override
+				public boolean matches(Object o) {
+					numInvocations.incrementAndGet();
+					return true;
+				}
+			})
 			.respond()
 			.withStatus(404);
 		
@@ -220,9 +264,70 @@ public class DefaultEntityStatementRetrieverTest {
 			retriever.fetchSelfIssuedEntityStatement(new EntityID(issuer.getValue()));
 			fail();
 		} catch (ResolveException e) {
-			assertEquals("Entity configuration error response from " + issuer + ": 404", e.getMessage());
+			assertEquals("Entity configuration error response from " + issuer + "/.well-known/openid-federation: 404", e.getMessage());
 			assertEquals(404, e.getErrorObject().getHTTPStatusCode());
 		}
+		
+		assertEquals("One HTTP GET with no path, postfix / infix strategy doesn't matter", 1, numInvocations.get());
+	}
+	
+	
+	@Test
+	public void testFetchSelfIssuedEntityStatement_error_404_pathInEntityID() {
+		
+		Issuer issuer = new Issuer("http://localhost:" + port() + "/rp");
+		
+		final AtomicInteger numPostfixInvocations = new AtomicInteger();
+		
+		onRequest()
+			.havingMethodEqualTo("GET")
+			.havingPathEqualTo("/rp" + FederationEntityConfigurationRequest.OPENID_FEDERATION_ENTITY_WELL_KNOWN_PATH)
+			.that(new BaseMatcher<Object>() {
+				@Override
+				public void describeTo(Description description) {
+				
+				}
+				
+				@Override
+				public boolean matches(Object o) {
+					numPostfixInvocations.incrementAndGet();
+					return true;
+				}
+			})
+			.respond()
+			.withStatus(404);
+		
+		final AtomicInteger numInfixInvocations = new AtomicInteger();
+		
+		onRequest()
+			.havingMethodEqualTo("GET")
+			.havingPathEqualTo(FederationEntityConfigurationRequest.OPENID_FEDERATION_ENTITY_WELL_KNOWN_PATH + "/rp")
+			.that(new BaseMatcher<Object>() {
+				@Override
+				public void describeTo(Description description) {
+				
+				}
+				
+				@Override
+				public boolean matches(Object o) {
+					numInfixInvocations.incrementAndGet();
+					return true;
+				}
+			})
+			.respond()
+			.withStatus(404);
+		
+		DefaultEntityStatementRetriever retriever = new DefaultEntityStatementRetriever();
+		try {
+			retriever.fetchSelfIssuedEntityStatement(new EntityID(issuer.getValue()));
+			fail();
+		} catch (ResolveException e) {
+			assertEquals("Entity configuration error response from http://localhost:" + port() + "/.well-known/openid-federation/rp: 404", e.getMessage());
+			assertEquals(404, e.getErrorObject().getHTTPStatusCode());
+		}
+		
+		assertEquals(1, numPostfixInvocations.get());
+		assertEquals(1, numInfixInvocations.get());
 	}
 	
 	

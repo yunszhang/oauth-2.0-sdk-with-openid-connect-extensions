@@ -23,8 +23,6 @@ import java.util.List;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 
-import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.writer.JsonReader;
 

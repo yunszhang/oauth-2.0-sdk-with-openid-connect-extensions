@@ -35,21 +35,23 @@ import com.nimbusds.oauth2.sdk.GeneralException;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.as.AuthorizationServerEndpointMetadata;
 import com.nimbusds.oauth2.sdk.as.AuthorizationServerMetadata;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.Identifier;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.oauth2.sdk.util.MapUtils;
 import com.nimbusds.openid.connect.sdk.Display;
 import com.nimbusds.openid.connect.sdk.SubjectType;
+import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
 import com.nimbusds.openid.connect.sdk.assurance.evidences.IDDocumentType;
 import com.nimbusds.openid.connect.sdk.assurance.evidences.IdentityEvidenceType;
-import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
 import com.nimbusds.openid.connect.sdk.assurance.evidences.IdentityVerificationMethod;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimType;
-import com.nimbusds.openid.connect.sdk.federation.FederationType;
+import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
 
 
 /**
@@ -63,7 +65,7 @@ import com.nimbusds.openid.connect.sdk.federation.FederationType;
  *     <li>OpenID Connect Front-Channel Logout 1.0, section 3 (draft 02).
  *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.1 (draft 04).
  *     <li>OpenID Connect for Identity Assurance 1.0 (draft 08).
- *     <li>OpenID Connect Federation 1.0 (draft 10).
+ *     <li>OpenID Connect Federation 1.0 (draft 12).
  *     <li>OAuth 2.0 Authorization Server Metadata (RFC 8414)
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
  *         Access Tokens (RFC 8705)
@@ -108,7 +110,8 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		p.add("id_documents_supported");
 		p.add("id_documents_verification_methods_supported");
 		p.add("claims_in_verified_claims_supported");
-		p.add("federation_types_supported");
+		p.add("client_registration_types_supported");
+		p.add("client_registration_authn_methods_supported");
 		p.add("organization_name");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -275,9 +278,16 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	
 	
 	/**
-	 * The supported federation types.
+	 * The supported federation client registration types.
 	 */
-	private List<FederationType> federationTypes;
+	private List<ClientRegistrationType> clientRegistrationTypes;
+	
+	
+	/**
+	 * The supported client authentication methods for automatic federation
+	 * client registration.
+	 */
+	private Map<EndpointName,List<ClientAuthenticationMethod>> clientRegistrationAuthMethods;
 	
 	
 	/**
@@ -1008,26 +1018,54 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	
 	
 	/**
-	 * Gets the supported federation types. Corresponds to the
-	 * {@code federation_types_supported} metadata field.
+	 * Gets the supported federation client registration types. Corresponds
+	 * to the {@code client_registration_types_supported} metadata field.
 	 *
-	 * @return The supported federation types, {@code null} if not
+	 * @return The supported client registration types, {@code null} if not
 	 *         specified.
 	 */
-	public List<FederationType> getFederationTypes() {
-		return federationTypes;
+	public List<ClientRegistrationType> getClientRegistrationTypes() {
+		return clientRegistrationTypes;
 	}
 	
 	
 	/**
-	 * Sets the supported federation types. Corresponds to the
-	 * {@code federation_types_supported} metadata field.
+	 * Sets the supported federation client registration types. Corresponds
+	 * to the {@code client_registration_types_supported} metadata field.
 	 *
-	 * @param federationTypes The supported federation types, {@code null}
-	 *                        if not specified.
+	 * @param clientRegistrationTypes The supported client registration
+	 *                                types, {@code null} if not specified.
 	 */
-	public void setFederationTypes(final List<FederationType> federationTypes) {
-		this.federationTypes = federationTypes;
+	public void setClientRegistrationTypes(final List<ClientRegistrationType> clientRegistrationTypes) {
+		this.clientRegistrationTypes = clientRegistrationTypes;
+	}
+	
+	
+	/**
+	 * Gets the supported client authentication methods for automatic
+	 * federation client registration. Corresponds to the
+	 * {@code client_registration_authn_methods_supported} field.
+	 *
+	 * @return The supported authentication methods for automatic
+	 *         federation client registration, {@code null} if not
+	 *         specified.
+	 */
+	public Map<EndpointName,List<ClientAuthenticationMethod>> getClientRegistrationAuthnMethods() {
+		return clientRegistrationAuthMethods;
+	}
+	
+	
+	/**
+	 * Sets the supported client authentication methods for automatic
+	 * federation client registration. Corresponds to the
+	 * {@code client_registration_authn_methods_supported} field.
+	 *
+	 * @param methods The supported authentication methods for automatic
+	 *                federation client registration, {@code null} if not
+	 *                specified.
+	 */
+	public void setClientRegistrationAuthnMethods(final Map<EndpointName,List<ClientAuthenticationMethod>> methods) {
+		clientRegistrationAuthMethods = methods;
 	}
 	
 	
@@ -1283,8 +1321,19 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		
 		// federation
 		
-		if (CollectionUtils.isNotEmpty(federationTypes)) {
-			o.put("federation_types_supported", Identifier.toStringList(federationTypes));
+		if (CollectionUtils.isNotEmpty(clientRegistrationTypes)) {
+			o.put("client_registration_types_supported", Identifier.toStringList(clientRegistrationTypes));
+		}
+		if (MapUtils.isNotEmpty(clientRegistrationAuthMethods)) {
+			JSONObject map = new JSONObject();
+			for (Map.Entry<EndpointName,List<ClientAuthenticationMethod>> en: getClientRegistrationAuthnMethods().entrySet()) {
+				List<String> methodNames = new LinkedList<>();
+				for (ClientAuthenticationMethod method: en.getValue()) {
+					methodNames.add(method.getValue());
+				}
+				map.put(en.getKey().getValue(), methodNames);
+			}
+			o.put("client_registration_authn_methods_supported", map);
 		}
 		if (organizationName != null) {
 			o.put("organization_name", organizationName);
@@ -1579,11 +1628,26 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		
 		// Federation
 		
-		if (jsonObject.get("federation_types_supported") != null) {
-			op.federationTypes = new LinkedList<>();
-			for (String v: JSONObjectUtils.getStringList(jsonObject, "federation_types_supported")) {
-				op.federationTypes.add(new FederationType(v));
+		if (jsonObject.get("client_registration_types_supported") != null) {
+			op.clientRegistrationTypes = new LinkedList<>();
+			for (String v: JSONObjectUtils.getStringList(jsonObject, "client_registration_types_supported")) {
+				op.clientRegistrationTypes.add(new ClientRegistrationType(v));
 			}
+		}
+		
+		if (jsonObject.get("client_registration_authn_methods_supported") != null) {
+			Map<EndpointName,List<ClientAuthenticationMethod>> fedClientAuthMethods = new HashMap<>();
+			JSONObject spec = JSONObjectUtils.getJSONObject(jsonObject, "client_registration_authn_methods_supported");
+			// ar or rar
+			for (String endpointName: spec.keySet()) {
+				List<String> methodNames = JSONObjectUtils.getStringList(spec, endpointName, Collections.<String>emptyList());
+				List<ClientAuthenticationMethod> authMethods = new LinkedList<>();
+				for (String name: methodNames) {
+					authMethods.add(ClientAuthenticationMethod.parse(name));
+				}
+				fedClientAuthMethods.put(new EndpointName(endpointName), authMethods);
+			}
+			op.setClientRegistrationAuthnMethods(fedClientAuthMethods);
 		}
 		
 		op.organizationName = JSONObjectUtils.getString(jsonObject, "organization_name", null);

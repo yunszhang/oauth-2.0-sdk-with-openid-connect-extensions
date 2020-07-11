@@ -23,8 +23,10 @@ import java.net.URI;
 
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.WellKnownPathComposeStrategy;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.openid.connect.sdk.federation.api.FetchEntityStatementRequest;
 import com.nimbusds.openid.connect.sdk.federation.api.FetchEntityStatementResponse;
 import com.nimbusds.openid.connect.sdk.federation.config.FederationEntityConfigurationRequest;
@@ -34,7 +36,10 @@ import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 
 
 /**
- * The default entity statement retriever for resolving trust chains.
+ * The default entity statement retriever for resolving trust chains. Supports
+ * the {@link WellKnownPathComposeStrategy#POSTFIX postfix} and
+ * {@link WellKnownPathComposeStrategy#INFIX infix} well-known path composition
+ * strategies.
  */
 public class DefaultEntityStatementRetriever implements EntityStatementRetriever {
 	
@@ -54,20 +59,20 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 	/**
 	 * The default HTTP connect timeout in milliseconds.
 	 */
-	static final int DEFAULT_HTTP_CONNECT_TIMEOUT_MS = 1000;
+	public static final int DEFAULT_HTTP_CONNECT_TIMEOUT_MS = 1000;
 	
 	
 	/**
 	 * The default HTTP read timeout in milliseconds.
 	 */
-	static final int DEFAULT_HTTP_READ_TIMEOUT_MS = 1000;
+	public static final int DEFAULT_HTTP_READ_TIMEOUT_MS = 1000;
 	
 	
 	/**
 	 * Creates a new entity statement retriever using the default HTTP
 	 * timeout settings.
 	 */
-	DefaultEntityStatementRetriever() {
+	public DefaultEntityStatementRetriever() {
 		this(DEFAULT_HTTP_CONNECT_TIMEOUT_MS, DEFAULT_HTTP_READ_TIMEOUT_MS);
 	}
 	
@@ -82,8 +87,8 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 	 *                             zero means timeout determined by the
 	 *                             underlying HTTP client.
 	 */
-	DefaultEntityStatementRetriever(final int httpConnectTimeoutMs,
-					final int httpReadTimeoutMs) {
+	public DefaultEntityStatementRetriever(final int httpConnectTimeoutMs,
+					       final int httpReadTimeoutMs) {
 		this.httpConnectTimeoutMs = httpConnectTimeoutMs;
 		this.httpReadTimeoutMs = httpReadTimeoutMs;
 	}
@@ -95,7 +100,7 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 	 * @return The configured HTTP connect timeout in milliseconds, zero
 	 *         means timeout determined by the underlying HTTP client.
 	 */
-	int getHTTPConnectTimeout() {
+	public int getHTTPConnectTimeout() {
 		return httpConnectTimeoutMs;
 	}
 	
@@ -106,7 +111,7 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 	 * @return The configured HTTP read timeout in milliseconds, zero
 	 *         means timeout determined by the underlying HTTP client.
 	 */
-	int getHTTPReadTimeout() {
+	public int getHTTPReadTimeout() {
 		return httpReadTimeoutMs;
 	}
 	
@@ -129,20 +134,32 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 		try {
 			httpResponse = httpRequest.send();
 		} catch (IOException e) {
-			throw new ResolveException("Couldn't retrieve entity configuration for " + target + ": " + e.getMessage(), e);
+			throw new ResolveException("Couldn't retrieve entity configuration for " + httpRequest.getURL() + ": " + e.getMessage(), e);
+		}
+		
+		if (StringUtils.isNotBlank(target.toURI().getPath()) && HTTPResponse.SC_NOT_FOUND == httpResponse.getStatusCode()) {
+			// We have a path in the entity ID URL, try infix strategy
+			request = new FederationEntityConfigurationRequest(target, WellKnownPathComposeStrategy.INFIX);
+			httpRequest = request.toHTTPRequest();
+			applyTimeouts(httpRequest);
+			
+			try {
+				httpResponse = httpRequest.send();
+			} catch (IOException e) {
+				throw new ResolveException("Couldn't retrieve entity configuration for " + httpRequest.getURL() + ": " + e.getMessage(), e);
+			}
 		}
 		
 		FederationEntityConfigurationResponse response;
-		
 		try {
 			response = FederationEntityConfigurationResponse.parse(httpResponse);
 		} catch (ParseException e) {
-			throw new ResolveException("Error parsing entity configuration response from " + target + ": " + e.getMessage(), e);
+			throw new ResolveException("Error parsing entity configuration response from " + httpRequest.getURL() + ": " + e.getMessage(), e);
 		}
 		
 		if (! response.indicatesSuccess()) {
 			ErrorObject errorObject = response.toErrorResponse().getErrorObject();
-			throw new ResolveException("Entity configuration error response from " + target + ": " +
+			throw new ResolveException("Entity configuration error response from " + httpRequest.getURL() + ": " +
 				errorObject.getHTTPStatusCode() +
 				(errorObject.getCode() != null ? " " + errorObject.getCode() : ""),
 				errorObject);

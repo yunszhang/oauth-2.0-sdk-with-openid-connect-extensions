@@ -39,10 +39,15 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.SubjectType;
+import com.nimbusds.openid.connect.sdk.federation.policy.MetadataPolicy;
+import com.nimbusds.openid.connect.sdk.federation.policy.factories.DefaultRPMetadataPolicyFactory;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 
 public class EntityStatementTest extends TestCase {
@@ -78,7 +83,7 @@ public class EntityStatementTest extends TestCase {
 	}
 	
 	
-	public static EntityStatementClaimsSet createEntityStatementClaimsSet() {
+	public static EntityStatementClaimsSet createSelfIssuedEntityStatementClaimsSet() {
 		
 		Date now = new Date();
 		long nowTS = DateUtils.toSecondsSinceEpoch(now);
@@ -100,10 +105,32 @@ public class EntityStatementTest extends TestCase {
 		return stmt;
 	}
 	
+	
+	public static EntityStatementClaimsSet createOPAboutRPEntityStatementClaimsSet() {
+		
+		Date now = new Date();
+		long nowTS = DateUtils.toSecondsSinceEpoch(now);
+		Date iat = DateUtils.fromSecondsSinceEpoch(nowTS);
+		Date exp = DateUtils.fromSecondsSinceEpoch(nowTS + 60);
+		
+		Issuer iss = OP_METADATA.getIssuer();
+		Subject sub = new Subject("https://rp.example.com");
+		List<EntityID> authorityHints = Collections.singletonList(new EntityID("https://federation.example.com"));
+		
+		EntityStatementClaimsSet stmt = new EntityStatementClaimsSet(
+			iss,
+			sub,
+			iat,
+			exp,
+			null);
+		stmt.setAuthorityHints(authorityHints);
+		return stmt;
+	}
+	
 
 	public void testLifecycle_defaultJWSAlg() throws Exception {
 		
-		EntityStatementClaimsSet claimsSet = createEntityStatementClaimsSet();
+		EntityStatementClaimsSet claimsSet = createSelfIssuedEntityStatementClaimsSet();
 		
 		EntityStatement entityStatement = EntityStatement.sign(claimsSet, RSA_JWK);
 		
@@ -132,7 +159,7 @@ public class EntityStatementTest extends TestCase {
 
 	public void testLifecycle_explicitJWSAlg() throws Exception {
 		
-		EntityStatementClaimsSet claimsSet = createEntityStatementClaimsSet();
+		EntityStatementClaimsSet claimsSet = createSelfIssuedEntityStatementClaimsSet();
 		
 		EntityStatement entityStatement = EntityStatement.sign(claimsSet, RSA_JWK, JWSAlgorithm.RS512);
 		
@@ -158,9 +185,33 @@ public class EntityStatementTest extends TestCase {
 	}
 	
 	
+	public void testLifecycle_OPAboutRP() throws Exception {
+		
+		EntityStatementClaimsSet claimsSet = createOPAboutRPEntityStatementClaimsSet();
+		
+		OIDCClientMetadata origMetadata = new OIDCClientMetadata();
+		origMetadata.setRedirectionURI(URI.create("https://rp.example.com/cb"));
+		
+		claimsSet.setRPMetadata(origMetadata);
+		
+		OIDCClientMetadata registeredMetadata = new OIDCClientMetadata(origMetadata);
+		registeredMetadata.applyDefaults();
+		OIDCClientInformation clientInfo = new OIDCClientInformation(
+			new ClientID("123"),
+			claimsSet.getIssueTime(),
+			registeredMetadata,
+			null);
+		MetadataPolicy rpMetadataPolicy = new DefaultRPMetadataPolicyFactory().create(origMetadata, clientInfo);
+		claimsSet.setMetadataPolicy(FederationMetadataType.OPENID_RELYING_PARTY, rpMetadataPolicy);
+		
+		EntityStatement registrationStatement = EntityStatement.sign(claimsSet, RSA_JWK);
+		registrationStatement.verifySignature(SIMPLE_JWK_SET);
+	}
+	
+	
 	public void testExpired() throws Exception {
 		
-		EntityStatementClaimsSet claimsSet = createEntityStatementClaimsSet();
+		EntityStatementClaimsSet claimsSet = createSelfIssuedEntityStatementClaimsSet();
 		
 		// Put exp in past
 		long now = DateUtils.toSecondsSinceEpoch(new Date());
@@ -186,7 +237,7 @@ public class EntityStatementTest extends TestCase {
 	
 	public void testInvalidSignature_noMatchingKey() throws Exception {
 		
-		EntityStatementClaimsSet claimsSet = createEntityStatementClaimsSet();
+		EntityStatementClaimsSet claimsSet = createSelfIssuedEntityStatementClaimsSet();
 		
 		RSAKey rsaJWK = new RSAKeyGenerator(2048)
 			.keyIDFromThumbprint(true)
@@ -209,7 +260,7 @@ public class EntityStatementTest extends TestCase {
 	
 	public void testInvalidSignature_signature() throws Exception {
 		
-		EntityStatementClaimsSet claimsSet = createEntityStatementClaimsSet();
+		EntityStatementClaimsSet claimsSet = createSelfIssuedEntityStatementClaimsSet();
 		
 		RSAKey rsaJWK = new RSAKeyGenerator(2048)
 			.keyID(RSA_JWK.getKeyID())
@@ -243,7 +294,7 @@ public class EntityStatementTest extends TestCase {
 	
 	public void testIsForTrustAnchor() throws Exception {
 		
-		EntityStatementClaimsSet claimsSet = createEntityStatementClaimsSet();
+		EntityStatementClaimsSet claimsSet = createSelfIssuedEntityStatementClaimsSet();
 		claimsSet.setAuthorityHints(null);
 		
 		EntityStatement entityStatement = EntityStatement.sign(claimsSet, RSA_JWK);

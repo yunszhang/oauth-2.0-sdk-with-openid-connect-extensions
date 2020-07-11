@@ -8,55 +8,6 @@ README
 This open source SDK is your starting point for developing OAuth 2.0 and OpenID
 Connect based applications in Java.
 
-OAuth 2.0
-
-Supported endpoint requests and responses:
-
-    * Authorisation Server Metadata
-
-    * Authorisation Endpoint
-
-    * Token Endpoint
-
-    * Token Introspection Endpoint
-
-    * Token Revocation Endpoint
-
-    * Client Registration and Management Endpoint
-
-    * Request Object Endpoint
-
-    * Resource protected with an OAuth 2.0 access token
-
-
-OpenID Connect
-
-Supported endpoint requests and responses:
-
-    * OpenID Provider Metadata
-
-    * Authorisation Endpoint for OpenID Authentication requests
-
-    * Token Endpoint
-
-    * UserInfo Endpoint
-
-    * End-Session (Logout) Endpoint
-
-    * Back-Channel Logout Endpoint
-
-
-Features:
-
-	* Process plain, signed and encrypted JSON Web Tokens (JWTs) with help 
-	  of the Nimbus JOSE+JWT library.
-
-	* OpenID Connect UserInfo i10n and l10n support with help of the Nimbus
-	  Language Tags (RFC 5646) library.
-
-	* Java Servlet integration.
-
-
 This SDK version implements the following standards and drafts:
 
 	* The OAuth 2.0 Authorization Framework (RFC 6749)
@@ -122,7 +73,7 @@ This SDK version implements the following standards and drafts:
 
 	* OpenID Connect for Identity Assurance 1.0 - draft 08
 
-	* OpenID Connect Federation 1.0 - draft 11
+	* OpenID Connect Federation 1.0 - draft 12
 
 	* OAuth 2.0 Multiple Response Type Encoding Practices 1.0 (2014-02-25)
 
@@ -142,4 +93,4 @@ This SDK is provided under the terms of the Apache 2.0 licence.
 Questions or comments? Email support@connect2id.com
 
 
-2020-04-30
+2020-07-01

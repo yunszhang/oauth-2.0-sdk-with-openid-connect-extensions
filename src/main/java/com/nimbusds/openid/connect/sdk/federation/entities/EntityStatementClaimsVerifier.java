@@ -73,7 +73,7 @@ public class EntityStatementClaimsVerifier extends DefaultJWTClaimsVerifier {
 		super(
 			expectedAudience != null ? expectedAudience.getValue() : null,
 			null,
-			new HashSet<>(Arrays.asList("iss", "sub", "iat", "exp", "jwks"))
+			new HashSet<>(Arrays.asList("iss", "sub", "iat", "exp"))
 		);
 		isSelfIssued = false;
 	}

@@ -49,7 +49,7 @@ public class FederationEntityMetadata implements JSONAware {
 	 * The federation API endpoint, required for trust anchors and
 	 * intermediate entities.
 	 */
-	private URI federationAPIEndpoint;
+	private final URI federationAPIEndpoint;
 	
 	
 	/**

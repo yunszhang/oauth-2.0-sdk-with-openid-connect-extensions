@@ -37,7 +37,7 @@ import com.nimbusds.oauth2.sdk.client.RegistrationError;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
-import com.nimbusds.openid.connect.sdk.federation.FederationType;
+import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
 import com.nimbusds.openid.connect.sdk.id.SectorID;
 
 
@@ -98,7 +98,7 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("frontchannel_logout_session_required"));
 		assertTrue(paramNames.contains("backchannel_logout_uri"));
 		assertTrue(paramNames.contains("backchannel_logout_session_required"));
-		assertTrue(paramNames.contains("federation_type"));
+		assertTrue(paramNames.contains("client_registration_types"));
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("trust_anchor_id"));
 
@@ -764,10 +764,10 @@ public class OIDCClientMetadataTest extends TestCase {
 		URI redirectionURI = URI.create("https://example.com/cb");
 		clientMetadata.setRedirectionURI(redirectionURI);
 		
-		assertNull(clientMetadata.getFederationTypes());
-		List<FederationType> federationTypes = Arrays.asList(FederationType.EXPLICIT, FederationType.AUTOMATIC);
-		clientMetadata.setFederationTypes(federationTypes);
-		assertEquals(federationTypes, clientMetadata.getFederationTypes());
+		assertNull(clientMetadata.getClientRegistrationTypes());
+		List<ClientRegistrationType> federationTypes = Arrays.asList(ClientRegistrationType.EXPLICIT, ClientRegistrationType.AUTOMATIC);
+		clientMetadata.setClientRegistrationTypes(federationTypes);
+		assertEquals(federationTypes, clientMetadata.getClientRegistrationTypes());
 		
 		assertNull(clientMetadata.getOrganizationName());
 		String orgName = "Example Org";
@@ -782,7 +782,7 @@ public class OIDCClientMetadataTest extends TestCase {
 		clientMetadata = OIDCClientMetadata.parse(jsonObject);
 		
 		assertEquals(redirectionURI, clientMetadata.getRedirectionURI());
-		assertEquals(federationTypes, clientMetadata.getFederationTypes());
+		assertEquals(federationTypes, clientMetadata.getClientRegistrationTypes());
 		assertEquals(orgName, clientMetadata.getOrganizationName());
 	}
 }

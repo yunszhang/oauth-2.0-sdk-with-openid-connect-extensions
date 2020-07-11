@@ -132,7 +132,7 @@ public class EntityStatementClaimsVerifierTest extends TestCase {
 		
 		EntityStatementClaimsVerifier verifier = new EntityStatementClaimsVerifier(new Audience("https://c2id.com"));
 		assertEquals(Collections.singleton("https://c2id.com"), verifier.getAcceptedAudienceValues());
-		assertEquals(new HashSet<>(Arrays.asList("aud", "iss", "sub", "iat", "exp", "jwks")), verifier.getRequiredClaims());
+		assertEquals(new HashSet<>(Arrays.asList("aud", "iss", "sub", "iat", "exp")), verifier.getRequiredClaims());
 		assertTrue(verifier.getProhibitedClaims().isEmpty());
 		assertTrue(verifier.getExactMatchClaims().getClaims().isEmpty());
 	}

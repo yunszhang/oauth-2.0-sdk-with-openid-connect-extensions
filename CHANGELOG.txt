@@ -1369,8 +1369,55 @@ version 8.10 (2020-06-10)
     * Makes EntityStatementRetriever and DefaultEntityStatementRetriever
       public.
 
-version 8.11 (2020-06-10)
+version 8.11 (2020-06-28)
     * Adds WellKnownPathComposeStrategy enum and updates the
       AuthorizationServerConfigurationRequest,
       OIDCProviderConfigurationRequest and FederationEntityConfigurationRequest
       to support infix and postfix well-known path composition strategies.
+    * Updates the OpenID Connect Federation 1.0 DefaultEntityStatementRetriever
+      to support the postfix and infix well-known path composition strategies.
+    * Makes DefaultEntityStatementRetriever package private methods public.
+    * Adds HTTPResponse.SC_NOT_FOUND 404 constant.
+    * CodeVerifier and Secret implement Serializable (iss #303).
+    * Renames FederationType to ClientRegistrationType.
+    * Updates OIDCProviderMetadata for client_registration_types_supported,
+      deprecates federation_types_supported.
+    * Adds OIDCProviderMetadata support for
+      client_registration_auth_methods_supported.
+    * Adds ClientAuthenticationMethod.REQUEST_OBJECT (request_object) for
+      OpenID Connect Federation 1.0.
+
+version 8.12 (2020-06-29)
+    * Updates ClientMetadata for client_registration_types.
+
+version 8.12.1 (2020-06-29)
+    * Fixes NPE in FederationEntityConfigurationSuccessResponse.parse with
+      empty entity body.
+
+version 8.13 (2020-07-01)
+    * Adds new RequestName class for OpenID Connect Federation 1.0 (draft 12).
+    * Federation EntityStatementClaimsSet no longer requires jwks for OP
+      statements about an RP in explicit client registration.
+    * Updates OIDCProviderMetadata for
+      client_registration_authn_methods_supported.
+    * Removes old OpenID Connect Federation 1.0 draft 11 fields.
+
+version 8.14 (2020-07-07)
+    * Updates DefaultEntityStatementRetriever.fetchSelfIssuedEntityStatement to
+      include complete URL in error messages.
+    * Fixes DefaultEntityStatementRetriever.fetchSelfIssuedEntityStatement to
+      not attempt INFIX strategy when the entity ID has not path in its URI.
+    * Updates to Nimbus JOSE +JWT 8.18.
+
+version 8.15 (2020-07-08)
+    * Adds new TrustChainResolver.resolveTrustChains method that starts with an
+      EntityStatement instead of an EntityID.
+    * Adds new TrustChainRetriever.retrieve method that starts with an
+      EntityStatement instead of an EntityID.
+
+version 8.15.1 (2020-07-08)
+    * Upgrades to com.nimbusds:content-type:2.1
+
+version 8.16 (2020-07-10)
+    * EntityStatementClaimsVerifier requires jwks for self-issued statements
+      only.

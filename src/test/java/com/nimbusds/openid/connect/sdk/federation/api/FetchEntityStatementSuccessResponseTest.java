@@ -146,7 +146,7 @@ public class FetchEntityStatementSuccessResponseTest extends TestCase {
 			FetchEntityStatementSuccessResponse.parse(httpResponse);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("The HTTP Content-Type header must be application/jose; charset=UTF-8", e.getMessage());
+			assertEquals("The HTTP Content-Type header must be application/jose, received application/x-www-form-urlencoded", e.getMessage());
 		}
 	}
 	
