@@ -36,6 +36,7 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.ciba.BackChannelTokenDeliveryMode;
 import com.nimbusds.oauth2.sdk.id.Identifier;
 import com.nimbusds.oauth2.sdk.id.SoftwareID;
 import com.nimbusds.oauth2.sdk.id.SoftwareVersion;
@@ -121,6 +122,12 @@ public class ClientMetadata {
 		p.add("federation_type");
 		p.add("organization_name");
 		p.add("trust_anchor_id");
+		
+		// ciba client metadata
+		p.add("backchannel_token_delivery_mode");
+		p.add("backchannel_client_notification_endpoint");
+		p.add("backchannel_authentication_request_signing_alg");
+		p.add("backchannel_user_code_parameter");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -340,6 +347,33 @@ public class ClientMetadata {
 	private JSONObject customFields;
 
 
+	/**
+	 * One of the following values: poll, ping and
+	 * push used to indicate the mode of token delivery that the OpenID provider
+	 * supports
+	 */
+	private BackChannelTokenDeliveryMode backChannelTokenDeliveryMode;
+	
+	/**
+	 * If the token delivery mode is set to ping or push. This is the endpoint to
+	 * which the OP will post a notification after a successful or failed end-user
+	 * authentication. It MUST be an HTTPS URL.
+	 */
+	private URI backChannelClientNotificationEndpoint;
+	/**
+	 * The JWS algorithm <code>alg</code> value that the Client will use for signing
+	 * authentication request, as described in Section 7.1.1. When omitted, the
+	 * Client will not send signed authentication requests.
+	 */
+	private JWSAlgorithm backChannelAuthenticationRequestSigningAlgorithm;
+	
+	/**
+	 * Boolean value specifying whether the Client supports the user_code parameter.
+	 * If omitted, the default value is false. This parameter only applies when OP
+	 * parameter backchannel_user_code_parameter_supported is true.
+	 */
+	private boolean backChannelUserCodeParameter = false;
+	
 	/**
 	 * Creates a new OAuth 2.0 client metadata instance.
 	 */
@@ -1687,6 +1721,69 @@ public class ClientMetadata {
 
 
 	/**
+	 * Gets the backchannel token delivery mode (poll, ping or push)
+	 * @return the token delivery mode
+	 */
+	public BackChannelTokenDeliveryMode getBackChannelTokenDeliveryMode() {
+		return backChannelTokenDeliveryMode;
+	}
+
+	/**
+	 * Sets the backchannel token delivery mode
+	 * @param the backchannel token delivery mode
+	 */
+	public void setBackChannelTokenDeliveryMode(final BackChannelTokenDeliveryMode backChannelTokenDeliveryMode) {
+		this.backChannelTokenDeliveryMode = backChannelTokenDeliveryMode;
+	}
+
+	/**
+	 * Gets the OpenID Provider's Backchannel Authentication Endpoint
+	 * @return the CIBA endpoint
+	 */
+	public URI getBackChannelClientNotificationEndpoint() {
+		return backChannelClientNotificationEndpoint;
+	}
+
+	/**
+	 * Sets the Backchannel Client Notification Endpoint
+	 * @param the Backchannel Client Notification Endpoint
+	 */
+	public void setBackChannelClientNotificationEndpoint(final URI backChannelClientNotificationEndpoint) {
+		this.backChannelClientNotificationEndpoint = backChannelClientNotificationEndpoint;
+	}
+
+	/**
+	 * Gets  Backchannel Authentication Request Signing Algorithm
+	 * @return The Backchannel Authentication Request Signing Algorithm
+	 */
+	public JWSAlgorithm getBackChannelAuthenticationRequestSigningAlgorithm() {
+		return backChannelAuthenticationRequestSigningAlgorithm;
+	}
+
+	/**
+	 * Sets the supported list of Backchannel Authentication Request Signing Algorithms Values
+	 * @param the supported list of Backchannel Authentication Request Signing Algorithms Values
+	 */
+	public void setBackChannelAuthenticationRequestSigningAlgorithm(final JWSAlgorithm backChannelAuthenticationRequestSigningAlgorithm) {
+		this.backChannelAuthenticationRequestSigningAlgorithm = backChannelAuthenticationRequestSigningAlgorithm;
+	}
+
+	/**
+	 * Gets if Backchannel UserCode Parameter is enabled
+	 * @return is Backchannel UserCode Parameter enabled
+	 */
+	public boolean isBackChannelUserCodeParameter() {
+		return backChannelUserCodeParameter;
+	}
+
+	/**
+	 * Sets if Backchannel UserCode Parameter is enabled
+	 * @param the flag if backchannel UserCode Parameter is enabled
+	 */
+	public void setBackChannelUserCodeParameter(final boolean backChannelUserCodeParameter) {
+		this.backChannelUserCodeParameter = backChannelUserCodeParameter;
+	}
+	/**
 	 * Applies the client metadata defaults where no values have been
 	 * specified.
 	 *
@@ -1977,6 +2074,18 @@ public class ClientMetadata {
 		if (trustAnchorID != null) {
 			o.put("trust_anchor_id", trustAnchorID.getValue());
 		}
+
+		if (backChannelUserCodeParameter)
+			o.put("backchannel_user_code_parameter", backChannelUserCodeParameter);
+
+		if (backChannelAuthenticationRequestSigningAlgorithm != null)
+			o.put("backchannel_authentication_request_signing_alg", backChannelAuthenticationRequestSigningAlgorithm.getName());
+		
+		if (backChannelClientNotificationEndpoint != null)
+			o.put("backchannel_client_notification_endpoint", backChannelClientNotificationEndpoint.toString());
+		
+		if (backChannelTokenDeliveryMode != null)
+			o.put("backchannel_token_delivery_mode", backChannelTokenDeliveryMode.getValue());
 
 		return o;
 	}
@@ -2329,7 +2438,31 @@ public class ClientMetadata {
 				metadata.setTrustAnchorID(EntityID.parse(JSONObjectUtils.getString(jsonObject, "trust_anchor_id")));
 				jsonObject.remove("trust_anchor_id");
 			}
+			
+			if (jsonObject.get("backchannel_user_code_parameter") != null) {
+				metadata.setBackChannelUserCodeParameter(JSONObjectUtils.getBoolean(jsonObject, "backchannel_user_code_parameter"));
+				jsonObject.remove("backchannel_user_code_parameter");
+			}
 
+			if (jsonObject.get("backchannel_authentication_request_signing_alg") != null) {
+				metadata.setBackChannelAuthenticationRequestSigningAlgorithm(JWSAlgorithm.parse(JSONObjectUtils.getString(jsonObject, "backchannel_authentication_request_signing_alg")));
+				jsonObject.remove("backchannel_authentication_request_signing_alg");
+			}
+
+			if (jsonObject.get("backchannel_client_notification_endpoint") != null) {
+				try {
+					metadata.setBackChannelClientNotificationEndpoint(
+							new URI(jsonObject.getAsString("backchannel_client_notification_endpoint")));
+
+				} catch (URISyntaxException e) {
+					throw new ParseException("Invalid \"backchannel_client_notification_endpoint\" parameter");
+				}
+				jsonObject.remove("backchannel_client_notification_endpoint");
+			}
+			if (jsonObject.get("backchannel_token_delivery_mode") != null) {
+				metadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.parse(jsonObject.getAsString("backchannel_token_delivery_mode")));
+				jsonObject.remove("backchannel_token_delivery_mode");
+			}
 		} catch (ParseException | IllegalStateException e) {
 			// Insert client_client_metadata error code so that it
 			// can be reported back to the client if we have a

@@ -38,7 +38,7 @@ import com.nimbusds.oauth2.sdk.util.URLUtils;
 
 
 /**
- * Device authorisation request. Used to start the authorization flow for
+ * Device authorization request. Used to start the authorization flow for
  * browserless and input constraint devices. Supports custom request
  * parameters.
  *

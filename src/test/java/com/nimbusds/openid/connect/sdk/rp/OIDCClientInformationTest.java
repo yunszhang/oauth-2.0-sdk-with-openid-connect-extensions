@@ -98,7 +98,12 @@ public class OIDCClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(56, paramNames.size());
+		assertTrue(paramNames.contains("backchannel_token_delivery_mode"));
+		assertTrue(paramNames.contains("backchannel_client_notification_endpoint"));
+		assertTrue(paramNames.contains("backchannel_authentication_request_signing_alg"));
+		assertTrue(paramNames.contains("backchannel_user_code_parameter"));
+		
+		assertEquals(60, paramNames.size());
 	}
 
 

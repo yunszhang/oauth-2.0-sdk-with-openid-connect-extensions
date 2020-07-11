@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package com.nimbusds.oauth2.sdk.device;
+package com.nimbusds.oauth2.sdk.ciba;
 
 
 import java.net.URI;
@@ -36,41 +36,13 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
 
 /**
- * OAuth 2.0 device authorization error response.
- *
- * <p>Standard authorization errors:
- *
- * <ul>
- *     <li>{@link OAuth2Error#INVALID_REQUEST}
- *     <li>{@link OAuth2Error#INVALID_CLIENT}
- *     <li>{@link OAuth2Error#INVALID_SCOPE}
- * </ul>
- *
- * <p>Example HTTP response:
- *
- * <pre>
- * HTTP/1.1 400 Bad Request
- * Content-Type: application/json
- * Cache-Control: no-store
- * Pragma: no-cache
- * 
- * {
- *  "error" : "invalid_request"
- * }
- * </pre>
- *
- * <p>Related specifications:
- *
- * <ul>
- *     <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
- * </ul>
  */
 @Immutable
-public class DeviceAuthorizationErrorResponse extends DeviceAuthorizationResponse implements ErrorResponse {
+public class CIBATokenErrorResponse extends CIBAAuthorizationResponse implements ErrorResponse {
 
 	
 	/**
-	 * The standard OAuth 2.0 errors for a device authorization error response.
+	 * The standard OAuth 2.0 errors for a Backchannel Authentication Flow error response.
 	 */
 	private static final Set<ErrorObject> STANDARD_ERRORS;
 
@@ -84,7 +56,7 @@ public class DeviceAuthorizationErrorResponse extends DeviceAuthorizationRespons
 
 
 	/**
-	 * Gets the standard OAuth 2.0 errors for a device authorization error
+	 * Gets the standard OAuth 2.0 errors for a Backchannel Authentication Flow error
 	 * response.
 	 *
 	 * @return The standard errors, as a read-only set.
@@ -94,7 +66,6 @@ public class DeviceAuthorizationErrorResponse extends DeviceAuthorizationRespons
 		return STANDARD_ERRORS;
 	}
 
-
 	/**
 	 * The error.
 	 */
@@ -102,23 +73,23 @@ public class DeviceAuthorizationErrorResponse extends DeviceAuthorizationRespons
 
 
 	/**
-	 * Creates a new OAuth 2.0 device authorization error response. No
+	 * Creates a new OAuth 2.0 Backchannel Authentication Flow error response. No
 	 * OAuth 2.0 error is specified.
 	 */
-	protected DeviceAuthorizationErrorResponse() {
+	protected CIBATokenErrorResponse() {
 
 		error = null;
 	}
 
 
 	/**
-	 * Creates a new OAuth 2.0 device authorization error response.
+	 * Creates a new OAuth 2.0 Backchannel Authentication Flow error response.
 	 *
 	 * @param error The error. Should match one of the
 	 *              {@link #getStandardErrors standard errors} for a token
 	 *              error response. Must not be {@code null}.
 	 */
-	public DeviceAuthorizationErrorResponse(final ErrorObject error) {
+	public CIBATokenErrorResponse(final ErrorObject error) {
 
 		if (error == null)
 			throw new IllegalArgumentException("The error must not be null");
@@ -188,7 +159,7 @@ public class DeviceAuthorizationErrorResponse extends DeviceAuthorizationRespons
 
 
 	/**
-	 * Parses an OAuth 2.0 device authorization response from the specified
+	 * Parses an OAuth 2.0 Backchannel Authentication Flow response from the specified
 	 * JSON object.
 	 *
 	 * @param jsonObject The JSON object to parse. Its status code must not
@@ -197,14 +168,14 @@ public class DeviceAuthorizationErrorResponse extends DeviceAuthorizationRespons
 	 * @return The token error response.
 	 *
 	 * @throws ParseException If the JSON object couldn't be parsed to an
-	 *                        OAuth 2.0 device authorization error
+	 *                        OAuth 2.0 Backchannel Authentication Flow error
 	 *                        response.
 	 */
-	public static DeviceAuthorizationErrorResponse parse(final JSONObject jsonObject) throws ParseException {
+	public static CIBATokenErrorResponse parse(final JSONObject jsonObject) throws ParseException {
 
 		// No error code?
 		if (!jsonObject.containsKey("error"))
-			return new DeviceAuthorizationErrorResponse();
+			return new CIBATokenErrorResponse();
 
 		ErrorObject error;
 
@@ -221,26 +192,26 @@ public class DeviceAuthorizationErrorResponse extends DeviceAuthorizationRespons
 			                e);
 		}
 
-		return new DeviceAuthorizationErrorResponse(error);
+		return new CIBATokenErrorResponse(error);
 	}
 
 
 	/**
-	 * Parses an OAuth 2.0 ciba authorization error, push error or token response -  from the
+	 * Parses an OAuth 2.0 Backchannel Authentication Flow error response from the
 	 * specified HTTP response.
 	 *
 	 * @param httpResponse The HTTP response to parse. Its status code must
 	 *                     not be 200 (OK). Must not be {@code null}.
 	 *
-	 * @return The device authorization error response.
+	 * @return The Backchannel Authentication Flow error response.
 	 *
 	 * @throws ParseException If the HTTP response couldn't be parsed to an
-	 *                        OAuth 2.0 device authorization error
+	 *                        OAuth 2.0 Backchannel Authentication Flow error
 	 *                        response.
 	 */
-	public static DeviceAuthorizationErrorResponse parse(final HTTPResponse httpResponse) throws ParseException {
+	public static CIBATokenErrorResponse parse(final HTTPResponse httpResponse) throws ParseException {
 
 		httpResponse.ensureStatusCodeNotOK();
-		return new DeviceAuthorizationErrorResponse(ErrorObject.parse(httpResponse));
+		return new CIBATokenErrorResponse(ErrorObject.parse(httpResponse));
 	}
 }

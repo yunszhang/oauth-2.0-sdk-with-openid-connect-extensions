@@ -1359,6 +1359,13 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		op.setRequiresRequestURIRegistration(as.requiresRequestURIRegistration());
 		
 		op.setCodeChallengeMethods(as.getCodeChallengeMethods());
+		
+
+		op.setBackChannelAuthenticationEndpoint(as.getBackChannelAuthenticationEndpoint());
+		op.setBackChannelAuthenticationRequestSigningAlgValues(as.getBackChannelAuthenticationRequestSigningAlgValues());
+		op.setBackChannelUserCodeParameterSupported(as.isBackChannelUserCodeParameterSupported());
+		op.setBackChannelClientNotificationEndpoint(as.getBackChannelClientNotificationEndpoint());
+		op.setBackChannelTokenDeliveryModes(as.getBackChannelTokenDeliveryModes());
 
 		if (jsonObject.get("acr_values_supported") != null) {
 

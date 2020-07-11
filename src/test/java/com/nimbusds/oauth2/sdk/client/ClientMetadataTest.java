@@ -37,6 +37,7 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.ciba.BackChannelTokenDeliveryMode;
 import com.nimbusds.oauth2.sdk.id.SoftwareID;
 import com.nimbusds.oauth2.sdk.id.SoftwareVersion;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
@@ -84,8 +85,12 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("federation_type"));
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("trust_anchor_id"));
+		assertTrue(paramNames.contains("backchannel_token_delivery_mode"));
+		assertTrue(paramNames.contains("backchannel_client_notification_endpoint"));
+		assertTrue(paramNames.contains("backchannel_authentication_request_signing_alg"));
+		assertTrue(paramNames.contains("backchannel_user_code_parameter"));
 
-		assertEquals(32, ClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(36, ClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -173,6 +178,14 @@ public class ClientMetadataTest extends TestCase {
 
 		SoftwareVersion softwareVersion = new SoftwareVersion("1.0");
 		meta.setSoftwareVersion(softwareVersion);
+
+		meta.setBackChannelAuthenticationRequestSigningAlgorithm(JWSAlgorithm.HS512);
+
+		URI cn = new URI("http://example.com/de/cn");
+		meta.setBackChannelClientNotificationEndpoint(cn);
+		
+		meta.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.PUSH);
+		meta.setBackChannelUserCodeParameter(true);
 		
 		assertFalse(meta.getTLSClientCertificateBoundAccessTokens());
 		assertFalse(meta.getMutualTLSSenderConstrainedAccessTokens());
@@ -255,6 +268,11 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(authzJWEEnc, meta.getAuthorizationJWEEnc());
 		assertTrue(meta.getCustomFields().isEmpty());
 		
+		assertEquals(cn, meta.getBackChannelClientNotificationEndpoint());
+		assertTrue(meta.isBackChannelUserCodeParameter());
+		assertEquals(BackChannelTokenDeliveryMode.PUSH, meta.getBackChannelTokenDeliveryMode());
+		assertEquals(JWSAlgorithm.HS512, meta.getBackChannelAuthenticationRequestSigningAlgorithm());
+		
 		String json = meta.toJSONObject().toJSONString();
 		
 		JSONObject jsonObject = JSONObjectUtils.parse(json);
@@ -302,6 +320,11 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(authzJWEAlg, meta.getAuthorizationJWEAlg());
 		assertEquals(authzJWEEnc, meta.getAuthorizationJWEEnc());
 
+		assertEquals(cn, meta.getBackChannelClientNotificationEndpoint());
+		assertTrue(meta.isBackChannelUserCodeParameter());
+		assertEquals(BackChannelTokenDeliveryMode.PUSH, meta.getBackChannelTokenDeliveryMode());
+		assertEquals(JWSAlgorithm.HS512, meta.getBackChannelAuthenticationRequestSigningAlgorithm());
+	
 		assertTrue(meta.getCustomFields().isEmpty());
 	}
 
@@ -385,6 +408,15 @@ public class ClientMetadataTest extends TestCase {
 		SoftwareVersion softwareVersion = new SoftwareVersion("1.0");
 		meta.setSoftwareVersion(softwareVersion);
 		
+		meta.setBackChannelAuthenticationRequestSigningAlgorithm(JWSAlgorithm.HS512);
+
+		URI cn = new URI("http://example.com/de/cn");
+		meta.setBackChannelClientNotificationEndpoint(cn);
+		
+		meta.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.PUSH);
+		meta.setBackChannelUserCodeParameter(true);
+		
+		
 		// Test getters
 		assertEquals(redirectURIs, meta.getRedirectionURIs());
 		assertEquals(scope, meta.getScope());
@@ -415,6 +447,11 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(softwareVersion, meta.getSoftwareVersion());
 		assertTrue(meta.getCustomFields().isEmpty());
 		
+		assertEquals(cn, meta.getBackChannelClientNotificationEndpoint());
+		assertTrue(meta.isBackChannelUserCodeParameter());
+		assertEquals(BackChannelTokenDeliveryMode.PUSH, meta.getBackChannelTokenDeliveryMode());
+		assertEquals(JWSAlgorithm.HS512, meta.getBackChannelAuthenticationRequestSigningAlgorithm());
+	
 		String json = meta.toJSONObject().toJSONString();
 		
 		JSONObject jsonObject = JSONObjectUtils.parse(json);
@@ -451,7 +488,12 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(1, meta.getJWKSet().getKeys().size());
 		assertEquals(softwareID, meta.getSoftwareID());
 		assertEquals(softwareVersion, meta.getSoftwareVersion());
-
+		
+		assertEquals(cn, meta.getBackChannelClientNotificationEndpoint());
+		assertTrue(meta.isBackChannelUserCodeParameter());
+		assertEquals(BackChannelTokenDeliveryMode.PUSH, meta.getBackChannelTokenDeliveryMode());
+		assertEquals(JWSAlgorithm.HS512, meta.getBackChannelAuthenticationRequestSigningAlgorithm());
+	
 		assertTrue(meta.getCustomFields().isEmpty());
 	}
 
@@ -538,6 +580,15 @@ public class ClientMetadataTest extends TestCase {
 		SoftwareVersion softwareVersion = new SoftwareVersion("1.0");
 		meta.setSoftwareVersion(softwareVersion);
 		
+		meta.setBackChannelAuthenticationRequestSigningAlgorithm(JWSAlgorithm.HS512);
+
+		URI cn = new URI("http://example.com/de/cn");
+		meta.setBackChannelClientNotificationEndpoint(cn);
+		
+		meta.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.PUSH);
+		meta.setBackChannelUserCodeParameter(true);
+		
+		
 		meta.setTLSClientCertificateBoundAccessTokens(true);
 		
 		String subjectDN = "cn=123";
@@ -610,7 +661,12 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(authzJWSAlg, copy.getAuthorizationJWSAlg());
 		assertEquals(authzJWEAlg, copy.getAuthorizationJWEAlg());
 		assertEquals(authzJWEEnc, copy.getAuthorizationJWEEnc());
-
+		
+		assertEquals(cn, meta.getBackChannelClientNotificationEndpoint());
+		assertTrue(meta.isBackChannelUserCodeParameter());
+		assertEquals(BackChannelTokenDeliveryMode.PUSH, meta.getBackChannelTokenDeliveryMode());
+		assertEquals(JWSAlgorithm.HS512, meta.getBackChannelAuthenticationRequestSigningAlgorithm());
+	
 		String json = copy.toJSONObject().toJSONString();
 
 		JSONObject jsonObject = JSONObjectUtils.parse(json);
@@ -655,7 +711,12 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(authzJWSAlg, copy.getAuthorizationJWSAlg());
 		assertEquals(authzJWEAlg, copy.getAuthorizationJWEAlg());
 		assertEquals(authzJWEEnc, copy.getAuthorizationJWEEnc());
-
+		
+		assertEquals(cn, meta.getBackChannelClientNotificationEndpoint());
+		assertTrue(meta.isBackChannelUserCodeParameter());
+		assertEquals(BackChannelTokenDeliveryMode.PUSH, meta.getBackChannelTokenDeliveryMode());
+		assertEquals(JWSAlgorithm.HS512, meta.getBackChannelAuthenticationRequestSigningAlgorithm());
+	
 		assertTrue(copy.getCustomFields().isEmpty());
 	}
 

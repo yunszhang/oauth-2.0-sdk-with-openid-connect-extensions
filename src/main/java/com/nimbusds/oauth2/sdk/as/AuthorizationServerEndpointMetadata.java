@@ -63,6 +63,7 @@ public class AuthorizationServerEndpointMetadata {
 		p.add("device_authorization_endpoint");
 		p.add("request_object_endpoint");
 		p.add("pushed_authorization_request_endpoint");
+		p.add("backchannel_client_notification_endpoint");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 	
@@ -122,6 +123,12 @@ public class AuthorizationServerEndpointMetadata {
 	
 	
 	/**
+	 * The backchannel client notification endpoint.
+	 */
+	private URI backChannelClientNotificationEndpoint;
+	
+
+	/**
 	 * The device authorization endpoint.
 	 */
 	private URI deviceAuthzEndpoint;
@@ -171,7 +178,22 @@ public class AuthorizationServerEndpointMetadata {
 		return tokenEndpoint;
 	}
 	
-	
+
+	/**
+	 * Gets the back-channel Client Notification endpoint URI. Corresponds the {@code backchannel_client_notification_endpoint}
+	 * metadata field.
+	 *
+	 * @return The back-channel Client Notification Endpoint URI, {@code null} if not specified.
+	 */
+	public URI getBackChannelClientNotificationEndpoint() {
+		return backChannelClientNotificationEndpoint;
+	}
+
+
+	public void setBackChannelClientNotificationEndpoint(final URI backChannelClientNotificationEndpoint) {
+		this.backChannelClientNotificationEndpoint = backChannelClientNotificationEndpoint;
+	}
+
 	/**
 	 * Sts the token endpoint URI. Corresponds the {@code token_endpoint}
 	 * metadata field.
@@ -376,6 +398,9 @@ public class AuthorizationServerEndpointMetadata {
 		if (deviceAuthzEndpoint != null)
 			o.put("device_authorization_endpoint", deviceAuthzEndpoint.toString());
 		
+		if (backChannelClientNotificationEndpoint != null)
+			o.put("backchannel_client_notification_endpoint", backChannelClientNotificationEndpoint.toString());
+		
 		return o;
 	}
 	
@@ -410,6 +435,7 @@ public class AuthorizationServerEndpointMetadata {
 		as.regEndpoint = JSONObjectUtils.getURI(jsonObject, "registration_endpoint", null);
 		as.introspectionEndpoint = JSONObjectUtils.getURI(jsonObject, "introspection_endpoint", null);
 		as.revocationEndpoint = JSONObjectUtils.getURI(jsonObject, "revocation_endpoint", null);
+		as.backChannelClientNotificationEndpoint = JSONObjectUtils.getURI(jsonObject, "backchannel_client_notification_endpoint", null);
 		as.deviceAuthzEndpoint = JSONObjectUtils.getURI(jsonObject, "device_authorization_endpoint", null);
 		as.requestObjectEndpoint = JSONObjectUtils.getURI(jsonObject, "request_object_endpoint", null);
 		as.parEndpoint = JSONObjectUtils.getURI(jsonObject, "pushed_authorization_request_endpoint", null);

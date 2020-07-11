@@ -92,6 +92,12 @@ public final class GrantType extends Identifier {
 
 
 	/**
+	 * Grant Type for allowing authentication initiated by client from a back
+	 * channel.Explicit client authentication is optional.
+	 */
+	public static final GrantType CIBA = new GrantType("urn:openid:params:grant-type:ciba", false, false, Collections.singleton("ciba"));
+
+	/**
 	 * The client authentication requirement for this grant type.
 	 */
 	private final boolean requiresClientAuth;
@@ -246,6 +252,10 @@ public final class GrantType extends Identifier {
 		} else if (grantType.equals(GrantType.DEVICE_CODE)) {
 
 			return GrantType.DEVICE_CODE;
+
+		} else if (grantType.equals(GrantType.CIBA)) {
+
+			return GrantType.CIBA;
 
 		} else {
 

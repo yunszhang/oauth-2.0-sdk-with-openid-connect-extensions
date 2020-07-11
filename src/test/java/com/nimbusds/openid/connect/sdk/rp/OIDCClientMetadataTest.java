@@ -102,7 +102,12 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(50, OIDCClientMetadata.getRegisteredParameterNames().size());
+		assertTrue(paramNames.contains("backchannel_token_delivery_mode"));
+		assertTrue(paramNames.contains("backchannel_client_notification_endpoint"));
+		assertTrue(paramNames.contains("backchannel_authentication_request_signing_alg"));
+		assertTrue(paramNames.contains("backchannel_user_code_parameter"));
+		
+		assertEquals(54, OIDCClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	

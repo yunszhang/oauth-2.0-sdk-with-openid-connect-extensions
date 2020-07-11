@@ -32,6 +32,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
 import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.ciba.CIBAGrant;
 import com.nimbusds.oauth2.sdk.device.DeviceCodeGrant;
 
 
@@ -148,5 +149,17 @@ public class AuthorizationGrantTest extends TestCase {
 
 		assertEquals(GrantType.DEVICE_CODE, grant.getType());
 		assertEquals("abc", grant.getDeviceCode().getValue());
+	}
+	
+
+	public void testParseCiba()
+		throws Exception {
+
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList(GrantType.CIBA.getValue()));
+
+		CIBAGrant grant = (CIBAGrant)AuthorizationGrant.parse(params);
+
+		assertEquals(GrantType.CIBA, grant.getType());
 	}
 }

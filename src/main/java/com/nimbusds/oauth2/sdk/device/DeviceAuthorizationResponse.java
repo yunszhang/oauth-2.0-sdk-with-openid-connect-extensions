@@ -88,7 +88,7 @@ public abstract class DeviceAuthorizationResponse implements Response {
 	 *
 	 * @param httpResponse The HTTP response. Must not be {@code null}.
 	 *
-	 * @return The device authorization sucess or error response.
+	 * @return The device authorization success or error response.
 	 *
 	 * @throws ParseException If the HTTP response couldn't be parsed to a
 	 *                        device authorization response.

@@ -31,6 +31,7 @@ import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.as.AuthorizationServerEndpointMetadata;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.ciba.BackChannelTokenDeliveryMode;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
@@ -110,6 +111,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("authorization_encryption_alg_values_supported"));
 		assertTrue(paramNames.contains("authorization_encryption_enc_values_supported"));
+		assertTrue(paramNames.contains("backchannel_client_notification_endpoint"));
 		assertTrue(paramNames.contains("device_authorization_endpoint"));
 		assertTrue(paramNames.contains("verified_claims_supported"));
 		assertTrue(paramNames.contains("trust_frameworks_supported"));
@@ -121,7 +123,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("federation_registration_endpoint"));
 
-		assertEquals(65, paramNames.size());
+		assertEquals(70, paramNames.size());
 	}
 
 
@@ -555,6 +557,26 @@ public class OIDCProviderMetadataTest extends TestCase {
 		meta.setSupportsRequestURIParam(true);
 		assertTrue(meta.supportsRequestURIParam());
 
+		meta.setBackChannelAuthenticationEndpoint(new URI("https://c2id.com/ciba"));
+		assertEquals("https://c2id.com/ciba", meta.getBackChannelAuthenticationEndpoint().toString());
+
+		userInfoJWSAlgs = new LinkedList<>();
+		userInfoJWSAlgs.add(JWSAlgorithm.RS256);
+		meta.setBackChannelAuthenticationRequestSigningAlgValues(userInfoJWSAlgs);
+		assertEquals(JWSAlgorithm.RS256, meta.getBackChannelAuthenticationRequestSigningAlgValues().get(0));
+
+		meta.setBackChannelClientNotificationEndpoint(new URI("https://c2id.com/ciba_notification"));
+		assertEquals("https://c2id.com/ciba_notification", meta.getBackChannelClientNotificationEndpoint().toString());
+		
+
+		List<BackChannelTokenDeliveryMode> deliveryModes = new LinkedList<>();
+		deliveryModes.add(BackChannelTokenDeliveryMode.PING);
+		meta.setBackChannelTokenDeliveryModes(deliveryModes); 
+		assertEquals(BackChannelTokenDeliveryMode.PING, meta.getBackChannelTokenDeliveryModes().get(0));
+		
+		meta.setBackChannelUserCodeParameterSupported(true);
+		assertTrue(meta.isBackChannelUserCodeParameterSupported());
+		
 		meta.setRequiresRequestURIRegistration(true);
 		assertTrue(meta.requiresRequestURIRegistration());
 		
