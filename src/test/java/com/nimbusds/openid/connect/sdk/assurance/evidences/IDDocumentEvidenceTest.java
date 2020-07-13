@@ -18,36 +18,47 @@
 package com.nimbusds.openid.connect.sdk.assurance.evidences;
 
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import net.minidev.json.JSONObject;
+import org.junit.Test;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.date.SimpleDate;
 import com.nimbusds.openid.connect.sdk.assurance.claims.ISO3166_1Alpha2CountryCode;
 
 
-public class IDDocumentEvidenceTest extends TestCase {
+public class IDDocumentEvidenceTest {
 	
 	
-	public void testArgRequirement() {
+	@Test
+	public void minimal() throws ParseException {
 		
-		try {
-			new IDDocumentEvidence(null, null, null, null);
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The verification method must not be null", e.getMessage());
-		}
+		IDDocumentEvidence evidence = new IDDocumentEvidence(null, null, null, null);
 		
-		try {
-			new IDDocumentEvidence(IdentityVerificationMethod.PIPP, null, null, null);
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The identity document description must not be null", e.getMessage());
-		}
+		assertEquals(IdentityEvidenceType.ID_DOCUMENT, evidence.getEvidenceType());
+		assertNull(evidence.getVerificationMethod());
+		assertNull(evidence.getVerifier());
+		assertNull(evidence.getVerificationTime());
+		assertNull(evidence.getIdentityDocument());
+		
+		JSONObject jsonObject = evidence.toJSONObject();
+		assertEquals("id_document", jsonObject.get("type"));
+		assertEquals(1, jsonObject.size());
+		
+		evidence = IDDocumentEvidence.parse(jsonObject);
+		
+		assertEquals(IdentityEvidenceType.ID_DOCUMENT, evidence.getEvidenceType());
+		assertNull(evidence.getVerificationMethod());
+		assertNull(evidence.getVerifier());
+		assertNull(evidence.getVerificationTime());
+		assertNull(evidence.getIdentityDocument());
 	}
 	
 	
-	public void testMinimal() throws ParseException {
+	@Test
+	public void someVariant() throws ParseException {
 		
 		IDDocumentDescription idDoc = new IDDocumentDescription(
 			IDDocumentType.IDCARD,

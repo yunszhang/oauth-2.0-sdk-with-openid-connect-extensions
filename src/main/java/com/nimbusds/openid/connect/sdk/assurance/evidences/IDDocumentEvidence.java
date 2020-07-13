@@ -66,14 +66,14 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 	/**
 	 * Creates a new identity document evidence.
 	 *
-	 * @param method     The document verification method. Must not be
-	 *                   {@code null}.
+	 * @param method     The document verification method, {@code null} if
+	 *                   not specified.
 	 * @param verifier   Optional verifier if not the OpenID provider
 	 *                   itself, {@code null} if none.
 	 * @param dtz        The document verification timestamp, {@code null}
 	 *                   if not specified.
-	 * @param idDocument The identity document description. Must not be
-	 *                   {@code null}.
+	 * @param idDocument The identity document description, {@code null} if
+	 *                   not specified.
 	 */
 	public IDDocumentEvidence(final IdentityVerificationMethod method,
 				  final IdentityVerifier verifier,
@@ -82,18 +82,9 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 		
 		super(IdentityEvidenceType.ID_DOCUMENT);
 		
-		if (method == null) {
-			throw new IllegalArgumentException("The verification method must not be null");
-		}
 		this.method = method;
-		
 		this.dtz = dtz;
-		
 		this.verifier = verifier;
-		
-		if (idDocument == null) {
-			throw new IllegalArgumentException("The identity document description must not be null");
-		}
 		this.idDocument = idDocument;
 	}
 	
@@ -101,7 +92,8 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 	/**
 	 * Returns the document verification method.
 	 *
-	 * @return The document verification method.
+	 * @return The document verification method, {@code null} if not
+	 *         specified.
 	 */
 	public IdentityVerificationMethod getVerificationMethod() {
 		return method;
@@ -133,7 +125,8 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 	/**
 	 * Returns the identity document description.
 	 *
-	 * @return The identity document description.
+	 * @return The identity document description, {@code null} if not
+	 *         specified.
 	 */
 	public IDDocumentDescription getIdentityDocument() {
 		return idDocument;
@@ -143,14 +136,18 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 	@Override
 	public JSONObject toJSONObject() {
 		JSONObject o = super.toJSONObject();
-		o.put("method", getVerificationMethod().getValue());
+		if (getVerificationMethod() != null) {
+			o.put("method", getVerificationMethod().getValue());
+		}
 		if (dtz != null) {
 			o.put("time", getVerificationTime().toISO8601String());
 		}
 		if (verifier != null) {
 			o.put("verifier", getVerifier().toJSONObject());
 		}
-		o.put("document", getIdentityDocument().toJSONObject());
+		if (getIdentityDocument() != null) {
+			o.put("document", getIdentityDocument().toJSONObject());
+		}
 		return o;
 	}
 	
@@ -170,7 +167,10 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 		
 		ensureType(IdentityEvidenceType.ID_DOCUMENT, jsonObject);
 		
-		IdentityVerificationMethod method = new IdentityVerificationMethod(JSONObjectUtils.getString(jsonObject, "method"));
+		IdentityVerificationMethod method = null;
+		if (jsonObject.get("method") != null) {
+			method = new IdentityVerificationMethod(JSONObjectUtils.getString(jsonObject, "method"));
+		}
 		
 		DateWithTimeZoneOffset dtz = null;
 		if (jsonObject.get("time") != null) {
@@ -182,7 +182,10 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 			verifier = IdentityVerifier.parse(JSONObjectUtils.getJSONObject(jsonObject, "verifier"));
 		}
 		
-		IDDocumentDescription idDocument = IDDocumentDescription.parse(JSONObjectUtils.getJSONObject(jsonObject, "document"));
+		IDDocumentDescription idDocument = null;
+		if (jsonObject.get("document") != null) {
+			idDocument = IDDocumentDescription.parse(JSONObjectUtils.getJSONObject(jsonObject, "document"));
+		}
 		
 		return new IDDocumentEvidence(method, verifier, dtz, idDocument);
 	}
