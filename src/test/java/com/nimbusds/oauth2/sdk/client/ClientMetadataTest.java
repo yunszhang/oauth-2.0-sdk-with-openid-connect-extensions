@@ -81,11 +81,12 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_signed_response_alg"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
+		assertTrue(paramNames.contains("require_pushed_authorization_requests"));
 		assertTrue(paramNames.contains("client_registration_types"));
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(32, ClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(33, ClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -1130,6 +1131,45 @@ public class ClientMetadataTest extends TestCase {
 				"tls_client_auth_subject_dn, tls_client_auth_san_dns, tls_client_auth_san_uri, tls_client_auth_san_ip or tls_client_auth_san_email",
 				e.getErrorObject().getDescription());
 		}
+	}
+	
+	
+	public void testPAR()
+		throws ParseException {
+		
+		ClientMetadata clientMetadata = new ClientMetadata();
+		assertFalse(clientMetadata.requiresPushedAuthorizationRequests());
+		
+		clientMetadata.applyDefaults();
+		assertFalse(clientMetadata.requiresPushedAuthorizationRequests());
+		
+		JSONObject jsonObject = clientMetadata.toJSONObject();
+		assertFalse(jsonObject.containsKey("require_pushed_authorization_requests"));
+		
+		clientMetadata = ClientMetadata.parse(jsonObject);
+		assertFalse(clientMetadata.requiresPushedAuthorizationRequests());
+		
+		assertTrue(clientMetadata.getCustomFields().isEmpty());
+	}
+	
+	
+	public void testPAR_required()
+		throws ParseException {
+		
+		ClientMetadata clientMetadata = new ClientMetadata();
+		clientMetadata.requiresPushedAuthorizationRequests(true);
+		assertTrue(clientMetadata.requiresPushedAuthorizationRequests());
+		
+		clientMetadata.applyDefaults();
+		assertTrue(clientMetadata.requiresPushedAuthorizationRequests());
+		
+		JSONObject jsonObject = clientMetadata.toJSONObject();
+		assertTrue((Boolean) jsonObject.get("require_pushed_authorization_requests"));
+		
+		clientMetadata = ClientMetadata.parse(jsonObject);
+		assertTrue(clientMetadata.requiresPushedAuthorizationRequests());
+		
+		assertTrue(clientMetadata.getCustomFields().isEmpty());
 	}
 	
 	

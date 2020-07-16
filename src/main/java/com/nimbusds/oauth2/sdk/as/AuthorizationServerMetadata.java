@@ -55,7 +55,7 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  *         OAuth 2.0 (JARM)
  *     <li>Financial-grade API - Part 2: Read and Write API Security Profile
  *     <li>OAuth 2.0 Pushed Authorization Requests
- *         (draft-lodderstedt-oauth-par-01)
+ *         (draft-lodderstedt-oauth-par-02)
  *     <li>OAuth 2.0 Device Flow for Browserless and Input Constrained Devices
  *         (draft-ietf-oauth-device-flow-14)
  * </ul>
@@ -98,6 +98,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 		p.add("authorization_signing_alg_values_supported");
 		p.add("authorization_encryption_alg_values_supported");
 		p.add("authorization_encryption_enc_values_supported");
+		p.add("require_pushed_authorization_requests");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 	
@@ -294,6 +295,12 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	 * responses.
 	 */
 	private List<EncryptionMethod> authzJWEEncs;
+	
+	
+	/**
+	 * If {@code true} PAR is required, else not.
+	 */
+	private boolean requirePAR = false;
 	
 	
 	/**
@@ -1131,6 +1138,33 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	
 	
 	/**
+	 * Gets the requirement for pushed authorisation requests (PAR).
+	 * Corresponds to the {@code pushed_authorization_request_endpoint}
+	 * metadata field.
+	 *
+	 * @return {@code true} if PAR is required, else {@code false}.
+	 */
+	public boolean requiresPushedAuthorizationRequests() {
+		
+		return requirePAR;
+	}
+	
+	
+	/**
+	 * Sets the requirement for pushed authorisation requests (PAR).
+	 * Corresponds to the {@code pushed_authorization_request_endpoint}
+	 * metadata field.
+	 *
+	 * @param requirePAR {@code true} if PAR is required, else
+	 *                   {@code false}.
+	 */
+	public void requiresPushedAuthorizationRequests(final boolean requirePAR) {
+		
+		this.requirePAR = requirePAR;
+	}
+	
+	
+	/**
 	 * Gets the specified custom (not registered) parameter.
 	 *
 	 * @param name The parameter name. Must not be {@code null}.
@@ -1442,6 +1476,11 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 			
 			o.put("authorization_encryption_enc_values_supported", stringList);
 		}
+		
+		// PAR
+		if (requirePAR) {
+			o.put("require_pushed_authorization_requests", true);
+		}
 
 		// Append any custom (not registered) parameters
 		o.putAll(customParameters);
@@ -1738,6 +1777,11 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 				if (v != null)
 					as.authzJWEEncs.add(EncryptionMethod.parse(v));
 			}
+		}
+		
+		// PAR
+		if (jsonObject.get("require_pushed_authorization_requests") != null) {
+			as.requiresPushedAuthorizationRequests(JSONObjectUtils.getBoolean(jsonObject, "require_pushed_authorization_requests"));
 		}
 		
 		// Parse custom (not registered) parameters

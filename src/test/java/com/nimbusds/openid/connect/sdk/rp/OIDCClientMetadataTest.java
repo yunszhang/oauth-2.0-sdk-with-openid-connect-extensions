@@ -33,6 +33,7 @@ import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.oauth2.sdk.client.RegistrationError;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.SubjectType;
@@ -78,6 +79,7 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_signed_response_alg"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
+		assertTrue(paramNames.contains("require_pushed_authorization_requests"));
 
 		// OIDC specifid params
 		assertTrue(paramNames.contains("application_type"));
@@ -102,7 +104,7 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(50, OIDCClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(51, OIDCClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -394,6 +396,45 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertNull(metadata.getAuthorizationJWSAlg());
 		assertEquals(JWEAlgorithm.ECDH_ES, metadata.getAuthorizationJWEAlg());
 		assertEquals(EncryptionMethod.A128CBC_HS256, metadata.getAuthorizationJWEEnc());
+	}
+	
+	
+	public void testPAR()
+		throws ParseException {
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		assertFalse(clientMetadata.requiresPushedAuthorizationRequests());
+		
+		clientMetadata.applyDefaults();
+		assertFalse(clientMetadata.requiresPushedAuthorizationRequests());
+		
+		JSONObject jsonObject = clientMetadata.toJSONObject();
+		assertFalse(jsonObject.containsKey("require_pushed_authorization_requests"));
+		
+		clientMetadata = OIDCClientMetadata.parse(jsonObject);
+		assertFalse(clientMetadata.requiresPushedAuthorizationRequests());
+		
+		assertTrue(clientMetadata.getCustomFields().isEmpty());
+	}
+	
+	
+	public void testPAR_required()
+		throws ParseException {
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.requiresPushedAuthorizationRequests(true);
+		assertTrue(clientMetadata.requiresPushedAuthorizationRequests());
+		
+		clientMetadata.applyDefaults();
+		assertTrue(clientMetadata.requiresPushedAuthorizationRequests());
+		
+		JSONObject jsonObject = clientMetadata.toJSONObject();
+		assertTrue((Boolean) jsonObject.get("require_pushed_authorization_requests"));
+		
+		clientMetadata = OIDCClientMetadata.parse(jsonObject);
+		assertTrue(clientMetadata.requiresPushedAuthorizationRequests());
+		
+		assertTrue(clientMetadata.getCustomFields().isEmpty());
 	}
 
 

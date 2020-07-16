@@ -1424,3 +1424,9 @@ version 8.16 (2020-07-10)
 
 version 8.16.1 (2020-07-13)
     * IDDocumentEvidence must allow null method and document fields (iss #305).
+
+version 8.17 (2020-07-16)
+    * Adds require_pushed_authorization_requests support to
+      AuthorizationServerMetadata (draft-ietf-oauth-par-02).
+    * Adds require_pushed_authorization_requests support to
+      ClientMetadata and OIDCClientMetadata (draft-ietf-oauth-par-02).

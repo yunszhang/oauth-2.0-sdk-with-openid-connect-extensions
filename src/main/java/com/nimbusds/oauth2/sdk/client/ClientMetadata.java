@@ -72,6 +72,8 @@ import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
  *         Access Tokens (RFC 8705), sections 2.1.2 and 3.4.
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM).
+ *     <li>OAuth 2.0 Pushed Authorization Requests
+ *         (draft-lodderstedt-oauth-par-02)
  *     <li>OpenID Connect Federation 1.0 (draft 11)
  * </ul>
  */
@@ -105,6 +107,7 @@ public class ClientMetadata {
 		p.add("request_object_signing_alg");
 		p.add("request_object_encryption_alg");
 		p.add("request_object_encryption_enc");
+		p.add("require_pushed_authorization_requests");
 		p.add("software_id");
 		p.add("software_version");
 		p.add("tls_client_certificate_bound_access_tokens");
@@ -316,6 +319,12 @@ public class ClientMetadata {
 	
 	
 	/**
+	 * If {@code true} PAR is required, else not.
+	 */
+	private boolean requirePAR = false;
+	
+	
+	/**
 	 * The supported OpenID Connect Federation 1.0 client registration
 	 * types.
 	 */
@@ -394,6 +403,7 @@ public class ClientMetadata {
 		authzJWSAlg = metadata.authzJWSAlg;
 		authzJWEAlg = metadata.authzJWEAlg;
 		authzJWEEnc = metadata.authzJWEEnc;
+		requirePAR = metadata.requirePAR;
 		clientRegistrationTypes = metadata.clientRegistrationTypes;
 		organizationName = metadata.organizationName;
 		trustAnchorID = metadata.trustAnchorID;
@@ -1557,6 +1567,33 @@ public class ClientMetadata {
 	
 	
 	/**
+	 * Gets the requirement for pushed authorisation requests (PAR).
+	 * Corresponds to the {@code pushed_authorization_request_endpoint}
+	 * client metadata field.
+	 *
+	 * @return {@code true} if PAR is required, else {@code false}.
+	 */
+	public boolean requiresPushedAuthorizationRequests() {
+		
+		return requirePAR;
+	}
+	
+	
+	/**
+	 * Sets the requirement for pushed authorisation requests (PAR).
+	 * Corresponds to the {@code pushed_authorization_request_endpoint}
+	 * client metadata field.
+	 *
+	 * @param requirePAR {@code true} if PAR is required, else
+	 *                   {@code false}.
+	 */
+	public void requiresPushedAuthorizationRequests(final boolean requirePAR) {
+		
+		this.requirePAR = requirePAR;
+	}
+	
+	
+	/**
 	 * Gets the supported OpenID Connect Federation 1.0 client registration
 	 * types. Corresponds to the {@code client_registration_types} metadata
 	 * field.
@@ -1968,6 +2005,11 @@ public class ClientMetadata {
 			o.put("authorization_encrypted_response_enc", authzJWEEnc.getName());
 		}
 		
+		// PAR
+		if (requirePAR) {
+			o.put("require_pushed_authorization_requests", true);
+		}
+		
 		// Federation
 		
 		if (CollectionUtils.isNotEmpty(clientRegistrationTypes)) {
@@ -2311,6 +2353,12 @@ public class ClientMetadata {
 			if (jsonObject.get("authorization_encrypted_response_enc") != null) {
 				metadata.setAuthorizationJWEEnc(EncryptionMethod.parse(JSONObjectUtils.getString(jsonObject, "authorization_encrypted_response_enc")));
 				jsonObject.remove("authorization_encrypted_response_enc");
+			}
+			
+			// PAR
+			if (jsonObject.get("require_pushed_authorization_requests") != null) {
+				metadata.requiresPushedAuthorizationRequests(JSONObjectUtils.getBoolean(jsonObject, "require_pushed_authorization_requests"));
+				jsonObject.remove("require_pushed_authorization_requests");
 			}
 			
 			// Federation

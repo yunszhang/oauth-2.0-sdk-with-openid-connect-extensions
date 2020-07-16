@@ -71,6 +71,7 @@ public class OIDCClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_signed_response_alg"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
+		assertTrue(paramNames.contains("require_pushed_authorization_requests"));
 
 		// OIDC specifid params
 		assertTrue(paramNames.contains("application_type"));
@@ -98,7 +99,7 @@ public class OIDCClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(56, paramNames.size());
+		assertEquals(57, paramNames.size());
 	}
 
 

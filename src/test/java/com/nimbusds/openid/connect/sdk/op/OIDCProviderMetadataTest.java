@@ -75,6 +75,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("userinfo_encryption_alg_values_supported"));
 		assertTrue(paramNames.contains("userinfo_encryption_enc_values_supported"));
 		assertTrue(paramNames.contains("pushed_authorization_request_endpoint"));
+		assertTrue(paramNames.contains("require_pushed_authorization_requests"));
 		assertTrue(paramNames.contains("request_object_endpoint"));
 		assertTrue(paramNames.contains("request_object_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("request_object_encryption_alg_values_supported"));
@@ -122,7 +123,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("federation_registration_endpoint"));
 
-		assertEquals(66, paramNames.size());
+		assertEquals(67, paramNames.size());
 	}
 
 
