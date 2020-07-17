@@ -1430,3 +1430,7 @@ version 8.17 (2020-07-16)
       AuthorizationServerMetadata (draft-ietf-oauth-par-02).
     * Adds require_pushed_authorization_requests support to
       ClientMetadata and OIDCClientMetadata (draft-ietf-oauth-par-02).
+
+version 8.18 (2020-07-17)
+    * Adds overbroad_scope OAuth 2.0 error from OAuth 2.0 Incremental
+      Authorization (draft-ietf-oauth-incremental-authz-04).

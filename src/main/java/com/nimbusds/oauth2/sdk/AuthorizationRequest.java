@@ -66,7 +66,7 @@ import com.nimbusds.openid.connect.sdk.Prompt;
  *     <li>Proof Key for Code Exchange by OAuth Public Clients (RFC 7636).
  *     <li>Resource Indicators for OAuth 2.0 (RFC 8707)
  *     <li>OAuth 2.0 Incremental Authorization
- *         (draft-ietf-oauth-incremental-authz-00)
+ *         (draft-ietf-oauth-incremental-authz-04)
  *     <li>The OAuth 2.0 Authorization Framework: JWT Secured Authorization
  *         Request (JAR) draft-ietf-oauth-jwsreq-21
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for

@@ -61,7 +61,7 @@ import com.nimbusds.oauth2.sdk.util.*;
  *     <li>OAuth 2.0 (RFC 6749), sections 4.1.3, 4.3.2, 4.4.2 and 6.
  *     <li>Resource Indicators for OAuth 2.0 (RFC 8707)
  *     <li>OAuth 2.0 Incremental Authorization
- *         (draft-ietf-oauth-incremental-authz-00)
+ *         (draft-ietf-oauth-incremental-authz-04)
  * </ul>
  */
 @Immutable

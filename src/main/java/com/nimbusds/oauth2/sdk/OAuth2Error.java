@@ -156,6 +156,14 @@ public final class OAuth2Error {
 		new ErrorObject("invalid_resource", "Invalid or unaccepted resource", HTTPResponse.SC_BAD_REQUEST);
 	
 	
+	/**
+	 * The scope of the request is considered overbroad by the
+	 * authorisation server.
+	 */
+	public static final ErrorObject OVERBROAD_SCOPE =
+		new ErrorObject("overbroad_scope", "Overbroad scope", HTTPResponse.SC_BAD_REQUEST);
+	
+	
 	// OpenID Connect Federation 1.0
 	
 	

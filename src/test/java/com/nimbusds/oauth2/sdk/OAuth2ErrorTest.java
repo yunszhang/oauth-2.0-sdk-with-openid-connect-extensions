@@ -40,6 +40,7 @@ public class OAuth2ErrorTest extends TestCase {
 		assertEquals(400, OAuth2Error.UNSUPPORTED_GRANT_TYPE.getHTTPStatusCode());
 		assertEquals(400, OAuth2Error.UNSUPPORTED_RESPONSE_TYPE.getHTTPStatusCode());
 		assertEquals(400, OAuth2Error.INVALID_RESOURCE.getHTTPStatusCode());
+		assertEquals(400, OAuth2Error.OVERBROAD_SCOPE.getHTTPStatusCode());
 		assertEquals(400, OAuth2Error.MISSING_TRUST_ANCHOR.getHTTPStatusCode());
 		assertEquals(400, OAuth2Error.VALIDATION_FAILED.getHTTPStatusCode());
 	}
@@ -74,6 +75,14 @@ public class OAuth2ErrorTest extends TestCase {
 		assertEquals("invalid_resource", OAuth2Error.INVALID_RESOURCE.getCode());
 		assertEquals("Invalid or unaccepted resource", OAuth2Error.INVALID_RESOURCE.getDescription());
 		assertEquals(400, OAuth2Error.INVALID_RESOURCE.getHTTPStatusCode());
+	}
+	
+	
+	public void testIncrementalAuthorization_overbroadScopeError() {
+		
+		assertEquals("overbroad_scope", OAuth2Error.OVERBROAD_SCOPE.getCode());
+		assertEquals("Overbroad scope", OAuth2Error.OVERBROAD_SCOPE.getDescription());
+		assertEquals(400, OAuth2Error.OVERBROAD_SCOPE.getHTTPStatusCode());
 	}
 	
 	

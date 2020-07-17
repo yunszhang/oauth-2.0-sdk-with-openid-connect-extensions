@@ -45,7 +45,7 @@ This SDK version implements the following standards and drafts:
     * Resource Indicators for OAuth 2.0 (RFC 8707)
 
     * OAuth 2.0 Incremental Authorization
-      (draft-ietf-oauth-incremental-authz-00)
+      (draft-ietf-oauth-incremental-authz-04)
 
     * OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
 
