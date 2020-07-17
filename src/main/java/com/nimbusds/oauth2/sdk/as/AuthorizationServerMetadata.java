@@ -35,10 +35,12 @@ import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.client.ClientType;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
 
@@ -58,6 +60,8 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  *         (draft-lodderstedt-oauth-par-02)
  *     <li>OAuth 2.0 Device Flow for Browserless and Input Constrained Devices
  *         (draft-ietf-oauth-device-flow-14)
+ *     <li>OAuth 2.0 Incremental Authorization
+ *         (draft-ietf-oauth-incremental-authz-04)
  * </ul>
  */
 public class AuthorizationServerMetadata extends AuthorizationServerEndpointMetadata {
@@ -99,6 +103,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 		p.add("authorization_encryption_alg_values_supported");
 		p.add("authorization_encryption_enc_values_supported");
 		p.add("require_pushed_authorization_requests");
+		p.add("incremental_authz_types_supported");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 	
@@ -301,6 +306,12 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	 * If {@code true} PAR is required, else not.
 	 */
 	private boolean requirePAR = false;
+	
+	
+	/**
+	 * The supported OAuth 2.0 client types for incremental authorisation.
+	 */
+	private List<ClientType> incrementalAuthzTypes;
 	
 	
 	/**
@@ -1165,6 +1176,35 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	
 	
 	/**
+	 * Gets the supported OAuth 2.0 client types for incremental
+	 * authorisation. Corresponds to the
+	 * {@code incremental_authz_types_supported} metadata field.
+	 *
+	 * @return The supported client types for incremental authorisation,
+	 *         {@code null} if not specified.
+	 */
+	public List<ClientType> getIncrementalAuthorizationTypes() {
+		
+		return incrementalAuthzTypes;
+	}
+	
+	
+	/**
+	 * Sets the supported OAuth 2.0 client types for incremental
+	 * authorisation. Corresponds to the
+	 * {@code incremental_authz_types_supported} metadata field.
+	 *
+	 * @param incrementalAuthzTypes The supported client types for
+	 *                              incremental authorisation, {@code null}
+	 *                              if not specified.
+	 */
+	public void setIncrementalAuthorizationTypes(final List<ClientType> incrementalAuthzTypes) {
+	
+		this.incrementalAuthzTypes = incrementalAuthzTypes;
+	}
+	
+	
+	/**
 	 * Gets the specified custom (not registered) parameter.
 	 *
 	 * @param name The parameter name. Must not be {@code null}.
@@ -1481,6 +1521,17 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 		if (requirePAR) {
 			o.put("require_pushed_authorization_requests", true);
 		}
+		
+		// Incremental authz
+		if (CollectionUtils.isNotEmpty(incrementalAuthzTypes)) {
+			stringList = new ArrayList<>(incrementalAuthzTypes.size());
+			for (ClientType clientType: incrementalAuthzTypes) {
+				if (clientType != null) {
+					stringList.add(clientType.name().toLowerCase());
+				}
+			}
+			o.put("incremental_authz_types_supported", stringList);
+		}
 
 		// Append any custom (not registered) parameters
 		o.putAll(customParameters);
@@ -1782,6 +1833,25 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 		// PAR
 		if (jsonObject.get("require_pushed_authorization_requests") != null) {
 			as.requiresPushedAuthorizationRequests(JSONObjectUtils.getBoolean(jsonObject, "require_pushed_authorization_requests"));
+		}
+		
+		// Incremental authz
+		if (jsonObject.get("incremental_authz_types_supported") != null) {
+			
+			as.incrementalAuthzTypes = new ArrayList<>();
+			
+			for (String v: JSONObjectUtils.getStringArray(jsonObject, "incremental_authz_types_supported")) {
+				
+				if (v != null) {
+					ClientType clientType;
+					try {
+						clientType = ClientType.valueOf(v.toUpperCase());
+					} catch (IllegalArgumentException e) {
+						throw new ParseException("Illegal client type in incremental_authz_types_supported field: " + v);
+					}
+					as.incrementalAuthzTypes.add(clientType);
+				}
+			}
 		}
 		
 		// Parse custom (not registered) parameters

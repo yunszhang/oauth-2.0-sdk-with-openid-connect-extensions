@@ -30,6 +30,7 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.client.ClientType;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
@@ -81,8 +82,9 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_encryption_alg_values_supported"));
 		assertTrue(paramNames.contains("authorization_encryption_enc_values_supported"));
 		assertTrue(paramNames.contains("device_authorization_endpoint"));
+		assertTrue(paramNames.contains("incremental_authz_types_supported"));
 		
-		assertEquals(37, paramNames.size());
+		assertEquals(38, paramNames.size());
 	}
 	
 	
@@ -399,5 +401,101 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		as = AuthorizationServerMetadata.parse(jsonObject.toJSONString());
 		assertEquals(parEndpoint, as.getPushedAuthorizationRequestEndpointURI());
 		assertTrue(as.requiresPushedAuthorizationRequests());
+	}
+	
+	
+	public void testIncrementalAuthz_none() throws ParseException {
+		
+		AuthorizationServerMetadata as = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
+		
+		assertNull(as.getIncrementalAuthorizationTypes());
+		
+		JSONObject jsonObject = as.toJSONObject();
+		assertFalse(jsonObject.containsKey("incremental_authz_types_supported"));
+		
+		as = AuthorizationServerMetadata.parse(jsonObject.toJSONString());
+		
+		assertNull(as.getIncrementalAuthorizationTypes());
+		
+		assertTrue(as.getCustomParameters().isEmpty());
+	}
+	
+	
+	public void testIncrementalAuthz_confidential() throws ParseException {
+		
+		AuthorizationServerMetadata as = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
+		
+		assertNull(as.getIncrementalAuthorizationTypes());
+		
+		as.setIncrementalAuthorizationTypes(Collections.singletonList(ClientType.CONFIDENTIAL));
+		
+		assertEquals(Collections.singletonList(ClientType.CONFIDENTIAL), as.getIncrementalAuthorizationTypes());
+		
+		JSONObject jsonObject = as.toJSONObject();
+		assertEquals(Collections.singletonList("confidential"), jsonObject.get("incremental_authz_types_supported"));
+		
+		as = AuthorizationServerMetadata.parse(jsonObject.toJSONString());
+		
+		assertEquals(Collections.singletonList(ClientType.CONFIDENTIAL), as.getIncrementalAuthorizationTypes());
+		
+		assertTrue(as.getCustomParameters().isEmpty());
+	}
+	
+	
+	public void testIncrementalAuthz_public() throws ParseException {
+		
+		AuthorizationServerMetadata as = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
+		
+		assertNull(as.getIncrementalAuthorizationTypes());
+		
+		as.setIncrementalAuthorizationTypes(Collections.singletonList(ClientType.PUBLIC));
+		
+		assertEquals(Collections.singletonList(ClientType.PUBLIC), as.getIncrementalAuthorizationTypes());
+		
+		JSONObject jsonObject = as.toJSONObject();
+		assertEquals(Collections.singletonList("public"), jsonObject.get("incremental_authz_types_supported"));
+		
+		as = AuthorizationServerMetadata.parse(jsonObject.toJSONString());
+		
+		assertEquals(Collections.singletonList(ClientType.PUBLIC), as.getIncrementalAuthorizationTypes());
+		
+		assertTrue(as.getCustomParameters().isEmpty());
+	}
+	
+	
+	public void testIncrementalAuthz_public_confidential() throws ParseException {
+		
+		AuthorizationServerMetadata as = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
+		
+		assertNull(as.getIncrementalAuthorizationTypes());
+		
+		as.setIncrementalAuthorizationTypes(Arrays.asList(ClientType.PUBLIC, ClientType.CONFIDENTIAL));
+		
+		assertEquals(Arrays.asList(ClientType.PUBLIC, ClientType.CONFIDENTIAL), as.getIncrementalAuthorizationTypes());
+		
+		JSONObject jsonObject = as.toJSONObject();
+		assertEquals(Arrays.asList("public", "confidential"), jsonObject.get("incremental_authz_types_supported"));
+		
+		as = AuthorizationServerMetadata.parse(jsonObject.toJSONString());
+		
+		assertEquals(Arrays.asList(ClientType.PUBLIC, ClientType.CONFIDENTIAL), as.getIncrementalAuthorizationTypes());
+		
+		assertTrue(as.getCustomParameters().isEmpty());
+	}
+	
+	
+	public void testIncrementalAuthz_illegalClientType() {
+		
+		AuthorizationServerMetadata as = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
+		
+		JSONObject jsonObject = as.toJSONObject();
+		jsonObject.put("incremental_authz_types_supported", Collections.singletonList("illegal_client_tupe"));
+		
+		try {
+			AuthorizationServerMetadata.parse(jsonObject.toJSONString());
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Illegal client type in incremental_authz_types_supported field: illegal_client_tupe", e.getMessage());
+		}
 	}
 }

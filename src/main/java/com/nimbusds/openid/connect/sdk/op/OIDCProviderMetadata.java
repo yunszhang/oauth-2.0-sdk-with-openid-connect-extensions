@@ -1585,6 +1585,9 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		op.setAuthorizationJWEAlgs(as.getAuthorizationJWEAlgs());
 		op.setAuthorizationJWEEncs(as.getAuthorizationJWEEncs());
 		
+		// Incremental authz
+		op.setIncrementalAuthorizationTypes(as.getIncrementalAuthorizationTypes());
+		
 		// OpenID Connect for Identity Assurance 1.0
 		if (jsonObject.get("verified_claims_supported") != null) {
 			op.verifiedClaimsSupported = JSONObjectUtils.getBoolean(jsonObject, "verified_claims_supported");

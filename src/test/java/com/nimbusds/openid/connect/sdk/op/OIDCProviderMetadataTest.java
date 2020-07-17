@@ -30,7 +30,9 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.as.AuthorizationServerEndpointMetadata;
+import com.nimbusds.oauth2.sdk.as.AuthorizationServerMetadata;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.client.ClientType;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
@@ -112,6 +114,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_encryption_alg_values_supported"));
 		assertTrue(paramNames.contains("authorization_encryption_enc_values_supported"));
 		assertTrue(paramNames.contains("device_authorization_endpoint"));
+		assertTrue(paramNames.contains("incremental_authz_types_supported"));
 		assertTrue(paramNames.contains("verified_claims_supported"));
 		assertTrue(paramNames.contains("trust_frameworks_supported"));
 		assertTrue(paramNames.contains("evidence_supported"));
@@ -123,7 +126,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("federation_registration_endpoint"));
 
-		assertEquals(67, paramNames.size());
+		assertEquals(68, paramNames.size());
 	}
 
 
@@ -1407,5 +1410,35 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertEquals(clientAuthMethods, meta.getClientRegistrationAuthnMethods());
 		assertEquals(orgName, meta.getOrganizationName());
 		assertEquals(fedRegURI, meta.getFederationRegistrationEndpointURI());
+	}
+	
+	
+	public void testIncrementalAuthz_public_confidential() throws Exception {
+		
+		Issuer issuer = new Issuer("https://c2id.com");
+		
+		List<SubjectType> subjectTypes = new LinkedList<>();
+		subjectTypes.add(SubjectType.PAIRWISE);
+		subjectTypes.add(SubjectType.PUBLIC);
+		
+		URI jwkSetURI = new URI("https://c2id.com/jwks.json");
+		
+		OIDCProviderMetadata meta = new OIDCProviderMetadata(issuer, subjectTypes, jwkSetURI);
+		meta.applyDefaults();
+		
+		assertNull(meta.getIncrementalAuthorizationTypes());
+		
+		meta.setIncrementalAuthorizationTypes(Arrays.asList(ClientType.PUBLIC, ClientType.CONFIDENTIAL));
+		
+		assertEquals(Arrays.asList(ClientType.PUBLIC, ClientType.CONFIDENTIAL), meta.getIncrementalAuthorizationTypes());
+		
+		JSONObject jsonObject = meta.toJSONObject();
+		assertEquals(Arrays.asList("public", "confidential"), jsonObject.get("incremental_authz_types_supported"));
+		
+		meta = OIDCProviderMetadata.parse(jsonObject.toJSONString());
+		
+		assertEquals(Arrays.asList(ClientType.PUBLIC, ClientType.CONFIDENTIAL), meta.getIncrementalAuthorizationTypes());
+		
+		assertTrue(meta.getCustomParameters().isEmpty());
 	}
 }

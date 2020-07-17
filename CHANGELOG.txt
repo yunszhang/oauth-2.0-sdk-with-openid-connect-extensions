@@ -1434,3 +1434,6 @@ version 8.17 (2020-07-16)
 version 8.18 (2020-07-17)
     * Adds overbroad_scope OAuth 2.0 error from OAuth 2.0 Incremental
       Authorization (draft-ietf-oauth-incremental-authz-04).
+    * Adds incremental_authz_types_supported field to
+      AuthorizationServerMetadata and OIDCProviderMetadata
+      (draft-ietf-oauth-incremental-authz-04).
