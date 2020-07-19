@@ -58,8 +58,7 @@ import com.nimbusds.openid.connect.sdk.op.AuthenticationRequestDetector;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OAuth 2.0 Pushed Authorization Requests
- *         (draft-lodderstedt-oauth-par-02)
+ *     <li>OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-02)
  * </ul>
  */
 @Immutable

@@ -56,8 +56,7 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
  *     <li>Financial-grade API - Part 2: Read and Write API Security Profile
- *     <li>OAuth 2.0 Pushed Authorization Requests
- *         (draft-lodderstedt-oauth-par-02)
+ *     <li>OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-02)
  *     <li>OAuth 2.0 Device Flow for Browserless and Input Constrained Devices
  *         (draft-ietf-oauth-device-flow-14)
  *     <li>OAuth 2.0 Incremental Authorization

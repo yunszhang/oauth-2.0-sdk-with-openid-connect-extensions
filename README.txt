@@ -52,7 +52,7 @@ This SDK version implements the following standards and drafts:
     * The OAuth 2.0 Authorization Framework: JWT Secured Authorization Request
       (JAR) (draft-ietf-oauth-jwsreq-21)
 
-    * OAuth 2.0 Pushed Authorization Requests (draft-lodderstedt-oauth-par-02)
+    * OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-02)
 
 	* OpenID Connect Core 1.0 (2014-02-25)
 

@@ -47,8 +47,7 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OAuth 2.0 Pushed Authorization Requests
- *         (draft-lodderstedt-oauth-par-02)
+ *     <li>OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-02)
  * </ul>
  */
 @Immutable

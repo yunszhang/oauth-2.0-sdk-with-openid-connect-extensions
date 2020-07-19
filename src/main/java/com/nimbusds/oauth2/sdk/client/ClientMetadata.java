@@ -72,8 +72,7 @@ import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
  *         Access Tokens (RFC 8705), sections 2.1.2 and 3.4.
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM).
- *     <li>OAuth 2.0 Pushed Authorization Requests
- *         (draft-lodderstedt-oauth-par-02)
+ *     <li>OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-02)
  *     <li>OpenID Connect Federation 1.0 (draft 11)
  * </ul>
  */
