@@ -20,6 +20,9 @@ package com.nimbusds.openid.connect.sdk.federation.trust;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.LinkedList;
+import java.util.List;
 
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -66,6 +69,12 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 	 * The default HTTP read timeout in milliseconds.
 	 */
 	public static final int DEFAULT_HTTP_READ_TIMEOUT_MS = 1000;
+	
+	
+	/**
+	 * Running list of the recorded HTTP requests.
+	 */
+	private final List<URI> recordedRequests = new LinkedList<>();
 	
 	
 	/**
@@ -130,6 +139,8 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		applyTimeouts(httpRequest);
 		
+		record(httpRequest);
+		
 		HTTPResponse httpResponse;
 		try {
 			httpResponse = httpRequest.send();
@@ -142,6 +153,8 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 			request = new FederationEntityConfigurationRequest(target, WellKnownPathComposeStrategy.INFIX);
 			httpRequest = request.toHTTPRequest();
 			applyTimeouts(httpRequest);
+			
+			record(httpRequest);
 			
 			try {
 				httpResponse = httpRequest.send();
@@ -177,6 +190,8 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		applyTimeouts(httpRequest);
 		
+		record(httpRequest);
+		
 		HTTPResponse httpResponse;
 		try {
 			httpResponse = httpRequest.send();
@@ -200,5 +215,33 @@ public class DefaultEntityStatementRetriever implements EntityStatementRetriever
 		}
 		
 		return response.toSuccessResponse().getEntityStatement();
+	}
+	
+	
+	private void record(final HTTPRequest httpRequest) {
+		
+		URI uri = null;
+		if (httpRequest.getQuery() == null) {
+			uri = httpRequest.getURI();
+		} else {
+			try {
+				uri = new URI(httpRequest.getURL() + "?" + httpRequest.getQuery());
+			} catch (URISyntaxException e) {
+				// ignore
+			}
+		}
+		
+		recordedRequests.add(uri);
+	}
+	
+	
+	/**
+	 * Returns the running list of the recorded HTTP requests.
+	 *
+	 * @return The HTTP request URIs (with query parameters), empty if
+	 *         none.
+	 */
+	public List<URI> getRecordedRequests() {
+		return recordedRequests;
 	}
 }

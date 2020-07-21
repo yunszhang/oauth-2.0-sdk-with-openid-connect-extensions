@@ -19,19 +19,14 @@ package com.nimbusds.openid.connect.sdk.federation.trust;
 
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.jadler.Jadler.*;
 import static org.junit.Assert.*;
 
-import net.jadler.Request;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -177,6 +172,8 @@ public class DefaultEntityStatementRetrieverTest {
 		out.verifySignatureOfSelfStatement();
 		
 		assertEquals(entityStatement.getClaimsSet().toJWTClaimsSet().getClaims(), out.getClaimsSet().toJWTClaimsSet().getClaims());
+		
+		assertEquals(Collections.singletonList(URI.create(issuer + "/.well-known/openid-federation")), retriever.getRecordedRequests());
 	}
 	
 	
@@ -204,6 +201,8 @@ public class DefaultEntityStatementRetrieverTest {
 		out.verifySignatureOfSelfStatement();
 		
 		assertEquals(entityStatement.getClaimsSet().toJWTClaimsSet().getClaims(), out.getClaimsSet().toJWTClaimsSet().getClaims());
+		
+		assertEquals(Collections.singletonList(URI.create(issuer + "/.well-known/openid-federation")), retriever.getRecordedRequests());
 	}
 	
 	
@@ -231,6 +230,14 @@ public class DefaultEntityStatementRetrieverTest {
 		out.verifySignatureOfSelfStatement();
 		
 		assertEquals(entityStatement.getClaimsSet().toJWTClaimsSet().getClaims(), out.getClaimsSet().toJWTClaimsSet().getClaims());
+		
+		assertEquals(
+			Arrays.asList(
+				URI.create("http://localhost:" + port() + "/op/.well-known/openid-federation"),
+				URI.create("http://localhost:" + port() + "/.well-known/openid-federation/op")
+			),
+			retriever.getRecordedRequests()
+		);
 	}
 	
 	
@@ -269,6 +276,8 @@ public class DefaultEntityStatementRetrieverTest {
 		}
 		
 		assertEquals("One HTTP GET with no path, postfix / infix strategy doesn't matter", 1, numInvocations.get());
+		
+		assertEquals(Collections.singletonList(URI.create(issuer + "/.well-known/openid-federation")), retriever.getRecordedRequests());
 	}
 	
 	
@@ -328,6 +337,14 @@ public class DefaultEntityStatementRetrieverTest {
 		
 		assertEquals(1, numPostfixInvocations.get());
 		assertEquals(1, numInfixInvocations.get());
+		
+		assertEquals(
+			Arrays.asList(
+				URI.create("http://localhost:" + port() + "/rp/.well-known/openid-federation"),
+				URI.create("http://localhost:" + port() + "/.well-known/openid-federation/rp")
+			),
+			retriever.getRecordedRequests()
+		);
 	}
 	
 	
@@ -368,6 +385,17 @@ public class DefaultEntityStatementRetrieverTest {
 		out.verifySignature(INTERMEDIATE_JWK_SET);
 		
 		assertEquals(intermediateStatementAboutOP.getClaimsSet().toJWTClaimsSet().getClaims(), out.getClaimsSet().toJWTClaimsSet().getClaims());
+	
+		URI fetchedURI = retriever.getRecordedRequests().get(0);
+		
+		assertTrue(fetchedURI.toString().startsWith("http://localhost:" + port() + "/federation?"));
+		
+		Map<String,List<String>> queryParams = URLUtils.parseParameters(fetchedURI.getQuery());
+		assertEquals(Collections.singletonList(issuer.getValue()), queryParams.get("iss"));
+		assertEquals(Collections.singletonList(opIssuer.getValue()), queryParams.get("sub"));
+		assertEquals(2, queryParams.size());
+		
+		assertEquals(1, retriever.getRecordedRequests().size());
 	}
 	
 	

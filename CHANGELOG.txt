@@ -1437,3 +1437,6 @@ version 8.18 (2020-07-17)
     * Adds incremental_authz_types_supported field to
       AuthorizationServerMetadata and OIDCProviderMetadata
       (draft-ietf-oauth-incremental-authz-04).
+
+version 8.19 (2020-07-21)
+    * Adds DefaultEntityStatementRetriever.getRecordedRequests method.
