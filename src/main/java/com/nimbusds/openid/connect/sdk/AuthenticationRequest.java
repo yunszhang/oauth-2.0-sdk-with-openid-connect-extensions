@@ -31,8 +31,6 @@ import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.*;
-import com.nimbusds.oauth2.sdk.auth.JWTAuthentication;
-import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
@@ -1648,21 +1646,6 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			String msg = "Invalid \"purpose\" parameter: Must not be shorter than " + PURPOSE_MIN_LENGTH + " and longer than " + PURPOSE_MAX_LENGTH + " characters";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 				ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState());
-		}
-		
-		
-		PrivateKeyJWT privateKeyJWTAuth = null;
-		if (params.containsKey("client_assertion") &&
-			params.containsKey("client_assertion_type") &&
-			JWTAuthentication.CLIENT_ASSERTION_TYPE.equals(MultivaluedMapUtils.getFirstValue(params, "client_assertion_type"))) {
-			
-			try {
-				privateKeyJWTAuth = PrivateKeyJWT.parse(params);
-			} catch (ParseException e) {
-				String msg = "Invalid client private_key_jwt authentication: " + e.getMessage();
-				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-					ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState());
-			}
 		}
 		
 
