@@ -1444,3 +1444,4 @@ version 8.19 (2020-07-21)
 version 8.19.1 (2020-07-xx)
     * Removes unused client_assertion and client_assertion_type parsing from
       AuthenticationRequest.parse (iss #307).
+    * Removes Java 6 build from pom.xml.

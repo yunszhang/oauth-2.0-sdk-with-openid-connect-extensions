@@ -227,16 +227,6 @@
 						<id>default-jar</id>
 					</execution>
 					<execution>
-						<id>jdk6-jar</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-						<configuration>
-							<classesDirectory>${project.build.outputDirectory}_jdk6</classesDirectory>
-							<classifier>jdk6</classifier>
-						</configuration>
-					</execution>
-					<execution>
 						<id>jdk8-jar</id>
 						<goals>
 							<goal>jar</goal>
