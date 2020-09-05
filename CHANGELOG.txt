@@ -1441,7 +1441,10 @@ version 8.18 (2020-07-17)
 version 8.19 (2020-07-21)
     * Adds DefaultEntityStatementRetriever.getRecordedRequests method.
 
-version 8.19.1 (2020-07-xx)
+version 8.19.1 (2020-09-05)
+    * Updates the OpenID Connect Federation 1.0 TrustChain class to verify that
+      the signing JWK used by an entity is found in the statement published by
+      the superior.
     * Removes unused client_assertion and client_assertion_type parsing from
       AuthenticationRequest.parse (iss #307).
     * Removes Java 6 build from pom.xml.

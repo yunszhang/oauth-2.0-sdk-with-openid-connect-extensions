@@ -18,21 +18,20 @@
 package com.nimbusds.openid.connect.sdk.federation.entities;
 
 
-import java.security.Key;
-import java.util.LinkedList;
+import java.security.PublicKey;
 import java.util.List;
 
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.factories.DefaultJWSSignerFactory;
+import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory;
 import com.nimbusds.jose.jwk.*;
 import com.nimbusds.jose.proc.BadJOSEException;
-import com.nimbusds.jose.proc.JWSKeySelector;
-import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.jose.proc.JWSVerifierFactory;
+import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 
@@ -134,18 +133,21 @@ public final class EntityStatement {
 	 * Verifies the signature for a self-statement (typically for a trust
 	 * anchor or leaf) and checks the statement issue and expiration times.
 	 *
+	 * @return The SHA-256 thumbprint of the key used to successfully
+	 *         verify the signature.
+	 *
 	 * @throws BadJOSEException If the signature is invalid or the
 	 *                          statement is expired or before the issue
 	 *                          time.
 	 * @throws JOSEException    On a internal JOSE exception.
 	 */
-	public void verifySignatureOfSelfStatement() throws BadJOSEException, JOSEException {
+	public Base64URL verifySignatureOfSelfStatement() throws BadJOSEException, JOSEException {
 		
 		if (! getClaimsSet().isSelfStatement()) {
 			throw new BadJOSEException("Entity statement not self-issued");
 		}
 		
-		verifySignature(getClaimsSet().getJWKSet());
+		return verifySignature(getClaimsSet().getJWKSet());
 	}
 	
 	
@@ -153,29 +155,55 @@ public final class EntityStatement {
 	 * Verifies the signature and checks the statement issue and expiration
 	 * times.
 	 *
-	 * @param jwkSet The JWK set to use for the signature validation.
+	 * @param jwkSet The JWK set to use for the signature verification.
 	 *               Must not be {@code null}.
+	 *
+	 * @return The SHA-256 thumbprint of the key used to successfully
+	 *         verify the signature.
 	 *
 	 * @throws BadJOSEException If the signature is invalid or the
 	 *                          statement is expired or before the issue
 	 *                          time.
 	 * @throws JOSEException    On a internal JOSE exception.
 	 */
-	public void verifySignature(final JWKSet jwkSet)
+	public Base64URL verifySignature(final JWKSet jwkSet)
 		throws BadJOSEException, JOSEException {
 		
-		DefaultJWTProcessor<?> jwtProcessor = new DefaultJWTProcessor<>();
-		jwtProcessor.setJWSKeySelector(new JWSKeySelector() {
-			@Override
-			public List<? extends Key> selectJWSKeys(final JWSHeader header, final SecurityContext context) {
-				List<JWK> jwkMatches = new JWKSelector(JWKMatcher.forJWSHeader(header)).select(jwkSet);
-				return new LinkedList<>(KeyConverter.toJavaKeys(jwkMatches));
+		List<JWK> jwkMatches = new JWKSelector(JWKMatcher.forJWSHeader(statementJWT.getHeader())).select(jwkSet);
+		
+		if (jwkMatches.isEmpty()) {
+			throw new BadJOSEException("Entity statement rejected: Another JOSE algorithm expected, or no matching key(s) found");
+		}
+		
+		JWSVerifierFactory verifierFactory = new DefaultJWSVerifierFactory();
+		
+		JWK signingJWK = null;
+		
+		for (JWK candidateJWK: jwkMatches) {
+			
+			if (candidateJWK instanceof AsymmetricJWK) {
+				PublicKey publicKey = ((AsymmetricJWK)candidateJWK).toPublicKey();
+				JWSVerifier jwsVerifier = verifierFactory.createJWSVerifier(statementJWT.getHeader(), publicKey);
+				if (statementJWT.verify(jwsVerifier)) {
+					// success
+					signingJWK = candidateJWK;
+				}
 			}
-		});
+		}
+		
+		if (signingJWK == null) {
+			throw new BadJOSEException("Entity statement rejected: Invalid signature");
+		}
 		
 		// Double check claims with JWT framework
-		jwtProcessor.setJWTClaimsSetVerifier(new EntityStatementClaimsVerifier(null));
-		jwtProcessor.process(getSignedStatement(), null);
+		
+		try {
+			new EntityStatementClaimsVerifier(null).verify(statementJWT.getJWTClaimsSet());
+		} catch (java.text.ParseException e) {
+			throw new BadJOSEException(e.getMessage(), e);
+		}
+		
+		return signingJWK.computeThumbprint();
 	}
 	
 	

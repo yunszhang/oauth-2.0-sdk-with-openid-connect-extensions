@@ -35,6 +35,7 @@ import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jose.proc.BadJOSEException;
+import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
@@ -56,6 +57,9 @@ public class EntityStatementTest extends TestCase {
 	public static final RSAKey RSA_JWK;
 	
 	
+	public static final Base64URL RSA_JWK_THUMBPRINT;
+	
+	
 	public static final JWKSet SIMPLE_JWK_SET;
 	
 	
@@ -68,6 +72,7 @@ public class EntityStatementTest extends TestCase {
 				.keyIDFromThumbprint(true)
 				.keyUse(KeyUse.SIGNATURE)
 				.generate();
+			RSA_JWK_THUMBPRINT = RSA_JWK.computeThumbprint();
 			SIMPLE_JWK_SET = new JWKSet(RSA_JWK.toPublicJWK());
 		} catch (JOSEException e) {
 			throw new RuntimeException(e);
@@ -152,8 +157,8 @@ public class EntityStatementTest extends TestCase {
 		assertEquals(OP_METADATA.getIssuer().getValue(), entityStatement.getEntityID().getValue());
 		assertEquals(claimsSet.toJWTClaimsSet().getClaims(), entityStatement.getClaimsSet().toJWTClaimsSet().getClaims());
 		
-		entityStatement.verifySignatureOfSelfStatement();
-		entityStatement.verifySignature(SIMPLE_JWK_SET);
+		assertEquals(RSA_JWK_THUMBPRINT, entityStatement.verifySignatureOfSelfStatement());
+		assertEquals(RSA_JWK_THUMBPRINT, entityStatement.verifySignature(SIMPLE_JWK_SET));
 	}
 	
 
@@ -180,8 +185,8 @@ public class EntityStatementTest extends TestCase {
 		assertEquals(OP_METADATA.getIssuer().getValue(), entityStatement.getEntityID().getValue());
 		assertEquals(claimsSet.toJWTClaimsSet().getClaims(), entityStatement.getClaimsSet().toJWTClaimsSet().getClaims());
 		
-		entityStatement.verifySignatureOfSelfStatement();
-		entityStatement.verifySignature(SIMPLE_JWK_SET);
+		assertEquals(RSA_JWK_THUMBPRINT, entityStatement.verifySignatureOfSelfStatement());
+		assertEquals(RSA_JWK_THUMBPRINT, entityStatement.verifySignature(SIMPLE_JWK_SET));
 	}
 	
 	
@@ -205,7 +210,7 @@ public class EntityStatementTest extends TestCase {
 		claimsSet.setMetadataPolicy(FederationMetadataType.OPENID_RELYING_PARTY, rpMetadataPolicy);
 		
 		EntityStatement registrationStatement = EntityStatement.sign(claimsSet, RSA_JWK);
-		registrationStatement.verifySignature(SIMPLE_JWK_SET);
+		assertEquals(RSA_JWK_THUMBPRINT, registrationStatement.verifySignature(SIMPLE_JWK_SET));
 	}
 	
 	
@@ -253,7 +258,7 @@ public class EntityStatementTest extends TestCase {
 			EntityStatement.parse(signedJWT.serialize()).verifySignatureOfSelfStatement();
 			fail();
 		} catch (BadJOSEException e) {
-			assertEquals("Signed JWT rejected: Another algorithm expected, or no matching key(s) found", e.getMessage());
+			assertEquals("Entity statement rejected: Another JOSE algorithm expected, or no matching key(s) found", e.getMessage());
 		}
 	}
 	
@@ -276,7 +281,7 @@ public class EntityStatementTest extends TestCase {
 			EntityStatement.parse(signedJWT.serialize()).verifySignatureOfSelfStatement();
 			fail();
 		} catch (BadJOSEException e) {
-			assertEquals("Signed JWT rejected: Invalid signature", e.getMessage());
+			assertEquals("Entity statement rejected: Invalid signature", e.getMessage());
 		}
 	}
 	

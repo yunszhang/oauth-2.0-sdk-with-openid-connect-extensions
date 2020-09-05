@@ -340,7 +340,7 @@ public class TrustChainTest extends TestCase {
 			trustChain.verifySignatures(ANCHOR_JWK_SET);
 			fail();
 		} catch (BadJOSEException e) {
-			assertEquals("Invalid leaf statement: Signed JWT rejected: Invalid signature", e.getMessage());
+			assertEquals("Invalid leaf statement: Entity statement rejected: Invalid signature", e.getMessage());
 		}
 	}
 	
@@ -369,7 +369,44 @@ public class TrustChainTest extends TestCase {
 			trustChain.verifySignatures(ANCHOR_JWK_SET);
 			fail();
 		} catch (BadJOSEException e) {
-			assertEquals("Invalid statement from https://federation.example.com: Signed JWT rejected: Invalid signature", e.getMessage());
+			assertEquals("Invalid statement from https://federation.example.com: Entity statement rejected: Invalid signature", e.getMessage());
+		}
+	}
+	
+	
+	// Anchor -> OP
+	public void testMinimal_signingJWKNotRegisteredWithAnchor() throws JOSEException, ParseException {
+		
+		EntityStatementClaimsSet leafClaims = createOPSelfStatementClaimsSet(ANCHOR_ENTITY_ID);
+		EntityStatement leafStmt = EntityStatement.sign(leafClaims, OP_RSA_JWK);
+		
+		EntityStatementClaimsSet anchorClaimsAboutLeaf = createOPStatementClaimsSet(new Issuer(ANCHOR_ENTITY_ID.getValue()), ANCHOR_ENTITY_ID);
+		// Replace the signing JWK with some other key
+		JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder(anchorClaimsAboutLeaf.toJWTClaimsSet())
+			.claim(EntityStatementClaimsSet.JWKS_CLAIM_NAME, new JWKSet(new RSAKeyGenerator(2048)
+				.keyIDFromThumbprint(true)
+				.keyUse(KeyUse.SIGNATURE)
+				.generate()).toJSONObject())
+			.build();
+		anchorClaimsAboutLeaf = new EntityStatementClaimsSet(jwtClaimsSet);
+		
+		EntityStatement anchorStmtAboutLeaf = EntityStatement.sign(anchorClaimsAboutLeaf, ANCHOR_RSA_JWK);
+		
+		List<EntityStatement> superiorStatements = Collections.singletonList(anchorStmtAboutLeaf);
+		TrustChain trustChain = new TrustChain(leafStmt, superiorStatements);
+		
+		assertEquals(leafStmt, trustChain.getLeafSelfStatement());
+		assertEquals(superiorStatements, trustChain.getSuperiorStatements());
+		
+		assertEquals(ANCHOR_ENTITY_ID, trustChain.getTrustAnchorEntityID());
+		
+		try {
+			trustChain.verifySignatures(ANCHOR_JWK_SET);
+			fail();
+		} catch (BadJOSEException e) {
+			assertEquals(
+				"Signing JWK with thumbprint " + OP_RSA_JWK.computeThumbprint() + " not found in entity statement issued from superior https://federation.example.com",
+				e.getMessage());
 		}
 	}
 	

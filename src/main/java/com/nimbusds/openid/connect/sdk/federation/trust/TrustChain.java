@@ -18,6 +18,7 @@
 package com.nimbusds.openid.connect.sdk.federation.trust;
 
 
+import java.security.ProviderException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -28,8 +29,10 @@ import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.proc.BadJOSEException;
+import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
@@ -315,8 +318,9 @@ public final class TrustChain {
 	public void verifySignatures(final JWKSet trustAnchorJWKSet)
 		throws BadJOSEException, JOSEException {
 		
+		Base64URL signingJWKThumbprint;
 		try {
-			leaf.verifySignatureOfSelfStatement();
+			signingJWKThumbprint = leaf.verifySignatureOfSelfStatement();
 		} catch (BadJOSEException e) {
 			throw new BadJOSEException("Invalid leaf statement: " + e.getMessage(), e);
 		}
@@ -332,11 +336,38 @@ public final class TrustChain {
 				verificationJWKSet = superiors.get(i+1).getClaimsSet().getJWKSet();
 			}
 			
+			// Check that the signing JWK is registered with the superior
+			if (! hasJWKWithThumbprint(stmt.getClaimsSet().getJWKSet(), signingJWKThumbprint)) {
+				throw new BadJOSEException("Signing JWK with thumbprint " + signingJWKThumbprint + " not found in entity statement issued from superior " + stmt.getClaimsSet().getIssuerEntityID());
+			}
+			
 			try {
-				stmt.verifySignature(verificationJWKSet);
+				signingJWKThumbprint = stmt.verifySignature(verificationJWKSet);
 			} catch (BadJOSEException e) {
 				throw new BadJOSEException("Invalid statement from " + stmt.getClaimsSet().getIssuer() + ": " + e.getMessage(), e);
 			}
 		}
+	}
+	
+	
+	private static boolean hasJWKWithThumbprint(final JWKSet jwkSet, final Base64URL thumbprint) {
+		
+		if (jwkSet == null) {
+			return false;
+		}
+		
+		for (JWK jwk: jwkSet.getKeys()) {
+			
+			try {
+				if (thumbprint.equals(jwk.computeThumbprint())) {
+					return true;
+				}
+			} catch (JOSEException e) {
+				throw new ProviderException(e.getMessage(), e);
+			}
+			
+		}
+		
+		return false;
 	}
 }

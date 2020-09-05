@@ -159,7 +159,7 @@ public class FederationEntityConfigurationSuccessResponseTest extends TestCase {
 			response.getEntityStatement().verifySignatureOfSelfStatement();
 			fail();
 		} catch (BadJOSEException e) {
-			assertEquals("Signed JWT rejected: Invalid signature", e.getMessage());
+			assertEquals("Entity statement rejected: Invalid signature", e.getMessage());
 		}
 	}
 	
