@@ -29,6 +29,7 @@ import net.jcip.annotations.Immutable;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
+import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
@@ -68,7 +69,7 @@ import com.nimbusds.openid.connect.sdk.Prompt;
  *     <li>OAuth 2.0 Incremental Authorization
  *         (draft-ietf-oauth-incremental-authz-04)
  *     <li>The OAuth 2.0 Authorization Framework: JWT Secured Authorization
- *         Request (JAR) draft-ietf-oauth-jwsreq-21
+ *         Request (JAR) draft-ietf-oauth-jwsreq-29
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
  * </ul>
@@ -825,6 +826,21 @@ public class AuthorizationRequest extends AbstractRequest {
 		this.requestObject = requestObject;
 		this.requestURI = requestURI;
 		
+		if (requestObject instanceof SignedJWT) {
+			// Make sure the "sub" claim is not set to the client_id value
+			// https://tools.ietf.org/html/draft-ietf-oauth-jwsreq-29#section-10.8
+			JWTClaimsSet requestObjectClaims;
+			try {
+				requestObjectClaims = requestObject.getJWTClaimsSet();
+			} catch (java.text.ParseException e) {
+				// Should never happen
+				throw new IllegalArgumentException("Illegal \"request\" parameter: " + e.getMessage(), e);
+			}
+			if (clientID.getValue().equals(requestObjectClaims.getSubject())) {
+				throw new IllegalArgumentException("Illegal \"request\" parameter: The JWT sub (subject) claim must not equal the client_id");
+			}
+		}
+		
 		this.prompt = prompt; // technically OpenID
 
 		if (MapUtils.isNotEmpty(customParams)) {
@@ -1392,8 +1408,17 @@ public class AuthorizationRequest extends AbstractRequest {
 			try {
 				requestObject = JWTParser.parse(v);
 				
+				if (requestObject instanceof SignedJWT) {
+					// Make sure the "sub" claim is not set to the client_id value
+					// https://tools.ietf.org/html/draft-ietf-oauth-jwsreq-29#section-10.8
+					JWTClaimsSet requestObjectClaims = requestObject.getJWTClaimsSet();
+					if (clientID.getValue().equals(requestObjectClaims.getSubject())) {
+						throw new java.text.ParseException("The JWT sub (subject) claim must not equal the client_id", 0);
+					}
+				}
+				
 			} catch (java.text.ParseException e) {
-				String msg = "Invalid \"request_object\" parameter: " + e.getMessage();
+				String msg = "Invalid \"request\" parameter: " + e.getMessage();
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 					clientID, redirectURI, ResponseMode.resolve(rm, rt), state, e);
 			}

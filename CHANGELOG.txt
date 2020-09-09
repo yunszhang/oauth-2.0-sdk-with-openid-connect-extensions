@@ -1448,3 +1448,10 @@ version 8.19.1 (2020-09-05)
     * Removes unused client_assertion and client_assertion_type parsing from
       AuthenticationRequest.parse (iss #307).
     * Removes Java 6 build from pom.xml.
+
+version 8.19.2 (2020-09-09)
+    * Updates AuthorizationRequest to prohibit signed (JWS) request objects
+      where the optional JWT "sub" (subject) claim is set to the client_id, see
+      https://tools.ietf.org/html/draft-ietf-oauth-jwsreq-29#section-10.8
+    * Fixes AuthorizationRequest.parse ParseException messages on invalid
+      request object.

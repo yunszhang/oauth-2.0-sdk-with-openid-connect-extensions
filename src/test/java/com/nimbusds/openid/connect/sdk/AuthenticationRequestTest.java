@@ -2410,7 +2410,7 @@ public class AuthenticationRequestTest extends TestCase {
 		JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder(request.toJWTClaimsSet())
 			.issuer(clientID.getValue())
 			.audience(endpoint.toString())
-			.subject(clientID.getValue())
+			// .subject(clientID.getValue()) prohibited: https://tools.ietf.org/html/draft-ietf-oauth-jwsreq-29#section-10.8
 			.jwtID(new JWTID().getValue())
 			.expirationTime(exp)
 			.build();

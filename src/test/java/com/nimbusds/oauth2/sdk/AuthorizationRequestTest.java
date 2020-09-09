@@ -25,11 +25,15 @@ import java.util.*;
 
 import junit.framework.TestCase;
 
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.gen.OctetSequenceKeyGenerator;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -1186,6 +1190,67 @@ public class AuthorizationRequestTest extends TestCase {
 	}
 	
 	
+	// https://tools.ietf.org/html/draft-ietf-oauth-jwsreq-29#section-10.8
+	public void testJAR_requestObject_construct_rejectWithSubjectClaimsEqualsClientID()
+		throws JOSEException {
+		
+		URI endpointURI = URI.create("https://c2id.com/login");
+		ResponseType rt = new ResponseType("code");
+		ClientID clientID = new ClientID("123");
+		
+		AuthorizationRequest jar = new AuthorizationRequest.Builder(rt, clientID)
+			.build();
+		
+		JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder(jar.toJWTClaimsSet())
+			.subject(clientID.getValue())
+			.build();
+		
+		SignedJWT requestObject = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtClaimsSet);
+		requestObject.sign(new MACSigner(new OctetSequenceKeyGenerator(256).generate()));
+		
+		try {
+			new AuthorizationRequest.Builder(rt, clientID)
+				.requestObject(requestObject)
+				.endpointURI(endpointURI)
+				.build();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Illegal \"request\" parameter: The JWT sub (subject) claim must not equal the client_id", e.getMessage());
+			assertTrue(e.getCause() instanceof IllegalArgumentException);
+			assertEquals("Illegal \"request\" parameter: The JWT sub (subject) claim must not equal the client_id", e.getCause().getMessage());
+		}
+	}
+	
+	
+	// https://tools.ietf.org/html/draft-ietf-oauth-jwsreq-29#section-10.8
+	public void testJAR_requestObject_parse_rejectWithSubjectClaimsEqualsClientID()
+		throws JOSEException {
+		
+		URI endpointURI = URI.create("https://c2id.com/login");
+		ResponseType rt = new ResponseType("code");
+		ClientID clientID = new ClientID("123");
+		
+		JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+			.subject(clientID.getValue()) // illegal
+			.claim("client_id", clientID.getValue())
+			.claim("response_type", rt.toString())
+			.build();
+		
+		SignedJWT requestObject = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtClaimsSet);
+		requestObject.sign(new MACSigner(new OctetSequenceKeyGenerator(256).generate()));
+		
+		URI request = URI.create(endpointURI + "?client_id=" + clientID + "&request=" + requestObject.serialize());
+		
+		try {
+			AuthorizationRequest.parse(request);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid \"request\" parameter: The JWT sub (subject) claim must not equal the client_id", e.getMessage());
+			assertEquals(clientID, e.getClientID());
+		}
+	}
+	
+	
 	public void testBuilder_nullRequestObject_clientID() {
 		
 		try {
@@ -1417,7 +1482,7 @@ public class AuthorizationRequestTest extends TestCase {
 			AuthorizationRequest.parse(URI.create("https://c2id.com/login?request=abc&client_id=123"));
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"request_object\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getMessage());
+			assertEquals("Invalid \"request\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
 		}
 	}
@@ -1469,9 +1534,9 @@ public class AuthorizationRequestTest extends TestCase {
 			AuthorizationRequest.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"request_object\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getMessage());
+			assertEquals("Invalid \"request\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
-			assertEquals("Invalid request: Invalid \"request_object\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Invalid \"request\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getErrorObject().getDescription());
 			assertEquals(clientID, e.getClientID());
 			assertEquals(redirectionURI, e.getRedirectionURI());
 			assertEquals(state, e.getState());
@@ -1570,9 +1635,9 @@ public class AuthorizationRequestTest extends TestCase {
 			AuthorizationRequest.parse(uri);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"request_object\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getMessage());
+			assertEquals("Invalid \"request\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Invalid \"request_object\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Invalid \"request\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getErrorObject().getDescription());
 			assertEquals(URI.create("//example.io"), e.getRedirectionURI());
 			assertNull(e.getState());
 			assertEquals(new ClientID("123"), e.getClientID());
