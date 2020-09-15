@@ -1455,3 +1455,6 @@ version 8.19.2 (2020-09-09)
       https://tools.ietf.org/html/draft-ietf-oauth-jwsreq-29#section-10.8
     * Fixes AuthorizationRequest.parse ParseException messages on invalid
       request object.
+
+version 8.20 (2020-09-15)
+    * Adds EntityID constructor and conversion for ClientID.

@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Identifier;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
@@ -78,6 +79,18 @@ public final class EntityID extends Identifier {
 	
 	
 	/**
+	 * Creates a new entity identifier from the specified client
+	 * identifier.
+	 *
+	 * @param clientID The client ID. Must represent an URI and must not be
+	 *                 {@code null}.
+	 */
+	public EntityID(final ClientID clientID) {
+		this(clientID.getValue());
+	}
+	
+	
+	/**
 	 * Creates a new entity identifier with the specified value.
 	 *
 	 * @param value The identifier value. Must represent an URI and must
@@ -110,6 +123,16 @@ public final class EntityID extends Identifier {
 	 */
 	public URI toURI() {
 		return URI.create(getValue());
+	}
+	
+	
+	/**
+	 * Returns the entity identifier as a client ID.
+	 *
+	 * @return The client ID.
+	 */
+	public ClientID toClientID() {
+		return new ClientID(getValue());
 	}
 	
 	

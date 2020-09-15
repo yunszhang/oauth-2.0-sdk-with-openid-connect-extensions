@@ -23,6 +23,7 @@ import java.net.URI;
 import junit.framework.TestCase;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 
@@ -56,6 +57,14 @@ public class EntityIDTest extends TestCase {
 		EntityID entityID = new EntityID(subject);
 		assertEquals(subject.getValue(), entityID.getValue());
 		assertEquals(uri, entityID.toURI());
+	}
+	
+	
+	public void testClientIDConstructor() {
+		
+		ClientID clientID = new ClientID("https://c2id.com");
+		EntityID entityID = new EntityID(clientID);
+		assertEquals(clientID, entityID.toClientID());
 	}
 	
 	
