@@ -27,6 +27,7 @@ import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 import com.nimbusds.openid.connect.sdk.federation.entities.FederationEntityMetadata;
+import com.nimbusds.openid.connect.sdk.federation.entities.FederationMetadataType;
 import com.nimbusds.openid.connect.sdk.federation.trust.constraints.TrustChainConstraints;
 
 
@@ -94,7 +95,10 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 	
 	
 	@Override
-	public TrustChainSet retrieve(final EntityID target, final Set<EntityID> trustAnchors) {
+	public TrustChainSet retrieve(final EntityID target,
+				      final EntityMetadataValidator targetMetadataValidator,
+				      final Set<EntityID> trustAnchors)
+		throws InvalidEntityMetadataException {
 		
 		if (CollectionUtils.isEmpty(trustAnchors)) {
 			throw new IllegalArgumentException("The trust anchors must not be empty");
@@ -109,6 +113,16 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 		} catch (ResolveException e) {
 			accumulatedExceptions.add(e);
 			return new TrustChainSet();
+		}
+		
+		if (targetMetadataValidator != null) {
+			
+			FederationMetadataType type = targetMetadataValidator.getType();
+			if (type == null) {
+				throw new IllegalArgumentException("The target metadata validation doesn't specify a federation entity type");
+			}
+			
+			targetMetadataValidator.validate(targetStatement.getClaimsSet().getMetadata(type));
 		}
 		
 		return retrieve(targetStatement, trustAnchors);

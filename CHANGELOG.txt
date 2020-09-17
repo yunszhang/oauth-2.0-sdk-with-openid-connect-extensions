@@ -1456,5 +1456,8 @@ version 8.19.2 (2020-09-09)
     * Fixes AuthorizationRequest.parse ParseException messages on invalid
       request object.
 
-version 8.20 (2020-09-15)
+version 8.20 (2020-09-17)
+    * Updates the OpenID Connect Federation 1.0 TrustChainResolver to enable
+      optional target entity metadata validation before proceeding with
+      retrieving the authority statements.
     * Adds EntityID constructor and conversion for ClientID.

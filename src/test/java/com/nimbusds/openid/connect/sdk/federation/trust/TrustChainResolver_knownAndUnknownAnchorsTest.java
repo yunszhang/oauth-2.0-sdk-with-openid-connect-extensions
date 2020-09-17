@@ -149,7 +149,7 @@ public class TrustChainResolver_knownAndUnknownAnchorsTest extends TestCase {
 	}
 	
 	
-	public void testResolve() throws ResolveException {
+	public void testResolve() throws ResolveException, InvalidEntityMetadataException {
 		
 		EntityStatementRetriever statementRetriever = new EntityStatementRetriever() {
 			@Override
@@ -185,7 +185,7 @@ public class TrustChainResolver_knownAndUnknownAnchorsTest extends TestCase {
 		// Test the retriever
 		DefaultTrustChainRetriever retriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		TrustChainSet trustChains = retriever.retrieve(new EntityID(OP_ISSUER), Collections.singleton(new EntityID("https://federation.com")));
+		TrustChainSet trustChains = retriever.retrieve(new EntityID(OP_ISSUER), null, Collections.singleton(new EntityID("https://federation.com")));
 		
 		assertEquals(1, trustChains.size());
 		

@@ -22,8 +22,10 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -34,10 +36,7 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.SubjectType;
-import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
-import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
-import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
-import com.nimbusds.openid.connect.sdk.federation.entities.FederationEntityMetadata;
+import com.nimbusds.openid.connect.sdk.federation.entities.*;
 import com.nimbusds.openid.connect.sdk.federation.trust.constraints.TrustChainConstraints;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
@@ -131,15 +130,15 @@ public class TrustChainResolver_basicTest extends TestCase {
 		
 		try {
 			new DefaultTrustChainRetriever(new DefaultEntityStatementRetriever())
-				.retrieve(new EntityID("https://example.com"), Collections.<EntityID>emptySet());
+				.retrieve(new EntityID("https://example.com"), null, Collections.<EntityID>emptySet());
 			fail();
-		} catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException | InvalidEntityMetadataException e) {
 			assertEquals("The trust anchors must not be empty", e.getMessage());
 		}
 	}
 	
 	
-	public void testSimple_fetchStatement_oneStep() throws ResolveException {
+	public void testSimple_fetchStatement_oneStep() throws ResolveException, InvalidEntityMetadataException {
 		
 		EntityStatementRetriever statementRetriever = new EntityStatementRetriever() {
 			@Override
@@ -170,7 +169,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
 		assertEquals(TrustChainConstraints.NO_CONSTRAINTS, chainRetriever.getConstraints());
 		
-		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), null, Collections.singleton(new EntityID(ANCHOR_ISSUER)));
 		
 		assertEquals(1, trustChains.size());
 		
@@ -213,6 +212,202 @@ public class TrustChainResolver_basicTest extends TestCase {
 		assertEquals(1, chain.getSuperiorStatements().size());
 		
 		assertEquals(1, resolvedChains.size());
+	}
+	
+	
+	public void testSimple_fetchStatement_oneStep_withOPMetadataValidator() throws ResolveException, InvalidEntityMetadataException {
+		
+		EntityStatementRetriever statementRetriever = new EntityStatementRetriever() {
+			@Override
+			public EntityStatement fetchSelfIssuedEntityStatement(EntityID target) throws ResolveException {
+				if (OP_ISSUER.getValue().equals(target.getValue())) {
+					return OP_SELF_STMT;
+				} else if (ANCHOR_ISSUER.getValue().equals(target.getValue())) {
+					return ANCHOR_SELF_STMT;
+				} else {
+					throw new ResolveException("Invalid target");
+				}
+			}
+			
+			
+			@Override
+			public EntityStatement fetchEntityStatement(URI federationAPIEndpoint, EntityID issuer, EntityID subject) throws ResolveException {
+				if (ANCHOR_FEDERATION_API_URI.equals(federationAPIEndpoint)) {
+					if (ANCHOR_ISSUER.getValue().equals(issuer.getValue()) && OP_ISSUER.getValue().equals(subject.getValue())) {
+						return ANCHOR_STMT_ABOUT_OP;
+					}
+					throw new ResolveException("Unknown subject: " + subject);
+				}
+				throw new ResolveException("Exception");
+			}
+		};
+		
+		// Test the retriever
+		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
+		assertEquals(TrustChainConstraints.NO_CONSTRAINTS, chainRetriever.getConstraints());
+		
+		final AtomicBoolean opMetadataValidatorCalled = new AtomicBoolean(false);
+		
+		EntityMetadataValidator opMetadataValidator = new EntityMetadataValidator() {
+			@Override
+			public FederationMetadataType getType() {
+				return FederationMetadataType.OPENID_PROVIDER;
+			}
+			
+			
+			@Override
+			public void validate(JSONObject metadata) throws InvalidEntityMetadataException {
+				opMetadataValidatorCalled.set(true);
+				if (metadata == null || metadata.isEmpty()) {
+					throw new InvalidEntityMetadataException("Missing required OP metadata");
+				}
+			}
+		};
+		
+		TrustChainSet trustChains = chainRetriever.retrieve(
+			new EntityID(OP_ISSUER),
+			opMetadataValidator,
+			Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		
+		assertTrue(opMetadataValidatorCalled.get());
+		opMetadataValidatorCalled.set(false);
+		assertEquals(1, trustChains.size());
+		
+		TrustChain chain = trustChains.getShortest();
+		
+		assertEquals(OP_SELF_STMT, chain.getLeafSelfStatement());
+		assertEquals(ANCHOR_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));
+		assertEquals(1, chain.getSuperiorStatements().size());
+		
+		assertEquals(ANCHOR_JWK_SET.toJSONObject(), chainRetriever.getAccumulatedTrustAnchorJWKSets().get(new EntityID(ANCHOR_ISSUER)).toJSONObject());
+		assertEquals(1, chainRetriever.getAccumulatedTrustAnchorJWKSets().size());
+		
+		assertTrue(chainRetriever.getAccumulatedExceptions().isEmpty());
+		
+		// Test the resolver
+		Map<EntityID,JWKSet> anchors = Collections.singletonMap(new EntityID(ANCHOR_ISSUER), ANCHOR_JWK_SET);
+		TrustChainResolver resolver = new TrustChainResolver(anchors, TrustChainConstraints.NO_CONSTRAINTS, statementRetriever);
+		assertEquals(anchors, resolver.getTrustAnchors());
+		assertEquals(TrustChainConstraints.NO_CONSTRAINTS, resolver.getConstraints());
+		
+		TrustChainSet resolvedChains = resolver.resolveTrustChains(new EntityID(OP_ISSUER), opMetadataValidator);
+		assertTrue(opMetadataValidatorCalled.get());
+		opMetadataValidatorCalled.set(false);
+		
+		chain = resolvedChains.getShortest();
+		assertEquals(OP_SELF_STMT, chain.getLeafSelfStatement());
+		assertEquals(ANCHOR_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));
+		assertEquals(1, chain.getSuperiorStatements().size());
+		
+		assertEquals(1, resolvedChains.size());
+		
+		// Test the resolver, no configured anchor JWK set
+		anchors = Collections.singletonMap(new EntityID(ANCHOR_ISSUER), null);
+		resolver = new TrustChainResolver(anchors, TrustChainConstraints.NO_CONSTRAINTS, statementRetriever);
+		assertEquals(anchors, resolver.getTrustAnchors());
+		
+		resolvedChains = resolver.resolveTrustChains(new EntityID(OP_ISSUER), opMetadataValidator);
+		
+		assertTrue(opMetadataValidatorCalled.get());
+		opMetadataValidatorCalled.set(false);
+		
+		chain = resolvedChains.getShortest();
+		assertEquals(OP_SELF_STMT, chain.getLeafSelfStatement());
+		assertEquals(ANCHOR_STMT_ABOUT_OP, chain.getSuperiorStatements().get(0));
+		assertEquals(1, chain.getSuperiorStatements().size());
+		
+		assertEquals(1, resolvedChains.size());
+	}
+	
+	
+	public void testSimple_fetchStatement_oneStep_withOPMetadataValidator_missingOPMetadata() throws ResolveException, InvalidEntityMetadataException, JOSEException {
+		
+		Date now = new Date();
+		
+		EntityStatementClaimsSet opStmtClaims = new EntityStatementClaimsSet(
+			OP_ISSUER,
+			new Subject(OP_ISSUER.getValue()),
+			DateUtils.fromSecondsSinceEpoch(DateUtils.toSecondsSinceEpoch(now)),
+			DateUtils.fromSecondsSinceEpoch(DateUtils.toSecondsSinceEpoch(now) + 3600),
+			OP_JWK_SET.toPublicJWKSet());
+		opStmtClaims.setOPMetadata(null); // to fail validation
+		opStmtClaims.setAuthorityHints(Collections.singletonList(new EntityID(ANCHOR_ISSUER.getValue())));
+		
+		final EntityStatement opStmt = EntityStatement.sign(opStmtClaims, OP_JWK_SET.getKeyByKeyId("op1"));
+		
+		EntityStatementRetriever statementRetriever = new EntityStatementRetriever() {
+			@Override
+			public EntityStatement fetchSelfIssuedEntityStatement(EntityID target) throws ResolveException {
+				if (OP_ISSUER.getValue().equals(target.getValue())) {
+					return opStmt;
+				} else if (ANCHOR_ISSUER.getValue().equals(target.getValue())) {
+					return ANCHOR_SELF_STMT;
+				} else {
+					throw new ResolveException("Invalid target");
+				}
+			}
+			
+			
+			@Override
+			public EntityStatement fetchEntityStatement(URI federationAPIEndpoint, EntityID issuer, EntityID subject) throws ResolveException {
+				if (ANCHOR_FEDERATION_API_URI.equals(federationAPIEndpoint)) {
+					if (ANCHOR_ISSUER.getValue().equals(issuer.getValue()) && OP_ISSUER.getValue().equals(subject.getValue())) {
+						return ANCHOR_STMT_ABOUT_OP;
+					}
+					throw new ResolveException("Unknown subject: " + subject);
+				}
+				throw new ResolveException("Exception");
+			}
+		};
+		
+		// Test the retriever
+		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
+		assertEquals(TrustChainConstraints.NO_CONSTRAINTS, chainRetriever.getConstraints());
+		
+		final AtomicBoolean opMetadataValidatorCalled = new AtomicBoolean(false);
+		
+		EntityMetadataValidator opMetadataValidator = new EntityMetadataValidator() {
+			@Override
+			public FederationMetadataType getType() {
+				return FederationMetadataType.OPENID_PROVIDER;
+			}
+			
+			
+			@Override
+			public void validate(JSONObject metadata) throws InvalidEntityMetadataException {
+				opMetadataValidatorCalled.set(true);
+				if (metadata == null || metadata.isEmpty()) {
+					throw new InvalidEntityMetadataException("Missing required OP metadata");
+				}
+			}
+		};
+		
+		try {
+			chainRetriever.retrieve(
+				new EntityID(OP_ISSUER),
+				opMetadataValidator,
+				Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+			fail();
+		} catch (InvalidEntityMetadataException e) {
+			assertEquals("Missing required OP metadata", e.getMessage());
+		}
+		
+		assertTrue(opMetadataValidatorCalled.get());
+		opMetadataValidatorCalled.set(false);
+		
+		// Test the resolver
+		Map<EntityID,JWKSet> anchors = Collections.singletonMap(new EntityID(ANCHOR_ISSUER), ANCHOR_JWK_SET);
+		TrustChainResolver resolver = new TrustChainResolver(anchors, TrustChainConstraints.NO_CONSTRAINTS, statementRetriever);
+		assertEquals(anchors, resolver.getTrustAnchors());
+		assertEquals(TrustChainConstraints.NO_CONSTRAINTS, resolver.getConstraints());
+		
+		try {
+			resolver.resolveTrustChains(new EntityID(OP_ISSUER), opMetadataValidator);
+			fail();
+		} catch (InvalidEntityMetadataException e) {
+			assertEquals("Missing required OP metadata", e.getMessage());
+		}
+		assertTrue(opMetadataValidatorCalled.get());
 	}
 	
 	
@@ -294,7 +489,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 	}
 	
 	
-	public void testResolve_selfIssuedRetrievalThrowsResolveException() {
+	public void testResolve_selfIssuedRetrievalThrowsResolveException() throws InvalidEntityMetadataException {
 		
 		EntityStatementRetriever statementRetriever = new EntityStatementRetriever() {
 			@Override
@@ -313,7 +508,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 		// Test the retriever
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), null, Collections.singleton(new EntityID(ANCHOR_ISSUER)));
 		assertTrue(trustChains.isEmpty());
 		
 		ResolveException e1 = (ResolveException) chainRetriever.getAccumulatedExceptions().get(0);
@@ -334,7 +529,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 	}
 	
 	
-	public void testResolve_noFederationAPIURI() {
+	public void testResolve_noFederationAPIURI() throws InvalidEntityMetadataException {
 		
 		EntityStatementRetriever statementRetriever = new EntityStatementRetriever() {
 			@Override
@@ -365,7 +560,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 		// Test the retriever
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), null, Collections.singleton(new EntityID(ANCHOR_ISSUER)));
 		assertTrue(trustChains.isEmpty());
 		
 		ResolveException e1 = (ResolveException) chainRetriever.getAccumulatedExceptions().get(0);
@@ -386,7 +581,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 	}
 	
 	
-	public void testResolve_fetchEntityStatementException() {
+	public void testResolve_fetchEntityStatementException() throws InvalidEntityMetadataException {
 		
 		EntityStatementRetriever statementRetriever = new EntityStatementRetriever() {
 			@Override
@@ -411,7 +606,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 		// Test the retriever
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER.getValue())));
+		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), null, Collections.singleton(new EntityID(ANCHOR_ISSUER.getValue())));
 		assertTrue(trustChains.isEmpty());
 		
 		ResolveException e1 = (ResolveException) chainRetriever.getAccumulatedExceptions().get(0);

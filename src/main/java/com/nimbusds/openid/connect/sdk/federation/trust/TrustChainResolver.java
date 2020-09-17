@@ -190,12 +190,44 @@ public class TrustChainResolver {
 	public TrustChainSet resolveTrustChains(final EntityID target)
 		throws ResolveException {
 		
+		try {
+			return resolveTrustChains(target, null);
+		} catch (InvalidEntityMetadataException e) {
+			// Should never occur if target metadata validator omitted
+			throw new IllegalStateException("Unexpected exception: " + e.getMessage(), e);
+		}
+	}
+	
+	
+	/**
+	 * Resolves the trust chains for the specified target, with optional
+	 * validation of the target entity metadata. The validator can for
+	 * example check that for an entity which is expected to be an OpenID
+	 * relying party the required party metadata is present.
+	 *
+	 * @param target                  The target. Must not be {@code null}.
+	 * @param targetMetadataValidator To perform optional validation of the
+	 *                                retrieved target entity metadata,
+	 *                                before proceeding with retrieving the
+	 *                                entity statements from the
+	 *                                authorities, {@code null} if not
+	 *                                specified.
+	 *
+	 * @return The resolved trust chains, containing at least one valid and
+	 *         verified chain.
+	 *
+	 * @throws ResolveException If no trust chain could be resolved.
+	 */
+	public TrustChainSet resolveTrustChains(final EntityID target,
+						final EntityMetadataValidator targetMetadataValidator)
+		throws ResolveException, InvalidEntityMetadataException {
+		
 		if (trustAnchors.get(target) != null) {
 			throw new ResolveException("Target is trust anchor");
 		}
 		
 		TrustChainRetriever retriever = new DefaultTrustChainRetriever(statementRetriever, constraints);
-		Set<TrustChain> fetchedTrustChains = retriever.retrieve(target, trustAnchors.keySet());
+		Set<TrustChain> fetchedTrustChains = retriever.retrieve(target, targetMetadataValidator, trustAnchors.keySet());
 		return verifyTrustChains(
 			fetchedTrustChains,
 			retriever.getAccumulatedTrustAnchorJWKSets(),

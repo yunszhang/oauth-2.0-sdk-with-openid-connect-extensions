@@ -41,13 +41,27 @@ interface TrustChainRetriever {
 	 * Fetches the trust chains for the specified target entity. Intended
 	 * for use in automatic federation client registration.
 	 *
-	 * @param target       The target entity ID. Must not be {@code null}.
-	 * @param trustAnchors The trust anchors. Must contain at least one
-	 *                     trust anchor.
+	 * @param target                  The target entity ID. Must not be
+	 *                                {@code null}.
+	 * @param targetMetadataValidator To perform optional validation of the
+	 *                                retrieved target entity metadata,
+	 *                                before proceeding with retrieving the
+	 *                                entity statements from the
+	 *                                authorities, {@code null} if not
+	 *                                specified.
+	 * @param trustAnchors            The trust anchors. Must contain at
+	 *                                least one trust anchor.
 	 *
 	 * @return The successfully fetched trust chains, empty set if none.
+	 *
+	 * @throws InvalidEntityMetadataException If the optional target entity
+	 *                                        metadata validation didn't
+	 *                                        pass.
 	 */
-	TrustChainSet retrieve(final EntityID target, final Set<EntityID> trustAnchors);
+	TrustChainSet retrieve(final EntityID target,
+			       final EntityMetadataValidator targetMetadataValidator,
+			       final Set<EntityID> trustAnchors)
+		throws InvalidEntityMetadataException;
 	
 	
 	/**

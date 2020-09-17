@@ -172,7 +172,7 @@ public class TrustChainResolver_withIntermediateTest extends TestCase {
 	}
 	
 	
-	public void testResolve_fetchLeafStatement() throws ResolveException {
+	public void testResolve_fetchLeafStatement() throws ResolveException, InvalidEntityMetadataException {
 		
 		EntityStatementRetriever statementRetriever = new EntityStatementRetriever() {
 			@Override
@@ -210,7 +210,7 @@ public class TrustChainResolver_withIntermediateTest extends TestCase {
 		// Test the chain retriever
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever);
 		
-		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), null, Collections.singleton(new EntityID(ANCHOR_ISSUER)));
 		
 		assertTrue(chainRetriever.getAccumulatedExceptions().isEmpty());
 		
@@ -307,7 +307,7 @@ public class TrustChainResolver_withIntermediateTest extends TestCase {
 	}
 	
 	
-	public void testResolve_withMaxPathLengthConstraint() {
+	public void testResolve_withMaxPathLengthConstraint() throws InvalidEntityMetadataException {
 		
 		EntityStatementRetriever statementRetriever = new EntityStatementRetriever() {
 			@Override
@@ -349,7 +349,7 @@ public class TrustChainResolver_withIntermediateTest extends TestCase {
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever, constraints);
 		assertEquals(constraints, chainRetriever.getConstraints());
 		
-		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), null, Collections.singleton(new EntityID(ANCHOR_ISSUER)));
 		assertTrue(trustChains.isEmpty());
 		
 		ResolveException resolveException = (ResolveException)chainRetriever.getAccumulatedExceptions().get(0);
@@ -358,7 +358,7 @@ public class TrustChainResolver_withIntermediateTest extends TestCase {
 	}
 	
 	
-	public void testResolve_withExcludedConstraint() {
+	public void testResolve_withExcludedConstraint() throws InvalidEntityMetadataException {
 		
 		EntityStatementRetriever statementRetriever = new EntityStatementRetriever() {
 			@Override
@@ -404,7 +404,7 @@ public class TrustChainResolver_withIntermediateTest extends TestCase {
 		DefaultTrustChainRetriever chainRetriever = new DefaultTrustChainRetriever(statementRetriever, constraints);
 		assertEquals(constraints, chainRetriever.getConstraints());
 		
-		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), Collections.singleton(new EntityID(ANCHOR_ISSUER)));
+		TrustChainSet trustChains = chainRetriever.retrieve(new EntityID(OP_ISSUER), null, Collections.singleton(new EntityID(ANCHOR_ISSUER)));
 		assertTrue(trustChains.isEmpty());
 		
 		ResolveException resolveException = (ResolveException)chainRetriever.getAccumulatedExceptions().get(0);
