@@ -256,10 +256,10 @@ public class TrustChainResolver_basicTest extends TestCase {
 			
 			
 			@Override
-			public void validate(JSONObject metadata) throws InvalidEntityMetadataException {
+			public void validate(EntityID entityID, JSONObject metadata) throws InvalidEntityMetadataException {
 				opMetadataValidatorCalled.set(true);
 				if (metadata == null || metadata.isEmpty()) {
-					throw new InvalidEntityMetadataException("Missing required OP metadata");
+					throw new InvalidEntityMetadataException("Missing required OP metadata for " + entityID);
 				}
 			}
 		};
@@ -374,10 +374,10 @@ public class TrustChainResolver_basicTest extends TestCase {
 			
 			
 			@Override
-			public void validate(JSONObject metadata) throws InvalidEntityMetadataException {
+			public void validate(EntityID entityID, JSONObject metadata) throws InvalidEntityMetadataException {
 				opMetadataValidatorCalled.set(true);
 				if (metadata == null || metadata.isEmpty()) {
-					throw new InvalidEntityMetadataException("Missing required OP metadata");
+					throw new InvalidEntityMetadataException("Missing required OP metadata for " + entityID);
 				}
 			}
 		};
@@ -389,7 +389,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 				Collections.singleton(new EntityID(ANCHOR_ISSUER)));
 			fail();
 		} catch (InvalidEntityMetadataException e) {
-			assertEquals("Missing required OP metadata", e.getMessage());
+			assertEquals("Missing required OP metadata for " + OP_ISSUER, e.getMessage());
 		}
 		
 		assertTrue(opMetadataValidatorCalled.get());
@@ -405,7 +405,7 @@ public class TrustChainResolver_basicTest extends TestCase {
 			resolver.resolveTrustChains(new EntityID(OP_ISSUER), opMetadataValidator);
 			fail();
 		} catch (InvalidEntityMetadataException e) {
-			assertEquals("Missing required OP metadata", e.getMessage());
+			assertEquals("Missing required OP metadata for " + OP_ISSUER, e.getMessage());
 		}
 		assertTrue(opMetadataValidatorCalled.get());
 	}

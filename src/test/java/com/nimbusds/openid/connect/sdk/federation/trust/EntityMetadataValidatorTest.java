@@ -24,6 +24,7 @@ import java.util.Arrays;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.FederationMetadataType;
 import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
@@ -42,10 +43,10 @@ public class EntityMetadataValidatorTest extends TestCase {
 		
 		
 		@Override
-		public void validate(JSONObject metadata) throws InvalidEntityMetadataException {
+		public void validate(final EntityID entityID, final JSONObject metadata) throws InvalidEntityMetadataException {
 		
 			if (metadata == null || metadata.isEmpty()) {
-				throw new InvalidEntityMetadataException("Missing required RP metadata");
+				throw new InvalidEntityMetadataException("Missing required RP metadata for " + entityID);
 			}
 		}
 	}
@@ -56,11 +57,13 @@ public class EntityMetadataValidatorTest extends TestCase {
 		RPMetadataMustBePresentValidator validator = new RPMetadataMustBePresentValidator();
 		assertEquals(FederationMetadataType.OPENID_RELYING_PARTY, validator.getType());
 		
+		EntityID entityID = new EntityID("https://rp.example.com");
+		
 		try {
-			validator.validate(null);
+			validator.validate(entityID, null);
 			fail();
 		} catch (InvalidEntityMetadataException e) {
-			assertEquals("Missing required RP metadata", e.getMessage());
+			assertEquals("Missing required RP metadata for " + entityID, e.getMessage());
 		}
 		
 		OIDCClientMetadata rpMetadata = new OIDCClientMetadata();
@@ -69,6 +72,6 @@ public class EntityMetadataValidatorTest extends TestCase {
 		rpMetadata.setClientRegistrationTypes(Arrays.asList(ClientRegistrationType.EXPLICIT, ClientRegistrationType.AUTOMATIC));
 		
 		// Pass
-		validator.validate(rpMetadata.toJSONObject());
+		validator.validate(entityID, rpMetadata.toJSONObject());
 	}
 }

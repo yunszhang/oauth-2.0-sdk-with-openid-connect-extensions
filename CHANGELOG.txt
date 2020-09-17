@@ -1461,3 +1461,7 @@ version 8.20 (2020-09-17)
       optional target entity metadata validation before proceeding with
       retrieving the authority statements.
     * Adds EntityID constructor and conversion for ClientID.
+
+version 8.21 (2020-09-17)
+    * The EntityMetadataValidator.validate interface method includes the
+      EntityID.

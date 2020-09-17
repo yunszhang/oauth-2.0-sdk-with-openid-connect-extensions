@@ -20,6 +20,7 @@ package com.nimbusds.openid.connect.sdk.federation.trust;
 
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.FederationMetadataType;
 
 
@@ -40,10 +41,11 @@ public interface EntityMetadataValidator {
 	/**
 	 * Validates the specified metadata.
 	 *
+	 * @param entityID The entity ID.
 	 * @param metadata The metadata, {@code null} if none.
 	 *
 	 * @throws InvalidEntityMetadataException If validation failed.
 	 */
-	void validate(final JSONObject metadata)
+	void validate(final EntityID entityID, final JSONObject metadata)
 		throws InvalidEntityMetadataException;
 }

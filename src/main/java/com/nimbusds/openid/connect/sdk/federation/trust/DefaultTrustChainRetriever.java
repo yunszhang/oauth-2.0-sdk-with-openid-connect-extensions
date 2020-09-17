@@ -122,7 +122,7 @@ class DefaultTrustChainRetriever implements TrustChainRetriever {
 				throw new IllegalArgumentException("The target metadata validation doesn't specify a federation entity type");
 			}
 			
-			targetMetadataValidator.validate(targetStatement.getClaimsSet().getMetadata(type));
+			targetMetadataValidator.validate(target, targetStatement.getClaimsSet().getMetadata(type));
 		}
 		
 		return retrieve(targetStatement, trustAnchors);
