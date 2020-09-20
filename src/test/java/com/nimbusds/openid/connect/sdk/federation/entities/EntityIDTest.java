@@ -47,6 +47,7 @@ public class EntityIDTest extends TestCase {
 		EntityID entityID = new EntityID(issuer);
 		assertEquals(issuer.getValue(), entityID.getValue());
 		assertEquals(uri, entityID.toURI());
+		assertEquals(issuer, entityID.toIssuer());
 	}
 	
 	
@@ -57,6 +58,7 @@ public class EntityIDTest extends TestCase {
 		EntityID entityID = new EntityID(subject);
 		assertEquals(subject.getValue(), entityID.getValue());
 		assertEquals(uri, entityID.toURI());
+		assertEquals(subject, entityID.toSubject());
 	}
 	
 	
@@ -148,5 +150,13 @@ public class EntityIDTest extends TestCase {
 		String value = "https://c2id.com";
 		
 		assertEquals(value, EntityID.parse(new Subject(value)).getValue());
+	}
+	
+	
+	public void testParseFromClientID() throws ParseException {
+		
+		String value = "https://c2id.com";
+		
+		assertEquals(value, EntityID.parse(new ClientID(value)).getValue());
 	}
 }
