@@ -44,10 +44,15 @@ import com.nimbusds.oauth2.sdk.util.StringUtils;
 public final class EntityID extends Identifier {
 	
 	
+	private static final long serialVersionUID = -2884746939238001871L;
+	
+	
 	/**
 	 * Creates a new entity identifier from the specified URI.
 	 *
 	 * @param value The URI. Must not be {@code null}.
+	 *
+	 * @throws IllegalArgumentException On a illegal entity ID.
 	 */
 	public EntityID(final URI value) {
 		this(value.toString());
@@ -60,6 +65,8 @@ public final class EntityID extends Identifier {
 	 *
 	 * @param issuer The issuer. Must represent an URI and must not be
 	 *               {@code null}.
+	 *
+	 * @throws IllegalArgumentException On a illegal entity ID.
 	 */
 	public EntityID(final Issuer issuer) {
 		this(issuer.getValue());
@@ -72,6 +79,8 @@ public final class EntityID extends Identifier {
 	 *
 	 * @param subject The subject. Must represent an URI and must not be
 	 *                {@code null}.
+	 *
+	 * @throws IllegalArgumentException On a illegal entity ID.
 	 */
 	public EntityID(final Subject subject) {
 		this(subject.getValue());
@@ -95,6 +104,8 @@ public final class EntityID extends Identifier {
 	 *
 	 * @param value The identifier value. Must represent an URI and must
 	 *              not be {@code null}.
+	 *
+	 * @throws IllegalArgumentException On a illegal entity ID.
 	 */
 	public EntityID(final String value) {
 		super(value);
@@ -123,6 +134,25 @@ public final class EntityID extends Identifier {
 	 */
 	public URI toURI() {
 		return URI.create(getValue());
+	}
+	
+	/**
+	 * Returns the entity identifier as an issuer.
+	 *
+	 * @return The issuer.
+	 */
+	public Issuer toIssuer() {
+		return new Issuer(getValue());
+	}
+	
+	
+	/**
+	 * Returns the entity identifier as a subject.
+	 *
+	 * @return The subject.
+	 */
+	public Subject toSubject() {
+		return new Subject(getValue());
 	}
 	
 	
@@ -190,5 +220,20 @@ public final class EntityID extends Identifier {
 	public static EntityID parse(final Subject subject)
 		throws ParseException {
 		return parse(subject.getValue());
+	}
+	
+	
+	/**
+	 * Parses an entity ID from the specified client ID.
+	 *
+	 * @param clientID The client ID. Must not be {@code null}.
+	 *
+	 * @return The entity ID.
+	 *
+	 * @throws ParseException On a illegal entity ID.
+	 */
+	public static EntityID parse(final ClientID clientID)
+		throws ParseException {
+		return parse(clientID.getValue());
 	}
 }
