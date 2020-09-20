@@ -25,6 +25,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.client.ClientInformation;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
@@ -100,6 +101,36 @@ public class OIDCClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("trust_anchor_id"));
 
 		assertEquals(57, paramNames.size());
+	}
+
+
+	public void testMinimalConstructor()
+		throws Exception {
+
+		ClientID clientID = new ClientID("123");
+		OIDCClientMetadata metadata = new OIDCClientMetadata();
+		metadata.setName("Example app");
+
+		OIDCClientInformation info = new OIDCClientInformation(clientID, metadata);
+		
+		assertEquals(clientID, info.getID());
+		assertNull(info.getIDIssueDate());
+		assertEquals(metadata, info.getMetadata());
+		assertEquals("Example app", info.getMetadata().getName());
+		assertNull(info.getSecret());
+		assertNull(info.getRegistrationURI());
+		assertNull(info.getRegistrationAccessToken());
+		
+		String json = info.toJSONObject().toJSONString();
+		
+		info = OIDCClientInformation.parse(JSONObjectUtils.parse(json));
+		
+		assertEquals(clientID, info.getID());
+		assertNull(info.getIDIssueDate());
+		assertEquals("Example app", info.getMetadata().getName());
+		assertNull(info.getSecret());
+		assertNull(info.getRegistrationURI());
+		assertNull(info.getRegistrationAccessToken());
 	}
 
 

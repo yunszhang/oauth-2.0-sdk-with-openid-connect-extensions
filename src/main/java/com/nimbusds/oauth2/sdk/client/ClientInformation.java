@@ -24,13 +24,14 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
-import net.jcip.annotations.Immutable;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -112,19 +113,29 @@ public class ClientInformation {
 	 * The client registration access token.
 	 */
 	private final BearerAccessToken accessToken;
+	
+	
+	/**
+	 * Creates a new minimal client information instance without a client
+	 * secret.
+	 *
+	 * @param id       The client identifier. Must not be {@code null}.
+	 * @param metadata The client metadata. Must not be {@code null}.
+	 */
+	public ClientInformation(final ClientID id, final ClientMetadata metadata) {
+		this(id, null, metadata, null);
+	}
 
 
 	/**
 	 * Creates a new client information instance.
 	 *
-	 * @param id              The client identifier. Must not be
-	 *                        {@code null}.
-	 * @param issueDate       The issue date of the client identifier,
-	 *                        {@code null} if not specified.
-	 * @param metadata        The client metadata. Must not be
-	 *                        {@code null}.
-	 * @param secret          The optional client secret, {@code null} if
-	 *                        not specified.
+	 * @param id        The client identifier. Must not be {@code null}.
+	 * @param issueDate The issue date of the client identifier,
+	 *                  {@code null} if not specified.
+	 * @param metadata  The client metadata. Must not be {@code null}.
+	 * @param secret    The optional client secret, {@code null} if not
+	 *                  specified.
 	 */
 	public ClientInformation(final ClientID id,
 				 final Date issueDate,

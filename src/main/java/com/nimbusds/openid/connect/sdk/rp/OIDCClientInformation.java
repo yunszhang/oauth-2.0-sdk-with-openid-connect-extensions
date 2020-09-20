@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.jcip.annotations.Immutable;
-
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -76,6 +75,20 @@ public final class OIDCClientInformation extends ClientInformation {
 
 
 	/**
+	 * Creates a new minimal OpenID Connect client information instance
+	 * without a client secret.
+	 *
+	 * @param id       The client identifier. Must not be {@code null}.
+	 * @param metadata The OpenID Connect client metadata. Must not be
+	 *                 {@code null}.
+	 */
+	public OIDCClientInformation(final ClientID id, final OIDCClientMetadata metadata) {
+
+		this(id, null, metadata, null);
+	}
+
+
+	/**
 	 * Creates a new OpenID Connect client information instance.
 	 *
 	 * @param id        The client identifier. Must not be {@code null}.
@@ -87,9 +100,9 @@ public final class OIDCClientInformation extends ClientInformation {
 	 *                  specified.
 	 */
 	public OIDCClientInformation(final ClientID id,
-				 final Date issueDate,
-				 final OIDCClientMetadata metadata,
-				 final Secret secret) {
+				     final Date issueDate,
+				     final OIDCClientMetadata metadata,
+				     final Secret secret) {
 
 		this(id, issueDate, metadata, secret, null, null);
 	}

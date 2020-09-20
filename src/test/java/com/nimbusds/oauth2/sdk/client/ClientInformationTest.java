@@ -23,14 +23,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import junit.framework.TestCase;
-import net.minidev.json.JSONObject;
 
 
 public class ClientInformationTest extends TestCase {
@@ -82,6 +83,36 @@ public class ClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("trust_anchor_id"));
 
 		assertEquals(39, paramNames.size());
+	}
+	
+	
+	public void testSuperMinimalConstructor()
+		throws Exception {
+		
+		ClientID clientID = new ClientID("123");
+		ClientMetadata metadata = new ClientMetadata();
+		metadata.setName("Example app");
+		
+		ClientInformation info = new ClientInformation(clientID, metadata);
+		
+		assertEquals(clientID, info.getID());
+		assertNull(info.getIDIssueDate());
+		assertEquals(metadata, info.getMetadata());
+		assertEquals("Example app", info.getMetadata().getName());
+		assertNull(info.getSecret());
+		assertNull(info.getRegistrationURI());
+		assertNull(info.getRegistrationAccessToken());
+		
+		String json = info.toJSONObject().toJSONString();
+		
+		info = ClientInformation.parse(JSONObjectUtils.parse(json));
+		
+		assertEquals(clientID, info.getID());
+		assertNull(info.getIDIssueDate());
+		assertEquals("Example app", info.getMetadata().getName());
+		assertNull(info.getSecret());
+		assertNull(info.getRegistrationURI());
+		assertNull(info.getRegistrationAccessToken());
 	}
 
 
