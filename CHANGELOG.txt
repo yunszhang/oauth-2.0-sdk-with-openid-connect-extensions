@@ -1471,3 +1471,7 @@ version 8.22 (2020-09-20)
       constructors.
     * Adds new convenience EntityID.toIssuer, toSubject and parse(Subject),
       parse(ClientID) methods.
+
+version 8.23 (2020-09-25)
+    * Updates ClaimsRequest to handle verified_claims as JSON array by using
+      the first element, the rest are ignored.

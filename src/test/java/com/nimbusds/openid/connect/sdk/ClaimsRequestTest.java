@@ -1614,4 +1614,84 @@ public class ClaimsRequestTest extends TestCase {
 		
 		assertEquals(before, after);
 	}
+	
+	
+	// https://openid.net/specs/openid-connect-4-identity-assurance-1_0.html#section-6.3.3
+	public void testVerified_multipleVerifiedClaimsElements_ignoreElementsAfterTheFirst()
+		throws Exception {
+		
+		String json = "{" +
+			"  \"id_token\": {" +
+			"    \"verified_claims\": [" +
+			"      {" +
+			"        \"verification\": {" +
+			"          \"trust_framework\": {" +
+			"            \"value\": \"eidas_ial_substantial\"" +
+			"          }" +
+			"        }," +
+			"        \"claims\": {" +
+			"          \"email\": null," +
+			"          \"email_verified\": null" +
+			"        }" +
+			"      }," +
+			"      {" +
+			"        \"verification\": {" +
+			"          \"trust_framework\": {" +
+			"            \"values\": [\"eidas_ial_high\", \"eidas_ial_substantial\"]" +
+			"          }" +
+			"        }," +
+			"        \"claims\": {" +
+			"          \"birthdate\": null" +
+			"        }" +
+			"      }" +
+			"    ]" +
+			"  }," +
+			"  \"userinfo\": {" +
+			"    \"verified_claims\": [" +
+			"      {" +
+			"        \"verification\": {" +
+			"          \"trust_framework\": {" +
+			"            \"value\": \"eidas_ial_high\"" +
+			"          }" +
+			"        }," +
+			"        \"claims\": {" +
+			"          \"given_name\": null," +
+			"          \"family_name\": null" +
+			"        }" +
+			"      }," +
+			"      {" +
+			"        \"verification\": {" +
+			"          \"trust_framework\": {" +
+			"            \"values\": [\"eidas_ial_high\", \"eidas_ial_substantial\"]" +
+			"          }" +
+			"        }," +
+			"        \"claims\": {" +
+			"          \"birthdate\": null" +
+			"        }" +
+			"      }" +
+			"    ]" +
+			"  }" +
+			"}";
+		
+		
+		ClaimsRequest claimsRequest = ClaimsRequest.parse(json);
+		
+		// ID token
+		JSONObject idTokenClaimsVerification = claimsRequest.getIDTokenClaimsVerificationJSONObject();
+		assertEquals(1, idTokenClaimsVerification.size());
+		JSONObject trustFramework = JSONObjectUtils.getJSONObject(idTokenClaimsVerification, "trust_framework");
+		assertEquals("eidas_ial_substantial", trustFramework.get("value"));
+		assertEquals(1, trustFramework.size());
+		
+		assertEquals(new HashSet<>(Arrays.asList("email", "email_verified")), claimsRequest.getVerifiedIDTokenClaimNames(false));
+		
+		// UserInfo
+		JSONObject userInfoClaimsVerification = claimsRequest.getUserInfoClaimsVerificationJSONObject();
+		assertEquals(1, userInfoClaimsVerification.size());
+		trustFramework = JSONObjectUtils.getJSONObject(userInfoClaimsVerification, "trust_framework");
+		assertEquals("eidas_ial_high", trustFramework.get("value"));
+		assertEquals(1, trustFramework.size());
+		
+		assertEquals(new HashSet<>(Arrays.asList("given_name", "family_name")), claimsRequest.getVerifiedUserInfoClaimNames(false));
+	}
 }

@@ -21,6 +21,7 @@ package com.nimbusds.openid.connect.sdk;
 import java.util.*;
 
 import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONAware;
 import net.minidev.json.JSONObject;
 
@@ -30,6 +31,7 @@ import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.util.JSONArrayUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
 
@@ -1649,6 +1651,26 @@ public class ClaimsRequest implements JSONAware {
 	}
 	
 	
+	private static JSONObject parseFirstVerifiedClaimsObject(final JSONObject containingObject)
+		throws ParseException {
+		
+		if (containingObject.get("verified_claims") instanceof JSONObject) {
+			// JSON object is the simple case
+			return JSONObjectUtils.getJSONObject(containingObject, "verified_claims");
+		}
+		
+		if (containingObject.get("verified_claims") instanceof JSONArray) {
+			// Try JSON array, take first element, ignore rest (use new OIDCClaimsRequest class to handle this case)
+			List<JSONObject> elements = JSONArrayUtils.toJSONObjectList(JSONObjectUtils.getJSONArray(containingObject, "verified_claims"));
+			if (elements.size() > 0) {
+				return elements.get(0);
+			}
+		}
+		
+		return null;
+	}
+	
+	
 	/**
 	 * Parses a claims request from the specified JSON object
 	 * representation. Unexpected members in the JSON object are silently
@@ -1678,7 +1700,7 @@ public class ClaimsRequest implements JSONAware {
 					claimsRequest.addIDTokenClaim(entry);
 				}
 				
-				JSONObject verifiedClaimsObject = JSONObjectUtils.getJSONObject(idTokenObject, "verified_claims", null);
+				JSONObject verifiedClaimsObject = parseFirstVerifiedClaimsObject(idTokenObject);
 				
 				if (verifiedClaimsObject != null) {
 					// id_token -> verified_claims -> claims
@@ -1710,7 +1732,7 @@ public class ClaimsRequest implements JSONAware {
 					claimsRequest.addUserInfoClaim(entry);
 				}
 				
-				JSONObject verifiedClaimsObject = JSONObjectUtils.getJSONObject(userInfoObject, "verified_claims", null);
+				JSONObject verifiedClaimsObject = parseFirstVerifiedClaimsObject(userInfoObject);
 				
 				if (verifiedClaimsObject != null) {
 					// userinfo -> verified_claims -> claims
