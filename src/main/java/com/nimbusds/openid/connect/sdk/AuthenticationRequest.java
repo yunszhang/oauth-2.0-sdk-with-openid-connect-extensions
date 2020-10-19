@@ -23,7 +23,6 @@ import java.net.URISyntaxException;
 import java.util.*;
 
 import net.jcip.annotations.Immutable;
-import net.minidev.json.JSONObject;
 
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -37,7 +36,10 @@ import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
-import com.nimbusds.oauth2.sdk.util.*;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
+import com.nimbusds.oauth2.sdk.util.URIUtils;
+import com.nimbusds.oauth2.sdk.util.URLUtils;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 
 
@@ -171,7 +173,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 	/**
 	 * Individual claims to be returned (optional).
 	 */
-	private final ClaimsRequest claims;
+	private final OIDCClaimsRequest claims;
 	
 	
 	/**
@@ -291,7 +293,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		/**
 		 * Individual claims to be returned (optional).
 		 */
-		private ClaimsRequest claims;
+		private OIDCClaimsRequest claims;
 		
 		
 		/**
@@ -467,7 +469,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			idTokenHint = request.getIDTokenHint();
 			loginHint = request.getLoginHint();
 			acrValues = request.getACRValues();
-			claims = request.getClaims();
+			claims = request.getOIDCClaims();
 			purpose = request.getPurpose();
 			requestObject = request.getRequestObject();
 			requestURI = request.getRequestURI();
@@ -717,12 +719,40 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		 * Sets the individual claims to be returned. Corresponds to
 		 * the optional {@code claims} parameter.
 		 *
+		 * @see #claims(OIDCClaimsRequest)
+		 *
 		 * @param claims The individual claims to be returned,
 		 *               {@code null} if not specified.
 		 *
 		 * @return This builder.
 		 */
+		@Deprecated
 		public Builder claims(final ClaimsRequest claims) {
+
+			if (claims == null) {
+				this.claims = null;
+			} else {
+				try {
+					this.claims = OIDCClaimsRequest.parse(claims.toJSONObject());
+				} catch (ParseException e) {
+					// Should never happen
+					throw new IllegalArgumentException("Invalid claims: " + e.getMessage(), e);
+				}
+			}
+			return this;
+		}
+
+
+		/**
+		 * Sets the individual OpenID claims to be returned.
+		 * Corresponds to the optional {@code claims} parameter.
+		 *
+		 * @param claims The individual OpenID claims to be returned,
+		 *               {@code null} if not specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder claims(final OIDCClaimsRequest claims) {
 
 			this.claims = claims;
 			return this;
@@ -963,7 +993,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		// codeChallenge, codeChallengeMethod
 		this(uri, rt, null, scope, clientID, redirectURI, state, nonce,
 			null, null, -1, null, null,
-			null, null, null, null, null,
+			null, null, null, (OIDCClaimsRequest) null, null,
 			null, null,
 			null, null,
 			null, false, null);
@@ -1066,6 +1096,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 	 * @param customParams         Additional custom parameters, empty map
 	 *                             or {@code null} if none.
 	 */
+	@Deprecated
 	public AuthenticationRequest(final URI uri,
 				     final ResponseType rt,
 				     final ResponseMode rm,
@@ -1083,6 +1114,137 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				     final String loginHint,
 				     final List<ACR> acrValues,
 				     final ClaimsRequest claims,
+				     final String purpose,
+				     final JWT requestObject,
+				     final URI requestURI,
+				     final CodeChallenge codeChallenge,
+				     final CodeChallengeMethod codeChallengeMethod,
+				     final List<URI> resources,
+				     final boolean includeGrantedScopes,
+				     final Map<String,List<String>> customParams) {
+
+		this(uri, rt, rm, scope, clientID, redirectURI, state, nonce,
+			display, prompt, maxAge, uiLocales, claimsLocales,
+			idTokenHint, loginHint, acrValues, toOIDCClaimsRequestWithSilentFail(claims), purpose,
+			requestObject, requestURI,
+			codeChallenge, codeChallengeMethod,
+			resources, includeGrantedScopes, customParams);
+	}
+
+	
+	/**
+	 * Creates a new OpenID Connect authentication request with extension
+	 * and custom parameters.
+	 *
+	 * @param uri                  The URI of the OAuth 2.0 authorisation
+	 *                             endpoint. May be {@code null} if the
+	 *                             {@link #toHTTPRequest} method will not
+	 *                             be used.
+	 * @param rt                   The response type set. Corresponds to
+	 *                             the {@code response_type} parameter.
+	 *                             Must specify a valid OpenID Connect
+	 *                             response type. Must not be {@code null}.
+	 * @param rm                   The response mode. Corresponds to the
+	 *                             optional {@code response_mode}
+	 *                             parameter. Use of this parameter is not
+	 *                             recommended unless a non-default
+	 *                             response mode is requested (e.g.
+	 *                             form_post).
+	 * @param scope                The request scope. Corresponds to the
+	 *                             {@code scope} parameter. Must contain an
+	 *                             {@link OIDCScopeValue#OPENID openid
+	 *                             value}. Must not be {@code null}.
+	 * @param clientID             The client identifier. Corresponds to
+	 *                             the {@code client_id} parameter. Must
+	 *                             not be {@code null}.
+	 * @param redirectURI          The redirection URI. Corresponds to the
+	 *                             {@code redirect_uri} parameter. Must not
+	 *                             be {@code null} unless set by means of
+	 *                             the optional {@code request_object} /
+	 *                             {@code request_uri} parameter.
+	 * @param state                The state. Corresponds to the
+	 *                             recommended {@code state} parameter.
+	 *                             {@code null} if not specified.
+	 * @param nonce                The nonce. Corresponds to the
+	 *                             {@code nonce} parameter. May be
+	 *                             {@code null} for code flow.
+	 * @param display              The requested display type. Corresponds
+	 *                             to the optional {@code display}
+	 *                             parameter.
+	 *                             {@code null} if not specified.
+	 * @param prompt               The requested prompt. Corresponds to the
+	 *                             optional {@code prompt} parameter.
+	 *                             {@code null} if not specified.
+	 * @param maxAge               The required maximum authentication age,
+	 *                             in seconds. Corresponds to the optional
+	 *                             {@code max_age} parameter. -1 if not
+	 *                             specified, zero implies
+	 *                             {@code prompt=login}.
+	 * @param uiLocales            The preferred languages and scripts for
+	 *                             the user interface. Corresponds to the
+	 *                             optional {@code ui_locales} parameter.
+	 *                             {@code null} if not specified.
+	 * @param claimsLocales        The preferred languages and scripts for
+	 *                             claims being returned. Corresponds to
+	 *                             the optional {@code claims_locales}
+	 *                             parameter. {@code null} if not
+	 *                             specified.
+	 * @param idTokenHint          The ID Token hint. Corresponds to the
+	 *                             optional {@code id_token_hint}
+	 *                             parameter. {@code null} if not
+	 *                             specified.
+	 * @param loginHint            The login hint. Corresponds to the
+	 *                             optional {@code login_hint} parameter.
+	 *                             {@code null} if not specified.
+	 * @param acrValues            The requested Authentication Context
+	 *                             Class Reference values. Corresponds to
+	 *                             the optional {@code acr_values}
+	 *                             parameter. {@code null} if not
+	 *                             specified.
+	 * @param claims               The individual OpenID claims to be
+	 *                             returned. Corresponds to the optional
+	 *                             {@code claims} parameter. {@code null}
+	 *                             if not specified.
+	 * @param purpose              The transaction specific purpose,
+	 *                             {@code null} if not specified.
+	 * @param requestObject        The request object. Corresponds to the
+	 *                             optional {@code request} parameter. Must
+	 *                             not be specified together with a request
+	 *                             object URI. {@code null} if not
+	 *                             specified.
+	 * @param requestURI           The request object URI. Corresponds to
+	 *                             the optional {@code request_uri}
+	 *                             parameter. Must not be specified
+	 *                             together with a request object.
+	 *                             {@code null} if not specified.
+	 * @param codeChallenge        The code challenge for PKCE,
+	 *                             {@code null} if not specified.
+	 * @param codeChallengeMethod  The code challenge method for PKCE,
+	 *                             {@code null} if not specified.
+	 * @param resources            The resource URI(s), {@code null} if not
+	 *                             specified.
+	 * @param includeGrantedScopes {@code true} to request incremental
+	 *                             authorisation.
+	 * @param customParams         Additional custom parameters, empty map
+	 *                             or {@code null} if none.
+	 */
+	public AuthenticationRequest(final URI uri,
+				     final ResponseType rt,
+				     final ResponseMode rm,
+				     final Scope scope,
+				     final ClientID clientID,
+				     final URI redirectURI,
+				     final State state,
+				     final Nonce nonce,
+				     final Display display,
+				     final Prompt prompt,
+				     final int maxAge,
+				     final List<LangTag> uiLocales,
+				     final List<LangTag> claimsLocales,
+				     final JWT idTokenHint,
+				     final String loginHint,
+				     final List<ACR> acrValues,
+				     final OIDCClaimsRequest claims,
 				     final String purpose,
 				     final JWT requestObject,
 				     final URI requestURI,
@@ -1269,10 +1431,50 @@ public class AuthenticationRequest extends AuthorizationRequest {
 	 * Gets the individual claims to be returned. Corresponds to the 
 	 * optional {@code claims} parameter.
 	 *
+	 * @see #getOIDCClaims()
+	 *
 	 * @return The individual claims to be returned, {@code null} if not
 	 *         specified.
 	 */
+	@Deprecated
 	public ClaimsRequest getClaims() {
+
+		return toClaimsRequestWithSilentFail(claims);
+	}
+	
+	
+	private static OIDCClaimsRequest toOIDCClaimsRequestWithSilentFail(final ClaimsRequest claims) {
+		if (claims == null) {
+			return null;
+		}
+		try {
+			return OIDCClaimsRequest.parse(claims.toJSONObject());
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+	
+	
+	private static ClaimsRequest toClaimsRequestWithSilentFail(final OIDCClaimsRequest claims) {
+		if (claims == null) {
+			return null;
+		}
+		try {
+			return ClaimsRequest.parse(claims.toJSONObject());
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+
+
+	/**
+	 * Gets the individual OpenID claims to be returned. Corresponds to the
+	 * optional {@code claims} parameter.
+	 *
+	 * @return The individual claims to be returned, {@code null} if not
+	 *         specified.
+	 */
+	public OIDCClaimsRequest getOIDCClaims() {
 
 		return claims;
 	}
@@ -1617,25 +1819,14 @@ public class AuthenticationRequest extends AuthorizationRequest {
 
 		v = MultivaluedMapUtils.getFirstValue(params, "claims");
 
-		ClaimsRequest claims = null;
+		OIDCClaimsRequest claims = null;
 
 		if (StringUtils.isNotBlank(v)) {
-
-			JSONObject jsonObject;
-
 			try {
-				jsonObject = JSONObjectUtils.parse(v);
-
+				claims = OIDCClaimsRequest.parse(v);
 			} catch (ParseException e) {
 				String msg = "Invalid \"claims\" parameter: " + e.getMessage();
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
-					                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
-			}
-			
-			try {
-				claims = ClaimsRequest.parse(jsonObject);
-			} catch (ParseException e) {
-				throw new ParseException(e.getMessage(), e.getErrorObject(),
 					                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
 			}
 		}

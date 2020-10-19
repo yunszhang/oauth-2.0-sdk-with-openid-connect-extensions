@@ -18,17 +18,14 @@
 package com.nimbusds.openid.connect.sdk;
 
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.Scope;
 
 import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
+import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
 
 
 /**
@@ -236,11 +233,14 @@ public class OIDCScopeValue extends Scope.Value {
 	 * Gets the claims request entries for this OpenID Connect scope value.
 	 * 
 	 * <p>See OpenID Connect Core 1.0, section 5.1.
+	 *
+	 * @see #toClaimsSetRequestEntries()
 	 * 
 	 * @return The claims request entries, {@code null} if not applicable 
 	 *         (for scope values {@link #OPENID} and 
 	 *         {@link #OFFLINE_ACCESS}).
 	 */
+	@Deprecated
 	public Set<ClaimsRequest.Entry> toClaimsRequestEntries() {
 		
 		Set<ClaimsRequest.Entry> entries = new HashSet<>();
@@ -252,5 +252,29 @@ public class OIDCScopeValue extends Scope.Value {
 			entries.add(new ClaimsRequest.Entry(claimName).withClaimRequirement(ClaimRequirement.VOLUNTARY));
 		
 		return Collections.unmodifiableSet(entries);
+	}
+	
+	
+	/**
+	 * Gets the OpenID claims request entries for this OpenID Connect scope
+	 * value.
+	 *
+	 * <p>See OpenID Connect Core 1.0, section 5.1.
+	 *
+	 * @return The OpenID claims request entries, {@code null} if not
+	 *         applicable (for scope values {@link #OPENID} and
+	 *         {@link #OFFLINE_ACCESS}).
+	 */
+	public List<ClaimsSetRequest.Entry> toClaimsSetRequestEntries() {
+		
+		List<ClaimsSetRequest.Entry> entries = new LinkedList<>();
+		
+		if (this == OPENID || this == OFFLINE_ACCESS)
+			return Collections.unmodifiableList(entries);
+		
+		for (String claimName: getClaimNames())
+			entries.add(new ClaimsSetRequest.Entry(claimName).withClaimRequirement(ClaimRequirement.VOLUNTARY));
+		
+		return Collections.unmodifiableList(entries);
 	}
 }

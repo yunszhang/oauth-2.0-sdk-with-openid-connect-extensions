@@ -71,7 +71,7 @@ This SDK version implements the following standards and drafts:
 	* OpenID Connect Extended Authentication Profile (EAP) ACR Values 1.0 -
 	  draft 00
 
-	* OpenID Connect for Identity Assurance 1.0 - draft 08
+	* OpenID Connect for Identity Assurance 1.0 - draft 11
 
 	* OpenID Connect Federation 1.0 - draft 12
 
@@ -93,4 +93,4 @@ This SDK is provided under the terms of the Apache 2.0 licence.
 Questions or comments? Email support@connect2id.com
 
 
-2020-07-16
+2020-10-19

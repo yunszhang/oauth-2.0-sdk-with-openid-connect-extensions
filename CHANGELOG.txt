@@ -1472,6 +1472,16 @@ version 8.22 (2020-09-20)
     * Adds new convenience EntityID.toIssuer, toSubject and parse(Subject),
       parse(ClientID) methods.
 
-version 8.23 (2020-09-25)
+version 8.23 (2020-10-19)
+    * Adds new OIDCClaimsRequest class to represent the "claims" parameter in
+      OpenID authentication requests, deprecating the ClaimsRequest class.
+      Supports OpenID Connect Identity Assurance 1.0 claims requests with
+      multiple "verified_claims" elements (in a JSON array).
+    * Updates AuthenticationRequest to support the new OIDCClaimsRequest class
+      with new constructor, builder and getter methods. The methods relying on
+      the old ClaimsRequest class are marked as deprecated.
+    * Adds new OIDCScopeValue.toClaimsSetRequestEntries method supporting the
+      new OIDCClaimsRequest class, the toClaimsRequestEntries method is marked
+      as deprecated.
     * Updates ClaimsRequest to handle verified_claims as JSON array by using
       the first element, the rest are ignored.

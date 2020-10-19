@@ -54,7 +54,9 @@ import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
+import com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
+import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
 
 
 public class AuthenticationRequestTest extends TestCase {
@@ -153,6 +155,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertNull(request.getLoginHint());
 		assertNull(request.getACRValues());
 		assertNull(request.getClaims());
+		assertNull(request.getOIDCClaims());
 		assertNull(request.getClaimsLocales());
 		assertNull(request.getRequestObject());
 		assertNull(request.getRequestURI());
@@ -198,6 +201,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertNull(request.getLoginHint());
 		assertNull(request.getACRValues());
 		assertNull(request.getClaims());
+		assertNull(request.getOIDCClaims());
 		assertNull(request.getClaimsLocales());
 		assertNull(request.getRequestObject());
 		assertNull(request.getRequestURI());
@@ -962,7 +966,8 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(EXAMPLE_JWT_STRING, request.getIDTokenHint().getParsedString());
 		assertEquals("alice@wonderland.net", request.getLoginHint());
 		assertEquals(acrValues, request.getACRValues());
-		assertEquals(claims, request.getClaims());
+		assertEquals(claims.toJSONObject(), request.getClaims().toJSONObject());
+		assertEquals(claims.toJSONObject(), request.getOIDCClaims().toJSONObject());
 		assertEquals(purpose, request.getPurpose());
 		assertEquals(CodeChallenge.compute(CodeChallengeMethod.S256, codeVerifier), request.getCodeChallenge());
 		assertEquals(CodeChallengeMethod.S256, request.getCodeChallengeMethod());
@@ -1658,7 +1663,8 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(in.getIDTokenHint(), out.getIDTokenHint());
 		assertEquals(in.getLoginHint(), out.getLoginHint());
 		assertEquals(in.getACRValues(), out.getACRValues());
-		assertEquals(in.getClaims(), out.getClaims());
+		assertEquals(in.getClaims().toJSONObject(), out.getClaims().toJSONObject());
+		assertEquals(in.getOIDCClaims().toJSONObject(), out.getOIDCClaims().toJSONObject());
 		assertEquals(in.getRequestObject(), out.getRequestObject());
 		assertEquals(in.getRequestURI(), out.getRequestURI());
 		assertEquals(in.getResponseMode(), out.getResponseMode());
@@ -1714,7 +1720,8 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(in.getIDTokenHint(), out.getIDTokenHint());
 		assertEquals(in.getLoginHint(), out.getLoginHint());
 		assertEquals(in.getACRValues(), out.getACRValues());
-		assertEquals(in.getClaims(), out.getClaims());
+		assertEquals(in.getClaims().toJSONObject(), out.getClaims().toJSONObject());
+		assertEquals(in.getOIDCClaims().toJSONObject(), out.getOIDCClaims().toJSONObject());
 		assertEquals(in.getRequestObject(), out.getRequestObject());
 		assertEquals(in.getRequestURI(), out.getRequestURI());
 		assertEquals(in.getResponseMode(), out.getResponseMode());
@@ -2207,6 +2214,74 @@ public class AuthenticationRequestTest extends TestCase {
 	public void testIdentityAssurance_basicExample()
 		throws Exception {
 		
+		OIDCClaimsRequest claimsRequest = new OIDCClaimsRequest()
+			.withUserInfoVerifiedClaimsRequest(
+				new VerifiedClaimsSetRequest()
+				.add("given_name")
+				.add("family_name")
+				.add("address")
+			);
+		
+		CodeVerifier pkceVerifier = new CodeVerifier();
+		
+		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
+			new ResponseType(ResponseType.Value.CODE),
+			new Scope(OIDCScopeValue.OPENID),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.state(new State("7a4b68ab-5315-4e25-a10f-0fbfaa36d6c7"))
+			.codeChallenge(pkceVerifier, CodeChallengeMethod.S256)
+			.claims(claimsRequest)
+			.uiLocales(Collections.singletonList(new LangTag("en")))
+			.purpose("Account holder identification")
+			.endpointURI(URI.create("https://c2id.com/authz"))
+			.build();
+		
+		authRequest = AuthenticationRequest.parse(authRequest.toURI());
+		
+		assertEquals(claimsRequest.toJSONObject(), authRequest.getOIDCClaims().toJSONObject());
+		assertEquals(claimsRequest.toJSONObject(), authRequest.getClaims().toJSONObject());
+		
+		assertEquals(Collections.singletonList(new LangTag("en")), authRequest.getUILocales());
+		assertEquals("Account holder identification", authRequest.getPurpose());
+		assertEquals(claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0).getClaimNames(false), authRequest.getOIDCClaims().getUserInfoVerifiedClaimsRequestList().get(0).getClaimNames(false));
+	}
+	
+	
+	public void testIdentityAssurance_verificationElement()
+		throws Exception {
+		
+		JSONObject verification = new JSONObject();
+		verification.put("trust_framework", IdentityTrustFramework.DE_AML.getValue());
+		
+		OIDCClaimsRequest claimsRequest = new OIDCClaimsRequest()
+			.withUserInfoClaimsRequest(new ClaimsSetRequest()
+				.add("family_name")
+			)
+			.withUserInfoVerifiedClaimsRequest(
+				new VerifiedClaimsSetRequest()
+					.add("given_name")
+				.withVerificationJSONObject(verification)
+			);
+		
+		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
+			new ResponseType(ResponseType.Value.CODE),
+			new Scope("openid"),
+			new ClientID("123"),
+			new URI("https://client.com/callback"))
+			.state(new State())
+			.claims(claimsRequest)
+			.build();
+		
+		AuthenticationRequest parsed = AuthenticationRequest.parse(authRequest.toParameters());
+		
+		assertEquals(claimsRequest.toJSONObject(), parsed.getOIDCClaims().toJSONObject());
+	}
+	
+	
+	public void testIdentityAssurance_basicExample_deprecated()
+		throws Exception {
+		
 		ClaimsRequest claimsRequest = new ClaimsRequest();
 		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("given_name"));
 		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("family_name"));
@@ -2239,7 +2314,7 @@ public class AuthenticationRequestTest extends TestCase {
 	}
 	
 	
-	public void testIdentityAssurance_verificationElement()
+	public void testIdentityAssurance_verificationElement_deprecated()
 		throws Exception {
 		
 		ClaimsRequest claimsRequest = new ClaimsRequest();
@@ -2293,9 +2368,9 @@ public class AuthenticationRequestTest extends TestCase {
 			AuthenticationRequest.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid claims object: Empty verification claims object", e.getMessage());
+			assertEquals("Invalid \"claims\" parameter: Invalid verified claims request: Empty verified claims object", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
-			assertEquals("Invalid request: Invalid claims object: Empty verification claims object", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Invalid \"claims\" parameter: Invalid verified claims request: Empty verified claims object", e.getErrorObject().getDescription());
 		}
 	}
 	
