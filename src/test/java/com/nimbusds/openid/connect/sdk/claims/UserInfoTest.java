@@ -219,6 +219,7 @@ public class UserInfoTest extends TestCase {
 		assertNull(userInfo.getUpdatedTime());
 		
 		// Assurance
+		assertNull(userInfo.getPlaceOfBirth());
 		assertNull(userInfo.getBirthplace());
 		assertNull(userInfo.getNationalities());
 		assertNull(userInfo.getBirthFamilyName());
@@ -1385,8 +1386,14 @@ public class UserInfoTest extends TestCase {
 		Subject subject = new Subject("alice");
 		UserInfo userInfo = new UserInfo(subject);
 		
-		assertNull(userInfo.getBirthplace());
+		assertNull(userInfo.getPlaceOfBirth());
 		Birthplace birthplace = new Birthplace(new ISO3166_1Alpha2CountryCode("DE"), "Muster Region", "Musterstadt");
+		userInfo.setPlaceOfBirth(birthplace);
+		assertEquals(birthplace.getCountry(), userInfo.getPlaceOfBirth().getCountry());
+		assertEquals(birthplace.getRegion(), userInfo.getPlaceOfBirth().getRegion());
+		assertEquals(birthplace.getLocality(), userInfo.getPlaceOfBirth().getLocality());
+		
+		assertNull(userInfo.getBirthplace());
 		userInfo.setBirthplace(birthplace);
 		assertEquals(birthplace.getCountry(), userInfo.getBirthplace().getCountry());
 		assertEquals(birthplace.getRegion(), userInfo.getBirthplace().getRegion());
@@ -1425,6 +1432,9 @@ public class UserInfoTest extends TestCase {
 		
 		userInfo = UserInfo.parse(json);
 		
+		assertEquals(birthplace.getCountry(), userInfo.getPlaceOfBirth().getCountry());
+		assertEquals(birthplace.getRegion(), userInfo.getPlaceOfBirth().getRegion());
+		assertEquals(birthplace.getLocality(), userInfo.getPlaceOfBirth().getLocality());
 		assertEquals(birthplace.getCountry(), userInfo.getBirthplace().getCountry());
 		assertEquals(birthplace.getRegion(), userInfo.getBirthplace().getRegion());
 		assertEquals(birthplace.getLocality(), userInfo.getBirthplace().getLocality());

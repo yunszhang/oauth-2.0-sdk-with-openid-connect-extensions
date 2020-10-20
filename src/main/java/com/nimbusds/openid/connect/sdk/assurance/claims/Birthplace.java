@@ -34,10 +34,9 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OpenID Connect for Identity Assurance 1.0, section 3.1.
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 4.1.
  * </ul>
  */
-// TODO In anticipation of https://bitbucket.org/openid/connect/issues/1119/place_of_birth-birthplace
 public final class Birthplace extends ClaimsSet {
 	
 	

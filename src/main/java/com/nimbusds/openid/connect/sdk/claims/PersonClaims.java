@@ -163,7 +163,7 @@ public class PersonClaims extends ClaimsSet {
 	 * The birthplace claim name (OpenID Connect for Identity Assurance
 	 * 1.0). Alternative for {@link #PLACE_OF_BIRTH_CLAIM_NAME}.
 	 */
-	// https://bitbucket.org/openid/connect/issues/1119/place_of_birth-birthplace
+	@Deprecated
 	public static final String BIRTHPLACE_CLAIM_NAME = "birthplace";
 	
 	
@@ -1083,11 +1083,13 @@ public class PersonClaims extends ClaimsSet {
 	
 	
 	/**
-	 * Gets the birthplace. Corresponds to the {@code birthplace} claim
-	 * from OpenID Connect for Identity Assurance 1.0.
+	 * Gets the birthplace. Corresponds to the {@code birthplace} claim.
+	 *
+	 * @see #getPlaceOfBirth()
 	 *
 	 * @return The birthplace, {@code null} if not specified.
 	 */
+	@Deprecated
 	public Birthplace getBirthplace() {
 		
 		JSONObject jsonObject = getClaim(BIRTHPLACE_CLAIM_NAME, JSONObject.class);
@@ -1101,11 +1103,13 @@ public class PersonClaims extends ClaimsSet {
 	
 	
 	/**
-	 * Sets the birthplace. Corresponds to the {@code birthplace} claim
-	 * from OpenID Connect for Identity Assurance 1.0.
+	 * Sets the birthplace. Corresponds to the {@code birthplace} claim.
+	 *
+	 * @see #setPlaceOfBirth(Birthplace)
 	 *
 	 * @param birthplace The birthplace, {@code null} if not specified.
 	 */
+	@Deprecated
 	public void setBirthplace(final Birthplace birthplace) {
 		
 		if (birthplace != null) {
@@ -1119,8 +1123,7 @@ public class PersonClaims extends ClaimsSet {
 	
 	/**
 	 * Gets the birthplace. Corresponds to the {@code place_of_birth} claim
-	 * from OpenID Connect for Identity Assurance 1.0. Alternative for
-	 * {@link #getBirthplace()}.
+	 * from OpenID Connect for Identity Assurance 1.0.
 	 *
 	 * @return The birthplace, {@code null} if not specified.
 	 */
@@ -1138,8 +1141,7 @@ public class PersonClaims extends ClaimsSet {
 	
 	/**
 	 * Sets the birthplace. Corresponds to the {@code place_of_birth} claim
-	 * from OpenID Connect for Identity Assurance 1.0. Alternative for
-	 * {@link #setBirthplace(Birthplace)}.
+	 * from OpenID Connect for Identity Assurance 1.0.
 	 *
 	 * @param birthplace The birthplace, {@code null} if not specified.
 	 */

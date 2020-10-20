@@ -1472,7 +1472,7 @@ version 8.22 (2020-09-20)
     * Adds new convenience EntityID.toIssuer, toSubject and parse(Subject),
       parse(ClientID) methods.
 
-version 8.23 (2020-10-19)
+version 8.23 (2020-10-20)
     * Adds new OIDCClaimsRequest class to represent the "claims" parameter in
       OpenID authentication requests, deprecating the ClaimsRequest class.
       Supports OpenID Connect Identity Assurance 1.0 claims requests with
@@ -1485,3 +1485,6 @@ version 8.23 (2020-10-19)
       as deprecated.
     * Updates ClaimsRequest to handle verified_claims as JSON array by using
       the first element, the rest are ignored.
+    * Marks PersonClaims.getBirthplace and setBirthplace as deprecated, use
+      getPlaceOfBirth and setPlaceOfBirth instead (OpenID Connect for Identity
+      Assurance 1.0, section 4.1).
