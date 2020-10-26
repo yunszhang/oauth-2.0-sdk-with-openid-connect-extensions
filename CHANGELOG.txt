@@ -1488,3 +1488,6 @@ version 8.23 (2020-10-20)
     * Marks PersonClaims.getBirthplace and setBirthplace as deprecated, use
       getPlaceOfBirth and setPlaceOfBirth instead (OpenID Connect for Identity
       Assurance 1.0, section 4.1).
+
+version 8.23.1 (2020-10-26)
+    * Adds missing @Deprecated annotation to ClaimsRequest.

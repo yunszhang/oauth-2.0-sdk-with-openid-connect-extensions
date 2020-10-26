@@ -47,6 +47,7 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
  *     <li>OpenID Connect for Identity Assurance 1.0.
  * </ul>
  */
+@Deprecated
 public class ClaimsRequest implements JSONAware {
 	
 	
