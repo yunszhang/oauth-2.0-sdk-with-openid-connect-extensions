@@ -18,6 +18,7 @@
 package com.nimbusds.openid.connect.sdk;
 
 
+import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -25,10 +26,19 @@ import junit.framework.TestCase;
 import com.nimbusds.oauth2.sdk.ParseException;
 
 
-/**
- * Tests the prompt class.
- */
 public class PromptTest extends TestCase {
+	
+	
+	public void testPromptTypeValues() throws ParseException {
+		
+		List<String> names = Arrays.asList("login", "consent", "select_account", "none", "create");
+		
+		for (Prompt.Type type: Prompt.Type.values()) {
+			assertEquals(type, Prompt.Type.valueOf(type.name()));
+			assertEquals(type, Prompt.Type.parse(type.toString()));
+			assertTrue(names.contains(type.toString()));
+		}
+	}
 
 	
 	public void testRun()
@@ -98,6 +108,17 @@ public class PromptTest extends TestCase {
 		assertTrue(p.contains(Prompt.Type.CONSENT));
 		assertTrue(p.contains(Prompt.Type.LOGIN));
 		assertEquals(2, p.size());
+	}
+	
+	
+	public void testParsePromptCreate() throws ParseException {
+		
+		assertEquals("create", Prompt.Type.CREATE.toString());
+		
+		assertEquals(Prompt.Type.CREATE, Prompt.Type.parse("create"));
+		
+		Prompt prompt = Prompt.parse("create");
+		assertEquals(new Prompt(Prompt.Type.CREATE), prompt);
 	}
 	
 	

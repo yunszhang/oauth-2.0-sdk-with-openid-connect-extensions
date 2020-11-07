@@ -1411,6 +1411,39 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals("E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM", request.getCodeChallenge().getValue());
 		assertEquals(CodeChallengeMethod.S256, request.getCodeChallengeMethod());
 	}
+	
+	
+	public void testParsePromptCreate() throws ParseException {
+		
+		AuthorizationRequest request = new AuthenticationRequest.Builder(
+			new ResponseType("code"), new Scope("openid"), new ClientID("123"), URI.create("https://example.com/cb"))
+			.prompt(new Prompt("create"))
+			.endpointURI(URI.create("https://login.c2id.com"))
+			.build();
+		
+		assertEquals(new Prompt(Prompt.Type.CREATE), request.getPrompt());
+		
+		request = AuthorizationRequest.parse(request.toURI());
+		
+		assertEquals(new Prompt(Prompt.Type.CREATE), request.getPrompt());
+	}
+	
+	
+	public void testParseUnknownPrompt() {
+		
+		AuthorizationRequest request = new AuthenticationRequest.Builder(
+			new ResponseType("code"), new Scope("openid"), new ClientID("123"), URI.create("https://example.com/cb"))
+			.build();
+		
+		Map<String,List<String>> params = request.toParameters();
+		params.put("prompt", Collections.singletonList("prompt-xxx"));
+		
+		try {
+			AuthenticationRequest.parse(params);
+		} catch (ParseException e) {
+			assertEquals("Invalid \"prompt\" parameter: Unknown prompt type: prompt-xxx", e.getMessage());
+		}
+	}
 
 
 	public void testParseWithCustomParams()

@@ -33,12 +33,16 @@ import com.nimbusds.oauth2.sdk.util.StringUtils;
  *
  * <ul>
  *     <li>OpenID Connect Core 1.0, section 3.1.2.1.
+ *     <li>Initiating User Registration via OpenID Connect (draft 03)
  * </ul>
  */
 @NotThreadSafe
 public class Prompt extends LinkedHashSet<Prompt.Type> {
-
-
+	
+	
+	private static final long serialVersionUID = -3672900533669609699L;
+	
+	
 	/**
 	 * Enumeration of the prompt types.
 	 */
@@ -76,7 +80,18 @@ public class Prompt extends LinkedHashSet<Prompt.Type> {
 		 * at the authorisation server to select amongst the multiple 
 		 * accounts that they may have current sessions for.
 		 */
-		SELECT_ACCOUNT;
+		SELECT_ACCOUNT,
+		
+		
+		/**
+		 * The client desires the OpenID provider to present the
+		 * end-user with an account creation user interface instead of
+		 * the normal login flow. Care must be taken if combining this
+		 * value with other prompt values. Mutually exclusive
+		 * conditions can arise so it is RECOMMENDED that create not be
+		 * present with any other values.
+		 */
+		CREATE;
 		
 		
 		/**
@@ -115,6 +130,8 @@ public class Prompt extends LinkedHashSet<Prompt.Type> {
 				return CONSENT;
 			} else if ("select_account".equals(s)) {
 				return SELECT_ACCOUNT;
+			} else if ("create".equals(s)) {
+				return CREATE;
 			} else {
 				throw new ParseException("Unknown prompt type: " + s);
 			}
