@@ -1493,5 +1493,5 @@ version 8.23.1 (2020-10-26)
     * Adds missing @Deprecated annotation to ClaimsRequest.
 
 version 8.24 (2020-11-08)
-    * Adds support in prompt "create", see Initiating User Registration via
+    * Adds support for prompt "create", see Initiating User Registration via
       OpenID Connect (draft 03).
