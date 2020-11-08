@@ -21,12 +21,14 @@ package com.nimbusds.openid.connect.sdk;
 import java.net.URI;
 import java.util.*;
 
+import net.jcip.annotations.Immutable;
+
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
-import net.jcip.annotations.Immutable;
 
 
 /**
@@ -89,6 +91,8 @@ import net.jcip.annotations.Immutable;
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM).
+ *     <li>OAuth 2.0 Authorization Server Issuer Identifier in Authorization
+ *         Response (draft-meyerzuselhausen-oauth-iss-auth-resp-01).
  * </ul>
  */
 @Immutable
@@ -146,7 +150,31 @@ public class AuthenticationErrorResponse
 					   final State state,
 					   final ResponseMode rm) {
 					  
-		super(redirectURI, error, state, rm);
+		this(redirectURI, error, state, null, rm);
+	}
+
+
+	/**
+	 * Creates a new OpenID Connect authentication error response.
+	 *
+	 * @param redirectURI The base redirection URI. Must not be
+	 *                    {@code null}.
+	 * @param error       The error. Should match one of the
+	 *                    {@link #getStandardErrors standard errors} for an
+	 *                    OpenID Connect authentication error response.
+	 *                    Must not be {@code null}.
+	 * @param state       The state, {@code null} if not requested.
+	 * @param issuer      The issuer, {@code null} if not specified.
+	 * @param rm          The implied response mode, {@code null} if
+	 *                    unknown.
+	 */
+	public AuthenticationErrorResponse(final URI redirectURI,
+					   final ErrorObject error,
+					   final State state,
+					   final Issuer issuer,
+					   final ResponseMode rm) {
+					  
+		super(redirectURI, error, state, issuer, rm);
 	}
 
 
@@ -204,6 +232,7 @@ public class AuthenticationErrorResponse
 			errorResponse.getRedirectionURI(),
 			errorResponse.getErrorObject(),
 			errorResponse.getState(),
+			errorResponse.getIssuer(),
 			errorResponse.getResponseMode());
 	}
 	

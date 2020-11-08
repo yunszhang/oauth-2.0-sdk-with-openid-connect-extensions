@@ -28,13 +28,11 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 
 
-/**
- * Tests authorisation error response serialisation and parsing.
- */
 public class AuthorizationErrorResponseTest extends TestCase {
 	
 	
@@ -72,7 +70,7 @@ public class AuthorizationErrorResponseTest extends TestCase {
 	public void testSerializeAndParse()
 		throws Exception {
 	
-		State state = new State("xyz");
+		State state = new State();
 	
 		AuthorizationErrorResponse r = new AuthorizationErrorResponse(
 			REDIRECT_URI,
@@ -87,12 +85,14 @@ public class AuthorizationErrorResponseTest extends TestCase {
 		assertEquals(ResponseMode.QUERY, r.impliedResponseMode());
 
 		assertEquals(state, r.getState());
+		
+		assertNull(r.getIssuer());
 
 		Map<String,List<String>> params = r.toParameters();
 		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getCode()), params.get("error"));
 		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getDescription()), params.get("error_description"));
 		assertNull(params.get("error_uri"));
-		assertEquals(Collections.singletonList(state.toString()), params.get("state"));
+		assertEquals(Collections.singletonList(state.getValue()), params.get("state"));
 		assertEquals(3, params.size());
 
 		URI location = r.toURI();
@@ -110,7 +110,7 @@ public class AuthorizationErrorResponseTest extends TestCase {
 			
 		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getCode()), params.get("error"));
 		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getDescription()), params.get("error_description"));
-		assertEquals(Collections.singletonList(state.toString()), params.get("state"));
+		assertEquals(Collections.singletonList(state.getValue()), params.get("state"));
 		assertEquals(3, params.size());
 			
 		HTTPResponse httpResponse = r.toHTTPResponse();
@@ -126,6 +126,96 @@ public class AuthorizationErrorResponseTest extends TestCase {
 		assertNull(r.getResponseMode());
 		assertEquals(ResponseMode.QUERY, r.impliedResponseMode()); // default
 		assertEquals(state, r.getState());
+		assertNull(r.getIssuer());
+	}
+	
+	
+	public void testSerializeAndParse_withIssuer()
+		throws ParseException {
+		
+		Issuer issuer = new Issuer("https://openid.c2id.com");
+		
+		State state = new State();
+		
+		AuthorizationErrorResponse r = new AuthorizationErrorResponse(
+			REDIRECT_URI,
+			OAuth2Error.INVALID_REQUEST,
+			state,
+			issuer,
+			ResponseMode.QUERY);
+		
+		assertFalse(r.indicatesSuccess());
+		assertEquals(REDIRECT_URI, r.getRedirectionURI());
+		assertEquals(OAuth2Error.INVALID_REQUEST, r.getErrorObject());
+		assertEquals(ResponseMode.QUERY, r.getResponseMode());
+		assertEquals(ResponseMode.QUERY, r.impliedResponseMode());
+		
+		assertEquals(state, r.getState());
+		
+		assertEquals(issuer, r.getIssuer());
+		
+		Map<String,List<String>> params = r.toParameters();
+		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getCode()), params.get("error"));
+		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getDescription()), params.get("error_description"));
+		assertNull(params.get("error_uri"));
+		assertEquals(Collections.singletonList(state.getValue()), params.get("state"));
+		assertEquals(Collections.singletonList(issuer.getValue()), params.get("iss"));
+		assertEquals(4, params.size());
+		
+		URI location = r.toURI();
+		
+		assertNull(location.getFragment());
+		assertNotNull(location.getQuery());
+		
+		assertEquals(REDIRECT_URI.getScheme(), location.getScheme());
+		assertEquals(REDIRECT_URI.getPort(), location.getPort());
+		assertEquals(REDIRECT_URI.getHost(), location.getHost());
+		assertEquals(REDIRECT_URI.getPath(), location.getPath());
+		
+		params = URLUtils.parseParameters(location.getQuery());
+		
+		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getCode()), params.get("error"));
+		assertEquals(Collections.singletonList(OAuth2Error.INVALID_REQUEST.getDescription()), params.get("error_description"));
+		assertEquals(Collections.singletonList(state.getValue()), params.get("state"));
+		assertEquals(Collections.singletonList(issuer.getValue()), params.get("iss"));
+		assertEquals(4, params.size());
+		
+		HTTPResponse httpResponse = r.toHTTPResponse();
+		
+		assertEquals(HTTPResponse.SC_FOUND, httpResponse.getStatusCode());
+		assertEquals(location, httpResponse.getLocation());
+		
+		r = AuthorizationErrorResponse.parse(httpResponse);
+		
+		assertFalse(r.indicatesSuccess());
+		assertEquals(REDIRECT_URI, r.getRedirectionURI());
+		assertEquals(OAuth2Error.INVALID_REQUEST, r.getErrorObject());
+		assertNull(r.getResponseMode());
+		assertEquals(ResponseMode.QUERY, r.impliedResponseMode()); // default
+		assertEquals(state, r.getState());
+		assertEquals(issuer, r.getIssuer());
+	}
+	
+	
+	public void testParse_emptyIssuer()
+		throws URISyntaxException, ParseException {
+		
+		State state = new State();
+		
+		URI uri = new AuthorizationErrorResponse(
+			REDIRECT_URI,
+			OAuth2Error.INVALID_REQUEST,
+			state,
+			ResponseMode.QUERY)
+			.toURI();
+		
+		uri = new URI(uri.toString() + "&iss=");
+		
+		AuthorizationErrorResponse errorResponse = AuthorizationErrorResponse.parse(uri);
+		assertEquals(REDIRECT_URI, errorResponse.getRedirectionURI());
+		assertEquals(OAuth2Error.INVALID_REQUEST, errorResponse.getErrorObject());
+		assertEquals(state, errorResponse.getState());
+		assertNull(errorResponse.getIssuer());
 	}
 
 

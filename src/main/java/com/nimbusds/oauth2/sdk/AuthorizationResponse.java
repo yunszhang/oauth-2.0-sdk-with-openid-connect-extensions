@@ -29,6 +29,7 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.jarm.JARMUtils;
 import com.nimbusds.oauth2.sdk.jarm.JARMValidator;
@@ -49,6 +50,8 @@ import com.nimbusds.oauth2.sdk.util.URLUtils;
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM).
+ *     <li>OAuth 2.0 Authorization Server Issuer Identifier in Authorization
+ *         Response (draft-meyerzuselhausen-oauth-iss-auth-resp-01).
  * </ul>
  */
 public abstract class AuthorizationResponse implements Response {
@@ -64,6 +67,12 @@ public abstract class AuthorizationResponse implements Response {
 	 * The optional state parameter to be echoed back to the client.
 	 */
 	private final State state;
+	
+	
+	/**
+	 * Optional issuer.
+	 */
+	private final Issuer issuer;
 	
 	
 	/**
@@ -84,9 +93,13 @@ public abstract class AuthorizationResponse implements Response {
 	 * @param redirectURI The base redirection URI. Must not be
 	 *                    {@code null}.
 	 * @param state       The state, {@code null} if not requested.
+	 * @param issuer      The issuer, {@code null} if not specified.
 	 * @param rm          The response mode, {@code null} if not specified.
 	 */
-	protected AuthorizationResponse(final URI redirectURI, final State state, final ResponseMode rm) {
+	protected AuthorizationResponse(final URI redirectURI,
+					final State state,
+					final Issuer issuer,
+					final ResponseMode rm) {
 
 		if (redirectURI == null) {
 			throw new IllegalArgumentException("The redirection URI must not be null");
@@ -97,6 +110,8 @@ public abstract class AuthorizationResponse implements Response {
 		jwtResponse = null;
 
 		this.state = state;
+		
+		this.issuer = issuer;
 
 		this.rm = rm;
 	}
@@ -125,6 +140,8 @@ public abstract class AuthorizationResponse implements Response {
 		this.jwtResponse = jwtResponse;
 		
 		this.state = null;
+		
+		this.issuer = null;
 
 		this.rm = rm;
 	}
@@ -152,6 +169,17 @@ public abstract class AuthorizationResponse implements Response {
 	public State getState() {
 
 		return state;
+	}
+	
+	
+	/**
+	 * Returns the optional issuer.
+	 *
+	 * @return The issuer, {@code null} if not specified.
+	 */
+	public Issuer getIssuer() {
+		
+		return issuer;
 	}
 	
 	

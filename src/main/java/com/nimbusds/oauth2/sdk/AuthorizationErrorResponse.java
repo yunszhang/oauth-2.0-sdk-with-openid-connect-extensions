@@ -27,6 +27,7 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
@@ -75,6 +76,8 @@ import com.nimbusds.oauth2.sdk.util.URIUtils;
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM).
+ *     <li>OAuth 2.0 Authorization Server Issuer Identifier in Authorization
+ *         Response (draft-meyerzuselhausen-oauth-iss-auth-resp-01).
  * </ul>
  */
 @Immutable
@@ -136,7 +139,31 @@ public class AuthorizationErrorResponse
 					  final State state,
 					  final ResponseMode rm) {
 
-		super(redirectURI, state, rm);
+		this(redirectURI, error, state, null, rm);
+	}
+
+
+	/**
+	 * Creates a new authorisation error response.
+	 *
+	 * @param redirectURI The base redirection URI. Must not be
+	 *                    {@code null}.
+	 * @param error       The error. Should match one of the
+	 *                    {@link #getStandardErrors standard errors} for an
+	 *                    authorisation error response. Must not be
+	 *                    {@code null}.
+	 * @param state       The state, {@code null} if not requested.
+	 * @param issuer      The issuer, {@code null} if not specified.
+	 * @param rm          The implied response mode, {@code null} if
+	 *                    unknown.
+	 */
+	public AuthorizationErrorResponse(final URI redirectURI,
+					  final ErrorObject error,
+					  final State state,
+					  final Issuer issuer,
+					  final ResponseMode rm) {
+
+		super(redirectURI, state, issuer, rm);
 
 		if (error == null)
 			throw new IllegalArgumentException("The error must not be null");
@@ -203,6 +230,9 @@ public class AuthorizationErrorResponse
 
 		if (getState() != null)
 			params.put("state", Collections.singletonList(getState().getValue()));
+		
+		if (getIssuer() != null)
+			params.put("iss", Collections.singletonList(getIssuer().getValue()));
 
 		return params;
 	}
@@ -226,10 +256,11 @@ public class AuthorizationErrorResponse
 		throws ParseException {
 		
 		// JARM, ignore other top level params
-		if (params.get("response") != null) {
+		String responseString = MultivaluedMapUtils.getFirstValue(params, "response");
+		if (responseString != null) {
 			JWT jwtResponse;
 			try {
-				jwtResponse = JWTParser.parse(MultivaluedMapUtils.getFirstValue(params, "response"));
+				jwtResponse = JWTParser.parse(responseString);
 			} catch (java.text.ParseException e) {
 				throw new ParseException("Invalid JWT response: " + e.getMessage(), e);
 			}
@@ -248,7 +279,10 @@ public class AuthorizationErrorResponse
 		// State
 		State state = State.parse(MultivaluedMapUtils.getFirstValue(params, "state"));
 		
-		return new AuthorizationErrorResponse(redirectURI, error, state, null);
+		// Parse optional issuer, draft-meyerzuselhausen-oauth-iss-auth-resp-01
+		Issuer issuer = Issuer.parse(MultivaluedMapUtils.getFirstValue(params, "iss"));
+		
+		return new AuthorizationErrorResponse(redirectURI, error, state, issuer, null);
 	}
 	
 	

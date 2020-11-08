@@ -19,59 +19,40 @@ package com.nimbusds.oauth2.sdk;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.AccessTokenType;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
-import junit.framework.TestCase;
 
 
-/**
- * Tests authorisation response serialisation and parsing.
- */
 public class AuthorizationSuccessResponseTest extends TestCase {
 	
 	
-	private static URI ABS_REDIRECT_URI = null;
+	private static final URI ABS_REDIRECT_URI = URI.create("https://client.example.org/cb");
 
 
-	private static AuthorizationCode CODE = new AuthorizationCode("SplxlOBeZQQYbYS6WxSbIA");
+	private static final AuthorizationCode CODE = new AuthorizationCode("SplxlOBeZQQYbYS6WxSbIA");
 
 
-	private static AccessToken TOKEN = new BearerAccessToken("2YotnFZFEjr1zCsicMWpAA", 3600, null);
+	private static final AccessToken TOKEN = new BearerAccessToken("2YotnFZFEjr1zCsicMWpAA", 3600, null);
 
 
-	private static State STATE = new State("xyz");
-
-
-	private static String RESPONSE_CODE = 
-		"https://client.example.org/cb?code=SplxlOBeZQQYbYS6WxSbIA&state=xyz";
-
-
-	private static String RESPONSE_TOKEN = 
-		"https://client.example.org/cb#" +
-		"&access_token=2YotnFZFEjr1zCsicMWpAA" +
-		"&token_type=Bearer" +
-		"&expires_in=3600" +
-		"&state=xyz";
+	private static final State STATE = new State();
 	
 	
-	public void setUp()
-		throws URISyntaxException,
-		       java.text.ParseException {
-		
-		ABS_REDIRECT_URI = new URI("https://client.example.org/cb");
-	}
+	private static final Issuer ISSUER = new Issuer("https://login.c2id.com");
 	
 	
 	public void testCodeFlow()
@@ -83,11 +64,12 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 		assertEquals(ABS_REDIRECT_URI, resp.getRedirectionURI());
 		assertEquals(CODE, resp.getAuthorizationCode());
 		assertEquals(STATE, resp.getState());
+		assertNull(resp.getIssuer());
 		assertNull(resp.getAccessToken());
 		assertNull(resp.getResponseMode());
 
 		ResponseType responseType = resp.impliedResponseType();
-		assertTrue(new ResponseType("code").equals(responseType));
+		assertEquals(new ResponseType("code"), responseType);
 
 		assertEquals(ResponseMode.QUERY, resp.impliedResponseMode());
 
@@ -108,6 +90,51 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 		assertEquals(ABS_REDIRECT_URI, resp.getRedirectionURI());
 		assertEquals(CODE, resp.getAuthorizationCode());
 		assertEquals(STATE, resp.getState());
+		assertNull(resp.getIssuer());
+		assertNull(resp.getAccessToken());
+		assertNull(resp.getResponseMode());
+
+		assertEquals(ResponseMode.QUERY, resp.impliedResponseMode());
+	}
+	
+	
+	public void testCodeFlowWithIssuer()
+		throws Exception {
+	
+		AuthorizationSuccessResponse resp = new AuthorizationSuccessResponse(ABS_REDIRECT_URI, CODE, null, STATE, ISSUER, null);
+
+		assertTrue(resp.indicatesSuccess());
+		assertEquals(ABS_REDIRECT_URI, resp.getRedirectionURI());
+		assertEquals(CODE, resp.getAuthorizationCode());
+		assertEquals(STATE, resp.getState());
+		assertEquals(ISSUER, resp.getIssuer());
+		assertNull(resp.getAccessToken());
+		assertNull(resp.getResponseMode());
+
+		ResponseType responseType = resp.impliedResponseType();
+		assertEquals(new ResponseType("code"), responseType);
+
+		assertEquals(ResponseMode.QUERY, resp.impliedResponseMode());
+
+		Map<String,List<String>> params = resp.toParameters();
+		assertEquals(CODE, new AuthorizationCode(MultivaluedMapUtils.getFirstValue(params, "code")));
+		assertEquals(STATE, new State(MultivaluedMapUtils.getFirstValue(params,"state")));
+		assertEquals(ISSUER, new Issuer(MultivaluedMapUtils.getFirstValue(params,"iss")));
+		assertEquals(3, params.size());
+
+		URI uri = resp.toURI();
+
+		HTTPResponse httpResponse = resp.toHTTPResponse();
+		assertEquals(302, httpResponse.getStatusCode());
+		assertEquals(uri.toString(), httpResponse.getLocation().toString());
+
+		resp = AuthorizationSuccessResponse.parse(httpResponse);
+
+		assertTrue(resp.indicatesSuccess());
+		assertEquals(ABS_REDIRECT_URI, resp.getRedirectionURI());
+		assertEquals(CODE, resp.getAuthorizationCode());
+		assertEquals(STATE, resp.getState());
+		assertEquals(ISSUER, resp.getIssuer());
 		assertNull(resp.getAccessToken());
 		assertNull(resp.getResponseMode());
 
@@ -129,7 +156,7 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 		assertNull(resp.getResponseMode());
 
 		ResponseType responseType = resp.impliedResponseType();
-		assertTrue(new ResponseType("token").equals(responseType));
+		assertEquals(new ResponseType("token"), responseType);
 
 		assertEquals(ResponseMode.FRAGMENT, resp.impliedResponseMode());
 
@@ -141,8 +168,6 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 		assertEquals(4, params.size());
 
 		URI uri = resp.toURI();
-
-		System.out.println("Location: " + uri);
 
 		HTTPResponse httpResponse = resp.toHTTPResponse();
 		assertEquals(302, httpResponse.getStatusCode());
@@ -198,8 +223,7 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 	}
 
 
-	public void testOverrideQueryResponseMode()
-		throws Exception {
+	public void testOverrideQueryResponseMode() {
 
 		AuthorizationSuccessResponse resp = new AuthorizationSuccessResponse(
 			ABS_REDIRECT_URI,
@@ -230,8 +254,7 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 	}
 
 
-	public void testOverrideFragmentResponseMode()
-		throws Exception {
+	public void testOverrideFragmentResponseMode() {
 
 		AuthorizationSuccessResponse resp = new AuthorizationSuccessResponse(
 			ABS_REDIRECT_URI,
@@ -266,7 +289,8 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 
 	public void testParseCodeResponse()
 		throws Exception {
-
+		
+		String RESPONSE_CODE = "https://client.example.org/cb?code=SplxlOBeZQQYbYS6WxSbIA&state=xyz";
 		URI redirectionURI = new URI(RESPONSE_CODE);
 
 		AuthorizationSuccessResponse response = AuthorizationSuccessResponse.parse(redirectionURI);
@@ -280,8 +304,13 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 
 	public void testParseTokenResponse()
 		throws Exception {
-
-		URI redirectionURI = new URI(RESPONSE_TOKEN);
+		
+		String responseToken = "https://client.example.org/cb#" +
+			"&access_token=2YotnFZFEjr1zCsicMWpAA" +
+			"&token_type=Bearer" +
+			"&expires_in=3600" +
+			"&state=xyz";
+		URI redirectionURI = new URI(responseToken);
 
 		AuthorizationSuccessResponse response = AuthorizationSuccessResponse.parse(redirectionURI);
 		assertTrue(response.indicatesSuccess());
@@ -292,11 +321,28 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 		assertEquals("2YotnFZFEjr1zCsicMWpAA", accessToken.getValue());
 		assertEquals(3600L, accessToken.getLifetime());
 	}
-
-
-	public void testRedirectionURIWithQueryString()
+	
+	
+	public void testParseWithIssuer_example()
 		throws Exception {
-		// See https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/140
+		
+		String responseWithIssuer = "https://client.example/cb?" +
+			"code=x1848ZT64p4IirMPT0R-X3141MFPTuBX-VFL_cvaplMH58" +
+			"&state=ZWVlNDBlYzA1NjdkMDNhYjg3ZjUxZjAyNGQzMTM2NzI" +
+			"&iss=https://honest.as.example";
+		URI redirectionURI = new URI(responseWithIssuer);
+		
+		AuthorizationSuccessResponse response = AuthorizationSuccessResponse.parse(redirectionURI);
+		assertTrue(response.indicatesSuccess());
+		assertEquals("https://client.example/cb", response.getRedirectionURI().toString());
+		assertEquals(new AuthorizationCode("x1848ZT64p4IirMPT0R-X3141MFPTuBX-VFL_cvaplMH58"), response.getAuthorizationCode());
+		assertEquals(new State("ZWVlNDBlYzA1NjdkMDNhYjg3ZjUxZjAyNGQzMTM2NzI"), response.getState());
+		assertEquals(new Issuer("https://honest.as.example"), response.getIssuer());
+	}
+	
+	
+	// See https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/140
+	public void testRedirectionURIWithQueryString() {
 
 		URI redirectURI = URI.create("https://example.com/myservice/?action=oidccallback");
 		assertEquals("action=oidccallback", redirectURI.getQuery());
@@ -340,12 +386,11 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 		assertEquals(state, response.getState());
 		assertNull(response.getAccessToken());
 	}
-
-
+	
+	
+	// See https://bitbucket.org/connect2id/openid-connect-dev-client/issues/5/stripping-equal-sign-from-access_code-in
 	public void testParseWithEncodedEqualsCharAlt()
 		throws Exception {
-
-		// See https://bitbucket.org/connect2id/openid-connect-dev-client/issues/5/stripping-equal-sign-from-access_code-in
 
 		String uri = "https://demo.c2id.com/oidc-client/cb?" +
 			"&state=cVIe4g4D1J3tYtZgnTL-Po9QpozQJdikDCBp7KJorIQ" +

@@ -28,6 +28,7 @@ import com.nimbusds.oauth2.sdk.AuthorizationErrorResponse;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ResponseMode;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import junit.framework.TestCase;
@@ -58,7 +59,7 @@ public class AuthenticationErrorResponseTest extends TestCase {
 
 		URI redirectURI = new URI("https://client.com/cb");
 		ErrorObject error = OAuth2Error.ACCESS_DENIED;
-		State state = new State("123");
+		State state = new State();
 
 		AuthenticationErrorResponse response = new AuthenticationErrorResponse(
 			redirectURI, error, state, ResponseMode.QUERY);
@@ -69,6 +70,7 @@ public class AuthenticationErrorResponseTest extends TestCase {
 		assertEquals(ResponseMode.QUERY, response.getResponseMode());
 		assertEquals(ResponseMode.QUERY, response.impliedResponseMode());
 		assertEquals(state, response.getState());
+		assertNull(response.getIssuer());
 
 		URI responseURI = response.toURI();
 
@@ -84,6 +86,46 @@ public class AuthenticationErrorResponseTest extends TestCase {
 		assertEquals(redirectURI, response.getRedirectionURI());
 		assertEquals(error, response.getErrorObject());
 		assertEquals(state, response.getState());
+		assertNull(response.getIssuer());
+		assertNull(response.getResponseMode());
+		assertEquals(ResponseMode.QUERY, response.impliedResponseMode());
+	}
+
+
+	public void testCodeErrorResponse_withIssuer()
+		throws Exception {
+
+		URI redirectURI = new URI("https://client.com/cb");
+		ErrorObject error = OAuth2Error.ACCESS_DENIED;
+		State state = new State();
+		Issuer issuer = new Issuer("https://login.c2id.com");
+
+		AuthenticationErrorResponse response = new AuthenticationErrorResponse(
+			redirectURI, error, state, issuer, ResponseMode.QUERY);
+
+		assertFalse(response.indicatesSuccess());
+		assertEquals(redirectURI, response.getRedirectionURI());
+		assertEquals(error, response.getErrorObject());
+		assertEquals(ResponseMode.QUERY, response.getResponseMode());
+		assertEquals(ResponseMode.QUERY, response.impliedResponseMode());
+		assertEquals(state, response.getState());
+		assertEquals(issuer, response.getIssuer());
+
+		URI responseURI = response.toURI();
+
+		String[] parts = responseURI.toString().split("\\?");
+		assertEquals(redirectURI.toString(), parts[0]);
+
+		assertNotNull(responseURI.getQuery());
+		assertNull(responseURI.getFragment());
+
+		response = AuthenticationErrorResponse.parse(responseURI);
+
+		assertFalse(response.indicatesSuccess());
+		assertEquals(redirectURI, response.getRedirectionURI());
+		assertEquals(error, response.getErrorObject());
+		assertEquals(state, response.getState());
+		assertEquals(issuer, response.getIssuer());
 		assertNull(response.getResponseMode());
 		assertEquals(ResponseMode.QUERY, response.impliedResponseMode());
 	}
@@ -94,7 +136,7 @@ public class AuthenticationErrorResponseTest extends TestCase {
 
 		URI redirectURI = new URI("https://client.com/cb");
 		ErrorObject error = OAuth2Error.ACCESS_DENIED;
-		State state = new State("123");
+		State state = new State();
 
 		AuthenticationErrorResponse response = new AuthenticationErrorResponse(
 			redirectURI, error, state, ResponseMode.FRAGMENT);
@@ -105,6 +147,7 @@ public class AuthenticationErrorResponseTest extends TestCase {
 		assertEquals(ResponseMode.FRAGMENT, response.getResponseMode());
 		assertEquals(ResponseMode.FRAGMENT, response.impliedResponseMode());
 		assertEquals(state, response.getState());
+		assertNull(response.getIssuer());
 
 		URI responseURI = response.toURI();
 
@@ -120,15 +163,15 @@ public class AuthenticationErrorResponseTest extends TestCase {
 		assertEquals(redirectURI, response.getRedirectionURI());
 		assertEquals(error, response.getErrorObject());
 		assertEquals(state, response.getState());
+		assertNull(response.getIssuer());
 		assertNull(response.getResponseMode());
 		assertEquals(ResponseMode.QUERY, response.impliedResponseMode());
 	}
-
-
-	public void testRedirectionURIWithQueryString()
-		throws Exception {
-		// See https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/140
-
+	
+	
+	// See https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/140
+	public void testRedirectionURIWithQueryString() {
+		
 		URI redirectURI = URI.create("https://example.com/myservice/?action=oidccallback");
 		assertEquals("action=oidccallback", redirectURI.getQuery());
 

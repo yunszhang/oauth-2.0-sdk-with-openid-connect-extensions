@@ -54,6 +54,8 @@ This SDK version implements the following standards and drafts:
 
     * OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-02)
 
+    * OAuth 2.0 Authorization Server Issuer Identifier in Authorization Response (draft-meyerzuselhausen-oauth-iss-auth-resp-01)
+
 	* OpenID Connect Core 1.0 (2014-02-25)
 
 	* OpenID Connect Core Unmet Authentication Requirements 1.0 (2019-05-08)
@@ -89,10 +91,6 @@ This SDK version implements the following standards and drafts:
       2.0 (JARM) (2018-10-17)
 
 
-This SDK is provided under the terms of the Apache 2.0 licence.
-
+This SDK is provided under the terms of the Apache 2.0 license.
 
 Questions or comments? Email support@connect2id.com
-
-
-2020-11-08

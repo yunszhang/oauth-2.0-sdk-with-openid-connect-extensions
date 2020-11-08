@@ -1495,3 +1495,9 @@ version 8.23.1 (2020-10-26)
 version 8.24 (2020-11-08)
     * Adds support for prompt "create", see Initiating User Registration via
       OpenID Connect (draft 03).
+
+version 8.25 (2020-11-09)
+    * Adds optional "iss" (issuer) parameter to AuthorizationResponse, see
+      OAuth 2.0 Authorization Server Issuer Identifier in Authorization
+      Response (draft-meyerzuselhausen-oauth-iss-auth-resp-01).
+    * Adds new static Issuer.parse method.

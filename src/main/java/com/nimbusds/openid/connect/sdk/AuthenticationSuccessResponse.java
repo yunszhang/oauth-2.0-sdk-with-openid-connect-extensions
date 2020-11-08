@@ -28,6 +28,7 @@ import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
@@ -71,6 +72,8 @@ import net.jcip.annotations.Immutable;
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM).
+ *     <li>OAuth 2.0 Authorization Server Issuer Identifier in Authorization
+ *         Response (draft-meyerzuselhausen-oauth-iss-auth-resp-01).
  * </ul>
  */
 @Immutable
@@ -103,7 +106,7 @@ public class AuthenticationSuccessResponse
 	 * @param accessToken  The UserInfo access token, {@code null} if not
 	 *                     requested.
 	 * @param state        The state, {@code null} if not requested.
-	 * @param sessionState The session store, {@code null} if session
+	 * @param sessionState The session state, {@code null} if session
 	 *                     management is not supported.
 	 * @param rm           The response mode, {@code null} if not
 	 *                     specified.
@@ -116,7 +119,37 @@ public class AuthenticationSuccessResponse
 					     final State sessionState,
 					     final ResponseMode rm) {
 
-		super(redirectURI, code, accessToken, state, rm);
+		this(redirectURI, code, idToken, accessToken, state, sessionState, null, rm);
+	}
+
+
+	/**
+	 * Creates a new OpenID Connect authentication success response.
+	 *
+	 * @param redirectURI  The requested redirection URI. Must not be
+	 *                     {@code null}.
+	 * @param code         The authorisation code, {@code null} if not
+	 *                     requested.
+	 * @param idToken      The ID token (ready for output), {@code null} if
+	 *                     not requested.
+	 * @param accessToken  The UserInfo access token, {@code null} if not
+	 *                     requested.
+	 * @param state        The state, {@code null} if not requested.
+	 * @param sessionState The session state, {@code null} if session
+	 *                     management is not supported.
+	 * @param rm           The response mode, {@code null} if not
+	 *                     specified.
+	 */
+	public AuthenticationSuccessResponse(final URI redirectURI,
+					     final AuthorizationCode code,
+					     final JWT idToken,
+					     final AccessToken accessToken,
+					     final State state,
+					     final State sessionState,
+					     final Issuer issuer,
+					     final ResponseMode rm) {
+
+		super(redirectURI, code, accessToken, state, issuer, rm);
 
 		this.idToken = idToken;
 
@@ -302,6 +335,7 @@ public class AuthenticationSuccessResponse
 			asr.getAccessToken(),
 			asr.getState(),
 			sessionState,
+			asr.getIssuer(),
 			null);
 	}
 	

@@ -29,6 +29,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -36,46 +38,31 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.oauth2.sdk.*;
+import com.nimbusds.oauth2.sdk.AuthorizationCode;
+import com.nimbusds.oauth2.sdk.ResponseMode;
+import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.jarm.JARMUtils;
-import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
-import junit.framework.TestCase;
 
 
-/**
- * Tests the authentication success response class.
- */
 public class AuthenticationSuccessResponseTest extends TestCase {
 	
 	private static final RSAPrivateKey RSA_PRIVATE_KEY;
 	
 	
-	private static final RSAPublicKey RSA_PUBLIC_KEY;
-
-	
-	private static URI REDIRECT_URI;
+	private static final URI REDIRECT_URI = URI.create("https://client.com/cb");
 
 	
 	static {
-
-		try {
-			REDIRECT_URI = new URI("https://client.com/cb");
-
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		
 		try {
 			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
 			gen.initialize(2048);
 			KeyPair keyPair = gen.generateKeyPair();
 			RSA_PRIVATE_KEY = (RSAPrivateKey) keyPair.getPrivate();
-			RSA_PUBLIC_KEY = (RSAPublicKey) keyPair.getPublic();
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
@@ -108,6 +95,7 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		assertNull(response.getAccessToken());
 		assertEquals("abc", response.getState().getValue());
 		assertNull(response.getSessionState());
+		assertNull(response.getIssuer());
 		
 		assertEquals(new ResponseType("id_token"), response.impliedResponseType());
 		assertEquals(ResponseMode.FRAGMENT, response.impliedResponseMode());
@@ -131,6 +119,7 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		assertNull(response.getAccessToken());
 		assertEquals("abc", response.getState().getValue());
 		assertNull(response.getSessionState());
+		assertNull(response.getIssuer());
 		assertEquals(ResponseMode.FRAGMENT, response.impliedResponseMode());
 	}
 
@@ -163,6 +152,7 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		assertNull(response.getAccessToken());
 		assertEquals("abc", response.getState().getValue());
 		assertNull(response.getSessionState());
+		assertNull(response.getIssuer());
 		
 		assertEquals(new ResponseType("code", "id_token"), response.impliedResponseType());
 		assertEquals(ResponseMode.FRAGMENT, response.impliedResponseMode());
@@ -186,6 +176,7 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		assertNull(response.getAccessToken());
 		assertEquals("abc", response.getState().getValue());
 		assertNull(response.getSessionState());
+		assertNull(response.getIssuer());
 		assertEquals(ResponseMode.FRAGMENT, response.impliedResponseMode());
 	}
 
@@ -218,6 +209,7 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		assertNull(response.getAccessToken());
 		assertEquals("abc", response.getState().getValue());
 		assertEquals("xyz", response.getSessionState().getValue());
+		assertNull(response.getIssuer());
 		
 		assertEquals(new ResponseType("code", "id_token"), response.impliedResponseType());
 		assertEquals(ResponseMode.FRAGMENT, response.impliedResponseMode());
@@ -241,6 +233,7 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		assertNull(response.getAccessToken());
 		assertEquals("abc", response.getState().getValue());
 		assertEquals("xyz", response.getSessionState().getValue());
+		assertNull(response.getIssuer());
 		assertEquals(ResponseMode.FRAGMENT, response.impliedResponseMode());
 	}
 
@@ -260,6 +253,7 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		assertNull(response.getAccessToken());
 		assertEquals("abc", response.getState().getValue());
 		assertNull(response.getSessionState());
+		assertNull(response.getIssuer());
 		
 		assertEquals(new ResponseType("code"), response.impliedResponseType());
 		assertEquals(ResponseMode.QUERY, response.impliedResponseMode());
@@ -278,14 +272,55 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		assertNull(response.getAccessToken());
 		assertEquals("abc", response.getState().getValue());
 		assertNull(response.getSessionState());
+		assertNull(response.getIssuer());
 		assertEquals(ResponseMode.QUERY, response.impliedResponseMode());
 	}
 
 
-	public void testRedirectionURIWithQueryString()
+	public void testCodeResponse_withIssuer()
 		throws Exception {
-		// See https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/140
 
+		AuthorizationCode code = new AuthorizationCode();
+		
+		Issuer issuer = new Issuer("https://login.c2id.com");
+
+		AuthenticationSuccessResponse response = new AuthenticationSuccessResponse(
+			REDIRECT_URI, code, null, null, new State("abc"), null, issuer, ResponseMode.QUERY);
+
+		assertTrue(response.indicatesSuccess());
+		assertEquals(REDIRECT_URI, response.getRedirectionURI());
+		assertNull(response.getIDToken());
+		assertEquals(code, response.getAuthorizationCode());
+		assertNull(response.getAccessToken());
+		assertEquals("abc", response.getState().getValue());
+		assertNull(response.getSessionState());
+		assertEquals(issuer, response.getIssuer());
+		
+		assertEquals(new ResponseType("code"), response.impliedResponseType());
+		assertEquals(ResponseMode.QUERY, response.impliedResponseMode());
+
+		URI responseURI = response.toURI();
+
+		String[] parts = responseURI.toString().split("\\?");
+		assertEquals(REDIRECT_URI.toString(), parts[0]);
+
+		response = AuthenticationSuccessResponse.parse(responseURI);
+
+		assertTrue(response.indicatesSuccess());
+		assertEquals(REDIRECT_URI, response.getRedirectionURI());
+		assertNull(response.getIDToken());
+		assertEquals(code, response.getAuthorizationCode());
+		assertNull(response.getAccessToken());
+		assertEquals("abc", response.getState().getValue());
+		assertNull(response.getSessionState());
+		assertEquals(issuer, response.getIssuer());
+		assertEquals(ResponseMode.QUERY, response.impliedResponseMode());
+	}
+	
+	
+	// See https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/140
+	public void testRedirectionURIWithQueryString() {
+		
 		URI redirectURI = URI.create("https://example.com/myservice/?action=oidccallback");
 		assertEquals("action=oidccallback", redirectURI.getQuery());
 
@@ -330,30 +365,28 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), jwtClaimsSet);
 		signedJWT.sign(new RSASSASigner(RSA_PRIVATE_KEY));
 		
-		JWT jwt = signedJWT;
-		
 		AuthenticationSuccessResponse jwtSuccessResponse = new AuthenticationSuccessResponse(
 			successResponse.getRedirectionURI(),
-			jwt,
+			signedJWT,
 			successResponse.getResponseMode());
 		
 		assertEquals(successResponse.getRedirectionURI(), jwtSuccessResponse.getRedirectionURI());
-		assertEquals(jwt, jwtSuccessResponse.getJWTResponse());
+		assertEquals(signedJWT, jwtSuccessResponse.getJWTResponse());
 		assertEquals(successResponse.getResponseMode(), jwtSuccessResponse.getResponseMode());
 		
 		Map<String,List<String>> params = jwtSuccessResponse.toParameters();
-		assertEquals(jwt.serialize(), MultivaluedMapUtils.getFirstValue(params, "response"));
+		assertEquals(((JWT) signedJWT).serialize(), MultivaluedMapUtils.getFirstValue(params, "response"));
 		assertEquals(1, params.size());
 		
 		URI uri = jwtSuccessResponse.toURI();
 		
 		assertTrue(uri.toString().startsWith(successResponse.getRedirectionURI().toString()));
-		assertEquals("response=" + jwt.serialize(), uri.getQuery());
+		assertEquals("response=" + ((JWT) signedJWT).serialize(), uri.getQuery());
 		assertNull(uri.getFragment());
 		
 		jwtSuccessResponse = AuthenticationResponseParser.parse(uri).toSuccessResponse();
 		assertEquals(successResponse.getRedirectionURI(), jwtSuccessResponse.getRedirectionURI());
-		assertEquals(jwt.serialize(), jwtSuccessResponse.getJWTResponse().serialize());
+		assertEquals(((JWT) signedJWT).serialize(), jwtSuccessResponse.getJWTResponse().serialize());
 		assertEquals(ResponseMode.JWT, jwtSuccessResponse.getResponseMode());
 	}
 	
@@ -379,30 +412,28 @@ public class AuthenticationSuccessResponseTest extends TestCase {
 		SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), jwtClaimsSet);
 		signedJWT.sign(new RSASSASigner(RSA_PRIVATE_KEY));
 		
-		JWT jwt = signedJWT;
-		
 		AuthenticationSuccessResponse jwtSuccessResponse = new AuthenticationSuccessResponse(
 			successResponse.getRedirectionURI(),
-			jwt,
+			signedJWT,
 			successResponse.getResponseMode());
 		
 		assertEquals(successResponse.getRedirectionURI(), jwtSuccessResponse.getRedirectionURI());
-		assertEquals(jwt, jwtSuccessResponse.getJWTResponse());
+		assertEquals(signedJWT, jwtSuccessResponse.getJWTResponse());
 		assertEquals(successResponse.getResponseMode(), jwtSuccessResponse.getResponseMode());
 		
 		Map<String,List<String>> params = jwtSuccessResponse.toParameters();
-		assertEquals(jwt.serialize(), MultivaluedMapUtils.getFirstValue(params, "response"));
+		assertEquals(((JWT) signedJWT).serialize(), MultivaluedMapUtils.getFirstValue(params, "response"));
 		assertEquals(1, params.size());
 		
 		URI uri = jwtSuccessResponse.toURI();
 		
 		assertTrue(uri.toString().startsWith(successResponse.getRedirectionURI().toString()));
 		assertNull(uri.getQuery());
-		assertEquals("response=" + jwt.serialize(), uri.getFragment());
+		assertEquals("response=" + ((JWT) signedJWT).serialize(), uri.getFragment());
 		
 		jwtSuccessResponse = AuthenticationResponseParser.parse(uri).toSuccessResponse();
 		assertEquals(successResponse.getRedirectionURI(), jwtSuccessResponse.getRedirectionURI());
-		assertEquals(jwt.serialize(), jwtSuccessResponse.getJWTResponse().serialize());
+		assertEquals(((JWT) signedJWT).serialize(), jwtSuccessResponse.getJWTResponse().serialize());
 		assertEquals(ResponseMode.JWT, jwtSuccessResponse.getResponseMode());
 	}
 }

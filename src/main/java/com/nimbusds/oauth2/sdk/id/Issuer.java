@@ -23,6 +23,8 @@ import java.net.URISyntaxException;
 
 import net.jcip.annotations.Immutable;
 
+import com.nimbusds.oauth2.sdk.util.StringUtils;
+
 
 /**
  * Issuer identifier.
@@ -158,5 +160,23 @@ public final class Issuer extends Identifier {
 	public boolean equals(final Object object) {
 	
 		return object instanceof Issuer && this.toString().equals(object.toString());
+	}
+	
+	
+	/**
+	 * Parses an issuer from the specified string.
+	 *
+	 * @param s The string to parse, {@code null} or empty if no issuer is
+	 *          specified.
+	 *
+	 * @return The issuer, {@code null} if the parsed string was
+	 *         {@code null} or empty.
+	 */
+	public static Issuer parse(final String s) {
+		
+		if (StringUtils.isBlank(s))
+			return null;
+		
+		return new Issuer(s);
 	}
 }

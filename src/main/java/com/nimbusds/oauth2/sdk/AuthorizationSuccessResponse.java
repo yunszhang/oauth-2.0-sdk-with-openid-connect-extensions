@@ -24,16 +24,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
-import net.jcip.annotations.Immutable;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -63,6 +66,8 @@ import net.minidev.json.JSONObject;
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM).
+ *     <li>OAuth 2.0 Authorization Server Issuer Identifier in Authorization
+ *         Response (draft-meyerzuselhausen-oauth-iss-auth-resp-01).
  * </ul>
  */
 @Immutable
@@ -100,7 +105,30 @@ public class AuthorizationSuccessResponse
 				            final State state,
 					    final ResponseMode rm) {
 	
-		super(redirectURI, state, rm);
+		this(redirectURI, code, accessToken, state, null, rm);
+	}
+	
+	
+	/**
+	 * Creates a new authorisation success response.
+	 *
+	 * @param redirectURI The base redirection URI. Must not be
+	 *                    {@code null}.
+	 * @param code        The authorisation code, {@code null} if not
+	 *                    requested.
+	 * @param accessToken The access token, {@code null} if not requested.
+	 * @param state       The state, {@code null} if not specified.
+	 * @param issuer      The issuer, {@code null} if not specified.
+	 * @param rm          The response mode, {@code null} if not specified.
+	 */
+	public AuthorizationSuccessResponse(final URI redirectURI,
+					    final AuthorizationCode code,
+					    final AccessToken accessToken,
+					    final State state,
+					    final Issuer issuer,
+					    final ResponseMode rm) {
+	
+		super(redirectURI, state, issuer, rm);
 		this.code = code;
 		this.accessToken = accessToken;
 	}
@@ -216,6 +244,9 @@ public class AuthorizationSuccessResponse
 			
 		if (getState() != null)
 			params.put("state", Collections.singletonList(getState().getValue()));
+		
+		if (getIssuer() != null)
+			params.put("iss", Collections.singletonList(getIssuer().getValue()));
 
 		return params;
 	}
@@ -239,10 +270,11 @@ public class AuthorizationSuccessResponse
 		throws ParseException {
 		
 		// JARM, ignore other top level params
-		if (params.get("response") != null) {
+		String responseString = MultivaluedMapUtils.getFirstValue(params, "response");
+		if (responseString != null) {
 			JWT jwtResponse;
 			try {
-				jwtResponse = JWTParser.parse(MultivaluedMapUtils.getFirstValue(params, "response"));
+				jwtResponse = JWTParser.parse(responseString);
 			} catch (java.text.ParseException e) {
 				throw new ParseException("Invalid JWT response: " + e.getMessage(), e);
 			}
@@ -270,7 +302,10 @@ public class AuthorizationSuccessResponse
 		// Parse optional state parameter
 		State state = State.parse(MultivaluedMapUtils.getFirstValue(params, "state"));
 		
-		return new AuthorizationSuccessResponse(redirectURI, code, accessToken, state, null);
+		// Parse optional issuer, draft-meyerzuselhausen-oauth-iss-auth-resp-01
+		Issuer issuer = Issuer.parse(MultivaluedMapUtils.getFirstValue(params, "iss"));
+		
+		return new AuthorizationSuccessResponse(redirectURI, code, accessToken, state, issuer,null);
 	}
 	
 	

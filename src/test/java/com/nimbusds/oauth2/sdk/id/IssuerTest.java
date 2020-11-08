@@ -18,15 +18,12 @@
 package com.nimbusds.oauth2.sdk.id;
 
 
-import java.net.URISyntaxException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import junit.framework.TestCase;
 
 
-/**
- * Tests the issuer identifier class.
- */
 public class IssuerTest extends TestCase {
 
 
@@ -98,13 +95,32 @@ public class IssuerTest extends TestCase {
 	public void testURIConstructor() {
 
 		assertEquals("https://c2id.com", new Issuer(URI.create("https://c2id.com")).getValue());
-		assertTrue(new Issuer(URI.create("https://c2id.com")).equals(new Issuer("https://c2id.com")));
+		assertEquals(new Issuer(URI.create("https://c2id.com")), new Issuer("https://c2id.com"));
 	}
 
 
 	public void testClientIDConstructor() {
 
 		assertEquals("123", new Issuer(new ClientID("123")).getValue());
-		assertTrue(new Issuer("123").equals(new Issuer(new ClientID("123"))));
+		assertEquals(new Issuer("123"), new Issuer(new ClientID("123")));
+	}
+	
+	
+	public void testParse() {
+		
+		Issuer issuer = new Issuer("https://c2id.com");
+		assertEquals(issuer, Issuer.parse(issuer.getValue()));
+	}
+	
+	
+	public void testParseNull() {
+		
+		assertNull(Issuer.parse(null));
+	}
+	
+	
+	public void testParseBlank() {
+		
+		assertNull(Issuer.parse(" "));
 	}
 }
