@@ -24,6 +24,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -33,9 +36,6 @@ import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.client.ClientType;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-
-import junit.framework.TestCase;
-import net.minidev.json.JSONObject;
 
 
 public class AuthorizationServerMetadataTest extends TestCase {
@@ -58,6 +58,7 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("request_object_endpoint"));
 		assertTrue(paramNames.contains("request_parameter_supported"));
 		assertTrue(paramNames.contains("require_request_uri_registration"));
+		assertTrue(paramNames.contains("authorization_response_iss_parameter_supported"));
 		assertTrue(paramNames.contains("pushed_authorization_request_endpoint"));
 		assertTrue(paramNames.contains("require_pushed_authorization_requests"));
 		assertTrue(paramNames.contains("request_object_endpoint"));
@@ -84,7 +85,7 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("device_authorization_endpoint"));
 		assertTrue(paramNames.contains("incremental_authz_types_supported"));
 		
-		assertEquals(38, paramNames.size());
+		assertEquals(39, paramNames.size());
 	}
 	
 	
@@ -348,6 +349,41 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		
 		as = AuthorizationServerMetadata.parse(jsonObject);
 		assertFalse(as.supportsRequestURIParam());
+	}
+	
+	
+	public void testAuthorizationResponseIssuerParameterSupported_default() throws ParseException {
+		
+		AuthorizationServerMetadata as = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
+		assertFalse(as.supportsAuthorizationResponseIssuerParam());
+		
+		as.applyDefaults();
+		assertFalse(as.supportsAuthorizationResponseIssuerParam());
+		
+		JSONObject jsonObject = as.toJSONObject();
+		assertNull(jsonObject.get("authorization_response_iss_parameter_supported"));
+		
+		as = AuthorizationServerMetadata.parse(jsonObject);
+		assertFalse(as.supportsAuthorizationResponseIssuerParam());
+	}
+	
+	
+	public void testAuthorizationResponseIssuerParameterSupported_set() throws ParseException {
+		
+		AuthorizationServerMetadata as = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
+		assertFalse(as.supportsAuthorizationResponseIssuerParam());
+		
+		as.setSupportsAuthorizationResponseIssuerParam(true);
+		assertTrue(as.supportsAuthorizationResponseIssuerParam());
+		
+		as.applyDefaults();
+		assertTrue(as.supportsAuthorizationResponseIssuerParam());
+		
+		JSONObject jsonObject = as.toJSONObject();
+		assertTrue(JSONObjectUtils.getBoolean(jsonObject, "authorization_response_iss_parameter_supported"));
+		
+		as = AuthorizationServerMetadata.parse(jsonObject);
+		assertTrue(as.supportsAuthorizationResponseIssuerParam());
 	}
 	
 	

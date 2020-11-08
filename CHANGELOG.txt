@@ -1500,4 +1500,8 @@ version 8.25 (2020-11-09)
     * Adds optional "iss" (issuer) parameter to AuthorizationResponse, see
       OAuth 2.0 Authorization Server Issuer Identifier in Authorization
       Response (draft-meyerzuselhausen-oauth-iss-auth-resp-01).
+    * AuthorizationServerMetadata and OIDCProviderMetadata support for
+      "authorization_response_iss_parameter_supported", see OAuth 2.0
+      Authorization Server Issuer Identifier in Authorization Response
+      (draft-meyerzuselhausen-oauth-iss-auth-resp-01).
     * Adds new static Issuer.parse method.

@@ -55,10 +55,12 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  *         Access Tokens (RFC 8705)
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
+ *     <li>OAuth 2.0 Authorization Server Issuer Identifier in Authorization
+ *         Response (draft-meyerzuselhausen-oauth-iss-auth-resp-01)
  *     <li>Financial-grade API - Part 2: Read and Write API Security Profile
  *     <li>OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-02)
  *     <li>OAuth 2.0 Device Flow for Browserless and Input Constrained Devices
- *         (draft-ietf-oauth-device-flow-14)
+ *         (RFC 8628)
  *     <li>OAuth 2.0 Incremental Authorization
  *         (draft-ietf-oauth-incremental-authz-04)
  * </ul>
@@ -103,6 +105,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 		p.add("authorization_encryption_enc_values_supported");
 		p.add("require_pushed_authorization_requests");
 		p.add("incremental_authz_types_supported");
+		p.add("authorization_response_iss_parameter_supported");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 	
@@ -240,6 +243,13 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	 * pre-registered with the provider, else not.
 	 */
 	private boolean requireRequestURIReg = false;
+	
+	
+	/**
+	 * If {@code true} the {@code iss} authorisation response is supported,
+	 * else not.
+	 */
+	private boolean authzResponseIssParameterSupported = false;
 	
 	
 	/**
@@ -873,6 +883,39 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	
 	
 	/**
+	 * Gets the support for the {@code iss} authorisation response
+	 * parameter. Corresponds to the
+	 * {@code authorization_response_iss_parameter_supported} metadata
+	 * field.
+	 *
+	 * @return {@code true} if the {@code iss} authorisation response
+	 *         parameter is provided, else {@code false}.
+	 */
+	public boolean supportsAuthorizationResponseIssuerParam() {
+		
+		return authzResponseIssParameterSupported;
+	}
+	
+	
+	/**
+	 * Sets the support for the {@code iss} authorisation response
+	 * parameter. Corresponds to the
+	 * {@code authorization_response_iss_parameter_supported} metadata
+	 * field.
+	 *
+	 * @param authzResponseIssParameterSupported {@code true} if the
+	 *                                           {@code iss} authorisation
+	 *                                           response parameter is
+	 *                                           provided, else
+	 *                                           {@code false}.
+	 */
+	public void setSupportsAuthorizationResponseIssuerParam(final boolean authzResponseIssParameterSupported) {
+		
+		this.authzResponseIssParameterSupported = authzResponseIssParameterSupported;
+	}
+	
+	
+	/**
 	 * Gets the supported UI locales. Corresponds to the
 	 * {@code ui_locales_supported} metadata field.
 	 *
@@ -1478,6 +1521,10 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 			o.put("require_request_uri_registration", true);
 		}
 		
+		if (authzResponseIssParameterSupported) {
+			o.put("authorization_response_iss_parameter_supported", true);
+		}
+		
 		if (mtlsEndpointAliases != null)
 			o.put("mtls_endpoint_aliases", mtlsEndpointAliases.toJSONObject());
 		
@@ -1786,6 +1833,9 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 		
 		if (jsonObject.get("require_request_uri_registration") != null)
 			as.requireRequestURIReg = JSONObjectUtils.getBoolean(jsonObject, "require_request_uri_registration");
+		
+		if (jsonObject.get("authorization_response_iss_parameter_supported") != null)
+			as.authzResponseIssParameterSupported = JSONObjectUtils.getBoolean(jsonObject, "authorization_response_iss_parameter_supported");
 		
 		if (jsonObject.get("mtls_endpoint_aliases") != null)
 			as.mtlsEndpointAliases = AuthorizationServerEndpointMetadata.parse(JSONObjectUtils.getJSONObject(jsonObject, "mtls_endpoint_aliases"));

@@ -30,7 +30,6 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.as.AuthorizationServerEndpointMetadata;
-import com.nimbusds.oauth2.sdk.as.AuthorizationServerMetadata;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.client.ClientType;
 import com.nimbusds.oauth2.sdk.id.Issuer;
@@ -94,6 +93,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("request_parameter_supported"));
 		assertTrue(paramNames.contains("request_uri_parameter_supported"));
 		assertTrue(paramNames.contains("require_request_uri_registration"));
+		assertTrue(paramNames.contains("authorization_response_iss_parameter_supported"));
 		assertTrue(paramNames.contains("op_policy_uri"));
 		assertTrue(paramNames.contains("op_tos_uri"));
 		assertTrue(paramNames.contains("check_session_iframe"));
@@ -126,7 +126,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("federation_registration_endpoint"));
 
-		assertEquals(68, paramNames.size());
+		assertEquals(69, paramNames.size());
 	}
 
 
@@ -563,6 +563,9 @@ public class OIDCProviderMetadataTest extends TestCase {
 		meta.setRequiresRequestURIRegistration(true);
 		assertTrue(meta.requiresRequestURIRegistration());
 		
+		meta.setSupportsAuthorizationResponseIssuerParam(true);
+		assertTrue(meta.supportsAuthorizationResponseIssuerParam());
+		
 		assertFalse(meta.supportsFrontChannelLogout());
 		meta.setSupportsFrontChannelLogout(true);
 		assertTrue(meta.supportsFrontChannelLogout());
@@ -734,6 +737,8 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(meta.supportsRequestURIParam());
 
 		assertTrue(meta.requiresRequestURIRegistration());
+		
+		assertTrue(meta.supportsAuthorizationResponseIssuerParam());
 		
 		assertTrue(meta.supportsFrontChannelLogout());
 		assertTrue(meta.supportsFrontChannelLogoutSession());
