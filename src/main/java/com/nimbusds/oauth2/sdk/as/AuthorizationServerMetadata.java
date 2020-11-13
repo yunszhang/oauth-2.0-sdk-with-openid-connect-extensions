@@ -42,6 +42,7 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.oauth2.sdk.util.URIUtils;
 
 
 /**
@@ -958,10 +959,12 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	 * {@code service_documentation} metadata field.
 	 *
 	 * @param serviceDocsURI The service documentation URI, {@code null} if
-	 *                       not specified.
+	 *                       not specified. The URI scheme must be https or
+	 *                       http.
 	 */
 	public void setServiceDocsURI(final URI serviceDocsURI) {
 		
+		URIUtils.ensureSchemeIsHTTPSorHTTP(serviceDocsURI);
 		this.serviceDocsURI = serviceDocsURI;
 	}
 	
@@ -982,10 +985,12 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	 * Sets the provider's policy regarding relying party use of data.
 	 * Corresponds to the {@code op_policy_uri} metadata field.
 	 *
-	 * @param policyURI The policy URI, {@code null} if not specified.
+	 * @param policyURI The policy URI, {@code null} if not specified. The
+	 *                  URI scheme must be https or http.
 	 */
 	public void setPolicyURI(final URI policyURI) {
 		
+		URIUtils.ensureSchemeIsHTTPSorHTTP(policyURI);
 		this.policyURI = policyURI;
 	}
 	
@@ -1007,10 +1012,11 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	 * {@code op_tos_uri} metadata field.
 	 *
 	 * @param tosURI The terms of service URI, {@code null} if not
-	 *               specified.
+	 *               specified. The URI scheme must be https or http.
 	 */
 	public void setTermsOfServiceURI(final URI tosURI) {
 		
+		URIUtils.ensureSchemeIsHTTPSorHTTP(tosURI);
 		this.tosURI = tosURI;
 	}
 	
@@ -1816,14 +1822,29 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 			}
 		}
 		
-		if (jsonObject.get("service_documentation") != null)
-			as.serviceDocsURI = JSONObjectUtils.getURI(jsonObject, "service_documentation");
+		if (jsonObject.get("service_documentation") != null) {
+			try {
+				as.setServiceDocsURI(JSONObjectUtils.getURI(jsonObject, "service_documentation"));
+			} catch (IllegalArgumentException e) {
+				throw new ParseException("Illegal service_documentation parameter: " + e.getMessage());
+			}
+		}
 		
-		if (jsonObject.get("op_policy_uri") != null)
-			as.policyURI = JSONObjectUtils.getURI(jsonObject, "op_policy_uri");
+		if (jsonObject.get("op_policy_uri") != null) {
+			try {
+				as.setPolicyURI(JSONObjectUtils.getURI(jsonObject, "op_policy_uri"));
+			} catch (IllegalArgumentException e) {
+				throw new ParseException("Illegal op_policy_uri parameter: " + e.getMessage());
+			}
+		}
 		
-		if (jsonObject.get("op_tos_uri") != null)
-			as.tosURI = JSONObjectUtils.getURI(jsonObject, "op_tos_uri");
+		if (jsonObject.get("op_tos_uri") != null) {
+			try {
+				as.setTermsOfServiceURI(JSONObjectUtils.getURI(jsonObject, "op_tos_uri"));
+			} catch (IllegalArgumentException e) {
+				throw new ParseException("Illegal op_tos_uri parameter: " + e.getMessage());
+			}
+		}
 		
 		if (jsonObject.get("request_parameter_supported") != null)
 			as.requestParamSupported = JSONObjectUtils.getBoolean(jsonObject, "request_parameter_supported");

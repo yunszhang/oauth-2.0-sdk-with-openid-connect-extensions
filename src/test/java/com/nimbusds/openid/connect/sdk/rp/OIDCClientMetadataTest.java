@@ -824,9 +824,6 @@ public class OIDCClientMetadataTest extends TestCase {
 	}
 	
 	
-	
-	
-	
 	public void testHumanFacingURIsMustBeHTTPSorHTTP() throws LangTagException {
 		
 		OIDCClientMetadata metadata = new OIDCClientMetadata();

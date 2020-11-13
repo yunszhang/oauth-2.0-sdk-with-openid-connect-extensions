@@ -31,6 +31,7 @@ import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.langtag.LangTag;
+import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.client.ClientType;
@@ -532,6 +533,88 @@ public class AuthorizationServerMetadataTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Illegal client type in incremental_authz_types_supported field: illegal_client_tupe", e.getMessage());
+		}
+	}
+	
+	
+	public void testHumanFacingURIsMustBeHTTPSorHTTP() throws LangTagException {
+		
+		AuthorizationServerMetadata metadata = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
+		
+		String exceptionMessage = "The URI scheme must be https or http";
+		
+		// service_documentation
+		metadata.setServiceDocsURI(URI.create("https://example.com"));
+		metadata.setServiceDocsURI(URI.create("http://example.com"));
+		
+		try {
+			metadata.setServiceDocsURI(URI.create("ftp://example.com"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		
+		// op_policy_uri
+		metadata.setPolicyURI(URI.create("https://example.com"));
+		metadata.setPolicyURI(URI.create("http://example.com"));
+		
+		try {
+			metadata.setPolicyURI(URI.create("ftp://example.com"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		
+		// op_tos_uri
+		metadata.setTermsOfServiceURI(URI.create("https://example.com"));
+		metadata.setTermsOfServiceURI(URI.create("http://example.com"));
+		
+		try {
+			metadata.setTermsOfServiceURI(URI.create("ftp://example.com"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		
+		// Test parse
+		metadata = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
+		metadata.applyDefaults();
+		JSONObject jsonObject = metadata.toJSONObject();
+		
+		// client_uri
+		JSONObject copy = new JSONObject();
+		copy.putAll(jsonObject);
+		copy.put("service_documentation", "ftp://example.com");
+		
+		try {
+			AuthorizationServerMetadata.parse(copy);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Illegal service_documentation parameter: The URI scheme must be https or http", e.getMessage());
+		}
+		
+		// policy_uri
+		copy = new JSONObject();
+		copy.putAll(jsonObject);
+		copy.put("op_policy_uri", "ftp://example.com");
+		
+		try {
+			AuthorizationServerMetadata.parse(copy);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Illegal op_policy_uri parameter: The URI scheme must be https or http", e.getMessage());
+		}
+		
+		// tos_uri
+		copy = new JSONObject();
+		copy.putAll(jsonObject);
+		copy.put("op_tos_uri", "ftp://example.com");
+		
+		try {
+			AuthorizationServerMetadata.parse(copy);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Illegal op_tos_uri parameter: The URI scheme must be https or http", e.getMessage());
 		}
 	}
 }
