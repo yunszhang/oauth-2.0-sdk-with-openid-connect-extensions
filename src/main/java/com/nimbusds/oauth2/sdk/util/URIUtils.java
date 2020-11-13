@@ -20,6 +20,7 @@ package com.nimbusds.oauth2.sdk.util;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 
 
 /**
@@ -215,6 +216,46 @@ public final class URIUtils {
 		}
 		
 		return uri;
+	}
+	
+	
+	/**
+	 * Ensures the scheme of the specified URI is https.
+	 *
+	 * @param uri The URI to check, {@code null} if not specified.
+	 *
+	 * @throws IllegalArgumentException If the URI is specified and the
+	 *                                  scheme is not https.
+	 */
+	public static void ensureSchemeIsHTTPS(final URI uri) {
+		
+		if (uri == null) {
+			return;
+		}
+		
+		if (uri.getScheme() == null || ! "https".equals(uri.getScheme().toLowerCase())) {
+			throw new IllegalArgumentException("The URI scheme must be https");
+		}
+	}
+	
+	
+	/**
+	 * Ensures the scheme of the specified URI is https or http.
+	 *
+	 * @param uri The URI to check, {@code null} if not specified.
+	 *
+	 * @throws IllegalArgumentException If the URI is specified and the
+	 *                                  scheme is not https or http.
+	 */
+	public static void ensureSchemeIsHTTPSorHTTP(final URI uri) {
+		
+		if (uri == null) {
+			return;
+		}
+		
+		if (uri.getScheme() == null || ! Arrays.asList("http", "https").contains(uri.getScheme().toLowerCase())) {
+			throw new IllegalArgumentException("The URI scheme must be https or http");
+		}
 	}
 
 

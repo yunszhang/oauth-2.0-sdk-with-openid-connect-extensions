@@ -1505,3 +1505,7 @@ version 8.25 (2020-11-09)
       Authorization Server Issuer Identifier in Authorization Response
       (draft-meyerzuselhausen-oauth-iss-auth-resp-01).
     * Adds new static Issuer.parse method.
+
+version 8.26 (2020-11-13)
+    * Adds URIUtils.ensureSchemeIsHTTPS and ensureSchemeIsHTTPSorHTTP.
+

@@ -24,9 +24,6 @@ import java.net.URISyntaxException;
 import junit.framework.TestCase;
 
 
-/**
- * Tests the URI utility methods.
- */
 public class URIUtilsTest extends TestCase {
 
 
@@ -208,5 +205,62 @@ public class URIUtilsTest extends TestCase {
 			URIUtils.prependPath(URI.create("https://c2id.com/"),
 				"/.well-known/oauth-authorization-server")
 		);
+	}
+	
+	
+	public void testEnsureSchemeIsHTTPS() {
+	
+		URIUtils.ensureSchemeIsHTTPS(null);
+		URIUtils.ensureSchemeIsHTTPS(URI.create("https://example.com"));
+		URIUtils.ensureSchemeIsHTTPS(URI.create("HTTPS://example.com"));
+		
+		String exceptionMessage = "The URI scheme must be https";
+		
+		try {
+			URIUtils.ensureSchemeIsHTTPS(URI.create("/about/profile"));
+			fail("Absolute URI");
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		
+		try {
+			URIUtils.ensureSchemeIsHTTPS(URI.create("http://about/profile"));
+			fail("Scheme is http");
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		
+		try {
+			URIUtils.ensureSchemeIsHTTPS(URI.create("ftp://about/profile"));
+			fail("Scheme is ftp");
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+	}
+	
+	
+	public void testEnsureSchemeIsHTTPSorHTTP() {
+	
+		URIUtils.ensureSchemeIsHTTPSorHTTP(null);
+		URIUtils.ensureSchemeIsHTTPSorHTTP(URI.create("https://example.com"));
+		URIUtils.ensureSchemeIsHTTPSorHTTP(URI.create("http://example.com"));
+		URIUtils.ensureSchemeIsHTTPSorHTTP(URI.create("HTTPS://example.com"));
+		URIUtils.ensureSchemeIsHTTPSorHTTP(URI.create("HTTP://example.com"));
+		
+		String exceptionMessage = "The URI scheme must be https or http";
+		
+		try {
+			URIUtils.ensureSchemeIsHTTPSorHTTP(URI.create("/about/profile"));
+			fail("Absolute URI");
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		
+		try {
+			URIUtils.ensureSchemeIsHTTPSorHTTP(URI.create("ftp://about/profile"));
+			fail("Scheme is ftp");
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
 	}
 }
