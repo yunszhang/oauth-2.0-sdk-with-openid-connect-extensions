@@ -678,10 +678,12 @@ public class OIDCClientMetadata extends ClientMetadata {
 	 * {@code frontchannel_logout_uri} client metadata field.
 	 *
 	 * @param frontChannelLogoutURI The front-channel logout URI,
-	 *                              {@code null} if not specified.
+	 *                              {@code null} if not specified. The URI
+	 *                              scheme must be https or http.
 	 */
 	public void setFrontChannelLogoutURI(final URI frontChannelLogoutURI) {
 		
+		URIUtils.ensureSchemeIsHTTPSorHTTP(frontChannelLogoutURI);
 		this.frontChannelLogoutURI = frontChannelLogoutURI;
 	}
 	
@@ -733,10 +735,12 @@ public class OIDCClientMetadata extends ClientMetadata {
 	 * {@code backchannel_logout_uri} client metadata field.
 	 *
 	 * @param backChannelLogoutURI The back-channel logout URI,
-	 *                             {@code null} if not specified.
+	 *                             {@code null} if not specified. The URI
+	 *                             scheme must be https or http.
 	 */
 	public void setBackChannelLogoutURI(final URI backChannelLogoutURI) {
 		
+		URIUtils.ensureSchemeIsHTTPSorHTTP(backChannelLogoutURI);
 		this.backChannelLogoutURI = backChannelLogoutURI;
 	}
 	
@@ -1020,7 +1024,11 @@ public class OIDCClientMetadata extends ClientMetadata {
 			
 			if (jsonObject.get("frontchannel_logout_uri") != null) {
 				
-				metadata.setFrontChannelLogoutURI(JSONObjectUtils.getURI(jsonObject, "frontchannel_logout_uri"));
+				try {
+					metadata.setFrontChannelLogoutURI(JSONObjectUtils.getURI(jsonObject, "frontchannel_logout_uri"));
+				} catch (IllegalArgumentException e) {
+					throw new ParseException("Invalid \"frontchannel_logout_uri\" parameter: " + e.getMessage());
+				}
 				oidcFields.remove("frontchannel_logout_uri");
 			
 				if (jsonObject.get("frontchannel_logout_session_required") != null) {
@@ -1032,7 +1040,11 @@ public class OIDCClientMetadata extends ClientMetadata {
 			
 			if (jsonObject.get("backchannel_logout_uri") != null) {
 				
-				metadata.setBackChannelLogoutURI(JSONObjectUtils.getURI(jsonObject, "backchannel_logout_uri"));
+				try {
+					metadata.setBackChannelLogoutURI(JSONObjectUtils.getURI(jsonObject, "backchannel_logout_uri"));
+				} catch (IllegalArgumentException e) {
+					throw new ParseException("Invalid \"backchannel_logout_uri\" parameter: " + e.getMessage());
+				}
 				oidcFields.remove("backchannel_logout_uri");
 				
 				if (jsonObject.get("backchannel_logout_session_required") != null) {

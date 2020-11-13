@@ -938,4 +938,54 @@ public class OIDCClientMetadataTest extends TestCase {
 			assertEquals("Invalid \"initiate_login_uri\" parameter: The URI scheme must be https", e.getMessage());
 		}
 	}
+	
+	
+	public void testFrontChannelLogoutURIMustBeHTTPSorHTTP() {
+		
+		OIDCClientMetadata metadata = new OIDCClientMetadata();
+		metadata.setFrontChannelLogoutURI(URI.create("https://rp.example.com/front-channel-logout"));
+		metadata.setFrontChannelLogoutURI(URI.create("http://rp.example.com/front-channel-logout"));
+		
+		try {
+			metadata.setFrontChannelLogoutURI(URI.create("ftp://rp.example.com/front-channel-logout"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The URI scheme must be https or http", e.getMessage());
+		}
+		
+		JSONObject jsonObject = metadata.toJSONObject();
+		jsonObject.put("frontchannel_logout_uri", "ftp://rp.example.com/front-channel-logout");
+		
+		try {
+			OIDCClientMetadata.parse(jsonObject);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid \"frontchannel_logout_uri\" parameter: The URI scheme must be https or http", e.getMessage());
+		}
+	}
+	
+	
+	public void testBackChannelLogoutURIMustBeHTTPSorHTTP() {
+		
+		OIDCClientMetadata metadata = new OIDCClientMetadata();
+		metadata.setBackChannelLogoutURI(URI.create("https://rp.example.com/back-channel-logout"));
+		metadata.setBackChannelLogoutURI(URI.create("http://rp.example.com/back-channel-logout"));
+		
+		try {
+			metadata.setBackChannelLogoutURI(URI.create("ftp://rp.example.com/back-channel-logout"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The URI scheme must be https or http", e.getMessage());
+		}
+		
+		JSONObject jsonObject = metadata.toJSONObject();
+		jsonObject.put("backchannel_logout_uri", "ftp://rp.example.com/back-channel-logout");
+		
+		try {
+			OIDCClientMetadata.parse(jsonObject);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid \"backchannel_logout_uri\" parameter: The URI scheme must be https or http", e.getMessage());
+		}
+	}
 }

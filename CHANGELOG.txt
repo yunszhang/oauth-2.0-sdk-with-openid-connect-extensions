@@ -1514,4 +1514,6 @@ version 8.26 (2020-11-13)
     * The URI scheme of browser rendered AS and OP metadata "op_policy_uri",
       "op_tos_uri" and "service_documentation" must be "https" or "http" (iss
       #323).
+    * The URI scheme of "frontchannel_logout_uri" and "backchannel_logout_uri"
+      must be "https" or "http" (iss #324).
     * Adds URIUtils.ensureSchemeIsHTTPS and ensureSchemeIsHTTPSorHTTP.
