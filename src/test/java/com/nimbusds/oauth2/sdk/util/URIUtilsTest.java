@@ -20,6 +20,9 @@ package com.nimbusds.oauth2.sdk.util;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 
 import junit.framework.TestCase;
 
@@ -261,6 +264,25 @@ public class URIUtilsTest extends TestCase {
 			fail("Scheme is ftp");
 		} catch (IllegalArgumentException e) {
 			assertEquals(exceptionMessage, e.getMessage());
+		}
+	}
+	
+	
+	public void testEnsureSchemeIsNotProhibited() {
+		
+		URIUtils.ensureSchemeIsNotProhibited(null, null);
+		URIUtils.ensureSchemeIsNotProhibited(null, new HashSet<String>());
+		URIUtils.ensureSchemeIsNotProhibited(URI.create("/about/profile"), null);
+		URIUtils.ensureSchemeIsNotProhibited(URI.create("/about/profile"), new HashSet<String>());
+		
+		URIUtils.ensureSchemeIsNotProhibited(URI.create("https://example.com/about/profile"), Collections.singleton("data"));
+		URIUtils.ensureSchemeIsNotProhibited(URI.create("https://example.com/about/profile"), new HashSet<>(Arrays.asList("data", "javascript")));
+		
+		try {
+			URIUtils.ensureSchemeIsNotProhibited(URI.create("data://example.com/about/profile"), new HashSet<>(Arrays.asList("data", "javascript")));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The URI scheme data is prohibited", e.getMessage());
 		}
 	}
 }

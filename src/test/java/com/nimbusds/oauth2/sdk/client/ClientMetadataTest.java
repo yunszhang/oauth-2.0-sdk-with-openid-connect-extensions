@@ -91,6 +91,15 @@ public class ClientMetadataTest extends TestCase {
 	}
 	
 	
+	public void testProhibitedRedirectURISchemes() {
+		
+		assertTrue(ClientMetadata.PROHIBITED_REDIRECT_URI_SCHEMES.contains("data"));
+		assertTrue(ClientMetadata.PROHIBITED_REDIRECT_URI_SCHEMES.contains("javascript"));
+		assertTrue(ClientMetadata.PROHIBITED_REDIRECT_URI_SCHEMES.contains("vbscript"));
+		assertEquals(3, ClientMetadata.PROHIBITED_REDIRECT_URI_SCHEMES.size());
+	}
+	
+	
 	public void testSerializeAndParse()
 		throws Exception {
 		
@@ -1089,9 +1098,65 @@ public class ClientMetadataTest extends TestCase {
 			ClientMetadata.parse(o);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"redirect_uris\" parameter: URI must not contain fragment", e.getMessage());
+			assertEquals("Invalid \"redirect_uris\" parameter: The redirect_uri must not contain fragment", e.getMessage());
 			assertEquals(RegistrationError.INVALID_REDIRECT_URI.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid redirection URI(s): URI must not contain fragment", e.getErrorObject().getDescription());
+			assertEquals("Invalid redirection URI(s): The redirect_uri must not contain fragment", e.getErrorObject().getDescription());
+		}
+	}
+	
+	
+	public void testCustomRedirectURIScheme() throws ParseException {
+		
+		URI redirectURI = URI.create("myapp://login-callback");
+		
+		ClientMetadata clientMetadata = new ClientMetadata();
+		assertNull(clientMetadata.getRedirectionURI());
+		clientMetadata.setRedirectionURI(redirectURI);
+		assertEquals(redirectURI, clientMetadata.getRedirectionURI());
+		
+		JSONObject jsonObject = clientMetadata.toJSONObject();
+		
+		clientMetadata = ClientMetadata.parse(jsonObject);
+		assertEquals(redirectURI, clientMetadata.getRedirectionURI());
+	}
+
+
+	public void testRejectProhibitedSchemeInRedirectURI() {
+
+		for (String scheme: ClientMetadata.PROHIBITED_REDIRECT_URI_SCHEMES) {
+			
+			URI illegalRedirectURI = URI.create(scheme + "://example.com/cb");
+			
+			ClientMetadata metadata = new ClientMetadata();
+			
+			// single setter
+			try {
+				metadata.setRedirectionURI(illegalRedirectURI);
+				fail();
+			} catch (IllegalArgumentException e) {
+				assertEquals("The URI scheme " + scheme + " is prohibited", e.getMessage());
+			}
+			
+			// collection setter
+			try {
+				metadata.setRedirectionURIs(Collections.singleton(illegalRedirectURI));
+				fail();
+			} catch (IllegalArgumentException e) {
+				assertEquals("The URI scheme " + scheme + " is prohibited", e.getMessage());
+			}
+			
+			// static parse method
+			JSONObject o = new JSONObject();
+			o.put("redirect_uris", Collections.singletonList(illegalRedirectURI.toString()));
+			
+			try {
+				ClientMetadata.parse(o);
+				fail();
+			} catch (ParseException e) {
+				assertEquals("Invalid \"redirect_uris\" parameter: The URI scheme " + scheme + " is prohibited", e.getMessage());
+				assertEquals(RegistrationError.INVALID_REDIRECT_URI.getCode(), e.getErrorObject().getCode());
+				assertEquals("Invalid redirection URI(s): The URI scheme " + scheme + " is prohibited", e.getErrorObject().getDescription());
+			}
 		}
 	}
 

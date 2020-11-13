@@ -1507,6 +1507,9 @@ version 8.25 (2020-11-09)
     * Adds new static Issuer.parse method.
 
 version 8.26 (2020-11-13)
+    * Prohibit insecure "redirect_uris" and "post_logout_redirect_uris" URI
+      schemes, such as data, javascript and vbscript from being registered (iss
+      #325).
     * The URI scheme of browser rendered client metadata "client_uri",
       "policy_uri" and "tos_uri" must be "https" or "http" (iss #321).
     * The URI scheme of "initiate_login_uri" client metadata must be "https"
@@ -1517,3 +1520,4 @@ version 8.26 (2020-11-13)
     * The URI scheme of "frontchannel_logout_uri" and "backchannel_logout_uri"
       must be "https" or "http" (iss #324).
     * Adds URIUtils.ensureSchemeIsHTTPS and ensureSchemeIsHTTPSorHTTP.
+    * Adds URIUtils.ensureSchemeIsNotProhibited.

@@ -21,6 +21,7 @@ package com.nimbusds.oauth2.sdk.util;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Set;
 
 
 /**
@@ -255,6 +256,30 @@ public final class URIUtils {
 		
 		if (uri.getScheme() == null || ! Arrays.asList("http", "https").contains(uri.getScheme().toLowerCase())) {
 			throw new IllegalArgumentException("The URI scheme must be https or http");
+		}
+	}
+	
+	
+	/**
+	 * Ensures the scheme of the specified URI is not prohibited.
+	 *
+	 * @param uri                  The URI to check, {@code null} if not
+	 *                             specified.
+	 * @param prohibitedURISchemes The prohibited URI schemes (should be in
+	 *                             lower case), empty or {@code null} if
+	 *                             not specified.
+	 *
+	 * @throws IllegalArgumentException If the URI is specified and its
+	 *                                  scheme is prohibited.
+	 */
+	public static void ensureSchemeIsNotProhibited(final URI uri, final Set<String> prohibitedURISchemes) {
+		
+		if (uri == null || uri.getScheme() == null || prohibitedURISchemes == null || prohibitedURISchemes.isEmpty()) {
+			return;
+		}
+		
+		if (prohibitedURISchemes.contains(uri.getScheme().toLowerCase())) {
+			throw new IllegalArgumentException("The URI scheme " + uri.getScheme() + " is prohibited");
 		}
 	}
 

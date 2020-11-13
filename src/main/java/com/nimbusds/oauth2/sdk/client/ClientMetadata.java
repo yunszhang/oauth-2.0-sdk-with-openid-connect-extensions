@@ -42,8 +42,8 @@ import com.nimbusds.oauth2.sdk.id.SoftwareVersion;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
-import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
+import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
 
 
 /**
@@ -84,6 +84,13 @@ public class ClientMetadata {
 	 * The registered parameter names.
 	 */
 	private static final Set<String> REGISTERED_PARAMETER_NAMES;
+	
+	
+	/**
+	 * Prohibited URI schemes in redirection URIs. See
+	 * https://security.lauritz-holtmann.de/post/sso-security-redirect-uri/.
+	 */
+	public static final Set<String> PROHIBITED_REDIRECT_URI_SCHEMES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("data", "javascript", "vbscript")));
 
 
 	static {
@@ -494,8 +501,9 @@ public class ClientMetadata {
 				if (uri.getFragment() != null) {
 					throw new IllegalArgumentException("The redirect_uri must not contain fragment");
 				}
+				URIUtils.ensureSchemeIsNotProhibited(uri, PROHIBITED_REDIRECT_URI_SCHEMES);
 			}
-			this.redirectURIs = redirectURIs;
+			this.redirectURIs = Collections.unmodifiableSet(redirectURIs);
 		} else {
 			this.redirectURIs = null;
 		}
@@ -2091,16 +2099,13 @@ public class ClientMetadata {
 				} catch (URISyntaxException e) {
 					throw new ParseException("Invalid \"redirect_uris\" parameter: " + e.getMessage(), RegistrationError.INVALID_REDIRECT_URI.appendDescription(": " + e.getMessage()));
 				}
-
-				if (uri.getFragment() != null) {
-					String detail = "URI must not contain fragment";
-					throw new ParseException("Invalid \"redirect_uris\" parameter: " + detail, RegistrationError.INVALID_REDIRECT_URI.appendDescription(": " + detail));
-				}
-
 				redirectURIs.add(uri);
 			}
-
-			metadata.setRedirectionURIs(redirectURIs);
+			try {
+				metadata.setRedirectionURIs(redirectURIs);
+			} catch (IllegalArgumentException e) {
+				throw new ParseException("Invalid \"redirect_uris\" parameter: " + e.getMessage(), RegistrationError.INVALID_REDIRECT_URI.appendDescription(": " + e.getMessage()));
+			}
 			jsonObject.remove("redirect_uris");
 		}
 

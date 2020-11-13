@@ -988,4 +988,36 @@ public class OIDCClientMetadataTest extends TestCase {
 			assertEquals("Invalid \"backchannel_logout_uri\" parameter: The URI scheme must be https or http", e.getMessage());
 		}
 	}
+	
+	
+	public void testRejectProhibitedSchemeInPostLogoutRedirectURI() {
+		
+		for (String scheme: ClientMetadata.PROHIBITED_REDIRECT_URI_SCHEMES) {
+			
+			URI illegalRedirectURI = URI.create(scheme + "://example.com/post-logout");
+			
+			OIDCClientMetadata metadata = new OIDCClientMetadata();
+			
+			// collection setter
+			try {
+				metadata.setPostLogoutRedirectionURIs(Collections.singleton(illegalRedirectURI));
+				fail();
+			} catch (IllegalArgumentException e) {
+				assertEquals("The URI scheme " + scheme + " is prohibited", e.getMessage());
+			}
+			
+			// static parse method
+			JSONObject o = new JSONObject();
+			o.put("post_logout_redirect_uris", Collections.singletonList(illegalRedirectURI.toString()));
+			
+			try {
+				OIDCClientMetadata.parse(o);
+				fail();
+			} catch (ParseException e) {
+				assertEquals("Invalid \"post_logout_redirect_uris\" parameter: The URI scheme " + scheme + " is prohibited", e.getMessage());
+				assertEquals(RegistrationError.INVALID_CLIENT_METADATA.getCode(), e.getErrorObject().getCode());
+				assertEquals("Invalid client metadata field: Invalid \"post_logout_redirect_uris\" parameter: The URI scheme " + scheme + " is prohibited", e.getErrorObject().getDescription());
+			}
+		}
+	}
 }

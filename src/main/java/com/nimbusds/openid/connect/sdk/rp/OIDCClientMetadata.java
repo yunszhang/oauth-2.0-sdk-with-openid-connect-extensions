@@ -652,11 +652,16 @@ public class OIDCClientMetadata extends ClientMetadata {
 	 * Sets the post logout redirection URIs. Corresponds to the
 	 * {@code post_logout_redirect_uris} client metadata field.
 	 *
-	 * @param logoutURIs The logout redirection URIs, {@code null} if not
-	 *                   specified.
+	 * @param logoutURIs The post logout redirection URIs, {@code null} if
+	 *                   not specified.
 	 */
 	public void setPostLogoutRedirectionURIs(final Set<URI> logoutURIs) {
 
+		if (logoutURIs != null) {
+			for (URI uri: logoutURIs) {
+				URIUtils.ensureSchemeIsNotProhibited(uri, PROHIBITED_REDIRECT_URI_SCHEMES);
+			}
+		}
 		postLogoutRedirectURIs = logoutURIs;
 	}
 	
@@ -1011,14 +1016,16 @@ public class OIDCClientMetadata extends ClientMetadata {
 
 					try {
 						logoutURIs.add(new URI(uriString));
-
 					} catch (URISyntaxException e) {
-
 						throw new ParseException("Invalid \"post_logout_redirect_uris\" parameter");
 					}
 				}
 
-				metadata.setPostLogoutRedirectionURIs(logoutURIs);
+				try {
+					metadata.setPostLogoutRedirectionURIs(logoutURIs);
+				} catch (IllegalArgumentException e) {
+					throw new ParseException("Invalid \"post_logout_redirect_uris\" parameter: " + e.getMessage());
+				}
 				oidcFields.remove("post_logout_redirect_uris");
 			}
 			
