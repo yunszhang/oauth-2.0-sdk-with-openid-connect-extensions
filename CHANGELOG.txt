@@ -1508,4 +1508,7 @@ version 8.25 (2020-11-09)
 
 version 8.26 (2020-11-13)
     * Adds URIUtils.ensureSchemeIsHTTPS and ensureSchemeIsHTTPSorHTTP.
-
+    * The URI scheme of browser rendered client metadata "client_uri",
+      "policy_uri" and "tos_uri" must be "https" or "http" (iss #321).
+    * The URI scheme of "initiate_login_uri" client metadata must be "https"
+      (iss #322).

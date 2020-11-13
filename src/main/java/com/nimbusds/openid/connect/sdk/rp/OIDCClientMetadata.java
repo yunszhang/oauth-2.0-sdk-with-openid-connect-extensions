@@ -33,6 +33,7 @@ import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.oauth2.sdk.client.RegistrationError;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.id.SectorID;
@@ -625,10 +626,12 @@ public class OIDCClientMetadata extends ClientMetadata {
 	 * initiate a login at the client. Corresponds to the 
 	 * {@code initiate_login_uri} client metadata field.
 	 *
-	 * @param loginURI The login URI, {@code null} if not specified.
+	 * @param loginURI The login URI, {@code null} if not specified. The
+	 *                 URI scheme must be https.
 	 */
 	public void setInitiateLoginURI(final URI loginURI) {
-
+		
+		URIUtils.ensureSchemeIsHTTPS(loginURI);
 		this.initiateLoginURI = loginURI;
 	}
 
@@ -988,7 +991,11 @@ public class OIDCClientMetadata extends ClientMetadata {
 			}
 
 			if (jsonObject.get("initiate_login_uri") != null) {
-				metadata.setInitiateLoginURI(JSONObjectUtils.getURI(jsonObject, "initiate_login_uri"));
+				try {
+					metadata.setInitiateLoginURI(JSONObjectUtils.getURI(jsonObject, "initiate_login_uri"));
+				} catch (IllegalArgumentException e) {
+					throw new ParseException("Invalid \"initiate_login_uri\" parameter: " + e.getMessage());
+				}
 				oidcFields.remove("initiate_login_uri");
 			}
 

@@ -41,6 +41,7 @@ import com.nimbusds.oauth2.sdk.id.SoftwareID;
 import com.nimbusds.oauth2.sdk.id.SoftwareVersion;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 
@@ -802,10 +803,12 @@ public class ClientMetadata {
 	 * Sets the client home page. Corresponds to the {@code client_uri}
 	 * client metadata field, with no language tag.
 	 *
-	 * @param uri The client URI, {@code null} if not specified.
+	 * @param uri The client URI, {@code null} if not specified. The URI
+	 *            scheme must be https or http.
 	 */
 	public void setURI(final URI uri) {
 
+		URIUtils.ensureSchemeIsHTTPSorHTTP(uri);
 		uriEntries.put(null, uri);
 	}
 
@@ -814,11 +817,13 @@ public class ClientMetadata {
 	 * Sets the client home page. Corresponds to the {@code client_uri}
 	 * client metadata field, with an optional language tag.
 	 *
-	 * @param uri     The URI. Must not be {@code null}.
+	 * @param uri     The URI. The URI scheme must be https or http. Must
+	 *                not be {@code null}.
 	 * @param langTag The language tag, {@code null} if not specified.
 	 */
 	public void setURI(final URI uri, final LangTag langTag) {
-
+		
+		URIUtils.ensureSchemeIsHTTPSorHTTP(uri);
 		uriEntries.put(langTag, uri);
 	}
 
@@ -868,10 +873,12 @@ public class ClientMetadata {
 	 * {@code policy_uri} client metadata field, with no language
 	 * tag.
 	 *
-	 * @param policyURI The policy URI, {@code null} if not specified.
+	 * @param policyURI The policy URI, {@code null} if not specified. The
+	 *                  URI scheme must be https or http.
 	 */
 	public void setPolicyURI(final URI policyURI) {
 
+		URIUtils.ensureSchemeIsHTTPSorHTTP(policyURI);
 		policyURIEntries.put(null, policyURI);
 	}
 
@@ -881,11 +888,13 @@ public class ClientMetadata {
 	 * {@code policy_uri} client metadata field, with an optional
 	 * language tag.
 	 *
-	 * @param policyURI The policy URI. Must not be {@code null}.
+	 * @param policyURI The policy URI. The URI scheme must be https or
+	 *                  http. Must not be {@code null}.
 	 * @param langTag   The language tag, {@code null} if not specified.
 	 */
 	public void setPolicyURI(final URI policyURI, final LangTag langTag) {
 
+		URIUtils.ensureSchemeIsHTTPSorHTTP(policyURI);
 		policyURIEntries.put(langTag, policyURI);
 	}
 
@@ -936,10 +945,11 @@ public class ClientMetadata {
 	 * tag.
 	 *
 	 * @param tosURI The terms of service URI, {@code null} if not
-	 *               specified.
+	 *               specified. The URI scheme must be https or http.
 	 */
 	public void setTermsOfServiceURI(final URI tosURI) {
 
+		URIUtils.ensureSchemeIsHTTPSorHTTP(tosURI);
 		tosURIEntries.put(null, tosURI);
 	}
 
@@ -949,11 +959,13 @@ public class ClientMetadata {
 	 * {@code tos_uri} client metadata field, with an optional
 	 * language tag.
 	 *
-	 * @param tosURI  The terms of service URI. Must not be {@code null}.
+	 * @param tosURI  The terms of service URI. The URI scheme must not be
+	 *                https or http. Must not be {@code null}.
 	 * @param langTag The language tag, {@code null} if not specified.
 	 */
 	public void setTermsOfServiceURI(final URI tosURI, final LangTag langTag) {
-
+		
+		URIUtils.ensureSchemeIsHTTPSorHTTP(tosURI);
 		tosURIEntries.put(langTag, tosURI);
 	}
 
@@ -2159,9 +2171,7 @@ public class ClientMetadata {
 				
 				try {
 					metadata.setLogoURI(new URI((String) entry.getValue()), entry.getKey());
-
 				} catch (Exception e) {
-
 					throw new ParseException("Invalid \"logo_uri\" (language tag) parameter");
 				}
 
@@ -2177,11 +2187,8 @@ public class ClientMetadata {
 
 				try {
 					metadata.setURI(new URI((String) entry.getValue()), entry.getKey());
-
-
 				} catch (Exception e) {
-
-					throw new ParseException("Invalid \"client_uri\" (language tag) parameter");
+					throw new ParseException("Invalid \"client_uri\" (language tag) parameter: " + e.getMessage());
 				}
 
 				removeMember(jsonObject, "client_uri", entry.getKey());
@@ -2196,10 +2203,8 @@ public class ClientMetadata {
 
 				try {
 					metadata.setPolicyURI(new URI((String) entry.getValue()), entry.getKey());
-
 				} catch (Exception e) {
-
-					throw new ParseException("Invalid \"policy_uri\" (language tag) parameter");
+					throw new ParseException("Invalid \"policy_uri\" (language tag) parameter: " + e.getMessage());
 				}
 
 				removeMember(jsonObject, "policy_uri", entry.getKey());
@@ -2214,10 +2219,8 @@ public class ClientMetadata {
 
 				try {
 					metadata.setTermsOfServiceURI(new URI((String) entry.getValue()), entry.getKey());
-
 				} catch (Exception e) {
-
-					throw new ParseException("Invalid \"tos_uri\" (language tag) parameter");
+					throw new ParseException("Invalid \"tos_uri\" (language tag) parameter: " + e.getMessage());
 				}
 
 				removeMember(jsonObject, "tos_uri", entry.getKey());

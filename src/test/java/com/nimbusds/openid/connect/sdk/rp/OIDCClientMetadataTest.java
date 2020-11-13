@@ -29,6 +29,7 @@ import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.langtag.LangTag;
+import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
@@ -81,7 +82,7 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("require_pushed_authorization_requests"));
 
-		// OIDC specifid params
+		// OIDC specified params
 		assertTrue(paramNames.contains("application_type"));
 		assertTrue(paramNames.contains("sector_identifier_uri"));
 		assertTrue(paramNames.contains("subject_type"));
@@ -250,8 +251,8 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertEquals("1", meta.getDefaultACRs().get(0).toString());
 
 		assertNull(meta.getInitiateLoginURI());
-		meta.setInitiateLoginURI(new URI("http://do-login.com"));
-		assertEquals("http://do-login.com", meta.getInitiateLoginURI().toString());
+		meta.setInitiateLoginURI(new URI("https://do-login.com"));
+		assertEquals("https://do-login.com", meta.getInitiateLoginURI().toString());
 
 		assertNull(meta.getPostLogoutRedirectionURIs());
 		Set<URI> logoutURIs = new HashSet<>();
@@ -307,7 +308,7 @@ public class OIDCClientMetadataTest extends TestCase {
 
 		assertEquals("1", meta.getDefaultACRs().get(0).toString());
 
-		assertEquals("http://do-login.com", meta.getInitiateLoginURI().toString());
+		assertEquals("https://do-login.com", meta.getInitiateLoginURI().toString());
 
 		assertEquals("http://post-logout.com", meta.getPostLogoutRedirectionURIs().iterator().next().toString());
 		
@@ -820,5 +821,124 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertEquals(redirectionURI, clientMetadata.getRedirectionURI());
 		assertEquals(federationTypes, clientMetadata.getClientRegistrationTypes());
 		assertEquals(orgName, clientMetadata.getOrganizationName());
+	}
+	
+	
+	
+	
+	
+	public void testHumanFacingURIsMustBeHTTPSorHTTP() throws LangTagException {
+		
+		OIDCClientMetadata metadata = new OIDCClientMetadata();
+		
+		String exceptionMessage = "The URI scheme must be https or http";
+		
+		// client_uri
+		try {
+			metadata.setURI(URI.create("ftp://example.com"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		try {
+			metadata.setURI(URI.create("ftp://example.com"), LangTag.parse("en"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		
+		// policy_uri
+		try {
+			metadata.setPolicyURI(URI.create("ftp://example.com"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		try {
+			metadata.setPolicyURI(URI.create("ftp://example.com"), LangTag.parse("en"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		
+		// tos_uri
+		try {
+			metadata.setTermsOfServiceURI(URI.create("ftp://example.com"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		try {
+			metadata.setTermsOfServiceURI(URI.create("ftp://example.com"), LangTag.parse("en"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		
+		// Test parse
+		metadata = new OIDCClientMetadata();
+		metadata.applyDefaults();
+		JSONObject jsonObject = metadata.toJSONObject();
+		
+		// client_uri
+		JSONObject copy = new JSONObject();
+		copy.putAll(jsonObject);
+		copy.put("client_uri", "ftp://example.com");
+		
+		try {
+			ClientMetadata.parse(copy);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid \"client_uri\" (language tag) parameter: The URI scheme must be https or http", e.getMessage());
+		}
+		
+		// policy_uri
+		copy = new JSONObject();
+		copy.putAll(jsonObject);
+		copy.put("policy_uri", "ftp://example.com");
+		
+		try {
+			ClientMetadata.parse(copy);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid \"policy_uri\" (language tag) parameter: The URI scheme must be https or http", e.getMessage());
+		}
+		
+		// tos_uri
+		copy = new JSONObject();
+		copy.putAll(jsonObject);
+		copy.put("tos_uri", "ftp://example.com");
+		
+		try {
+			ClientMetadata.parse(copy);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid \"tos_uri\" (language tag) parameter: The URI scheme must be https or http", e.getMessage());
+		}
+	}
+	
+	
+	public void testInitiateLoginURIMustBeHTTPS() {
+		
+		OIDCClientMetadata metadata = new OIDCClientMetadata();
+		
+		metadata.setInitiateLoginURI(URI.create("https://rp.example.com/initiate-login"));
+		
+		try {
+			metadata.setInitiateLoginURI(URI.create("http://rp.example.com/initiate-login"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The URI scheme must be https", e.getMessage());
+		}
+		
+		JSONObject jsonObject = metadata.toJSONObject();
+		jsonObject.put("initiate_login_uri", "http://rp.example.com/initiate-login");
+		
+		try {
+			OIDCClientMetadata.parse(jsonObject);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid \"initiate_login_uri\" parameter: The URI scheme must be https", e.getMessage());
+		}
 	}
 }

@@ -32,6 +32,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.langtag.LangTag;
+import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
@@ -846,8 +847,7 @@ public class ClientMetadataTest extends TestCase {
 	}
 
 
-	public void testParseBadRedirectionURI()
-		throws Exception {
+	public void testParseBadRedirectionURI() {
 
 		String json = "{\n" +
 			" \"redirect_uris\":[\n" +
@@ -864,6 +864,97 @@ public class ClientMetadataTest extends TestCase {
 			assertEquals("Invalid \"redirect_uris\" parameter: Expected authority at index 8: https://", e.getMessage());
 			assertEquals(RegistrationError.INVALID_REDIRECT_URI.getCode(), e.getErrorObject().getCode());
 			assertEquals("Invalid redirection URI(s): Expected authority at index 8: https://", e.getErrorObject().getDescription());
+		}
+	}
+	
+	
+	public void testHumanFacingURIsMustBeHTTPSorHTTP() throws LangTagException {
+		
+		ClientMetadata metadata = new ClientMetadata();
+		
+		String exceptionMessage = "The URI scheme must be https or http";
+		
+		// client_uri
+		try {
+			metadata.setURI(URI.create("ftp://example.com"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		try {
+			metadata.setURI(URI.create("ftp://example.com"), LangTag.parse("en"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		
+		// policy_uri
+		try {
+			metadata.setPolicyURI(URI.create("ftp://example.com"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		try {
+			metadata.setPolicyURI(URI.create("ftp://example.com"), LangTag.parse("en"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		
+		// tos_uri
+		try {
+			metadata.setTermsOfServiceURI(URI.create("ftp://example.com"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		try {
+			metadata.setTermsOfServiceURI(URI.create("ftp://example.com"), LangTag.parse("en"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals(exceptionMessage, e.getMessage());
+		}
+		
+		// Test parse
+		metadata = new ClientMetadata();
+		metadata.applyDefaults();
+		JSONObject jsonObject = metadata.toJSONObject();
+		
+		// client_uri
+		JSONObject copy = new JSONObject();
+		copy.putAll(jsonObject);
+		copy.put("client_uri", "ftp://example.com");
+		
+		try {
+			ClientMetadata.parse(copy);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid \"client_uri\" (language tag) parameter: The URI scheme must be https or http", e.getMessage());
+		}
+		
+		// policy_uri
+		copy = new JSONObject();
+		copy.putAll(jsonObject);
+		copy.put("policy_uri", "ftp://example.com");
+		
+		try {
+			ClientMetadata.parse(copy);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid \"policy_uri\" (language tag) parameter: The URI scheme must be https or http", e.getMessage());
+		}
+		
+		// tos_uri
+		copy = new JSONObject();
+		copy.putAll(jsonObject);
+		copy.put("tos_uri", "ftp://example.com");
+		
+		try {
+			ClientMetadata.parse(copy);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid \"tos_uri\" (language tag) parameter: The URI scheme must be https or http", e.getMessage());
 		}
 	}
 
