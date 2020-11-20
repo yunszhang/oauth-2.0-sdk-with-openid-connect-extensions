@@ -1522,6 +1522,6 @@ version 8.26 (2020-11-13)
     * Adds URIUtils.ensureSchemeIsHTTPS and ensureSchemeIsHTTPSorHTTP.
     * Adds URIUtils.ensureSchemeIsNotProhibited.
 
-version 8.26 (2020-11-20)
-    * Updats AuthorizationServerMetadata and OIDCProviderMetadata to support
+version 8.27 (2020-11-20)
+    * Updates AuthorizationServerMetadata and OIDCProviderMetadata to support
       the "dpop_signing_alg_values_supported" metadata field.
