@@ -30,6 +30,7 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.as.AuthorizationServerEndpointMetadata;
+import com.nimbusds.oauth2.sdk.as.AuthorizationServerMetadata;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.client.ClientType;
 import com.nimbusds.oauth2.sdk.id.Issuer;
@@ -110,6 +111,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("backchannel_logout_session_supported"));
 		assertTrue(paramNames.contains("mtls_endpoint_aliases"));
 		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
+		assertTrue(paramNames.contains("dpop_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("authorization_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("authorization_encryption_alg_values_supported"));
 		assertTrue(paramNames.contains("authorization_encryption_enc_values_supported"));
@@ -126,7 +128,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("federation_registration_endpoint"));
 
-		assertEquals(69, paramNames.size());
+		assertEquals(70, paramNames.size());
 	}
 
 
@@ -1445,5 +1447,50 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertEquals(Arrays.asList(ClientType.PUBLIC, ClientType.CONFIDENTIAL), meta.getIncrementalAuthorizationTypes());
 		
 		assertTrue(meta.getCustomParameters().isEmpty());
+	}
+	
+	
+	public void testDPoP() throws ParseException {
+		
+		// init
+		OIDCProviderMetadata op = new OIDCProviderMetadata(new Issuer("https://c2id.com"), Collections.singletonList(SubjectType.PUBLIC), URI.create("https://c2id.com/jwks.json"));
+		
+		assertNull(op.getDPoPJWSAlgs());
+		
+		op.applyDefaults();
+		assertNull(op.getDPoPJWSAlgs());
+		
+		// null
+		op.setDPoPJWSAlgs(null);
+		assertNull(op.getDPoPJWSAlgs());
+		
+		op = OIDCProviderMetadata.parse(op.toJSONObject());
+		assertNull(op.getDPoPJWSAlgs());
+		
+		// empty
+		op.setDPoPJWSAlgs(Collections.<JWSAlgorithm>emptyList());
+		assertEquals(Collections.emptyList(), op.getDPoPJWSAlgs());
+		
+		op = OIDCProviderMetadata.parse(op.toJSONObject());
+		assertEquals(Collections.emptyList(), op.getDPoPJWSAlgs());
+		
+		// one JWS alg
+		op.setDPoPJWSAlgs(Collections.singletonList(JWSAlgorithm.RS256));
+		assertEquals(Collections.singletonList(JWSAlgorithm.RS256), op.getDPoPJWSAlgs());
+		
+		JSONObject jsonObject = op.toJSONObject();
+		assertEquals(Collections.singletonList("RS256"), JSONObjectUtils.getStringList(jsonObject, "dpop_signing_alg_values_supported"));
+		
+		op = OIDCProviderMetadata.parse(jsonObject);
+		assertEquals(Collections.singletonList(JWSAlgorithm.RS256), op.getDPoPJWSAlgs());
+		
+		// three JWS algs
+		op.setDPoPJWSAlgs(Arrays.asList(JWSAlgorithm.ES256, JWSAlgorithm.ES384, JWSAlgorithm.ES512));
+		
+		jsonObject = op.toJSONObject();
+		assertEquals(Arrays.asList("ES256", "ES384", "ES512"), JSONObjectUtils.getStringList(jsonObject, "dpop_signing_alg_values_supported"));
+		
+		op = OIDCProviderMetadata.parse(jsonObject);
+		assertEquals(Arrays.asList(JWSAlgorithm.ES256, JWSAlgorithm.ES384, JWSAlgorithm.ES512), op.getDPoPJWSAlgs());
 	}
 }

@@ -1584,6 +1584,9 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		
 		op.setSupportsTLSClientCertificateBoundAccessTokens(as.supportsTLSClientCertificateBoundAccessTokens());
 		
+		// DPoP
+		op.setDPoPJWSAlgs(as.getDPoPJWSAlgs());
+		
 		// JARM
 		op.setAuthorizationJWSAlgs(as.getAuthorizationJWSAlgs());
 		op.setAuthorizationJWEAlgs(as.getAuthorizationJWEAlgs());

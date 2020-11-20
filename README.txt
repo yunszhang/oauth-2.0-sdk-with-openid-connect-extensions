@@ -42,6 +42,9 @@ This SDK version implements the following standards and drafts:
     * OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound Access
       Tokens (RFC 8705)
 
+    * OAuth 2.0 Demonstrating Proof-of-Possession at the Application Layer
+      (DPoP) (draft-ietf-oauth-dpop-02)
+
     * Resource Indicators for OAuth 2.0 (RFC 8707)
 
     * OAuth 2.0 Device Authorization Grant (RFC 8628)

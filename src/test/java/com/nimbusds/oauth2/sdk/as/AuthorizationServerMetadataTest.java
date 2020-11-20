@@ -80,13 +80,14 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("revocation_endpoint_auth_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("mtls_endpoint_aliases"));
 		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
+		assertTrue(paramNames.contains("dpop_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("authorization_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("authorization_encryption_alg_values_supported"));
 		assertTrue(paramNames.contains("authorization_encryption_enc_values_supported"));
 		assertTrue(paramNames.contains("device_authorization_endpoint"));
 		assertTrue(paramNames.contains("incremental_authz_types_supported"));
 		
-		assertEquals(39, paramNames.size());
+		assertEquals(40, paramNames.size());
 	}
 	
 	
@@ -264,6 +265,51 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		} catch (IllegalArgumentException e) {
 			assertEquals("The \"none\" algorithm is not accepted", e.getMessage());
 		}
+	}
+	
+	
+	public void testDPoP() throws ParseException {
+		
+		// init
+		AuthorizationServerMetadata as = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
+		
+		assertNull(as.getDPoPJWSAlgs());
+		
+		as.applyDefaults();
+		assertNull(as.getDPoPJWSAlgs());
+		
+		// null
+		as.setDPoPJWSAlgs(null);
+		assertNull(as.getDPoPJWSAlgs());
+		
+		as = AuthorizationServerMetadata.parse(as.toJSONObject());
+		assertNull(as.getDPoPJWSAlgs());
+		
+		// empty
+		as.setDPoPJWSAlgs(Collections.<JWSAlgorithm>emptyList());
+		assertEquals(Collections.emptyList(), as.getDPoPJWSAlgs());
+		
+		as = AuthorizationServerMetadata.parse(as.toJSONObject());
+		assertEquals(Collections.emptyList(), as.getDPoPJWSAlgs());
+		
+		// one JWS alg
+		as.setDPoPJWSAlgs(Collections.singletonList(JWSAlgorithm.RS256));
+		assertEquals(Collections.singletonList(JWSAlgorithm.RS256), as.getDPoPJWSAlgs());
+		
+		JSONObject jsonObject = as.toJSONObject();
+		assertEquals(Collections.singletonList("RS256"), JSONObjectUtils.getStringList(jsonObject, "dpop_signing_alg_values_supported"));
+		
+		as = AuthorizationServerMetadata.parse(jsonObject);
+		assertEquals(Collections.singletonList(JWSAlgorithm.RS256), as.getDPoPJWSAlgs());
+		
+		// three JWS algs
+		as.setDPoPJWSAlgs(Arrays.asList(JWSAlgorithm.ES256, JWSAlgorithm.ES384, JWSAlgorithm.ES512));
+		
+		jsonObject = as.toJSONObject();
+		assertEquals(Arrays.asList("ES256", "ES384", "ES512"), JSONObjectUtils.getStringList(jsonObject, "dpop_signing_alg_values_supported"));
+		
+		as = AuthorizationServerMetadata.parse(jsonObject);
+		assertEquals(Arrays.asList(JWSAlgorithm.ES256, JWSAlgorithm.ES384, JWSAlgorithm.ES512), as.getDPoPJWSAlgs());
 	}
 	
 	

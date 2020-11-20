@@ -54,6 +54,8 @@ import com.nimbusds.oauth2.sdk.util.URIUtils;
  *     <li>OAuth 2.0 Authorization Server Metadata (RFC 8414)
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
  *         Access Tokens (RFC 8705)
+ *     <li>OAuth 2.0 Demonstrating Proof-of-Possession at the Application Layer
+ *         (DPoP) (draft-ietf-oauth-dpop-02)
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
  *     <li>OAuth 2.0 Authorization Server Issuer Identifier in Authorization
@@ -101,6 +103,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 		p.add("revocation_endpoint_auth_signing_alg_values_supported");
 		p.add("mtls_endpoint_aliases");
 		p.add("tls_client_certificate_bound_access_tokens");
+		p.add("dpop_signing_alg_values_supported");
 		p.add("authorization_signing_alg_values_supported");
 		p.add("authorization_encryption_alg_values_supported");
 		p.add("authorization_encryption_enc_values_supported");
@@ -289,6 +292,12 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	 * not.
 	 */
 	private boolean tlsClientCertificateBoundAccessTokens = false;
+	
+	
+	/**
+	 * The supported JWS algorithms for DPoP.
+	 */
+	private List<JWSAlgorithm> dPoPJWSAlgs;
 	
 	
 	/**
@@ -1111,6 +1120,33 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	
 	
 	/**
+	 * Gets the supported JWS algorithms for Demonstrating
+	 * Proof-of-Possession at the Application Layer (DPoP). Corresponds to
+	 * the "dpop_signing_alg_values_supported" metadata field.
+	 *
+	 * @return The supported JWS algorithms for DPoP, {@code null} if none.
+	 */
+	public List<JWSAlgorithm> getDPoPJWSAlgs() {
+		
+		return dPoPJWSAlgs;
+	}
+	
+	
+	/**
+	 * Sets the supported JWS algorithms for Demonstrating
+	 * Proof-of-Possession at the Application Layer (DPoP). Corresponds to
+	 * the "dpop_signing_alg_values_supported" metadata field.
+	 *
+	 * @param dPoPJWSAlgs The supported JWS algorithms for DPoP,
+	 *                    {@code null} if none.
+	 */
+	public void setDPoPJWSAlgs(final List<JWSAlgorithm> dPoPJWSAlgs) {
+		
+		this.dPoPJWSAlgs = dPoPJWSAlgs;
+	}
+	
+	
+	/**
 	 * Gets the supported JWS algorithms for JWT-encoded authorisation
 	 * responses. Corresponds to the
 	 * {@code authorization_signing_alg_values_supported} metadata field.
@@ -1538,6 +1574,17 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 			o.put("tls_client_certificate_bound_access_tokens", true);
 		}
 		
+		// DPoP
+		if (dPoPJWSAlgs != null) {
+			
+			stringList = new ArrayList<>(dPoPJWSAlgs.size());
+			
+			for (JWSAlgorithm alg: dPoPJWSAlgs)
+				stringList.add(alg.getName());
+			
+			o.put("dpop_signing_alg_values_supported", stringList);
+		}
+		
 		// JARM
 		if (authzJWSAlgs != null) {
 			
@@ -1863,6 +1910,18 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 		
 		if (jsonObject.get("tls_client_certificate_bound_access_tokens") != null)
 			as.tlsClientCertificateBoundAccessTokens = JSONObjectUtils.getBoolean(jsonObject, "tls_client_certificate_bound_access_tokens");
+		
+		// DPoP
+		if (jsonObject.get("dpop_signing_alg_values_supported") != null)  {
+			
+			as.dPoPJWSAlgs = new ArrayList<>();
+			
+			for (String v: JSONObjectUtils.getStringArray(jsonObject, "dpop_signing_alg_values_supported")) {
+				
+				if (v != null)
+					as.dPoPJWSAlgs.add(JWSAlgorithm.parse(v));
+			}
+		}
 		
 		// JARM
 		if (jsonObject.get("authorization_signing_alg_values_supported") != null) {
