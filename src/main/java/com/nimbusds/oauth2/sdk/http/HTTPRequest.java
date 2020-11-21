@@ -28,12 +28,14 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
+import net.jcip.annotations.ThreadSafe;
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.common.contenttype.ContentType;
+import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
-import net.jcip.annotations.ThreadSafe;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -291,6 +293,39 @@ public class HTTPRequest extends HTTPMessage {
 	public void setAuthorization(final String authz) {
 	
 		setHeader("Authorization", authz);
+	}
+	
+	
+	/**
+	 * Gets the {@code DPoP} header value.
+	 *
+	 * @return The {@code DPoP} header value, {@code null} if not specified
+	 *         or parsing failed.
+	 */
+	public SignedJWT getDPoP() {
+	
+		String dPoP = getHeaderValue("DPoP");
+		if (dPoP == null) {
+			return null;
+		}
+		
+		try {
+			return SignedJWT.parse(dPoP);
+		} catch (java.text.ParseException e) {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Sets the {@code DPoP} header value.
+	 *
+	 * @param dPoPJWT The {@code DPoP} header value, {@code null} if not
+	 *                specified.
+	 */
+	public void setDPoP(final SignedJWT dPoPJWT) {
+	
+		setHeader("DPoP", dPoPJWT.serialize());
 	}
 
 

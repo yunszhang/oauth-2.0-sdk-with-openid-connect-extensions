@@ -19,12 +19,8 @@ package com.nimbusds.oauth2.sdk.http;
 
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
-import java.net.Proxy;
+import java.net.*;
 import java.net.Proxy.Type;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -46,7 +42,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.nimbusds.common.contenttype.ContentType;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
+import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.dpop.DefaultDPoPJWTFactory;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
@@ -536,7 +538,7 @@ public class HTTPRequestTest {
 	
 
 	@Test
-	public void testNoProxy() throws MalformedURLException, IOException{
+	public void testNoProxy() throws IOException{
 		onRequest()
 				.havingMethodEqualTo("POST")
 				.havingHeaderEqualTo("Host","localhost:" + port())
@@ -548,5 +550,37 @@ public class HTTPRequestTest {
 
 		HTTPResponse httpResponse = httpRequest.send();
 		assertEquals(999, httpResponse.getStatusCode());
+	}
+	
+	
+	@Test
+	public void testDPoP() throws MalformedURLException, JOSEException {
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
+		
+		assertNull(httpRequest.getDPoP());
+		
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.generate();
+		
+		SignedJWT dPoP = new DefaultDPoPJWTFactory(rsaJWK, JWSAlgorithm.RS256)
+			.createDPoPJWT(httpRequest.getMethod().name(), httpRequest.getURI());
+		
+		httpRequest.setDPoP(dPoP);
+		
+		assertEquals(dPoP.serialize(), httpRequest.getHeaderValue("DPoP"));
+		
+		assertEquals(dPoP.serialize(), httpRequest.getDPoP().serialize());
+	}
+	
+	
+	@Test
+	public void testDPoP_illegal() throws MalformedURLException {
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
+		
+		httpRequest.setHeader("DPoP", "illegal-jwt");
+		
+		assertNull(httpRequest.getDPoP());
 	}
 }
