@@ -1522,8 +1522,9 @@ version 8.26 (2020-11-13)
     * Adds URIUtils.ensureSchemeIsHTTPS and ensureSchemeIsHTTPSorHTTP.
     * Adds URIUtils.ensureSchemeIsNotProhibited.
 
-version 8.27 (2020-11-21)
+version 8.27 (2020-11-24)
     * Updates AuthorizationServerMetadata and OIDCProviderMetadata to support
       the "dpop_signing_alg_values_supported" metadata field.
     * Adds a DPoPJWTFactory with a default implementation.
     * Adds HTTPRequest get and setDPoP methods for "DPoP" header support.
+    * ClientMetadata adds "software_statement" parameter support.

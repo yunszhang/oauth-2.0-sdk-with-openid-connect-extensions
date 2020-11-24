@@ -28,7 +28,9 @@ import net.minidev.json.JSONObject;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagUtils;
 import com.nimbusds.oauth2.sdk.GrantType;
@@ -117,6 +119,7 @@ public class ClientMetadata {
 		p.add("require_pushed_authorization_requests");
 		p.add("software_id");
 		p.add("software_version");
+		p.add("software_statement");
 		p.add("tls_client_certificate_bound_access_tokens");
 		p.add("tls_client_auth_subject_dn");
 		p.add("tls_client_auth_san_dns");
@@ -266,6 +269,12 @@ public class ClientMetadata {
 	
 	
 	/**
+	 * Signed software statement.
+	 */
+	private SignedJWT softwareStatement;
+	
+	
+	/**
 	 * Preference for TLS client certificate bound access tokens.
 	 */
 	private boolean tlsClientCertificateBoundAccessTokens = false;
@@ -401,6 +410,7 @@ public class ClientMetadata {
 		requestObjectJWEEnc = metadata.requestObjectJWEEnc;
 		softwareID = metadata.softwareID;
 		softwareVersion = metadata.softwareVersion;
+		softwareStatement = metadata.softwareStatement;
 		tlsClientCertificateBoundAccessTokens = metadata.tlsClientCertificateBoundAccessTokens;
 		tlsClientAuthSubjectDN = metadata.tlsClientAuthSubjectDN;
 		tlsClientAuthSanDNS = metadata.tlsClientAuthSanDNS;
@@ -1247,6 +1257,36 @@ public class ClientMetadata {
 	
 	
 	/**
+	 * Gets the software statement. Corresponds to the
+	 * {@code software_statement} client metadata field.
+	 *
+	 * @return The signed software statement, {@code null} if not
+	 *         specified.
+	 */
+	public SignedJWT getSoftwareStatement() {
+		
+		return softwareStatement;
+	}
+	
+	
+	/**
+	 * Sets the software statement. Corresponds to the
+	 * {@code software_statement} client metadata field.
+	 *
+	 * @param softwareStatement The signed software statement, {@code null}
+	 *                          if not specified.
+	 */
+	public void setSoftwareStatement(final SignedJWT softwareStatement) {
+		
+		if (softwareStatement != null && softwareStatement.getState().equals(JWSObject.State.UNSIGNED)) {
+			throw new IllegalArgumentException("The software statement must be signed");
+		}
+		
+		this.softwareStatement = softwareStatement;
+	}
+	
+	
+	/**
 	 * Sets the preference for TLS client certificate bound access tokens.
 	 * Corresponds to the
 	 * {@code tls_client_certificate_bound_access_tokens} client metadata
@@ -1993,6 +2033,9 @@ public class ClientMetadata {
 		if (softwareVersion != null)
 			o.put("software_version", softwareVersion.getValue());
 		
+		if (softwareStatement != null)
+			o.put("software_statement", softwareStatement.serialize());
+		
 		if (getTLSClientCertificateBoundAccessTokens()) {
 			o.put("tls_client_certificate_bound_access_tokens", tlsClientCertificateBoundAccessTokens);
 		}
@@ -2313,6 +2356,15 @@ public class ClientMetadata {
 			if (jsonObject.get("software_version") != null) {
 				metadata.setSoftwareVersion(new SoftwareVersion(JSONObjectUtils.getString(jsonObject, "software_version")));
 				jsonObject.remove("software_version");
+			}
+			
+			if (jsonObject.get("software_statement") != null) {
+				try {
+					metadata.setSoftwareStatement(SignedJWT.parse(JSONObjectUtils.getString(jsonObject, "software_statement")));
+				} catch (java.text.ParseException e) {
+					throw new ParseException("Invalid software_statement JWT: " + e.getMessage());
+				}
+				jsonObject.remove("software_statement");
 			}
 			
 			if (jsonObject.get("tls_client_certificate_bound_access_tokens") != null) {

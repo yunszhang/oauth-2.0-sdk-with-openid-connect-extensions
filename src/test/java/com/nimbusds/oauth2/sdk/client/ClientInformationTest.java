@@ -68,6 +68,7 @@ public class ClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("request_object_encryption_enc"));
 		assertTrue(paramNames.contains("software_id"));
 		assertTrue(paramNames.contains("software_version"));
+		assertTrue(paramNames.contains("software_statement"));
 		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
 		assertTrue(paramNames.contains("tls_client_auth_subject_dn"));
 		assertTrue(paramNames.contains("tls_client_auth_san_dns"));
@@ -82,7 +83,7 @@ public class ClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(39, paramNames.size());
+		assertEquals(40, paramNames.size());
 	}
 	
 	

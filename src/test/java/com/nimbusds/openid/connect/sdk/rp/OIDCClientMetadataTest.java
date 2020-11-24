@@ -25,9 +25,13 @@ import java.util.*;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
-import com.nimbusds.jose.EncryptionMethod;
-import com.nimbusds.jose.JWEAlgorithm;
-import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.GrantType;
@@ -36,6 +40,7 @@ import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.oauth2.sdk.client.RegistrationError;
+import com.nimbusds.oauth2.sdk.id.SoftwareID;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
@@ -71,6 +76,7 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("request_object_encryption_enc"));
 		assertTrue(paramNames.contains("software_id"));
 		assertTrue(paramNames.contains("software_version"));
+		assertTrue(paramNames.contains("software_statement"));
 		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
 		assertTrue(paramNames.contains("tls_client_auth_subject_dn"));
 		assertTrue(paramNames.contains("tls_client_auth_san_dns"));
@@ -105,7 +111,7 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(51, OIDCClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(52, OIDCClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -374,6 +380,52 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC.getValue(), jsonObject.get("token_endpoint_auth_method"));
 		assertEquals(JWSAlgorithm.RS256.getName(), jsonObject.get("id_token_signed_response_alg"));
 		assertEquals(5, jsonObject.size());
+	}
+	
+	
+	public void testSoftwareStatement()
+		throws JOSEException, java.text.ParseException, ParseException {
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		assertNull(clientMetadata.getSoftwareStatement());
+		
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.keyIDFromThumbprint(true)
+			.generate();
+		
+		OIDCClientMetadata signedClientMetadata = new OIDCClientMetadata();
+		SoftwareID softwareID = new SoftwareID("4NRB1-0XZABZI9E6-5SM3R");
+		signedClientMetadata.setSoftwareID(softwareID);
+		String name = "Example Statement-based Client";
+		signedClientMetadata.setName(name);
+		URI uri = URI.create("https://client.example.net/");
+		signedClientMetadata.setURI(uri);
+		
+		SignedJWT softwareStatement = new SignedJWT(
+			new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaJWK.getKeyID()).build(),
+			JWTClaimsSet.parse(signedClientMetadata.toJSONObject()));
+		
+		try {
+			clientMetadata.setSoftwareStatement(softwareStatement);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The software statement must be signed", e.getMessage());
+		}
+		
+		softwareStatement.sign(new RSASSASigner(rsaJWK));
+		
+		clientMetadata.setSoftwareStatement(softwareStatement);
+		
+		assertEquals(softwareStatement, clientMetadata.getSoftwareStatement());
+		
+		JSONObject jsonObject = clientMetadata.toJSONObject();
+		
+		assertEquals(softwareStatement.serialize(), jsonObject.get("software_statement"));
+		
+		clientMetadata = OIDCClientMetadata.parse(jsonObject);
+		assertEquals(softwareStatement.serialize(), clientMetadata.getSoftwareStatement().serialize());
+		
+		assertTrue(clientMetadata.getSoftwareStatement().verify(new RSASSAVerifier(rsaJWK.toRSAPublicKey())));
 	}
 	
 	
