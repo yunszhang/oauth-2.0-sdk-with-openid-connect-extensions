@@ -1528,3 +1528,4 @@ version 8.27 (2020-11-24)
     * Adds a DPoPJWTFactory with a default implementation.
     * Adds HTTPRequest get and setDPoP methods for "DPoP" header support.
     * ClientMetadata adds "software_statement" parameter support.
+    * ClientMetadata copy constructor switches from fields access to getters.

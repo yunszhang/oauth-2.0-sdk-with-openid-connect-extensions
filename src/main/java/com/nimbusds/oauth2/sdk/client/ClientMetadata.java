@@ -390,41 +390,41 @@ public class ClientMetadata {
 	 */
 	public ClientMetadata(final ClientMetadata metadata) {
 
-		redirectURIs = metadata.redirectURIs;
-		scope = metadata.scope;
-		responseTypes = metadata.responseTypes;
-		grantTypes = metadata.grantTypes;
-		contacts = metadata.contacts;
-		nameEntries = metadata.nameEntries;
-		logoURIEntries = metadata.logoURIEntries;
-		uriEntries = metadata.uriEntries;
-		policyURIEntries = metadata.policyURIEntries;
-		tosURIEntries = metadata.tosURIEntries;
-		authMethod = metadata.authMethod;
-		authJWSAlg = metadata.authJWSAlg;
-		jwkSetURI = metadata.jwkSetURI;
+		redirectURIs = metadata.getRedirectionURIs();
+		scope = metadata.getScope();
+		responseTypes = metadata.getResponseTypes();
+		grantTypes = metadata.getGrantTypes();
+		contacts = metadata.getEmailContacts();
+		nameEntries = metadata.getNameEntries();
+		logoURIEntries = metadata.getLogoURIEntries();
+		uriEntries = metadata.getURIEntries();
+		policyURIEntries = metadata.getPolicyURIEntries();
+		tosURIEntries = metadata.getTermsOfServiceURIEntries();
+		authMethod = metadata.getTokenEndpointAuthMethod();
+		authJWSAlg = metadata.getTokenEndpointAuthJWSAlg();
+		jwkSetURI = metadata.getJWKSetURI();
 		jwkSet = metadata.getJWKSet();
-		requestObjectURIs = metadata.requestObjectURIs;
-		requestObjectJWSAlg = metadata.requestObjectJWSAlg;
-		requestObjectJWEAlg = metadata.requestObjectJWEAlg;
-		requestObjectJWEEnc = metadata.requestObjectJWEEnc;
-		softwareID = metadata.softwareID;
-		softwareVersion = metadata.softwareVersion;
-		softwareStatement = metadata.softwareStatement;
-		tlsClientCertificateBoundAccessTokens = metadata.tlsClientCertificateBoundAccessTokens;
-		tlsClientAuthSubjectDN = metadata.tlsClientAuthSubjectDN;
-		tlsClientAuthSanDNS = metadata.tlsClientAuthSanDNS;
-		tlsClientAuthSanURI = metadata.tlsClientAuthSanURI;
-		tlsClientAuthSanIP = metadata.tlsClientAuthSanIP;
-		tlsClientAuthSanEmail = metadata.tlsClientAuthSanEmail;
-		authzJWSAlg = metadata.authzJWSAlg;
-		authzJWEAlg = metadata.authzJWEAlg;
-		authzJWEEnc = metadata.authzJWEEnc;
-		requirePAR = metadata.requirePAR;
-		clientRegistrationTypes = metadata.clientRegistrationTypes;
-		organizationName = metadata.organizationName;
-		trustAnchorID = metadata.trustAnchorID;
-		customFields = metadata.customFields;
+		requestObjectURIs = metadata.getRequestObjectURIs();
+		requestObjectJWSAlg = metadata.getRequestObjectJWSAlg();
+		requestObjectJWEAlg = metadata.getRequestObjectJWEAlg();
+		requestObjectJWEEnc = metadata.getRequestObjectJWEEnc();
+		softwareID = metadata.getSoftwareID();
+		softwareVersion = metadata.getSoftwareVersion();
+		softwareStatement = metadata.getSoftwareStatement();
+		tlsClientCertificateBoundAccessTokens = metadata.getTLSClientCertificateBoundAccessTokens();
+		tlsClientAuthSubjectDN = metadata.getTLSClientAuthSubjectDN();
+		tlsClientAuthSanDNS = metadata.getTLSClientAuthSanDNS();
+		tlsClientAuthSanURI = metadata.getTLSClientAuthSanURI();
+		tlsClientAuthSanIP = metadata.getTLSClientAuthSanIP();
+		tlsClientAuthSanEmail = metadata.getTLSClientAuthSanEmail();
+		authzJWSAlg = metadata.getAuthorizationJWSAlg();
+		authzJWEAlg = metadata.getAuthorizationJWEAlg();
+		authzJWEEnc = metadata.getAuthorizationJWEEnc();
+		requirePAR = metadata.requiresPushedAuthorizationRequests();
+		clientRegistrationTypes = metadata.getClientRegistrationTypes();
+		organizationName = metadata.getOrganizationName();
+		trustAnchorID = metadata.getTrustAnchorID();
+		customFields = metadata.getCustomFields();
 	}
 
 
