@@ -22,10 +22,11 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
 
 import static net.jadler.Jadler.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import org.junit.After;
 import org.junit.Before;
@@ -38,6 +39,7 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
+import com.nimbusds.jose.jwk.source.RemoteJWKSet;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.client.ClientMetadata;
@@ -179,6 +181,79 @@ public class SoftwareStatementProcessorTest {
 			assertEquals(uri, out.getURI());
 			assertEquals(4, out.toJSONObject().size());
 		}
+	}
+
+
+	@Test
+	public void testRS256_jwkSetURI_additionalRequiredClaims_iat_jti()
+		throws Exception {
+		
+		Issuer issuer = new Issuer("https://issuer.com");
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		URI redirectURI = URI.create("https://example.com/cb");
+		clientMetadata.setRedirectionURI(redirectURI);
+		
+		ClientMetadata signedClientMetadata = new ClientMetadata();
+		SoftwareID softwareID = new SoftwareID("4NRB1-0XZABZI9E6-5SM3R");
+		signedClientMetadata.setSoftwareID(softwareID);
+		String name = "Example Statement-based Client";
+		signedClientMetadata.setName(name);
+		URI uri = URI.create("https://client.example.net/");
+		signedClientMetadata.setURI(uri);
+		
+		// Missing required iat, jti
+		SignedJWT softwareStatement = new SignedJWT(
+			new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(RSA_JWK.getKeyID()).build(),
+			new JWTClaimsSet.Builder(JWTClaimsSet.parse(signedClientMetadata.toJSONObject()))
+				.issuer(issuer.getValue())
+				.build());
+		softwareStatement.sign(new RSASSASigner(RSA_JWK));
+		clientMetadata.setSoftwareStatement(softwareStatement);
+		
+		URL jwkSetURL = new URL("http://localhost:" + port());
+		
+		onRequest()
+			.havingMethodEqualTo("GET")
+			.respond()
+			.withStatus(200)
+			.withContentType("application/json")
+			.withBody(new JWKSet(RSA_JWK.toPublicJWK()).toString());
+		
+		SoftwareStatementProcessor<?> processor = new SoftwareStatementProcessor<>(
+			issuer,
+			true,
+			Collections.singleton(JWSAlgorithm.RS256),
+			new RemoteJWKSet(jwkSetURL),
+			new HashSet<>(Arrays.asList("iat", "jti")));
+		
+		try {
+			processor.process(clientMetadata);
+			fail();
+		} catch (InvalidSoftwareStatementException e) {
+			assertEquals("Invalid software statement JWT: JWT missing required claims: [iat, jti]", e.getMessage());
+		}
+		
+		
+		// Add required iat, jti
+		softwareStatement = new SignedJWT(
+			new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(RSA_JWK.getKeyID()).build(),
+			new JWTClaimsSet.Builder(JWTClaimsSet.parse(signedClientMetadata.toJSONObject()))
+				.issuer(issuer.getValue())
+				.issueTime(new Date())
+				.jwtID("34f8774a-1ede-45be-9b68-595f91a0ab35")
+				.build());
+		softwareStatement.sign(new RSASSASigner(RSA_JWK));
+		clientMetadata.setSoftwareStatement(softwareStatement);
+		
+		OIDCClientMetadata out = processor.process(clientMetadata);
+		assertEquals(Collections.singleton(redirectURI), out.getRedirectionURIs());
+		assertEquals(softwareID, out.getSoftwareID());
+		assertEquals(name, out.getName());
+		assertEquals(uri, out.getURI());
+		assertNotNull(out.getCustomField("iat"));
+		assertEquals("34f8774a-1ede-45be-9b68-595f91a0ab35", out.getCustomField("jti"));
+		assertEquals(6, out.toJSONObject().size());
 	}
 
 

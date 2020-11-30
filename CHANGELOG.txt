@@ -1531,3 +1531,7 @@ version 8.27 (2020-11-25)
     * Adds SoftwareStatementProcessor for verifying and merging software
       statements in client metadata.
     * ClientMetadata copy constructor switches from fields access to getters.
+
+version 8.28 (2020-11-30)
+    * Adds SoftwareStatementProcessor constructor for specifying additional
+      required claims.

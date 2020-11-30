@@ -20,6 +20,7 @@ package com.nimbusds.openid.connect.sdk.rp.statement;
 
 import java.net.URL;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import net.jcip.annotations.ThreadSafe;
@@ -41,6 +42,7 @@ import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 
@@ -159,7 +161,51 @@ public class SoftwareStatementProcessor <C extends SecurityContext> {
 					  final Set<JWSAlgorithm> jwsAlgs,
 					  final JWKSource<C> jwkSource) {
 		
+		this(issuer, required, jwsAlgs, jwkSource, Collections.<String>emptySet());
+	}
+	
+	
+	/**
+	 * Creates a new software statement processor.
+	 *
+	 * @param issuer                   The expected software statement
+	 *                                 issuer. Must not be {@code null}.
+	 * @param required                 If {@code true} the processed client
+	 *                                 metadata must include a software
+	 *                                 statement and if missing this will
+	 *                                 result in a
+	 *                                 {@code invalid_software_statement}
+	 *                                 error. If {@code false} client
+	 *                                 metadata with missing software
+	 *                                 statement will be returned
+	 *                                 unmodified by the processor.
+	 * @param jwsAlgs                  The expected JWS algorithms of the
+	 *                                 software statements. Must not be
+	 *                                 empty or {@code null}.
+	 * @param jwkSource                The public JWK source to use for
+	 *                                 verifying the software statement
+	 *                                 signatures.
+	 * @param additionalRequiredClaims The names of any additional JWT
+	 *                                 claims other than "iss" (issuer)
+	 *                                 that must be present in the software
+	 *                                 statement, empty or {@code null} if
+	 *                                 none.
+	 */
+	public SoftwareStatementProcessor(final Issuer issuer,
+					  final boolean required,
+					  final Set<JWSAlgorithm> jwsAlgs,
+					  final JWKSource<C> jwkSource,
+					  final Set<String> additionalRequiredClaims) {
+		
 		this.required = required;
+		
+		Set<String> allRequiredClaims = new HashSet<>();
+		allRequiredClaims.add("iss");
+		if (CollectionUtils.isNotEmpty(additionalRequiredClaims)) {
+			for (String claimName: additionalRequiredClaims) {
+				allRequiredClaims.add(claimName);
+			}
+		}
 		
 		processor = new DefaultJWTProcessor<>();
 		processor.setJWSKeySelector(new JWSVerificationKeySelector<>(jwsAlgs, jwkSource));
@@ -167,7 +213,7 @@ public class SoftwareStatementProcessor <C extends SecurityContext> {
 			new JWTClaimsSet.Builder()
 				.issuer(issuer.getValue())
 				.build(),
-			Collections.singleton("iss")));
+			allRequiredClaims));
 	}
 	
 	
