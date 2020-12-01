@@ -28,6 +28,7 @@ import net.minidev.json.JSONObject;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.RemoteKeySourceException;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
@@ -278,6 +279,8 @@ public class SoftwareStatementProcessor <C extends SecurityContext> {
 			statementClaims = processor.process(softwareStatement, context);
 		} catch (BadJOSEException e) {
 			throw new InvalidSoftwareStatementException("Invalid software statement JWT: " + e.getMessage(), e);
+		} catch (RemoteKeySourceException e) {
+			throw new InvalidSoftwareStatementException("Software statement JWT validation failed: " + e.getMessage(), e);
 		}
 		
 		JSONObject mergedMetadataJSONObject = new JSONObject();

@@ -1535,3 +1535,7 @@ version 8.27 (2020-11-25)
 version 8.28 (2020-11-30)
     * Adds SoftwareStatementProcessor constructor for specifying additional
       required claims.
+
+version 8.28.1 (2020-12-01)
+    * SoftwareStatementProcessor must throw InvalidSoftwareStatementException
+      on JWK set URL 404.

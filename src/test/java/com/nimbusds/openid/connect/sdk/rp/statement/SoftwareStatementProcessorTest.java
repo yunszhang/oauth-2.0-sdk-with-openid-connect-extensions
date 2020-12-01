@@ -336,6 +336,57 @@ public class SoftwareStatementProcessorTest {
 
 
 	@Test
+	public void testRS256_jwkSet_404()
+		throws Exception {
+		
+		Issuer issuer = new Issuer("https://issuer.com");
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		URI redirectURI = URI.create("https://example.com/cb");
+		clientMetadata.setRedirectionURI(redirectURI);
+		
+		ClientMetadata signedClientMetadata = new ClientMetadata();
+		SoftwareID softwareID = new SoftwareID("4NRB1-0XZABZI9E6-5SM3R");
+		signedClientMetadata.setSoftwareID(softwareID);
+		String name = "Example Statement-based Client";
+		signedClientMetadata.setName(name);
+		URI uri = URI.create("https://client.example.net/");
+		signedClientMetadata.setURI(uri);
+		
+		SignedJWT softwareStatement = new SignedJWT(
+			new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(RSA_JWK.getKeyID()).build(),
+			new JWTClaimsSet.Builder(JWTClaimsSet.parse(signedClientMetadata.toJSONObject()))
+				.issuer(issuer.getValue())
+				.build());
+		softwareStatement.sign(new RSASSASigner(RSA_JWK));
+		clientMetadata.setSoftwareStatement(softwareStatement);
+		
+		URL jwkSetURL = new URL("http://localhost:" + port());
+		
+		onRequest()
+			.havingMethodEqualTo("GET")
+			.respond()
+			.withStatus(404);
+		
+		SoftwareStatementProcessor processor = new SoftwareStatementProcessor(
+			issuer,
+			true,
+			Collections.singleton(JWSAlgorithm.RS256),
+			jwkSetURL,
+			250,
+			250,
+			10_000);
+		
+		try {
+			processor.process(clientMetadata);
+			fail();
+		} catch (InvalidSoftwareStatementException e) {
+			assertEquals("Software statement JWT validation failed: Couldn't retrieve remote JWK set: http://localhost:" + port(), e.getMessage());
+		}
+	}
+
+
+	@Test
 	public void testRS256_jwkSet_issuerChecks()
 		throws Exception {
 		
