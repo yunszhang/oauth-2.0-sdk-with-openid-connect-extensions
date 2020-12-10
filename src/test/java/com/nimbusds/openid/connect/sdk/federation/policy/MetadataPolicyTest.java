@@ -369,4 +369,156 @@ public class MetadataPolicyTest extends TestCase {
 		
 		assertEquals(expectedEndMetadata, endMetadata);
 	}
+	
+	
+	public void testParseInterOpExample_OP() throws ParseException, PolicyViolationException {
+		
+		String policySpec = "{" +
+			"  \"token_endpoint_auth_signing_alg_values_supported\": {" +
+			"    \"default\": [" +
+			"      \"ES256\"" +
+			"    ]," +
+			"    \"subset_of\": [" +
+			"      \"ES256\"," +
+			"      \"ES384\"," +
+			"      \"ES512\"" +
+			"    ]" +
+			"  }," +
+			"  \"userinfo_signing_alg_values_supported\": {" +
+			"    \"default\": [" +
+			"      \"ES256\"" +
+			"    ]," +
+			"    \"subset_of\": [" +
+			"      \"ES256\"," +
+			"      \"ES384\"," +
+			"      \"ES512\"" +
+			"    ]" +
+			"  }," +
+			"  \"id_token_signing_alg_values_supported\": {" +
+			"    \"default\": [" +
+			"      \"ES256\"" +
+			"    ]," +
+			"    \"subset_of\": [" +
+			"      \"ES256\"," +
+			"      \"ES384\"," +
+			"      \"ES512\"" +
+			"    ]" +
+			"  }," +
+			"  \"token_endpoint_auth_methods_supported\": {" +
+			"    \"value\": [" +
+			"      \"private_key_jwt\"" +
+			"    ]" +
+			"  }," +
+			"  \"contacts\": {" +
+			"    \"add\": \"operations@feide.no\"" +
+			"  }" +
+			"}";
+		
+		MetadataPolicy.parse(policySpec);
+		
+		MetadataPolicy policy = MetadataPolicy.parse(policySpec);
+		
+		MetadataPolicyEntry en;
+		JSONObject expected;
+		
+		en = policy.getEntry("token_endpoint_auth_signing_alg_values_supported");
+		expected = new JSONObject();
+		expected.put("default", Collections.singletonList("ES256"));
+		expected.put("subset_of", Arrays.asList("ES256", "ES384", "ES512"));
+		assertEquals(expected, en.toJSONObject());
+		
+		en = policy.getEntry("userinfo_signing_alg_values_supported");
+		expected = new JSONObject();
+		expected.put("default", Collections.singletonList("ES256"));
+		expected.put("subset_of", Arrays.asList("ES256", "ES384", "ES512"));
+		assertEquals(expected, en.toJSONObject());
+		
+		en = policy.getEntry("id_token_signing_alg_values_supported");
+		expected = new JSONObject();
+		expected.put("default", Collections.singletonList("ES256"));
+		expected.put("subset_of", Arrays.asList("ES256", "ES384", "ES512"));
+		assertEquals(expected, en.toJSONObject());
+		
+		en = policy.getEntry("token_endpoint_auth_methods_supported");
+		expected = new JSONObject();
+		expected.put("value", Collections.singletonList("private_key_jwt"));
+		assertEquals(expected, en.toJSONObject());
+		
+		en = policy.getEntry("contacts");
+		expected = new JSONObject();
+		expected.put("add", "operations@feide.no");
+		assertEquals(expected, en.toJSONObject());
+		
+		assertEquals(5, policy.entrySet().size());
+	}
+	
+	
+	public void testParseInterOpExample_RP() throws ParseException, PolicyViolationException {
+		
+		String policySpec = "{" +
+			"  \"token_endpoint_auth_signing_alg\": {" +
+			"    \"default\": \"ES256\"," +
+			"    \"one_of\": [" +
+			"      \"ES256\"," +
+			"      \"ES384\"," +
+			"      \"ES512\"" +
+			"    ]" +
+			"  }," +
+			"  \"request_object_signing_alg\": {" +
+			"    \"default\": \"ES256\"," +
+			"    \"one_of\": [" +
+			"      \"ES256\"," +
+			"      \"ES384\"," +
+			"      \"ES512\"" +
+			"    ]" +
+			"  }," +
+			"  \"userinfo_signed_response_alg\": {" +
+			"    \"default\": \"ES256\"," +
+			"    \"one_of\": [" +
+			"      \"ES256\"," +
+			"      \"ES384\"," +
+			"      \"ES512\"" +
+			"    ]" +
+			"  }," +
+			"  \"id_token_signed_response_alg\": {" +
+			"    \"default\": \"ES256\"," +
+			"    \"one_of\": [" +
+			"      \"ES256\"," +
+			"      \"ES384\"," +
+			"      \"ES512\"" +
+			"    ]" +
+			"  }" +
+			"}";
+		
+		MetadataPolicy policy = MetadataPolicy.parse(policySpec);
+		
+		MetadataPolicyEntry en;
+		JSONObject expected;
+		
+		en = policy.getEntry("token_endpoint_auth_signing_alg");
+		expected = new JSONObject();
+		expected.put("default", "ES256");
+		expected.put("one_of", Arrays.asList("ES256", "ES384", "ES512"));
+		assertEquals(expected, en.toJSONObject());
+		
+		en = policy.getEntry("request_object_signing_alg");
+		expected = new JSONObject();
+		expected.put("default", "ES256");
+		expected.put("one_of", Arrays.asList("ES256", "ES384", "ES512"));
+		assertEquals(expected, en.toJSONObject());
+		
+		en = policy.getEntry("userinfo_signed_response_alg");
+		expected = new JSONObject();
+		expected.put("default", "ES256");
+		expected.put("one_of", Arrays.asList("ES256", "ES384", "ES512"));
+		assertEquals(expected, en.toJSONObject());
+		
+		en = policy.getEntry("id_token_signed_response_alg");
+		expected = new JSONObject();
+		expected.put("default", "ES256");
+		expected.put("one_of", Arrays.asList("ES256", "ES384", "ES512"));
+		assertEquals(expected, en.toJSONObject());
+		
+		assertEquals(4, policy.entrySet().size());
+	}
 }
