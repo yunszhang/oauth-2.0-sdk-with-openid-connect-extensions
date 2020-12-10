@@ -341,6 +341,9 @@ public class MetadataPolicyEntry implements Map.Entry<String, List<PolicyOperati
 		
 		for (String opName: entrySpec.keySet()) {
 			PolicyOperation op = factory.createForName(new OperationName(opName));
+			if (op == null) {
+				throw new PolicyViolationException("Unsupported policy operation: " + opName);
+			}
 			op.parseConfiguration(entrySpec.get(opName));
 			policyOperations.add(op);
 		}

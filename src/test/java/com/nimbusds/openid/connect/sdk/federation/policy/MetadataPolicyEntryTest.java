@@ -263,4 +263,21 @@ public class MetadataPolicyEntryTest extends TestCase {
 			assertEquals("The entry spec must not be null", e.getMessage());
 		}
 	}
+	
+	
+	public void testParse_entryUnsupportedPolicyName()
+		throws ParseException {
+		
+		String unsupportedPolicyName = "policy-abc";
+		
+		JSONObject entrySpec = new JSONObject();
+		entrySpec.put(unsupportedPolicyName, "123");
+		
+		try {
+			MetadataPolicyEntry.parse("scope", entrySpec, MetadataPolicyEntry.DEFAULT_POLICY_OPERATION_FACTORY, MetadataPolicyEntry.DEFAULT_POLICY_COMBINATION_VALIDATOR);
+			fail();
+		} catch (PolicyViolationException e) {
+			assertEquals("Unsupported policy operation: " + unsupportedPolicyName, e.getMessage());
+		}
+	}
 }
