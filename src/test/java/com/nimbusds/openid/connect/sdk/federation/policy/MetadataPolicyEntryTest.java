@@ -251,4 +251,16 @@ public class MetadataPolicyEntryTest extends TestCase {
 			assertEquals("The parameter name of the other policy doesn't match: contacts", e.getMessage());
 		}
 	}
+	
+	
+	public void testParse_entrySpecMustNotBeNull()
+		throws ParseException, PolicyViolationException {
+		
+		try {
+			MetadataPolicyEntry.parse("scope", null, MetadataPolicyEntry.DEFAULT_POLICY_OPERATION_FACTORY, MetadataPolicyEntry.DEFAULT_POLICY_COMBINATION_VALIDATOR);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The entry spec must not be null", e.getMessage());
+		}
+	}
 }

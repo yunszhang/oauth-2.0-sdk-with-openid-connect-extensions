@@ -1539,3 +1539,7 @@ version 8.28 (2020-11-30)
 version 8.28.1 (2020-12-01)
     * SoftwareStatementProcessor must throw InvalidSoftwareStatementException
       on JWK set URL 404.
+
+version 8.28.2 (2020-12-10)
+    * MetadataPolicyEntry.parse throws IllegalArgumentException instead of NPE
+      on null entry spec JSON object.

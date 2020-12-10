@@ -333,6 +333,10 @@ public class MetadataPolicyEntry implements Map.Entry<String, List<PolicyOperati
 						final PolicyOperationCombinationValidator combinationValidator)
 		throws ParseException, PolicyViolationException {
 		
+		if (entrySpec == null) {
+			throw new IllegalArgumentException("The entry spec must not be null");
+		}
+		
 		List<PolicyOperation> policyOperations = new LinkedList<>();
 		
 		for (String opName: entrySpec.keySet()) {
