@@ -608,4 +608,166 @@ public class EntityStatementClaimsSetTest extends TestCase {
 		
 		assertNull(stmt.getMetadataPolicyJSONObject());
 	}
+	
+	
+	public void testParseInteropExample() throws java.text.ParseException, ParseException, PolicyViolationException {
+		
+		String json = "{" +
+			"  \"sub\": \"https://federation.catalogix.se:4002/eid/lu.se\"," +
+			"  \"jwks\": {" +
+			"    \"keys\": [" +
+			"      {" +
+			"        \"kty\": \"RSA\"," +
+			"        \"e\": \"AQAB\"," +
+			"        \"use\": \"sig\"," +
+			"        \"kid\": \"SzhWamJCUnJtQy16THpuT0pOYlc1bGlid0FyTlR0RXJIb3pYTUUxVGp1Zw\"," +
+			"        \"n\": \"tgUdKJM7Ddi0cfyH0eVI94r-UMfXX4NLm_FblI2hScYomlp6RdcPeja5GZADUldLTz2x2fuhviqt5oL5uN26d7DV-MBel4wMpN0SuIcLhSvJM0gs3lQhy74uMOgKzgRhpOoAmybnlPQccUzmRnTyJFBG9E6Xr4pF-RH60G7zfJLXPUN71K21twfc2urbfqj9kr3jjFt_bo4g4NIb8N3QSSaF3fpFRRlI1MQyiim3KCPlL2lgI1UEzfGWrA4CnEDeYFg-pDBjKlnEeud7IiO3VEk26mP9IdSHeFDNs9oimfKjDE7R5Yokhls1GvX7Oz0zmEuVCpsA4aBuDbWdkqNdCw\"" +
+			"      }," +
+			"      {" +
+			"        \"kty\": \"EC\"," +
+			"        \"use\": \"sig\"," +
+			"        \"crv\": \"P-256\"," +
+			"        \"kid\": \"bE5rd2VkcnJXc2hKX3lBaEU4VGQ3M0tuZVZob252c3hnSW1KTmJ1RmFBbw\"," +
+			"        \"x\": \"YCdN_RkzgzdXf9jKb5DMOqm8Sw96pCwNYXekMjrrE0Y\"," +
+			"        \"y\": \"gZQvZl8i71CL5HN8YY_Jakcj7Czx-yM_hIPanjuF6SQ\"" +
+			"      }" +
+			"    ]" +
+			"  }," +
+			"  \"metadata_policy\": {" +
+			"    \"openid_provider\": {" +
+			"      \"token_endpoint_auth_signing_alg_values_supported\": {" +
+			"        \"default\": [" +
+			"          \"ES256\"" +
+			"        ]," +
+			"        \"subset_of\": [" +
+			"          \"ES256\"," +
+			"          \"ES384\"," +
+			"          \"ES512\"" +
+			"        ]" +
+			"      }," +
+			"      \"userinfo_signing_alg_values_supported\": {" +
+			"        \"default\": [" +
+			"          \"ES256\"" +
+			"        ]," +
+			"        \"subset_of\": [" +
+			"          \"ES256\"," +
+			"          \"ES384\"," +
+			"          \"ES512\"" +
+			"        ]" +
+			"      }," +
+			"      \"id_token_signing_alg_values_supported\": {" +
+			"        \"default\": [" +
+			"          \"ES256\"" +
+			"        ]," +
+			"        \"subset_of\": [" +
+			"          \"ES256\"," +
+			"          \"ES384\"," +
+			"          \"ES512\"" +
+			"        ]" +
+			"      }," +
+			"      \"token_endpoint_auth_methods_supported\": {" +
+			"        \"default\": [" +
+			"          \"ES256\"" +
+			"        ]," +
+			"        \"subset_of\": [" +
+			"          \"client_secret_jwt\"," +
+			"          \"private_key_jwt\"" +
+			"        ]" +
+			"      }," +
+			"      \"contacts\": {" +
+			"        \"add\": \"operations@feide.no\"" +
+			"      }" +
+			"    }," +
+			"    \"openid_relying_party\": {" +
+			"      \"token_endpoint_auth_signing_alg\": {" +
+			"        \"default\": \"ES256\"," +
+			"        \"one_of\": [" +
+			"          \"ES256\"," +
+			"          \"ES384\"," +
+			"          \"ES512\"" +
+			"        ]" +
+			"      }," +
+			"      \"request_object_signing_alg\": {" +
+			"        \"default\": \"ES256\"," +
+			"        \"one_of\": [" +
+			"          \"ES256\"," +
+			"          \"ES384\"," +
+			"          \"ES512\"" +
+			"        ]" +
+			"      }," +
+			"      \"userinfo_signed_response_alg\": {" +
+			"        \"default\": \"ES256\"," +
+			"        \"one_of\": [" +
+			"          \"ES256\"," +
+			"          \"ES384\"," +
+			"          \"ES512\"" +
+			"        ]" +
+			"      }," +
+			"      \"id_token_signed_response_alg\": {" +
+			"        \"default\": \"ES256\"," +
+			"        \"one_of\": [" +
+			"          \"ES256\"," +
+			"          \"ES384\"," +
+			"          \"ES512\"" +
+			"        ]" +
+			"      }" +
+			"    }" +
+			"  }," +
+			"  \"iss\": \"https://federation.catalogix.se:4002/eid/feide.no\"," +
+			"  \"authority_hints\": [" +
+			"    \"https://federation.catalogix.se:4002/eid/feide.no\"" +
+			"  ]," +
+			"  \"exp\": 1607715732," +
+			"  \"constraints\": {" +
+			"    \"max_path_length\": 1" +
+			"  }," +
+			"  \"iat\": 1607629332" +
+			"}";
+		
+		JSONObject jsonObject = JSONObjectUtils.parse(json);
+		
+		EntityStatementClaimsSet claimsSet = new EntityStatementClaimsSet(JWTClaimsSet.parse(jsonObject));
+		
+		assertEquals(jsonObject, claimsSet.toJSONObject());
+		
+		MetadataPolicy metadataRPPolicy = claimsSet.getMetadataPolicy(FederationMetadataType.OPENID_RELYING_PARTY);
+		
+		JSONObject expectedMetadataRPPolicyJSONObject = JSONObjectUtils.parse(
+			"{" +
+			"  \"token_endpoint_auth_signing_alg\": {" +
+			"    \"default\": \"ES256\"," +
+			"    \"one_of\": [" +
+			"      \"ES256\"," +
+			"      \"ES384\"," +
+			"      \"ES512\"" +
+			"    ]" +
+			"  }," +
+			"  \"request_object_signing_alg\": {" +
+			"    \"default\": \"ES256\"," +
+			"    \"one_of\": [" +
+			"      \"ES256\"," +
+			"      \"ES384\"," +
+			"      \"ES512\"" +
+			"    ]" +
+			"  }," +
+			"  \"userinfo_signed_response_alg\": {" +
+			"    \"default\": \"ES256\"," +
+			"    \"one_of\": [" +
+			"      \"ES256\"," +
+			"      \"ES384\"," +
+			"      \"ES512\"" +
+			"    ]" +
+			"  }," +
+			"  \"id_token_signed_response_alg\": {" +
+			"    \"default\": \"ES256\"," +
+			"    \"one_of\": [" +
+			"      \"ES256\"," +
+			"      \"ES384\"," +
+			"      \"ES512\"" +
+			"    ]" +
+			"  }" +
+			"}");
+		
+		assertEquals(expectedMetadataRPPolicyJSONObject, metadataRPPolicy.toJSONObject());
+	}
 }
