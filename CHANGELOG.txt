@@ -1545,3 +1545,7 @@ version 8.28.2 (2020-12-10)
       on null entry spec JSON object.
     * MetadataPolicyEntry.parse must throw PolicyViolationException on
       unsupported policy name.
+
+version 8.28.3 (2020-12-10)
+    * Fixes TrustChain.resolveCombinedMetadataPolicy (iss #328).
+

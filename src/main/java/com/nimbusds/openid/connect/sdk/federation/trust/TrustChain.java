@@ -38,6 +38,7 @@ import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
+import com.nimbusds.openid.connect.sdk.federation.entities.FederationMetadataType;
 import com.nimbusds.openid.connect.sdk.federation.policy.MetadataPolicy;
 import com.nimbusds.openid.connect.sdk.federation.policy.MetadataPolicyEntry;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
@@ -177,45 +178,50 @@ public final class TrustChain {
 	 * {@link DefaultPolicyOperationCombinationValidator default policy
 	 * combination validator}.
 	 *
+	 * @param type The metadata type, such as {@code openid_relying_party}.
+	 *             Must not be {@code null}.
+	 *
 	 * @return The combined metadata policy, with no policy operations if
 	 *         no policies were found.
 	 *
-	 * @throws ParseException           On a policy parse exception.
 	 * @throws PolicyViolationException On a policy violation exception.
 	 */
-	public MetadataPolicy resolveCombinedMetadataPolicy()
-		throws ParseException, PolicyViolationException {
+	public MetadataPolicy resolveCombinedMetadataPolicy(final FederationMetadataType type)
+		throws PolicyViolationException {
 		
-		return resolveCombinedMetadataPolicy(MetadataPolicyEntry.DEFAULT_POLICY_COMBINATION_VALIDATOR);
+		return resolveCombinedMetadataPolicy(type, MetadataPolicyEntry.DEFAULT_POLICY_COMBINATION_VALIDATOR);
 	}
 	
 	
 	/**
 	 * Resolves the combined metadata policy for this trust chain.
 	 *
+	 * @param type                 The metadata type, such as
+	 *                             {@code openid_relying_party}. Must not
+	 *                             be {@code null}.
 	 * @param combinationValidator The policy operation combination
 	 *                             validator. Must not be {@code null}.
 	 *
 	 * @return The combined metadata policy, with no policy operations if
 	 *         no policies were found.
 	 *
-	 * @throws ParseException           On a policy parse exception.
 	 * @throws PolicyViolationException On a policy violation exception.
 	 */
-	public MetadataPolicy resolveCombinedMetadataPolicy(final PolicyOperationCombinationValidator combinationValidator)
-		throws ParseException, PolicyViolationException {
+	public MetadataPolicy resolveCombinedMetadataPolicy(final FederationMetadataType type,
+							    final PolicyOperationCombinationValidator combinationValidator)
+		throws PolicyViolationException {
 		
 		List<MetadataPolicy> policies = new LinkedList<>();
 		
 		for (EntityStatement stmt: getSuperiorStatements()) {
 			
-			JSONObject jsonObject = stmt.getClaimsSet().getMetadataPolicyJSONObject();
+			MetadataPolicy metadataPolicy = stmt.getClaimsSet().getMetadataPolicy(type);
 			
-			if (jsonObject == null) {
+			if (metadataPolicy == null) {
 				continue;
 			}
 			
-			policies.add(MetadataPolicy.parse(jsonObject));
+			policies.add(metadataPolicy);
 		}
 		
 		return MetadataPolicy.combine(policies, combinationValidator);

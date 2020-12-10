@@ -22,6 +22,7 @@ import java.net.URI;
 import java.util.*;
 
 import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -38,12 +39,18 @@ import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatement;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityStatementClaimsSet;
+import com.nimbusds.openid.connect.sdk.federation.entities.FederationMetadataType;
 import com.nimbusds.openid.connect.sdk.federation.policy.MetadataPolicy;
+import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyOperation;
 import com.nimbusds.openid.connect.sdk.federation.policy.language.PolicyViolationException;
+import com.nimbusds.openid.connect.sdk.federation.policy.operations.AddOperation;
+import com.nimbusds.openid.connect.sdk.federation.policy.operations.DefaultOperation;
+import com.nimbusds.openid.connect.sdk.federation.policy.operations.OneOfOperation;
 import com.nimbusds.openid.connect.sdk.federation.policy.operations.SubsetOfOperation;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
@@ -190,7 +197,8 @@ public class TrustChainTest extends TestCase {
 		
 		assertEquals(1, trustChain.length());
 		
-		assertTrue(trustChain.resolveCombinedMetadataPolicy().entrySet().isEmpty());
+		assertTrue(trustChain.resolveCombinedMetadataPolicy(FederationMetadataType.OPENID_PROVIDER).entrySet().isEmpty());
+		assertTrue(trustChain.resolveCombinedMetadataPolicy(FederationMetadataType.OPENID_RELYING_PARTY).entrySet().isEmpty());
 	}
 	
 	
@@ -235,7 +243,8 @@ public class TrustChainTest extends TestCase {
 		
 		assertEquals(2, trustChain.length());
 		
-		assertTrue(trustChain.resolveCombinedMetadataPolicy().entrySet().isEmpty());
+		assertTrue(trustChain.resolveCombinedMetadataPolicy(FederationMetadataType.OPENID_PROVIDER).entrySet().isEmpty());
+		assertTrue(trustChain.resolveCombinedMetadataPolicy(FederationMetadataType.OPENID_RELYING_PARTY).entrySet().isEmpty());
 	}
 	
 	
@@ -411,18 +420,66 @@ public class TrustChainTest extends TestCase {
 	}
 	
 	
-	public void testResolveMetadataPolicy() throws JOSEException, BadJOSEException, ParseException, PolicyViolationException {
+	public void testResolveMetadataPolicy_simple() throws JOSEException, BadJOSEException, PolicyViolationException {
 		
-		MetadataPolicy policy = new MetadataPolicy();
-		SubsetOfOperation subsetOfOperation = new SubsetOfOperation();
-		subsetOfOperation.configure(Collections.singletonList("scopes"));
-		policy.put("scopes", subsetOfOperation);
-		
+		// Leaf OP self
 		EntityStatementClaimsSet leafClaims = createOPSelfStatementClaimsSet(ANCHOR_ENTITY_ID);
 		EntityStatement leafStmt = EntityStatement.sign(leafClaims, OP_RSA_JWK);
 		
+		// Anchor about OP
 		EntityStatementClaimsSet anchorClaimsAboutLeaf = createOPStatementClaimsSet(new Issuer(ANCHOR_ENTITY_ID.getValue()), ANCHOR_ENTITY_ID);
-		anchorClaimsAboutLeaf.setMetadataPolicyJSONObject(policy.toJSONObject());
+		
+		MetadataPolicy opMetadataPolicy = new MetadataPolicy();
+		List<PolicyOperation> opsList = new LinkedList<>();
+		DefaultOperation defaultOperation = new DefaultOperation();
+		defaultOperation.configure(Collections.singletonList("ES256"));
+		opsList.add(defaultOperation);
+		SubsetOfOperation subsetOfOperation = new SubsetOfOperation();
+		subsetOfOperation.configure(Arrays.asList("ES256", "ES384", "ES512"));
+		opsList.add(subsetOfOperation);
+		opMetadataPolicy.put("id_token_signing_alg_values_supported", opsList);
+		
+		MetadataPolicy rpMetadataPolicy = new MetadataPolicy();
+		opsList = new LinkedList<>();
+		defaultOperation = new DefaultOperation();
+		defaultOperation.configure("ES256");
+		opsList.add(defaultOperation);
+		OneOfOperation oneOfOperation = new OneOfOperation();
+		oneOfOperation.configure(Arrays.asList("ES256", "ES384", "ES512"));
+		opsList.add(oneOfOperation);
+		rpMetadataPolicy.put("id_token_signed_response_alg", opsList);
+		
+		
+		JSONObject metadataPolicyJSONObject = new JSONObject();
+		metadataPolicyJSONObject.put("openid_provider", opMetadataPolicy.toJSONObject());
+		metadataPolicyJSONObject.put("openid_relying_party", rpMetadataPolicy.toJSONObject());
+		
+		//   "metadata_policy": {
+		//    "openid_provider": {
+		//      "id_token_signing_alg_values_supported": {
+		//        "default": [
+		//          "ES256"
+		//        ],
+		//        "subset_of": [
+		//          "ES256",
+		//          "ES384",
+		//          "ES512"
+		//        ]
+		//      }
+		//    },
+		//    "openid_relying_party": {
+		//      "id_token_signed_response_alg": {
+		//        "default": "ES256",
+		//        "one_of": [
+		//          "ES256",
+		//          "ES384",
+		//          "ES512"
+		//        ]
+		//      }
+		//    }
+		//  },
+		
+		anchorClaimsAboutLeaf.setMetadataPolicyJSONObject(metadataPolicyJSONObject);
 		EntityStatement anchorStmtAboutLeaf = EntityStatement.sign(anchorClaimsAboutLeaf, ANCHOR_RSA_JWK);
 		
 		List<EntityStatement> superiorStatements = Collections.singletonList(anchorStmtAboutLeaf);
@@ -435,6 +492,133 @@ public class TrustChainTest extends TestCase {
 		
 		trustChain.verifySignatures(ANCHOR_JWK_SET);
 		
-		assertEquals(policy.toJSONObject(), trustChain.resolveCombinedMetadataPolicy().toJSONObject());
+		assertEquals(opMetadataPolicy.toJSONObject(), trustChain.resolveCombinedMetadataPolicy(FederationMetadataType.OPENID_PROVIDER).toJSONObject());
+		assertEquals(rpMetadataPolicy.toJSONObject(), trustChain.resolveCombinedMetadataPolicy(FederationMetadataType.OPENID_RELYING_PARTY).toJSONObject());
+		assertTrue(trustChain.resolveCombinedMetadataPolicy(FederationMetadataType.FEDERATION_ENTITY).toJSONObject().isEmpty());
+		assertTrue(trustChain.resolveCombinedMetadataPolicy(FederationMetadataType.OAUTH_AUTHORIZATION_SERVER).toJSONObject().isEmpty());
+		assertTrue(trustChain.resolveCombinedMetadataPolicy(FederationMetadataType.OAUTH_CLIENT).toJSONObject().isEmpty());
+		assertTrue(trustChain.resolveCombinedMetadataPolicy(FederationMetadataType.OAUTH_RESOURCE).toJSONObject().isEmpty());
+	}
+	
+	
+	public void testResolveMetadataPolicy_withIntermediate() throws JOSEException, BadJOSEException, PolicyViolationException, ParseException {
+		
+		// Leaf OP about self
+		EntityStatementClaimsSet leafClaims = createOPSelfStatementClaimsSet(INTERMEDIATE_ENTITY_ID);
+		EntityStatement leafStmt = EntityStatement.sign(leafClaims, OP_RSA_JWK);
+		
+		// Intermediate about OP
+		EntityStatementClaimsSet intermediateClaimsAboutLeaf = createOPStatementClaimsSet(new Issuer(INTERMEDIATE_ENTITY_ID), INTERMEDIATE_ENTITY_ID);
+		
+		MetadataPolicy opMetadataPolicy = new MetadataPolicy();
+		List<PolicyOperation> opsList = new LinkedList<>();
+		DefaultOperation defaultOperation = new DefaultOperation();
+		defaultOperation.configure(Collections.singletonList("ES256"));
+		opsList.add(defaultOperation);
+		SubsetOfOperation subsetOfOperation = new SubsetOfOperation();
+		subsetOfOperation.configure(Arrays.asList("ES256", "ES384", "ES512"));
+		opsList.add(subsetOfOperation);
+		opMetadataPolicy.put("id_token_signing_alg_values_supported", opsList);
+		
+		MetadataPolicy rpMetadataPolicy = new MetadataPolicy();
+		opsList = new LinkedList<>();
+		defaultOperation = new DefaultOperation();
+		defaultOperation.configure("ES256");
+		opsList.add(defaultOperation);
+		OneOfOperation oneOfOperation = new OneOfOperation();
+		oneOfOperation.configure(Arrays.asList("ES256", "ES384", "ES512"));
+		opsList.add(oneOfOperation);
+		rpMetadataPolicy.put("id_token_signed_response_alg", opsList);
+		
+		
+		JSONObject metadataPolicyJSONObject = new JSONObject();
+		metadataPolicyJSONObject.put("openid_provider", opMetadataPolicy.toJSONObject());
+		metadataPolicyJSONObject.put("openid_relying_party", rpMetadataPolicy.toJSONObject());
+		
+		//   "metadata_policy": {
+		//    "openid_provider": {
+		//      "id_token_signing_alg_values_supported": {
+		//        "default": [
+		//          "ES256"
+		//        ],
+		//        "subset_of": [
+		//          "ES256",
+		//          "ES384",
+		//          "ES512"
+		//        ]
+		//      }
+		//    },
+		//    "openid_relying_party": {
+		//      "id_token_signed_response_alg": {
+		//        "default": "ES256",
+		//        "one_of": [
+		//          "ES256",
+		//          "ES384",
+		//          "ES512"
+		//        ]
+		//      }
+		//    }
+		//  },
+		
+		intermediateClaimsAboutLeaf.setMetadataPolicyJSONObject(metadataPolicyJSONObject);
+		
+		EntityStatement intermediateStmtAboutLeaf = EntityStatement.sign(intermediateClaimsAboutLeaf, INTERMEDIATE_RSA_JWK);
+		
+		EntityStatementClaimsSet anchorClaimsAboutIntermediate = createIntermediateStatementClaimsSet(ANCHOR_ENTITY_ID);
+		
+		opMetadataPolicy = new MetadataPolicy();
+		opsList = new LinkedList<>();
+		AddOperation addOperation = new AddOperation();
+		addOperation.configure("support@federation.example.com");
+		opsList.add(addOperation);
+		opMetadataPolicy.put("contacts", opsList);
+		
+		metadataPolicyJSONObject = new JSONObject();
+		metadataPolicyJSONObject.put("openid_provider", opMetadataPolicy.toJSONObject());
+		
+		// {
+		//  "openid_provider": {
+		//    "contacts": {
+		//      "add": "support@federation.example.com"
+		//    }
+		//  }
+		//}
+		
+		anchorClaimsAboutIntermediate.setMetadataPolicyJSONObject(metadataPolicyJSONObject);
+		
+		EntityStatement anchorStmtAboutIntermediate = EntityStatement.sign(anchorClaimsAboutIntermediate, ANCHOR_RSA_JWK);
+		
+		List<EntityStatement> superiorStatements = Arrays.asList(intermediateStmtAboutLeaf, anchorStmtAboutIntermediate);
+		TrustChain trustChain = new TrustChain(leafStmt, superiorStatements);
+		
+		assertEquals(leafStmt, trustChain.getLeafSelfStatement());
+		assertEquals(superiorStatements, trustChain.getSuperiorStatements());
+		
+		assertEquals(ANCHOR_ENTITY_ID, trustChain.getTrustAnchorEntityID());
+		
+		trustChain.verifySignatures(ANCHOR_JWK_SET);
+		
+		String expectedCombinedOPMetadataPolicyJSON = "{" +
+			"  \"id_token_signing_alg_values_supported\": {" +
+			"    \"default\": [" +
+			"      \"ES256\"" +
+			"    ]," +
+			"    \"subset_of\": [" +
+			"      \"ES256\"," +
+			"      \"ES384\"," +
+			"      \"ES512\"" +
+			"    ]" +
+			"  }," +
+			"  \"contacts\": {" +
+			"    \"add\": \"support@federation.example.com\"" +
+			"  }" +
+			"}";
+		
+		assertEquals(JSONObjectUtils.parse(expectedCombinedOPMetadataPolicyJSON), trustChain.resolveCombinedMetadataPolicy(FederationMetadataType.OPENID_PROVIDER).toJSONObject());
+		assertEquals(rpMetadataPolicy.toJSONObject(), trustChain.resolveCombinedMetadataPolicy(FederationMetadataType.OPENID_RELYING_PARTY).toJSONObject());
+		assertTrue(trustChain.resolveCombinedMetadataPolicy(FederationMetadataType.FEDERATION_ENTITY).toJSONObject().isEmpty());
+		assertTrue(trustChain.resolveCombinedMetadataPolicy(FederationMetadataType.OAUTH_AUTHORIZATION_SERVER).toJSONObject().isEmpty());
+		assertTrue(trustChain.resolveCombinedMetadataPolicy(FederationMetadataType.OAUTH_CLIENT).toJSONObject().isEmpty());
+		assertTrue(trustChain.resolveCombinedMetadataPolicy(FederationMetadataType.OAUTH_RESOURCE).toJSONObject().isEmpty());
 	}
 }
