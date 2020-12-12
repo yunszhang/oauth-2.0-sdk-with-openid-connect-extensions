@@ -521,4 +521,45 @@ public class MetadataPolicyTest extends TestCase {
 		
 		assertEquals(4, policy.entrySet().size());
 	}
+	
+	
+	// TODO incomplete
+	public void testValueOverridesAll()
+		throws PolicyViolationException {
+		
+		MetadataPolicy policy = new MetadataPolicy();
+		
+		ValueOperation valueOp = new ValueOperation();
+		valueOp.configure("ES256");
+		
+		// value only
+		policy.put("id_token_signed_response_alg", valueOp);
+		
+		// value ON empty metadata
+		JSONObject metadata = new JSONObject();
+		
+		JSONObject out = policy.apply(metadata);
+		assertEquals("ES256", out.get("id_token_signed_response_alg"));
+		assertEquals(1, out.size());
+		
+		// value - set metadata
+		metadata = new JSONObject();
+		metadata.put("id_token_signed_response_alg", "RS256");
+		out = policy.apply(metadata);
+		assertEquals("ES256", out.get("id_token_signed_response_alg"));
+		assertEquals(1, out.size());
+		
+		// value + default
+		DefaultOperation defaultOp = new DefaultOperation();
+		defaultOp.configure("PS256");
+		
+		policy.put("id_token_signed_response_alg", Arrays.asList((PolicyOperation) defaultOp, valueOp));
+		
+		// value + default ON empty metadata
+		metadata = new JSONObject();
+		
+		out = policy.apply(metadata);
+		assertEquals("ES256", out.get("id_token_signed_response_alg"));
+		assertEquals(1, out.size());
+	}
 }

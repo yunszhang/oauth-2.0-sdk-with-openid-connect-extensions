@@ -89,7 +89,7 @@ public class MetadataPolicy implements JSONAware {
 		
 		JSONObject out = new JSONObject();
 		
-		// Copy params not subject by policy
+		// Copy params not subject to policy
 		for (String key: metadata.keySet()) {
 			if (! entries.containsKey(key)) {
 				out.put(key, metadata.get(key));
