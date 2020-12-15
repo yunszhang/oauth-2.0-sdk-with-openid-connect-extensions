@@ -136,6 +136,14 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	
 	
 	/**
+	 * The assumed trust anchor in a explicit client registration. Intended
+	 * for entity statements issued by an OP for RP performing explicit
+	 * client registration only.
+	 */
+	public static final String TRUST_ANCHOR_ID_CLAIM_NAME = "trust_anchor_id";
+	
+	
+	/**
 	 * The constraints claim name.
 	 */
 	public static final String CONSTRAINTS_CLAIM_NAME = "constraints";
@@ -710,6 +718,47 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 			o = null;
 		}
 		setMetadataPolicyJSONObject(o);
+	}
+	
+	
+	/**
+	 * Gets the used trust anchor in a explicit client registration in
+	 * OpenID Connect Federation 1.0. Intended for entity statements issued
+	 * by an OpenID provider for a Relying party performing explicit client
+	 * registration only.Corresponds to the {@code trust_anchor_id} client
+	 * metadata field.
+	 *
+	 * @return The trust anchor ID, {@code null} if not specified.
+	 */
+	public EntityID getTrustAnchorID() {
+		
+		String value = getStringClaim(TRUST_ANCHOR_ID_CLAIM_NAME);
+		
+		try {
+			return EntityID.parse(value);
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Sets the used trust anchor in a explicit client registration in
+	 * OpenID Connect Federation 1.0. Intended for entity statements issued
+	 * by an OpenID provider for a Relying party performing explicit client
+	 * registration only.Corresponds to the {@code trust_anchor_id} client
+	 * metadata field.
+	 *
+	 * @param trustAnchorID The trust anchor ID, {@code null} if not
+	 *                      specified.
+	 */
+	public void setTrustAnchorID(final EntityID trustAnchorID) {
+		
+		if (trustAnchorID != null) {
+			setClaim(TRUST_ANCHOR_ID_CLAIM_NAME, trustAnchorID.getValue());
+		} else {
+			setClaim(TRUST_ANCHOR_ID_CLAIM_NAME, null);
+		}
 	}
 	
 	

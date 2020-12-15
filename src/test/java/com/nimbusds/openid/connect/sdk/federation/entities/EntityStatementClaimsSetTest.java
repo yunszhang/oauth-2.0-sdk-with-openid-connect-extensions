@@ -112,6 +112,7 @@ public class EntityStatementClaimsSetTest extends TestCase {
 			assertNull(stmt.getASMetadata());
 			assertNull(stmt.getFederationEntityMetadata());
 			assertNull(stmt.getMetadataPolicyJSONObject());
+			assertNull(stmt.getTrustAnchorID());
 			assertNull(stmt.getConstraints());
 			assertNull(stmt.getCriticalExtensionClaims());
 			assertNull(stmt.getCriticalPolicyExtensions());
@@ -147,6 +148,7 @@ public class EntityStatementClaimsSetTest extends TestCase {
 			assertNull(stmt.getASMetadata());
 			assertNull(stmt.getFederationEntityMetadata());
 			assertNull(stmt.getMetadataPolicyJSONObject());
+			assertNull(stmt.getTrustAnchorID());
 			assertNull(stmt.getConstraints());
 			assertNull(stmt.getCriticalExtensionClaims());
 			assertNull(stmt.getCriticalPolicyExtensions());
@@ -198,6 +200,7 @@ public class EntityStatementClaimsSetTest extends TestCase {
 			assertNull(stmt.getASMetadata());
 			assertNull(stmt.getFederationEntityMetadata());
 			assertNull(stmt.getMetadataPolicyJSONObject());
+			assertNull(stmt.getTrustAnchorID());
 			assertNull(stmt.getConstraints());
 			assertNull(stmt.getCriticalExtensionClaims());
 			assertNull(stmt.getCriticalPolicyExtensions());
@@ -232,6 +235,7 @@ public class EntityStatementClaimsSetTest extends TestCase {
 			assertNull(stmt.getASMetadata());
 			assertNull(stmt.getFederationEntityMetadata());
 			assertNull(stmt.getMetadataPolicyJSONObject());
+			assertNull(stmt.getTrustAnchorID());
 			assertNull(stmt.getConstraints());
 			assertNull(stmt.getCriticalExtensionClaims());
 			assertNull(stmt.getCriticalPolicyExtensions());
@@ -399,6 +403,127 @@ public class EntityStatementClaimsSetTest extends TestCase {
 		assertEquals(stmt.getAuthorityHints(), parsed.getAuthorityHints());
 		assertEquals(stmt.getRPMetadata().toJSONObject(), parsed.getRPMetadata().toJSONObject());
 		assertEquals(stmt.getMetadataPolicyJSONObject(), parsed.getMetadataPolicyJSONObject());
+		assertEquals(stmt.getConstraints(), parsed.getConstraints());
+		assertEquals(stmt.getCriticalExtensionClaims(), parsed.getCriticalExtensionClaims());
+		assertEquals(stmt.getStringClaim("jti"), parsed.getStringClaim("jti"));
+		assertEquals(stmt.getCriticalPolicyExtensions(), parsed.getCriticalPolicyExtensions());
+	}
+	
+	
+	// Includes trust_anchor_id
+	public void testWithRPMetadata_OPStated()
+		throws Exception {
+		
+		Issuer iss = new Issuer("https://op.c2id.com");
+		Subject sub = new Subject("https://rp.c2id.com");
+		
+		Date iat = DateUtils.fromSecondsSinceEpoch(1000);
+		Date exp = DateUtils.fromSecondsSinceEpoch(2000);
+		
+		EntityStatementClaimsSet stmt = new EntityStatementClaimsSet(
+			iss,
+			sub,
+			iat,
+			exp,
+			JWK_SET);
+		
+		stmt.validateRequiredClaimsPresence();
+		
+		assertFalse(stmt.isSelfStatement());
+		assertFalse(stmt.hasMetadata());
+		
+		// aud
+		List<Audience> audList = new Audience("123").toSingleAudienceList();
+		stmt.setAudience(audList);
+		assertEquals(audList, stmt.getAudience());
+		
+		// authority_hints
+		List<EntityID> authorityHints = Collections.singletonList(new EntityID("https://federation.example.com"));
+		stmt.setAuthorityHints(authorityHints);
+		assertEquals(authorityHints, stmt.getAuthorityHints());
+		
+		// metadata -> openid_relying_party
+		OIDCClientMetadata rpMetadata = createRPMetadata();
+		stmt.setRPMetadata(rpMetadata);
+		assertEquals(rpMetadata.toJSONObject(), stmt.getRPMetadata().toJSONObject());
+		
+		// passes now
+		assertTrue(stmt.hasMetadata());
+		stmt.validateRequiredClaimsPresence();
+		
+		// metadata_policy
+		JSONObject metadataPolicy = createMetadataPolicy();
+		stmt.setMetadataPolicyJSONObject(metadataPolicy);
+		assertEquals(metadataPolicy, stmt.getMetadataPolicyJSONObject());
+		
+		EntityID trustAnchorID = new EntityID("https://federation.example.com");
+		stmt.setTrustAnchorID(trustAnchorID);
+		assertEquals(trustAnchorID, stmt.getTrustAnchorID());
+		
+		// constraints
+		TrustChainConstraints constraints = new TrustChainConstraints(10, null, null);
+		stmt.setConstraints(constraints);
+		assertEquals(constraints, stmt.getConstraints());
+		
+		// crit
+		List<String> crit = Collections.singletonList("jti");
+		stmt.setCriticalExtensionClaims(crit);
+		assertEquals(crit, stmt.getCriticalExtensionClaims());
+		
+		try {
+			stmt.validateRequiredClaimsPresence();
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing critical jti claim", e.getMessage());
+		}
+		
+		// jti
+		stmt.setClaim("jti", "be0Chi8U");
+		
+		stmt.validateRequiredClaimsPresence();
+		
+		// policy_language_crit
+		List<String> policyCrit = Collections.singletonList("regexp");
+		stmt.setCriticalPolicyExtensions(policyCrit);
+		assertEquals(policyCrit, stmt.getCriticalPolicyExtensions());
+		
+		// output
+		JWTClaimsSet jwtClaimsSet = stmt.toJWTClaimsSet();
+		
+		assertEquals(iss.getValue(), jwtClaimsSet.getIssuer());
+		assertEquals(sub.getValue(), jwtClaimsSet.getSubject());
+		assertEquals(iat, jwtClaimsSet.getIssueTime());
+		assertEquals(exp, jwtClaimsSet.getExpirationTime());
+		assertEquals(JWK_SET.toJSONObject(), jwtClaimsSet.getJSONObjectClaim("jwks"));
+		assertEquals(audList.get(0).getValue(), jwtClaimsSet.getAudience().get(0));
+		assertEquals(authorityHints.get(0).getValue(), jwtClaimsSet.getStringListClaim("authority_hints").get(0));
+		
+		JSONObject metadata = jwtClaimsSet.getJSONObjectClaim("metadata");
+		OIDCClientMetadata parsedRPMetadata = OIDCClientMetadata.parse(JSONObjectUtils.getJSONObject(metadata, "openid_relying_party"));
+		assertEquals(rpMetadata.toJSONObject(), parsedRPMetadata.toJSONObject());
+		assertEquals(1, metadata.size());
+		
+		assertEquals(trustAnchorID.getValue(), jwtClaimsSet.getStringClaim("trust_anchor_id"));
+		
+		assertEquals(metadataPolicy, jwtClaimsSet.getJSONObjectClaim("metadata_policy"));
+		assertEquals(constraints.toJSONObject().toJSONString(), jwtClaimsSet.getJSONObjectClaim("constraints").toJSONString());
+		assertEquals(crit, jwtClaimsSet.getStringListClaim("crit"));
+		assertEquals("be0Chi8U", jwtClaimsSet.getJWTID());
+		assertEquals(policyCrit, jwtClaimsSet.getStringListClaim("policy_language_crit"));
+		
+		// parse
+		EntityStatementClaimsSet parsed = new EntityStatementClaimsSet(jwtClaimsSet);
+		
+		assertEquals(stmt.getIssuer(), parsed.getIssuer());
+		assertEquals(stmt.getSubject(), parsed.getSubject());
+		assertEquals(stmt.getIssueTime(), parsed.getIssueTime());
+		assertEquals(stmt.getExpirationTime(), parsed.getExpirationTime());
+		assertEquals(stmt.getJWKSet().toJSONObject(), parsed.getJWKSet().toJSONObject());
+		assertEquals(stmt.getAudience(), parsed.getAudience());
+		assertEquals(stmt.getAuthorityHints(), parsed.getAuthorityHints());
+		assertEquals(stmt.getRPMetadata().toJSONObject(), parsed.getRPMetadata().toJSONObject());
+		assertEquals(stmt.getMetadataPolicyJSONObject(), parsed.getMetadataPolicyJSONObject());
+		assertEquals(stmt.getTrustAnchorID(), parsed.getTrustAnchorID());
 		assertEquals(stmt.getConstraints(), parsed.getConstraints());
 		assertEquals(stmt.getCriticalExtensionClaims(), parsed.getCriticalExtensionClaims());
 		assertEquals(stmt.getStringClaim("jti"), parsed.getStringClaim("jti"));
