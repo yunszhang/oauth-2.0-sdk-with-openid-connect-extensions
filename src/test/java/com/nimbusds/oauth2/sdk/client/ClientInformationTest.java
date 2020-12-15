@@ -81,9 +81,8 @@ public class ClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("require_pushed_authorization_requests"));
 		assertTrue(paramNames.contains("client_registration_types"));
 		assertTrue(paramNames.contains("organization_name"));
-		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(40, paramNames.size());
+		assertEquals(39, paramNames.size());
 	}
 	
 	

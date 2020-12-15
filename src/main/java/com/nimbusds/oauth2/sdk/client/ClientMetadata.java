@@ -44,7 +44,6 @@ import com.nimbusds.oauth2.sdk.id.SoftwareVersion;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
-import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
 
 
@@ -133,7 +132,6 @@ public class ClientMetadata {
 		// OIDC federation
 		p.add("client_registration_types");
 		p.add("organization_name");
-		p.add("trust_anchor_id");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -351,13 +349,6 @@ public class ClientMetadata {
 	 * The organisation name in OpenID Connect Federation 1.0.
 	 */
 	private String organizationName;
-	
-	
-	/**
-	 * The used trust anchor in a explicit client registration in OpenID
-	 * Connect Federation 1.0.
-	 */
-	private EntityID trustAnchorID;
 
 
 	/**
@@ -423,7 +414,6 @@ public class ClientMetadata {
 		requirePAR = metadata.requiresPushedAuthorizationRequests();
 		clientRegistrationTypes = metadata.getClientRegistrationTypes();
 		organizationName = metadata.getOrganizationName();
-		trustAnchorID = metadata.getTrustAnchorID();
 		customFields = metadata.getCustomFields();
 	}
 
@@ -1706,33 +1696,6 @@ public class ClientMetadata {
 	
 	
 	/**
-	 * Gets the used trust anchor in a explicit client registration in
-	 * OpenID Connect Federation 1.0. Corresponds to the
-	 * {@code trust_anchor_id} client metadata field.
-	 *
-	 * @return The trust anchor ID, {@code null} if not specified.
-	 */
-	public EntityID getTrustAnchorID() {
-		
-		return trustAnchorID;
-	}
-	
-	
-	/**
-	 * Sets the used trust anchor in a explicit client registration in
-	 * OpenID Connect Federation 1.0. Corresponds to the
-	 * {@code trust_anchor_id} client metadata field.
-	 *
-	 * @param trustAnchorID The trust anchor ID, {@code null} if not
-	 *                      specified.
-	 */
-	public void setTrustAnchorID(final EntityID trustAnchorID) {
-		
-		this.trustAnchorID = trustAnchorID;
-	}
-	
-	
-	/**
 	 * Gets the specified custom metadata field.
 	 *
 	 * @param name The field name. Must not be {@code null}.
@@ -2080,10 +2043,6 @@ public class ClientMetadata {
 		}
 		if (organizationName != null) {
 			o.put("organization_name", organizationName);
-		}
-		
-		if (trustAnchorID != null) {
-			o.put("trust_anchor_id", trustAnchorID.getValue());
 		}
 
 		return o;
@@ -2442,11 +2401,6 @@ public class ClientMetadata {
 			if (jsonObject.get("organization_name") != null) {
 				metadata.setOrganizationName(JSONObjectUtils.getString(jsonObject, "organization_name"));
 				jsonObject.remove("organization_name");
-			}
-			
-			if (jsonObject.get("trust_anchor_id") != null) {
-				metadata.setTrustAnchorID(EntityID.parse(JSONObjectUtils.getString(jsonObject, "trust_anchor_id")));
-				jsonObject.remove("trust_anchor_id");
 			}
 
 		} catch (ParseException | IllegalStateException e) {

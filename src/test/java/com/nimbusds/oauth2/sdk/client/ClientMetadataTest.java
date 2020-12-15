@@ -45,7 +45,6 @@ import com.nimbusds.oauth2.sdk.id.SoftwareID;
 import com.nimbusds.oauth2.sdk.id.SoftwareVersion;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
-import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 
@@ -89,9 +88,8 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("require_pushed_authorization_requests"));
 		assertTrue(paramNames.contains("client_registration_types"));
 		assertTrue(paramNames.contains("organization_name"));
-		assertTrue(paramNames.contains("trust_anchor_id"));
 
-		assertEquals(34, ClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(33, ClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -1419,8 +1417,6 @@ public class ClientMetadataTest extends TestCase {
 	public void testFederationFields()
 		throws Exception {
 		
-		EntityID trustAnchor = new EntityID("https://federation.c2id.com");
-		
 		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
 		
 		URI redirectionURI = URI.create("https://example.com/cb");
@@ -1436,23 +1432,17 @@ public class ClientMetadataTest extends TestCase {
 		clientMetadata.setOrganizationName(orgName);
 		assertEquals(orgName, clientMetadata.getOrganizationName());
 		
-		assertNull(clientMetadata.getTrustAnchorID());
-		clientMetadata.setTrustAnchorID(trustAnchor);
-		assertEquals(trustAnchor, clientMetadata.getTrustAnchorID());
-		
 		JSONObject jsonObject = clientMetadata.toJSONObject();
 		
 		assertEquals(Arrays.asList("explicit", "automatic"), JSONObjectUtils.getStringList(jsonObject, "client_registration_types"));
 		assertEquals(Arrays.asList("explicit", "automatic"), JSONObjectUtils.getStringList(jsonObject, "federation_type"));
 		assertEquals(orgName, JSONObjectUtils.getString(jsonObject, "organization_name"));
-		assertEquals(trustAnchor.getValue(), jsonObject.get("trust_anchor_id"));
 		
 		clientMetadata = OIDCClientMetadata.parse(jsonObject);
 		
 		assertEquals(redirectionURI, clientMetadata.getRedirectionURI());
 		assertEquals(federationTypes, clientMetadata.getClientRegistrationTypes());
 		assertEquals(orgName, clientMetadata.getOrganizationName());
-		assertEquals(trustAnchor, clientMetadata.getTrustAnchorID());
 		
 		// parse deprecated only
 		jsonObject.remove("client_registration_types");
@@ -1461,11 +1451,9 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(redirectionURI, clientMetadata.getRedirectionURI());
 		assertEquals(federationTypes, clientMetadata.getClientRegistrationTypes());
 		assertEquals(orgName, clientMetadata.getOrganizationName());
-		assertEquals(trustAnchor, clientMetadata.getTrustAnchorID());
 		
 		ClientMetadata copy = new ClientMetadata(clientMetadata);
 		assertEquals(federationTypes, copy.getClientRegistrationTypes());
 		assertEquals(orgName, copy.getOrganizationName());
-		assertEquals(trustAnchor, copy.getTrustAnchorID());
 	}
 }
