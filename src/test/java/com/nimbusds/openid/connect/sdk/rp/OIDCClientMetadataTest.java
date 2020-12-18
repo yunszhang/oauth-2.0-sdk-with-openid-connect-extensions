@@ -280,6 +280,12 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertFalse(meta.requiresBackChannelLogoutSession());
 		meta.requiresBackChannelLogoutSession(true);
 		assertTrue(meta.requiresBackChannelLogoutSession());
+		
+		assertTrue(meta.getCustomFields().isEmpty());
+		meta.setCustomField("custom-x", "abc");
+		JSONObject expectedCustomFields = new JSONObject();
+		expectedCustomFields.put("custom-x", "abc");
+		assertEquals(expectedCustomFields, meta.getCustomFields());
 
 		String json = meta.toJSONObject().toJSONString();
 
@@ -322,6 +328,12 @@ public class OIDCClientMetadataTest extends TestCase {
 		
 		assertEquals(URI.create("https://example.com/logout/back-channel"), meta.getBackChannelLogoutURI());
 		assertTrue(meta.requiresBackChannelLogoutSession());
+		
+		assertEquals(expectedCustomFields, meta.getCustomFields());
+		
+		// test copy constructor
+		OIDCClientMetadata copy = new OIDCClientMetadata(meta);
+		assertEquals(meta.toJSONObject(), copy.toJSONObject());
 	}
 
 

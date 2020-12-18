@@ -49,7 +49,7 @@ import com.nimbusds.openid.connect.sdk.id.SectorID;
  *     <li>OpenID Connect Session Management 1.0, section 5.1.1 (draft 28).
  *     <li>OpenID Connect Front-Channel Logout 1.0, section 2 (draft 02).
  *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.2 (draft 04).
- *     <li>OpenID Connect Federation 1.0 (draft 11).
+ *     <li>OpenID Connect Federation 1.0 (draft 14).
  *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section
  *         2.
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
@@ -236,6 +236,37 @@ public class OIDCClientMetadata extends ClientMetadata {
 	public OIDCClientMetadata(final ClientMetadata metadata) {
 		
 		super(metadata);
+	}
+	
+	
+	/**
+	 * Creates a shallow copy of the specified OpenID Connect client
+	 * metadata instance.
+	 *
+	 * @param metadata The client metadata to copy. Must not be
+	 *                 {@code null}.
+	 */
+	public OIDCClientMetadata(final OIDCClientMetadata metadata) {
+		
+		super(metadata);
+		applicationType = metadata.getApplicationType();
+		subjectType = metadata.getSubjectType();
+		sectorIDURI = metadata.getSectorIDURI();
+		idTokenJWSAlg = metadata.getIDTokenJWSAlg();
+		idTokenJWEAlg = metadata.getIDTokenJWEAlg();
+		idTokenJWEEnc = metadata.getIDTokenJWEEnc();
+		userInfoJWSAlg = metadata.getUserInfoJWSAlg();
+		userInfoJWEAlg = metadata.getUserInfoJWEAlg();
+		userInfoJWEEnc = metadata.getUserInfoJWEEnc();
+		defaultMaxAge = metadata.getDefaultMaxAge();
+		requiresAuthTime = metadata.requiresAuthTime();
+		defaultACRs = metadata.getDefaultACRs();
+		initiateLoginURI = metadata.getInitiateLoginURI();
+		postLogoutRedirectURIs = metadata.getPostLogoutRedirectionURIs();
+		frontChannelLogoutURI = metadata.getFrontChannelLogoutURI();
+		frontChannelLogoutSessionRequired = metadata.requiresFrontChannelLogoutSession();
+		backChannelLogoutURI = metadata.getBackChannelLogoutURI();
+		backChannelLogoutSessionRequired = metadata.requiresBackChannelLogoutSession();
 	}
 
 
