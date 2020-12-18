@@ -183,15 +183,15 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>jdk10-compile</id>
+						<id>jdk11-compile</id>
 						<phase>compile</phase>
 						<goals>
 							<goal>compile</goal>
 						</goals>
 						<configuration>
 							<source>1.7</source>
-							<target>10</target>
-							<outputDirectory>${project.build.outputDirectory}_jdk10</outputDirectory>
+							<target>11</target>
+							<outputDirectory>${project.build.outputDirectory}_jdk11</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
@@ -230,7 +230,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>jdk10-jar</id>
+						<id>jdk11-jar</id>
 						<goals>
 							<goal>jar</goal>
 						</goals>
@@ -241,8 +241,8 @@
 									<Automatic-Module-Name>com.nimbusds.oauth2.sdk</Automatic-Module-Name>
 								</manifestEntries>
 							</archive>
-							<classesDirectory>${project.build.outputDirectory}_jdk10</classesDirectory>
-							<classifier>jdk10</classifier>
+							<classesDirectory>${project.build.outputDirectory}_jdk11</classesDirectory>
+							<classifier>jdk11</classifier>
 						</configuration>
 					</execution>
 				</executions>

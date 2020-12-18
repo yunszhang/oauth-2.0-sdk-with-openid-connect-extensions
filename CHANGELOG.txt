@@ -1557,3 +1557,4 @@ version 8.28.4 (2020-12-15)
 
 version 8.29 (2020-12-18)
     * New OIDCClientMetadata shallow copy constructor.
+    * Replaces JDK 10 with JDK 11 build.
