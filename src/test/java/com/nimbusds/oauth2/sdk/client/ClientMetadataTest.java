@@ -1316,24 +1316,155 @@ public class ClientMetadataTest extends TestCase {
 	}
 	
 	
-	public void testRequireOneTLSSubjectParam() {
+	public void testRequireOneTLSSubjectParam_toJSONObject() {
 	
 		ClientMetadata clientMetadata = new ClientMetadata();
 		clientMetadata.setTokenEndpointAuthMethod(ClientAuthenticationMethod.TLS_CLIENT_AUTH);
 		clientMetadata.applyDefaults();
 		
 		try {
-			ClientMetadata.parse(clientMetadata.toJSONObject());
+			clientMetadata.toJSONObject();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("A certificate field must be specified to indicate the subject in tls_client_auth: " +
+				"tls_client_auth_subject_dn, tls_client_auth_san_dns, tls_client_auth_san_uri, tls_client_auth_san_ip or tls_client_auth_san_email",
+				e.getMessage());
+		}
+	}
+	
+	
+	public void testRequireOneTLSSubjectParam_parse() {
+	
+		ClientMetadata clientMetadata = new ClientMetadata();
+		clientMetadata.setTokenEndpointAuthMethod(ClientAuthenticationMethod.TLS_CLIENT_AUTH);
+		clientMetadata.applyDefaults();
+		
+		clientMetadata.setTLSClientAuthSubjectDN("cn=example.com"); // to pass toJSON checks
+		
+		JSONObject jsonObject = clientMetadata.toJSONObject();
+		jsonObject.remove("tls_client_auth_subject_dn");
+		
+		try {
+			ClientMetadata.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
 			assertEquals("A certificate field must be specified to indicate the subject in tls_client_auth: " +
 				"tls_client_auth_subject_dn, tls_client_auth_san_dns, tls_client_auth_san_uri, tls_client_auth_san_ip or tls_client_auth_san_email",
 				e.getMessage());
-			assertEquals("invalid_client_metadata", e.getErrorObject().getCode());
-			assertEquals("Invalid client metadata field: " +
-				"A certificate field must be specified to indicate the subject in tls_client_auth: " +
-				"tls_client_auth_subject_dn, tls_client_auth_san_dns, tls_client_auth_san_uri, tls_client_auth_san_ip or tls_client_auth_san_email",
-				e.getErrorObject().getDescription());
+		}
+	}
+	
+	
+	public void testRejectMoreThanOneTLSSubjectParam_toJSONObject() {
+	
+		ClientMetadata clientMetadata = new ClientMetadata();
+		clientMetadata.setTokenEndpointAuthMethod(ClientAuthenticationMethod.TLS_CLIENT_AUTH);
+		clientMetadata.applyDefaults();
+		
+		List<ClientMetadata> forTest = new LinkedList<>();
+		
+		// test combinations of two only
+		
+		// tls_client_auth_subject_dn
+		ClientMetadata a_1 = new ClientMetadata(clientMetadata);
+		a_1.setTLSClientAuthSubjectDN("cn=example.com");
+		a_1.setTLSClientAuthSanDNS("example.com");
+		forTest.add(a_1);
+		
+		ClientMetadata a_2 = new ClientMetadata(clientMetadata);
+		a_2.setTLSClientAuthSubjectDN("cn=example.com");
+		a_2.setTLSClientAuthSanURI("https://example.com");
+		forTest.add(a_2);
+		
+		ClientMetadata a_3 = new ClientMetadata(clientMetadata);
+		a_3.setTLSClientAuthSubjectDN("cn=example.com");
+		a_3.setTLSClientAuthSanIP("192.168.0.1");
+		forTest.add(a_3);
+		
+		ClientMetadata a_4 = new ClientMetadata(clientMetadata);
+		a_4.setTLSClientAuthSubjectDN("cn=example.com");
+		a_4.setTLSClientAuthSanEmail("user@example.com");
+		forTest.add(a_4);
+		
+		// tls_client_auth_san_dns
+		ClientMetadata b_1 = new ClientMetadata(clientMetadata);
+		b_1.setTLSClientAuthSanDNS("example.com");
+		b_1.setTLSClientAuthSanURI("https://example.com");
+		forTest.add(b_1);
+		
+		ClientMetadata b_2 = new ClientMetadata(clientMetadata);
+		b_2.setTLSClientAuthSanDNS("example.com");
+		b_2.setTLSClientAuthSanIP("192.168.0.1");
+		forTest.add(b_2);
+		
+		ClientMetadata b_3 = new ClientMetadata(clientMetadata);
+		b_3.setTLSClientAuthSanDNS("example.com");
+		b_3.setTLSClientAuthSanEmail("user@example.com");
+		forTest.add(b_3);
+		
+		// tls_client_auth_san_uri
+		ClientMetadata c_1 = new ClientMetadata(clientMetadata);
+		c_1.setTLSClientAuthSanURI("https://example.com");
+		c_1.setTLSClientAuthSanIP("192.168.0.1");
+		forTest.add(c_1);
+		
+		ClientMetadata c_2 = new ClientMetadata(clientMetadata);
+		c_2.setTLSClientAuthSanURI("https://example.com");
+		c_2.setTLSClientAuthSanEmail("user@example.com");
+		forTest.add(c_2);
+		
+		// tls_client_auth_san_ip
+		ClientMetadata d_1 = new ClientMetadata(clientMetadata);
+		d_1.setTLSClientAuthSanIP("192.168.0.1");
+		d_1.setTLSClientAuthSanEmail("user@example.com");
+		forTest.add(d_1);
+		
+		for (ClientMetadata cm: forTest) {
+			try {
+				cm.toJSONObject();
+				fail();
+			} catch (IllegalStateException e) {
+				assertEquals("Exactly one certificate field must be specified to indicate the subject in tls_client_auth: " +
+						"tls_client_auth_subject_dn, tls_client_auth_san_dns, tls_client_auth_san_uri, tls_client_auth_san_ip or tls_client_auth_san_email",
+					e.getMessage());
+			}
+		}
+	}
+	
+	
+	public void testRejectMoreThanOneTLSSubjectParam_parse() {
+		
+		ClientMetadata clientMetadata = new ClientMetadata();
+		clientMetadata.applyDefaults();
+		
+		List<String> certParams = new LinkedList<>();
+		certParams.add("tls_client_auth_subject_dn");
+		certParams.add("tls_client_auth_san_dns");
+		certParams.add("tls_client_auth_san_uri");
+		certParams.add("tls_client_auth_san_ip");
+		certParams.add("tls_client_auth_san_email");
+		
+		String expectedMessage = "Exactly one certificate field must be specified to indicate the subject in tls_client_auth: " +
+			"tls_client_auth_subject_dn, tls_client_auth_san_dns, tls_client_auth_san_uri, tls_client_auth_san_ip or tls_client_auth_san_email";
+		
+		for (int subsetSize: new int[]{2,3,4,5}) {
+			
+			for (int[] combi : new Combinations(certParams.size(), subsetSize)) {
+				
+				JSONObject jsonObject = clientMetadata.toJSONObject();
+				jsonObject.put("token_endpoint_auth_method", "tls_client_auth");
+				for (int i: combi) {
+					jsonObject.put(certParams.get(i), "value");
+				}
+				try {
+					ClientMetadata.parse(jsonObject);
+					fail(jsonObject.toJSONString());
+				} catch (ParseException e) {
+					assertEquals(expectedMessage, e.getMessage());
+					assertEquals("invalid_client_metadata", e.getErrorObject().getCode());
+					assertEquals("Invalid client metadata field: " + expectedMessage, e.getErrorObject().getDescription());
+				}
+			}
 		}
 	}
 	
@@ -1374,43 +1505,6 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(clientMetadata.requiresPushedAuthorizationRequests());
 		
 		assertTrue(clientMetadata.getCustomFields().isEmpty());
-	}
-	
-	
-	public void testRejectMoreThanOneTLSSubjectParam() {
-	
-		ClientMetadata clientMetadata = new ClientMetadata();
-		clientMetadata.setTokenEndpointAuthMethod(ClientAuthenticationMethod.TLS_CLIENT_AUTH);
-		clientMetadata.applyDefaults();
-		
-		List<String> certParams = new LinkedList<>();
-		certParams.add("tls_client_auth_subject_dn");
-		certParams.add("tls_client_auth_san_dns");
-		certParams.add("tls_client_auth_san_uri");
-		certParams.add("tls_client_auth_san_ip");
-		certParams.add("tls_client_auth_san_email");
-		
-		String expectedMessage = "Exactly one certificate field must be specified to indicate the subject in tls_client_auth: " +
-			"tls_client_auth_subject_dn, tls_client_auth_san_dns, tls_client_auth_san_uri, tls_client_auth_san_ip or tls_client_auth_san_email";
-		
-		for (int subsetSize: new int[]{2,3,4,5}) {
-			
-			for (int[] combi : new Combinations(certParams.size(), subsetSize)) {
-				
-				JSONObject jsonObject = clientMetadata.toJSONObject();
-				for (int i: combi) {
-					jsonObject.put(certParams.get(i), "value");
-				}
-				try {
-					ClientMetadata.parse(jsonObject);
-					fail(jsonObject.toJSONString());
-				} catch (ParseException e) {
-					assertEquals(expectedMessage, e.getMessage());
-					assertEquals("invalid_client_metadata", e.getErrorObject().getCode());
-					assertEquals("Invalid client metadata field: " + expectedMessage, e.getErrorObject().getDescription());
-				}
-			}
-		}
 	}
 	
 	

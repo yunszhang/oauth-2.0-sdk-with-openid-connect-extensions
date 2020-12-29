@@ -1813,6 +1813,8 @@ public class ClientMetadata {
 	 */
 	public JSONObject toJSONObject(final boolean includeCustomFields) {
 
+		ensureExactlyOneCertSubjectFieldForTLSClientAuth();
+		
 		JSONObject o;
 
 		if (includeCustomFields)
