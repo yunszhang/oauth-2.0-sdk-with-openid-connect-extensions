@@ -1563,3 +1563,7 @@ version 8.29.1 (2020-12-29)
     * Updates ClientMetadata.toJSONObject to throw IllegalStateException on
       missing or more than one certificate field for the subject in
       tls_client_auth.
+
+version 8.30 (2020-12-31)
+    * Adds new static X509CertificateUtils.generate method with X500Principal
+      args for issuer and subject.

@@ -169,8 +169,8 @@ public final class X509CertificateUtils {
 	 * @throws OperatorCreationException On a generation exception.
 	 * @throws IOException               On a byte buffer exception.
 	 */
-	public static X509Certificate generate(final Issuer issuer,
-					       final Subject subject,
+	public static X509Certificate generate(final X500Principal issuer,
+					       final X500Principal subject,
 					       final Date nbf,
 					       final Date exp,
 					       final PublicKey certKey,
@@ -178,9 +178,6 @@ public final class X509CertificateUtils {
 		throws OperatorCreationException, IOException {
 		
 		BigInteger serialNumber = new BigInteger(64, new SecureRandom());
-		
-		X500Principal certIssuer = new X500Principal("cn=" + issuer);
-		X500Principal certSubject = new X500Principal("cn=" + subject);
 		
 		final String signingAlg;
 		if ("RSA".equalsIgnoreCase(signingKey.getAlgorithm())) {
@@ -192,15 +189,57 @@ public final class X509CertificateUtils {
 		}
 		
 		X509CertificateHolder certHolder = new JcaX509v3CertificateBuilder(
-			certIssuer,
+			issuer,
 			serialNumber,
 			nbf,
 			exp,
-			certSubject,
+			subject,
 			certKey)
 			.build(new JcaContentSignerBuilder(signingAlg).build(signingKey));
 		
 		return X509CertUtils.parse(certHolder.getEncoded());
+	}
+	
+	
+	/**
+	 * Generates a new X.509 certificate. The certificate is provisioned
+	 * with a 64-bit random serial number.
+	 *
+	 * <p>Signing algorithm:
+	 *
+	 * <ul>
+	 *     <li>For RSA signing keys: SHA256withRSA
+	 *     <li>For EC signing keys: SHA256withECDSA
+	 * </ul>
+	 *
+	 * @param issuer     The issuer. Will be prepended by {@code cn=} in
+	 *                   the certificate to ensure a valid Distinguished
+	 *                   Name (DN). Must not be {@code null}.
+	 * @param subject    The subject. Will be prepended by {@code cn=} in
+	 *                   the certificate to ensure a valid Distinguished
+	 *                   Name (DN). Must not be {@code null}.
+	 * @param nbf        Date before which the certificate is not valid.
+	 *                   Must not be {@code null}.
+	 * @param exp        Date after which the certificate is not valid.
+	 *                   Must not be {@code null}.
+	 * @param certKey    The public key to include in the certificate. Must
+	 *                   not be {@code null}.
+	 * @param signingKey The signing private key. Must not be {@code null}.
+	 *
+	 * @return The X.509 certificate.
+	 *
+	 * @throws OperatorCreationException On a generation exception.
+	 * @throws IOException               On a byte buffer exception.
+	 */
+	public static X509Certificate generate(final Issuer issuer,
+					       final Subject subject,
+					       final Date nbf,
+					       final Date exp,
+					       final PublicKey certKey,
+					       final PrivateKey signingKey)
+		throws OperatorCreationException, IOException {
+		
+		return generate(new X500Principal("cn=" + issuer), new X500Principal("cn=" + subject), nbf, exp, certKey, signingKey);
 	}
 	
 	
