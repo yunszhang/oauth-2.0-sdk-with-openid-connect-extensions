@@ -29,12 +29,15 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
+ *     <li>OAuth 2.0 Device Authorization Grant (RFC 8628).
  * </ul>
  */
 @Immutable
 public final class DeviceCode extends Identifier {
-
+	
+	
+	private static final long serialVersionUID = 5165818656410539254L;
+	
 	
 	/**
 	 * Creates a new device code with the specified value.
