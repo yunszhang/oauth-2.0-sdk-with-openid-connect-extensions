@@ -79,10 +79,14 @@ public class ClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("require_pushed_authorization_requests"));
+		assertTrue(paramNames.contains("backchannel_token_delivery_mode"));
+		assertTrue(paramNames.contains("backchannel_client_notification_endpoint"));
+		assertTrue(paramNames.contains("backchannel_authentication_request_signing_alg"));
+		assertTrue(paramNames.contains("backchannel_user_code_parameter"));
 		assertTrue(paramNames.contains("client_registration_types"));
 		assertTrue(paramNames.contains("organization_name"));
 
-		assertEquals(39, paramNames.size());
+		assertEquals(43, paramNames.size());
 	}
 	
 	

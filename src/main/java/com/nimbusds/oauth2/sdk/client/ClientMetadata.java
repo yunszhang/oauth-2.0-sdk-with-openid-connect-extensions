@@ -38,6 +38,7 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.ciba.BackChannelTokenDeliveryMode;
 import com.nimbusds.oauth2.sdk.id.Identifier;
 import com.nimbusds.oauth2.sdk.id.SoftwareID;
 import com.nimbusds.oauth2.sdk.id.SoftwareVersion;
@@ -74,8 +75,10 @@ import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistratio
  *         Access Tokens (RFC 8705), sections 2.1.2 and 3.4.
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM).
- *     <li>OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-02)
- *     <li>OpenID Connect Federation 1.0 (draft 11)
+ *     <li>OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-05)
+ *     <li>OpenID Connect Client Initiated Backchannel Authentication Flow -
+ * 	   Core 1.0 (draft 03)
+ *     <li>OpenID Connect Federation 1.0 (draft 13)
  * </ul>
  */
 public class ClientMetadata {
@@ -128,6 +131,12 @@ public class ClientMetadata {
 		p.add("authorization_signed_response_alg");
 		p.add("authorization_encrypted_response_alg");
 		p.add("authorization_encrypted_response_enc");
+		
+		// CIBA
+		p.add("backchannel_token_delivery_mode");
+		p.add("backchannel_client_notification_endpoint");
+		p.add("backchannel_authentication_request_signing_alg");
+		p.add("backchannel_user_code_parameter");
 		
 		// OIDC federation
 		p.add("client_registration_types");
@@ -339,6 +348,31 @@ public class ClientMetadata {
 	
 	
 	/**
+	 * The CIBA token delivery mode.
+	 */
+	private BackChannelTokenDeliveryMode backChannelTokenDeliveryMode;
+	
+	
+	/**
+	 * The CIBA client notification endpoint for the ping or push token
+	 * delivery modes.
+	 */
+	private URI backChannelClientNotificationEndpoint;
+	
+	
+	/**
+	 * The JWS algorithm for signed CIBA requests.
+	 */
+	private JWSAlgorithm backChannelAuthRequestJWSAlg;
+	
+	
+	/**
+	 * Support for the {@code user_code} CIBA request parameter.
+	 */
+	private boolean backChannelUserCodeParam = false;
+	
+	
+	/**
 	 * The supported OpenID Connect Federation 1.0 client registration
 	 * types.
 	 */
@@ -412,6 +446,10 @@ public class ClientMetadata {
 		authzJWEAlg = metadata.getAuthorizationJWEAlg();
 		authzJWEEnc = metadata.getAuthorizationJWEEnc();
 		requirePAR = metadata.requiresPushedAuthorizationRequests();
+		backChannelTokenDeliveryMode = metadata.getBackChannelTokenDeliveryMode();
+		backChannelClientNotificationEndpoint = metadata.getBackChannelClientNotificationEndpoint();
+		backChannelAuthRequestJWSAlg = metadata.getBackChannelAuthRequestJWSAlg();
+		backChannelUserCodeParam = metadata.supportsBackChannelUserCodeParam();
 		clientRegistrationTypes = metadata.getClientRegistrationTypes();
 		organizationName = metadata.getOrganizationName();
 		customFields = metadata.getCustomFields();
@@ -1643,6 +1681,120 @@ public class ClientMetadata {
 	
 	
 	/**
+	 * Gets the CIBA token delivery mode. Corresponds to the
+	 * {@code backchannel_token_delivery_mode} metadata field.
+	 *
+	 * @return The CIBA token delivery mode, {@code null} if not
+	 *         specified.
+	 */
+	public BackChannelTokenDeliveryMode getBackChannelTokenDeliveryMode() {
+		
+		return backChannelTokenDeliveryMode;
+	}
+	
+	
+	/**
+	 * Sets the CIBA token delivery mode. Corresponds to the
+	 * {@code backchannel_token_delivery_mode} metadata field.
+	 *
+	 * @param backChannelTokenDeliveryMode The CIBA token delivery mode,
+	 *                                     {@code null} if not specified.
+	 */
+	public void setBackChannelTokenDeliveryMode(final BackChannelTokenDeliveryMode backChannelTokenDeliveryMode) {
+		
+		this.backChannelTokenDeliveryMode = backChannelTokenDeliveryMode;
+	}
+	
+	
+	/**
+	 * Gets the CIBA client notification endpoint URI for the ping or push
+	 * delivery modes. Corresponds to the
+	 * {@code backchannel_client_notification_endpoint} metadata field.
+	 *
+	 * @return The CIBA client notification endpoint URI, {@code null} if
+	 *         not specified.
+	 */
+	public URI getBackChannelClientNotificationEndpoint() {
+		
+		return backChannelClientNotificationEndpoint;
+	}
+	
+	
+	/**
+	 * Sets the CIBA client notification endpoint URI for the ping or push
+	 * delivery modes. Corresponds to the
+	 * {@code backchannel_client_notification_endpoint} metadata field.
+	 *
+	 * @param backChannelClientNotificationEndpoint The CIBA client
+	 *                                              notification endpoint
+	 *                                              URI, {@code null} if
+	 *                                              not specified.
+	 */
+	public void setBackChannelClientNotificationEndpoint(final URI backChannelClientNotificationEndpoint) {
+		
+		this.backChannelClientNotificationEndpoint = backChannelClientNotificationEndpoint;
+	}
+	
+	
+	/**
+	 * Gets the JWS algorithm for CIBA requests. Corresponds to the
+	 * {@code backchannel_authentication_request_signing_alg} metadata
+	 * field.
+	 *
+	 * @return The JWS algorithm for CIBA requests, {@code null} if not
+	 *         specified.
+	 */
+	public JWSAlgorithm getBackChannelAuthRequestJWSAlg() {
+		
+		return backChannelAuthRequestJWSAlg;
+	}
+	
+	
+	/**
+	 * Sets the JWS algorithm for CIBA requests. Corresponds to the
+	 * {@code backchannel_authentication_request_signing_alg} metadata
+	 * field.
+	 *
+	 * @param backChannelAuthRequestJWSAlg The JWS algorithm for CIBA
+	 *                                     requests, {@code null} if not
+	 *                                     specified.
+	 */
+	public void setBackChannelAuthRequestJWSAlg(final JWSAlgorithm backChannelAuthRequestJWSAlg) {
+		
+		this.backChannelAuthRequestJWSAlg = backChannelAuthRequestJWSAlg;
+	}
+	
+	
+	/**
+	 * Gets the support for the {@code user_code} CIBA request parameter.
+	 * Corresponds to the {@code backchannel_user_code_parameter} metadata
+	 * field.
+	 *
+	 * @return {@code true} if the {@code user_code} parameter is
+	 *         supported, else {@code false}.
+	 */
+	public boolean supportsBackChannelUserCodeParam() {
+		
+		return backChannelUserCodeParam;
+	}
+	
+	
+	/**
+	 * Sets the support for the {@code user_code} CIBA request parameter.
+	 * Corresponds to the {@code backchannel_user_code_parameter} metadata
+	 * field.
+	 *
+	 * @param backChannelUserCodeParam {@code true} if the
+	 *                                 {@code user_code} parameter is
+	 *                                 supported, else {@code false}.
+	 */
+	public void setSupportsBackChannelUserCodeParam(final boolean backChannelUserCodeParam) {
+		
+		this.backChannelUserCodeParam = backChannelUserCodeParam;
+	}
+	
+	
+	/**
 	 * Gets the supported OpenID Connect Federation 1.0 client registration
 	 * types. Corresponds to the {@code client_registration_types} metadata
 	 * field.
@@ -1747,7 +1899,7 @@ public class ClientMetadata {
 		this.customFields = customFields;
 	}
 
-
+	
 	/**
 	 * Applies the client metadata defaults where no values have been
 	 * specified.
@@ -2035,6 +2187,24 @@ public class ClientMetadata {
 		// PAR
 		if (requirePAR) {
 			o.put("require_pushed_authorization_requests", true);
+		}
+		
+		// CIBA
+		
+		if (backChannelTokenDeliveryMode != null) {
+			o.put("backchannel_token_delivery_mode", backChannelTokenDeliveryMode.getValue());
+		}
+		
+		if (backChannelClientNotificationEndpoint != null) {
+			o.put("backchannel_client_notification_endpoint", backChannelClientNotificationEndpoint.toString());
+		}
+		
+		if (backChannelAuthRequestJWSAlg != null) {
+			o.put("backchannel_authentication_request_signing_alg", backChannelAuthRequestJWSAlg.getName());
+		}
+		
+		if (backChannelUserCodeParam) {
+			o.put("backchannel_user_code_parameter", true);
 		}
 		
 		// Federation
@@ -2380,6 +2550,29 @@ public class ClientMetadata {
 				metadata.requiresPushedAuthorizationRequests(JSONObjectUtils.getBoolean(jsonObject, "require_pushed_authorization_requests"));
 				jsonObject.remove("require_pushed_authorization_requests");
 			}
+			
+			// CIBA
+			
+			if (jsonObject.get("backchannel_token_delivery_mode") != null) {
+				metadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.parse(jsonObject.getAsString("backchannel_token_delivery_mode")));
+				jsonObject.remove("backchannel_token_delivery_mode");
+			}
+			
+			if (jsonObject.get("backchannel_client_notification_endpoint") != null) {
+				metadata.setBackChannelClientNotificationEndpoint(JSONObjectUtils.getURI(jsonObject, "backchannel_client_notification_endpoint"));
+				jsonObject.remove("backchannel_client_notification_endpoint");
+			}
+			
+			if (jsonObject.get("backchannel_authentication_request_signing_alg") != null) {
+				metadata.setBackChannelAuthRequestJWSAlg(JWSAlgorithm.parse(JSONObjectUtils.getString(jsonObject, "backchannel_authentication_request_signing_alg")));
+				jsonObject.remove("backchannel_authentication_request_signing_alg");
+			}
+			
+			if (jsonObject.get("backchannel_user_code_parameter") != null) {
+				metadata.setSupportsBackChannelUserCodeParam(JSONObjectUtils.getBoolean(jsonObject, "backchannel_user_code_parameter"));
+				jsonObject.remove("backchannel_user_code_parameter");
+			}
+			
 			
 			// Federation
 			

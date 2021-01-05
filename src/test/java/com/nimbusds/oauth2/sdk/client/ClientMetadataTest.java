@@ -41,6 +41,7 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.ciba.BackChannelTokenDeliveryMode;
 import com.nimbusds.oauth2.sdk.id.SoftwareID;
 import com.nimbusds.oauth2.sdk.id.SoftwareVersion;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
@@ -86,10 +87,13 @@ public class ClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("require_pushed_authorization_requests"));
+		assertTrue(paramNames.contains("backchannel_token_delivery_mode"));
+		assertTrue(paramNames.contains("backchannel_client_notification_endpoint"));
+		assertTrue(paramNames.contains("backchannel_authentication_request_signing_alg"));
+		assertTrue(paramNames.contains("backchannel_user_code_parameter"));
 		assertTrue(paramNames.contains("client_registration_types"));
 		assertTrue(paramNames.contains("organization_name"));
-
-		assertEquals(33, ClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(37, ClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -187,6 +191,12 @@ public class ClientMetadataTest extends TestCase {
 		SoftwareVersion softwareVersion = new SoftwareVersion("1.0");
 		meta.setSoftwareVersion(softwareVersion);
 		
+		meta.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.PUSH);
+		URI cibaEndpoint = new URI("http://example.com/ciba");
+		meta.setBackChannelClientNotificationEndpoint(cibaEndpoint);
+		meta.setBackChannelAuthRequestJWSAlg(JWSAlgorithm.RS256);
+		meta.setSupportsBackChannelUserCodeParam(true);
+		
 		assertFalse(meta.getTLSClientCertificateBoundAccessTokens());
 		assertFalse(meta.getMutualTLSSenderConstrainedAccessTokens());
 		meta.setTLSClientCertificateBoundAccessTokens(true);
@@ -268,6 +278,11 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(authzJWEEnc, meta.getAuthorizationJWEEnc());
 		assertTrue(meta.getCustomFields().isEmpty());
 		
+		assertEquals(cibaEndpoint, meta.getBackChannelClientNotificationEndpoint());
+		assertTrue(meta.supportsBackChannelUserCodeParam());
+		assertEquals(BackChannelTokenDeliveryMode.PUSH, meta.getBackChannelTokenDeliveryMode());
+		assertEquals(JWSAlgorithm.RS256, meta.getBackChannelAuthRequestJWSAlg());
+		
 		String json = meta.toJSONObject().toJSONString();
 		
 		JSONObject jsonObject = JSONObjectUtils.parse(json);
@@ -314,7 +329,11 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(authzJWSAlg, meta.getAuthorizationJWSAlg());
 		assertEquals(authzJWEAlg, meta.getAuthorizationJWEAlg());
 		assertEquals(authzJWEEnc, meta.getAuthorizationJWEEnc());
-
+		assertEquals(BackChannelTokenDeliveryMode.PUSH, meta.getBackChannelTokenDeliveryMode());
+		assertEquals(cibaEndpoint, meta.getBackChannelClientNotificationEndpoint());
+		assertEquals(JWSAlgorithm.RS256, meta.getBackChannelAuthRequestJWSAlg());
+		assertTrue(meta.supportsBackChannelUserCodeParam());
+	
 		assertTrue(meta.getCustomFields().isEmpty());
 	}
 
@@ -398,6 +417,13 @@ public class ClientMetadataTest extends TestCase {
 		SoftwareVersion softwareVersion = new SoftwareVersion("1.0");
 		meta.setSoftwareVersion(softwareVersion);
 		
+		meta.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.PUSH);
+		URI cibaEndpoint = new URI("http://example.com/de/cn");
+		meta.setBackChannelClientNotificationEndpoint(cibaEndpoint);
+		meta.setBackChannelAuthRequestJWSAlg(JWSAlgorithm.RS256);
+		meta.setSupportsBackChannelUserCodeParam(true);
+		
+		
 		// Test getters
 		assertEquals(redirectURIs, meta.getRedirectionURIs());
 		assertEquals(scope, meta.getScope());
@@ -426,6 +452,10 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(1, meta.getJWKSet().getKeys().size());
 		assertEquals(softwareID, meta.getSoftwareID());
 		assertEquals(softwareVersion, meta.getSoftwareVersion());
+		assertEquals(BackChannelTokenDeliveryMode.PUSH, meta.getBackChannelTokenDeliveryMode());
+		assertEquals(cibaEndpoint, meta.getBackChannelClientNotificationEndpoint());
+		assertEquals(JWSAlgorithm.RS256, meta.getBackChannelAuthRequestJWSAlg());
+		assertTrue(meta.supportsBackChannelUserCodeParam());
 		assertTrue(meta.getCustomFields().isEmpty());
 		
 		String json = meta.toJSONObject().toJSONString();
@@ -464,7 +494,12 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(1, meta.getJWKSet().getKeys().size());
 		assertEquals(softwareID, meta.getSoftwareID());
 		assertEquals(softwareVersion, meta.getSoftwareVersion());
-
+		
+		assertEquals(cibaEndpoint, meta.getBackChannelClientNotificationEndpoint());
+		assertTrue(meta.supportsBackChannelUserCodeParam());
+		assertEquals(BackChannelTokenDeliveryMode.PUSH, meta.getBackChannelTokenDeliveryMode());
+		assertEquals(JWSAlgorithm.RS256, meta.getBackChannelAuthRequestJWSAlg());
+	
 		assertTrue(meta.getCustomFields().isEmpty());
 	}
 
@@ -576,6 +611,12 @@ public class ClientMetadataTest extends TestCase {
 		
 		EncryptionMethod authzJWEEnc = EncryptionMethod.A256GCM;
 		meta.setAuthorizationJWEEnc(authzJWEEnc);
+		
+		meta.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.PUSH);
+		URI cibaEndpoint = new URI("http://example.com/de/cn");
+		meta.setBackChannelClientNotificationEndpoint(cibaEndpoint);
+		meta.setBackChannelAuthRequestJWSAlg(JWSAlgorithm.RS256);
+		meta.setSupportsBackChannelUserCodeParam(true);
 
 		// Shallow copy
 		ClientMetadata copy = new ClientMetadata(meta);
@@ -623,7 +664,12 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(authzJWSAlg, copy.getAuthorizationJWSAlg());
 		assertEquals(authzJWEAlg, copy.getAuthorizationJWEAlg());
 		assertEquals(authzJWEEnc, copy.getAuthorizationJWEEnc());
-
+		
+		assertEquals(BackChannelTokenDeliveryMode.PUSH, meta.getBackChannelTokenDeliveryMode());
+		assertEquals(cibaEndpoint, meta.getBackChannelClientNotificationEndpoint());
+		assertEquals(JWSAlgorithm.RS256, meta.getBackChannelAuthRequestJWSAlg());
+		assertTrue(meta.supportsBackChannelUserCodeParam());
+	
 		String json = copy.toJSONObject().toJSONString();
 
 		JSONObject jsonObject = JSONObjectUtils.parse(json);
@@ -668,7 +714,12 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(authzJWSAlg, copy.getAuthorizationJWSAlg());
 		assertEquals(authzJWEAlg, copy.getAuthorizationJWEAlg());
 		assertEquals(authzJWEEnc, copy.getAuthorizationJWEEnc());
-
+		
+		assertEquals(BackChannelTokenDeliveryMode.PUSH, meta.getBackChannelTokenDeliveryMode());
+		assertEquals(cibaEndpoint, meta.getBackChannelClientNotificationEndpoint());
+		assertEquals(JWSAlgorithm.RS256, meta.getBackChannelAuthRequestJWSAlg());
+		assertTrue(meta.supportsBackChannelUserCodeParam());
+	
 		assertTrue(copy.getCustomFields().isEmpty());
 	}
 

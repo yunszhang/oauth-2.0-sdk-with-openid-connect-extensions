@@ -73,8 +73,14 @@ public class OIDCClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("require_pushed_authorization_requests"));
+		
+		// CIBA
+		assertTrue(paramNames.contains("backchannel_token_delivery_mode"));
+		assertTrue(paramNames.contains("backchannel_client_notification_endpoint"));
+		assertTrue(paramNames.contains("backchannel_authentication_request_signing_alg"));
+		assertTrue(paramNames.contains("backchannel_user_code_parameter"));
 
-		// OIDC specifid params
+		// OIDC specific params
 		assertTrue(paramNames.contains("application_type"));
 		assertTrue(paramNames.contains("sector_identifier_uri"));
 		assertTrue(paramNames.contains("subject_type"));
@@ -98,8 +104,7 @@ public class OIDCClientInformationTest extends TestCase {
 		assertTrue(paramNames.contains("backchannel_logout_session_required"));
 		assertTrue(paramNames.contains("client_registration_types"));
 		assertTrue(paramNames.contains("organization_name"));
-
-		assertEquals(57, paramNames.size());
+		assertEquals(61, paramNames.size());
 	}
 
 

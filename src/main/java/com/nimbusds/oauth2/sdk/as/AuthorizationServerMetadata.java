@@ -17,7 +17,6 @@
 
 package com.nimbusds.oauth2.sdk.as;
 
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -36,6 +35,7 @@ import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.client.ClientType;
+import com.nimbusds.oauth2.sdk.ciba.BackChannelTokenDeliveryMode;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.Issuer;
@@ -43,7 +43,6 @@ import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
-
 
 /**
  * OAuth 2.0 Authorisation Server (AS) metadata.
@@ -61,21 +60,21 @@ import com.nimbusds.oauth2.sdk.util.URIUtils;
  *     <li>OAuth 2.0 Authorization Server Issuer Identifier in Authorization
  *         Response (draft-meyerzuselhausen-oauth-iss-auth-resp-01)
  *     <li>Financial-grade API - Part 2: Read and Write API Security Profile
- *     <li>OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-02)
- *     <li>OAuth 2.0 Device Flow for Browserless and Input Constrained Devices
- *         (RFC 8628)
+ *     <li>OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-05)
+ *     <li>OAuth 2.0 Device Authorization Grant (RFC 8628)
+ *     <li>OpenID Connect Client Initiated Backchannel Authentication Flow -
+ * 	   Core 1.0 (draft 03)
  *     <li>OAuth 2.0 Incremental Authorization
  *         (draft-ietf-oauth-incremental-authz-04)
  * </ul>
  */
 public class AuthorizationServerMetadata extends AuthorizationServerEndpointMetadata {
-	
+
 	/**
 	 * The registered parameter names.
 	 */
 	private static final Set<String> REGISTERED_PARAMETER_NAMES;
-	
-	
+
 	static {
 		Set<String> p = new HashSet<>(AuthorizationServerEndpointMetadata.getRegisteredParameterNames());
 		p.add("issuer");
@@ -110,6 +109,9 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 		p.add("require_pushed_authorization_requests");
 		p.add("incremental_authz_types_supported");
 		p.add("authorization_response_iss_parameter_supported");
+		p.add("backchannel_token_delivery_modes_supported");
+		p.add("backchannel_authentication_request_signing_alg_values_supported");
+		p.add("backchannel_user_code_parameter_supported");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 	
@@ -331,6 +333,26 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	 * The supported OAuth 2.0 client types for incremental authorisation.
 	 */
 	private List<ClientType> incrementalAuthzTypes;
+
+	
+	/**
+	 * The supported CIBA token delivery modes.
+	 */
+	private List<BackChannelTokenDeliveryMode> backChannelTokenDeliveryModes;
+	
+	
+	/**
+	 * The supported JWS algorithms for CIBA requests. If omitted signed
+	 * authentication requests are not supported.
+	 */
+	private List<JWSAlgorithm> backChannelAuthRequestJWSAlgs;
+
+	
+	/**
+	 * If {@code true} the CIBA {@code user_code} parameter is supported,
+	 * else not.
+	 */
+	private boolean backChannelUserCodeSupported = false;
 	
 	
 	/**
@@ -836,8 +858,8 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	
 	/**
 	 * Gets the support for the {@code request_uri} authorisation request
-	 * parameter. Corresponds the {@code request_uri_parameter_supported}
-	 * metadata field.
+	 * parameter. Corresponds to the
+	 * {@code request_uri_parameter_supported} metadata field.
 	 *
 	 * @return {@code true} if the {@code request_uri} parameter is
 	 *         supported, else {@code false}.
@@ -850,8 +872,8 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	
 	/**
 	 * Sets the support for the {@code request_uri} authorisation request
-	 * parameter. Corresponds the {@code request_uri_parameter_supported}
-	 * metadata field.
+	 * parameter. Corresponds to the
+	 * {@code request_uri_parameter_supported} metadata field.
 	 *
 	 * @param requestURIParamSupported {@code true} if the
 	 *                                 {@code request_uri} parameter is
@@ -1289,6 +1311,86 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	
 	
 	/**
+	 * Gets the supported CIBA token delivery modes. Corresponds to the
+	 * {@code backchannel_token_delivery_modes_supported} metadata field.
+	 *
+	 * @return The CIBA token delivery modes, {@code null} if not
+	 *         specified.
+	 */
+	public List<BackChannelTokenDeliveryMode> getBackChannelTokenDeliveryModes() {
+		
+		return backChannelTokenDeliveryModes;
+	}
+	
+	
+	/**
+	 * Sets the supported CIBA token delivery modes. Corresponds to the
+	 * {@code backchannel_token_delivery_modes_supported} metadata field.
+	 *
+	 * @param backChannelTokenDeliveryModes The CIBA token delivery modes,
+	 *                                      {@code null} if not specified.
+	 */
+	public void setBackChannelTokenDeliveryModes(final List<BackChannelTokenDeliveryMode> backChannelTokenDeliveryModes) {
+		
+		this.backChannelTokenDeliveryModes = backChannelTokenDeliveryModes;
+	}
+	
+	/**
+	 * Gets the supported JWS algorithms for CIBA requests. Corresponds to
+	 * the {@code backchannel_authentication_request_signing_alg_values_supported}
+	 * metadata field.
+	 *
+	 * @return The supported JWS algorithms, {@code null} if not specified.
+	 */
+	public List<JWSAlgorithm> getBackChannelAuthenticationRequestJWSAlgs() {
+		
+		return backChannelAuthRequestJWSAlgs;
+	}
+	
+	/**
+	 * Gets the supported JWS algorithms for CIBA requests. Corresponds to
+	 * the {@code backchannel_authentication_request_signing_alg_values_supported}
+	 * metadata field.
+	 *
+	 * @param backChannelAuthRequestJWSAlgs The supported JWS algorithms,
+	 *                                      {@code null} if not specified.
+	 */
+	public void setBackChannelAuthenticationRequestJWSAlgs(final List<JWSAlgorithm> backChannelAuthRequestJWSAlgs) {
+		
+		this.backChannelAuthRequestJWSAlgs = backChannelAuthRequestJWSAlgs;
+	}
+	
+	
+	/**
+	 * Gets the support for the {@code user_code} CIBA request parameter.
+	 * Corresponds to the {@code backchannel_user_code_parameter_supported}
+	 * metadata field.
+	 *
+	 * @return {@code true} if the {@code user_code} parameter is
+	 *         supported, else {@code false}.
+	 */
+	public boolean supportsBackChannelUserCodeParam() {
+		
+		return backChannelUserCodeSupported;
+	}
+	
+	
+	/**
+	 * Sets the support for the {@code user_code} CIBA request parameter.
+	 * Corresponds to the {@code backchannel_user_code_parameter_supported}
+	 * metadata field.
+	 *
+	 * @param backChannelUserCodeSupported {@code true} if the
+	 *                                     {@code user_code} parameter is
+	 *                                     supported, else {@code false}.
+	 */
+	public void setSupportsBackChannelUserCodeParam(final boolean backChannelUserCodeSupported) {
+		
+		this.backChannelUserCodeSupported = backChannelUserCodeSupported;
+	}
+	
+	
+	/**
 	 * Gets the specified custom (not registered) parameter.
 	 *
 	 * @param name The parameter name. Must not be {@code null}.
@@ -1385,7 +1487,6 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	 * @return The JSON object representation.
 	 */
 	public JSONObject toJSONObject() {
-		
 		JSONObject o = super.toJSONObject();
 		
 		// Mandatory fields
@@ -1631,6 +1732,37 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 			}
 			o.put("incremental_authz_types_supported", stringList);
 		}
+		
+		// CIBA
+		if (backChannelTokenDeliveryModes != null) {
+			
+			stringList = new ArrayList<>(backChannelTokenDeliveryModes.size());
+			
+			for (BackChannelTokenDeliveryMode mode: backChannelTokenDeliveryModes) {
+				if (mode != null) {
+					stringList.add(mode.getValue());
+				}
+			}
+			
+			o.put("backchannel_token_delivery_modes_supported", stringList);
+		}
+		
+		if (backChannelAuthRequestJWSAlgs != null) {
+			
+			stringList = new ArrayList<>(backChannelAuthRequestJWSAlgs.size());
+			
+			for (JWSAlgorithm alg : backChannelAuthRequestJWSAlgs) {
+				if (alg != null) {
+					stringList.add(alg.getName());
+				}
+			}
+			
+			o.put("backchannel_authentication_request_signing_alg_values_supported", stringList);
+		}
+		
+		if (backChannelUserCodeSupported) {
+			o.put("backchannel_user_code_parameter_supported", true);
+		}
 
 		// Append any custom (not registered) parameters
 		o.putAll(customParameters);
@@ -1674,9 +1806,10 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 		as.setRegistrationEndpointURI(asEndpoints.getRegistrationEndpointURI());
 		as.setIntrospectionEndpointURI(asEndpoints.getIntrospectionEndpointURI());
 		as.setRevocationEndpointURI(asEndpoints.getRevocationEndpointURI());
-		as.setDeviceAuthorizationEndpointURI(asEndpoints.getDeviceAuthorizationEndpointURI());
 		as.setRequestObjectEndpoint(asEndpoints.getRequestObjectEndpoint());
 		as.setPushedAuthorizationRequestEndpointURI(asEndpoints.getPushedAuthorizationRequestEndpointURI());
+		as.setDeviceAuthorizationEndpointURI(asEndpoints.getDeviceAuthorizationEndpointURI());
+		as.setBackChannelAuthenticationEndpoint(asEndpoints.getBackChannelAuthenticationEndpoint());
 		as.jwkSetURI = JSONObjectUtils.getURI(jsonObject, "jwks_uri", null);
 		
 		// AS capabilities
@@ -1983,6 +2116,33 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 			}
 		}
 		
+		// CIBA
+		if (jsonObject.get("backchannel_token_delivery_modes_supported") != null) {
+			
+			as.backChannelTokenDeliveryModes = new ArrayList<>();
+
+			for (String v : JSONObjectUtils.getStringArray(jsonObject, "backchannel_token_delivery_modes_supported")) {
+
+				if (v != null)
+					as.backChannelTokenDeliveryModes.add(BackChannelTokenDeliveryMode.parse(v));
+			}
+		}
+
+		if (jsonObject.get("backchannel_authentication_request_signing_alg_values_supported") != null) {
+			
+			as.backChannelAuthRequestJWSAlgs = new ArrayList<>();
+
+			for (String v : JSONObjectUtils.getStringArray(jsonObject, "backchannel_authentication_request_signing_alg_values_supported")) {
+
+				if (v != null)
+					as.backChannelAuthRequestJWSAlgs.add(JWSAlgorithm.parse(v));
+			}
+		}
+		
+		if (jsonObject.get("backchannel_user_code_parameter_supported") != null) {
+			as.backChannelUserCodeSupported = JSONObjectUtils.getBoolean(jsonObject, "backchannel_user_code_parameter_supported");
+		}
+
 		// Parse custom (not registered) parameters
 		JSONObject customParams = new JSONObject(jsonObject);
 		customParams.keySet().removeAll(REGISTERED_PARAMETER_NAMES);
