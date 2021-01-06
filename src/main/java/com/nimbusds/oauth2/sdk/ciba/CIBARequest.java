@@ -27,9 +27,11 @@ import java.util.*;
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.common.contenttype.ContentType;
+import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
+import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.AbstractAuthenticatedRequest;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
@@ -44,7 +46,8 @@ import com.nimbusds.openid.connect.sdk.claims.ACR;
 
 /**
  * <p>CIBA request to an OpenID provider / OAuth 2.0 authorisation server
- * backend authentication endpoint.
+ * backend authentication endpoint. Supports plan as well as signed (JWT)
+ * requests.
  *
  * <p>Example HTTP request:
  * 
@@ -94,6 +97,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	static {
 		Set<String> p = new HashSet<>();
 
+		// Plain
 		p.add("scope");
 		p.add("client_notification_token");
 		p.add("acr_values");
@@ -103,6 +107,9 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		p.add("binding_message");
 		p.add("user_code");
 		p.add("requested_expiry");
+		
+		// Signed JWT
+		p.add("request");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -172,6 +179,12 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	 * Custom parameters.
 	 */
 	private final Map<String,List<String>> customParams;
+	
+	
+	/**
+	 * The JWT for a signed request.
+	 */
+	private final SignedJWT signedRequest;
 	
 
 	/**
@@ -259,6 +272,12 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		 * Custom parameters.
 		 */
 		private Map<String,List<String>> customParams = new HashMap<>();
+		
+		
+		/**
+		 * The JWT for a signed request.
+		 */
+		private final SignedJWT signedRequest;
 
 		
 		/**
@@ -281,6 +300,33 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 				throw new IllegalArgumentException("The scope must not be null or empty");
 			}
 			this.scope = scope;
+			
+			signedRequest = null;
+		}
+		
+		
+		/**
+		 * Creates a new CIBA signed request builder.
+		 *
+		 * @param clientAuth    The client authentication. Must not be
+		 *                      {@code null}.
+		 * @param signedRequest The signed request JWT. Must not be
+		 *                      {@code null}.
+		 */
+		public Builder(final ClientAuthentication clientAuth,
+			       final SignedJWT signedRequest) {
+			
+			if (clientAuth == null) {
+				throw new IllegalArgumentException("The client authentication must not be null");
+			}
+			this.clientAuth = clientAuth;
+			
+			if (signedRequest == null) {
+				throw new IllegalArgumentException("The signed request JWT must not be null");
+			}
+			this.signedRequest = signedRequest;
+			
+			scope = null;
 		}
 		
 
@@ -304,6 +350,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			userCode = request.getUserCode();
 			requestedExpiry = request.getRequestedExpiry();
 			customParams = request.getCustomParameters();
+			signedRequest = request.getRequestJWT();
 		}
 		
 		
@@ -477,6 +524,15 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		public CIBARequest build() {
 			
 			try {
+				if (signedRequest != null) {
+					return new CIBARequest(
+						uri,
+						clientAuth,
+						signedRequest
+					);
+				}
+				
+				// Plain request
 				return new CIBARequest(
 					uri,
 					clientAuth,
@@ -565,6 +621,45 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		this.requestedЕxpiry = requestedExpiry;
 		
 		this.customParams = customParams != null ? customParams : Collections.<String, List<String>>emptyMap();
+		
+		signedRequest = null;
+	}
+	
+	
+	/**
+	 * Creates a new CIBA signed request.
+	 *
+	 * @param uri           The endpoint URI, {@code null} if not
+	 *                      specified.
+	 * @param clientAuth    The client authentication. Must not be
+	 *                      {@code null}.
+	 * @param signedRequest The signed request JWT. Must not be
+	 *                      {@code null}.
+	 */
+	public CIBARequest(final URI uri,
+			   final ClientAuthentication clientAuth,
+			   final SignedJWT signedRequest) {
+		
+		super(uri, clientAuth);
+		
+		if (signedRequest == null) {
+			throw new IllegalArgumentException("The signed request JWT must not be null");
+		}
+		if (JWSObject.State.UNSIGNED.equals(signedRequest.getState())) {
+			throw new IllegalArgumentException("The request JWT must be in a signed state");
+		}
+		this.signedRequest = signedRequest;
+		
+		scope = null;
+		clientNotificationToken = null;
+		acrValues = null;
+		loginHintTokenString = null;
+		idTokenHint = null;
+		loginHint = null;
+		bindingMessage = null;
+		userCode = null;
+		requestedЕxpiry = null;
+		customParams = Collections.emptyMap();
 	}
 
 	
@@ -583,7 +678,8 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	/**
 	 * Gets the scope. Corresponds to the optional {@code scope} parameter.
 	 *
-	 * @return The scope.
+	 * @return The scope, {@code null} for a {@link #isSigned signed
+	 *         request}.
 	 */
 	public Scope getScope() {
 
@@ -722,6 +818,29 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	
 	
 	/**
+	 * Returns {@code true} if this request is signed.
+	 *
+	 * @return {@code true} for a signed request, {@code false} for a plain
+	 *         request.
+	 */
+	public boolean isSigned() {
+		
+		return signedRequest != null;
+	}
+	
+	
+	/**
+	 * Returns the JWT for a signed request.
+	 *
+	 * @return The request JWT.
+	 */
+	public SignedJWT getRequestJWT() {
+		
+		return signedRequest;
+	}
+	
+	
+	/**
 	 * Returns the for parameters for this CIBA request. Parameters which
 	 * are part of the client authentication are not included.
 	 *
@@ -731,6 +850,11 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		
 		// Put custom params first, so they may be overwritten by std params
 		Map<String, List<String>> params = new LinkedHashMap<>(getCustomParameters());
+		
+		if (isSigned()) {
+			params.put("request", Collections.singletonList(signedRequest.serialize()));
+			return params;
+		}
 		
 		params.put("scope", Collections.singletonList(getScope().toString()));
 		
@@ -770,6 +894,10 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	 * @return The parameters as JWT claim set.
 	 */
 	public JWTClaimsSet toJWTClaimsSet() {
+		
+		if (isSigned()) {
+			throw new IllegalStateException();
+		}
 		
 		return JWTClaimsSetUtils.toJWTClaimsSet(toParameters());
 	}
@@ -837,7 +965,32 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		Map<String, List<String>> params = httpRequest.getQueryParameters();
 		
 		String v;
-
+		
+		if (params.containsKey("request")) {
+			// Signed request
+			v = MultivaluedMapUtils.getFirstValue(params, "request");
+			
+			if (StringUtils.isBlank(v)) {
+				throw new ParseException("Empty \"request\" parameter");
+			}
+			
+			SignedJWT signedRequest;
+			try {
+				signedRequest = SignedJWT.parse(v);
+			} catch (java.text.ParseException e) {
+				throw new ParseException("Invalid \"request\" JWT: " + e.getMessage(), e);
+			}
+			
+			try {
+				return new CIBARequest(uri, clientAuth, signedRequest);
+			} catch (IllegalArgumentException e) {
+				throw new ParseException(e.getMessage(), e);
+			}
+		}
+		
+		
+		// Plain request
+		
 		// Parse required scope
 		v = MultivaluedMapUtils.getFirstValue(params, "scope");
 		Scope scope = Scope.parse(v);

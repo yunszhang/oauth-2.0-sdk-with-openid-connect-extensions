@@ -9,6 +9,7 @@ import java.util.*;
 import junit.framework.TestCase;
 
 import com.nimbusds.common.contenttype.ContentType;
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.RSASSASigner;
@@ -17,6 +18,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.SerializeException;
@@ -24,8 +26,10 @@ import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.id.JWTID;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 
@@ -140,6 +144,8 @@ public class CIBARequestTest extends TestCase {
 		assertNull(request.getRequestedExpiry());
 		assertTrue(request.getCustomParameters().isEmpty());
 		assertNull(request.getCustomParameter("no-such-param"));
+		assertFalse(request.isSigned());
+		assertNull(request.getRequestJWT());
 		
 		try {
 			request.toHTTPRequest();
@@ -183,6 +189,8 @@ public class CIBARequestTest extends TestCase {
 		assertEquals(USER_CODE, request.getUserCode());
 		assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
 		assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
+		assertFalse(request.isSigned());
+		assertNull(request.getRequestJWT());
 		
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		assertEquals(ENDPOINT_URI.toURL(), httpRequest.getURL());
@@ -209,6 +217,8 @@ public class CIBARequestTest extends TestCase {
 		assertEquals(USER_CODE, request.getUserCode());
 		assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
 		assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
+		assertFalse(request.isSigned());
+		assertNull(request.getRequestJWT());
 		
 		JWTClaimsSet jwtClaimsSet = request.toJWTClaimsSet();
 		Map<String, List<String>> params = request.toParameters();
@@ -218,7 +228,7 @@ public class CIBARequestTest extends TestCase {
 		assertEquals(params.size(), jwtClaimsSet.getClaims().size());
 	}
 	
-
+	
 	public void testBuilders() {
 		
 		// Regular
@@ -264,6 +274,64 @@ public class CIBARequestTest extends TestCase {
 		assertEquals(USER_CODE, request.getUserCode());
 		assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
 		assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
+	}
+	
+	
+	public void testSignedRequest()
+		throws JOSEException, ParseException {
+		
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.algorithm(JWSAlgorithm.RS256)
+			.generate();
+		
+		CIBARequest plainRequest = new CIBARequest.Builder(CLIENT_AUTH, SCOPE)
+			.clientNotificationToken(CLIENT_NOTIFICATION_TOKEN)
+			.bindingMessage(BINDING_MESSAGE)
+			.build();
+		
+		Issuer iss = new Issuer(new ClientID());
+		Audience aud = new Audience("https://c2id.com");
+		Date now = new Date();
+		long nowTs = now.getTime() / 1000;
+		Date iat = DateUtils.fromSecondsSinceEpoch(nowTs);
+		Date nbf = DateUtils.fromSecondsSinceEpoch(nowTs);
+		Date exp = DateUtils.fromSecondsSinceEpoch(nowTs + 600);
+		JWTID jti = new JWTID();
+		
+		CIBASignedRequestClaimsSet claimsSet = new CIBASignedRequestClaimsSet(
+			plainRequest,
+			iss,
+			aud,
+			iat,
+			nbf,
+			exp,
+			jti);
+		
+		SignedJWT requestJWT = new SignedJWT(
+			new JWSHeader((JWSAlgorithm) rsaJWK.getAlgorithm()),
+			claimsSet.toJWTClaimsSet());
+		requestJWT.sign(new RSASSASigner(rsaJWK));
+		
+		CIBARequest signedRequest = new CIBARequest.Builder(CLIENT_AUTH, requestJWT)
+			.endpointURI(ENDPOINT_URI)
+			.build();
+		
+		assertTrue(signedRequest.isSigned());
+		assertEquals(requestJWT, signedRequest.getRequestJWT());
+		
+		HTTPRequest httpRequest = signedRequest.toHTTPRequest();
+		assertEquals(ENDPOINT_URI, httpRequest.getURI());
+		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
+		assertEquals(((ClientSecretBasic)CLIENT_AUTH).toHTTPAuthorizationHeader(), httpRequest.getAuthorization());
+		assertEquals(ContentType.APPLICATION_URLENCODED, httpRequest.getEntityContentType());
+		Map<String, List<String>> params = httpRequest.getQueryParameters();
+		assertEquals(Collections.singletonList(requestJWT.serialize()), params.get("request"));
+		assertEquals(1, params.size());
+		
+		signedRequest = CIBARequest.parse(httpRequest);
+		
+		assertTrue(signedRequest.isSigned());
+		assertEquals(requestJWT.serialize(), signedRequest.getRequestJWT().getParsedString());
 	}
 	
 	
