@@ -25,6 +25,10 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
 
 /**
  * CIBA token delivery mode.
+ *
+ * <ul>
+ *      <li>OpenID Connect CIBA Flow - Core 1.0, section 5.
+ * </ul>
  */
 @Immutable
 public final class BackChannelTokenDeliveryMode extends Identifier {

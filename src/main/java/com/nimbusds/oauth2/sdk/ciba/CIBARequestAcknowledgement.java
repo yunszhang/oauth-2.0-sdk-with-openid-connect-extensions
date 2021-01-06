@@ -49,7 +49,7 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  * <p>Related specifications:
  *
  * <ul>
- *      <li>TODO
+ *      <li>OpenID Connect CIBA Flow - Core 1.0, section 7.3.
  * </ul>
  */
 @Immutable

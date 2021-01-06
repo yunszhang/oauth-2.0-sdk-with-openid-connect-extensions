@@ -30,7 +30,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
  * <p>Related specifications:
  *
  * <ul>
- *      <li>TODO
+ *      <li>OpenID Connect CIBA Flow - Core 1.0, section 7.3 and 13.
  * </ul>
  */
 public abstract class CIBAResponse implements Response {

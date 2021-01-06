@@ -70,7 +70,7 @@ import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
  * <p>Related specifications:
  *
  * <ul>
- *      <li>TODO
+ *      <li>OpenID Connect CIBA Flow - Core 1.0, section 10.3.1.
  * </ul>
  */
 @Immutable

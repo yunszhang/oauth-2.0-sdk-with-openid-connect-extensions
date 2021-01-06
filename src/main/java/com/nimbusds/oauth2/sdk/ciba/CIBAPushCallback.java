@@ -34,7 +34,7 @@ import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
  * <p>Related specifications:
  *
  * <ul>
- *      <li>TODO
+ *      <li>OpenID Connect CIBA Flow - Core 1.0, section 12.3.
  * </ul>
  */
 public abstract class CIBAPushCallback extends ProtectedResourceRequest {

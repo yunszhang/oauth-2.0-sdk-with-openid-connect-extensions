@@ -76,7 +76,7 @@ import com.nimbusds.openid.connect.sdk.claims.ACR;
  * <p>Related specifications:
  *
  * <ul>
- *      <li>TODO
+ *      <li>OpenID Connect CIBA Flow - Core 1.0, section 7.1.
  * </ul>
  */
 @Immutable

@@ -67,7 +67,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
  * <p>Related specifications:
  *
  * <ul>
- *      <li>TODO
+ *      <li>OpenID Connect CIBA Flow - Core 1.0, sections 11, 12 and 13.
  * </ul>
  */
 @Immutable

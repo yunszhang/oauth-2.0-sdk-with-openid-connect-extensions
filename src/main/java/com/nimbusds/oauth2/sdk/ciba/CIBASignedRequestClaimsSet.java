@@ -52,7 +52,7 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>TODO
+ *     <li>OpenID Connect CIBA Flow - Core 1.0, section 7.1.1.
  * </ul>
  */
 public class CIBASignedRequestClaimsSet extends ClaimsSet {
