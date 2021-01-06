@@ -85,6 +85,24 @@ public final class CIBAError {
 	
 	
 	/**
+	 * The {@code auth_req_id} has expired.
+	 */
+	public static final ErrorObject EXPIRED_TOKEN = new ErrorObject(
+		"expired_token",
+		"The auth_req_id has expired",
+		0);
+	
+	
+	/**
+	 * The transaction failed due to an unexpected condition.
+	 */
+	public static final ErrorObject TRANSACTION_FAILED = new ErrorObject(
+		"transaction_failed",
+		"The transaction failed due to an unexpected condition",
+		0);
+	
+	
+	/**
 	 * Prevents public instantiation.
 	 */
 	private CIBAError() { }

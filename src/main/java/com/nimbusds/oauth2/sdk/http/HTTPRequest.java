@@ -34,6 +34,7 @@ import net.minidev.json.JSONObject;
 import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 
@@ -216,6 +217,27 @@ public class HTTPRequest extends HTTPMessage {
 			throw new IllegalArgumentException("The HTTP URL must not be null");
 
 		this.url = url;
+	}
+	
+	
+	/**
+	 * Creates a new minimally specified HTTP request.
+	 *
+	 * @param method The HTTP request method. Must not be {@code null}.
+	 * @param uri    The HTTP request URI. Must be an URL and not
+	 *               {@code null}.
+	 */
+	public HTTPRequest(final Method method, final URI uri) {
+		this(method, toURLWithUncheckedException(uri));
+	}
+	
+	
+	private static URL toURLWithUncheckedException(final URI uri) {
+		try {
+			return uri.toURL();
+		} catch (MalformedURLException e) {
+			throw new SerializeException(e.getMessage(), e);
+		}
 	}
 	
 	

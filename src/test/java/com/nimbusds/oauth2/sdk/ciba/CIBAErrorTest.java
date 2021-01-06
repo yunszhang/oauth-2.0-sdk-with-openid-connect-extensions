@@ -52,5 +52,16 @@ public class CIBAErrorTest extends TestCase {
 		assertEquals("Invalid or unacceptable binding_message", CIBAError.INVALID_BINDING_MESSAGE.getDescription());
 		assertNull(CIBAError.INVALID_BINDING_MESSAGE.getURI());
 		assertEquals(HTTPResponse.SC_BAD_REQUEST, CIBAError.INVALID_BINDING_MESSAGE.getHTTPStatusCode());
+		
+		// push specific errors
+		assertEquals("expired_token", CIBAError.EXPIRED_TOKEN.getCode());
+		assertEquals("The auth_req_id has expired", CIBAError.EXPIRED_TOKEN.getDescription());
+		assertNull(CIBAError.EXPIRED_TOKEN.getURI());
+		assertEquals(0, CIBAError.EXPIRED_TOKEN.getHTTPStatusCode());
+		
+		assertEquals("transaction_failed", CIBAError.TRANSACTION_FAILED.getCode());
+		assertEquals("The transaction failed due to an unexpected condition", CIBAError.TRANSACTION_FAILED.getDescription());
+		assertNull(CIBAError.TRANSACTION_FAILED.getURI());
+		assertEquals(0, CIBAError.TRANSACTION_FAILED.getHTTPStatusCode());
 	}
 }
