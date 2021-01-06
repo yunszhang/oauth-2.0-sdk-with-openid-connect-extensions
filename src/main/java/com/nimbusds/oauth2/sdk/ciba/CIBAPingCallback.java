@@ -18,10 +18,8 @@
 package com.nimbusds.oauth2.sdk.ciba;
 
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
@@ -29,7 +27,6 @@ import net.minidev.json.JSONObject;
 import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ProtectedResourceRequest;
-import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
@@ -101,14 +98,8 @@ public class CIBAPingCallback extends ProtectedResourceRequest {
 	@Override
 	public HTTPRequest toHTTPRequest() {
 		
-		URL url;
-		try {
-			url = getEndpointURI().toURL();
-		} catch (MalformedURLException e) {
-			throw new SerializeException(e.getMessage(), e);
-		}
-		
-		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, url);
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, getEndpointURI());
+		httpRequest.setFollowRedirects(false);
 		httpRequest.setAuthorization(getAccessToken().toAuthorizationHeader());
 		httpRequest.setEntityContentType(ContentType.APPLICATION_JSON);
 		JSONObject jsonObject = new JSONObject();
@@ -130,7 +121,6 @@ public class CIBAPingCallback extends ProtectedResourceRequest {
 	public static CIBAPingCallback parse(final HTTPRequest httpRequest)
 		throws ParseException {
 		
-		// Only HTTP POST accepted
 		URI uri;
 		try {
 			uri = httpRequest.getURL().toURI();

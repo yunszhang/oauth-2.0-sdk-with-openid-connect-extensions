@@ -58,6 +58,7 @@ public class CIBAPingCallbackTest extends TestCase {
 		HTTPRequest httpRequest = pingCallback.toHTTPRequest();
 		assertEquals(ENDPOINT.toURL(), httpRequest.getURL());
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
+		assertFalse(httpRequest.getFollowRedirects());
 		assertEquals(ACCESS_TOKEN.toAuthorizationHeader(), httpRequest.getAuthorization());
 		assertEquals(ContentType.APPLICATION_JSON, httpRequest.getEntityContentType());
 		assertEquals(2, httpRequest.getHeaderMap().size());
