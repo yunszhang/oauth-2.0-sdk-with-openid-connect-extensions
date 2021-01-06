@@ -49,25 +49,25 @@ import com.nimbusds.openid.connect.sdk.claims.ACR;
  * <p>Example HTTP request:
  * 
  * <pre>
- *  POST /bc-authorize HTTP/1.1
- *  Host: server.example.com
- *  Content-Type: application/x-www-form-urlencoded
+ * POST /bc-authorize HTTP/1.1
+ * Host: server.example.com
+ * Content-Type: application/x-www-form-urlencoded
  *
- *  scope=openid%20email%20example-scope&
- *  client_notification_token=8d67dc78-7faa-4d41-aabd-67707b374255&
- *  binding_message=W4SCT&
- *  login_hint_token=eyJraWQiOiJsdGFjZXNidyIsImFsZyI6IkVTMjU2In0.eyJ
- *  zdWJfaWQiOnsic3ViamVjdF90eXBlIjoicGhvbmUiLCJwaG9uZSI6IisxMzMwMjg
- *  xODAwNCJ9fQ.Kk8jcUbHjJAQkRSHyDuFQr3NMEOSJEZc85VfER74tX6J9CuUllr8
- *  9WKUHUR7MA0-mWlptMRRhdgW1ZDt7g1uwQ&
- *  client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3A
- *  client-assertion-type%3Ajwt-bearer&
- *  client_assertion=eyJraWQiOiJsdGFjZXNidyIsImFsZyI6IkVTMjU2In0.eyJ
- *  pc3MiOiJzNkJoZFJrcXQzIiwic3ViIjoiczZCaGRSa3F0MyIsImF1ZCI6Imh0dHB
- *  zOi8vc2VydmVyLmV4YW1wbGUuY29tIiwianRpIjoiYmRjLVhzX3NmLTNZTW80RlN
- *  6SUoyUSIsImlhdCI6MTUzNzgxOTQ4NiwiZXhwIjoxNTM3ODE5Nzc3fQ.Ybr8mg_3
- *  E2OptOSsA8rnelYO_y1L-yFaF_j1iemM3ntB61_GN3APe5cl_-5a6cvGlP154XAK
- *  7fL-GaZSdnd9kg
+ * scope=openid%20email%20example-scope&
+ * client_notification_token=8d67dc78-7faa-4d41-aabd-67707b374255&
+ * binding_message=W4SCT&
+ * login_hint_token=eyJraWQiOiJsdGFjZXNidyIsImFsZyI6IkVTMjU2In0.eyJ
+ * zdWJfaWQiOnsic3ViamVjdF90eXBlIjoicGhvbmUiLCJwaG9uZSI6IisxMzMwMjg
+ * xODAwNCJ9fQ.Kk8jcUbHjJAQkRSHyDuFQr3NMEOSJEZc85VfER74tX6J9CuUllr8
+ * 9WKUHUR7MA0-mWlptMRRhdgW1ZDt7g1uwQ&
+ * client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3A
+ * client-assertion-type%3Ajwt-bearer&
+ * client_assertion=eyJraWQiOiJsdGFjZXNidyIsImFsZyI6IkVTMjU2In0.eyJ
+ * pc3MiOiJzNkJoZFJrcXQzIiwic3ViIjoiczZCaGRSa3F0MyIsImF1ZCI6Imh0dHB
+ * zOi8vc2VydmVyLmV4YW1wbGUuY29tIiwianRpIjoiYmRjLVhzX3NmLTNZTW80RlN
+ * 6SUoyUSIsImlhdCI6MTUzNzgxOTQ4NiwiZXhwIjoxNTM3ODE5Nzc3fQ.Ybr8mg_3
+ * E2OptOSsA8rnelYO_y1L-yFaF_j1iemM3ntB61_GN3APe5cl_-5a6cvGlP154XAK
+ * 7fL-GaZSdnd9kg
  * </pre>
  *
  * <p>Related specifications:
