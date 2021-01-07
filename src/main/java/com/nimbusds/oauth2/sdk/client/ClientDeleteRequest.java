@@ -18,10 +18,8 @@
 package com.nimbusds.oauth2.sdk.client;
 
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 import net.jcip.annotations.Immutable;
 
@@ -79,17 +77,7 @@ public class ClientDeleteRequest extends ProtectedResourceRequest {
 		if (getEndpointURI() == null)
 			throw new SerializeException("The endpoint URI is not specified");
 
-		URL endpointURL;
-
-		try {
-			endpointURL = getEndpointURI().toURL();
-
-		} catch (MalformedURLException e) {
-
-			throw new SerializeException(e.getMessage(), e);
-		}
-	
-		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.DELETE, endpointURL);
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.DELETE, getEndpointURI());
 		httpRequest.setAuthorization(getAccessToken().toAuthorizationHeader());
 		return httpRequest;
 	}

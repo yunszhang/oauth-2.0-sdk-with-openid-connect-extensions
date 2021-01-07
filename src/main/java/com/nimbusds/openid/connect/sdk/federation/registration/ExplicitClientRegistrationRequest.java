@@ -18,10 +18,8 @@
 package com.nimbusds.openid.connect.sdk.federation.registration;
 
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 import net.jcip.annotations.Immutable;
 
@@ -88,14 +86,7 @@ public class ExplicitClientRegistrationRequest extends AbstractRequest {
 			throw new SerializeException("The endpoint URI is not specified");
 		}
 		
-		URL url;
-		try {
-			url = getEndpointURI().toURL();
-		} catch (MalformedURLException e) {
-			throw new SerializeException(e.getMessage(), e);
-		}
-		
-		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, url);
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, getEndpointURI());
 		httpRequest.setEntityContentType(ContentType.APPLICATION_JOSE);
 		httpRequest.setQuery(getEntityStatement().getSignedStatement().serialize());
 		return httpRequest;

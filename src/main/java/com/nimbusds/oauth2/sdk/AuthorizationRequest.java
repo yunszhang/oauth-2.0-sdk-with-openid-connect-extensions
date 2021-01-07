@@ -18,10 +18,8 @@
 package com.nimbusds.oauth2.sdk;
 
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.*;
 
 import net.jcip.annotations.Immutable;
@@ -1241,27 +1239,11 @@ public class AuthorizationRequest extends AbstractRequest {
 			throw new SerializeException("The endpoint URI is not specified");
 		
 		HTTPRequest httpRequest;
-
-		URL endpointURL;
-
-		try {
-			endpointURL = getEndpointURI().toURL();
-
-		} catch (MalformedURLException e) {
-
-			throw new SerializeException(e.getMessage(), e);
-		}
-		
 		if (method.equals(HTTPRequest.Method.GET)) {
-
-			httpRequest = new HTTPRequest(HTTPRequest.Method.GET, endpointURL);
-
+			httpRequest = new HTTPRequest(HTTPRequest.Method.GET, getEndpointURI());
 		} else if (method.equals(HTTPRequest.Method.POST)) {
-
-			httpRequest = new HTTPRequest(HTTPRequest.Method.POST, endpointURL);
-
+			httpRequest = new HTTPRequest(HTTPRequest.Method.POST, getEndpointURI());
 		} else {
-
 			throw new IllegalArgumentException("The HTTP request method must be GET or POST");
 		}
 		

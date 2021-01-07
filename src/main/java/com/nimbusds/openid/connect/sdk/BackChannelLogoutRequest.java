@@ -18,10 +18,8 @@
 package com.nimbusds.openid.connect.sdk;
 
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -139,19 +137,7 @@ public class BackChannelLogoutRequest extends AbstractRequest {
 		if (getEndpointURI() == null)
 			throw new SerializeException("The endpoint URI is not specified");
 		
-		HTTPRequest httpRequest;
-		
-		URL endpointURL;
-		
-		try {
-			endpointURL = getEndpointURI().toURL();
-			
-		} catch (MalformedURLException e) {
-			
-			throw new SerializeException(e.getMessage(), e);
-		}
-		
-		httpRequest = new HTTPRequest(HTTPRequest.Method.POST, endpointURL);
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, getEndpointURI());
 		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery(URLUtils.serializeParameters(toParameters()));
 		

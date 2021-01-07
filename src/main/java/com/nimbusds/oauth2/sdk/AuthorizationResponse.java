@@ -18,7 +18,6 @@
 package com.nimbusds.oauth2.sdk;
 
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -337,15 +336,7 @@ public abstract class AuthorizationResponse implements Response {
 		}
 
 		// Use HTTP POST
-		HTTPRequest request;
-
-		try {
-			request = new HTTPRequest(HTTPRequest.Method.POST, redirectURI.toURL());
-
-		} catch (MalformedURLException e) {
-			throw new SerializeException(e.getMessage(), e);
-		}
-
+		HTTPRequest request = new HTTPRequest(HTTPRequest.Method.POST, getRedirectionURI());
 		request.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		request.setQuery(URLUtils.serializeParameters(toParameters()));
 		return request;

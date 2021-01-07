@@ -235,7 +235,7 @@ public class HTTPRequest extends HTTPMessage {
 	private static URL toURLWithUncheckedException(final URI uri) {
 		try {
 			return uri.toURL();
-		} catch (MalformedURLException e) {
+		} catch (MalformedURLException | IllegalArgumentException e) {
 			throw new SerializeException(e.getMessage(), e);
 		}
 	}

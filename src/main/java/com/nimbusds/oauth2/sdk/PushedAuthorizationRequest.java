@@ -18,10 +18,8 @@
 package com.nimbusds.oauth2.sdk;
 
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -140,14 +138,7 @@ public class PushedAuthorizationRequest extends AbstractOptionallyAuthenticatedR
 		if (getEndpointURI() == null)
 			throw new SerializeException("The endpoint URI is not specified");
 		
-		URL url;
-		try {
-			url = getEndpointURI().toURL();
-		} catch (MalformedURLException e) {
-			throw new SerializeException(e.getMessage(), e);
-		}
-		
-		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, url);
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, getEndpointURI());
 		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		
 		if (getClientAuthentication() != null) {

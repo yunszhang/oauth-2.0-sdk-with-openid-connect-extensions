@@ -18,9 +18,7 @@
 package com.nimbusds.oauth2.sdk;
 
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
@@ -187,14 +185,7 @@ public final class RequestObjectPOSTRequest extends AbstractOptionallyAuthentica
 		if (getEndpointURI() == null)
 			throw new SerializeException("The endpoint URI is not specified");
 		
-		URL url;
-		try {
-			url = getEndpointURI().toURL();
-		} catch (MalformedURLException e) {
-			throw new SerializeException(e.getMessage(), e);
-		}
-		
-		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, url);
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, getEndpointURI());
 		
 		if (getRequestObject() != null) {
 			httpRequest.setEntityContentType(ContentType.APPLICATION_JWT);

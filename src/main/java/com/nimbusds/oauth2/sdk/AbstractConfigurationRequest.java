@@ -18,9 +18,7 @@
 package com.nimbusds.oauth2.sdk;
 
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
@@ -54,13 +52,6 @@ public abstract class AbstractConfigurationRequest extends AbstractRequest {
 	@Override
 	public HTTPRequest toHTTPRequest() {
 		
-		URL url;
-		try {
-			url = getEndpointURI().toURL();
-		} catch (IllegalArgumentException | MalformedURLException e) {
-			throw new SerializeException(e.getMessage(), e);
-		}
-		
-		return new HTTPRequest(HTTPRequest.Method.GET, url);
+		return new HTTPRequest(HTTPRequest.Method.GET, getEndpointURI());
 	}
 }

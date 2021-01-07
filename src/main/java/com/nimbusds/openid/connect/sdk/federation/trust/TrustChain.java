@@ -26,14 +26,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import net.jcip.annotations.Immutable;
-import net.minidev.json.JSONObject;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jose.util.Base64URL;
-import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;

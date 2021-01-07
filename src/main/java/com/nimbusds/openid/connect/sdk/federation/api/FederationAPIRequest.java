@@ -18,14 +18,11 @@
 package com.nimbusds.openid.connect.sdk.federation.api;
 
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.AbstractRequest;
-import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 
@@ -86,14 +83,7 @@ public abstract class FederationAPIRequest extends AbstractRequest {
 	@Override
 	public HTTPRequest toHTTPRequest() {
 		
-		URL url;
-		try {
-			url = getEndpointURI().toURL();
-		} catch (IllegalArgumentException | MalformedURLException e) {
-			throw new SerializeException(e.getMessage(), e);
-		}
-		
-		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, url);
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, getEndpointURI());
 		httpRequest.setQuery(URLUtils.serializeParameters(toParameters()));
 		return httpRequest;
 	}

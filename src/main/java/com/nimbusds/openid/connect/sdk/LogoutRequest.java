@@ -282,10 +282,8 @@ public class LogoutRequest extends AbstractRequest {
 		HTTPRequest httpRequest;
 
 		URL baseURL;
-
 		try {
 			baseURL = URLUtils.getBaseURL(getEndpointURI().toURL());
-
 		} catch (MalformedURLException e) {
 			throw new SerializeException(e.getMessage(), e);
 		}
