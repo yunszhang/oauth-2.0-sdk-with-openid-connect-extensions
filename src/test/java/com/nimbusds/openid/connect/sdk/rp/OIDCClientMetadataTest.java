@@ -71,22 +71,36 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("jwks_uri"));
 		assertTrue(paramNames.contains("jwks"));
 		assertTrue(paramNames.contains("request_uris"));
-		assertTrue(paramNames.contains("request_object_signing_alg"));
-		assertTrue(paramNames.contains("request_object_encryption_alg"));
-		assertTrue(paramNames.contains("request_object_encryption_enc"));
 		assertTrue(paramNames.contains("software_id"));
 		assertTrue(paramNames.contains("software_version"));
 		assertTrue(paramNames.contains("software_statement"));
+		
+		// JARM
+		assertTrue(paramNames.contains("request_object_signing_alg"));
+		assertTrue(paramNames.contains("request_object_encryption_alg"));
+		assertTrue(paramNames.contains("request_object_encryption_enc"));
+		
+		// mTLS
 		assertTrue(paramNames.contains("tls_client_certificate_bound_access_tokens"));
 		assertTrue(paramNames.contains("tls_client_auth_subject_dn"));
 		assertTrue(paramNames.contains("tls_client_auth_san_dns"));
 		assertTrue(paramNames.contains("tls_client_auth_san_uri"));
 		assertTrue(paramNames.contains("tls_client_auth_san_ip"));
 		assertTrue(paramNames.contains("tls_client_auth_san_email"));
+		
+		// JARM
 		assertTrue(paramNames.contains("authorization_signed_response_alg"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
 		assertTrue(paramNames.contains("authorization_encrypted_response_enc"));
+		
+		// PAR
 		assertTrue(paramNames.contains("require_pushed_authorization_requests"));
+		
+		// CIBA
+		assertTrue(paramNames.contains("backchannel_token_delivery_mode"));
+		assertTrue(paramNames.contains("backchannel_client_notification_endpoint"));
+		assertTrue(paramNames.contains("backchannel_authentication_request_signing_alg"));
+		assertTrue(paramNames.contains("backchannel_user_code_parameter"));
 
 		// OIDC specified params
 		assertTrue(paramNames.contains("application_type"));
@@ -109,8 +123,7 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("backchannel_logout_session_required"));
 		assertTrue(paramNames.contains("client_registration_types"));
 		assertTrue(paramNames.contains("organization_name"));
-
-		assertEquals(51, OIDCClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(55, OIDCClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	

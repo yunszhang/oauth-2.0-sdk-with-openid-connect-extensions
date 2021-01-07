@@ -1,7 +1,7 @@
 /*
  * oauth2-oidc-sdk
  *
- * Copyright 2012-2016, Connect2id Ltd and contributors.
+ * Copyright 2012-2021, Connect2id Ltd and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -88,9 +88,20 @@ public final class GrantType extends Identifier {
 	 * Browserless and Input Constrained Devices. Explicit client
 	 * authentication is optional.
 	 */
-	public static final GrantType DEVICE_CODE = new GrantType("urn:ietf:params:oauth:grant-type:device_code", false, false, Collections.singleton("device_code"));
+	public static final GrantType DEVICE_CODE = new GrantType("urn:ietf:params:oauth:grant-type:device_code", false, true, Collections.singleton("device_code"));
 
 
+	/**
+	 * Client Initiated Back-channel Authentication (CIBA), as defined in
+	 * OpenID Connect Client Initiated Backchannel Authentication Flow -
+	 * Core 1.0. Explicit client authentication is optional.
+	 */
+	public static final GrantType CIBA = new GrantType("urn:openid:params:grant-type:ciba", true, true, Collections.singleton("auth_req_id"));
+	
+	
+	private static final long serialVersionUID = -5367937758427680765L;
+	
+	
 	/**
 	 * The client authentication requirement for this grant type.
 	 */
@@ -246,6 +257,10 @@ public final class GrantType extends Identifier {
 		} else if (grantType.equals(GrantType.DEVICE_CODE)) {
 
 			return GrantType.DEVICE_CODE;
+
+		} else if (grantType.equals(GrantType.CIBA)) {
+
+			return GrantType.CIBA;
 
 		} else {
 

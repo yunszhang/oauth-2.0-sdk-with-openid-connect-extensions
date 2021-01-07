@@ -86,8 +86,12 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("authorization_encryption_enc_values_supported"));
 		assertTrue(paramNames.contains("device_authorization_endpoint"));
 		assertTrue(paramNames.contains("incremental_authz_types_supported"));
-		
-		assertEquals(40, paramNames.size());
+		assertTrue(paramNames.contains("pushed_authorization_request_endpoint"));
+		assertTrue(paramNames.contains("backchannel_token_delivery_modes_supported"));
+		assertTrue(paramNames.contains("backchannel_authentication_endpoint"));
+		assertTrue(paramNames.contains("backchannel_authentication_request_signing_alg_values_supported"));
+		assertTrue(paramNames.contains("backchannel_user_code_parameter_supported"));
+		assertEquals(44, paramNames.size());
 	}
 	
 	

@@ -78,7 +78,7 @@ public class LogoutTokenClaimsSet extends CommonOIDCTokenClaimsSet {
 	
 	
 	/**
-	 * The names of the standard top-level ID token claims.
+	 * The names of the standard top-level logout token claims.
 	 */
 	private static final Set<String> STD_CLAIM_NAMES;
 	

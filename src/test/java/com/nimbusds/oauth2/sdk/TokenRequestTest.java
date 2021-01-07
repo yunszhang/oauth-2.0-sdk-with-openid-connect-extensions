@@ -18,6 +18,7 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
@@ -33,16 +34,16 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.assertions.jwt.JWTAssertionDetails;
 import com.nimbusds.oauth2.sdk.assertions.jwt.JWTAssertionFactory;
 import com.nimbusds.oauth2.sdk.assertions.saml2.SAML2AssertionDetails;
 import com.nimbusds.oauth2.sdk.assertions.saml2.SAML2AssertionFactory;
 import com.nimbusds.oauth2.sdk.auth.*;
+import com.nimbusds.oauth2.sdk.ciba.AuthRequestID;
+import com.nimbusds.oauth2.sdk.ciba.CIBAGrant;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
-import com.nimbusds.oauth2.sdk.id.Audience;
-import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.oauth2.sdk.id.Issuer;
-import com.nimbusds.oauth2.sdk.id.Subject;
+import com.nimbusds.oauth2.sdk.id.*;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
@@ -1656,5 +1657,38 @@ public class TokenRequestTest extends TestCase {
 			assertEquals(OAuth2Error.INVALID_RESOURCE, e.getErrorObject());
 			assertEquals("Invalid \"resource\" parameter: Must be an absolute URI and with no query or fragment: https://rs.example.com/#fragment", e.getErrorObject().getDescription());
 		}
+	}
+	
+	
+	// https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0-03.html#rfc.section.10.1
+	public void testParseCIBAExample()
+		throws MalformedURLException, ParseException {
+	
+		URL endpoint = new URL("https://server.example.com/token");
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, endpoint);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
+		httpRequest.setQuery("grant_type=urn%3Aopenid%3Aparams%3Agrant-type%3Aciba&" +
+			"auth_req_id=1c266114-a1be-4252-8ad1-04986c5b9ac1&" +
+			"client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&" +
+			"client_assertion=eyJraWQiOiJsdGFjZXNidyIsImFsZyI6IkVTMjU2In0.ey" +
+			"Jpc3MiOiJzNkJoZFJrcXQzIiwic3ViIjoiczZCaGRSa3F0MyIsImF1ZCI6Imh0d" +
+			"HBzOi8vc2VydmVyLmV4YW1wbGUuY29tL3Rva2VuIiwianRpIjoiLV9wMTZqNkhj" +
+			"aVhvMzE3aHZaMzEyYyIsImlhdCI6MTUzNzgxOTQ5MSwiZXhwIjoxNTM3ODE5Nzg" +
+			"yfQ.BjaEoqZb-81gE5zz4UYwNpC3QVSeX5XhH176vg35zjkbq3Zmv_UpHB2ZugR" +
+			"Va344WchTQVpaSSShLbvha4yziA");
+		
+		TokenRequest tokenRequest = TokenRequest.parse(httpRequest);
+		
+		PrivateKeyJWT privateKeyJWT = (PrivateKeyJWT) tokenRequest.getClientAuthentication();
+		assertEquals(new ClientID("s6BhdRkqt3"), privateKeyJWT.getClientID());
+		assertEquals(new ClientID("s6BhdRkqt3"), privateKeyJWT.getJWTAuthenticationClaimsSet().getClientID());
+		assertEquals(new Issuer("s6BhdRkqt3"), privateKeyJWT.getJWTAuthenticationClaimsSet().getIssuer());
+		assertEquals(Collections.singletonList(new Audience("https://server.example.com/token")), privateKeyJWT.getJWTAuthenticationClaimsSet().getAudience());
+		assertEquals(new JWTID("-_p16j6HciXo317hvZ312c"), privateKeyJWT.getJWTAuthenticationClaimsSet().getJWTID());
+		assertEquals(DateUtils.fromSecondsSinceEpoch(1537819491L), privateKeyJWT.getJWTAuthenticationClaimsSet().getIssueTime());
+		assertEquals(DateUtils.fromSecondsSinceEpoch(1537819782L), privateKeyJWT.getJWTAuthenticationClaimsSet().getExpirationTime());
+		assertEquals(GrantType.CIBA, tokenRequest.getAuthorizationGrant().getType());
+		CIBAGrant cibaGrant = (CIBAGrant) tokenRequest.getAuthorizationGrant();
+		assertEquals(new AuthRequestID("1c266114-a1be-4252-8ad1-04986c5b9ac1"), cibaGrant.getAuthRequestID());
 	}
 }

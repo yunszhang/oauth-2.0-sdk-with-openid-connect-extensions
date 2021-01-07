@@ -62,7 +62,7 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
+ *     <li>OAuth 2.0 Device Authorization Grant (RFC 8628)
  * </ul>
  */
 @Immutable
@@ -226,7 +226,7 @@ public class DeviceAuthorizationErrorResponse extends DeviceAuthorizationRespons
 
 
 	/**
-	 * Parses an OAuth 2.0 device authorization error response from the
+	 * Parses an OAuth 2.0 ciba authorization error, push error or token response -  from the
 	 * specified HTTP response.
 	 *
 	 * @param httpResponse The HTTP response to parse. Its status code must

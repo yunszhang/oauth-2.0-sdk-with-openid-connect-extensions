@@ -29,11 +29,10 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
  * Token endpoint response. This is the base abstract class for device
  * authorization success and error responses.
  *
- * <p>
- * Related specifications:
+ * <p>Related specifications:
  *
  * <ul>
- *     <li>OAuth 2.0 Device Authorization Grant (draft-ietf-oauth-device-flow-15)
+ *     <li>OAuth 2.0 Device Authorization Grant (RFC 8628)
  * </ul>
  */
 public abstract class DeviceAuthorizationResponse implements Response {
@@ -88,7 +87,7 @@ public abstract class DeviceAuthorizationResponse implements Response {
 	 *
 	 * @param httpResponse The HTTP response. Must not be {@code null}.
 	 *
-	 * @return The device authorization sucess or error response.
+	 * @return The device authorization success or error response.
 	 *
 	 * @throws ParseException If the HTTP response couldn't be parsed to a
 	 *                        device authorization response.

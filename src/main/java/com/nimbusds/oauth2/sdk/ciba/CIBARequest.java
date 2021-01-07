@@ -1,0 +1,1072 @@
+/*
+ * oauth2-oidc-sdk
+ *
+ * Copyright 2012-2016, Connect2id Ltd and contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
+package com.nimbusds.oauth2.sdk.ciba;
+
+
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.*;
+
+import net.jcip.annotations.Immutable;
+
+import com.nimbusds.common.contenttype.ContentType;
+import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.JWTParser;
+import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.oauth2.sdk.AbstractAuthenticatedRequest;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.SerializeException;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
+import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.id.Identifier;
+import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+import com.nimbusds.oauth2.sdk.util.*;
+import com.nimbusds.openid.connect.sdk.claims.ACR;
+
+/**
+ * <p>CIBA request to an OpenID provider / OAuth 2.0 authorisation server
+ * backend authentication endpoint. Supports plan as well as signed (JWT)
+ * requests.
+ *
+ * <p>Example HTTP request:
+ * 
+ * <pre>
+ * POST /bc-authorize HTTP/1.1
+ * Host: server.example.com
+ * Content-Type: application/x-www-form-urlencoded
+ *
+ * scope=openid%20email%20example-scope&
+ * client_notification_token=8d67dc78-7faa-4d41-aabd-67707b374255&
+ * binding_message=W4SCT&
+ * login_hint_token=eyJraWQiOiJsdGFjZXNidyIsImFsZyI6IkVTMjU2In0.eyJ
+ * zdWJfaWQiOnsic3ViamVjdF90eXBlIjoicGhvbmUiLCJwaG9uZSI6IisxMzMwMjg
+ * xODAwNCJ9fQ.Kk8jcUbHjJAQkRSHyDuFQr3NMEOSJEZc85VfER74tX6J9CuUllr8
+ * 9WKUHUR7MA0-mWlptMRRhdgW1ZDt7g1uwQ&
+ * client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3A
+ * client-assertion-type%3Ajwt-bearer&
+ * client_assertion=eyJraWQiOiJsdGFjZXNidyIsImFsZyI6IkVTMjU2In0.eyJ
+ * pc3MiOiJzNkJoZFJrcXQzIiwic3ViIjoiczZCaGRSa3F0MyIsImF1ZCI6Imh0dHB
+ * zOi8vc2VydmVyLmV4YW1wbGUuY29tIiwianRpIjoiYmRjLVhzX3NmLTNZTW80RlN
+ * 6SUoyUSIsImlhdCI6MTUzNzgxOTQ4NiwiZXhwIjoxNTM3ODE5Nzc3fQ.Ybr8mg_3
+ * E2OptOSsA8rnelYO_y1L-yFaF_j1iemM3ntB61_GN3APe5cl_-5a6cvGlP154XAK
+ * 7fL-GaZSdnd9kg
+ * </pre>
+ *
+ * <p>Related specifications:
+ *
+ * <ul>
+ *      <li>OpenID Connect CIBA Flow - Core 1.0, section 7.1.
+ * </ul>
+ */
+@Immutable
+public class CIBARequest extends AbstractAuthenticatedRequest {
+	
+	
+	/**
+	 * The maximum allowed length of a client notification token.
+	 */
+	public static final int CLIENT_NOTIFICATION_TOKEN_MAX_LENGTH = 1024;
+	
+
+	/**
+	 * The registered parameter names.
+	 */
+	private static final Set<String> REGISTERED_PARAMETER_NAMES;
+
+	static {
+		Set<String> p = new HashSet<>();
+
+		// Plain
+		p.add("scope");
+		p.add("client_notification_token");
+		p.add("acr_values");
+		p.add("login_hint_token");
+		p.add("id_token_hint");
+		p.add("login_hint");
+		p.add("binding_message");
+		p.add("user_code");
+		p.add("requested_expiry");
+		
+		// Signed JWT
+		p.add("request");
+
+		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
+	}
+
+	
+	/**
+	 * The scope (required), must contain {@code openid}.
+	 */
+	private final Scope scope;
+
+	
+	/**
+	 * The client notification token, required for the CIBA ping and push
+	 * token delivery modes.
+	 */
+	private final BearerAccessToken clientNotificationToken;
+	
+	
+	/**
+	 * Requested Authentication Context Class Reference values (optional).
+	 */
+	private final List<ACR> acrValues;
+	
+	
+	/**
+	 * A token containing information identifying the end-user for whom
+	 * authentication is being requested (optional).
+	 */
+	private final String loginHintTokenString;
+	
+	
+	/**
+	 * Previously issued ID token passed as a hint to identify the end-user
+	 * for whom authentication is being requested (optional).
+	 */
+	private final JWT idTokenHint;
+	
+	
+	/**
+	 * Login hint (email address, phone number, etc) about the end-user for
+	 * whom authentication is being requested (optional).
+	 */
+	private final String loginHint;
+	
+	
+	/**
+	 * Human readable binding message for the display at the consumption
+	 * and authentication devices (optional).
+	 */
+	private final String bindingMessage;
+	
+	
+	/**
+	 * User secret code (password, PIN, etc) to authorise the CIBA request
+	 * with the authentication device (optional).
+	 */
+	private final Secret userCode;
+	
+	
+	/**
+	 * Requested expiration for the {@code auth_req_id} (optional).
+	 */
+	private final Integer requestedЕxpiry;
+	
+	
+	/**
+	 * Custom parameters.
+	 */
+	private final Map<String,List<String>> customParams;
+	
+	
+	/**
+	 * The JWT for a signed request.
+	 */
+	private final SignedJWT signedRequest;
+	
+
+	/**
+	 * Builder for constructing CIBA requests.
+	 */
+	public static class Builder {
+
+		
+		/**
+		 * The endpoint URI (optional).
+		 */
+		private URI uri;
+		
+		
+		/**
+		 * The client authentication (required).
+		 */
+		private final ClientAuthentication clientAuth;
+		
+		
+		/**
+		 * The scope (required).
+		 */
+		private final Scope scope;
+		
+		
+		/**
+		 * The client notification type, required for the CIBA ping and
+		 * push token delivery modes.
+		 */
+		private BearerAccessToken clientNotificationToken;
+		
+		
+		/**
+		 * Requested Authentication Context Class Reference values
+		 * (optional).
+		 */
+		private List<ACR> acrValues;
+		
+		
+		/**
+		 * A token containing information identifying the end-user for
+		 * whom authentication is being requested (optional).
+		 */
+		private String loginHintTokenString;
+		
+		
+		/**
+		 * Previously issued ID token passed as a hint to identify the
+		 * end-user for whom authentication is being requested
+		 * (optional).
+		 */
+		private JWT idTokenHint;
+		
+		
+		/**
+		 * Identity hint (email address, phone number, etc) about the
+		 * end-user for whom authentication is being requested
+		 * (optional).
+		 */
+		private String loginHint;
+		
+		
+		/**
+		 * Human readable binding message for the display at the
+		 * consumption and authentication devices (optional).
+		 */
+		private String bindingMessage;
+		
+		
+		/**
+		 * User secret code (password, PIN, etc) to authorise the CIBA
+		 * request with the authentication device (optional).
+		 */
+		private Secret userCode;
+		
+		
+		/**
+		 * Requested expiration for the {@code auth_req_id} (optional).
+		 */
+		private Integer requestedExpiry;
+		
+		
+		/**
+		 * Custom parameters.
+		 */
+		private Map<String,List<String>> customParams = new HashMap<>();
+		
+		
+		/**
+		 * The JWT for a signed request.
+		 */
+		private final SignedJWT signedRequest;
+
+		
+		/**
+		 * Creates a new CIBA request builder.
+		 *
+		 * @param clientAuth The client authentication. Must not be
+		 *                   {@code null}.
+		 * @param scope      The requested scope. Must not be empty or
+		 *                   {@code null}.
+		 */
+		public Builder(final ClientAuthentication clientAuth,
+			       final Scope scope) {
+			
+			if (clientAuth == null) {
+				throw new IllegalArgumentException("The client authentication must not be null");
+			}
+			this.clientAuth = clientAuth;
+			
+			if (CollectionUtils.isEmpty(scope)) {
+				throw new IllegalArgumentException("The scope must not be null or empty");
+			}
+			this.scope = scope;
+			
+			signedRequest = null;
+		}
+		
+		
+		/**
+		 * Creates a new CIBA signed request builder.
+		 *
+		 * @param clientAuth    The client authentication. Must not be
+		 *                      {@code null}.
+		 * @param signedRequest The signed request JWT. Must not be
+		 *                      {@code null}.
+		 */
+		public Builder(final ClientAuthentication clientAuth,
+			       final SignedJWT signedRequest) {
+			
+			if (clientAuth == null) {
+				throw new IllegalArgumentException("The client authentication must not be null");
+			}
+			this.clientAuth = clientAuth;
+			
+			if (signedRequest == null) {
+				throw new IllegalArgumentException("The signed request JWT must not be null");
+			}
+			this.signedRequest = signedRequest;
+			
+			scope = null;
+		}
+		
+
+		/**
+		 * Creates a new CIBA request builder from the specified
+		 * request.
+		 *
+		 * @param request The CIBA request. Must not be {@code null}.
+		 */
+		public Builder(final CIBARequest request) {
+			
+			uri = request.getEndpointURI();
+			clientAuth = request.getClientAuthentication();
+			scope = request.getScope();
+			clientNotificationToken = request.getClientNotificationToken();
+			acrValues = request.getACRValues();
+			loginHintTokenString = request.getLoginHintTokenString();
+			idTokenHint = request.getIDTokenHint();
+			loginHint = request.getLoginHint();
+			bindingMessage = request.getBindingMessage();
+			userCode = request.getUserCode();
+			requestedExpiry = request.getRequestedExpiry();
+			customParams = request.getCustomParameters();
+			signedRequest = request.getRequestJWT();
+		}
+		
+		
+		/**
+		 * Sets the client notification token, required for the CIBA
+		 * ping and push token delivery modes. Corresponds to the
+		 * {@code client_notification_token} parameter.
+		 *
+		 * @param token The client notification token, {@code null} if
+		 *              not specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder clientNotificationToken(final BearerAccessToken token) {
+			this.clientNotificationToken = token;
+			return this;
+		}
+
+		
+		/**
+		 * Sets the requested Authentication Context Class Reference
+		 * values. Corresponds to the optional {@code acr_values}
+		 * parameter.
+		 *
+		 * @param acrValues The requested ACR values, {@code null} if
+		 *                  not specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder acrValues(final List<ACR> acrValues) {
+			this.acrValues = acrValues;
+			return this;
+		}
+		
+		
+		/**
+		 * Sets the login hint token string, containing information
+		 * identifying the end-user for whom authentication is being requested.
+		 * Corresponds to the {@code login_hint_token} parameter.
+		 *
+		 * @param loginHintTokenString The login hint token string,
+		 *                             {@code null} if not specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder loginHintTokenString(final String loginHintTokenString) {
+			this.loginHintTokenString = loginHintTokenString;
+			return this;
+		}
+		
+		
+		/**
+		 * Sets the ID Token hint, passed as a hint to identify the
+		 * end-user for whom authentication is being requested.
+		 * Corresponds to the {@code id_token_hint} parameter.
+		 *
+		 * @param idTokenHint The ID Token hint, {@code null} if not
+		 *                    specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder idTokenHint(final JWT idTokenHint) {
+			this.idTokenHint = idTokenHint;
+			return this;
+		}
+		
+		
+		/**
+		 * Sets the login hint (email address, phone number, etc),
+		 * about the end-user for whom authentication is being
+		 * requested. Corresponds to the {@code login_hint} parameter.
+		 *
+		 * @param loginHint The login hint, {@code null} if not
+		 *                  specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder loginHint(final String loginHint) {
+			this.loginHint = loginHint;
+			return this;
+		}
+		
+		
+		/**
+		 * Sets the human readable binding message for the display at
+		 * the consumption and authentication devices. Corresponds to
+		 * the {@code binding_message} parameter.
+		 *
+		 * @param bindingMessage The binding message, {@code null} if
+		 *                       not specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder bindingMessage(final String bindingMessage) {
+			this.bindingMessage = bindingMessage;
+			return this;
+		}
+		
+		
+		/**
+		 * Gets the user secret code (password, PIN, etc) to authorise
+		 * the CIBA request with the authentication device. Corresponds
+		 * to the {@code user_code} parameter.
+		 *
+		 * @param userCode The user code, {@code null} if not
+		 *                 specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder userCode(final Secret userCode) {
+			this.userCode = userCode;
+			return this;
+		}
+		
+		
+		/**
+		 * Sets the requested expiration for the {@code auth_req_id}.
+		 * Corresponds to the {@code requested_expiry} parameter.
+		 *
+		 * @param requestedExpiry The required expiry (as positive
+		 *                        integer), {@code null} if not
+		 *                        specified.
+		 */
+		public Builder requestedExpiry(final Integer requestedExpiry) {
+			this.requestedExpiry = requestedExpiry;
+			return this;
+		}
+		
+		
+		/**
+		 * Sets a custom parameter.
+		 *
+		 * @param name   The parameter name. Must not be {@code null}.
+		 * @param values The parameter values, {@code null} if not
+		 *               specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder customParameter(final String name, final String ... values) {
+			
+			if (values == null || values.length == 0) {
+				customParams.remove(name);
+			} else {
+				customParams.put(name, Arrays.asList(values));
+			}
+			
+			return this;
+		}
+		
+		
+		/**
+		 * Sets the URI of the endpoint (HTTP or HTTPS) for which the
+		 * request is intended.
+		 *
+		 * @param uri The endpoint URI, {@code null} if not specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder endpointURI(final URI uri) {
+			
+			this.uri = uri;
+			return this;
+		}
+		
+		
+		/**
+		 * Builds a new CIBA request.
+		 *
+		 * @return The CIBA request.
+		 */
+		public CIBARequest build() {
+			
+			try {
+				if (signedRequest != null) {
+					return new CIBARequest(
+						uri,
+						clientAuth,
+						signedRequest
+					);
+				}
+				
+				// Plain request
+				return new CIBARequest(
+					uri,
+					clientAuth,
+					scope,
+					clientNotificationToken,
+					acrValues,
+					loginHintTokenString,
+					idTokenHint,
+					loginHint,
+					bindingMessage,
+					userCode,
+					requestedExpiry,
+					customParams
+				);
+			} catch (IllegalArgumentException e) {
+				throw new IllegalArgumentException(e.getMessage(), e);
+			}
+		}
+	}
+	
+	
+	/**
+	 * Creates a new CIBA request.
+	 *
+	 * @param uri                     The endpoint URI, {@code null} if not
+	 *                                specified.
+	 * @param clientAuth              The client authentication. Must not
+	 *                                be {@code null}.
+	 * @param scope                   The requested scope. Must not be
+	 *                                empty or {@code null}.
+	 * @param clientNotificationToken The client notification token,
+	 *                                {@code null} if not specified.
+	 * @param acrValues               The requested ACR values,
+	 *                                {@code null} if not specified.
+	 * @param loginHintTokenString    The login hint token string,
+	 *                                {@code null} if not specified.
+	 * @param idTokenHint             The ID Token hint, {@code null} if
+	 *                                not specified.
+	 * @param loginHint               The login hint, {@code null} if not
+	 *                                specified.
+	 * @param bindingMessage          The binding message, {@code null} if
+	 *                                not specified.
+	 * @param userCode                The user code, {@code null} if not
+	 *                                specified.
+	 * @param requestedExpiry         The required expiry (as positive
+	 *                                integer), {@code null} if not
+	 *                                specified.
+	 * @param customParams            Custom parameters, empty or
+	 *                                {@code null} if not specified.
+	 */
+	public CIBARequest(final URI uri,
+			   final ClientAuthentication clientAuth,
+			   final Scope scope,
+			   final BearerAccessToken clientNotificationToken,
+			   final List<ACR> acrValues,
+			   final String loginHintTokenString,
+			   final JWT idTokenHint,
+			   final String loginHint,
+			   final String bindingMessage,
+			   final Secret userCode,
+			   final Integer requestedExpiry,
+			   final Map<String, List<String>> customParams) {
+		
+		super(uri, clientAuth);
+		
+		if (CollectionUtils.isEmpty(scope)) {
+			throw new IllegalArgumentException("The scope must not be null or empty");
+		}
+		this.scope = scope;
+		
+		if (clientNotificationToken != null && clientNotificationToken.getValue().length() > CLIENT_NOTIFICATION_TOKEN_MAX_LENGTH) {
+			throw new IllegalArgumentException("The client notification token must not exceed " + CLIENT_NOTIFICATION_TOKEN_MAX_LENGTH + " chars");
+		}
+		this.clientNotificationToken = clientNotificationToken;
+		
+		this.acrValues = acrValues;
+		this.loginHintTokenString = loginHintTokenString;
+		this.idTokenHint = idTokenHint;
+		this.loginHint = loginHint;
+		this.bindingMessage = bindingMessage;
+		this.userCode = userCode;
+		
+		if (requestedExpiry != null && requestedExpiry < 1) {
+			throw new IllegalArgumentException("The requested expiry must be a positive integer");
+		}
+		this.requestedЕxpiry = requestedExpiry;
+		
+		this.customParams = customParams != null ? customParams : Collections.<String, List<String>>emptyMap();
+		
+		signedRequest = null;
+	}
+	
+	
+	/**
+	 * Creates a new CIBA signed request.
+	 *
+	 * @param uri           The endpoint URI, {@code null} if not
+	 *                      specified.
+	 * @param clientAuth    The client authentication. Must not be
+	 *                      {@code null}.
+	 * @param signedRequest The signed request JWT. Must not be
+	 *                      {@code null}.
+	 */
+	public CIBARequest(final URI uri,
+			   final ClientAuthentication clientAuth,
+			   final SignedJWT signedRequest) {
+		
+		super(uri, clientAuth);
+		
+		if (signedRequest == null) {
+			throw new IllegalArgumentException("The signed request JWT must not be null");
+		}
+		if (JWSObject.State.UNSIGNED.equals(signedRequest.getState())) {
+			throw new IllegalArgumentException("The request JWT must be in a signed state");
+		}
+		this.signedRequest = signedRequest;
+		
+		scope = null;
+		clientNotificationToken = null;
+		acrValues = null;
+		loginHintTokenString = null;
+		idTokenHint = null;
+		loginHint = null;
+		bindingMessage = null;
+		userCode = null;
+		requestedЕxpiry = null;
+		customParams = Collections.emptyMap();
+	}
+
+	
+	/**
+	 * Returns the registered (standard) CIBA request parameter names.
+	 *
+	 * @return The registered CIBA request parameter names, as a
+	 *         unmodifiable set.
+	 */
+	public static Set<String> getRegisteredParameterNames() {
+
+		return REGISTERED_PARAMETER_NAMES;
+	}
+
+	
+	/**
+	 * Gets the scope. Corresponds to the optional {@code scope} parameter.
+	 *
+	 * @return The scope, {@code null} for a {@link #isSigned signed
+	 *         request}.
+	 */
+	public Scope getScope() {
+
+		return scope;
+	}
+	
+	
+	/**
+	 * Gets the client notification token, required for the CIBA ping and
+	 * push token delivery modes. Corresponds to the
+	 * {@code client_notification_token} parameter.
+	 *
+	 * @return The client notification token, {@code null} if not
+	 *         specified.
+	 */
+	public BearerAccessToken getClientNotificationToken() {
+		
+		return clientNotificationToken;
+	}
+	
+	
+	/**
+	 * Gets the requested Authentication Context Class Reference values.
+	 * Corresponds to the optional {@code acr_values} parameter.
+	 *
+	 * @return The requested ACR values, {@code null} if not specified.
+	 */
+	public List<ACR> getACRValues() {
+		
+		return acrValues;
+	}
+	
+	
+	/**
+	 * Gets the login hint token string, containing information
+	 * identifying the end-user for whom authentication is being requested.
+	 * Corresponds to the {@code login_hint_token} parameter.
+	 *
+	 * @return The login hint token string, {@code null} if not
+	 *         specified.
+	 */
+	public String getLoginHintTokenString() {
+		
+		return loginHintTokenString;
+	}
+	
+	
+	/**
+	 * Gets the ID Token hint, passed as a hint to identify the end-user
+	 * for whom authentication is being requested. Corresponds to the
+	 * {@code id_token_hint} parameter.
+	 *
+	 * @return The ID Token hint, {@code null} if not specified.
+	 */
+	public JWT getIDTokenHint() {
+		
+		return idTokenHint;
+	}
+	
+	
+	/**
+	 * Gets the login hint (email address, phone number, etc), about the
+	 * end-user for whom authentication is being requested. Corresponds to
+	 * the {@code login_hint} parameter.
+	 *
+	 * @return The login hint, {@code null} if not specified.
+	 */
+	public String getLoginHint() {
+		
+		return loginHint;
+	}
+	
+	
+	/**
+	 * Gets the human readable binding message for the display at the
+	 * consumption and authentication devices. Corresponds to the
+	 * {@code binding_message} parameter.
+	 *
+	 * @return The binding message, {@code null} if not specified.
+	 */
+	public String getBindingMessage() {
+		
+		return bindingMessage;
+	}
+	
+	
+	/**
+	 * Gets the user secret code (password, PIN, etc) to authorise the CIBA
+	 * request with the authentication device. Corresponds to the
+	 * {@code user_code} parameter.
+	 *
+	 * @return The user code, {@code null} if not specified.
+	 */
+	public Secret getUserCode() {
+		
+		return userCode;
+	}
+	
+	
+	/**
+	 * Gets the requested expiration for the {@code auth_req_id}.
+	 * Corresponds to the {@code requested_expiry} parameter.
+	 *
+	 * @return The required expiry (as positive integer), {@code null} if
+	 *         not specified.
+	 */
+	public Integer getRequestedExpiry() {
+		
+		return requestedЕxpiry;
+	}
+	
+	
+	/**
+	 * Returns the additional custom parameters.
+	 *
+	 * @return The additional custom parameters as a unmodifiable map,
+	 *         empty map if none.
+	 */
+	public Map<String, List<String>> getCustomParameters() {
+		
+		return customParams;
+	}
+	
+	
+	/**
+	 * Returns the specified custom parameter.
+	 *
+	 * @param name The parameter name. Must not be {@code null}.
+	 *
+	 * @return The parameter value(s), {@code null} if not specified.
+	 */
+	public List<String> getCustomParameter(final String name) {
+		
+		return customParams.get(name);
+	}
+	
+	
+	/**
+	 * Returns {@code true} if this request is signed.
+	 *
+	 * @return {@code true} for a signed request, {@code false} for a plain
+	 *         request.
+	 */
+	public boolean isSigned() {
+		
+		return signedRequest != null;
+	}
+	
+	
+	/**
+	 * Returns the JWT for a signed request.
+	 *
+	 * @return The request JWT.
+	 */
+	public SignedJWT getRequestJWT() {
+		
+		return signedRequest;
+	}
+	
+	
+	/**
+	 * Returns the for parameters for this CIBA request. Parameters which
+	 * are part of the client authentication are not included.
+	 *
+	 * @return The parameters.
+	 */
+	public Map<String, List<String>> toParameters() {
+		
+		// Put custom params first, so they may be overwritten by std params
+		Map<String, List<String>> params = new LinkedHashMap<>(getCustomParameters());
+		
+		if (isSigned()) {
+			params.put("request", Collections.singletonList(signedRequest.serialize()));
+			return params;
+		}
+		
+		params.put("scope", Collections.singletonList(getScope().toString()));
+		
+		if (getClientNotificationToken() != null) {
+			params.put("client_notification_token", Collections.singletonList(getClientNotificationToken().getValue()));
+		}
+		if (getACRValues() != null) {
+			params.put("acr_values", Identifier.toStringList(getACRValues()));
+		}
+		if (getLoginHintTokenString() != null) {
+			params.put("login_hint_token", Collections.singletonList(getLoginHintTokenString()));
+		}
+		if (getIDTokenHint() != null) {
+			params.put("id_token_hint", Collections.singletonList(getIDTokenHint().serialize()));
+		}
+		if (getLoginHint() != null) {
+			params.put("login_hint", Collections.singletonList(getLoginHint()));
+		}
+		if (getBindingMessage() != null) {
+			params.put("binding_message", Collections.singletonList(getBindingMessage()));
+		}
+		if (getUserCode() != null) {
+			params.put("user_code", Collections.singletonList(getUserCode().getValue()));
+		}
+		if (getRequestedExpiry() != null) {
+			params.put("requested_expiry", Collections.singletonList(getRequestedExpiry().toString()));
+		}
+		
+		return params;
+	}
+	
+	
+	/**
+	 * Returns the parameters for this CIBA request as a JSON Web Token
+	 * (JWT) claims set. Intended for creating a signed CIBA request.
+	 *
+	 * @return The parameters as JWT claim set.
+	 */
+	public JWTClaimsSet toJWTClaimsSet() {
+		
+		if (isSigned()) {
+			throw new IllegalStateException();
+		}
+		
+		return JWTClaimsSetUtils.toJWTClaimsSet(toParameters());
+	}
+	
+	
+	/**
+	 * Returns the matching HTTP request.
+	 *
+	 * @return The HTTP request.
+	 */
+	@Override
+	public HTTPRequest toHTTPRequest() {
+
+		if (getEndpointURI() == null)
+			throw new SerializeException("The endpoint URI is not specified");
+
+		URL endpointURL;
+		try {
+			endpointURL = getEndpointURI().toURL();
+		} catch (MalformedURLException e) {
+			throw new SerializeException(e.getMessage(), e);
+		}
+
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, endpointURL);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
+
+		getClientAuthentication().applyTo(httpRequest);
+
+		Map<String, List<String>> params = httpRequest.getQueryParameters();
+		params.putAll(toParameters());
+		httpRequest.setQuery(URLUtils.serializeParameters(params));
+		
+		return httpRequest;
+	}
+
+	
+	/**
+	 * Parses a CIBA request from the specified HTTP request.
+	 *
+	 * @param httpRequest The HTTP request. Must not be {@code null}.
+	 *
+	 * @return The CIBA request.
+	 *
+	 * @throws ParseException If parsing failed.
+	 */
+	public static CIBARequest parse(final HTTPRequest httpRequest) throws ParseException {
+
+		// Only HTTP POST accepted
+		URI uri;
+		try {
+			uri = httpRequest.getURL().toURI();
+		} catch (URISyntaxException e) {
+			throw new ParseException(e.getMessage(), e);
+		}
+
+		httpRequest.ensureMethod(HTTPRequest.Method.POST);
+		httpRequest.ensureEntityContentType(ContentType.APPLICATION_URLENCODED);
+		
+		ClientAuthentication clientAuth = ClientAuthentication.parse(httpRequest);
+		
+		if (clientAuth == null) {
+			throw new ParseException("Missing required client authentication");
+		}
+		
+		Map<String, List<String>> params = httpRequest.getQueryParameters();
+		
+		String v;
+		
+		if (params.containsKey("request")) {
+			// Signed request
+			v = MultivaluedMapUtils.getFirstValue(params, "request");
+			
+			if (StringUtils.isBlank(v)) {
+				throw new ParseException("Empty \"request\" parameter");
+			}
+			
+			SignedJWT signedRequest;
+			try {
+				signedRequest = SignedJWT.parse(v);
+			} catch (java.text.ParseException e) {
+				throw new ParseException("Invalid \"request\" JWT: " + e.getMessage(), e);
+			}
+			
+			try {
+				return new CIBARequest(uri, clientAuth, signedRequest);
+			} catch (IllegalArgumentException e) {
+				throw new ParseException(e.getMessage(), e);
+			}
+		}
+		
+		
+		// Plain request
+		
+		// Parse required scope
+		v = MultivaluedMapUtils.getFirstValue(params, "scope");
+		Scope scope = Scope.parse(v);
+
+		v = MultivaluedMapUtils.getFirstValue(params, "client_notification_token");
+		BearerAccessToken clientNotificationToken = null;
+		if (StringUtils.isNotBlank(v)) {
+			clientNotificationToken = new BearerAccessToken(v);
+		}
+		
+		v = MultivaluedMapUtils.getFirstValue(params, "acr_values");
+		List<ACR> acrValues = null;
+		if (StringUtils.isNotBlank(v)) {
+			acrValues = new LinkedList<>();
+			StringTokenizer st = new StringTokenizer(v, " ");
+			while (st.hasMoreTokens()) {
+				acrValues.add(new ACR(st.nextToken()));
+			}
+		}
+		
+		String loginHintTokenString = MultivaluedMapUtils.getFirstValue(params, "login_hint_token");
+		
+		v = MultivaluedMapUtils.getFirstValue(params, "id_token_hint");
+		JWT idTokenHint = null;
+		if (StringUtils.isNotBlank(v)) {
+			try {
+				idTokenHint = JWTParser.parse(v);
+			} catch (java.text.ParseException e) {
+				throw new ParseException("Invalid \"id_token_hint\" parameter: " + e.getMessage());
+			}
+		}
+		
+		String loginHint = MultivaluedMapUtils.getFirstValue(params, "login_hint");
+		
+		v = MultivaluedMapUtils.getFirstValue(params, "user_code");
+		
+		Secret userCode = null;
+		if (StringUtils.isNotBlank(v)) {
+			userCode = new Secret(v);
+		}
+		
+		String bindingMessage = MultivaluedMapUtils.getFirstValue(params, "binding_message");
+		
+		v = MultivaluedMapUtils.getFirstValue(params, "requested_expiry");
+		
+		Integer requestedExpiry = null;
+
+		if (StringUtils.isNotBlank(v)) {
+			try {
+				requestedExpiry = Integer.valueOf(v);
+			} catch (NumberFormatException e) {
+				throw new ParseException("The \"requested_expiry\" parameter must be an integer");
+			}
+		}
+		
+		// Parse additional custom parameters
+		Map<String,List<String>> customParams = null;
+		
+		for (Map.Entry<String,List<String>> p: params.entrySet()) {
+			
+			if (! REGISTERED_PARAMETER_NAMES.contains(p.getKey())) {
+				// We have a custom parameter
+				if (customParams == null) {
+					customParams = new HashMap<>();
+				}
+				customParams.put(p.getKey(), p.getValue());
+			}
+		}
+
+		try {
+			return new CIBARequest(
+				uri, clientAuth,
+				scope, clientNotificationToken, acrValues, loginHintTokenString, idTokenHint, loginHint, bindingMessage, userCode, requestedExpiry,
+				customParams);
+		} catch (IllegalArgumentException e) {
+			throw new ParseException(e.getMessage());
+		}
+	}
+}

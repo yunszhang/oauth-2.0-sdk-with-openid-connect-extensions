@@ -30,9 +30,9 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.as.AuthorizationServerEndpointMetadata;
-import com.nimbusds.oauth2.sdk.as.AuthorizationServerMetadata;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.client.ClientType;
+import com.nimbusds.oauth2.sdk.ciba.BackChannelTokenDeliveryMode;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
@@ -127,8 +127,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("client_registration_authn_methods_supported"));
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("federation_registration_endpoint"));
-
-		assertEquals(70, paramNames.size());
+		assertEquals(74, paramNames.size());
 	}
 
 
@@ -562,6 +561,26 @@ public class OIDCProviderMetadataTest extends TestCase {
 		meta.setSupportsRequestURIParam(true);
 		assertTrue(meta.supportsRequestURIParam());
 
+		meta.setBackChannelAuthenticationEndpoint(new URI("https://c2id.com/ciba"));
+		assertEquals("https://c2id.com/ciba", meta.getBackChannelAuthenticationEndpoint().toString());
+
+		userInfoJWSAlgs = new LinkedList<>();
+		userInfoJWSAlgs.add(JWSAlgorithm.RS256);
+		meta.setBackChannelAuthenticationRequestJWSAlgs(userInfoJWSAlgs);
+		assertEquals(JWSAlgorithm.RS256, meta.getBackChannelAuthenticationRequestJWSAlgs().get(0));
+
+		meta.setBackChannelAuthenticationEndpoint(new URI("https://c2id.com/ciba_notification"));
+		assertEquals("https://c2id.com/ciba_notification", meta.getBackChannelAuthenticationEndpoint().toString());
+		
+
+		List<BackChannelTokenDeliveryMode> deliveryModes = new LinkedList<>();
+		deliveryModes.add(BackChannelTokenDeliveryMode.PING);
+		meta.setBackChannelTokenDeliveryModes(deliveryModes); 
+		assertEquals(BackChannelTokenDeliveryMode.PING, meta.getBackChannelTokenDeliveryModes().get(0));
+		
+		meta.setSupportsBackChannelUserCodeParam(true);
+		assertTrue(meta.supportsBackChannelUserCodeParam());
+		
 		meta.setRequiresRequestURIRegistration(true);
 		assertTrue(meta.requiresRequestURIRegistration());
 		

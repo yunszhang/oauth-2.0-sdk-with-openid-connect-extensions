@@ -1,7 +1,7 @@
 /*
  * oauth2-oidc-sdk
  *
- * Copyright 2012-2016, Connect2id Ltd and contributors.
+ * Copyright 2012-2021, Connect2id Ltd and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -32,6 +32,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
 import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.ciba.CIBAGrant;
 import com.nimbusds.oauth2.sdk.device.DeviceCodeGrant;
 
 
@@ -148,5 +149,19 @@ public class AuthorizationGrantTest extends TestCase {
 
 		assertEquals(GrantType.DEVICE_CODE, grant.getType());
 		assertEquals("abc", grant.getDeviceCode().getValue());
+	}
+	
+
+	public void testParseCIBA()
+		throws Exception {
+
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList(GrantType.CIBA.getValue()));
+		params.put("auth_req_id", Collections.singletonList("1c266114-a1be-4252-8ad1-04986c5b9ac1"));
+
+		CIBAGrant grant = (CIBAGrant)AuthorizationGrant.parse(params);
+
+		assertEquals(GrantType.CIBA, grant.getType());
+		assertEquals("1c266114-a1be-4252-8ad1-04986c5b9ac1", grant.getAuthRequestID().getValue());
 	}
 }

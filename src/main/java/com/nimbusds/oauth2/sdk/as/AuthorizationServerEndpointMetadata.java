@@ -39,9 +39,10 @@ import com.nimbusds.oauth2.sdk.util.OrderedJSONObject;
  *     <li>OAuth 2.0 Authorization Server Metadata (RFC 8414)
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
  *         Access Tokens (RFC 8705)
- *     <li>OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-02)
- *     <li>OAuth 2.0 Device Flow for Browserless and Input Constrained Devices
- *         (draft-ietf-oauth-device-flow-14)
+ *     <li>OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-05)
+ *     <li>OAuth 2.0 Device Authorization Grant (RFC 8628)
+ *     <li>OpenID Connect Client Initiated Backchannel Authentication Flow -
+ * 	   Core 1.0 (draft 03)
  * </ul>
  */
 public class AuthorizationServerEndpointMetadata {
@@ -59,9 +60,10 @@ public class AuthorizationServerEndpointMetadata {
 		p.add("registration_endpoint");
 		p.add("introspection_endpoint");
 		p.add("revocation_endpoint");
-		p.add("device_authorization_endpoint");
 		p.add("request_object_endpoint");
 		p.add("pushed_authorization_request_endpoint");
+		p.add("device_authorization_endpoint");
+		p.add("backchannel_authentication_endpoint");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 	
@@ -69,8 +71,8 @@ public class AuthorizationServerEndpointMetadata {
 	/**
 	 * Gets the registered provider metadata parameter names for endpoints.
 	 *
-	 * @return The registered provider metadata parameter names for endpoints,
-	 * as an unmodifiable set.
+	 * @return The registered provider metadata parameter names for
+	 *         endpoints, as an unmodifiable set.
 	 */
 	public static Set<String> getRegisteredParameterNames() {
 		
@@ -127,7 +129,14 @@ public class AuthorizationServerEndpointMetadata {
 	
 	
 	/**
-	 * Creates a new OAuth 2.0 Authorisation Server (AS) endpoint metadata instance.
+	 * The back-channel authentication endpoint.
+	 */
+	private URI backChannelAuthEndpoint;
+	
+	
+	/**
+	 * Creates a new OAuth 2.0 Authorisation Server (AS) endpoint metadata
+	 * instance.
 	 */
 	public AuthorizationServerEndpointMetadata() {
 	}
@@ -169,7 +178,7 @@ public class AuthorizationServerEndpointMetadata {
 		
 		return tokenEndpoint;
 	}
-	
+
 	
 	/**
 	 * Sts the token endpoint URI. Corresponds the {@code token_endpoint}
@@ -342,6 +351,33 @@ public class AuthorizationServerEndpointMetadata {
 	
 	
 	/**
+	 * Gets the back-channel authentication endpoint URI. Corresponds the
+	 * {@code backchannel_authentication_endpoint} metadata field.
+	 *
+	 * @return The back-channel authentication endpoint URI, {@code null}
+	 *         if not specified.
+	 */
+	public URI getBackChannelAuthenticationEndpoint() {
+		
+		return backChannelAuthEndpoint;
+	}
+	
+	
+	/**
+	 * Sets the back-channel authentication endpoint URI. Corresponds the
+	 * {@code backchannel_authentication_endpoint} metadata field.
+	 *
+	 * @param backChannelAuthEndpoint The back-channel authentication e
+	 *                                endpoint URI, {@code null} if not
+	 *                                specified.
+	 */
+	public void setBackChannelAuthenticationEndpoint(final URI backChannelAuthEndpoint) {
+		
+		this.backChannelAuthEndpoint = backChannelAuthEndpoint;
+	}
+	
+	
+	/**
 	 * Returns the JSON object representation of this OpenID Connect
 	 * provider metadata.
 	 *
@@ -374,6 +410,9 @@ public class AuthorizationServerEndpointMetadata {
 		
 		if (deviceAuthzEndpoint != null)
 			o.put("device_authorization_endpoint", deviceAuthzEndpoint.toString());
+		
+		if (backChannelAuthEndpoint != null)
+			o.put("backchannel_authentication_endpoint", backChannelAuthEndpoint.toString());
 		
 		return o;
 	}
@@ -409,9 +448,10 @@ public class AuthorizationServerEndpointMetadata {
 		as.regEndpoint = JSONObjectUtils.getURI(jsonObject, "registration_endpoint", null);
 		as.introspectionEndpoint = JSONObjectUtils.getURI(jsonObject, "introspection_endpoint", null);
 		as.revocationEndpoint = JSONObjectUtils.getURI(jsonObject, "revocation_endpoint", null);
-		as.deviceAuthzEndpoint = JSONObjectUtils.getURI(jsonObject, "device_authorization_endpoint", null);
 		as.requestObjectEndpoint = JSONObjectUtils.getURI(jsonObject, "request_object_endpoint", null);
 		as.parEndpoint = JSONObjectUtils.getURI(jsonObject, "pushed_authorization_request_endpoint", null);
+		as.deviceAuthzEndpoint = JSONObjectUtils.getURI(jsonObject, "device_authorization_endpoint", null);
+		as.backChannelAuthEndpoint = JSONObjectUtils.getURI(jsonObject, "backchannel_authentication_endpoint", null);
 		return as;
 	}
 }

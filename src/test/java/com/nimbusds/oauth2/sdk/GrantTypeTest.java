@@ -1,7 +1,7 @@
 /*
  * oauth2-oidc-sdk
  *
- * Copyright 2012-2016, Connect2id Ltd and contributors.
+ * Copyright 2012-2021, Connect2id Ltd and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -36,6 +36,8 @@ public class GrantTypeTest extends TestCase {
 		assertEquals("client_credentials", GrantType.CLIENT_CREDENTIALS.toString());
 		assertEquals("urn:ietf:params:oauth:grant-type:jwt-bearer", GrantType.JWT_BEARER.toString());
 		assertEquals("urn:ietf:params:oauth:grant-type:saml2-bearer", GrantType.SAML2_BEARER.toString());
+		assertEquals("urn:ietf:params:oauth:grant-type:device_code", GrantType.DEVICE_CODE.toString());
+		assertEquals("urn:openid:params:grant-type:ciba", GrantType.CIBA.toString());
 	}
 
 
@@ -48,6 +50,8 @@ public class GrantTypeTest extends TestCase {
 		assertTrue(GrantType.CLIENT_CREDENTIALS.requiresClientAuthentication());
 		assertFalse(GrantType.JWT_BEARER.requiresClientAuthentication());
 		assertFalse(GrantType.SAML2_BEARER.requiresClientAuthentication());
+		assertFalse(GrantType.DEVICE_CODE.requiresClientAuthentication());
+		assertTrue(GrantType.CIBA.requiresClientAuthentication());
 	}
 
 
@@ -60,6 +64,8 @@ public class GrantTypeTest extends TestCase {
 		assertTrue(GrantType.CLIENT_CREDENTIALS.requiresClientID());
 		assertFalse(GrantType.JWT_BEARER.requiresClientID());
 		assertFalse(GrantType.SAML2_BEARER.requiresClientID());
+		assertTrue(GrantType.DEVICE_CODE.requiresClientID());
+		assertTrue(GrantType.CIBA.requiresClientID());
 	}
 
 
@@ -83,6 +89,12 @@ public class GrantTypeTest extends TestCase {
 
 		assertTrue(GrantType.SAML2_BEARER.getRequestParameterNames().contains("assertion"));
 		assertEquals(1, GrantType.SAML2_BEARER.getRequestParameterNames().size());
+		
+		assertTrue(GrantType.DEVICE_CODE.getRequestParameterNames().contains("device_code"));
+		assertEquals(1, GrantType.DEVICE_CODE.getRequestParameterNames().size());
+		
+		assertTrue(GrantType.CIBA.getRequestParameterNames().contains("auth_req_id"));
+		assertEquals(1, GrantType.DEVICE_CODE.getRequestParameterNames().size());
 	}
 
 
@@ -105,6 +117,8 @@ public class GrantTypeTest extends TestCase {
 		assertEquals(GrantType.CLIENT_CREDENTIALS, GrantType.parse(GrantType.CLIENT_CREDENTIALS.getValue()));
 		assertEquals(GrantType.JWT_BEARER, GrantType.parse(GrantType.JWT_BEARER.getValue()));
 		assertEquals(GrantType.SAML2_BEARER, GrantType.parse(GrantType.SAML2_BEARER.getValue()));
+		assertEquals(GrantType.DEVICE_CODE, GrantType.parse(GrantType.DEVICE_CODE.getValue()));
+		assertEquals(GrantType.CIBA, GrantType.parse(GrantType.CIBA.getValue()));
 	}
 
 
