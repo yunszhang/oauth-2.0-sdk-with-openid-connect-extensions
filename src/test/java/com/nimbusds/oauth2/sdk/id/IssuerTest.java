@@ -123,4 +123,20 @@ public class IssuerTest extends TestCase {
 		
 		assertNull(Issuer.parse(" "));
 	}
+	
+	
+	public void testEqualityAndHashCode() {
+		
+		Issuer a = new Issuer("https://c2id.com");
+		Issuer b = new Issuer("https://c2id.com");
+		Issuer c = new Issuer("https://example.com");
+		
+		assertEquals(a, b);
+		assertEquals(a.hashCode(), b.hashCode());
+		
+		assertNotSame(a, c);
+		assertNotSame(b, c);
+		assertNotSame(a.hashCode(), c.hashCode());
+		assertNotSame(b.hashCode(), c.hashCode());
+	}
 }
