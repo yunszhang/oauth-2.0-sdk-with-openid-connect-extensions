@@ -1572,3 +1572,8 @@ version 8.31 (2021-01-07)
     * Adds support for OpenID Connect Client Initiated Backchannel
       Authentication (CIBA) Flow - Core 1.0 (draft 03).
     * Adds new HTTPRequest(Method,URI) constructor.
+
+version 8.31 (2021-01-08)
+    * Adds ClaimsSetRequest support for values of type Number, JSONObject and
+      untyped. Deprecates ClaimsSetRequest.Entry.getValue (iss #333).
+

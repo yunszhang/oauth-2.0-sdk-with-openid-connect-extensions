@@ -714,6 +714,39 @@ public class OIDCClaimsRequestTest extends TestCase {
 		
 		assertEquals(7, claimsRequest.getUserInfoClaimsRequest().getEntries().size());
 	}
+	
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/333/support-json-object-values-in-individual
+	public void testParseWithJSONObjectClaimValue()
+		throws ParseException {
+		
+		String json = "{" +
+			"  \"id_token\": {" +
+			"    \"transaction\": {" +
+			"      \"value\": {" +
+			"          \"display_data\": \"abc\"" +
+			"      }" +
+			"    }" +
+			"  }" +
+			"}";
+		
+		OIDCClaimsRequest claimsRequest = OIDCClaimsRequest.parse(json);
+		
+		ClaimsSetRequest idTokenClaimsRequest = claimsRequest.getIDTokenClaimsRequest();
+		assertEquals(1, idTokenClaimsRequest.getEntries().size());
+		
+		ClaimsSetRequest.Entry txEntry = idTokenClaimsRequest.get("transaction", null);
+		
+		// JSON object getter
+		JSONObject jsonObject = txEntry.getValueAsJSONObject();
+		assertEquals("abc", jsonObject.get("display_data"));
+		assertEquals(1, jsonObject.size());
+		
+		// Raw getter
+		jsonObject = (JSONObject) txEntry.getRawValue();
+		assertEquals("abc", jsonObject.get("display_data"));
+		assertEquals(1, jsonObject.size());
+	}
 
 
 	public void testAddIDTokenClaims() {

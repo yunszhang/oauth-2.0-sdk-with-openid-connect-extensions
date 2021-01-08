@@ -93,9 +93,9 @@ public class ClaimsSetRequest implements JSONAware {
 		
 		
 		/**
-		 * Optional claim value.
+		 * Optional claim value, as string, number or JSON object.
 		 */
-		private final String value;
+		private final Object value;
 		
 		
 		/**
@@ -168,7 +168,7 @@ public class ClaimsSetRequest implements JSONAware {
 		private Entry(final String claimName,
 			      final ClaimRequirement requirement,
 			      final LangTag langTag,
-			      final String value,
+			      final Object value,
 			      final List<String> values,
 			      final String purpose,
 			      final Map<String, Object> additionalInformation) {
@@ -296,7 +296,7 @@ public class ClaimsSetRequest implements JSONAware {
 		
 		
 		/**
-		 * Sets the requested value for the claim.
+		 * Sets the requested value (as string) for the claim.
 		 *
 		 * @param value The value, {@code null} if not specified.
 		 *
@@ -308,11 +308,105 @@ public class ClaimsSetRequest implements JSONAware {
 		
 		
 		/**
-		 * Returns the requested value for the claim.
+		 * Sets the requested value (as number) for the claim.
 		 *
-		 * @return The value, {@code null} if not specified.
+		 * @param value The value, {@code null} if not specified.
+		 *
+		 * @return The updated entry.
 		 */
+		public ClaimsSetRequest.Entry withValue(final Number value) {
+			return new ClaimsSetRequest.Entry(claimName, requirement, langTag, value, null, purpose, additionalInformation);
+		}
+		
+		
+		/**
+		 * Sets the requested value (as JSON object) for the claim.
+		 *
+		 * @param value The value, {@code null} if not specified.
+		 *
+		 * @return The updated entry.
+		 */
+		public ClaimsSetRequest.Entry withValue(final JSONObject value) {
+			return new ClaimsSetRequest.Entry(claimName, requirement, langTag, value, null, purpose, additionalInformation);
+		}
+		
+		
+		/**
+		 * Sets the requested value (untyped) for the claim.
+		 *
+		 * @param value The value, {@code null} if not specified.
+		 *
+		 * @return The updated entry.
+		 */
+		public ClaimsSetRequest.Entry withValue(final Object value) {
+			return new ClaimsSetRequest.Entry(claimName, requirement, langTag, value, null, purpose, additionalInformation);
+		}
+		
+		
+		/**
+		 * Returns the requested value (as string) for the claim.
+		 *
+		 * @return The value as string, {@code null} if not specified
+		 *         or the value isn't a string.
+		 */
+		public String getValueAsString() {
+			if (value instanceof String) {
+				return (String)value;
+			} else {
+				return null;
+			}
+		}
+		
+		
+		/**
+		 * Returns the requested value (as string) for the claim. Use
+		 * {@link #getValueAsString() instead}.
+		 *
+		 * @return The value as string, {@code null} if not specified
+		 *         or the value isn't a string.
+		 */
+		@Deprecated
 		public String getValue() {
+			return getValueAsString();
+		}
+		
+		
+		/**
+		 * Returns the requested value (as number) for the claim.
+		 *
+		 * @return The value as number, {@code null} if not specified
+		 *         or the value isn't a number.
+		 */
+		public Number getValueAsNumber() {
+			if (value instanceof Number) {
+				return (Number)value;
+			} else {
+				return null;
+			}
+		}
+		
+		
+		/**
+		 * Returns the requested value (as JSON object) for the claim.
+		 *
+		 * @return The value as JSON object, {@code null} if not
+		 *         specified or the value isn't a JSON object.
+		 */
+		public JSONObject getValueAsJSONObject() {
+			if (value instanceof JSONObject) {
+				return (JSONObject)value;
+			} else {
+				return null;
+			}
+		}
+		
+		
+		/**
+		 * Returns the requested value (untyped) for the claim.
+		 *
+		 * @return The value (untyped), {@code null} if not specified.
+		 */
+		public Object getRawValue() {
 			return value;
 		}
 		
@@ -421,10 +515,10 @@ public class ClaimsSetRequest implements JSONAware {
 			// Compose the optional value
 			JSONObject entrySpec = null;
 			
-			if (getValue() != null) {
+			if (getRawValue() != null) {
 				
 				entrySpec = new JSONObject();
-				entrySpec.put("value", getValue());
+				entrySpec.put("value", getRawValue());
 			}
 			
 			if (getValues() != null) {
@@ -520,13 +614,13 @@ public class ClaimsSetRequest implements JSONAware {
 			
 			String purpose = JSONObjectUtils.getString(spec, "purpose", null);
 			
-			if (spec.containsKey("value")) {
+			if (spec.get("value") != null) {
 				
-				String expectedValue = JSONObjectUtils.getString(spec, "value", null);
+				Object expectedValue = spec.get("value");
 				Map<String, Object> additionalInformation = getAdditionalInformationFromClaim(spec);
 				return new ClaimsSetRequest.Entry(claimName, requirement, langTag, expectedValue, null, purpose, additionalInformation);
 				
-			} else if (spec.containsKey("values")) {
+			} else if (spec.get("values") != null) {
 				
 				List<String> expectedValues = JSONObjectUtils.getStringList(spec, "values", null);
 				Map<String, Object> additionalInformation = getAdditionalInformationFromClaim(spec);
@@ -618,7 +712,7 @@ public class ClaimsSetRequest implements JSONAware {
 	 * @return The request entries, empty collection if none.
 	 */
 	public Collection<ClaimsSetRequest.Entry> getEntries() {
-		return Collections.unmodifiableCollection(entries);
+		return entries;
 	}
 	
 	

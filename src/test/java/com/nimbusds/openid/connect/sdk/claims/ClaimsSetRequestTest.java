@@ -42,7 +42,11 @@ public class ClaimsSetRequestTest extends TestCase {
 		
 		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
+		assertNull(entry.getValueAsString());
 		assertNull(entry.getValue());
+		assertNull(entry.getValueAsNumber());
+		assertNull(entry.getValueAsJSONObject());
+		assertNull(entry.getRawValue());
 		assertNull(entry.getValues());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
@@ -59,7 +63,11 @@ public class ClaimsSetRequestTest extends TestCase {
 		
 		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
+		assertNull(entry.getValueAsString());
 		assertNull(entry.getValue());
+		assertNull(entry.getValueAsNumber());
+		assertNull(entry.getValueAsJSONObject());
+		assertNull(entry.getRawValue());
 		assertNull(entry.getValues());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
@@ -77,7 +85,11 @@ public class ClaimsSetRequestTest extends TestCase {
 		
 		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
 		assertEquals(LangTag.parse("en-GB"), entry.getLangTag());
+		assertNull(entry.getValueAsString());
 		assertNull(entry.getValue());
+		assertNull(entry.getValueAsNumber());
+		assertNull(entry.getValueAsJSONObject());
+		assertNull(entry.getRawValue());
 		assertNull(entry.getValues());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
@@ -94,7 +106,11 @@ public class ClaimsSetRequestTest extends TestCase {
 		
 		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
 		assertEquals(LangTag.parse("en-GB"), entry.getLangTag());
+		assertNull(entry.getValueAsString());
 		assertNull(entry.getValue());
+		assertNull(entry.getValueAsNumber());
+		assertNull(entry.getValueAsJSONObject());
+		assertNull(entry.getRawValue());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
 	}
@@ -111,7 +127,11 @@ public class ClaimsSetRequestTest extends TestCase {
 		
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
+		assertNull(entry.getValueAsString());
 		assertNull(entry.getValue());
+		assertNull(entry.getValueAsNumber());
+		assertNull(entry.getValueAsJSONObject());
+		assertNull(entry.getRawValue());
 		assertNull(entry.getValues());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
@@ -130,14 +150,18 @@ public class ClaimsSetRequestTest extends TestCase {
 		
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
+		assertNull(entry.getValueAsString());
 		assertNull(entry.getValue());
+		assertNull(entry.getValueAsNumber());
+		assertNull(entry.getValueAsJSONObject());
+		assertNull(entry.getRawValue());
 		assertNull(entry.getValues());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
 	}
 	
 	
-	public void testEntryClass_essential_withValue() throws ParseException {
+	public void testEntryClass_essential_withValueAsString() throws ParseException {
 		
 		ClaimsSetRequest.Entry entry = new ClaimsSetRequest.Entry("name")
 			.withClaimRequirement(ClaimRequirement.ESSENTIAL)
@@ -149,7 +173,11 @@ public class ClaimsSetRequestTest extends TestCase {
 		
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
+		assertEquals("Alice Adams", entry.getValueAsString());
 		assertEquals("Alice Adams", entry.getValue());
+		assertNull(entry.getValueAsNumber());
+		assertNull(entry.getValueAsJSONObject());
+		assertEquals("Alice Adams", entry.getRawValue());
 		assertNull(entry.getValues());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
@@ -169,7 +197,148 @@ public class ClaimsSetRequestTest extends TestCase {
 		
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
+		assertEquals("Alice Adams", entry.getValueAsString());
 		assertEquals("Alice Adams", entry.getValue());
+		assertNull(entry.getValueAsNumber());
+		assertNull(entry.getValueAsJSONObject());
+		assertEquals("Alice Adams", entry.getRawValue());
+		assertNull(entry.getValues());
+		assertNull(entry.getPurpose());
+		assertNull(entry.getAdditionalInformation());
+	}
+	
+	
+	public void testEntryClass_essential_withValueAsNumber() throws ParseException {
+		
+		ClaimsSetRequest.Entry entry = new ClaimsSetRequest.Entry("age")
+			.withClaimRequirement(ClaimRequirement.ESSENTIAL)
+			.withValue(18);
+		
+		assertEquals("age", entry.getClaimName());
+		assertEquals("age", entry.getClaimName(false));
+		assertEquals("age", entry.getClaimName(true));
+		
+		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
+		assertNull(entry.getLangTag());
+		assertNull(entry.getValueAsString());
+		assertNull(entry.getValue());
+		assertEquals(18, entry.getValueAsNumber().intValue());
+		assertNull(entry.getValueAsJSONObject());
+		assertEquals(18, entry.getRawValue());
+		assertNull(entry.getValues());
+		assertNull(entry.getPurpose());
+		assertNull(entry.getAdditionalInformation());
+		
+		Map.Entry<String, JSONObject> jsonObjectEntry = entry.toJSONObjectEntry();
+		assertEquals("age", jsonObjectEntry.getKey());
+		JSONObject spec = jsonObjectEntry.getValue();
+		assertTrue(JSONObjectUtils.getBoolean(spec, "essential"));
+		assertEquals(18, spec.get("value"));
+		assertEquals(2, spec.size());
+		
+		entry = ClaimsSetRequest.Entry.parse(jsonObjectEntry);
+		
+		assertEquals("age", entry.getClaimName());
+		assertEquals("age", entry.getClaimName(false));
+		assertEquals("age", entry.getClaimName(true));
+		
+		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
+		assertNull(entry.getLangTag());
+		assertNull(entry.getValueAsString());
+		assertNull(entry.getValue());
+		assertEquals(18, entry.getValueAsNumber().intValue());
+		assertNull(entry.getValueAsJSONObject());
+		assertEquals(18, entry.getRawValue());
+		assertNull(entry.getValues());
+		assertNull(entry.getPurpose());
+		assertNull(entry.getAdditionalInformation());
+	}
+	
+	
+	public void testEntryClass_withValueAsJSONObject() throws ParseException {
+		
+		JSONObject tx = new JSONObject();
+		tx.put("data", "abc");
+		
+		ClaimsSetRequest.Entry entry = new ClaimsSetRequest.Entry("transaction").withValue(tx);
+		
+		assertEquals("transaction", entry.getClaimName());
+		assertEquals("transaction", entry.getClaimName(false));
+		assertEquals("transaction", entry.getClaimName(true));
+		
+		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
+		assertNull(entry.getLangTag());
+		assertNull(entry.getValueAsString());
+		assertNull(entry.getValue());
+		assertNull(entry.getValueAsNumber());
+		assertEquals(tx, entry.getValueAsJSONObject());
+		assertEquals(tx, entry.getRawValue());
+		assertNull(entry.getValues());
+		assertNull(entry.getPurpose());
+		assertNull(entry.getAdditionalInformation());
+		
+		Map.Entry<String, JSONObject> jsonObjectEntry = entry.toJSONObjectEntry();
+		assertEquals("transaction", jsonObjectEntry.getKey());
+		JSONObject expectedValue = new JSONObject();
+		expectedValue.put("value", tx);
+		assertEquals(expectedValue, jsonObjectEntry.getValue());
+		
+		entry = ClaimsSetRequest.Entry.parse(jsonObjectEntry);
+		
+		assertEquals("transaction", entry.getClaimName());
+		assertEquals("transaction", entry.getClaimName(false));
+		assertEquals("transaction", entry.getClaimName(true));
+		
+		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
+		assertNull(entry.getLangTag());
+		assertNull(entry.getValueAsString());
+		assertNull(entry.getValue());
+		assertNull(entry.getValueAsNumber());
+		assertEquals(tx, entry.getValueAsJSONObject());
+		assertEquals(tx, entry.getRawValue());
+		assertNull(entry.getValues());
+		assertNull(entry.getPurpose());
+		assertNull(entry.getAdditionalInformation());
+	}
+	
+	
+	public void testEntryClass_essential_withRawValue() throws ParseException {
+		
+		ClaimsSetRequest.Entry entry = new ClaimsSetRequest.Entry("pi")
+			.withClaimRequirement(ClaimRequirement.ESSENTIAL)
+			.withValue((Object) 3.14);
+		
+		assertEquals("pi", entry.getClaimName());
+		assertEquals("pi", entry.getClaimName(false));
+		assertEquals("pi", entry.getClaimName(true));
+		
+		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
+		assertNull(entry.getLangTag());
+		assertNull(entry.getValueAsString());
+		assertNull(entry.getValue());
+		assertEquals(3.14, entry.getValueAsNumber().doubleValue());
+		assertNull(entry.getValueAsJSONObject());
+		assertEquals(3.14, entry.getRawValue());
+		assertNull(entry.getValues());
+		assertNull(entry.getPurpose());
+		assertNull(entry.getAdditionalInformation());
+		
+		Map.Entry<String, JSONObject> jsonObjectEntry = entry.toJSONObjectEntry();
+		assertEquals("pi", jsonObjectEntry.getKey());
+		JSONObject spec = jsonObjectEntry.getValue();
+		assertTrue(JSONObjectUtils.getBoolean(spec, "essential"));
+		assertEquals(3.14, spec.get("value"));
+		assertEquals(2, spec.size());
+		
+		entry = ClaimsSetRequest.Entry.parse(jsonObjectEntry);
+		
+		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
+		assertNull(entry.getLangTag());
+		assertNull(entry.getValueAsString());
+		assertNull(entry.getValue());
+		assertEquals(3.14, entry.getValueAsNumber().doubleValue());
+		assertNull(entry.getValueAsJSONObject());
+		assertEquals(3.14, entry.getRawValue());
 		assertNull(entry.getValues());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
@@ -188,7 +357,11 @@ public class ClaimsSetRequestTest extends TestCase {
 		
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
+		assertNull(entry.getValueAsString());
 		assertNull(entry.getValue());
+		assertNull(entry.getValueAsNumber());
+		assertNull(entry.getValueAsJSONObject());
+		assertNull(entry.getRawValue());
 		assertEquals(Arrays.asList("Alice Adams", "A. Adams"), entry.getValues());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
@@ -208,7 +381,11 @@ public class ClaimsSetRequestTest extends TestCase {
 		
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
+		assertNull(entry.getValueAsString());
 		assertNull(entry.getValue());
+		assertNull(entry.getValueAsNumber());
+		assertNull(entry.getValueAsJSONObject());
+		assertNull(entry.getRawValue());
 		assertEquals(Arrays.asList("Alice Adams", "A. Adams"), entry.getValues());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
@@ -226,7 +403,11 @@ public class ClaimsSetRequestTest extends TestCase {
 		
 		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
+		assertNull(entry.getValueAsString());
 		assertNull(entry.getValue());
+		assertNull(entry.getValueAsNumber());
+		assertNull(entry.getValueAsJSONObject());
+		assertNull(entry.getRawValue());
 		assertNull(entry.getValues());
 		assertEquals("Name verification", entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
@@ -245,7 +426,11 @@ public class ClaimsSetRequestTest extends TestCase {
 		
 		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
+		assertNull(entry.getValueAsString());
 		assertNull(entry.getValue());
+		assertNull(entry.getValueAsNumber());
+		assertNull(entry.getValueAsJSONObject());
+		assertNull(entry.getRawValue());
 		assertNull(entry.getValues());
 		assertEquals("Name verification", entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
@@ -266,7 +451,11 @@ public class ClaimsSetRequestTest extends TestCase {
 		
 		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
+		assertNull(entry.getValueAsString());
 		assertNull(entry.getValue());
+		assertNull(entry.getValueAsNumber());
+		assertNull(entry.getValueAsJSONObject());
+		assertNull(entry.getRawValue());
 		assertNull(entry.getValues());
 		assertNull(entry.getPurpose());
 		assertEquals(additinalInfo, entry.getAdditionalInformation());
@@ -285,7 +474,11 @@ public class ClaimsSetRequestTest extends TestCase {
 		
 		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
+		assertNull(entry.getValueAsString());
 		assertNull(entry.getValue());
+		assertNull(entry.getValueAsNumber());
+		assertNull(entry.getValueAsJSONObject());
+		assertNull(entry.getRawValue());
 		assertNull(entry.getValues());
 		assertNull(entry.getPurpose());
 		assertEquals(additinalInfo, entry.getAdditionalInformation());
@@ -294,14 +487,14 @@ public class ClaimsSetRequestTest extends TestCase {
 	
 	public void testEntryClass_fullSpec_withValue() throws ParseException {
 		
-		Map<String,Object> additinalInfo = new HashMap<>();
-		additinalInfo.put("info", "custom info");
+		Map<String,Object> additionalInfo = new HashMap<>();
+		additionalInfo.put("info", "custom info");
 		
 		ClaimsSetRequest.Entry entry = new ClaimsSetRequest.Entry("name")
 			.withClaimRequirement(ClaimRequirement.ESSENTIAL)
 			.withValue("Alice Adams")
 			.withPurpose("Name verification")
-			.withAdditionalInformation(additinalInfo);
+			.withAdditionalInformation(additionalInfo);
 		
 		assertEquals("name", entry.getClaimName());
 		assertEquals("name", entry.getClaimName(false));
@@ -312,7 +505,7 @@ public class ClaimsSetRequestTest extends TestCase {
 		assertEquals("Alice Adams", entry.getValue());
 		assertNull(entry.getValues());
 		assertEquals("Name verification", entry.getPurpose());
-		assertEquals(additinalInfo, entry.getAdditionalInformation());
+		assertEquals(additionalInfo, entry.getAdditionalInformation());
 		
 		Map.Entry<String, JSONObject> jsonObjectEntry = entry.toJSONObjectEntry();
 		assertEquals("name", jsonObjectEntry.getKey());
@@ -334,7 +527,7 @@ public class ClaimsSetRequestTest extends TestCase {
 		assertEquals("Alice Adams", entry.getValue());
 		assertNull(entry.getValues());
 		assertEquals("Name verification", entry.getPurpose());
-		assertEquals(additinalInfo, entry.getAdditionalInformation());
+		assertEquals(additionalInfo, entry.getAdditionalInformation());
 	}
 	
 	
