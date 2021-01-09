@@ -93,15 +93,15 @@ public class ClaimsSetRequest implements JSONAware {
 		
 		
 		/**
-		 * Optional claim value.
+		 * Optional claim value, as string, number or JSON object.
 		 */
-		private final String value;
+		private final Object value;
 		
 		
 		/**
-		 * Optional claim values.
+		 * Optional claim values, as an array of JSON entities.
 		 */
-		private final List<String> values;
+		private final List<?> values;
 		
 		
 		/**
@@ -168,8 +168,8 @@ public class ClaimsSetRequest implements JSONAware {
 		private Entry(final String claimName,
 			      final ClaimRequirement requirement,
 			      final LangTag langTag,
-			      final String value,
-			      final List<String> values,
+			      final Object value,
+			      final List<?> values,
 			      final String purpose,
 			      final Map<String, Object> additionalInformation) {
 			
@@ -296,7 +296,7 @@ public class ClaimsSetRequest implements JSONAware {
 		
 		
 		/**
-		 * Sets the requested value for the claim.
+		 * Sets the requested value (as string) for the claim.
 		 *
 		 * @param value The value, {@code null} if not specified.
 		 *
@@ -308,33 +308,192 @@ public class ClaimsSetRequest implements JSONAware {
 		
 		
 		/**
-		 * Returns the requested value for the claim.
+		 * Sets the requested value (as number) for the claim.
 		 *
-		 * @return The value, {@code null} if not specified.
+		 * @param value The value, {@code null} if not specified.
+		 *
+		 * @return The updated entry.
 		 */
+		public ClaimsSetRequest.Entry withValue(final Number value) {
+			return new ClaimsSetRequest.Entry(claimName, requirement, langTag, value, null, purpose, additionalInformation);
+		}
+		
+		
+		/**
+		 * Sets the requested value (as JSON object) for the claim.
+		 *
+		 * @param value The value, {@code null} if not specified.
+		 *
+		 * @return The updated entry.
+		 */
+		public ClaimsSetRequest.Entry withValue(final JSONObject value) {
+			return new ClaimsSetRequest.Entry(claimName, requirement, langTag, value, null, purpose, additionalInformation);
+		}
+		
+		
+		/**
+		 * Sets the requested value (untyped) for the claim.
+		 *
+		 * @param value The value, {@code null} if not specified.
+		 *
+		 * @return The updated entry.
+		 */
+		public ClaimsSetRequest.Entry withValue(final Object value) {
+			return new ClaimsSetRequest.Entry(claimName, requirement, langTag, value, null, purpose, additionalInformation);
+		}
+		
+		
+		/**
+		 * Returns the requested value (as string) for the claim.
+		 *
+		 * @return The value as string, {@code null} if not specified
+		 *         or the value isn't a string.
+		 */
+		public String getValueAsString() {
+			if (value instanceof String) {
+				return (String)value;
+			} else {
+				return null;
+			}
+		}
+		
+		
+		/**
+		 * Returns the requested value (as string) for the claim. Use
+		 * {@link #getValueAsString()} instead.
+		 *
+		 * @return The value as string, {@code null} if not specified
+		 *         or the value isn't a string.
+		 */
+		@Deprecated
 		public String getValue() {
+			return getValueAsString();
+		}
+		
+		
+		/**
+		 * Returns the requested value (as number) for the claim.
+		 *
+		 * @return The value as number, {@code null} if not specified
+		 *         or the value isn't a number.
+		 */
+		public Number getValueAsNumber() {
+			if (value instanceof Number) {
+				return (Number)value;
+			} else {
+				return null;
+			}
+		}
+		
+		
+		/**
+		 * Returns the requested value (as JSON object) for the claim.
+		 *
+		 * @return The value as JSON object, {@code null} if not
+		 *         specified or the value isn't a JSON object.
+		 */
+		public JSONObject getValueAsJSONObject() {
+			if (value instanceof JSONObject) {
+				return (JSONObject)value;
+			} else {
+				return null;
+			}
+		}
+		
+		
+		/**
+		 * Returns the requested value (untyped) for the claim.
+		 *
+		 * @return The value (untyped), {@code null} if not specified.
+		 */
+		public Object getRawValue() {
 			return value;
 		}
 		
 		
 		/**
-		 * Sets the requested values for the claim.
+		 * Sets the requested values (untyped) for the claim.
 		 *
 		 * @param values The values, {@code null} if not specified.
 		 *
 		 * @return The updated entry.
 		 */
-		public ClaimsSetRequest.Entry withValues(final List<String> values) {
+		public ClaimsSetRequest.Entry withValues(final List<?> values) {
 			return new ClaimsSetRequest.Entry(claimName, requirement, langTag, null, values, purpose, additionalInformation);
 		}
 		
 		
 		/**
-		 * Returns the requested values for the claim.
+		 * Returns the requested values (as strings) for the claim.
 		 *
-		 * @return The values, {@code null} if not specified.
+		 * @return The values as list of strings, {@code null} if not
+		 *         specified or the values aren't strings.
 		 */
+		public List<String> getValuesAsListOfStrings() {
+			if (values == null) {
+				return null;
+			}
+			if (values.isEmpty()) {
+				return Collections.emptyList();
+			}
+			List<String> list = new ArrayList<>(values.size());
+			for (Object v: values) {
+				if (v instanceof String) {
+					list.add((String)v);
+				} else {
+					return null;
+				}
+			}
+			return list;
+		}
+		
+		
+		/**
+		 * Returns the requested values (as strings) for the claim. Use
+		 * {@link #getValuesAsListOfStrings()} instead.
+		 *
+		 * @return The values as list of strings, {@code null} if not
+		 *         specified or the values aren't strings.
+		 */
+		@Deprecated
 		public List<String> getValues() {
+			return getValuesAsListOfStrings();
+		}
+		
+		
+		/**
+		 * Returns the requested values (as JSON objects) for the
+		 * claim.
+		 *
+		 * @return The values as list of JSON objects, {@code null} if
+		 *         not specified or the values aren't JSON objects.
+		 */
+		public List<JSONObject> getValuesAsListOfJSONObjects() {
+			if (values == null) {
+				return null;
+			}
+			if (values.isEmpty()) {
+				return Collections.emptyList();
+			}
+			List<JSONObject> list = new ArrayList<>(values.size());
+			for (Object v: values) {
+				if (v instanceof JSONObject) {
+					list.add((JSONObject) v);
+				} else {
+					return null;
+				}
+			}
+			return list;
+		}
+		
+		
+		/**
+		 * Returns the requested values (untyped) for the claim.
+		 *
+		 * @return The values as list of untyped objects, {@code null}
+		 *         if not specified.
+		 */
+		public List<?> getValuesAsRawList() {
 			return values;
 		}
 		
@@ -421,18 +580,18 @@ public class ClaimsSetRequest implements JSONAware {
 			// Compose the optional value
 			JSONObject entrySpec = null;
 			
-			if (getValue() != null) {
+			if (getRawValue() != null) {
 				
 				entrySpec = new JSONObject();
-				entrySpec.put("value", getValue());
+				entrySpec.put("value", getRawValue());
 			}
 			
-			if (getValues() != null) {
+			if (getValuesAsRawList() != null) {
 				
 				// Either "value" or "values", or none
 				// may be defined
 				entrySpec = new JSONObject();
-				entrySpec.put("values", getValues());
+				entrySpec.put("values", getValuesAsRawList());
 			}
 			
 			if (getClaimRequirement().equals(ClaimRequirement.ESSENTIAL)) {
@@ -520,15 +679,15 @@ public class ClaimsSetRequest implements JSONAware {
 			
 			String purpose = JSONObjectUtils.getString(spec, "purpose", null);
 			
-			if (spec.containsKey("value")) {
+			if (spec.get("value") != null) {
 				
-				String expectedValue = JSONObjectUtils.getString(spec, "value", null);
+				Object expectedValue = spec.get("value");
 				Map<String, Object> additionalInformation = getAdditionalInformationFromClaim(spec);
 				return new ClaimsSetRequest.Entry(claimName, requirement, langTag, expectedValue, null, purpose, additionalInformation);
 				
-			} else if (spec.containsKey("values")) {
+			} else if (spec.get("values") != null) {
 				
-				List<String> expectedValues = JSONObjectUtils.getStringList(spec, "values", null);
+				List<Object> expectedValues = JSONObjectUtils.getList(spec, "values");
 				Map<String, Object> additionalInformation = getAdditionalInformationFromClaim(spec);
 				return new ClaimsSetRequest.Entry(claimName, requirement, langTag, null, expectedValues, purpose, additionalInformation);
 				
@@ -618,7 +777,7 @@ public class ClaimsSetRequest implements JSONAware {
 	 * @return The request entries, empty collection if none.
 	 */
 	public Collection<ClaimsSetRequest.Entry> getEntries() {
-		return Collections.unmodifiableCollection(entries);
+		return entries;
 	}
 	
 	

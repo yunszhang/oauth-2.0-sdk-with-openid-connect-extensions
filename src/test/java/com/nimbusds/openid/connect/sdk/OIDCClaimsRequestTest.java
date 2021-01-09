@@ -714,6 +714,98 @@ public class OIDCClaimsRequestTest extends TestCase {
 		
 		assertEquals(7, claimsRequest.getUserInfoClaimsRequest().getEntries().size());
 	}
+	
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/333/support-json-object-values-in-individual
+	public void testParseWithJSONObjectClaimValue()
+		throws ParseException {
+		
+		String json = "{" +
+			"  \"id_token\": {" +
+			"    \"transaction\": {" +
+			"      \"value\": {" +
+			"          \"display_data\": \"abc\"" +
+			"      }" +
+			"    }" +
+			"  }" +
+			"}";
+		
+		OIDCClaimsRequest claimsRequest = OIDCClaimsRequest.parse(json);
+		
+		ClaimsSetRequest idTokenClaimsRequest = claimsRequest.getIDTokenClaimsRequest();
+		assertEquals(1, idTokenClaimsRequest.getEntries().size());
+		
+		ClaimsSetRequest.Entry txEntry = idTokenClaimsRequest.get("transaction", null);
+		
+		// JSON object getter
+		JSONObject jsonObject = txEntry.getValueAsJSONObject();
+		assertEquals("abc", jsonObject.get("display_data"));
+		assertEquals(1, jsonObject.size());
+		
+		// Raw getter
+		jsonObject = (JSONObject) txEntry.getRawValue();
+		assertEquals("abc", jsonObject.get("display_data"));
+		assertEquals(1, jsonObject.size());
+	}
+	
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/333/support-json-object-values-in-individual
+	public void testParseWithJSONArrayOfObjectsClaimValue()
+		throws ParseException {
+		
+		String json = "{" +
+			"  \"id_token\": {" +
+			"    \"transaction\": {" +
+			"      \"essential\": false," +
+			"      \"values\": [" +
+			"        {" +
+			"          \"display_data\": \"abc\"," +
+			"          \"additional_data\" : \"def\"" +
+			"        }," +
+			"        {" +
+			"          \"display_data\": \"ghi\"," +
+			"          \"additional_data\" : \"jkl\"" +
+			"        }" +
+			"      ]" +
+			"    }" +
+			"  }" +
+			"}";
+		
+		OIDCClaimsRequest claimsRequest = OIDCClaimsRequest.parse(json);
+		
+		ClaimsSetRequest idTokenClaimsRequest = claimsRequest.getIDTokenClaimsRequest();
+		assertEquals(1, idTokenClaimsRequest.getEntries().size());
+		
+		ClaimsSetRequest.Entry txEntry = idTokenClaimsRequest.get("transaction", null);
+		
+		// List of JSON objects getter
+		List<JSONObject> jsonObjects = txEntry.getValuesAsListOfJSONObjects();
+		assertEquals(2, jsonObjects.size());
+		
+		JSONObject o1 = jsonObjects.get(0);
+		assertEquals("abc", o1.get("display_data"));
+		assertEquals("def", o1.get("additional_data"));
+		assertEquals(2, o1.size());
+		
+		JSONObject o2 = jsonObjects.get(1);
+		assertEquals("ghi", o2.get("display_data"));
+		assertEquals("jkl", o2.get("additional_data"));
+		assertEquals(2, o2.size());
+		
+		// List of untyped values getter
+		List<?> wildcardList = txEntry.getValuesAsRawList();
+		assertEquals(2, wildcardList.size());
+		
+		o1 = (JSONObject) wildcardList.get(0);
+		assertEquals("abc", o1.get("display_data"));
+		assertEquals("def", o1.get("additional_data"));
+		assertEquals(2, o1.size());
+		
+		o2 = (JSONObject) wildcardList.get(1);
+		assertEquals("ghi", o2.get("display_data"));
+		assertEquals("jkl", o2.get("additional_data"));
+		assertEquals(2, o2.size());
+	}
 
 
 	public void testAddIDTokenClaims() {
