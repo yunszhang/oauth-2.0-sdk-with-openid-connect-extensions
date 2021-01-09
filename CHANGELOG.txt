@@ -1580,3 +1580,5 @@ version 8.32 (2021-01-09)
     * Adds ClaimsSetRequest support for value lists of type JSONObject and
       untyped. Deprecates ClaimsSetRequest.Entry.getValues in favour of a new
       getValuesAsStringList (iss #333).
+    * Deprecates duplicate and internally unused AuthorizedParty class under
+      com.nimbusds.oauth2.sdk.id.AuthorizedParty (iss #334).

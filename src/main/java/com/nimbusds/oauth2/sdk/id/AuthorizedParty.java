@@ -23,7 +23,9 @@ import net.jcip.annotations.Immutable;
 
 /**
  * Authorised party.
+ * Use {@link com.nimbusds.openid.connect.sdk.claims.AuthorizedParty} instead.
  */
+@Deprecated
 @Immutable
 public final class AuthorizedParty extends Identifier {
 
