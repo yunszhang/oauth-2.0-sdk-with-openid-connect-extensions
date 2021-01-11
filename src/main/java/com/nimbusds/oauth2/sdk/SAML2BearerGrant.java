@@ -55,7 +55,7 @@ public class SAML2BearerGrant extends AssertionGrant {
 	 * Cached {@code unsupported_grant_type} exception.
 	 */
 	private static final ParseException UNSUPPORTED_GRANT_TYPE_EXCEPTION
-			= new ParseException("The \"grant_type\" must be " + GRANT_TYPE, OAuth2Error.UNSUPPORTED_GRANT_TYPE);
+			= new ParseException("The grant_type must be " + GRANT_TYPE, OAuth2Error.UNSUPPORTED_GRANT_TYPE);
 
 
 	/**

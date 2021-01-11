@@ -147,18 +147,18 @@ public final class JSONObjectUtils {
 		throws ParseException {
 	
 		if (! o.containsKey(key))
-			throw new ParseException("Missing JSON object member with key \"" + key + "\"");
+			throw new ParseException("Missing JSON object member with key " + key + "");
 		
 		Object value = o.get(key);
 		
 		if (value == null) {
-			throw new ParseException("JSON object member with key \"" + key + "\" has null value");
+			throw new ParseException("JSON object member with key " + key + " has null value");
 		}
 		
 		try {
 			return JSONUtils.to(value, clazz);
 		} catch (ParseException e) {
-			throw new ParseException("Unexpected type of JSON object member with key \"" + key + "\"", e);
+			throw new ParseException("Unexpected type of JSON object member with key " + key + "", e);
 		}
 	}
 
@@ -476,7 +476,7 @@ public final class JSONObjectUtils {
 				return en;
 		}
 
-		throw new ParseException("Unexpected value of JSON object member with key \"" + key + "\"");
+		throw new ParseException("Unexpected value of JSON object member with key " + key + "");
 	}
 
 
@@ -685,7 +685,7 @@ public final class JSONObjectUtils {
 
 		} catch (ArrayStoreException e) {
 
-			throw new ParseException("JSON object member with key \"" + key + "\" is not an array of strings");
+			throw new ParseException("JSON object member with key " + key + " is not an array of strings");
 		}
 	}
 
@@ -779,7 +779,7 @@ public final class JSONObjectUtils {
 
 			} catch (Exception e) {
 
-				throw new ParseException("JSON object member with key \"" + key + "\" is not an array of strings");
+				throw new ParseException("JSON object member with key " + key + " is not an array of strings");
 			}
 
 		}

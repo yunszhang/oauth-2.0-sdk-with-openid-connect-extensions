@@ -872,7 +872,7 @@ public class TokenRequestTest extends TestCase {
 			TokenRequest.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing required \"client_id\" parameter", e.getMessage());
+			assertEquals("Missing required client_id parameter", e.getMessage());
 		}
 	}
 
@@ -1511,10 +1511,10 @@ public class TokenRequestTest extends TestCase {
 			TokenRequest.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Missing credentials delimiter \":\"", e.getMessage());
+			assertEquals("Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Missing credentials delimiter (:)", e.getMessage());
 			
 			assertEquals(OAuth2Error.INVALID_REQUEST.toString(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Missing credentials delimiter \":\"", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Missing credentials delimiter (:)", e.getErrorObject().getDescription());
 		}
 	}
 	
@@ -1619,7 +1619,7 @@ public class TokenRequestTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_RESOURCE, e.getErrorObject());
-			assertEquals("Invalid \"resource\" parameter: Must be an absolute URI and with no query or fragment: https:///", e.getErrorObject().getDescription());
+			assertEquals("Illegal resource parameter: Must be an absolute URI and with no query or fragment: https:///", e.getErrorObject().getDescription());
 		}
 	}
 	
@@ -1637,7 +1637,7 @@ public class TokenRequestTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_RESOURCE, e.getErrorObject());
-			assertEquals("Invalid \"resource\" parameter: Must be an absolute URI and with no query or fragment: https://rs.example.com/?query", e.getErrorObject().getDescription());
+			assertEquals("Illegal resource parameter: Must be an absolute URI and with no query or fragment: https://rs.example.com/?query", e.getErrorObject().getDescription());
 		}
 	}
 	
@@ -1655,7 +1655,7 @@ public class TokenRequestTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_RESOURCE, e.getErrorObject());
-			assertEquals("Invalid \"resource\" parameter: Must be an absolute URI and with no query or fragment: https://rs.example.com/#fragment", e.getErrorObject().getDescription());
+			assertEquals("Illegal resource parameter: Must be an absolute URI and with no query or fragment: https://rs.example.com/#fragment", e.getErrorObject().getDescription());
 		}
 	}
 	

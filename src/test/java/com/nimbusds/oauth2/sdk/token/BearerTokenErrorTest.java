@@ -184,7 +184,7 @@ public class BearerTokenErrorTest extends TestCase {
 			new BearerTokenError("\"invalid_token\"", null);
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("The error code contains invalid ASCII characters, see RFC 6750, section 3", e.getMessage());
+			assertEquals("Illegal char(s) in code, see RFC 6749, section 5.2", e.getMessage());
 		}
 	}
 	
@@ -195,7 +195,7 @@ public class BearerTokenErrorTest extends TestCase {
 			new BearerTokenError("invalid_token", "Invalid token: \"abc\"");
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("The error description contains invalid ASCII characters, see RFC 6750, section 3", e.getMessage());
+			assertEquals("Illegal char(s) in description, see RFC 6749, section 5.2", e.getMessage());
 		}
 	}
 	
@@ -206,7 +206,7 @@ public class BearerTokenErrorTest extends TestCase {
 			BearerTokenError.INSUFFICIENT_SCOPE.setScope(new Scope("read", "\"write\""));
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("The scope contains invalid ASCII characters, see RFC 6750, section 3", e.getMessage());
+			assertEquals("The scope contains illegal characters, see RFC 6750, section 3", e.getMessage());
 		}
 	}
 	

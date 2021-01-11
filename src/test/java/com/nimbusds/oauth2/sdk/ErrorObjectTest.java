@@ -28,6 +28,7 @@ import static org.junit.Assert.assertNotEquals;
 
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 
 import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
@@ -267,5 +268,63 @@ public class ErrorObjectTest extends TestCase {
 	public void testSetHTTPStatusCode() {
 
 		assertEquals(440, new ErrorObject("code", "description", 400).setHTTPStatusCode(440).getHTTPStatusCode());
+	}
+	
+	
+	// Values for the "error" parameter MUST NOT include characters outside the
+	// set %x20-21 / %x23-5B / %x5D-7E.
+	//
+	// Values for the "error_description" parameter MUST NOT include characters
+	// outside the set %x20-21 / %x23-5B / %x5D-7E.
+	public void testLegalCharsInCodeAndDescription() {
+		
+		for (char c=0; c < 128; c++) {
+		
+			if (c >= 0x20 && c <= 0x21) {
+				assertTrue(ErrorObject.isLegal(c));
+			} else if (c >= 0x23 && c <= 0x5B) {
+				assertTrue(ErrorObject.isLegal(c));
+			} else if (c >= 0x5D && c <= 0x7e) {
+				assertTrue(ErrorObject.isLegal(c));
+			} else {
+				assertFalse(ErrorObject.isLegal(c));
+			}
+		}
+		
+		String alphaNum =
+			"Aa" +
+			"Bb" +
+			"Cc" +
+			"Dd" +
+			"Ee" +
+			"Ff" +
+			"Gg" +
+			"Hh" +
+			"Ii" +
+			"Jj" +
+			"Kk" +
+			"Ll" +
+			"Mm" +
+			"Nn" +
+			"Oo" +
+			"Pp" +
+			"Qq" +
+			"Rr" +
+			"Ss" +
+			"Tt" +
+			"Uu" +
+			"Vv" +
+			"Ww" +
+			"Xx" +
+			"Yy" +
+			"Zz" +
+			"1234567890";
+		
+		assertTrue(ErrorObject.isLegal(alphaNum));
+		
+		assertTrue(ErrorObject.isLegal("`~!@#$%^&*()-_=+,./<>?|"));
+		
+		assertFalse(ErrorObject.isLegal('"'));
+		assertFalse(ErrorObject.isLegal('\\'));
 	}
 }

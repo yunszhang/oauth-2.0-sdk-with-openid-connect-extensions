@@ -201,7 +201,7 @@ public class CIBARequestAcknowledgement extends CIBAResponse implements SuccessR
 		int expiresIn = JSONObjectUtils.getInt(jsonObject, "expires_in");
 		
 		if (expiresIn < 1) {
-			throw new ParseException("The \"expires_in\" parameter must be a positive integer");
+			throw new ParseException("The expires_in parameter must be a positive integer");
 		}
 		
 		Integer minWaitInterval = null;
@@ -210,7 +210,7 @@ public class CIBARequestAcknowledgement extends CIBAResponse implements SuccessR
 		}
 		
 		if (minWaitInterval != null && minWaitInterval < 1) {
-			throw new ParseException("The \"interval\" parameter must be a positive integer");
+			throw new ParseException("The interval parameter must be a positive integer");
 		}
 		
 		return new CIBARequestAcknowledgement(authRequestID, expiresIn, minWaitInterval);

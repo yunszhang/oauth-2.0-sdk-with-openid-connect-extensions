@@ -523,7 +523,7 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 				clientID = new ClientID(clientIDString);
 
 			if (clientID == null && grant.getType().requiresClientID()) {
-				String msg = "Missing required \"client_id\" parameter";
+				String msg = "Missing required client_id parameter";
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 			}
 		}
@@ -551,7 +551,7 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 				if (uriValue == null)
 					continue;
 				
-				String errMsg = "Invalid \"resource\" parameter: Must be an absolute URI and with no query or fragment: " + uriValue;
+				String errMsg = "Illegal resource parameter: Must be an absolute URI and with no query or fragment: " + uriValue;
 				
 				URI resourceURI;
 				try {

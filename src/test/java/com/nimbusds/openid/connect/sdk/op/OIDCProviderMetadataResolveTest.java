@@ -150,7 +150,7 @@ public class OIDCProviderMetadataResolveTest {
 			OIDCProviderMetadata.resolve(issuer);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing JSON object member with key \"subject_types_supported\"", e.getMessage());
+			assertEquals("Missing JSON object member with key subject_types_supported", e.getMessage());
 		}
 	}
 	

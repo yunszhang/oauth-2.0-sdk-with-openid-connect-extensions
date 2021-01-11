@@ -80,7 +80,7 @@ public class DeviceCodeGrantTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing \"grant_type\" parameter",
+			assertEquals("Invalid request: Missing grant_type parameter",
 			                e.getErrorObject().getDescription());
 			assertNull(e.getErrorObject().getURI());
 		}
@@ -98,7 +98,7 @@ public class DeviceCodeGrantTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.UNSUPPORTED_GRANT_TYPE.getCode(), e.getErrorObject().getCode());
-			assertEquals("Unsupported grant type: The \"grant_type\" must be \"authorization_code\"",
+			assertEquals("Unsupported grant type: The grant_type must be authorization_code",
 			                e.getErrorObject().getDescription());
 			assertNull(e.getErrorObject().getURI());
 		}
@@ -116,7 +116,7 @@ public class DeviceCodeGrantTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing or empty \"device_code\" parameter",
+			assertEquals("Invalid request: Missing or empty device_code parameter",
 			                e.getErrorObject().getDescription());
 			assertNull(e.getErrorObject().getURI());
 		}

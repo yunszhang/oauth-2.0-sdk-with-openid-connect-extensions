@@ -513,7 +513,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				throw new IllegalArgumentException("The scope must not be null");
 			
 			if (! scope.contains(OIDCScopeValue.OPENID))
-				throw new IllegalArgumentException("The scope must include an \"openid\" value");
+				throw new IllegalArgumentException("The scope must include an openid value");
 			
 			this.scope = scope;
 			return this;
@@ -1665,20 +1665,20 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			// Required params if no JAR is present
 			
 			if (ar.getRedirectionURI() == null) {
-				String msg = "Missing \"redirect_uri\" parameter";
+				String msg = "Missing redirect_uri parameter";
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 					ar.getClientID(), null, ar.impliedResponseMode(), ar.getState());
 			}
 			
 			if (ar.getScope() == null) {
-				String msg = "Missing \"scope\" parameter";
+				String msg = "Missing scope parameter";
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 					ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState());
 			}
 			
 			// Nonce required in the implicit and hybrid flows
 			if (nonce == null && (ar.getResponseType().impliesImplicitFlow() || ar.getResponseType().impliesHybridFlow())) {
-				String msg = "Missing \"nonce\" parameter: Required in the implicit and hybrid flows";
+				String msg = "Missing nonce parameter: Required in the implicit and hybrid flows";
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 					ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState());
 			}
@@ -1689,7 +1689,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			try {
 				OIDCResponseTypeValidator.validate(ar.getResponseType());
 			} catch (IllegalArgumentException e) {
-				String msg = "Unsupported \"response_type\" parameter: " + e.getMessage();
+				String msg = "Unsupported response_type parameter: " + e.getMessage();
 				throw new ParseException(msg, OAuth2Error.UNSUPPORTED_RESPONSE_TYPE.appendDescription(": " + msg),
 					ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState());
 			}
@@ -1697,7 +1697,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		
 		// Check if present (not in JAR)
 		if (ar.getScope() != null && ! ar.getScope().contains(OIDCScopeValue.OPENID)) {
-			String msg = "The scope must include an \"openid\" value";
+			String msg = "The scope must include an openid value";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 				                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState());
 		}
@@ -1709,7 +1709,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				display = Display.parse(MultivaluedMapUtils.getFirstValue(params, "display"));
 
 			} catch (ParseException e) {
-				String msg = "Invalid \"display\" parameter: " + e.getMessage();
+				String msg = "Invalid display parameter: " + e.getMessage();
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 					ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
 			}
@@ -1726,7 +1726,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				maxAge = Integer.parseInt(v);
 
 			} catch (NumberFormatException e) {
-				String msg = "Invalid \"max_age\" parameter: " + v;
+				String msg = "Invalid max_age parameter: " + v;
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 					                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
 			}
@@ -1749,7 +1749,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 					uiLocales.add(LangTag.parse(st.nextToken()));
 
 				} catch (LangTagException e) {
-					String msg = "Invalid \"ui_locales\" parameter: " + e.getMessage();
+					String msg = "Invalid ui_locales parameter: " + e.getMessage();
 					throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 						                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
 				}
@@ -1773,7 +1773,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 					claimsLocales.add(LangTag.parse(st.nextToken()));
 
 				} catch (LangTagException e) {
-					String msg = "Invalid \"claims_locales\" parameter: " + e.getMessage();
+					String msg = "Invalid claims_locales parameter: " + e.getMessage();
 					throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 						                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
 				}
@@ -1791,7 +1791,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				idTokenHint = JWTParser.parse(v);
 				
 			} catch (java.text.ParseException e) {
-				String msg = "Invalid \"id_token_hint\" parameter: " + e.getMessage();
+				String msg = "Invalid id_token_hint parameter: " + e.getMessage();
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 					                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
 			}
@@ -1825,7 +1825,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			try {
 				claims = OIDCClaimsRequest.parse(v);
 			} catch (ParseException e) {
-				String msg = "Invalid \"claims\" parameter: " + e.getMessage();
+				String msg = "Invalid claims parameter: " + e.getMessage();
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 					                 ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState(), e);
 			}
@@ -1834,7 +1834,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		String purpose = MultivaluedMapUtils.getFirstValue(params, "purpose");
 		
 		if (purpose != null && (purpose.length() < PURPOSE_MIN_LENGTH || purpose.length() > PURPOSE_MAX_LENGTH)) {
-			String msg = "Invalid \"purpose\" parameter: Must not be shorter than " + PURPOSE_MIN_LENGTH + " and longer than " + PURPOSE_MAX_LENGTH + " characters";
+			String msg = "Invalid purpose parameter: Must not be shorter than " + PURPOSE_MIN_LENGTH + " and longer than " + PURPOSE_MAX_LENGTH + " characters";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 				ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState());
 		}

@@ -923,7 +923,7 @@ public class ClientMetadataTest extends TestCase {
 			ClientMetadata.parse(JSONObjectUtils.parse(json));
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"redirect_uris\" parameter: Expected authority at index 8: https://", e.getMessage());
+			assertEquals("Invalid redirect_uris parameter: Expected authority at index 8: https://", e.getMessage());
 			assertEquals(RegistrationError.INVALID_REDIRECT_URI.getCode(), e.getErrorObject().getCode());
 			assertEquals("Invalid redirection URI(s): Expected authority at index 8: https://", e.getErrorObject().getDescription());
 		}
@@ -992,7 +992,7 @@ public class ClientMetadataTest extends TestCase {
 			ClientMetadata.parse(copy);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"client_uri\" (language tag) parameter: The URI scheme must be https or http", e.getMessage());
+			assertEquals("Invalid client_uri (language tag) parameter: The URI scheme must be https or http", e.getMessage());
 		}
 		
 		// policy_uri
@@ -1004,7 +1004,7 @@ public class ClientMetadataTest extends TestCase {
 			ClientMetadata.parse(copy);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"policy_uri\" (language tag) parameter: The URI scheme must be https or http", e.getMessage());
+			assertEquals("Invalid policy_uri (language tag) parameter: The URI scheme must be https or http", e.getMessage());
 		}
 		
 		// tos_uri
@@ -1016,7 +1016,7 @@ public class ClientMetadataTest extends TestCase {
 			ClientMetadata.parse(copy);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"tos_uri\" (language tag) parameter: The URI scheme must be https or http", e.getMessage());
+			assertEquals("Invalid tos_uri (language tag) parameter: The URI scheme must be https or http", e.getMessage());
 		}
 	}
 
@@ -1151,7 +1151,7 @@ public class ClientMetadataTest extends TestCase {
 			ClientMetadata.parse(o);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"redirect_uris\" parameter: The redirect_uri must not contain fragment", e.getMessage());
+			assertEquals("Invalid redirect_uris parameter: The redirect_uri must not contain fragment", e.getMessage());
 			assertEquals(RegistrationError.INVALID_REDIRECT_URI.getCode(), e.getErrorObject().getCode());
 			assertEquals("Invalid redirection URI(s): The redirect_uri must not contain fragment", e.getErrorObject().getDescription());
 		}
@@ -1206,7 +1206,7 @@ public class ClientMetadataTest extends TestCase {
 				ClientMetadata.parse(o);
 				fail();
 			} catch (ParseException e) {
-				assertEquals("Invalid \"redirect_uris\" parameter: The URI scheme " + scheme + " is prohibited", e.getMessage());
+				assertEquals("Invalid redirect_uris parameter: The URI scheme " + scheme + " is prohibited", e.getMessage());
 				assertEquals(RegistrationError.INVALID_REDIRECT_URI.getCode(), e.getErrorObject().getCode());
 				assertEquals("Invalid redirection URI(s): The URI scheme " + scheme + " is prohibited", e.getErrorObject().getDescription());
 			}
@@ -1223,9 +1223,9 @@ public class ClientMetadataTest extends TestCase {
 			ClientMetadata.parse(o);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Unexpected type of JSON object member with key \"response_types\"", e.getMessage());
+			assertEquals("Unexpected type of JSON object member with key response_types", e.getMessage());
 			assertEquals(RegistrationError.INVALID_CLIENT_METADATA.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid client metadata field: Unexpected type of JSON object member with key \"response_types\"", e.getErrorObject().getDescription());
+			assertEquals("Invalid client metadata field: Unexpected type of JSON object member with key response_types", e.getErrorObject().getDescription());
 		}
 	}
 	

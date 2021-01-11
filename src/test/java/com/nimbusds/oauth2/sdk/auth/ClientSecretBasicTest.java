@@ -137,7 +137,7 @@ public class ClientSecretBasicTest extends TestCase {
 			ClientSecretBasic.parse("Basic " + b64);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Missing credentials delimiter \":\"", e.getMessage());
+			assertEquals("Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Missing credentials delimiter (:)", e.getMessage());
 		}
 	}
 	

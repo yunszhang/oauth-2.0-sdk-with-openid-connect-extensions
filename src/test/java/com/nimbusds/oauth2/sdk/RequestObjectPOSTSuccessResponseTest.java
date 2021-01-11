@@ -139,7 +139,7 @@ public class RequestObjectPOSTSuccessResponseTest extends TestCase {
 			RequestObjectPOSTSuccessResponse.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing JSON object member with key \"iss\"", e.getMessage());
+			assertEquals("Missing JSON object member with key iss", e.getMessage());
 		}
 		
 		jsonObject = response.toJSONObject();
@@ -148,7 +148,7 @@ public class RequestObjectPOSTSuccessResponseTest extends TestCase {
 			RequestObjectPOSTSuccessResponse.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing JSON object member with key \"aud\"", e.getMessage());
+			assertEquals("Missing JSON object member with key aud", e.getMessage());
 		}
 		
 		jsonObject = response.toJSONObject();
@@ -157,7 +157,7 @@ public class RequestObjectPOSTSuccessResponseTest extends TestCase {
 			RequestObjectPOSTSuccessResponse.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing JSON object member with key \"request_uri\"", e.getMessage());
+			assertEquals("Missing JSON object member with key request_uri", e.getMessage());
 		}
 		
 		jsonObject = response.toJSONObject();
@@ -166,7 +166,7 @@ public class RequestObjectPOSTSuccessResponseTest extends TestCase {
 			RequestObjectPOSTSuccessResponse.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing JSON object member with key \"exp\"", e.getMessage());
+			assertEquals("Missing JSON object member with key exp", e.getMessage());
 		}
 	}
 	
@@ -243,7 +243,7 @@ public class RequestObjectPOSTSuccessResponseTest extends TestCase {
 			RequestObjectPOSTSuccessResponse.parse(httpResponse);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing JSON object member with key \"iss\"", e.getMessage());
+			assertEquals("Missing JSON object member with key iss", e.getMessage());
 		}
 	}
 }

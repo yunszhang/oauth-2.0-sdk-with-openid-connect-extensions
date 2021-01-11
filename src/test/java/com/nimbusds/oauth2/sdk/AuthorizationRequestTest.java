@@ -582,9 +582,9 @@ public class AuthorizationRequestTest extends TestCase {
 			AuthorizationRequest.parse(requestURI);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing \"client_id\" parameter", e.getMessage());
+			assertEquals("Missing client_id parameter", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing \"client_id\" parameter", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Missing client_id parameter", e.getErrorObject().getDescription());
 			assertNull(e.getErrorObject().getURI());
 		}
 	}
@@ -603,9 +603,9 @@ public class AuthorizationRequestTest extends TestCase {
 			AuthorizationRequest.parse(requestURI);
 			fail();
 		} catch (ParseException e) {
-			assertTrue(e.getMessage().startsWith("Invalid \"redirect_uri\" parameter"));
+			assertTrue(e.getMessage().startsWith("Invalid redirect_uri parameter"));
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertTrue(e.getErrorObject().getDescription().startsWith("Invalid request: Invalid \"redirect_uri\" parameter"));
+			assertTrue(e.getErrorObject().getDescription().startsWith("Invalid request: Invalid redirect_uri parameter"));
 			assertNull(e.getErrorObject().getURI());
 		}
 	}
@@ -624,9 +624,9 @@ public class AuthorizationRequestTest extends TestCase {
 			AuthorizationRequest.parse(requestURI);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing \"response_type\" parameter", e.getMessage());
+			assertEquals("Missing response_type parameter", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing \"response_type\" parameter", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Missing response_type parameter", e.getErrorObject().getDescription());
 			assertNull(e.getErrorObject().getURI());
 		}
 	}
@@ -791,7 +791,7 @@ public class AuthorizationRequestTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_RESOURCE, e.getErrorObject());
-			assertEquals("Invalid \"resource\" parameter: Must be an absolute URI and with no query or fragment: https:///", e.getErrorObject().getDescription());
+			assertEquals("Illegal resource parameter: Must be an absolute URI and with no query or fragment: https:///", e.getErrorObject().getDescription());
 		}
 	}
 	
@@ -808,7 +808,7 @@ public class AuthorizationRequestTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_RESOURCE, e.getErrorObject());
-			assertEquals("Invalid \"resource\" parameter: Must be an absolute URI and with no query or fragment: https://rs.example.com/?query", e.getErrorObject().getDescription());
+			assertEquals("Illegal resource parameter: Must be an absolute URI and with no query or fragment: https://rs.example.com/?query", e.getErrorObject().getDescription());
 		}
 	}
 	
@@ -825,7 +825,7 @@ public class AuthorizationRequestTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_RESOURCE, e.getErrorObject());
-			assertEquals("Invalid \"resource\" parameter: Must be an absolute URI and with no query or fragment: https://rs.example.com/#fragment", e.getErrorObject().getDescription());
+			assertEquals("Illegal resource parameter: Must be an absolute URI and with no query or fragment: https://rs.example.com/#fragment", e.getErrorObject().getDescription());
 		}
 	}
 	
@@ -1215,9 +1215,9 @@ public class AuthorizationRequestTest extends TestCase {
 				.build();
 			fail();
 		} catch (IllegalStateException e) {
-			assertEquals("Illegal \"request\" parameter: The JWT sub (subject) claim must not equal the client_id", e.getMessage());
+			assertEquals("Illegal request parameter: The JWT sub (subject) claim must not equal the client_id", e.getMessage());
 			assertTrue(e.getCause() instanceof IllegalArgumentException);
-			assertEquals("Illegal \"request\" parameter: The JWT sub (subject) claim must not equal the client_id", e.getCause().getMessage());
+			assertEquals("Illegal request parameter: The JWT sub (subject) claim must not equal the client_id", e.getCause().getMessage());
 		}
 	}
 	
@@ -1245,7 +1245,7 @@ public class AuthorizationRequestTest extends TestCase {
 			AuthorizationRequest.parse(request);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"request\" parameter: The JWT sub (subject) claim must not equal the client_id", e.getMessage());
+			assertEquals("Invalid request parameter: The JWT sub (subject) claim must not equal the client_id", e.getMessage());
 			assertEquals(clientID, e.getClientID());
 		}
 	}
@@ -1446,7 +1446,7 @@ public class AuthorizationRequestTest extends TestCase {
 			AuthorizationRequest.parse(URI.create("https://c2id.com/login?request_uri=https%3A%2F%2Fexample.org%2Frequest.jwt"));
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing \"client_id\" parameter", e.getMessage());
+			assertEquals("Missing client_id parameter", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
 		}
 	}
@@ -1458,7 +1458,7 @@ public class AuthorizationRequestTest extends TestCase {
 			AuthorizationRequest.parse(URI.create("https://c2id.com/login?request_uri=%3A&client_id=123"));
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"request_uri\" parameter: Expected scheme name at index 0: :", e.getMessage());
+			assertEquals("Invalid request_uri parameter: Expected scheme name at index 0: :", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
 		}
 	}
@@ -1470,7 +1470,7 @@ public class AuthorizationRequestTest extends TestCase {
 			AuthorizationRequest.parse(URI.create("https://c2id.com/login?request=eyJhbGciOiJub25lIn0.eyJyZXNwb25zZV90eXBlIjoiY29kZSIsImNsaWVudF9pZCI6IjEyMyJ9."));
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing \"client_id\" parameter", e.getMessage());
+			assertEquals("Missing client_id parameter", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
 		}
 	}
@@ -1482,7 +1482,7 @@ public class AuthorizationRequestTest extends TestCase {
 			AuthorizationRequest.parse(URI.create("https://c2id.com/login?request=abc&client_id=123"));
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"request\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getMessage());
+			assertEquals("Invalid request parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
 		}
 	}
@@ -1506,9 +1506,9 @@ public class AuthorizationRequestTest extends TestCase {
 			AuthorizationRequest.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"request_uri\" parameter: Expected scheme name at index 0: :", e.getMessage());
+			assertEquals("Invalid request_uri parameter: Expected scheme name at index 0: :", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
-			assertEquals("Invalid request: Invalid \"request_uri\" parameter: Expected scheme name at index 0: :", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Invalid request_uri parameter: Expected scheme name at index 0: :", e.getErrorObject().getDescription());
 			assertEquals(clientID, e.getClientID());
 			assertEquals(redirectionURI, e.getRedirectionURI());
 			assertEquals(state, e.getState());
@@ -1534,9 +1534,9 @@ public class AuthorizationRequestTest extends TestCase {
 			AuthorizationRequest.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"request\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getMessage());
+			assertEquals("Invalid request parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
-			assertEquals("Invalid request: Invalid \"request\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Invalid request parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getErrorObject().getDescription());
 			assertEquals(clientID, e.getClientID());
 			assertEquals(redirectionURI, e.getRedirectionURI());
 			assertEquals(state, e.getState());
@@ -1562,9 +1562,9 @@ public class AuthorizationRequestTest extends TestCase {
 			AuthorizationRequest.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing \"response_type\" parameter", e.getMessage());
+			assertEquals("Missing response_type parameter", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
-			assertEquals("Invalid request: Missing \"response_type\" parameter", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Missing response_type parameter", e.getErrorObject().getDescription());
 			assertEquals(clientID, e.getClientID());
 			assertEquals(redirectionURI, e.getRedirectionURI());
 			assertEquals("implied", ResponseMode.QUERY, e.getResponseMode());
@@ -1587,9 +1587,9 @@ public class AuthorizationRequestTest extends TestCase {
 			AuthorizationRequest.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing \"client_id\" parameter", e.getMessage());
+			assertEquals("Missing client_id parameter", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
-			assertEquals("Invalid request: Missing \"client_id\" parameter", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Missing client_id parameter", e.getErrorObject().getDescription());
 			assertNull(e.getClientID());
 			assertNull(e.getRedirectionURI());
 			assertNull(e.getResponseMode());
@@ -1616,9 +1616,9 @@ public class AuthorizationRequestTest extends TestCase {
 			AuthorizationRequest.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing \"client_id\" parameter", e.getMessage());
+			assertEquals("Missing client_id parameter", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
-			assertEquals("Invalid request: Missing \"client_id\" parameter", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Missing client_id parameter", e.getErrorObject().getDescription());
 			assertNull(e.getClientID());
 			assertNull(e.getRedirectionURI());
 			assertNull(e.getResponseMode());
@@ -1635,9 +1635,9 @@ public class AuthorizationRequestTest extends TestCase {
 			AuthorizationRequest.parse(uri);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"request\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getMessage());
+			assertEquals("Invalid request parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Invalid \"request\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Invalid request parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getErrorObject().getDescription());
 			assertEquals(URI.create("//example.io"), e.getRedirectionURI());
 			assertNull(e.getState());
 			assertEquals(new ClientID("123"), e.getClientID());

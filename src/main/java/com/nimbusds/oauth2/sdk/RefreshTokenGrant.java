@@ -136,12 +136,12 @@ public class RefreshTokenGrant extends AuthorizationGrant {
 		String grantTypeString = MultivaluedMapUtils.getFirstValue(params, "grant_type");
 
 		if (grantTypeString == null) {
-			String msg = "Missing \"grant_type\" parameter";
+			String msg = "Missing grant_type parameter";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 		}
 
 		if (! GrantType.parse(grantTypeString).equals(GRANT_TYPE)) {
-			String msg = "The \"grant_type\" must be \"" + GRANT_TYPE + "\"";
+			String msg = "The grant_type must be " + GRANT_TYPE + "";
 			throw new ParseException(msg, OAuth2Error.UNSUPPORTED_GRANT_TYPE.appendDescription(": " + msg));
 		}
 
@@ -149,7 +149,7 @@ public class RefreshTokenGrant extends AuthorizationGrant {
 		String refreshTokenString = MultivaluedMapUtils.getFirstValue(params, "refresh_token");
 
 		if (refreshTokenString == null || refreshTokenString.trim().isEmpty()) {
-			String msg = "Missing or empty \"refresh_token\" parameter";
+			String msg = "Missing or empty refresh_token parameter";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 		}
 

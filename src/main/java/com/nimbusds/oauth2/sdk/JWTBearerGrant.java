@@ -58,13 +58,13 @@ public class JWTBearerGrant extends AssertionGrant {
 	public static final GrantType GRANT_TYPE = GrantType.JWT_BEARER;
 
 	
-	private static final String UNSUPPORTED_GRANT_TYPE_MESSAGE = "The \"grant_type\" must be " + GRANT_TYPE;
+	private static final String UNSUPPORTED_GRANT_TYPE_MESSAGE = "The grant_type must be " + GRANT_TYPE;
 	
 	
 	private static final String PLAIN_ASSERTION_REJECTED_MESSAGE = "The JWT assertion must not be unsecured (plain)";
 	
 	
-	private static final String JWT_PARSE_MESSAGE = "The \"assertion\" is not a JWT";
+	private static final String JWT_PARSE_MESSAGE = "The assertion is not a JWT";
 
 
 	/**

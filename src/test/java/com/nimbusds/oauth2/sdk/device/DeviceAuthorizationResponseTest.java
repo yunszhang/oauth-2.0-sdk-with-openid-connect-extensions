@@ -174,7 +174,7 @@ public class DeviceAuthorizationResponseTest extends TestCase {
 			DeviceAuthorizationSuccessResponse.parse(httpResponse);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing JSON object member with key \"device_code\"", e.getMessage());
+			assertEquals("Missing JSON object member with key device_code", e.getMessage());
 		}
 	}
 
@@ -208,7 +208,7 @@ public class DeviceAuthorizationResponseTest extends TestCase {
 			DeviceAuthorizationSuccessResponse.parse(httpResponse);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing JSON object member with key \"user_code\"", e.getMessage());
+			assertEquals("Missing JSON object member with key user_code", e.getMessage());
 		}
 	}
 
@@ -242,7 +242,7 @@ public class DeviceAuthorizationResponseTest extends TestCase {
 			DeviceAuthorizationSuccessResponse.parse(httpResponse);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing JSON object member with key \"verification_uri\"", e.getMessage());
+			assertEquals("Missing JSON object member with key verification_uri", e.getMessage());
 		}
 	}
 

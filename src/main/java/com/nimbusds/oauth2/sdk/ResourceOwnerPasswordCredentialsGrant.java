@@ -161,12 +161,12 @@ public class ResourceOwnerPasswordCredentialsGrant extends AuthorizationGrant {
 		String grantTypeString = MultivaluedMapUtils.getFirstValue(params, "grant_type");
 
 		if (grantTypeString == null) {
-			String msg = "Missing \"grant_type\" parameter";
+			String msg = "Missing grant_type parameter";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 		}
 
 		if (! GrantType.parse(grantTypeString).equals(GRANT_TYPE)) {
-			String msg = "The \"grant_type\" must be " + GRANT_TYPE;
+			String msg = "The grant_type must be " + GRANT_TYPE;
 			throw new ParseException(msg, OAuth2Error.UNSUPPORTED_GRANT_TYPE.appendDescription(": " + msg));
 		}
 
@@ -175,7 +175,7 @@ public class ResourceOwnerPasswordCredentialsGrant extends AuthorizationGrant {
 		String username = MultivaluedMapUtils.getFirstValue(params, "username");
 
 		if (username == null || username.trim().isEmpty()) {
-			String msg = "Missing or empty \"username\" parameter";
+			String msg = "Missing or empty username parameter";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 		}
 
@@ -183,7 +183,7 @@ public class ResourceOwnerPasswordCredentialsGrant extends AuthorizationGrant {
 		String passwordString = MultivaluedMapUtils.getFirstValue(params, "password");
 
 		if (passwordString == null || passwordString.trim().isEmpty()) {
-			String msg = "Missing or empty \"password\" parameter";
+			String msg = "Missing or empty password parameter";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 		}
 

@@ -1039,9 +1039,9 @@ public class AuthenticationRequestTest extends TestCase {
 			AuthenticationRequest.parse(query);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing \"redirect_uri\" parameter", e.getMessage());
+			assertEquals("Missing redirect_uri parameter", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing \"redirect_uri\" parameter", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Missing redirect_uri parameter", e.getErrorObject().getDescription());
 			assertEquals(ResponseMode.FRAGMENT, e.getResponseMode());
 			assertNull(e.getErrorObject().getURI());
 		}
@@ -1059,9 +1059,9 @@ public class AuthenticationRequestTest extends TestCase {
 			AuthenticationRequest.parse(query);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing \"scope\" parameter", e.getMessage());
+			assertEquals("Missing scope parameter", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing \"scope\" parameter", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Missing scope parameter", e.getErrorObject().getDescription());
 			assertEquals(ResponseMode.FRAGMENT, e.getResponseMode());
 			assertNull(e.getErrorObject().getURI());
 		}
@@ -1080,9 +1080,9 @@ public class AuthenticationRequestTest extends TestCase {
 			AuthenticationRequest.parse(query);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("The scope must include an \"openid\" value", e.getMessage());
+			assertEquals("The scope must include an openid value", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: The scope must include an \"openid\" value", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: The scope must include an openid value", e.getErrorObject().getDescription());
 			assertEquals(ResponseMode.QUERY, e.getResponseMode());
 			assertNull(e.getErrorObject().getURI());
 		}
@@ -1101,9 +1101,9 @@ public class AuthenticationRequestTest extends TestCase {
 			AuthenticationRequest.parse(query);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing \"nonce\" parameter: Required in the implicit and hybrid flows", e.getMessage());
+			assertEquals("Missing nonce parameter: Required in the implicit and hybrid flows", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing \"nonce\" parameter: Required in the implicit and hybrid flows", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Missing nonce parameter: Required in the implicit and hybrid flows", e.getErrorObject().getDescription());
 			assertEquals(ResponseMode.FRAGMENT, e.getResponseMode());
 			assertNull(e.getErrorObject().getURI());
 		}
@@ -1123,9 +1123,9 @@ public class AuthenticationRequestTest extends TestCase {
 			AuthenticationRequest.parse(query);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"display\" parameter: Unknown display type: mobile", e.getMessage());
+			assertEquals("Invalid display parameter: Unknown display type: mobile", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Invalid \"display\" parameter: Unknown display type: mobile", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Invalid display parameter: Unknown display type: mobile", e.getErrorObject().getDescription());
 			assertEquals(ResponseMode.QUERY, e.getResponseMode());
 			assertNull(e.getErrorObject().getURI());
 		}
@@ -1145,9 +1145,9 @@ public class AuthenticationRequestTest extends TestCase {
 			AuthenticationRequest.parse(query);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"max_age\" parameter: zero", e.getMessage());
+			assertEquals("Invalid max_age parameter: zero", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Invalid \"max_age\" parameter: zero", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Invalid max_age parameter: zero", e.getErrorObject().getDescription());
 			assertEquals(ResponseMode.QUERY, e.getResponseMode());
 			assertNull(e.getErrorObject().getURI());
 		}
@@ -1167,9 +1167,9 @@ public class AuthenticationRequestTest extends TestCase {
 			AuthenticationRequest.parse(query);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"id_token_hint\" parameter: Invalid unsecured/JWS/JWE header: Invalid JSON: Unexpected token  at position 1.", e.getMessage());
+			assertEquals("Invalid id_token_hint parameter: Invalid unsecured/JWS/JWE header: Invalid JSON: Unexpected token  at position 1.", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Invalid \"id_token_hint\" parameter: Invalid unsecured/JWS/JWE header: Invalid JSON: Unexpected token  at position 1.", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Invalid id_token_hint parameter: Invalid unsecured/JWS/JWE header: Invalid JSON: Unexpected token  at position 1.", e.getErrorObject().getDescription());
 			assertEquals(ResponseMode.QUERY, e.getResponseMode());
 			assertNull(e.getErrorObject().getURI());
 		}
@@ -1235,7 +1235,7 @@ public class AuthenticationRequestTest extends TestCase {
 			AuthenticationRequest.parse(URI.create("https://c2id.com/login?request_uri=https%3A%2F%2Fexample.org%2Frequest.jwt"));
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing \"client_id\" parameter", e.getMessage());
+			assertEquals("Missing client_id parameter", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
 		}
 	}
@@ -1247,7 +1247,7 @@ public class AuthenticationRequestTest extends TestCase {
 			AuthenticationRequest.parse(URI.create("https://c2id.com/login?request=eyJhbGciOiJub25lIn0.eyJyZXNwb25zZV90eXBlIjoiY29kZSIsImNsaWVudF9pZCI6IjEyMyJ9."));
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing \"client_id\" parameter", e.getMessage());
+			assertEquals("Missing client_id parameter", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
 		}
 	}
@@ -1345,9 +1345,9 @@ public class AuthenticationRequestTest extends TestCase {
 				"&state=af0ifjsldkj"));
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing \"nonce\" parameter: Required in the implicit and hybrid flows", e.getMessage());
+			assertEquals("Missing nonce parameter: Required in the implicit and hybrid flows", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing \"nonce\" parameter: Required in the implicit and hybrid flows", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Missing nonce parameter: Required in the implicit and hybrid flows", e.getErrorObject().getDescription());
 			assertEquals(new ClientID("s6BhdRkqt3"), e.getClientID());
 			assertEquals(new URI("https://client.example.org/cb"), e.getRedirectionURI());
 			assertEquals(ResponseMode.FRAGMENT, e.getResponseMode());
@@ -1441,7 +1441,7 @@ public class AuthenticationRequestTest extends TestCase {
 		try {
 			AuthenticationRequest.parse(params);
 		} catch (ParseException e) {
-			assertEquals("Invalid \"prompt\" parameter: Unknown prompt type: prompt-xxx", e.getMessage());
+			assertEquals("Invalid prompt parameter: Unknown prompt type: prompt-xxx", e.getMessage());
 		}
 	}
 
@@ -1948,7 +1948,7 @@ public class AuthenticationRequestTest extends TestCase {
 			new AuthenticationRequest.Builder(requestURI, clientID).scope(new Scope("email"));
 			fail("Core scope when set must contain openid");
 		} catch (IllegalArgumentException e) {
-			assertEquals("The scope must include an \"openid\" value", e.getMessage());
+			assertEquals("The scope must include an openid value", e.getMessage());
 		}
 		
 		try {
@@ -2220,12 +2220,12 @@ public class AuthenticationRequestTest extends TestCase {
 			AuthenticationRequest.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"purpose\" parameter: Must not be shorter than 3 and longer than 300 characters", e.getMessage());
+			assertEquals("Invalid purpose parameter: Must not be shorter than 3 and longer than 300 characters", e.getMessage());
 			assertEquals(authRequest.getState(), e.getState());
 			assertEquals(authRequest.getClientID(), e.getClientID());
 			assertEquals(authRequest.getRedirectionURI(), e.getRedirectionURI());
 			assertEquals("invalid_request", e.getErrorObject().getCode());
-			assertEquals("Invalid request: Invalid \"purpose\" parameter: Must not be shorter than 3 and longer than 300 characters", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Invalid purpose parameter: Must not be shorter than 3 and longer than 300 characters", e.getErrorObject().getDescription());
 		}
 		
 		params.put("purpose", Collections.singletonList(RandomStringUtils.random(301)));
@@ -2234,12 +2234,12 @@ public class AuthenticationRequestTest extends TestCase {
 			AuthenticationRequest.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"purpose\" parameter: Must not be shorter than 3 and longer than 300 characters", e.getMessage());
+			assertEquals("Invalid purpose parameter: Must not be shorter than 3 and longer than 300 characters", e.getMessage());
 			assertEquals(authRequest.getState(), e.getState());
 			assertEquals(authRequest.getClientID(), e.getClientID());
 			assertEquals(authRequest.getRedirectionURI(), e.getRedirectionURI());
 			assertEquals("invalid_request", e.getErrorObject().getCode());
-			assertEquals("Invalid request: Invalid \"purpose\" parameter: Must not be shorter than 3 and longer than 300 characters", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Invalid purpose parameter: Must not be shorter than 3 and longer than 300 characters", e.getErrorObject().getDescription());
 		}
 	}
 	
@@ -2401,9 +2401,9 @@ public class AuthenticationRequestTest extends TestCase {
 			AuthenticationRequest.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"claims\" parameter: Invalid verified claims request: Empty verified claims object", e.getMessage());
+			assertEquals("Invalid claims parameter: Invalid verified claims request: Empty verified claims object", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST, e.getErrorObject());
-			assertEquals("Invalid request: Invalid \"claims\" parameter: Invalid verified claims request: Empty verified claims object", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Invalid claims parameter: Invalid verified claims request: Empty verified claims object", e.getErrorObject().getDescription());
 		}
 	}
 	

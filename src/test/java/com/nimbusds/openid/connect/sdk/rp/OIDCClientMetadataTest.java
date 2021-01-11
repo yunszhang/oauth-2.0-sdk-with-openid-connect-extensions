@@ -615,9 +615,9 @@ public class OIDCClientMetadataTest extends TestCase {
 			OIDCClientMetadata.parse(o);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Unexpected value of JSON object member with key \"application_type\"", e.getMessage());
+			assertEquals("Unexpected value of JSON object member with key application_type", e.getMessage());
 			assertEquals(RegistrationError.INVALID_CLIENT_METADATA.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid client metadata field: Unexpected value of JSON object member with key \"application_type\"", e.getErrorObject().getDescription());
+			assertEquals("Invalid client metadata field: Unexpected value of JSON object member with key application_type", e.getErrorObject().getDescription());
 		}
 	}
 
@@ -962,7 +962,7 @@ public class OIDCClientMetadataTest extends TestCase {
 			ClientMetadata.parse(copy);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"client_uri\" (language tag) parameter: The URI scheme must be https or http", e.getMessage());
+			assertEquals("Invalid client_uri (language tag) parameter: The URI scheme must be https or http", e.getMessage());
 		}
 		
 		// policy_uri
@@ -974,7 +974,7 @@ public class OIDCClientMetadataTest extends TestCase {
 			ClientMetadata.parse(copy);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"policy_uri\" (language tag) parameter: The URI scheme must be https or http", e.getMessage());
+			assertEquals("Invalid policy_uri (language tag) parameter: The URI scheme must be https or http", e.getMessage());
 		}
 		
 		// tos_uri
@@ -986,7 +986,7 @@ public class OIDCClientMetadataTest extends TestCase {
 			ClientMetadata.parse(copy);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"tos_uri\" (language tag) parameter: The URI scheme must be https or http", e.getMessage());
+			assertEquals("Invalid tos_uri (language tag) parameter: The URI scheme must be https or http", e.getMessage());
 		}
 	}
 	
@@ -1011,7 +1011,7 @@ public class OIDCClientMetadataTest extends TestCase {
 			OIDCClientMetadata.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"initiate_login_uri\" parameter: The URI scheme must be https", e.getMessage());
+			assertEquals("Invalid initiate_login_uri parameter: The URI scheme must be https", e.getMessage());
 		}
 	}
 	
@@ -1036,7 +1036,7 @@ public class OIDCClientMetadataTest extends TestCase {
 			OIDCClientMetadata.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"frontchannel_logout_uri\" parameter: The URI scheme must be https or http", e.getMessage());
+			assertEquals("Invalid frontchannel_logout_uri parameter: The URI scheme must be https or http", e.getMessage());
 		}
 	}
 	
@@ -1061,7 +1061,7 @@ public class OIDCClientMetadataTest extends TestCase {
 			OIDCClientMetadata.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"backchannel_logout_uri\" parameter: The URI scheme must be https or http", e.getMessage());
+			assertEquals("Invalid backchannel_logout_uri parameter: The URI scheme must be https or http", e.getMessage());
 		}
 	}
 	
@@ -1090,9 +1090,9 @@ public class OIDCClientMetadataTest extends TestCase {
 				OIDCClientMetadata.parse(o);
 				fail();
 			} catch (ParseException e) {
-				assertEquals("Invalid \"post_logout_redirect_uris\" parameter: The URI scheme " + scheme + " is prohibited", e.getMessage());
+				assertEquals("Invalid post_logout_redirect_uris parameter: The URI scheme " + scheme + " is prohibited", e.getMessage());
 				assertEquals(RegistrationError.INVALID_CLIENT_METADATA.getCode(), e.getErrorObject().getCode());
-				assertEquals("Invalid client metadata field: Invalid \"post_logout_redirect_uris\" parameter: The URI scheme " + scheme + " is prohibited", e.getErrorObject().getDescription());
+				assertEquals("Invalid client metadata field: Invalid post_logout_redirect_uris parameter: The URI scheme " + scheme + " is prohibited", e.getErrorObject().getDescription());
 			}
 		}
 	}

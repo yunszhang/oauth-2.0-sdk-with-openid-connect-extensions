@@ -184,7 +184,7 @@ public class CIBARequestAcknowledgementTest extends TestCase {
 			CIBARequestAcknowledgement.parse(httpResponse);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing JSON object member with key \"auth_req_id\"", e.getMessage());
+			assertEquals("Missing JSON object member with key auth_req_id", e.getMessage());
 		}
 	}
 	
@@ -203,7 +203,7 @@ public class CIBARequestAcknowledgementTest extends TestCase {
 			CIBARequestAcknowledgement.parse(httpResponse);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing JSON object member with key \"expires_in\"", e.getMessage());
+			assertEquals("Missing JSON object member with key expires_in", e.getMessage());
 		}
 	}
 	
@@ -224,7 +224,7 @@ public class CIBARequestAcknowledgementTest extends TestCase {
 			CIBARequestAcknowledgement.parse(httpResponse);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("The \"interval\" parameter must be a positive integer", e.getMessage());
+			assertEquals("The interval parameter must be a positive integer", e.getMessage());
 		}
 	}
 }

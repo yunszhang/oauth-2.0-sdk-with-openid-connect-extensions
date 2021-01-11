@@ -2271,14 +2271,14 @@ public class ClientMetadata {
 				try {
 					uri = new URI(uriString);
 				} catch (URISyntaxException e) {
-					throw new ParseException("Invalid \"redirect_uris\" parameter: " + e.getMessage(), RegistrationError.INVALID_REDIRECT_URI.appendDescription(": " + e.getMessage()));
+					throw new ParseException("Invalid redirect_uris parameter: " + e.getMessage(), RegistrationError.INVALID_REDIRECT_URI.appendDescription(": " + e.getMessage()));
 				}
 				redirectURIs.add(uri);
 			}
 			try {
 				metadata.setRedirectionURIs(redirectURIs);
 			} catch (IllegalArgumentException e) {
-				throw new ParseException("Invalid \"redirect_uris\" parameter: " + e.getMessage(), RegistrationError.INVALID_REDIRECT_URI.appendDescription(": " + e.getMessage()));
+				throw new ParseException("Invalid redirect_uris parameter: " + e.getMessage(), RegistrationError.INVALID_REDIRECT_URI.appendDescription(": " + e.getMessage()));
 			}
 			jsonObject.remove("redirect_uris");
 		}
@@ -2335,7 +2335,7 @@ public class ClientMetadata {
 
 				} catch (ClassCastException e) {
 
-					throw new ParseException("Invalid \"client_name\" (language tag) parameter");
+					throw new ParseException("Invalid client_name (language tag) parameter");
 				}
 
 				removeMember(jsonObject, "client_name", entry.getKey());
@@ -2351,7 +2351,7 @@ public class ClientMetadata {
 				try {
 					metadata.setLogoURI(new URI((String) entry.getValue()), entry.getKey());
 				} catch (Exception e) {
-					throw new ParseException("Invalid \"logo_uri\" (language tag) parameter");
+					throw new ParseException("Invalid logo_uri (language tag) parameter");
 				}
 
 				removeMember(jsonObject, "logo_uri", entry.getKey());
@@ -2367,7 +2367,7 @@ public class ClientMetadata {
 				try {
 					metadata.setURI(new URI((String) entry.getValue()), entry.getKey());
 				} catch (Exception e) {
-					throw new ParseException("Invalid \"client_uri\" (language tag) parameter: " + e.getMessage());
+					throw new ParseException("Invalid client_uri (language tag) parameter: " + e.getMessage());
 				}
 
 				removeMember(jsonObject, "client_uri", entry.getKey());
@@ -2383,7 +2383,7 @@ public class ClientMetadata {
 				try {
 					metadata.setPolicyURI(new URI((String) entry.getValue()), entry.getKey());
 				} catch (Exception e) {
-					throw new ParseException("Invalid \"policy_uri\" (language tag) parameter: " + e.getMessage());
+					throw new ParseException("Invalid policy_uri (language tag) parameter: " + e.getMessage());
 				}
 
 				removeMember(jsonObject, "policy_uri", entry.getKey());
@@ -2399,7 +2399,7 @@ public class ClientMetadata {
 				try {
 					metadata.setTermsOfServiceURI(new URI((String) entry.getValue()), entry.getKey());
 				} catch (Exception e) {
-					throw new ParseException("Invalid \"tos_uri\" (language tag) parameter: " + e.getMessage());
+					throw new ParseException("Invalid tos_uri (language tag) parameter: " + e.getMessage());
 				}
 
 				removeMember(jsonObject, "tos_uri", entry.getKey());
@@ -2450,7 +2450,7 @@ public class ClientMetadata {
 						
 					} catch (URISyntaxException e) {
 						
-						throw new ParseException("Invalid \"request_uris\" parameter");
+						throw new ParseException("Invalid request_uris parameter");
 					}
 				}
 				

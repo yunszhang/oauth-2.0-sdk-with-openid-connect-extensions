@@ -134,7 +134,7 @@ public class AuthorizationServerMetadataResolveTest {
 			AuthorizationServerMetadata.resolve(issuer);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing JSON object member with key \"issuer\"", e.getMessage());
+			assertEquals("Missing JSON object member with key issuer", e.getMessage());
 		}
 	}
 	

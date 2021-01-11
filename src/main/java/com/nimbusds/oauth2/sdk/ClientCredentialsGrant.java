@@ -91,12 +91,12 @@ public class ClientCredentialsGrant extends AuthorizationGrant {
 		String grantTypeString = MultivaluedMapUtils.getFirstValue(params, "grant_type");
 
 		if (grantTypeString == null) {
-			String msg = "Missing \"grant_type\" parameter";
+			String msg = "Missing grant_type parameter";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 		}
 
 		if (! GrantType.parse(grantTypeString).equals(GRANT_TYPE)) {
-		    	String msg = "The \"grant_type\" must be " + GRANT_TYPE;
+		    	String msg = "The grant_type must be " + GRANT_TYPE;
 			throw new ParseException(msg, OAuth2Error.UNSUPPORTED_GRANT_TYPE.appendDescription(": " + msg));
         	}
 

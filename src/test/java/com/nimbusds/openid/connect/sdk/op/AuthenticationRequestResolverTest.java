@@ -212,9 +212,9 @@ public class AuthenticationRequestResolverTest extends TestCase {
 		try {
 			resolver.resolve(request, null);
 		} catch (ResolveException e) {
-			assertEquals("Couldn't create final OpenID authentication request: Missing \"redirect_uri\" parameter", e.getMessage());
+			assertEquals("Couldn't create final OpenID authentication request: Missing redirect_uri parameter", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST_OBJECT.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request object parameter(s): Missing \"redirect_uri\" parameter", e.getErrorObject().getDescription());
+			assertEquals("Invalid request object parameter(s): Missing redirect_uri parameter", e.getErrorObject().getDescription());
 			assertNull(e.getRedirectionURI());
 			assertEquals(request.getState(), e.getState());
 		}

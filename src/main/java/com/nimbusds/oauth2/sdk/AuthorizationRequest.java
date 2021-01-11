@@ -832,10 +832,10 @@ public class AuthorizationRequest extends AbstractRequest {
 				requestObjectClaims = requestObject.getJWTClaimsSet();
 			} catch (java.text.ParseException e) {
 				// Should never happen
-				throw new IllegalArgumentException("Illegal \"request\" parameter: " + e.getMessage(), e);
+				throw new IllegalArgumentException("Illegal request parameter: " + e.getMessage(), e);
 			}
 			if (clientID.getValue().equals(requestObjectClaims.getSubject())) {
-				throw new IllegalArgumentException("Illegal \"request\" parameter: The JWT sub (subject) claim must not equal the client_id");
+				throw new IllegalArgumentException("Illegal request parameter: The JWT sub (subject) claim must not equal the client_id");
 			}
 		}
 		
@@ -1331,7 +1331,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		v = MultivaluedMapUtils.getFirstValue(params, "client_id");
 		if (StringUtils.isBlank(v)) {
 			// No automatic redirection https://tools.ietf.org/html/rfc6749#section-4.1.2.1
-			String msg = "Missing \"client_id\" parameter";
+			String msg = "Missing client_id parameter";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 		}
 		clientID = new ClientID(v);
@@ -1343,7 +1343,7 @@ public class AuthorizationRequest extends AbstractRequest {
 				redirectURI = new URI(v);
 			} catch (URISyntaxException e) {
 				// No automatic redirection https://tools.ietf.org/html/rfc6749#section-4.1.2.1
-				String msg = "Invalid \"redirect_uri\" parameter: " + e.getMessage();
+				String msg = "Invalid redirect_uri parameter: " + e.getMessage();
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 			}
 		}
@@ -1355,7 +1355,7 @@ public class AuthorizationRequest extends AbstractRequest {
 				rt = ResponseType.parse(v);
 			} catch (ParseException e) {
 				// Only cause
-				String msg = "Invalid \"response_type\" parameter";
+				String msg = "Invalid response_type parameter";
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 					clientID, redirectURI, rm, state, e);
 			}
@@ -1368,7 +1368,7 @@ public class AuthorizationRequest extends AbstractRequest {
 			try {
 				requestURI = new URI(v);
 			} catch (URISyntaxException e) {
-				String msg = "Invalid \"request_uri\" parameter: " + e.getMessage();
+				String msg = "Invalid request_uri parameter: " + e.getMessage();
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 					clientID, redirectURI, ResponseMode.resolve(rm, rt), state, e);
 			}
@@ -1382,7 +1382,7 @@ public class AuthorizationRequest extends AbstractRequest {
 			
 			// request_object and request_uri must not be present at the same time
 			if (requestURI != null) {
-				String msg = "Invalid request: Found mutually exclusive \"request\" and \"request_uri\" parameters";
+				String msg = "Invalid request: Found mutually exclusive request and request_uri parameters";
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 					clientID, redirectURI, ResponseMode.resolve(rm, rt), state, null);
 			}
@@ -1400,7 +1400,7 @@ public class AuthorizationRequest extends AbstractRequest {
 				}
 				
 			} catch (java.text.ParseException e) {
-				String msg = "Invalid \"request\" parameter: " + e.getMessage();
+				String msg = "Invalid request parameter: " + e.getMessage();
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 					clientID, redirectURI, ResponseMode.resolve(rm, rt), state, e);
 			}
@@ -1408,7 +1408,7 @@ public class AuthorizationRequest extends AbstractRequest {
 
 		// Response type mandatory, unless in JAR
 		if (rt == null && requestObject == null && requestURI == null) {
-			String msg = "Missing \"response_type\" parameter";
+			String msg = "Missing response_type parameter";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 				clientID, redirectURI, ResponseMode.resolve(rm, null), state, null);
 		}
@@ -1453,7 +1453,7 @@ public class AuthorizationRequest extends AbstractRequest {
 				if (uriValue == null)
 					continue;
 				
-				String errMsg = "Invalid \"resource\" parameter: Must be an absolute URI and with no query or fragment: " + uriValue;
+				String errMsg = "Illegal resource parameter: Must be an absolute URI and with no query or fragment: " + uriValue;
 				
 				URI resourceURI;
 				try {
@@ -1483,7 +1483,7 @@ public class AuthorizationRequest extends AbstractRequest {
 			prompt = Prompt.parse(MultivaluedMapUtils.getFirstValue(params, "prompt"));
 			
 		} catch (ParseException e) {
-			String msg = "Invalid \"prompt\" parameter: " + e.getMessage();
+			String msg = "Invalid prompt parameter: " + e.getMessage();
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 				clientID, redirectURI, ResponseMode.resolve(rm, rt), state, e);
 		}

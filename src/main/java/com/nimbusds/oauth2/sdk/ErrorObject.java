@@ -80,7 +80,8 @@ public class ErrorObject {
 
 
 	/**
-	 * Creates a new error with the specified code.
+	 * Creates a new error with the specified code. The code must be within
+	 * the {@link #isLegal(String) legal} character range.
 	 *
 	 * @param code The error code, {@code null} if not specified.
 	 */
@@ -91,7 +92,9 @@ public class ErrorObject {
 	
 	
 	/**
-	 * Creates a new error with the specified code and description.
+	 * Creates a new error with the specified code and description. The
+	 * code and the description must be within the {@link #isLegal(String)
+	 * legal} character range.
 	 *
 	 * @param code        The error code, {@code null} if not specified.
 	 * @param description The error description, {@code null} if not
@@ -105,15 +108,15 @@ public class ErrorObject {
 
 	/**
 	 * Creates a new error with the specified code, description and HTTP 
-	 * status code.
+	 * status code. The code and the description must be within the
+	 * {@link #isLegal(String) legal} character range.
 	 *
 	 * @param code           The error code, {@code null} if not specified.
 	 * @param description    The error description, {@code null} if not
 	 *                       specified.
 	 * @param httpStatusCode The HTTP status code, zero if not specified.
 	 */
-	public ErrorObject(final String code, final String description, 
-		           final int httpStatusCode) {
+	public ErrorObject(final String code, final String description, final int httpStatusCode) {
 	
 		this(code, description, httpStatusCode, null);
 	}
@@ -121,7 +124,8 @@ public class ErrorObject {
 
 	/**
 	 * Creates a new error with the specified code, description, HTTP 
-	 * status code and page URI.
+	 * status code and page URI. The code and the description must be
+	 * within the {@link #isLegal(String) legal} character range.
 	 *
 	 * @param code           The error code, {@code null} if not specified.
 	 * @param description    The error description, {@code null} if not
@@ -130,18 +134,28 @@ public class ErrorObject {
 	 * @param uri            The error page URI, {@code null} if not
 	 *                       specified.
 	 */
-	public ErrorObject(final String code, final String description, 
-		           final int httpStatusCode, final URI uri) {
+	public ErrorObject(final String code,
+			   final String description,
+		           final int httpStatusCode,
+			   final URI uri) {
 	
+		if (! isLegal(code)) {
+			throw new IllegalArgumentException("Illegal char(s) in code, see RFC 6749, section 5.2");
+		}
 		this.code = code;
+		
+		if (! isLegal(description)) {
+			throw new IllegalArgumentException("Illegal char(s) in description, see RFC 6749, section 5.2");
+		}
 		this.description = description;
+		
 		this.httpStatusCode = httpStatusCode;
 		this.uri = uri;
 	}
 
 
 	/**
-	 * Gets the error code.
+	 * Returns the error code.
 	 *
 	 * @return The error code, {@code null} if not specified.
 	 */
@@ -152,7 +166,7 @@ public class ErrorObject {
 	
 	
 	/**
-	 * Gets the error description.
+	 * Returns the error description.
 	 *
 	 * @return The error description, {@code null} if not specified.
 	 */
@@ -199,7 +213,7 @@ public class ErrorObject {
 
 
 	/**
-	 * Gets the HTTP status code.
+	 * Returns the HTTP status code.
 	 *
 	 * @return The HTTP status code, zero if not specified.
 	 */
@@ -223,7 +237,7 @@ public class ErrorObject {
 
 
 	/**
-	 * Gets the error page URI.
+	 * Returns the error page URI.
 	 *
 	 * @return The error page URI, {@code null} if not specified.
 	 */
@@ -373,11 +387,19 @@ public class ErrorObject {
 			// ignore and continue
 		}
 		
+		if (! isLegal(code)) {
+			code = null;
+		}
+		
 		String description = null;
 		try {
 			description = JSONObjectUtils.getString(jsonObject, "error_description", null);
 		} catch (ParseException e) {
 			// ignore and continue
+		}
+		
+		if (! isLegal(description)) {
+			description = null;
 		}
 		
 		URI uri = null;
@@ -414,6 +436,14 @@ public class ErrorObject {
 			}
 		}
 		
+		if (! isLegal(code)) {
+			code = null;
+		}
+		
+		if (! isLegal(description)) {
+			description = null;
+		}
+		
 		return new ErrorObject(code, description, 0, uri);
 	}
 
@@ -442,5 +472,62 @@ public class ErrorObject {
 			intermediary.description,
 			httpResponse.getStatusCode(),
 			intermediary.getURI());
+	}
+	
+	
+	/**
+	 * Returns {@code true} if the characters in the specified string are
+	 * within the {@link #isLegal(char)} legal ranges} for OAuth 2.0 error
+	 * codes and messages.
+	 *
+	 * <p>See RFC 6749, section 5.2.
+	 *
+	 * @param s The string to check. May be be {@code null}.
+	 *
+	 * @return {@code true} if the string is legal, else {@code false}.
+	 */
+	public static boolean isLegal(final String s) {
+	
+		if (s == null) {
+			return true;
+		}
+		
+		for (char c: s.toCharArray()) {
+			if (! isLegal(c)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	
+	/**
+	 * Returns {@code true} if the specified char is within the legal
+	 * ranges [0x20, 0x21] | [0x23 - 0x5B] | [0x5D - 0x7E] for OAuth 2.0
+	 * error codes and messages.
+	 *
+	 * <p>See RFC 6749, section 5.2.
+	 *
+	 * @param c The character to check. Must not be {@code null}.
+	 *
+	 * @return {@code true} if the character is legal, else {@code false}.
+	 */
+	public static boolean isLegal(final char c) {
+		
+		// https://tools.ietf.org/html/rfc6749#section-5.2
+		//
+		// Values for the "error" parameter MUST NOT include characters outside the
+		// set %x20-21 / %x23-5B / %x5D-7E.
+		//
+		// Values for the "error_description" parameter MUST NOT include characters
+		// outside the set %x20-21 / %x23-5B / %x5D-7E.
+		
+		if (c > 0x7f) {
+			// Not ASCII
+			return false;
+		}
+		
+		return c >= 0x20 && c <= 0x21 || c >= 0x23 && c <=0x5b || c >= 0x5d && c <= 0x7e;
 	}
 }

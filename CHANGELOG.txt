@@ -1582,3 +1582,10 @@ version 8.32 (2021-01-09)
       getValuesAsStringList (iss #333).
     * Deprecates duplicate and internally unused AuthorizedParty class under
       com.nimbusds.oauth2.sdk.id.AuthorizedParty (iss #334).
+
+version 8.32.1 (2021-01-11)
+    * Adds ErrorObject checking for legal "error" and "error_description" chars
+      according to RFC 6749, section 5.2. Adds new static
+      ErrorObject.isLegal(char) and ErrorObject.isLegal(String) methods.
+      Updates ErrorObject instances in the SDK to comply with the new legal
+      char checks (iss #284).

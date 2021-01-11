@@ -1034,7 +1034,7 @@ public class OIDCClientMetadata extends ClientMetadata {
 				try {
 					metadata.setInitiateLoginURI(JSONObjectUtils.getURI(jsonObject, "initiate_login_uri"));
 				} catch (IllegalArgumentException e) {
-					throw new ParseException("Invalid \"initiate_login_uri\" parameter: " + e.getMessage());
+					throw new ParseException("Invalid initiate_login_uri parameter: " + e.getMessage());
 				}
 				oidcFields.remove("initiate_login_uri");
 			}
@@ -1048,14 +1048,14 @@ public class OIDCClientMetadata extends ClientMetadata {
 					try {
 						logoutURIs.add(new URI(uriString));
 					} catch (URISyntaxException e) {
-						throw new ParseException("Invalid \"post_logout_redirect_uris\" parameter");
+						throw new ParseException("Invalid post_logout_redirect_uris parameter");
 					}
 				}
 
 				try {
 					metadata.setPostLogoutRedirectionURIs(logoutURIs);
 				} catch (IllegalArgumentException e) {
-					throw new ParseException("Invalid \"post_logout_redirect_uris\" parameter: " + e.getMessage());
+					throw new ParseException("Invalid post_logout_redirect_uris parameter: " + e.getMessage());
 				}
 				oidcFields.remove("post_logout_redirect_uris");
 			}
@@ -1065,7 +1065,7 @@ public class OIDCClientMetadata extends ClientMetadata {
 				try {
 					metadata.setFrontChannelLogoutURI(JSONObjectUtils.getURI(jsonObject, "frontchannel_logout_uri"));
 				} catch (IllegalArgumentException e) {
-					throw new ParseException("Invalid \"frontchannel_logout_uri\" parameter: " + e.getMessage());
+					throw new ParseException("Invalid frontchannel_logout_uri parameter: " + e.getMessage());
 				}
 				oidcFields.remove("frontchannel_logout_uri");
 			
@@ -1081,7 +1081,7 @@ public class OIDCClientMetadata extends ClientMetadata {
 				try {
 					metadata.setBackChannelLogoutURI(JSONObjectUtils.getURI(jsonObject, "backchannel_logout_uri"));
 				} catch (IllegalArgumentException e) {
-					throw new ParseException("Invalid \"backchannel_logout_uri\" parameter: " + e.getMessage());
+					throw new ParseException("Invalid backchannel_logout_uri parameter: " + e.getMessage());
 				}
 				oidcFields.remove("backchannel_logout_uri");
 				

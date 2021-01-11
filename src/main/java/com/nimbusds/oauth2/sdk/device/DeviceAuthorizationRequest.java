@@ -269,7 +269,8 @@ public class DeviceAuthorizationRequest extends AbstractOptionallyIdentifiedRequ
 	 *                 {@code null} if the {@link #toHTTPRequest} method
 	 *                 will not be used.
 	 * @param clientID The client identifier. Corresponds to the
-	 *                 {@code client_id} parameter. Must not be {@code null}.
+	 *                 {@code client_id} parameter. Must not be
+	 *                 {@code null}.
 	 * @param scope    The request scope. Corresponds to the optional
 	 *                 {@code scope} parameter. {@code null} if not
 	 *                 specified.
@@ -495,7 +496,7 @@ public class DeviceAuthorizationRequest extends AbstractOptionallyIdentifiedRequ
 			v = MultivaluedMapUtils.getFirstValue(params, "client_id");
 
 			if (StringUtils.isBlank(v)) {
-				String msg = "Missing \"client_id\" parameter";
+				String msg = "Missing client_id parameter";
 				throw new ParseException(msg,
 				                OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 			}

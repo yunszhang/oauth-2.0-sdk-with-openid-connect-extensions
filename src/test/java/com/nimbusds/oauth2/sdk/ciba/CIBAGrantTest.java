@@ -87,7 +87,7 @@ public class CIBAGrantTest extends TestCase {
 			CIBAGrant.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing \"grant_type\" parameter", e.getMessage());
+			assertEquals("Missing grant_type parameter", e.getMessage());
 		}
 	}
 	
@@ -101,7 +101,7 @@ public class CIBAGrantTest extends TestCase {
 			CIBAGrant.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("The \"grant_type\" must be urn:openid:params:grant-type:ciba", e.getMessage());
+			assertEquals("The grant_type must be urn:openid:params:grant-type:ciba", e.getMessage());
 		}
 	}
 	
@@ -115,7 +115,7 @@ public class CIBAGrantTest extends TestCase {
 			CIBAGrant.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing or empty \"auth_req_id\" parameter", e.getMessage());
+			assertEquals("Missing or empty auth_req_id parameter", e.getMessage());
 		}
 	}
 	
@@ -130,7 +130,7 @@ public class CIBAGrantTest extends TestCase {
 			CIBAGrant.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing or empty \"auth_req_id\" parameter", e.getMessage());
+			assertEquals("Missing or empty auth_req_id parameter", e.getMessage());
 		}
 	}
 	
@@ -145,7 +145,7 @@ public class CIBAGrantTest extends TestCase {
 			CIBAGrant.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing or empty \"auth_req_id\" parameter", e.getMessage());
+			assertEquals("Missing or empty auth_req_id parameter", e.getMessage());
 		}
 	}
 	

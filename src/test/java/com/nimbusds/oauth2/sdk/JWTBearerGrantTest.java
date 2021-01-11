@@ -155,7 +155,7 @@ public class JWTBearerGrantTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.UNSUPPORTED_GRANT_TYPE.getCode(), e.getErrorObject().getCode());
-			assertEquals("Unsupported grant type: The \"grant_type\" must be urn:ietf:params:oauth:grant-type:jwt-bearer", e.getErrorObject().getDescription());
+			assertEquals("Unsupported grant type: The grant_type must be urn:ietf:params:oauth:grant-type:jwt-bearer", e.getErrorObject().getDescription());
 		}
 	}
 
@@ -170,7 +170,7 @@ public class JWTBearerGrantTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing or empty \"assertion\" parameter", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Missing or empty assertion parameter", e.getErrorObject().getDescription());
 		}
 	}
 
@@ -186,7 +186,7 @@ public class JWTBearerGrantTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: The \"assertion\" is not a JWT", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: The assertion is not a JWT", e.getErrorObject().getDescription());
 		}
 	}
 

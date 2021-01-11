@@ -162,7 +162,7 @@ public class AuthorizationCodeGrantTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing \"grant_type\" parameter", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Missing grant_type parameter", e.getErrorObject().getDescription());
 			assertNull(e.getErrorObject().getURI());
 		}
 	}
@@ -180,7 +180,7 @@ public class AuthorizationCodeGrantTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.UNSUPPORTED_GRANT_TYPE.getCode(), e.getErrorObject().getCode());
-			assertEquals("Unsupported grant type: The \"grant_type\" must be \"authorization_code\"", e.getErrorObject().getDescription());
+			assertEquals("Unsupported grant type: The grant_type must be authorization_code", e.getErrorObject().getDescription());
 			assertNull(e.getErrorObject().getURI());
 		}
 	}
@@ -198,7 +198,7 @@ public class AuthorizationCodeGrantTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing or empty \"code\" parameter", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Missing or empty code parameter", e.getErrorObject().getDescription());
 			assertNull(e.getErrorObject().getURI());
 		}
 	}
@@ -216,7 +216,7 @@ public class AuthorizationCodeGrantTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Invalid \"redirect_uri\" parameter: Illegal character in path at index 7: invalid uri", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Invalid redirect_uri parameter: Illegal character in path at index 7: invalid uri", e.getErrorObject().getDescription());
 			assertNull(e.getErrorObject().getURI());
 			assertTrue(e.getCause() instanceof URISyntaxException);
 		}

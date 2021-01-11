@@ -23,8 +23,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.nimbusds.oauth2.sdk.token.RefreshToken;
+import static org.junit.Assert.assertNotEquals;
+
 import junit.framework.TestCase;
+
+import com.nimbusds.oauth2.sdk.token.RefreshToken;
 
 
 /**
@@ -60,8 +63,7 @@ public class RefreshTokenGrantTest extends TestCase {
 	}
 
 
-	public void testParse_missingGrantType()
-		throws Exception {
+	public void testParse_missingGrantType() {
 
 		Map<String,List<String>> params = new HashMap<>();
 		params.put("refresh_token", Collections.singletonList("abc123"));
@@ -71,13 +73,12 @@ public class RefreshTokenGrantTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing \"grant_type\" parameter", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Missing grant_type parameter", e.getErrorObject().getDescription());
 		}
 	}
 
 
-	public void testParse_unsupportedGrantType()
-		throws Exception {
+	public void testParse_unsupportedGrantType() {
 
 		Map<String,List<String>> params = new HashMap<>();
 		params.put("grant_type", Collections.singletonList("unsupported"));
@@ -88,13 +89,12 @@ public class RefreshTokenGrantTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.UNSUPPORTED_GRANT_TYPE.getCode(), e.getErrorObject().getCode());
-			assertEquals("Unsupported grant type: The \"grant_type\" must be \"refresh_token\"", e.getErrorObject().getDescription());
+			assertEquals("Unsupported grant type: The grant_type must be refresh_token", e.getErrorObject().getDescription());
 		}
 	}
 
 
-	public void testParse_missingRefreshToken()
-		throws Exception {
+	public void testParse_missingRefreshToken() {
 
 		Map<String,List<String>> params = new HashMap<>();
 		params.put("grant_type", Collections.singletonList("refresh_token"));
@@ -104,7 +104,7 @@ public class RefreshTokenGrantTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing or empty \"refresh_token\" parameter", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Missing or empty refresh_token parameter", e.getErrorObject().getDescription());
 		}
 	}
 
@@ -116,7 +116,7 @@ public class RefreshTokenGrantTest extends TestCase {
 
 
 	public void testInequality() {
-
-		assertFalse(new RefreshTokenGrant(new RefreshToken("abc")).equals(new RefreshTokenGrant(new RefreshToken("xyz"))));
+		
+		assertNotEquals(new RefreshTokenGrant(new RefreshToken("abc")), new RefreshTokenGrant(new RefreshToken("xyz")));
 	}
 }

@@ -20,10 +20,7 @@ package com.nimbusds.oauth2.sdk;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
@@ -166,32 +163,23 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
 
 		return params;
 	}
-
-
+	
+	
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (!(o instanceof AuthorizationCodeGrant)) return false;
-
-		AuthorizationCodeGrant codeGrant = (AuthorizationCodeGrant) o;
-
-		if (!code.equals(codeGrant.code)) return false;
-		if (redirectURI != null ? !redirectURI.equals(codeGrant.redirectURI) : codeGrant.redirectURI != null)
-			return false;
-		return codeVerifier != null ? codeVerifier.equals(codeGrant.codeVerifier) : codeGrant.codeVerifier == null;
-
+		AuthorizationCodeGrant that = (AuthorizationCodeGrant) o;
+		return code.equals(that.code) && Objects.equals(redirectURI, that.redirectURI) && Objects.equals(getCodeVerifier(), that.getCodeVerifier());
 	}
-
-
+	
+	
 	@Override
 	public int hashCode() {
-		int result = code.hashCode();
-		result = 31 * result + (redirectURI != null ? redirectURI.hashCode() : 0);
-		result = 31 * result + (codeVerifier != null ? codeVerifier.hashCode() : 0);
-		return result;
+		return Objects.hash(code, redirectURI, getCodeVerifier());
 	}
-
-
+	
+	
 	/**
 	 * Parses an authorisation code grant from the specified request body
 	 * parameters.
@@ -217,12 +205,12 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
 		String grantTypeString = MultivaluedMapUtils.getFirstValue(params, "grant_type");
 
 		if (grantTypeString == null) {
-			String msg = "Missing \"grant_type\" parameter";
+			String msg = "Missing grant_type parameter";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 		}
 
 		if (! GrantType.parse(grantTypeString).equals(GRANT_TYPE)) {
-			String msg = "The \"grant_type\" must be \"" + GRANT_TYPE + "\"";
+			String msg = "The grant_type must be " + GRANT_TYPE + "";
 			throw new ParseException(msg, OAuth2Error.UNSUPPORTED_GRANT_TYPE.appendDescription(": " + msg));
 		}
 
@@ -230,7 +218,7 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
 		String codeString = MultivaluedMapUtils.getFirstValue(params, "code");
 
 		if (codeString == null || codeString.trim().isEmpty()) {
-			String msg = "Missing or empty \"code\" parameter";
+			String msg = "Missing or empty code parameter";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 		}
 
@@ -245,7 +233,7 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
 			try {
 				redirectURI = new URI(redirectURIString);
 			} catch (URISyntaxException e) {
-				String msg = "Invalid \"redirect_uri\" parameter: " + e.getMessage();
+				String msg = "Invalid redirect_uri parameter: " + e.getMessage();
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg), e);
 			}
 		}

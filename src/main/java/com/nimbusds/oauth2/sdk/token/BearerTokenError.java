@@ -23,11 +23,12 @@ import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.jcip.annotations.Immutable;
+
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import net.jcip.annotations.Immutable;
 
 
 /**
@@ -113,48 +114,50 @@ public class BearerTokenError extends ErrorObject {
 	/**
 	 * Returns {@code true} if the specified error code consists of valid
 	 * characters. Values for the "error" and "error_description"
-	 * attributes must not include characters outside the set %x20-21 /
-	 * %x23-5B / %x5D-7E. See RFC 6750, section 3.
+	 * attributes must not include characters outside the [0x20, 0x21] |
+	 * [0x23 - 0x5B] | [0x5D - 0x7E] range. See RFC 6750, section 3.
+	 *
+	 * @see ErrorObject#isLegal(String)
 	 *
 	 * @param errorCode The error code string.
 	 *
 	 * @return {@code true} if the error code string contains valid
 	 *         characters, else {@code false}.
 	 */
+	@Deprecated
 	public static boolean isCodeWithValidChars(final String errorCode) {
 		
-		for (char c: errorCode.toCharArray()) {
-			
-			if ((c < 0x20 || c > 0x21) && (c < 0x23 || c > 0x5B) && (c < 0x5D || c > 0x7E))
-				return false;
-		}
-		
-		return true;
+		return ErrorObject.isLegal(errorCode);
 	}
 	
 	
 	/**
 	 * Returns {@code true} if the specified error description consists of
 	 * valid characters. Values for the "error" and "error_description"
-	 * attributes must not include characters outside the set %x20-21 /
-	 * %x23-5B / %x5D-7E. See RFC 6750, section 3.
+	 * attributes must not include characters outside the [0x20, 0x21] |
+	 * [0x23 - 0x5B] | [0x5D - 0x7E] range. See RFC 6750, section 3.
+	 *
+	 * @see ErrorObject#isLegal(String)
 	 *
 	 * @param errorDescription The error description string.
 	 *
 	 * @return {@code true} if the error description string contains valid
 	 *         characters, else {@code false}.
 	 */
+	@Deprecated
 	public static boolean isDescriptionWithValidChars(final String errorDescription) {
 	
-		return isCodeWithValidChars(errorDescription);
+		return ErrorObject.isLegal(errorDescription);
 	}
 	
 	
 	/**
 	 * Returns {@code true} if the specified scope consists of valid
 	 * characters. Values for the "scope" attributes must not include
-	 * characters outside the set %x21 / %x23-5B / %x5D-7E. See RFC 6750,
-	 * section 3.
+	 * characters outside the [0x20, 0x21] | [0x23 - 0x5B] | [0x5D - 0x7E]
+	 * range. See RFC 6750, section 3.
+	 *
+	 * @see ErrorObject#isLegal(String)
 	 *
 	 * @param scope The scope.
 	 *
@@ -164,15 +167,7 @@ public class BearerTokenError extends ErrorObject {
 	public static boolean isScopeWithValidChars(final Scope scope) {
 		
 		
-		for (Scope.Value sv: scope) {
-			for (char c : sv.getValue().toCharArray()) {
-				
-				if ((c != 0x21) && (c < 0x23 || c > 0x5B) && (c < 0x5D || c > 0x7E))
-					return false;
-			}
-		}
-		
-		return true;
+		return ErrorObject.isLegal(scope.toString());
 	}
 	
 	
@@ -277,14 +272,9 @@ public class BearerTokenError extends ErrorObject {
 		this.realm = realm;
 		this.scope = scope;
 		
-		if (code != null && ! isCodeWithValidChars(code))
-			throw new IllegalArgumentException("The error code contains invalid ASCII characters, see RFC 6750, section 3");
-		
-		if (description != null && ! isDescriptionWithValidChars(description))
-			throw new IllegalArgumentException("The error description contains invalid ASCII characters, see RFC 6750, section 3");
-		
-		if (scope != null && ! isScopeWithValidChars(scope))
-			throw new IllegalArgumentException("The scope contains invalid ASCII characters, see RFC 6750, section 3");
+		if (scope != null && ! isScopeWithValidChars(scope)) {
+			throw new IllegalArgumentException("The scope contains illegal characters, see RFC 6750, section 3");
+		}
 	}
 
 
@@ -503,7 +493,7 @@ public class BearerTokenError extends ErrorObject {
 			// Error code: try group with double quotes, else group with no quotes
 			errorCode = m.group(2) != null ? m.group(2) : m.group(3);
 			
-			if (errorCode != null && ! isCodeWithValidChars(errorCode))
+			if (! ErrorObject.isLegal(errorCode))
 				errorCode = null; // found invalid chars
 
 			// Parse optional error description

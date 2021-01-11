@@ -246,9 +246,9 @@ public class DeviceAuthorizationRequestTest extends TestCase {
 			DeviceAuthorizationRequest.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing \"client_id\" parameter", e.getMessage());
+			assertEquals("Missing client_id parameter", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing \"client_id\" parameter",
+			assertEquals("Invalid request: Missing client_id parameter",
 			                e.getErrorObject().getDescription());
 			assertNull(e.getErrorObject().getURI());
 		}

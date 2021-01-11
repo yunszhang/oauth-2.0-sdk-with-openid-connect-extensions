@@ -62,7 +62,7 @@ public class ClientCredentialsGrantTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing \"grant_type\" parameter", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Missing grant_type parameter", e.getErrorObject().getDescription());
 		}
 	}
 
@@ -77,7 +77,7 @@ public class ClientCredentialsGrantTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.UNSUPPORTED_GRANT_TYPE.getCode(), e.getErrorObject().getCode());
-			assertEquals("Unsupported grant type: The \"grant_type\" must be client_credentials", e.getErrorObject().getDescription());
+			assertEquals("Unsupported grant type: The grant_type must be client_credentials", e.getErrorObject().getDescription());
 		}
 	}
 }

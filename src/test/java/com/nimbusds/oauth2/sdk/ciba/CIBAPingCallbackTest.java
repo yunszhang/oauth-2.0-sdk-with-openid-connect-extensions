@@ -155,7 +155,7 @@ public class CIBAPingCallbackTest extends TestCase {
 			CIBAPingCallback.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing JSON object member with key \"auth_req_id\"", e.getMessage());
+			assertEquals("Missing JSON object member with key auth_req_id", e.getMessage());
 		}
 	}
 }

@@ -403,7 +403,7 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		try {
 			response.getBooleanParameter("iat");
 		} catch (ParseException e) {
-			assertEquals("Unexpected type of JSON object member with key \"iat\"", e.getMessage());
+			assertEquals("Unexpected type of JSON object member with key iat", e.getMessage());
 		}
 	}
 	

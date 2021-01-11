@@ -97,7 +97,7 @@ public class PushedAuthorizationSuccessResponseTest extends TestCase {
 			PushedAuthorizationSuccessResponse.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing JSON object member with key \"request_uri\"", e.getMessage());
+			assertEquals("Missing JSON object member with key request_uri", e.getMessage());
 		}
 	}
 	
@@ -110,7 +110,7 @@ public class PushedAuthorizationSuccessResponseTest extends TestCase {
 			PushedAuthorizationSuccessResponse.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing JSON object member with key \"expires_in\"", e.getMessage());
+			assertEquals("Missing JSON object member with key expires_in", e.getMessage());
 		}
 	}
 }
