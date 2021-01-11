@@ -139,21 +139,9 @@ public class CIBAGrant extends AuthorizationGrant {
 	 * @throws ParseException If parsing failed.
 	 */
 	public static CIBAGrant parse(final Map<String, List<String>> params) throws ParseException {
-
-		// Parse grant type
-		String grantTypeString = MultivaluedMapUtils.getFirstValue(params, "grant_type");
-
-		if (grantTypeString == null) {
-			String msg = "Missing grant_type parameter";
-			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
-		}
-
-		if (!GrantType.parse(grantTypeString).equals(GRANT_TYPE)) {
-			String msg = "The grant_type must be " + GRANT_TYPE;
-			throw new ParseException(msg, OAuth2Error.UNSUPPORTED_GRANT_TYPE.appendDescription(": " + msg));
-		}
 		
-		// Parse auth_req_id
+		GrantType.ensure(GRANT_TYPE, params);
+		
 		String authReqIDString = MultivaluedMapUtils.getFirstValue(params, "auth_req_id");
 		
 		if (authReqIDString == null || authReqIDString.trim().isEmpty()) {

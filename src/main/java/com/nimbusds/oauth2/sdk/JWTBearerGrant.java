@@ -18,13 +18,21 @@
 package com.nimbusds.oauth2.sdk;
 
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import net.jcip.annotations.Immutable;
 
-import com.nimbusds.jose.*;
-import com.nimbusds.jwt.*;
+import com.nimbusds.jose.JOSEObject;
+import com.nimbusds.jose.JWEObject;
+import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.PlainObject;
+import com.nimbusds.jwt.EncryptedJWT;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 
 
 /**
@@ -56,23 +64,12 @@ public class JWTBearerGrant extends AssertionGrant {
 	 * The grant type.
 	 */
 	public static final GrantType GRANT_TYPE = GrantType.JWT_BEARER;
-
-	
-	private static final String UNSUPPORTED_GRANT_TYPE_MESSAGE = "The grant_type must be " + GRANT_TYPE;
 	
 	
 	private static final String PLAIN_ASSERTION_REJECTED_MESSAGE = "The JWT assertion must not be unsecured (plain)";
 	
 	
 	private static final String JWT_PARSE_MESSAGE = "The assertion is not a JWT";
-
-
-	/**
-	 * Cached {@code unsupported_grant_type} exception.
-	 */
-	private static final ParseException UNSUPPORTED_GRANT_TYPE_EXCEPTION
-		= new ParseException(UNSUPPORTED_GRANT_TYPE_MESSAGE,
-			OAuth2Error.UNSUPPORTED_GRANT_TYPE.appendDescription(": " + UNSUPPORTED_GRANT_TYPE_MESSAGE));
 
 
 	/**
@@ -213,15 +210,8 @@ public class JWTBearerGrant extends AssertionGrant {
 	 */
 	public static JWTBearerGrant parse(final Map<String,List<String>> params)
 		throws ParseException {
-
-		// Parse grant type
-		String grantTypeString = MultivaluedMapUtils.getFirstValue(params, "grant_type");
-
-		if (grantTypeString == null)
-			throw MISSING_GRANT_TYPE_PARAM_EXCEPTION;
-
-		if (! GrantType.parse(grantTypeString).equals(GRANT_TYPE))
-			throw UNSUPPORTED_GRANT_TYPE_EXCEPTION;
+		
+		GrantType.ensure(GRANT_TYPE, params);
 
 		// Parse JWT assertion
 		String assertionString = MultivaluedMapUtils.getFirstValue(params, "assertion");

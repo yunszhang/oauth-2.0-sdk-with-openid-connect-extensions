@@ -1589,3 +1589,4 @@ version 8.32.1 (2021-01-11)
       ErrorObject.isLegal(char) and ErrorObject.isLegal(String) methods.
       Updates ErrorObject instances in the SDK to comply with the new legal
       char checks (iss #284).
+    * Factors common grant_type parse login into a static GrantType.ensure.

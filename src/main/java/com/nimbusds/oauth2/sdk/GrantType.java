@@ -18,14 +18,12 @@
 package com.nimbusds.oauth2.sdk;
 
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.oauth2.sdk.id.Identifier;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 
 
 /**
@@ -265,6 +263,32 @@ public final class GrantType extends Identifier {
 		} else {
 
 			return grantType;
+		}
+	}
+	
+	
+	/**
+	 * Ensures the specified grant type is set in a list of parameters.
+	 *
+	 * @param grantType The grant type. Must not be {@code null}.
+	 * @param params    The parameters. Must not be {@code null}.
+	 *
+	 * @throws ParseException If the grant type is not set.
+	 */
+	public static void ensure(final GrantType grantType, final Map<String, List<String>> params)
+		throws ParseException {
+		
+		// Parse grant type
+		String grantTypeString = MultivaluedMapUtils.getFirstValue(params, "grant_type");
+		
+		if (grantTypeString == null) {
+			String msg = "Missing grant_type parameter";
+			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
+		}
+		
+		if (! GrantType.parse(grantTypeString).equals(grantType)) {
+			String msg = "The grant_type must be " + grantType + "";
+			throw new ParseException(msg, OAuth2Error.UNSUPPORTED_GRANT_TYPE.appendDescription(": " + msg));
 		}
 	}
 }

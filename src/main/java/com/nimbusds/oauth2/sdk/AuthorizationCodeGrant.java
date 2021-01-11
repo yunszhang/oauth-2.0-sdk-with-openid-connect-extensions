@@ -22,10 +22,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
+import net.jcip.annotations.Immutable;
+
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
-import net.jcip.annotations.Immutable;
 
 
 /**
@@ -200,19 +201,8 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
 	 */
 	public static AuthorizationCodeGrant parse(final Map<String,List<String>> params)
 		throws ParseException {
-
-		// Parse grant type
-		String grantTypeString = MultivaluedMapUtils.getFirstValue(params, "grant_type");
-
-		if (grantTypeString == null) {
-			String msg = "Missing grant_type parameter";
-			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
-		}
-
-		if (! GrantType.parse(grantTypeString).equals(GRANT_TYPE)) {
-			String msg = "The grant_type must be " + GRANT_TYPE + "";
-			throw new ParseException(msg, OAuth2Error.UNSUPPORTED_GRANT_TYPE.appendDescription(": " + msg));
-		}
+		
+		GrantType.ensure(GRANT_TYPE, params);
 
 		// Parse authorisation code
 		String codeString = MultivaluedMapUtils.getFirstValue(params, "code");

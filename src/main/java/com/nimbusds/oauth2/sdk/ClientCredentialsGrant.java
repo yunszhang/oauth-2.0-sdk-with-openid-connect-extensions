@@ -23,7 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import net.jcip.annotations.Immutable;
 
 
@@ -86,19 +85,8 @@ public class ClientCredentialsGrant extends AuthorizationGrant {
 	 */
 	public static ClientCredentialsGrant parse(final Map<String,List<String>> params)
 		throws ParseException {
-
-		// Parse grant type
-		String grantTypeString = MultivaluedMapUtils.getFirstValue(params, "grant_type");
-
-		if (grantTypeString == null) {
-			String msg = "Missing grant_type parameter";
-			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
-		}
-
-		if (! GrantType.parse(grantTypeString).equals(GRANT_TYPE)) {
-		    	String msg = "The grant_type must be " + GRANT_TYPE;
-			throw new ParseException(msg, OAuth2Error.UNSUPPORTED_GRANT_TYPE.appendDescription(": " + msg));
-        	}
+		
+		GrantType.ensure(GRANT_TYPE, params);
 
 		return new ClientCredentialsGrant();
 	}

@@ -23,9 +23,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.jcip.annotations.Immutable;
+
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
-import net.jcip.annotations.Immutable;
 
 
 /**
@@ -49,13 +50,6 @@ public class SAML2BearerGrant extends AssertionGrant {
 	 * The grant type.
 	 */
 	public static final GrantType GRANT_TYPE = GrantType.SAML2_BEARER;
-
-
-	/**
-	 * Cached {@code unsupported_grant_type} exception.
-	 */
-	private static final ParseException UNSUPPORTED_GRANT_TYPE_EXCEPTION
-			= new ParseException("The grant_type must be " + GRANT_TYPE, OAuth2Error.UNSUPPORTED_GRANT_TYPE);
 
 
 	/**
@@ -147,15 +141,8 @@ public class SAML2BearerGrant extends AssertionGrant {
 	 */
 	public static SAML2BearerGrant parse(final Map<String,List<String>> params)
 		throws ParseException {
-
-		// Parse grant type
-		String grantTypeString = MultivaluedMapUtils.getFirstValue(params, "grant_type");
-
-		if (grantTypeString == null)
-			throw MISSING_GRANT_TYPE_PARAM_EXCEPTION;
-
-		if (! GrantType.parse(grantTypeString).equals(GRANT_TYPE))
-			throw UNSUPPORTED_GRANT_TYPE_EXCEPTION;
+		
+		GrantType.ensure(GRANT_TYPE, params);
 
 		// Parse JWT assertion
 		String assertionString = MultivaluedMapUtils.getFirstValue(params, "assertion");
