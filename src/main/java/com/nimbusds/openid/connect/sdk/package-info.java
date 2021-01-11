@@ -16,7 +16,7 @@
  */
 
 /**
- * Classes for representing, serialising and parsing OpenID Connect client 
- * requests and server responses.
+ * Classes for representing, serialising and parsing core OpenID Connect
+ * concepts.
  */
 package com.nimbusds.openid.connect.sdk;
