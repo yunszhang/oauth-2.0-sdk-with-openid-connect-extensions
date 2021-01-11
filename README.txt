@@ -18,7 +18,7 @@ This SDK version implements the following standards and drafts:
 
 	* OAuth 2.0 Token Revocation (RFC 7009)
 
-	* OAuth 2.0 Authorization Server Metadata (draft-ietf-oauth-discovery-10)
+	* OAuth 2.0 Authorization Server Metadata (RFC 8414)
 
 	* OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591)
 
@@ -57,7 +57,8 @@ This SDK version implements the following standards and drafts:
 
     * OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-02)
 
-    * OAuth 2.0 Authorization Server Issuer Identifier in Authorization Response (draft-meyerzuselhausen-oauth-iss-auth-resp-01)
+    * OAuth 2.0 Authorization Server Issuer Identifier in Authorization
+      Response (draft-ietf-oauth-iss-auth-resp-00)
 
 	* OpenID Connect Core 1.0 (2014-02-25)
 
