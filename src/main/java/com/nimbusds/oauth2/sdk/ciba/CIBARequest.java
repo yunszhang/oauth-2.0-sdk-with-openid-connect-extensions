@@ -607,10 +607,30 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		this.clientNotificationToken = clientNotificationToken;
 		
 		this.acrValues = acrValues;
+		
+		// https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0-03.html#rfc.section.7.1
+		// As in the CIBA flow the OP does not have an interaction with
+		// the end-user through the consumption device, it is REQUIRED
+		// that the Client provides one (and only one) of the hints
+		// specified above in the authentication request, that is
+		// "login_hint_token", "id_token_hint" or "login_hint".
+		int numHints = 0;
+		
+		if (loginHintTokenString != null) numHints++;
 		this.loginHintTokenString = loginHintTokenString;
+		
+		if (idTokenHint != null) numHints++;
 		this.idTokenHint = idTokenHint;
+		
+		if (loginHint != null) numHints++;
 		this.loginHint = loginHint;
+		
+		if (numHints != 1) {
+			throw new IllegalArgumentException("One user identity hist must be provided (login_hint_token, id_token_hint or login_hint)");
+		}
+		
 		this.bindingMessage = bindingMessage;
+		
 		this.userCode = userCode;
 		
 		if (requestedExpiry != null && requestedExpiry < 1) {

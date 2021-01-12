@@ -1,9 +1,12 @@
 package com.nimbusds.oauth2.sdk.ciba;
 
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import junit.framework.TestCase;
@@ -31,9 +34,12 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.JWTID;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+import com.nimbusds.oauth2.sdk.util.URLUtils;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 
 public class CIBARequestTest extends TestCase {
+	
+	enum HintBy { LOGIN_HINT_TOKEN, ID_TOKEN, LOGIN_HINT }
 	
 	private static final URI ENDPOINT_URI = URI.create("https://c2id.com/ciba/");
 	
@@ -125,7 +131,7 @@ public class CIBARequestTest extends TestCase {
 			null,
 			null,
 			null,
-			null,
+			LOGIN_HINT,
 			null,
 			null,
 			null,
@@ -139,7 +145,7 @@ public class CIBARequestTest extends TestCase {
 		assertNull(request.getACRValues());
 		assertNull(request.getLoginHintTokenString());
 		assertNull(request.getIDTokenHint());
-		assertNull(request.getLoginHint());
+		assertEquals(LOGIN_HINT, request.getLoginHint());
 		assertNull(request.getUserCode());
 		assertNull(request.getRequestedExpiry());
 		assertTrue(request.getCustomParameters().isEmpty());
@@ -156,124 +162,175 @@ public class CIBARequestTest extends TestCase {
 		
 		JWTClaimsSet jwtClaimsSet = request.toJWTClaimsSet();
 		assertEquals("openid", jwtClaimsSet.getStringClaim("scope"));
-		assertEquals(1, jwtClaimsSet.getClaims().size());
+		assertEquals(LOGIN_HINT, jwtClaimsSet.getStringClaim("login_hint"));
+		assertEquals(2, jwtClaimsSet.getClaims().size());
 	}
 	
 
 	public void testConstructor_allSet() throws MalformedURLException, ParseException {
 		
-		CIBARequest request = new CIBARequest(
-			ENDPOINT_URI,
-			CLIENT_AUTH,
-			SCOPE,
-			CLIENT_NOTIFICATION_TOKEN,
-			ACR_VALUES,
-			LOGIN_HINT_TOKEN_STRING,
-			ID_TOKEN,
-			LOGIN_HINT,
-			BINDING_MESSAGE,
-			USER_CODE,
-			REQUESTED_EXPIRY,
-			CUSTOM_PARAMS
-		);
-		
-		assertEquals(ENDPOINT_URI, request.getEndpointURI());
-		assertEquals(CLIENT_AUTH, request.getClientAuthentication());
-		assertEquals(SCOPE, request.getScope());
-		assertEquals(CLIENT_NOTIFICATION_TOKEN, request.getClientNotificationToken());
-		assertEquals(ACR_VALUES, request.getACRValues());
-		assertEquals(LOGIN_HINT_TOKEN_STRING, request.getLoginHintTokenString());
-		assertEquals(ID_TOKEN, request.getIDTokenHint());
-		assertEquals(LOGIN_HINT, request.getLoginHint());
-		assertEquals(BINDING_MESSAGE, request.getBindingMessage());
-		assertEquals(USER_CODE, request.getUserCode());
-		assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
-		assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
-		assertFalse(request.isSigned());
-		assertNull(request.getRequestJWT());
-		
-		HTTPRequest httpRequest = request.toHTTPRequest();
-		assertEquals(ENDPOINT_URI.toURL(), httpRequest.getURL());
-		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
-		assertEquals(ContentType.APPLICATION_URLENCODED, httpRequest.getEntityContentType());
-		
-		assertEquals(((ClientSecretBasic)CLIENT_AUTH).toHTTPAuthorizationHeader(), ClientSecretBasic.parse(httpRequest).toHTTPAuthorizationHeader());
-		
-		assertEquals(2, httpRequest.getHeaderMap().size());
-		
-		assertEquals(request.toParameters(), httpRequest.getQueryParameters());
-		
-		request = CIBARequest.parse(httpRequest);
-		
-		assertEquals(ENDPOINT_URI, request.getEndpointURI());
-		assertEquals(((ClientSecretBasic)CLIENT_AUTH).toHTTPAuthorizationHeader(), ((ClientSecretBasic)request.getClientAuthentication()).toHTTPAuthorizationHeader());
-		assertEquals(SCOPE, request.getScope());
-		assertEquals(CLIENT_NOTIFICATION_TOKEN, request.getClientNotificationToken());
-		assertEquals(ACR_VALUES, request.getACRValues());
-		assertEquals(LOGIN_HINT_TOKEN_STRING, request.getLoginHintTokenString());
-		assertEquals(ID_TOKEN.serialize(), request.getIDTokenHint().getParsedString());
-		assertEquals(LOGIN_HINT, request.getLoginHint());
-		assertEquals(BINDING_MESSAGE, request.getBindingMessage());
-		assertEquals(USER_CODE, request.getUserCode());
-		assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
-		assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
-		assertFalse(request.isSigned());
-		assertNull(request.getRequestJWT());
-		
-		JWTClaimsSet jwtClaimsSet = request.toJWTClaimsSet();
-		Map<String, List<String>> params = request.toParameters();
-		for (Map.Entry<String,Object> en: jwtClaimsSet.getClaims().entrySet()) {
-			assertEquals(Collections.singletonList((String)en.getValue()), params.get(en.getKey()));
+		for (HintBy hintBy: HintBy.values()) {
+			CIBARequest request = new CIBARequest(
+				ENDPOINT_URI,
+				CLIENT_AUTH,
+				SCOPE,
+				CLIENT_NOTIFICATION_TOKEN,
+				ACR_VALUES,
+				HintBy.LOGIN_HINT_TOKEN.equals(hintBy) ? LOGIN_HINT_TOKEN_STRING : null,
+				HintBy.ID_TOKEN.equals(hintBy) ? ID_TOKEN : null,
+				HintBy.LOGIN_HINT.equals(hintBy) ? LOGIN_HINT : null,
+				BINDING_MESSAGE,
+				USER_CODE,
+				REQUESTED_EXPIRY,
+				CUSTOM_PARAMS
+			);
+			
+			assertEquals(ENDPOINT_URI, request.getEndpointURI());
+			assertEquals(CLIENT_AUTH, request.getClientAuthentication());
+			assertEquals(SCOPE, request.getScope());
+			assertEquals(CLIENT_NOTIFICATION_TOKEN, request.getClientNotificationToken());
+			assertEquals(ACR_VALUES, request.getACRValues());
+			if (HintBy.LOGIN_HINT_TOKEN.equals(hintBy)) {
+				assertEquals(LOGIN_HINT_TOKEN_STRING, request.getLoginHintTokenString());
+			} else {
+				assertNull(request.getLoginHintTokenString());
+			}
+			if (HintBy.ID_TOKEN.equals(hintBy)) {
+				assertEquals(ID_TOKEN, request.getIDTokenHint());
+			} else {
+				assertNull(request.getIDTokenHint());
+			}
+			if (HintBy.LOGIN_HINT.equals(hintBy)) {
+				assertEquals(LOGIN_HINT, request.getLoginHint());
+			} else {
+				assertNull(request.getLoginHint());
+			}
+			assertEquals(BINDING_MESSAGE, request.getBindingMessage());
+			assertEquals(USER_CODE, request.getUserCode());
+			assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
+			assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
+			assertFalse(request.isSigned());
+			assertNull(request.getRequestJWT());
+			
+			HTTPRequest httpRequest = request.toHTTPRequest();
+			assertEquals(ENDPOINT_URI.toURL(), httpRequest.getURL());
+			assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
+			assertEquals(ContentType.APPLICATION_URLENCODED, httpRequest.getEntityContentType());
+			
+			assertEquals(((ClientSecretBasic) CLIENT_AUTH).toHTTPAuthorizationHeader(), ClientSecretBasic.parse(httpRequest).toHTTPAuthorizationHeader());
+			
+			assertEquals(2, httpRequest.getHeaderMap().size());
+			
+			assertEquals(request.toParameters(), httpRequest.getQueryParameters());
+			
+			request = CIBARequest.parse(httpRequest);
+			
+			assertEquals(ENDPOINT_URI, request.getEndpointURI());
+			assertEquals(((ClientSecretBasic) CLIENT_AUTH).toHTTPAuthorizationHeader(), ((ClientSecretBasic) request.getClientAuthentication()).toHTTPAuthorizationHeader());
+			assertEquals(SCOPE, request.getScope());
+			assertEquals(CLIENT_NOTIFICATION_TOKEN, request.getClientNotificationToken());
+			assertEquals(ACR_VALUES, request.getACRValues());
+			if (HintBy.LOGIN_HINT_TOKEN.equals(hintBy)) {
+				assertEquals(LOGIN_HINT_TOKEN_STRING, request.getLoginHintTokenString());
+			} else {
+				assertNull(request.getLoginHintTokenString());
+			}
+			if (HintBy.ID_TOKEN.equals(hintBy)) {
+				assertEquals(ID_TOKEN.serialize(), request.getIDTokenHint().getParsedString());
+			}
+			if (HintBy.LOGIN_HINT.equals(hintBy)) {
+				assertEquals(LOGIN_HINT, request.getLoginHint());
+			} else {
+				assertNull(request.getLoginHint());
+			}
+			assertEquals(BINDING_MESSAGE, request.getBindingMessage());
+			assertEquals(USER_CODE, request.getUserCode());
+			assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
+			assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
+			assertFalse(request.isSigned());
+			assertNull(request.getRequestJWT());
+			
+			JWTClaimsSet jwtClaimsSet = request.toJWTClaimsSet();
+			Map<String, List<String>> params = request.toParameters();
+			for (Map.Entry<String, Object> en : jwtClaimsSet.getClaims().entrySet()) {
+				assertEquals(Collections.singletonList((String) en.getValue()), params.get(en.getKey()));
+			}
+			assertEquals(params.size(), jwtClaimsSet.getClaims().size());
 		}
-		assertEquals(params.size(), jwtClaimsSet.getClaims().size());
 	}
 	
 	
 	public void testBuilders() {
 		
 		// Regular
-		CIBARequest request = new CIBARequest.Builder(CLIENT_AUTH, SCOPE)
-			.endpointURI(ENDPOINT_URI)
-			.clientNotificationToken(CLIENT_NOTIFICATION_TOKEN)
-			.acrValues(ACR_VALUES)
-			.loginHintTokenString(LOGIN_HINT_TOKEN_STRING)
-			.idTokenHint(ID_TOKEN)
-			.loginHint(LOGIN_HINT)
-			.bindingMessage(BINDING_MESSAGE)
-			.userCode(USER_CODE)
-			.requestedExpiry(REQUESTED_EXPIRY)
-			.customParameter("custom-xyz", "abc")
-			.build();
-		
-		assertEquals(ENDPOINT_URI, request.getEndpointURI());
-		assertEquals(CLIENT_AUTH, request.getClientAuthentication());
-		assertEquals(SCOPE, request.getScope());
-		assertEquals(CLIENT_NOTIFICATION_TOKEN, request.getClientNotificationToken());
-		assertEquals(ACR_VALUES, request.getACRValues());
-		assertEquals(LOGIN_HINT_TOKEN_STRING, request.getLoginHintTokenString());
-		assertEquals(ID_TOKEN, request.getIDTokenHint());
-		assertEquals(LOGIN_HINT, request.getLoginHint());
-		assertEquals(BINDING_MESSAGE, request.getBindingMessage());
-		assertEquals(USER_CODE, request.getUserCode());
-		assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
-		assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
-		
-		// Copy
-		request = new CIBARequest.Builder(request)
-			.build();
-		
-		assertEquals(ENDPOINT_URI, request.getEndpointURI());
-		assertEquals(CLIENT_AUTH, request.getClientAuthentication());
-		assertEquals(SCOPE, request.getScope());
-		assertEquals(CLIENT_NOTIFICATION_TOKEN, request.getClientNotificationToken());
-		assertEquals(ACR_VALUES, request.getACRValues());
-		assertEquals(LOGIN_HINT_TOKEN_STRING, request.getLoginHintTokenString());
-		assertEquals(ID_TOKEN, request.getIDTokenHint());
-		assertEquals(LOGIN_HINT, request.getLoginHint());
-		assertEquals(BINDING_MESSAGE, request.getBindingMessage());
-		assertEquals(USER_CODE, request.getUserCode());
-		assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
-		assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
+		for (HintBy hintBy: HintBy.values()) {
+			CIBARequest request = new CIBARequest.Builder(CLIENT_AUTH, SCOPE)
+				.endpointURI(ENDPOINT_URI)
+				.clientNotificationToken(CLIENT_NOTIFICATION_TOKEN)
+				.acrValues(ACR_VALUES)
+				.loginHintTokenString(HintBy.LOGIN_HINT_TOKEN.equals(hintBy) ? LOGIN_HINT_TOKEN_STRING : null)
+				.idTokenHint(HintBy.ID_TOKEN.equals(hintBy) ? ID_TOKEN : null)
+				.loginHint(HintBy.LOGIN_HINT.equals(hintBy) ? LOGIN_HINT : null)
+				.bindingMessage(BINDING_MESSAGE)
+				.userCode(USER_CODE)
+				.requestedExpiry(REQUESTED_EXPIRY)
+				.customParameter("custom-xyz", "abc")
+				.build();
+			
+			assertEquals(ENDPOINT_URI, request.getEndpointURI());
+			assertEquals(CLIENT_AUTH, request.getClientAuthentication());
+			assertEquals(SCOPE, request.getScope());
+			assertEquals(CLIENT_NOTIFICATION_TOKEN, request.getClientNotificationToken());
+			assertEquals(ACR_VALUES, request.getACRValues());
+			if (HintBy.LOGIN_HINT_TOKEN.equals(hintBy)) {
+				assertEquals(LOGIN_HINT_TOKEN_STRING, request.getLoginHintTokenString());
+			} else {
+				assertNull(request.getLoginHintTokenString());
+			}
+			if (HintBy.ID_TOKEN.equals(hintBy)) {
+				assertEquals(ID_TOKEN, request.getIDTokenHint());
+			} else {
+				assertNull(request.getIDTokenHint());
+			}
+			if (HintBy.LOGIN_HINT.equals(hintBy)) {
+				assertEquals(LOGIN_HINT, request.getLoginHint());
+			} else {
+				assertNull(request.getLoginHint());
+			}
+			assertEquals(BINDING_MESSAGE, request.getBindingMessage());
+			assertEquals(USER_CODE, request.getUserCode());
+			assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
+			assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
+			
+			// Copy
+			request = new CIBARequest.Builder(request)
+				.build();
+			
+			assertEquals(ENDPOINT_URI, request.getEndpointURI());
+			assertEquals(CLIENT_AUTH, request.getClientAuthentication());
+			assertEquals(SCOPE, request.getScope());
+			assertEquals(CLIENT_NOTIFICATION_TOKEN, request.getClientNotificationToken());
+			assertEquals(ACR_VALUES, request.getACRValues());
+			if (HintBy.LOGIN_HINT_TOKEN.equals(hintBy)) {
+				assertEquals(LOGIN_HINT_TOKEN_STRING, request.getLoginHintTokenString());
+			} else {
+				assertNull(request.getLoginHintTokenString());
+			}
+			if (HintBy.ID_TOKEN.equals(hintBy)) {
+				assertEquals(ID_TOKEN, request.getIDTokenHint());
+			} else {
+				assertNull(request.getIDTokenHint());
+			}
+			if (HintBy.LOGIN_HINT.equals(hintBy)) {
+				assertEquals(LOGIN_HINT, request.getLoginHint());
+			} else {
+				assertNull(request.getLoginHint());
+			}
+			assertEquals(BINDING_MESSAGE, request.getBindingMessage());
+			assertEquals(USER_CODE, request.getUserCode());
+			assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
+			assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
+		}
 	}
 	
 	
@@ -286,6 +343,7 @@ public class CIBARequestTest extends TestCase {
 		
 		CIBARequest plainRequest = new CIBARequest.Builder(CLIENT_AUTH, SCOPE)
 			.clientNotificationToken(CLIENT_NOTIFICATION_TOKEN)
+			.loginHint(LOGIN_HINT)
 			.bindingMessage(BINDING_MESSAGE)
 			.build();
 		
@@ -413,7 +471,7 @@ public class CIBARequestTest extends TestCase {
 	}
 	
 	
-	public void testConstructor_rejectZeroExpiry() {
+	public void testConstructor_rejectMissingIdentityHint() {
 		
 		IllegalArgumentException exception = null;
 		try {
@@ -426,6 +484,124 @@ public class CIBARequestTest extends TestCase {
 				null,
 				null,
 				null,
+				null,
+				null,
+				0,
+				null
+			);
+			fail();
+		} catch (IllegalArgumentException e) {
+			exception = e;
+		}
+		assertEquals("One user identity hist must be provided (login_hint_token, id_token_hint or login_hint)", exception.getMessage());
+	}
+	
+	
+	public void testConstructor_rejectMoreThanOneIdentityHint() {
+		
+		IllegalArgumentException exception = null;
+		try {
+			new CIBARequest(
+				null,
+				CLIENT_AUTH,
+				SCOPE,
+				null,
+				null,
+				LOGIN_HINT_TOKEN_STRING,
+				ID_TOKEN,
+				null,
+				null,
+				null,
+				0,
+				null
+			);
+			fail();
+		} catch (IllegalArgumentException e) {
+			exception = e;
+		}
+		assertEquals("One user identity hist must be provided (login_hint_token, id_token_hint or login_hint)", exception.getMessage());
+		
+		exception = null;
+		try {
+			new CIBARequest(
+				null,
+				CLIENT_AUTH,
+				SCOPE,
+				null,
+				null,
+				null,
+				ID_TOKEN,
+				LOGIN_HINT,
+				null,
+				null,
+				0,
+				null
+			);
+			fail();
+		} catch (IllegalArgumentException e) {
+			exception = e;
+		}
+		assertEquals("One user identity hist must be provided (login_hint_token, id_token_hint or login_hint)", exception.getMessage());
+		
+		exception = null;
+		try {
+			new CIBARequest(
+				null,
+				CLIENT_AUTH,
+				SCOPE,
+				null,
+				null,
+				LOGIN_HINT_TOKEN_STRING,
+				null,
+				LOGIN_HINT,
+				null,
+				null,
+				0,
+				null
+			);
+			fail();
+		} catch (IllegalArgumentException e) {
+			exception = e;
+		}
+		assertEquals("One user identity hist must be provided (login_hint_token, id_token_hint or login_hint)", exception.getMessage());
+		
+		exception = null;
+		try {
+			new CIBARequest(
+				null,
+				CLIENT_AUTH,
+				SCOPE,
+				null,
+				null,
+				LOGIN_HINT_TOKEN_STRING,
+				ID_TOKEN,
+				LOGIN_HINT,
+				null,
+				null,
+				0,
+				null
+			);
+			fail();
+		} catch (IllegalArgumentException e) {
+			exception = e;
+		}
+		assertEquals("One user identity hist must be provided (login_hint_token, id_token_hint or login_hint)", exception.getMessage());
+	}
+	
+	
+	public void testConstructor_rejectZeroExpiry() {
+		
+		IllegalArgumentException exception = null;
+		try {
+			new CIBARequest(
+				null,
+				CLIENT_AUTH,
+				SCOPE,
+				null,
+				null,
+				null,
+				null,
+				LOGIN_HINT,
 				null,
 				null,
 				0,
@@ -451,7 +627,7 @@ public class CIBARequestTest extends TestCase {
 				null,
 				null,
 				null,
-				null,
+				LOGIN_HINT,
 				null,
 				null,
 				0,
@@ -546,12 +722,13 @@ public class CIBARequestTest extends TestCase {
 	}
 	
 	
-	public void testParse_rejectNegativeExpiry() {
+	public void testParse_rejectNegativeExpiry()
+		throws UnsupportedEncodingException {
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, ENDPOINT_URL);
 		CLIENT_AUTH.applyTo(httpRequest);
 		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
-		httpRequest.setQuery("scope=openid&requested_expiry=-1");
+		httpRequest.setQuery("scope=openid&login_hint=" + URLEncoder.encode(LOGIN_HINT, StandardCharsets.UTF_8.name()) + "&requested_expiry=-1");
 		
 		try {
 			CIBARequest.parse(httpRequest);
@@ -562,12 +739,13 @@ public class CIBARequestTest extends TestCase {
 	}
 	
 	
-	public void testParse_rejectZeroExpiry() {
+	public void testParse_rejectZeroExpiry()
+		throws UnsupportedEncodingException {
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, ENDPOINT_URL);
 		CLIENT_AUTH.applyTo(httpRequest);
 		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
-		httpRequest.setQuery("scope=openid&requested_expiry=-1");
+		httpRequest.setQuery("scope=openid&login_hint=" + URLEncoder.encode(LOGIN_HINT, StandardCharsets.UTF_8.name()) + "&requested_expiry=-1");
 		
 		try {
 			CIBARequest.parse(httpRequest);
