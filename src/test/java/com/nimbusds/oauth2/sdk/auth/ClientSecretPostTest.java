@@ -76,7 +76,7 @@ public class ClientSecretPostTest extends TestCase {
 			ClientSecretPost.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Malformed client secret post authentication: Missing \"client_id\" parameter", e.getMessage());
+			assertEquals("Malformed client secret post authentication: Missing client_id parameter", e.getMessage());
 		}
 	}
 	
@@ -89,7 +89,7 @@ public class ClientSecretPostTest extends TestCase {
 			ClientSecretPost.parse(params);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Malformed client secret post authentication: Missing \"client_secret\" parameter", e.getMessage());
+			assertEquals("Malformed client secret post authentication: Missing client_secret parameter", e.getMessage());
 		}
 	}
 }

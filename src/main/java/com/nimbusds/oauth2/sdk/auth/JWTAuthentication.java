@@ -246,10 +246,10 @@ public abstract class JWTAuthentication extends ClientAuthentication {
 		final String clientAssertionType = MultivaluedMapUtils.getFirstValue(params, "client_assertion_type");
 		
 		if (clientAssertionType == null)
-			throw new ParseException("Missing \"client_assertion_type\" parameter");
+			throw new ParseException("Missing client_assertion_type parameter");
 		
 		if (! clientAssertionType.equals(CLIENT_ASSERTION_TYPE))
-			throw new ParseException("Invalid \"client_assertion_type\" parameter, must be " + CLIENT_ASSERTION_TYPE);
+			throw new ParseException("Invalid client_assertion_type parameter, must be " + CLIENT_ASSERTION_TYPE);
 	}
 	
 	
@@ -275,14 +275,14 @@ public abstract class JWTAuthentication extends ClientAuthentication {
 		final String clientAssertion = MultivaluedMapUtils.getFirstValue(params, "client_assertion");
 		
 		if (clientAssertion == null)
-			throw new ParseException("Missing \"client_assertion\" parameter");
+			throw new ParseException("Missing client_assertion parameter");
 		
 		try {
 			return SignedJWT.parse(clientAssertion);
 			
 		} catch (java.text.ParseException e) {
 		
-			throw new ParseException("Invalid \"client_assertion\" JWT: " + e.getMessage(), e);
+			throw new ParseException("Invalid client_assertion JWT: " + e.getMessage(), e);
 		}
 	}
 	

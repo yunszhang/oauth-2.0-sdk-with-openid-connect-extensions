@@ -206,20 +206,20 @@ public class IDTokenClaimsSet extends CommonOIDCTokenClaimsSet {
 		super(jsonObject);
 
 		if (getStringClaim(ISS_CLAIM_NAME) == null)
-			throw new ParseException("Missing or invalid \"iss\" claim");
+			throw new ParseException("Missing or invalid iss claim");
 
 		if (getStringClaim(SUB_CLAIM_NAME) == null)
-			throw new ParseException("Missing or invalid \"sub\" claim");
+			throw new ParseException("Missing or invalid sub claim");
 
 		if (getStringClaim(AUD_CLAIM_NAME) == null && getStringListClaim(AUD_CLAIM_NAME) == null ||
 		    getStringListClaim(AUD_CLAIM_NAME) != null && getStringListClaim(AUD_CLAIM_NAME).isEmpty())
-			throw new ParseException("Missing or invalid \"aud\" claim");
+			throw new ParseException("Missing or invalid aud claim");
 
 		if (getDateClaim(EXP_CLAIM_NAME) == null)
-			throw new ParseException("Missing or invalid \"exp\" claim");
+			throw new ParseException("Missing or invalid exp claim");
 
 		if (getDateClaim(IAT_CLAIM_NAME) == null)
-			throw new ParseException("Missing or invalid \"iat\" claim");
+			throw new ParseException("Missing or invalid iat claim");
 	}
 
 
