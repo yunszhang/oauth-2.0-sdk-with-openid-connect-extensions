@@ -1602,4 +1602,6 @@ version 8.33 (2021-01-15)
       matching of their SHA-256 values.
     * Updates ClientAuthenticationVerifier to use Secret.equals for
       client_secret_basic and client_secret_post verification.
+    * Updates ClientAuthenticationVerifier to ignore erased Secrets for
+      client_secret_jwt verification.
     * Adds ListUtils.

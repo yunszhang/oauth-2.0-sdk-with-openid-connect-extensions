@@ -20,8 +20,11 @@ package com.nimbusds.oauth2.sdk.auth.verifier;
 
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
+import net.jcip.annotations.ThreadSafe;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
@@ -33,8 +36,8 @@ import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.oauth2.sdk.auth.*;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
+import com.nimbusds.oauth2.sdk.util.ListUtils;
 import com.nimbusds.oauth2.sdk.util.X509CertificateUtils;
-import net.jcip.annotations.ThreadSafe;
 
 
 /**
@@ -238,6 +241,21 @@ public class ClientAuthenticationVerifier<T> {
 
 		return claimsSetVerifier.getExpectedAudience();
 	}
+	
+	
+	private static List<Secret> removeNullOrErased(final List<Secret> secrets) {
+		List<Secret> allSet = ListUtils.removeNullItems(secrets);
+		if (allSet == null) {
+			return null;
+		}
+		List<Secret> out = new LinkedList<>();
+		for (Secret secret: secrets) {
+			if (secret.getValue() != null && secret.getValueBytes() != null) {
+				out.add(secret);
+			}
+		}
+		return out;
+	}
 
 
 	/**
@@ -262,10 +280,13 @@ public class ClientAuthenticationVerifier<T> {
 
 		if (clientAuth instanceof PlainClientSecret) {
 
-			List<Secret> secretCandidates = clientCredentialsSelector.selectClientSecrets(
-				clientAuth.getClientID(),
-				clientAuth.getMethod(),
-				context);
+			List<Secret> secretCandidates = ListUtils.removeNullItems(
+				clientCredentialsSelector.selectClientSecrets(
+					clientAuth.getClientID(),
+					clientAuth.getMethod(),
+					context
+				)
+			);
 
 			if (CollectionUtils.isEmpty(secretCandidates)) {
 				throw InvalidClientException.NO_REGISTERED_SECRET;
@@ -274,10 +295,6 @@ public class ClientAuthenticationVerifier<T> {
 			PlainClientSecret plainAuth = (PlainClientSecret)clientAuth;
 
 			for (Secret candidate: secretCandidates) {
-				
-				if (candidate == null) {
-					continue;
-				}
 				
 				// Constant time, SHA-256 based, unless overridden
 				if (candidate.equals(plainAuth.getClientSecret())) {
@@ -298,10 +315,13 @@ public class ClientAuthenticationVerifier<T> {
 				throw new InvalidClientException("Bad / expired JWT claims: " + e.getMessage());
 			}
 
-			List<Secret> secretCandidates = clientCredentialsSelector.selectClientSecrets(
-				clientAuth.getClientID(),
-				clientAuth.getMethod(),
-				context);
+			List<Secret> secretCandidates = removeNullOrErased(
+				clientCredentialsSelector.selectClientSecrets(
+					clientAuth.getClientID(),
+					clientAuth.getMethod(),
+					context
+				)
+			);
 
 			if (CollectionUtils.isEmpty(secretCandidates)) {
 				throw InvalidClientException.NO_REGISTERED_SECRET;
@@ -331,13 +351,16 @@ public class ClientAuthenticationVerifier<T> {
 				throw new InvalidClientException("Bad / expired JWT claims: " + e.getMessage());
 			}
 			
-			List<? extends PublicKey> keyCandidates = clientCredentialsSelector.selectPublicKeys(
-				jwtAuth.getClientID(),
-				jwtAuth.getMethod(),
-				jwtAuth.getClientAssertion().getHeader(),
-				false,        // don't force refresh if we have a remote JWK set;
-				// selector may however do so if it encounters an unknown key ID
-				context);
+			List<? extends PublicKey> keyCandidates = ListUtils.removeNullItems(
+				clientCredentialsSelector.selectPublicKeys(
+					jwtAuth.getClientID(),
+					jwtAuth.getMethod(),
+					jwtAuth.getClientAssertion().getHeader(),
+					false,        // don't force refresh if we have a remote JWK set;
+					// selector may however do so if it encounters an unknown key ID
+					context
+				)
+			);
 			
 			if (CollectionUtils.isEmpty(keyCandidates)) {
 				throw InvalidClientException.NO_MATCHING_JWK;
@@ -346,10 +369,6 @@ public class ClientAuthenticationVerifier<T> {
 			SignedJWT assertion = jwtAuth.getClientAssertion();
 			
 			for (PublicKey candidate : keyCandidates) {
-				
-				if (candidate == null) {
-					continue; // skip
-				}
 				
 				JWSVerifier jwsVerifier = jwsVerifierFactory.createJWSVerifier(
 					jwtAuth.getClientAssertion().getHeader(),
@@ -366,12 +385,15 @@ public class ClientAuthenticationVerifier<T> {
 			if (hints != null && hints.contains(Hint.CLIENT_HAS_REMOTE_JWK_SET)) {
 				// Client possibly registered JWK set URL with keys that have no IDs
 				// force JWK set reload from URL and retry
-				keyCandidates = clientCredentialsSelector.selectPublicKeys(
-					jwtAuth.getClientID(),
-					jwtAuth.getMethod(),
-					jwtAuth.getClientAssertion().getHeader(),
-					true, // force reload of remote JWK set
-					context);
+				keyCandidates = ListUtils.removeNullItems(
+					clientCredentialsSelector.selectPublicKeys(
+						jwtAuth.getClientID(),
+						jwtAuth.getMethod(),
+						jwtAuth.getClientAssertion().getHeader(),
+						true, // force reload of remote JWK set
+						context
+					)
+				);
 				
 				if (CollectionUtils.isEmpty(keyCandidates)) {
 					throw InvalidClientException.NO_MATCHING_JWK;
@@ -380,10 +402,6 @@ public class ClientAuthenticationVerifier<T> {
 				assertion = jwtAuth.getClientAssertion();
 				
 				for (PublicKey candidate : keyCandidates) {
-					
-					if (candidate == null) {
-						continue; // skip
-					}
 					
 					JWSVerifier jwsVerifier = jwsVerifierFactory.createJWSVerifier(
 						jwtAuth.getClientAssertion().getHeader(),
@@ -411,23 +429,22 @@ public class ClientAuthenticationVerifier<T> {
 			}
 			
 			// Self-signed certs bound to registered public key in client jwks / jwks_uri
-			List<? extends PublicKey> keyCandidates = clientCredentialsSelector.selectPublicKeys(
-				tlsClientAuth.getClientID(),
-				tlsClientAuth.getMethod(),
-				null,
-				false, // don't force refresh if we have a remote JWK set;
-				// selector may however do so if it encounters an unknown key ID
-				context);
+			List<? extends PublicKey> keyCandidates = ListUtils.removeNullItems(
+				clientCredentialsSelector.selectPublicKeys(
+					tlsClientAuth.getClientID(),
+					tlsClientAuth.getMethod(),
+					null,
+					false, // don't force refresh if we have a remote JWK set;
+					// selector may however do so if it encounters an unknown key ID
+					context
+				)
+			);
 			
 			if (CollectionUtils.isEmpty(keyCandidates)) {
 				throw InvalidClientException.NO_MATCHING_JWK;
 			}
 			
 			for (PublicKey candidate : keyCandidates) {
-				
-				if (candidate == null) {
-					continue; // skip
-				}
 				
 				boolean valid = X509CertificateUtils.publicKeyMatches(clientCert, candidate);
 				
@@ -440,12 +457,15 @@ public class ClientAuthenticationVerifier<T> {
 			if (hints != null && hints.contains(Hint.CLIENT_HAS_REMOTE_JWK_SET)) {
 				// Client possibly registered JWK set URL with keys that have no IDs
 				// force JWK set reload from URL and retry
-				keyCandidates = clientCredentialsSelector.selectPublicKeys(
-					tlsClientAuth.getClientID(),
-					tlsClientAuth.getMethod(),
-					null,
-					true, // force reload of remote JWK set
-					context);
+				keyCandidates = ListUtils.removeNullItems(
+					clientCredentialsSelector.selectPublicKeys(
+						tlsClientAuth.getClientID(),
+						tlsClientAuth.getMethod(),
+						null,
+						true, // force reload of remote JWK set
+						context
+					)
+				);
 				
 				if (CollectionUtils.isEmpty(keyCandidates)) {
 					throw InvalidClientException.NO_MATCHING_JWK;

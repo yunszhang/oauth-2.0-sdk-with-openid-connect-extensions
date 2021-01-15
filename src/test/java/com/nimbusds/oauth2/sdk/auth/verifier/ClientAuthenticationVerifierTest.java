@@ -281,6 +281,43 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 
 		createBasicVerifier().verify(clientAuthentication, null, null);
 	}
+	
+
+	public void testClientSecretJWT_erasedStoredSecretValue()
+		throws JOSEException {
+		
+		final Secret storedHashBasedSecret = new Secret();
+		storedHashBasedSecret.erase();
+		
+		ClientAuthenticationVerifier<?> verifier = new ClientAuthenticationVerifier<>(
+			new ClientCredentialsSelector() {
+				@Override
+				public List<Secret> selectClientSecrets(ClientID claimedClientID, ClientAuthenticationMethod authMethod, Context context) {
+					return Collections.singletonList(storedHashBasedSecret);
+				}
+				
+				
+				@Override
+				public List<? extends PublicKey> selectPublicKeys(ClientID claimedClientID, ClientAuthenticationMethod authMethod, JWSHeader jwsHeader, boolean forceRefresh, Context context) throws InvalidClientException {
+					return null;
+				}
+			},
+			EXPECTED_JWT_AUDIENCE
+		);
+
+		ClientAuthentication clientAuthentication = new ClientSecretJWT(
+			VALID_CLIENT_ID,
+			URI.create("https://c2id.com/token"),
+			JWSAlgorithm.HS256,
+			VALID_CLIENT_SECRET);
+
+		try {
+			verifier.verify(clientAuthentication, null, null);
+			fail();
+		} catch (InvalidClientException e) {
+			assertEquals("The client has no registered secret", e.getMessage());
+		}
+	}
 
 
 	public void testHappyPrivateKeyJWT()
