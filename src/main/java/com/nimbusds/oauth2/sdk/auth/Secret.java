@@ -241,7 +241,8 @@ public class Secret implements Serializable {
 	 * @param other The other secret. May be {@code null}.
 	 *
 	 * @return {@code true} if the SHA-256 hashes of the two secrets are
-	 *         equal, else {@code false}.
+	 *         equal, {@code false} if the hashes don't match or the secret
+	 *         values are {@link #erase() erased}.
 	 */
 	public boolean equalsSHA256Based(final Secret other) {
 		
