@@ -25,42 +25,24 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
+import java.util.*;
 import javax.net.ssl.SSLSocketFactory;
+
+import junit.framework.TestCase;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.crypto.utils.ConstantTimeUtils;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
-import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
-import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
-import com.nimbusds.oauth2.sdk.auth.ClientSecretJWT;
-import com.nimbusds.oauth2.sdk.auth.JWTAuthenticationClaimsSet;
-import com.nimbusds.oauth2.sdk.auth.PKITLSClientAuthentication;
-import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
-import com.nimbusds.oauth2.sdk.auth.Secret;
-import com.nimbusds.oauth2.sdk.auth.SelfSignedTLSClientAuthentication;
+import com.nimbusds.oauth2.sdk.auth.*;
 import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.oauth2.sdk.http.X509CertificateGenerator;
-import com.nimbusds.oauth2.sdk.id.Audience;
-import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.oauth2.sdk.id.Issuer;
-import com.nimbusds.oauth2.sdk.id.JWTID;
-import com.nimbusds.oauth2.sdk.id.Subject;
+import com.nimbusds.oauth2.sdk.id.*;
 import com.nimbusds.oauth2.sdk.util.X509CertificateUtils;
-
-import junit.framework.TestCase;
 
 
 /**
@@ -237,16 +219,56 @@ public class ClientAuthenticationVerifierTest extends TestCase {
 
 		createBasicVerifier().verify(clientAuthentication, null, null);
 	}
-
-
+	
+	
 	public void testHappyClientSecretPost()
 		throws Exception{
-
+		
 		ClientAuthentication clientAuthentication = new ClientSecretBasic(VALID_CLIENT_ID, VALID_CLIENT_SECRET);
-
+		
 		createBasicVerifier().verify(clientAuthentication, null, null);
 	}
-
+	
+	
+	public void testHappyClientSecretBasic_overriddenSecretEquals()
+		throws Exception {
+		
+		final Secret storedHashBasedSecret = new Secret() {
+			
+			@Override
+			public boolean equals(Object o) {
+				
+				if (! (o instanceof Secret)) {
+					return false;
+				}
+				
+				Secret otherSecret = (Secret) o;
+				
+				return ConstantTimeUtils.areEqual(VALID_CLIENT_SECRET.getSHA256(), otherSecret.getSHA256());
+			}
+		};
+		
+		ClientAuthentication clientAuthentication = new ClientSecretBasic(VALID_CLIENT_ID, VALID_CLIENT_SECRET);
+		
+		ClientAuthenticationVerifier<?> verifier = new ClientAuthenticationVerifier<>(
+			new ClientCredentialsSelector() {
+				@Override
+				public List<Secret> selectClientSecrets(ClientID claimedClientID, ClientAuthenticationMethod authMethod, Context context) {
+					return Collections.singletonList(storedHashBasedSecret);
+				}
+				
+				
+				@Override
+				public List<? extends PublicKey> selectPublicKeys(ClientID claimedClientID, ClientAuthenticationMethod authMethod, JWSHeader jwsHeader, boolean forceRefresh, Context context) throws InvalidClientException {
+					return null;
+				}
+			},
+			EXPECTED_JWT_AUDIENCE
+		);
+		
+		verifier.verify(clientAuthentication, null, null);
+	}
+	
 
 	public void testHappyClientSecretJWT()
 		throws Exception {

@@ -1600,3 +1600,5 @@ version 8.32.3 (2021-01-13)
 version 8.33 (2021-01-15)
     * Makes Secret.equals comparison with another Secret based on constant time
       matching of their SHA-256 values.
+    * Updates ClientAuthenticationVerifier to use Secret.equals for
+      client_secret_basic and client_secret_post verification.

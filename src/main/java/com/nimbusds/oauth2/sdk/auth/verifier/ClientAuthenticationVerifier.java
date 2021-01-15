@@ -274,8 +274,13 @@ public class ClientAuthenticationVerifier<T> {
 			PlainClientSecret plainAuth = (PlainClientSecret)clientAuth;
 
 			for (Secret candidate: secretCandidates) {
-				// constant time, SHA-256 based
-				if (plainAuth.getClientSecret().equalsSHA256Based(candidate)) {
+				
+				if (candidate == null) {
+					continue;
+				}
+				
+				// Constant time, SHA-256 based, unless overridden
+				if (candidate.equals(plainAuth.getClientSecret())) {
 					return; // success
 				}
 			}
