@@ -26,9 +26,10 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Date;
 
+import net.jcip.annotations.Immutable;
+
 import com.nimbusds.jose.crypto.utils.ConstantTimeUtils;
 import com.nimbusds.jose.util.Base64URL;
-import net.jcip.annotations.Immutable;
 
 
 /**
@@ -244,6 +245,7 @@ public class Secret implements Serializable {
 	 *         equal, {@code false} if the hashes don't match or the secret
 	 *         values are {@link #erase() erased}.
 	 */
+	@Deprecated
 	public boolean equalsSHA256Based(final Secret other) {
 		
 		if (other == null) {
@@ -262,7 +264,8 @@ public class Secret implements Serializable {
 	
 	
 	/**
-	 * Comparison with another secret is constant time.
+	 * Comparison with another secret is constant time, based on the
+	 * secrets' {@link #getSHA256() SHA-256 hashes}.
 	 *
 	 * @param o The other object. May be {@code null}.
 	 *
@@ -273,8 +276,8 @@ public class Secret implements Serializable {
 		if (this == o) return true;
 		if (value == null) return false;
 		if (!(o instanceof Secret)) return false;
-		Secret secret = (Secret) o;
-		return ConstantTimeUtils.areEqual(value, secret.value);
+		Secret otherSecret = (Secret) o;
+		return equalsSHA256Based(otherSecret);
 	}
 
 

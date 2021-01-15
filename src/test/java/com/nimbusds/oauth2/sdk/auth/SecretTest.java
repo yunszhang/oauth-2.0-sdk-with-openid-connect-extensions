@@ -23,6 +23,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Date;
 
+import static org.junit.Assert.assertArrayEquals;
+
 import com.nimbusds.jose.util.Base64;
 import junit.framework.TestCase;
 
@@ -152,7 +154,7 @@ public class SecretTest extends TestCase {
 		byte[] value = secret.getValueBytes();
 		
 		MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-		assertTrue(Arrays.equals(sha256.digest(value), secret.getSHA256()));
+		assertArrayEquals(sha256.digest(value), secret.getSHA256());
 		
 		// Erase value
 		secret.erase();
