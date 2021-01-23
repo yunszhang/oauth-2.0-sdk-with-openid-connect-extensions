@@ -30,6 +30,7 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.as.AuthorizationServerEndpointMetadata;
+import com.nimbusds.oauth2.sdk.as.AuthorizationServerMetadata;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.client.ClientType;
 import com.nimbusds.oauth2.sdk.ciba.BackChannelTokenDeliveryMode;
@@ -899,6 +900,30 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(meta.supportsRequestURIParam());
 		assertFalse(meta.requiresRequestURIRegistration());
 		assertFalse(meta.supportsTLSClientCertificateBoundAccessTokens());
+	}
+	
+	
+	// request_uri_parameter_supported
+	//    OPTIONAL. Boolean value specifying whether the OP supports use of
+	//    the request_uri parameter, with true indicating support. If
+	//    omitted, the default value is true.
+	public void testRequestURIParamSupported_defaultTrue() throws ParseException {
+		
+		OIDCProviderMetadata op = new OIDCProviderMetadata(
+			new Issuer("https://c2id.com"),
+			Arrays.asList(SubjectType.PUBLIC, SubjectType.PAIRWISE),
+			URI.create("https://c2id.com/jwks.json"));
+		
+		assertTrue(op.supportsRequestURIParam());
+		
+		op.applyDefaults();
+		assertTrue(op.supportsRequestURIParam());
+		
+		JSONObject jsonObject = op.toJSONObject();
+		assertFalse(jsonObject.containsKey("request_uri_parameter_supported"));
+		
+		op = OIDCProviderMetadata.parse(jsonObject);
+		assertTrue(op.supportsRequestURIParam());
 	}
 
 
