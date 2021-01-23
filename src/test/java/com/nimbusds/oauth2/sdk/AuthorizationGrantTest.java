@@ -164,4 +164,31 @@ public class AuthorizationGrantTest extends TestCase {
 		assertEquals(GrantType.CIBA, grant.getType());
 		assertEquals("1c266114-a1be-4252-8ad1-04986c5b9ac1", grant.getAuthRequestID().getValue());
 	}
+	
+	
+	public void testParseException_missingGrantTypeParameter() {
+		
+		Map<String,List<String>> params = new HashMap<>();
+		
+		try {
+			AuthorizationGrant.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing grant_type parameter", e.getMessage());
+		}
+	}
+	
+	
+	public void testParseException_unsupportedGrant() {
+		
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList("no-such-grant"));
+		
+		try {
+			AuthorizationGrant.parse(params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid or unsupported grant type: no-such-grant", e.getMessage());
+		}
+	}
 }
