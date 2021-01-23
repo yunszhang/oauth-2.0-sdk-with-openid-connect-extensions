@@ -1613,3 +1613,8 @@ version 8.33.2 (2021-01-23)
     * Fixes bug in AuthorizationGrant.parse which caused output of an error
       object message with illegal chars according to RFC 6749, section 5.2 (iss
       #338).
+
+version 8.34 (2021-01-23)
+    * OIDCProviderMetadata.toJSONObject updated to always output
+      request_uri_parameter_supported in to prevent default value confusion for
+      OP and AS metadata.

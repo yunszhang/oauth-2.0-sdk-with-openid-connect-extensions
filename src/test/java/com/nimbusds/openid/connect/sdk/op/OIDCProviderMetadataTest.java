@@ -30,10 +30,9 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.as.AuthorizationServerEndpointMetadata;
-import com.nimbusds.oauth2.sdk.as.AuthorizationServerMetadata;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
-import com.nimbusds.oauth2.sdk.client.ClientType;
 import com.nimbusds.oauth2.sdk.ciba.BackChannelTokenDeliveryMode;
+import com.nimbusds.oauth2.sdk.client.ClientType;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
@@ -871,7 +870,8 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertEquals(Collections.singletonList("client_secret_basic"), JSONObjectUtils.getStringList(jsonObject, "token_endpoint_auth_methods_supported"));
 		assertEquals(Collections.singletonList("public"), JSONObjectUtils.getStringList(jsonObject, "subject_types_supported"));
 		assertEquals(Collections.singletonList("normal"), JSONObjectUtils.getStringList(jsonObject, "claim_types_supported"));
-		assertEquals(7, jsonObject.size());
+		assertTrue(JSONObjectUtils.getBoolean(jsonObject, "request_uri_parameter_supported"));
+		assertEquals(8, jsonObject.size());
 		
 		meta = OIDCProviderMetadata.parse(jsonObject.toJSONString());
 		
@@ -907,7 +907,8 @@ public class OIDCProviderMetadataTest extends TestCase {
 	//    OPTIONAL. Boolean value specifying whether the OP supports use of
 	//    the request_uri parameter, with true indicating support. If
 	//    omitted, the default value is true.
-	public void testRequestURIParamSupported_defaultTrue() throws ParseException {
+	public void testRequestURIParamSupported_defaultTrue()
+		throws ParseException {
 		
 		OIDCProviderMetadata op = new OIDCProviderMetadata(
 			new Issuer("https://c2id.com"),
@@ -920,8 +921,10 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(op.supportsRequestURIParam());
 		
 		JSONObject jsonObject = op.toJSONObject();
-		assertFalse(jsonObject.containsKey("request_uri_parameter_supported"));
+		assertTrue("Always output", JSONObjectUtils.getBoolean(jsonObject, "request_uri_parameter_supported"));
 		
+		// Remove to test default parsing
+		jsonObject.remove("request_uri_parameter_supported");
 		op = OIDCProviderMetadata.parse(jsonObject);
 		assertTrue(op.supportsRequestURIParam());
 	}

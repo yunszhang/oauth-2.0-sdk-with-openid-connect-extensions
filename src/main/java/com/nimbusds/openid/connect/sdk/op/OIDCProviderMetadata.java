@@ -1276,12 +1276,9 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 			o.put("claims_parameter_supported", true);
 		}
 		
-		if (supportsRequestURIParam()) {
-			// default true
-			o.remove("request_uri_parameter_supported");
-		} else {
-			o.put("request_uri_parameter_supported", false);
-		}
+		// Always output, for OP metadata default value is true, for
+		// AS metadata implied default is false
+		o.put("request_uri_parameter_supported", supportsRequestURIParam());
 		
 		// optional front and back-channel logout
 		if (frontChannelLogoutSupported) {
