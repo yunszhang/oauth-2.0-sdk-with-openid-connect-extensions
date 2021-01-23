@@ -109,7 +109,7 @@ public abstract class AuthorizationGrant {
 		String grantTypeString = MultivaluedMapUtils.getFirstValue(params, "grant_type");
 
 		if (grantTypeString == null) {
-			String msg = "Missing \"grant_type\" parameter";
+			String msg = "Missing grant_type parameter";
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
 		}
 
