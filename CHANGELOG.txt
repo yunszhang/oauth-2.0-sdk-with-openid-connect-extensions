@@ -1607,6 +1607,9 @@ version 8.33 (2021-01-15)
     * Adds ListUtils.
 
 version 8.33.1 (2021-01-23)
+    * No changes, unintended release.
+
+version 8.33.2 (2021-01-23)
     * Fixes bug in AuthorizationGrant.parse which caused output of an error
       object message with illegal chars according to RFC 6749, section 5.2 (iss
       #338).
