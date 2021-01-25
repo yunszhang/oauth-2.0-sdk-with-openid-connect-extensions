@@ -439,7 +439,7 @@ public class DeviceAuthorizationSuccessResponse extends DeviceAuthorizationRespo
 
 				} catch (NumberFormatException e) {
 
-					throw new ParseException("Invalid \"interval\" parameter, must be integer");
+					throw new ParseException("Invalid interval parameter, must be integer");
 				}
 			}
 		}

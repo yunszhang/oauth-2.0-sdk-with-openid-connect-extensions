@@ -982,14 +982,14 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			v = MultivaluedMapUtils.getFirstValue(params, "request");
 			
 			if (StringUtils.isBlank(v)) {
-				throw new ParseException("Empty \"request\" parameter");
+				throw new ParseException("Empty request parameter");
 			}
 			
 			SignedJWT signedRequest;
 			try {
 				signedRequest = SignedJWT.parse(v);
 			} catch (java.text.ParseException e) {
-				throw new ParseException("Invalid \"request\" JWT: " + e.getMessage(), e);
+				throw new ParseException("Invalid request JWT: " + e.getMessage(), e);
 			}
 			
 			try {
@@ -1030,7 +1030,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			try {
 				idTokenHint = JWTParser.parse(v);
 			} catch (java.text.ParseException e) {
-				throw new ParseException("Invalid \"id_token_hint\" parameter: " + e.getMessage());
+				throw new ParseException("Invalid id_token_hint parameter: " + e.getMessage());
 			}
 		}
 		
@@ -1053,7 +1053,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			try {
 				requestedExpiry = Integer.valueOf(v);
 			} catch (NumberFormatException e) {
-				throw new ParseException("The \"requested_expiry\" parameter must be an integer");
+				throw new ParseException("The requested_expiry parameter must be an integer");
 			}
 		}
 		

@@ -1618,3 +1618,7 @@ version 8.34 (2021-01-23)
     * OIDCProviderMetadata.toJSONObject updated to always output
       request_uri_parameter_supported in to prevent default value confusion for
       OP and AS metadata.
+
+version 8.34.1 (2021-01-25)
+    * Removes illegal double quotes from ParseException messages (iss #340).
+

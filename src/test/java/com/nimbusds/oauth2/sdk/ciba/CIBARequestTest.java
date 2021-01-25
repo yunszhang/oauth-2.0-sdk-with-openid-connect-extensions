@@ -701,7 +701,7 @@ public class CIBARequestTest extends TestCase {
 			CIBARequest.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid \"id_token_hint\" parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getMessage());
+			assertEquals("Invalid id_token_hint parameter: Invalid JWT serialization: Missing dot delimiter(s)", e.getMessage());
 		}
 	}
 	
@@ -717,7 +717,7 @@ public class CIBARequestTest extends TestCase {
 			CIBARequest.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("The \"requested_expiry\" parameter must be an integer", e.getMessage());
+			assertEquals("The requested_expiry parameter must be an integer", e.getMessage());
 		}
 	}
 	

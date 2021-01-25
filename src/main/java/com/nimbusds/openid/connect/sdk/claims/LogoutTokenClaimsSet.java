@@ -171,23 +171,23 @@ public class LogoutTokenClaimsSet extends CommonOIDCTokenClaimsSet {
 		super(jsonObject);
 		
 		if (getStringClaim(ISS_CLAIM_NAME) == null)
-			throw new ParseException("Missing or invalid \"iss\" claim");
+			throw new ParseException("Missing or invalid iss claim");
 		
 		if (getStringClaim(SUB_CLAIM_NAME) == null && getStringClaim(SID_CLAIM_NAME) == null)
-			throw new ParseException("Missing or invalid \"sub\" and / or \"sid\" claim(s)");
+			throw new ParseException("Missing or invalid sub and / or sid claim(s)");
 		
 		if (getStringClaim(AUD_CLAIM_NAME) == null && getStringListClaim(AUD_CLAIM_NAME) == null ||
 			getStringListClaim(AUD_CLAIM_NAME) != null && getStringListClaim(AUD_CLAIM_NAME).isEmpty())
-			throw new ParseException("Missing or invalid \"aud\" claim");
+			throw new ParseException("Missing or invalid aud claim");
 		
 		if (getDateClaim(IAT_CLAIM_NAME) == null)
-			throw new ParseException("Missing or invalid \"iat\" claim");
+			throw new ParseException("Missing or invalid iat claim");
 		
 		if (getStringClaim(JTI_CLAIM_NAME) == null)
-			throw new ParseException("Missing or invalid \"jti\" claim");
+			throw new ParseException("Missing or invalid jti claim");
 		
 		if (getClaim(EVENTS_CLAIM_NAME) == null)
-			throw new ParseException("Missing or invalid \"events\" claim");
+			throw new ParseException("Missing or invalid events claim");
 		
 		JSONObject events = getClaim(EVENTS_CLAIM_NAME, JSONObject.class);
 		
