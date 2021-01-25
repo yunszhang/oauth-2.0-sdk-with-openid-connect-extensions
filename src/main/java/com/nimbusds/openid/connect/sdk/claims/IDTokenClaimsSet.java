@@ -235,7 +235,7 @@ public class IDTokenClaimsSet extends CommonOIDCTokenClaimsSet {
 	public IDTokenClaimsSet(final JWTClaimsSet jwtClaimsSet)
 		throws ParseException {
 
-		this(new JSONObject(jwtClaimsSet.toJSONObject()));
+		this(JSONObjectUtils.toJSONObject(jwtClaimsSet));
 	}
 
 
