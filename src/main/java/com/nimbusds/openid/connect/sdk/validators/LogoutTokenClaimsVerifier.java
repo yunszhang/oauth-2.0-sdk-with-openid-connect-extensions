@@ -19,18 +19,17 @@ package com.nimbusds.openid.connect.sdk.validators;
 
 
 import java.util.List;
+import java.util.Map;
+
+import net.jcip.annotations.ThreadSafe;
 
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.JWTClaimsSetVerifier;
-import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
-import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.claims.LogoutTokenClaimsSet;
-import net.jcip.annotations.ThreadSafe;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -111,18 +110,18 @@ public class LogoutTokenClaimsVerifier implements JWTClaimsSetVerifier {
 		
 		// Check event type
 		try {
-			JSONObject events = claimsSet.getJSONObjectClaim("events");
+			Map<String, Object> events = claimsSet.getJSONObjectClaim("events");
 			
 			if (events == null) {
 				throw new BadJWTException("Missing JWT events (events) claim");
 			}
 			
-			if (JSONObjectUtils.getJSONObject(events, LogoutTokenClaimsSet.EVENT_TYPE, null) == null) {
+			if (com.nimbusds.jose.util.JSONObjectUtils.getJSONObject(events, LogoutTokenClaimsSet.EVENT_TYPE) == null) {
 				throw new BadJWTException("Missing event type, required " + LogoutTokenClaimsSet.EVENT_TYPE);
 			}
 			
-		} catch (java.text.ParseException | ParseException e) {
-			throw new BadJWTException("Invalid JWT events (events) claim");
+		} catch (java.text.ParseException e) {
+			throw new BadJWTException("Invalid JWT events (events) claim", e);
 		}
 		
 		

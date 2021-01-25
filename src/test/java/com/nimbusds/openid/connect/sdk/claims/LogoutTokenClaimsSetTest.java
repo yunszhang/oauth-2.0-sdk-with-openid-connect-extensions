@@ -295,7 +295,7 @@ public class LogoutTokenClaimsSetTest extends TestCase {
 			LogoutTokenClaimsSet.parse(json);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing or invalid \"events\" claim", e.getMessage());
+			assertEquals("Missing or invalid events claim", e.getMessage());
 		}
 	}
 }

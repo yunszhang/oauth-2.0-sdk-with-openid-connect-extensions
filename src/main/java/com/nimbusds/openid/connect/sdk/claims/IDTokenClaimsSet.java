@@ -235,7 +235,7 @@ public class IDTokenClaimsSet extends CommonOIDCTokenClaimsSet {
 	public IDTokenClaimsSet(final JWTClaimsSet jwtClaimsSet)
 		throws ParseException {
 
-		this(jwtClaimsSet.toJSONObject());
+		this(new JSONObject(jwtClaimsSet.toJSONObject()));
 	}
 
 
@@ -635,7 +635,7 @@ public class IDTokenClaimsSet extends CommonOIDCTokenClaimsSet {
 			if (subJWK.isPrivate())
 				throw new IllegalArgumentException("The subject's JSON Web Key (JWK) must be public");
 
-			setClaim(SUB_JWK_CLAIM_NAME, subJWK.toJSONObject());
+			setClaim(SUB_JWK_CLAIM_NAME, new JSONObject(subJWK.toJSONObject()));
 
 		} else {
 			setClaim(SUB_JWK_CLAIM_NAME, null);

@@ -28,6 +28,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -38,8 +41,6 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.Nonce;
-import junit.framework.TestCase;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -146,7 +147,7 @@ public class IDTokenClaimsSetTest extends TestCase {
 		assertEquals("urn:mace:incommon:iap:silver", idTokenClaimsSet.getACR().getValue());
 		assertEquals("MTIzNDU2Nzg5MDEyMzQ1Ng", idTokenClaimsSet.getAccessTokenHash().getValue());
 
-		json = idTokenClaimsSet.toJWTClaimsSet().toJSONObject().toJSONString();
+		json = new JSONObject(idTokenClaimsSet.toJWTClaimsSet().toJSONObject()).toJSONString();
 
 		jwtClaimsSet = JWTClaimsSet.parse(json);
 

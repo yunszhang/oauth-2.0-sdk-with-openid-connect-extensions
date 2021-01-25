@@ -1618,3 +1618,10 @@ version 8.34 (2021-01-23)
     * OIDCProviderMetadata.toJSONObject updated to always output
       request_uri_parameter_supported in to prevent default value confusion for
       OP and AS metadata.
+
+version 9.0 (2021-01-25)
+    * Upgrades to Nimbus JOSE+JWT 9.x (9.4.1) where the JSON Smart
+      (net.minidev:json-smart) dependency is shaded.
+    * Adds new safe JSONObjectUtils.toJSONObject(com.nimbusds.jwt.JWTClaimsSet)
+      method for obtaining a net.minidev.json.JSONObject representation of a
+      JWT claims set.

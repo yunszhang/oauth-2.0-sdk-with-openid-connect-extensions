@@ -21,14 +21,16 @@ package com.nimbusds.oauth2.sdk.util;
 import java.net.URI;
 import java.util.*;
 
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.client.ClientType;
 import junit.framework.TestCase;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
 import net.minidev.json.parser.JSONParser;
 import org.junit.Assert;
+
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.util.DateUtils;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.client.ClientType;
 
 
 /**
@@ -583,5 +585,42 @@ public class JSONObjectUtilsTest extends TestCase {
 		assertEquals(value, JSONObjectUtils.getJSONObject(o, "key", null));
 		
 		assertEquals(value, JSONObjectUtils.getJSONObject(o, "key", def));
+	}
+	
+	
+	public void testJWTClaimsSetToJSONObject_null() {
+		
+		assertNull(JSONObjectUtils.toJSONObject(null));
+	}
+	
+	
+	public void testJWTClaimsSetToJSONObject_empty() {
+		
+		assertTrue(JSONObjectUtils.toJSONObject(new JWTClaimsSet.Builder().build()).isEmpty());
+	}
+	
+	
+	public void testJWTClaimsSetToJSONObject_convert()
+		throws ParseException, java.text.ParseException {
+		
+		// Date with second resolution
+		Date iat = DateUtils.fromSecondsSinceEpoch(DateUtils.toSecondsSinceEpoch(new Date()));
+		
+		Map<String, Object> jsonObject = new HashMap<>();
+		jsonObject.put("key-1", "value-1");
+		
+		JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+			.subject("alice")
+			.issueTime(iat)
+			.claim("obj", jsonObject)
+			.build();
+		
+		JSONObject out = JSONObjectUtils.toJSONObject(jwtClaimsSet);
+		
+		assertEquals(jwtClaimsSet.getSubject(), JSONObjectUtils.getString(out, "sub"));
+		assertEquals(DateUtils.toSecondsSinceEpoch(jwtClaimsSet.getIssueTime()), JSONObjectUtils.getLong(out, "iat"));
+		
+		JSONObject obj = JSONObjectUtils.getJSONObject(out, "obj");
+		assertEquals(jwtClaimsSet.getJSONObjectClaim("obj"), obj);
 	}
 }

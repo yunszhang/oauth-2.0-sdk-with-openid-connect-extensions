@@ -133,7 +133,7 @@ public class UserInfo extends PersonClaims {
 	 */
 	public UserInfo(final JWTClaimsSet jwtClaimsSet) {
 
-		this(jwtClaimsSet.toJSONObject());
+		this(JSONObjectUtils.toJSONObject(jwtClaimsSet));
 	}
 
 

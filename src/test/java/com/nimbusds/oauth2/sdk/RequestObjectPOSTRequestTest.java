@@ -43,6 +43,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.X509CertificateGenerator;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
 
 public class RequestObjectPOSTRequestTest extends TestCase {
@@ -98,7 +99,7 @@ public class RequestObjectPOSTRequestTest extends TestCase {
 		
 		X509Certificate clientCert = X509CertificateGenerator.generateSampleClientCertificate();
 		
-		JSONObject jsonObject = createRequestJWT().getJWTClaimsSet().toJSONObject();
+		JSONObject jsonObject = JSONObjectUtils.toJSONObject(createRequestJWT().getJWTClaimsSet());
 		
 		URI endpoint = URI.create("https://c2id.com/requests");
 		TLSClientAuthentication clientAuth = new SelfSignedTLSClientAuthentication(new ClientID("123"), (SSLSocketFactory) null);
@@ -133,7 +134,7 @@ public class RequestObjectPOSTRequestTest extends TestCase {
 	// Plain JSON object with PKI-based mTLS
 	public void testJSONObjectLifeCycle_PKITLSClientAuth() throws Exception {
 		
-		JSONObject jsonObject = createRequestJWT().getJWTClaimsSet().toJSONObject();
+		JSONObject jsonObject = JSONObjectUtils.toJSONObject(createRequestJWT().getJWTClaimsSet());
 		
 		URI endpoint = URI.create("https://c2id.com/requests");
 		TLSClientAuthentication clientAuth = new PKITLSClientAuthentication(new ClientID("123"), (SSLSocketFactory) null);

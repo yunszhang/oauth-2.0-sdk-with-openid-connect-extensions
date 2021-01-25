@@ -24,14 +24,10 @@ import java.util.List;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.jwt.JWTClaimsSet;
-
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.assertions.jwt.JWTAssertionDetails;
-import com.nimbusds.oauth2.sdk.id.Audience;
-import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.oauth2.sdk.id.Issuer;
-import com.nimbusds.oauth2.sdk.id.JWTID;
-import com.nimbusds.oauth2.sdk.id.Subject;
+import com.nimbusds.oauth2.sdk.id.*;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
 
 /**
@@ -163,6 +159,6 @@ public class JWTAuthenticationClaimsSet extends JWTAssertionDetails {
 	public static JWTAuthenticationClaimsSet parse(final JWTClaimsSet jwtClaimsSet)
 		throws ParseException {
 		
-		return parse(jwtClaimsSet.toJSONObject());
+		return parse(JSONObjectUtils.toJSONObject(jwtClaimsSet));
 	}
 }
