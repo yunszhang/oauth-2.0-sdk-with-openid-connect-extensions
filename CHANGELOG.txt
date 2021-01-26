@@ -1622,3 +1622,7 @@ version 8.34 (2021-01-23)
 version 8.34.1 (2021-01-25)
     * Removes illegal double quotes from ParseException messages (iss #340).
 
+version 8.34.2 (2021-01-26)
+    * Updates JARMUtils.toJWTClaimsSet to ensure the optional "iss"
+      authorisation response parameter matches the JWT "iss" claim (iss #341).
+

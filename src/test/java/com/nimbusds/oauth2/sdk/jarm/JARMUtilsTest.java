@@ -161,6 +161,70 @@ public class JARMUtilsTest extends TestCase {
 	}
 	
 	
+	// draft-ietf-oauth-iss-auth-resp-00
+	public void testToJWTClaimsSet_issuerInResponse() throws ParseException {
+		
+		Issuer issuer = new Issuer("https://c2id.com");
+		ClientID clientID = new ClientID("123");
+		Date exp = new Date(); // now
+		AuthorizationSuccessResponse response = new AuthorizationSuccessResponse(
+			URI.create("https://exmaple.com?cb"),
+			new AuthorizationCode(),
+			null,
+			new State(),
+			issuer, //
+			null
+		);
+		
+		JWTClaimsSet jwtClaimsSet = JARMUtils.toJWTClaimsSet(
+			issuer,
+			clientID,
+			exp,
+			response
+		);
+		
+		assertEquals(issuer.getValue(), jwtClaimsSet.getIssuer());
+		assertEquals(clientID.getValue(), jwtClaimsSet.getAudience().get(0));
+		assertEquals(DateUtils.toSecondsSinceEpoch(exp), DateUtils.toSecondsSinceEpoch(jwtClaimsSet.getExpirationTime()));
+		
+		assertEquals(response.getAuthorizationCode().getValue(), jwtClaimsSet.getStringClaim("code"));
+		assertEquals(response.getState().getValue(), jwtClaimsSet.getStringClaim("state"));
+		
+		assertEquals(5, jwtClaimsSet.getClaims().size());
+	}
+	
+	
+	// draft-ietf-oauth-iss-auth-resp-00
+	public void testToJWTClaimsSet_issuerInResponseMustMatch() {
+		
+		Issuer issuer = new Issuer("https://c2id.com");
+		ClientID clientID = new ClientID("123");
+		Date exp = new Date(); // now
+		AuthorizationSuccessResponse response = new AuthorizationSuccessResponse(
+			URI.create("https://exmaple.com?cb"),
+			new AuthorizationCode(),
+			null,
+			new State(),
+			new Issuer("https://example.com/login"), // no match
+			null
+		);
+		
+		IllegalArgumentException ex = null;
+		try {
+			JARMUtils.toJWTClaimsSet(
+				issuer,
+				clientID,
+				exp,
+				response
+			);
+			fail();
+		} catch (IllegalArgumentException e) {
+			ex = e;
+		}
+		assertEquals("Authorization response iss doesn't match JWT iss claim: " + response.getIssuer(), ex.getMessage());
+	}
+	
+	
 	public void testToJWTClaimsSet_issNotNull() {
 		
 		try {

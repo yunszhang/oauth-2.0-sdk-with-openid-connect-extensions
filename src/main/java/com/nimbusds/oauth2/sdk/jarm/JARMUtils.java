@@ -43,7 +43,9 @@ public final class JARMUtils {
 	 * @param aud      The client ID. Must not be {@code null}.
 	 * @param exp      The JWT expiration time. Must not be {@code null}.
 	 * @param response The plain authorisation response to use its
-	 *                 parameters. Must not be {@code null}.
+	 *                 parameters. If it specifies an {@code iss} (issuer)
+	 *                 parameter its value must match the JWT {@code iss}
+	 *                 claim. Must not be {@code null}.
 	 *
 	 * @return The JWT claims set.
 	 */
@@ -65,6 +67,12 @@ public final class JARMUtils {
 			
 			if ("response".equals(en.getKey())) {
 				continue; // own JARM parameter, skip
+			}
+			
+			if ("iss".equals(en.getKey())) {
+				if (! iss.getValue().equals(en.getValue())) {
+					throw new IllegalArgumentException("Authorization response iss doesn't match JWT iss claim: " + en.getValue());
+				}
 			}
 			
 			builder = builder.claim(en.getKey(), en.getValue() + ""); // force string
