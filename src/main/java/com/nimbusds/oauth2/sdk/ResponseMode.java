@@ -106,6 +106,9 @@ public final class ResponseMode extends Identifier {
 	public static final ResponseMode JWT = new ResponseMode("jwt");
 	
 	
+	private static final long serialVersionUID = -5607166526553472087L;
+	
+	
 	/**
 	 * Resolves the requested response mode.
 	 *
