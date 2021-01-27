@@ -146,6 +146,26 @@ public final class ResponseMode extends Identifier {
 			return ResponseMode.QUERY;
 		}
 	}
+	
+	
+	/**
+	 * Resolves the appropriate JWT-secured authorisation response mode
+	 * (JARM) for the specified response type
+	 *
+	 * @param rt The response type ({@code response_type}). Must not be
+	 *           {@code null}.
+	 *
+	 * @return A {@link #QUERY_JWT query.jwt} or {@link #FRAGMENT_JWT
+	 *         fragment.jwt} response mode.
+	 */
+	public static ResponseMode resolveJARM(final ResponseType rt) {
+		
+		if (rt.impliesImplicitFlow() || rt.impliesHybridFlow()) {
+			return ResponseMode.FRAGMENT_JWT;
+		} else {
+			return ResponseMode.QUERY_JWT;
+		}
+	}
 
 
 	/**

@@ -1627,5 +1627,8 @@ version 8.34.2 (2021-01-26)
       authorisation response parameter matches the JWT "iss" claim (iss #341).
 
 version 8.35 (2021-01-27)
+    * Adds ResponseMode.resolveJARM(ResponseType) static method to resolve the
+      appropriate JWT-secured authorisation response_mode (JARM) for a given
+      response_type.
     * Adds JARMUtils.RESPONSE_MODES set constant of the JARM response modes.
     * Adds JARMUtils.supportsJARM(AuthorizationServerMetadata) static method.

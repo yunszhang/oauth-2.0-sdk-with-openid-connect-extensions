@@ -136,4 +136,16 @@ public class ResponseModeTest extends TestCase {
 		assertEquals(ResponseMode.FRAGMENT, ResponseMode.resolve(null, new ResponseType("token")));
 		assertEquals(ResponseMode.QUERY, ResponseMode.resolve(null, null));
 	}
+	
+	
+	public void testResolveJARM_fromResponseType() {
+		
+		assertEquals(ResponseMode.QUERY_JWT, ResponseMode.resolveJARM(new ResponseType("code")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolveJARM(new ResponseType("code", "token")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolveJARM(new ResponseType("code", "token", "id_token")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolveJARM(new ResponseType("code", "id_token")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolveJARM(new ResponseType("token", "id_token")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolveJARM(new ResponseType("id_token")));
+		assertEquals(ResponseMode.FRAGMENT_JWT, ResponseMode.resolveJARM(new ResponseType("token")));
+	}
 }
