@@ -1626,3 +1626,6 @@ version 8.34.2 (2021-01-26)
     * Updates JARMUtils.toJWTClaimsSet to ensure the optional "iss"
       authorisation response parameter matches the JWT "iss" claim (iss #341).
 
+version 8.35 (2021-01-27)
+    * Adds JARMUtils.RESPONSE_MODES set constant of the JARM response modes.
+    * Adds JARMUtils.supportsJARM(AuthorizationServerMetadata) static method.

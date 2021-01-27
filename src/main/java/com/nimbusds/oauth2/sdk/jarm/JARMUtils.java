@@ -23,15 +23,59 @@ import java.util.*;
 import com.nimbusds.jwt.*;
 import com.nimbusds.oauth2.sdk.AuthorizationResponse;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.ResponseMode;
+import com.nimbusds.oauth2.sdk.as.AuthorizationServerMetadata;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
+import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 
 /**
  * JWT Secured Authorization Response Mode for OAuth 2.0 (JARM) utilities.
  */
 public final class JARMUtils {
+	
+	
+	/**
+	 * The JARM response modes.
+	 */
+	public static final Set<ResponseMode> RESPONSE_MODES = new HashSet<>(Arrays.asList(
+		ResponseMode.JWT,
+		ResponseMode.QUERY_JWT,
+		ResponseMode.FRAGMENT_JWT,
+		ResponseMode.FORM_POST_JWT
+	));
+	
+	
+	/**
+	 * Returns {@code true} if JARM is supported for the specified OpenID
+	 * provider / Authorisation server metadata.
+	 *
+	 * @param asMetadata The OpenID provider / Authorisation server
+	 *                   metadata. Must not be {@code null}.
+	 *
+	 * @return {@code true} if JARM is supported, else {@code false}.
+	 */
+	public static boolean supportsJARM(final AuthorizationServerMetadata asMetadata) {
+		
+		if (CollectionUtils.isEmpty(asMetadata.getAuthorizationJWSAlgs())) {
+			return false;
+		}
+		
+		if (CollectionUtils.isEmpty(asMetadata.getResponseModes())) {
+			return false;
+		}
+		
+		for (ResponseMode responseMode: JARMUtils.RESPONSE_MODES) {
+			if (asMetadata.getResponseModes().contains(responseMode)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 	
 	
 	/**

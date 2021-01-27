@@ -25,29 +25,34 @@ import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+
+import junit.framework.TestCase;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.*;
 import com.nimbusds.jwt.util.DateUtils;
-import com.nimbusds.oauth2.sdk.AuthorizationCode;
-import com.nimbusds.oauth2.sdk.AuthorizationErrorResponse;
-import com.nimbusds.oauth2.sdk.AuthorizationSuccessResponse;
-import com.nimbusds.oauth2.sdk.OAuth2Error;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
-import junit.framework.TestCase;
+import com.nimbusds.openid.connect.sdk.SubjectType;
+import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 
 public class JARMUtilsTest extends TestCase {
 	
 	
-	private static final RSAPrivateKey RSA_PRIVATE_KEY;
+	private static final Issuer ISSUER = new Issuer("https://c2id.com");
 	
+	private static final URI JWKS_URI = URI.create("https://c2id.com/jwks.json");
+	
+	private static final RSAPrivateKey RSA_PRIVATE_KEY;
 	
 	private static final RSAPublicKey RSA_PUBLIC_KEY;
 	
@@ -62,6 +67,33 @@ public class JARMUtilsTest extends TestCase {
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	
+	public void testResponseModes() {
+		
+		assertTrue(JARMUtils.RESPONSE_MODES.contains(ResponseMode.JWT));
+		assertTrue(JARMUtils.RESPONSE_MODES.contains(ResponseMode.QUERY_JWT));
+		assertTrue(JARMUtils.RESPONSE_MODES.contains(ResponseMode.FRAGMENT_JWT));
+		assertTrue(JARMUtils.RESPONSE_MODES.contains(ResponseMode.FORM_POST_JWT));
+		assertEquals(4, JARMUtils.RESPONSE_MODES.size());
+	}
+	
+	
+	public void testSupportsJARM() {
+		
+		OIDCProviderMetadata opMetadata = new OIDCProviderMetadata(ISSUER, Collections.singletonList(SubjectType.PAIRWISE), JWKS_URI);
+		opMetadata.applyDefaults();
+		
+		assertFalse("Default OP metadata", JARMUtils.supportsJARM(opMetadata));
+		
+		opMetadata.setAuthorizationJWSAlgs(Collections.singletonList(JWSAlgorithm.RS256));
+		
+		assertFalse(JARMUtils.supportsJARM(opMetadata));
+		
+		opMetadata.setResponseModes(Arrays.asList(ResponseMode.QUERY, ResponseMode.QUERY_JWT));
+		
+		assertTrue(JARMUtils.supportsJARM(opMetadata));
 	}
 	
 	
