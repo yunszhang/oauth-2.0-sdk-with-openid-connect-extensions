@@ -112,10 +112,9 @@ public final class ResponseMode extends Identifier {
 	/**
 	 * Resolves the requested response mode.
 	 *
-	 * <p>Expands the {@link #JWT jwt} response mode shortcut from JARM to
-	 * {@link #QUERY_JWT query.jwt} or {@link #FRAGMENT_JWT fragment.jwt}
-	 * depending on the explicitly requested response mode
-	 * ({@code response_mode}) (if specified) and the response type
+	 * <p>If the {@link #JWT jwt} response mode shortcut from JARM is
+	 * explicitly requested expands it to {@link #QUERY_JWT query.jwt} or
+	 * {@link #FRAGMENT_JWT fragment.jwt} depending on the response type
 	 * ({@code response_type}).
 	 *
 	 * @param rm The explicitly requested response mode

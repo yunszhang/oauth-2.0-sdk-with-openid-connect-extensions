@@ -894,6 +894,12 @@ public class AuthorizationRequest extends AbstractRequest {
 	 * {@code response_mode} parameter, and if that isn't specified, by
 	 * the {@code response_type}.
 	 *
+	 * <p>If the {@link ResponseMode#JWT jwt} response mode shortcut from
+	 * JARM is explicitly requested expands it to
+	 * {@link ResponseMode#QUERY_JWT query.jwt} or
+	 * {@link ResponseMode#FRAGMENT_JWT fragment.jwt} depending on the
+	 * response type ({@code response_type}).
+	 *
 	 * @return The implied response mode.
 	 */
 	public ResponseMode impliedResponseMode() {
