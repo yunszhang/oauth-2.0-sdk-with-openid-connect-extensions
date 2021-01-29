@@ -20,16 +20,27 @@ package com.nimbusds.oauth2.sdk;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
 
 import com.nimbusds.common.contenttype.ContentType;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.jarm.JARMUtils;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.AccessTokenType;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
@@ -53,6 +64,9 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 	
 	
 	private static final Issuer ISSUER = new Issuer("https://login.c2id.com");
+	
+	
+	private static final ClientID CLIENT_ID = new ClientID("123");
 	
 	
 	public void testCodeFlow()
@@ -220,6 +234,60 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 		assertEquals(Collections.singletonList(TOKEN.getValue()), httpRequest.getQueryParameters().get("access_token"));
 		assertEquals(Collections.singletonList(STATE.getValue()), httpRequest.getQueryParameters().get("state"));
 		assertEquals(4, httpRequest.getQueryParameters().size());
+	}
+
+	
+	// JARM with form_post.jwt
+	public void testResponseModeJWTFormPost()
+		throws Exception {
+		
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.keyID("1")
+			.generate();
+		
+		AuthorizationSuccessResponse origResponse = new AuthorizationSuccessResponse(
+			ABS_REDIRECT_URI,
+			null,
+			TOKEN,
+			STATE,
+			null
+		);
+		
+		JWTClaimsSet jwtClaimsSet = JARMUtils.toJWTClaimsSet(
+			ISSUER,
+			CLIENT_ID,
+			DateUtils.fromSecondsSinceEpoch(DateUtils.toSecondsSinceEpoch(new Date()) + 60),
+			origResponse
+		);
+		
+		SignedJWT jwt = new SignedJWT(
+			new JWSHeader(JWSAlgorithm.RS256),
+			jwtClaimsSet
+		);
+		jwt.sign(new RSASSASigner(rsaJWK));
+
+		AuthorizationSuccessResponse resp = new AuthorizationSuccessResponse(
+			ABS_REDIRECT_URI,
+			jwt,
+			ResponseMode.FORM_POST_JWT);
+
+		assertEquals(ResponseMode.FORM_POST_JWT, resp.getResponseMode());
+		assertEquals(ResponseMode.FORM_POST_JWT, resp.impliedResponseMode());
+		
+		try {
+			resp.toURI();
+			fail();
+		} catch (SerializeException e) {
+			// ok
+		}
+
+		HTTPRequest httpRequest = resp.toHTTPRequest();
+		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
+		assertEquals(ContentType.APPLICATION_URLENCODED.toString(), httpRequest.getEntityContentType().toString());
+		assertEquals(ABS_REDIRECT_URI, httpRequest.getURL().toURI());
+
+		assertEquals(Collections.singletonList(jwt.serialize()), httpRequest.getQueryParameters().get("response"));
+		assertEquals(1, httpRequest.getQueryParameters().size());
 	}
 
 

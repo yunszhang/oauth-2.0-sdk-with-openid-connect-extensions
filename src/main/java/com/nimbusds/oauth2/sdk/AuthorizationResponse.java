@@ -331,8 +331,8 @@ public abstract class AuthorizationResponse implements Response {
 	 */
 	public HTTPRequest toHTTPRequest() {
 
-		if (! ResponseMode.FORM_POST.equals(rm)) {
-			throw new SerializeException("The response mode must be form_post");
+		if (! ResponseMode.FORM_POST.equals(rm) && ! ResponseMode.FORM_POST_JWT.equals(rm)) {
+			throw new SerializeException("The response mode must be form_post or form_post.jwt");
 		}
 
 		// Use HTTP POST

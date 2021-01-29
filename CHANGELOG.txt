@@ -1632,3 +1632,7 @@ version 8.35 (2021-01-27)
       response_type.
     * Adds JARMUtils.RESPONSE_MODES set constant of the JARM response modes.
     * Adds JARMUtils.supportsJARM(AuthorizationServerMetadata) static method.
+
+version 8.35.1 (2021-01-29)
+    * AuthorizationResponse.toHTTPRequest must support
+      response_mode=form_post.jwt (iss #343).
