@@ -57,6 +57,22 @@ public final class CollectionUtils {
 	
 	
 	/**
+	 * Returns {@code true} if the specified collection contains the
+	 * specified item.
+	 *
+	 * @param collection The collection. May be {@code null}.
+	 * @param item       The item. Should not be {@code null}.
+	 *
+	 * @return {@code true} if the collection is not empty and contains the
+	 *         item, else {@code false}.
+	 */
+	public static <T> boolean contains(final Collection<T> collection, final T item) {
+		
+		return isNotEmpty(collection) && collection.contains(item);
+	}
+	
+	
+	/**
 	 * Prevents public instantiation.
 	 */
 	private CollectionUtils() {}
