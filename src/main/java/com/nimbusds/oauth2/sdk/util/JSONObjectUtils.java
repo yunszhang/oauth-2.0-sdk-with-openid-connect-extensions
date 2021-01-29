@@ -652,7 +652,6 @@ public final class JSONObjectUtils {
 	 *
 	 * @throws ParseException If the value is not of the expected type.
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<Object> getList(final JSONObject o, final String key, final List<Object> def)
 		throws ParseException {
 		

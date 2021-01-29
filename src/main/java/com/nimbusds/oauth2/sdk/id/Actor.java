@@ -19,6 +19,7 @@ package com.nimbusds.oauth2.sdk.id;
 
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
@@ -33,7 +34,10 @@ import net.minidev.json.JSONObject;
 @Immutable
 public final class Actor implements Serializable, Comparable<Actor>, JSONAware {
 	
-
+	
+	private static final long serialVersionUID = 4171395610729169757L;
+	
+	
 	/**
 	 * The actor subject.
 	 */
@@ -173,26 +177,17 @@ public final class Actor implements Serializable, Comparable<Actor>, JSONAware {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (!(o instanceof Actor)) return false;
-
 		Actor actor = (Actor) o;
-
-		if (!subject.equals(actor.subject)) return false;
-		if (issuer != null ? !issuer.equals(actor.issuer) : actor.issuer != null)
-			return false;
-		return parent != null ? parent.equals(actor.parent) : actor.parent == null;
-
+		return getSubject().equals(actor.getSubject()) && Objects.equals(getIssuer(), actor.getIssuer()) && Objects.equals(getParent(), actor.getParent());
 	}
-
-
+	
+	
 	@Override
 	public int hashCode() {
-		int result = subject.hashCode();
-		result = 31 * result + (issuer != null ? issuer.hashCode() : 0);
-		result = 31 * result + (parent != null ? parent.hashCode() : 0);
-		return result;
+		return Objects.hash(getSubject(), getIssuer(), getParent());
 	}
-
-
+	
+	
 	/**
 	 * Parses an actor from the specified JSON object representation.
 	 *

@@ -22,6 +22,7 @@ import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.AbstractMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jose.util.JSONObjectUtils;
@@ -47,7 +48,8 @@ public final class X509CertificateConfirmation {
 	/**
 	 * Creates a new X.509 certificate SHA-256 confirmation.
 	 *
-	 * @param x5tS256 The X.509 certificate SHA-256 thumbprint.
+	 * @param x5tS256 The X.509 certificate SHA-256 thumbprint. Must not
+	 *                be {@code null}.
 	 */
 	public X509CertificateConfirmation(final Base64URL x5tS256) {
 		
@@ -141,17 +143,17 @@ public final class X509CertificateConfirmation {
 	
 	
 	@Override
-	public boolean equals(final Object o) {
+	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (!(o instanceof X509CertificateConfirmation)) return false;
 		X509CertificateConfirmation that = (X509CertificateConfirmation) o;
-		return x5tS256 != null ? x5tS256.equals(that.x5tS256) : that.x5tS256 == null;
+		return x5tS256.equals(that.x5tS256);
 	}
 	
 	
 	@Override
 	public int hashCode() {
-		return x5tS256 != null ? x5tS256.hashCode() : 0;
+		return Objects.hash(x5tS256);
 	}
 	
 	

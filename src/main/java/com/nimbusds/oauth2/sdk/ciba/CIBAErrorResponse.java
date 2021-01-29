@@ -82,7 +82,7 @@ public class CIBAErrorResponse extends CIBAResponse implements ErrorResponse {
 	static {
 		Set<ErrorObject> errors = new HashSet<>();
 		errors.add(OAuth2Error.INVALID_REQUEST);
-		errors.add(OAuth2Error.INVALID_SCOPE);;
+		errors.add(OAuth2Error.INVALID_SCOPE);
 		errors.add(OAuth2Error.INVALID_CLIENT);
 		errors.add(OAuth2Error.UNAUTHORIZED_CLIENT);
 		errors.add(OAuth2Error.ACCESS_DENIED);

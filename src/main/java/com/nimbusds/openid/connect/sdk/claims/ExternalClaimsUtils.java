@@ -116,7 +116,7 @@ class ExternalClaimsUtils {
 				//    "verified_claims": [ "src1", "src2" ]
 				// }
 				for (Object item: (List<?>)en.getValue()) {
-					if (item instanceof String && sourceID.equals((String)item)) {
+					if (item instanceof String && sourceID.equals(item)) {
 						claimNames.add(en.getKey());
 					}
 				}

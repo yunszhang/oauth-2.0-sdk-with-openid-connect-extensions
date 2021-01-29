@@ -152,7 +152,7 @@ public class DateWithTimeZoneOffset {
 		sdf.setTimeZone(tz);
 		
 		long localTimeSeconds = DateUtils.toSecondsSinceEpoch(date);
-		localTimeSeconds = localTimeSeconds + (tzOffsetMinutes * 60);
+		localTimeSeconds = localTimeSeconds + (tzOffsetMinutes * 60L);
 		
 		String out = sdf.format(DateUtils.fromSecondsSinceEpoch(localTimeSeconds));
 		

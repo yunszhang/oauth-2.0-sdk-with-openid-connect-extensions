@@ -234,7 +234,7 @@ public final class URIUtils {
 			return;
 		}
 		
-		if (uri.getScheme() == null || ! "https".equals(uri.getScheme().toLowerCase())) {
+		if (uri.getScheme() == null || ! "https".equalsIgnoreCase(uri.getScheme())) {
 			throw new IllegalArgumentException("The URI scheme must be https");
 		}
 	}

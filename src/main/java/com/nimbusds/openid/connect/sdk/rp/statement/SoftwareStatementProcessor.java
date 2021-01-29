@@ -203,9 +203,7 @@ public class SoftwareStatementProcessor <C extends SecurityContext> {
 		Set<String> allRequiredClaims = new HashSet<>();
 		allRequiredClaims.add("iss");
 		if (CollectionUtils.isNotEmpty(additionalRequiredClaims)) {
-			for (String claimName: additionalRequiredClaims) {
-				allRequiredClaims.add(claimName);
-			}
+			allRequiredClaims.addAll(additionalRequiredClaims);
 		}
 		
 		processor = new DefaultJWTProcessor<>();

@@ -1636,3 +1636,4 @@ version 8.35 (2021-01-27)
 version 8.35.1 (2021-01-29)
     * AuthorizationResponse.toHTTPRequest must support
       response_mode=form_post.jwt (iss #343).
+    * Cleans up code (auto).

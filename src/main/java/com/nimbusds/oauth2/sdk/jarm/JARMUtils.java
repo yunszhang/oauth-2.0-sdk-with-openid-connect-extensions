@@ -29,7 +29,6 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
-import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 
 /**
