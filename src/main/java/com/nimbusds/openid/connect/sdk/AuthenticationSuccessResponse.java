@@ -73,7 +73,7 @@ import net.jcip.annotations.Immutable;
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM).
  *     <li>OAuth 2.0 Authorization Server Issuer Identifier in Authorization
- *         Response (draft-meyerzuselhausen-oauth-iss-auth-resp-01).
+ *         Response (draft-ietf-oauth-iss-auth-resp-00).
  * </ul>
  */
 @Immutable

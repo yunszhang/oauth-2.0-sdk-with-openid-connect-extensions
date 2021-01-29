@@ -50,7 +50,7 @@ import com.nimbusds.oauth2.sdk.util.URLUtils;
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM).
  *     <li>OAuth 2.0 Authorization Server Issuer Identifier in Authorization
- *         Response (draft-meyerzuselhausen-oauth-iss-auth-resp-01).
+ *         Response (draft-ietf-oauth-iss-auth-resp-00).
  * </ul>
  */
 public abstract class AuthorizationResponse implements Response {

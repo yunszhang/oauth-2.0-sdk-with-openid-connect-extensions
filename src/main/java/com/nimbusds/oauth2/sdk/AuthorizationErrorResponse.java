@@ -77,7 +77,7 @@ import com.nimbusds.oauth2.sdk.util.URIUtils;
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM).
  *     <li>OAuth 2.0 Authorization Server Issuer Identifier in Authorization
- *         Response (draft-meyerzuselhausen-oauth-iss-auth-resp-01).
+ *         Response (draft-ietf-oauth-iss-auth-resp-00).
  * </ul>
  */
 @Immutable
@@ -279,7 +279,7 @@ public class AuthorizationErrorResponse
 		// State
 		State state = State.parse(MultivaluedMapUtils.getFirstValue(params, "state"));
 		
-		// Parse optional issuer, draft-meyerzuselhausen-oauth-iss-auth-resp-01
+		// Parse optional issuer, draft-ietf-oauth-iss-auth-resp-00
 		Issuer issuer = Issuer.parse(MultivaluedMapUtils.getFirstValue(params, "iss"));
 		
 		return new AuthorizationErrorResponse(redirectURI, error, state, issuer, null);
