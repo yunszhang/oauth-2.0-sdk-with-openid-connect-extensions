@@ -19,7 +19,6 @@ package com.nimbusds.oauth2.sdk.client;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
@@ -218,16 +217,6 @@ public class ClientUpdateRequest extends ProtectedResourceRequest {
 		if (jsonObject.get("client_secret") != null)
 			clientSecret = new Secret(JSONObjectUtils.getString(jsonObject, "client_secret"));
 			
-		URI endpointURI;
-
-		try {
-			endpointURI = httpRequest.getURL().toURI();
-
-		} catch (URISyntaxException e) {
-
-			throw new ParseException(e.getMessage(), e);
-		}
-
-		return new ClientUpdateRequest(endpointURI, id, accessToken, metadata, clientSecret);
+		return new ClientUpdateRequest(httpRequest.getURI(), id, accessToken, metadata, clientSecret);
 	}
 }

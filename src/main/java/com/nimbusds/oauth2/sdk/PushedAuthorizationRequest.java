@@ -19,7 +19,6 @@ package com.nimbusds.oauth2.sdk;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -168,13 +167,7 @@ public class PushedAuthorizationRequest extends AbstractOptionallyAuthenticatedR
 		throws ParseException {
 		
 		// Only HTTP POST accepted
-		URI uri;
-		try {
-			uri = httpRequest.getURL().toURI();
-		} catch (URISyntaxException e) {
-			throw new ParseException(e.getMessage(), e);
-		}
-		
+		URI uri = httpRequest.getURI();
 		httpRequest.ensureMethod(HTTPRequest.Method.POST);
 		httpRequest.ensureEntityContentType(ContentType.APPLICATION_URLENCODED);
 		

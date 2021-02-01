@@ -1989,15 +1989,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 		if (query == null)
 			throw new ParseException("Missing URI query string");
 
-		URI endpointURI;
-
-		try {
-			endpointURI = httpRequest.getURL().toURI();
-
-		} catch (URISyntaxException e) {
-
-			throw new ParseException(e.getMessage(), e);
-		}
+		URI endpointURI = httpRequest.getURI();
 		
 		return parse(endpointURI, query);
 	}

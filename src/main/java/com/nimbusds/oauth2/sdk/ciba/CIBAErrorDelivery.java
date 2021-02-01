@@ -19,7 +19,6 @@ package com.nimbusds.oauth2.sdk.ciba;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -148,13 +147,7 @@ public class CIBAErrorDelivery extends CIBAPushCallback {
 	public static CIBAErrorDelivery parse(final HTTPRequest httpRequest)
 		throws ParseException {
 		
-		URI uri;
-		try {
-			uri = httpRequest.getURL().toURI();
-		} catch (URISyntaxException e) {
-			throw new ParseException(e.getMessage(), e);
-		}
-		
+		URI uri = httpRequest.getURI();
 		httpRequest.ensureMethod(HTTPRequest.Method.POST);
 		httpRequest.ensureEntityContentType(ContentType.APPLICATION_JSON);
 		

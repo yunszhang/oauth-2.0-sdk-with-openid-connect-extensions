@@ -19,7 +19,6 @@ package com.nimbusds.oauth2.sdk.client;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
@@ -276,14 +275,10 @@ public class ClientRegistrationRequest extends ProtectedResourceRequest {
 		
 		if (StringUtils.isNotBlank(authzHeaderValue))
 			accessToken = BearerAccessToken.parse(authzHeaderValue);
-
+		
 		try {
-			URI endpointURI = httpRequest.getURL().toURI();
-
-			return new ClientRegistrationRequest(endpointURI, metadata, stmt, accessToken);
-
-		} catch (URISyntaxException | IllegalArgumentException e) {
-
+			return new ClientRegistrationRequest(httpRequest.getURI(), metadata, stmt, accessToken);
+		} catch (IllegalArgumentException e) {
 			throw new ParseException(e.getMessage(), e);
 		}
 	}

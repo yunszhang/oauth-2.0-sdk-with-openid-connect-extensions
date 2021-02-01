@@ -19,7 +19,6 @@ package com.nimbusds.oauth2.sdk.client;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import net.jcip.annotations.Immutable;
 
@@ -98,19 +97,9 @@ public class ClientDeleteRequest extends ProtectedResourceRequest {
 		throws ParseException {
 
 		httpRequest.ensureMethod(HTTPRequest.Method.DELETE);
-		
-		BearerAccessToken accessToken = BearerAccessToken.parse(httpRequest.getAuthorization());
-
-		URI endpointURI;
-
-		try {
-			endpointURI = httpRequest.getURL().toURI();
-
-		} catch (URISyntaxException e) {
-
-			throw new ParseException(e.getMessage(), e);
-		}
-		
-		return new ClientDeleteRequest(endpointURI, accessToken);
+		return new ClientDeleteRequest(
+			httpRequest.getURI(),
+			BearerAccessToken.parse(httpRequest.getAuthorization())
+		);
 	}
 }

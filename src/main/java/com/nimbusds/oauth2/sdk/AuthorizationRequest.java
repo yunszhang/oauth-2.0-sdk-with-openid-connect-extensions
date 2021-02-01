@@ -1627,13 +1627,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		
 		if (query == null)
 			throw new ParseException("Missing URI query string");
-
-		try {
-			return parse(URIUtils.getBaseURI(httpRequest.getURL().toURI()), query);
-
-		} catch (URISyntaxException e) {
-
-			throw new ParseException(e.getMessage(), e);
-		}
+		
+		return parse(URIUtils.getBaseURI(httpRequest.getURI()), query);
 	}
 }

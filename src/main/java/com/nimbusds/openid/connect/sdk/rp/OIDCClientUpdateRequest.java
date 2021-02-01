@@ -19,10 +19,8 @@ package com.nimbusds.openid.connect.sdk.rp;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import net.jcip.annotations.Immutable;
-
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -142,15 +140,7 @@ public class OIDCClientUpdateRequest extends ClientUpdateRequest {
 			clientSecret = new Secret(JSONObjectUtils.getString(jsonObject, "client_secret"));
 
 
-		URI endpointURI;
-
-		try {
-			endpointURI = httpRequest.getURL().toURI();
-
-		} catch (URISyntaxException e) {
-
-			throw new ParseException(e.getMessage(), e);
-		}
+		URI endpointURI = httpRequest.getURI();
 		
 		return new OIDCClientUpdateRequest(endpointURI, id, accessToken, metadata, clientSecret);
 	}

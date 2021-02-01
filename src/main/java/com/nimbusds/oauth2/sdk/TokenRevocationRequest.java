@@ -19,7 +19,6 @@ package com.nimbusds.oauth2.sdk;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 
 import net.jcip.annotations.Immutable;
@@ -253,15 +252,7 @@ public final class TokenRevocationRequest extends AbstractOptionallyIdentifiedRe
 			token = new RefreshToken(tokenValue);
 		}
 
-		URI uri;
-
-		try {
-			uri = httpRequest.getURL().toURI();
-
-		} catch (URISyntaxException e) {
-
-			throw new ParseException(e.getMessage(), e);
-		}
+		URI uri = httpRequest.getURI();
 
 		// Parse client auth
 		ClientAuthentication clientAuth = ClientAuthentication.parse(httpRequest);

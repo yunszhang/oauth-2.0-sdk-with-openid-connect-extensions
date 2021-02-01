@@ -121,13 +121,7 @@ public class CIBAPingCallback extends ProtectedResourceRequest {
 	public static CIBAPingCallback parse(final HTTPRequest httpRequest)
 		throws ParseException {
 		
-		URI uri;
-		try {
-			uri = httpRequest.getURL().toURI();
-		} catch (URISyntaxException e) {
-			throw new ParseException(e.getMessage(), e);
-		}
-		
+		URI uri = httpRequest.getURI();
 		httpRequest.ensureMethod(HTTPRequest.Method.POST);
 		httpRequest.ensureEntityContentType(ContentType.APPLICATION_JSON);
 		

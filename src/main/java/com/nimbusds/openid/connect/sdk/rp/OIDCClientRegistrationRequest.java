@@ -19,7 +19,9 @@ package com.nimbusds.openid.connect.sdk.rp;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
+
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
 
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -28,8 +30,6 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
-import net.jcip.annotations.Immutable;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -177,14 +177,12 @@ public class OIDCClientRegistrationRequest extends ClientRegistrationRequest {
 		
 		if (StringUtils.isNotBlank(authzHeaderValue))
 			accessToken = BearerAccessToken.parse(authzHeaderValue);
-
+		
+		URI endpointURI = httpRequest.getURI();
+		
 		try {
-			URI endpointURI = httpRequest.getURL().toURI();
-
 			return new OIDCClientRegistrationRequest(endpointURI, metadata, stmt, accessToken);
-
-		} catch (URISyntaxException | IllegalArgumentException e) {
-
+		} catch (IllegalArgumentException e) {
 			throw new ParseException(e.getMessage(), e);
 		}
 	}

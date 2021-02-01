@@ -470,16 +470,7 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 		throws ParseException {
 
 		// Only HTTP POST accepted
-		URI uri;
-
-		try {
-			uri = httpRequest.getURL().toURI();
-
-		} catch (URISyntaxException e) {
-
-			throw new ParseException(e.getMessage(), e);
-		}
-
+		URI uri = httpRequest.getURI();
 		httpRequest.ensureMethod(HTTPRequest.Method.POST);
 		httpRequest.ensureEntityContentType(ContentType.APPLICATION_URLENCODED);
 

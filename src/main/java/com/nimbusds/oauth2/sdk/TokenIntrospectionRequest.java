@@ -19,7 +19,6 @@ package com.nimbusds.oauth2.sdk;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 
 import net.jcip.annotations.Immutable;
@@ -394,15 +393,7 @@ public class TokenIntrospectionRequest extends AbstractOptionallyAuthenticatedRe
 			clientAuthz = AccessToken.parse(httpRequest.getAuthorization());
 		}
 
-		URI uri;
-
-		try {
-			uri = httpRequest.getURL().toURI();
-
-		} catch (URISyntaxException e) {
-
-			throw new ParseException(e.getMessage(), e);
-		}
+		URI uri = httpRequest.getURI();
 
 		if (clientAuthz != null) {
 			return new TokenIntrospectionRequest(uri, clientAuthz, token, params);

@@ -19,7 +19,6 @@ package com.nimbusds.openid.connect.sdk;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import net.jcip.annotations.Immutable;
 
@@ -151,21 +150,10 @@ public class UserInfoRequest extends ProtectedResourceRequest {
 	public static UserInfoRequest parse(final HTTPRequest httpRequest)
 		throws ParseException {
 		
-		HTTPRequest.Method httpMethod = httpRequest.getMethod();
-		
-		BearerAccessToken accessToken = BearerAccessToken.parse(httpRequest);
-
-		URI endpointURI;
-
-		try {
-
-			endpointURI = httpRequest.getURL().toURI();
-
-		} catch (URISyntaxException e) {
-
-			throw new ParseException(e.getMessage(), e);
-		}
-	
-		return new UserInfoRequest(endpointURI, httpMethod, accessToken);
+		return new UserInfoRequest(
+			httpRequest.getURI(),
+			httpRequest.getMethod(),
+			BearerAccessToken.parse(httpRequest)
+		);
 	}
 }

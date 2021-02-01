@@ -19,7 +19,6 @@ package com.nimbusds.openid.connect.sdk;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -249,12 +248,6 @@ public class BackChannelLogoutRequest extends AbstractRequest {
 		
 		Map<String,List<String>> params = URLUtils.parseParameters(query);
 		
-		try {
-			return parse(URIUtils.getBaseURI(httpRequest.getURL().toURI()), params);
-			
-		} catch (URISyntaxException e) {
-			
-			throw new ParseException(e.getMessage(), e);
-		}
+		return parse(URIUtils.getBaseURI(httpRequest.getURI()), params);
 	}
 }

@@ -19,7 +19,6 @@ package com.nimbusds.oauth2.sdk.client;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import net.jcip.annotations.Immutable;
 
@@ -100,18 +99,9 @@ public class ClientReadRequest extends ProtectedResourceRequest {
 
 		httpRequest.ensureMethod(HTTPRequest.Method.GET);
 
-		BearerAccessToken accessToken = BearerAccessToken.parse(httpRequest.getAuthorization());
-
-		URI endpointURI;
-
-		try {
-			endpointURI = httpRequest.getURL().toURI();
-
-		} catch (URISyntaxException e) {
-
-			throw new ParseException(e.getMessage(), e);
-		}
-		
-		return new ClientReadRequest(endpointURI, accessToken);
+		return new ClientReadRequest(
+			httpRequest.getURI(),
+			BearerAccessToken.parse(httpRequest.getAuthorization())
+		);
 	}
 }

@@ -19,7 +19,6 @@ package com.nimbusds.oauth2.sdk.device;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 
 import net.jcip.annotations.Immutable;
@@ -462,22 +461,12 @@ public class DeviceAuthorizationRequest extends AbstractOptionallyIdentifiedRequ
 	public static DeviceAuthorizationRequest parse(final HTTPRequest httpRequest) throws ParseException {
 
 		// Only HTTP POST accepted
-		URI uri;
-
-		try {
-			uri = httpRequest.getURL().toURI();
-
-		} catch (URISyntaxException e) {
-
-			throw new ParseException(e.getMessage(), e);
-		}
-
+		URI uri = httpRequest.getURI();
 		httpRequest.ensureMethod(HTTPRequest.Method.POST);
 		httpRequest.ensureEntityContentType(ContentType.APPLICATION_URLENCODED);
 
 		// Parse client authentication, if any
 		ClientAuthentication clientAuth;
-
 		try {
 			clientAuth = ClientAuthentication.parse(httpRequest);
 		} catch (ParseException e) {
