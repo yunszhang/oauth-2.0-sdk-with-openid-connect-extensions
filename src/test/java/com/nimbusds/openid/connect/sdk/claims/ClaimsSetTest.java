@@ -19,13 +19,17 @@ package com.nimbusds.openid.connect.sdk.claims;
 
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
 
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Audience;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
 
 public class ClaimsSetTest extends TestCase {
@@ -44,5 +48,28 @@ public class ClaimsSetTest extends TestCase {
 		JWTClaimsSet jwtClaimsSet = claimsSet.toJWTClaimsSet();
 		assertEquals(Collections.singletonList("123"), jwtClaimsSet.getAudience());
 		assertEquals(1, jwtClaimsSet.getClaims().size());
+	}
+	
+	
+	public void testDateHandling()
+		throws ParseException {
+		
+		ClaimsSet claimsSet = new ClaimsSet();
+		assertNull(claimsSet.getDateClaim("exp"));
+		
+		Date exp = new Date();
+		claimsSet.setDateClaim("exp", exp);
+		
+		Date expWithSecondPrecision = DateUtils.fromSecondsSinceEpoch(DateUtils.toSecondsSinceEpoch(exp));
+		assertEquals(expWithSecondPrecision, claimsSet.getDateClaim("exp"));
+		
+		JSONObject jsonObject = claimsSet.toJSONObject();
+		assertEquals(DateUtils.toSecondsSinceEpoch(exp), JSONObjectUtils.getLong(jsonObject, "exp"));
+		
+		JWTClaimsSet jwtClaimsSet = claimsSet.toJWTClaimsSet();
+		assertEquals(expWithSecondPrecision, jwtClaimsSet.getExpirationTime());
+		
+		ClaimsSet newClaimsSet = new ClaimsSet(jsonObject);
+		assertEquals(expWithSecondPrecision, newClaimsSet.getDateClaim("exp"));
 	}
 }
