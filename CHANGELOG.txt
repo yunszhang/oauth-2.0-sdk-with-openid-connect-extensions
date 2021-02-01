@@ -1640,3 +1640,10 @@ version 8.35.1 (2021-01-29)
 
 version 8.36 (2021-01-29)
     * Adds CollectionUtils.contains static method.
+
+version 9.0 (2021-02-01)
+    * Upgrades to Nimbus JOSE+JWT 9.x (9.4.1) where the JSON Smart
+      (net.minidev:json-smart) dependency is shaded.
+    * Adds new safe JSONObjectUtils.toJSONObject(com.nimbusds.jwt.JWTClaimsSet)
+      method for obtaining a net.minidev.json.JSONObject representation of a
+      JWT claims set.

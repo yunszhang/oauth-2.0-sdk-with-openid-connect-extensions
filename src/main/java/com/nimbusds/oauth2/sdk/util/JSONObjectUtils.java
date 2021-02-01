@@ -27,6 +27,7 @@ import java.util.*;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.ParseException;
 
 
@@ -848,6 +849,37 @@ public final class JSONObjectUtils {
 		}
 		
 		return def;
+	}
+	
+	
+	/**
+	 * Returns the JSON object representation of the specified JWT claims
+	 * set.
+	 *
+	 * @param jwtClaimsSet The JWT claims set, {@code null} if not
+	 *                     specified.
+	 *
+	 * @return The JSON object, {@code null} if not specified.
+	 */
+	public static JSONObject toJSONObject(final JWTClaimsSet jwtClaimsSet) {
+		
+		if (jwtClaimsSet == null) {
+			return null;
+		}
+		
+		if (jwtClaimsSet.getClaims().isEmpty()) {
+			return new JSONObject();
+		}
+		
+		// Serialise and parse is the safest method
+		final String json = jwtClaimsSet.toString();
+		
+		try {
+			return parse(json);
+		} catch (ParseException e) {
+			// Should never happen
+			return null;
+		}
 	}
 	
 

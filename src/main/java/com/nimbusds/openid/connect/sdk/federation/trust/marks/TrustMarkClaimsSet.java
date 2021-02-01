@@ -26,6 +26,7 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Identifier;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.claims.CommonClaimsSet;
 
 
@@ -114,7 +115,7 @@ public class TrustMarkClaimsSet extends CommonClaimsSet {
 	public TrustMarkClaimsSet(final JWTClaimsSet jwtClaimsSet)
 		throws ParseException {
 		
-		super(jwtClaimsSet.toJSONObject());
+		super(JSONObjectUtils.toJSONObject(jwtClaimsSet));
 		
 		validateRequiredClaimsPresence();
 	}

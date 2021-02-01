@@ -213,7 +213,7 @@ public class LogoutTokenClaimsSet extends CommonOIDCTokenClaimsSet {
 	public LogoutTokenClaimsSet(final JWTClaimsSet jwtClaimsSet)
 		throws ParseException {
 		
-		this(jwtClaimsSet.toJSONObject());
+		this(JSONObjectUtils.toJSONObject(jwtClaimsSet));
 	}
 	
 	

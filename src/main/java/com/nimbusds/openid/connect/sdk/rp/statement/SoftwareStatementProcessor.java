@@ -44,6 +44,7 @@ import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 
@@ -285,7 +286,7 @@ public class SoftwareStatementProcessor <C extends SecurityContext> {
 		mergedMetadataJSONObject.putAll(clientMetadata.toJSONObject());
 		mergedMetadataJSONObject.remove("software_statement");
 		
-		JSONObject statementJSONObject = statementClaims.toJSONObject();
+		JSONObject statementJSONObject = JSONObjectUtils.toJSONObject(statementClaims);
 		statementJSONObject.remove("iss");
 		mergedMetadataJSONObject.putAll(statementJSONObject);
 		

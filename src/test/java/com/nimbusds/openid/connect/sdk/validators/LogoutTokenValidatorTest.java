@@ -27,7 +27,12 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+
+import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
+import org.junit.Assert;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -47,14 +52,12 @@ import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.*;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.claims.LogoutTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.claims.SessionID;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
-import junit.framework.TestCase;
-import net.minidev.json.JSONObject;
-import org.junit.Assert;
 
 
 public class LogoutTokenValidatorTest extends TestCase {
@@ -343,7 +346,7 @@ public class LogoutTokenValidatorTest extends TestCase {
 			null)
 			.toJWTClaimsSet();
 		
-		JSONObject jsonObject = claimsSet.toJSONObject();
+		Map<String, Object> jsonObject = claimsSet.toJSONObject();
 		jsonObject.remove("sub");
 		
 		SignedJWT jwt = new SignedJWT(
@@ -378,7 +381,7 @@ public class LogoutTokenValidatorTest extends TestCase {
 			null)
 			.toJWTClaimsSet();
 		
-		JSONObject jsonObject = claimsSet.toJSONObject();
+		Map<String, Object> jsonObject = claimsSet.toJSONObject();
 		jsonObject.remove("events");
 		
 		SignedJWT jwt = new SignedJWT(
@@ -413,7 +416,7 @@ public class LogoutTokenValidatorTest extends TestCase {
 			null)
 			.toJWTClaimsSet();
 		
-		JSONObject jsonObject = claimsSet.toJSONObject();
+		JSONObject jsonObject = JSONObjectUtils.toJSONObject(claimsSet);
 		JSONObject events = (JSONObject)jsonObject.get("events");
 		events.remove(LogoutTokenClaimsSet.EVENT_TYPE);
 		
@@ -449,7 +452,7 @@ public class LogoutTokenValidatorTest extends TestCase {
 			null)
 			.toJWTClaimsSet();
 		
-		JSONObject jsonObject = claimsSet.toJSONObject();
+		Map<String, Object> jsonObject = claimsSet.toJSONObject();
 		jsonObject.remove("iss");
 		
 		SignedJWT jwt = new SignedJWT(
@@ -516,7 +519,7 @@ public class LogoutTokenValidatorTest extends TestCase {
 			null)
 			.toJWTClaimsSet();
 		
-		JSONObject jsonObject = claimsSet.toJSONObject();
+		Map<String, Object> jsonObject = claimsSet.toJSONObject();
 		jsonObject.remove("aud");
 		
 		SignedJWT jwt = new SignedJWT(
@@ -583,7 +586,7 @@ public class LogoutTokenValidatorTest extends TestCase {
 			null)
 			.toJWTClaimsSet();
 		
-		JSONObject jsonObject = claimsSet.toJSONObject();
+		Map<String, Object> jsonObject = claimsSet.toJSONObject();
 		jsonObject.remove("jti");
 		
 		SignedJWT jwt = new SignedJWT(
@@ -618,7 +621,7 @@ public class LogoutTokenValidatorTest extends TestCase {
 			null)
 			.toJWTClaimsSet();
 		
-		JSONObject jsonObject = claimsSet.toJSONObject();
+		Map<String, Object> jsonObject = claimsSet.toJSONObject();
 		jsonObject.remove("iat");
 		
 		SignedJWT jwt = new SignedJWT(

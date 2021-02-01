@@ -19,6 +19,7 @@ package com.nimbusds.oauth2.sdk.auth;
 
 
 import java.security.cert.X509Certificate;
+import java.util.Map;
 
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jose.util.ByteUtils;
@@ -99,8 +100,8 @@ public class X509CertificateConfirmationTest extends TestCase {
 		
 		JWTClaimsSet jwtClaimsSet = certCnf.applyTo(new JWTClaimsSet.Builder().build());
 		
-		JSONObject cnfObject = jwtClaimsSet.getJSONObjectClaim("cnf");
-		assertEquals(certCnf.getValue().toString(), JSONObjectUtils.getString(cnfObject, "x5t#S256"));
+		Map<String, Object> cnfObject = jwtClaimsSet.getJSONObjectClaim("cnf");
+		assertEquals(certCnf.getValue().toString(), com.nimbusds.jose.util.JSONObjectUtils.getString(cnfObject, "x5t#S256"));
 		
 		assertEquals(1, jwtClaimsSet.getClaims().size());
 	}

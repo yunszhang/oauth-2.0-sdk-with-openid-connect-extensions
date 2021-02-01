@@ -202,7 +202,7 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 		setDateClaim(IAT_CLAIM_NAME, iat);
 		setDateClaim(EXP_CLAIM_NAME, exp);
 		if (jwks != null) {
-			setClaim(JWKS_CLAIM_NAME, jwks.toJSONObject(true)); // public JWKs only
+			setClaim(JWKS_CLAIM_NAME, new JSONObject(jwks.toJSONObject(true))); // public JWKs only
 		}
 	}
 	
@@ -219,7 +219,7 @@ public class EntityStatementClaimsSet extends CommonClaimsSet {
 	public EntityStatementClaimsSet(final JWTClaimsSet jwtClaimsSet)
 		throws ParseException {
 		
-		super(jwtClaimsSet.toJSONObject());
+		super(JSONObjectUtils.toJSONObject(jwtClaimsSet));
 		
 		validateRequiredClaimsPresence();
 	}

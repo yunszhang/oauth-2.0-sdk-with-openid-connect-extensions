@@ -258,7 +258,7 @@ public class ClientInformationTest extends TestCase {
 
 		String jsonString = o.toJSONString();
 
-		o = com.nimbusds.jose.util.JSONObjectUtils.parse(jsonString);
+		o = JSONObjectUtils.parse(jsonString);
 
 		clientInfo = ClientInformation.parse(o);
 
@@ -301,7 +301,7 @@ public class ClientInformationTest extends TestCase {
 
 		String jsonString = o.toJSONString();
 
-		o = com.nimbusds.jose.util.JSONObjectUtils.parse(jsonString);
+		o = JSONObjectUtils.parse(jsonString);
 
 		clientInfo = ClientInformation.parse(o);
 

@@ -20,16 +20,17 @@ package com.nimbusds.oauth2.sdk.assertions.jwt;
 
 import java.util.*;
 
-import com.nimbusds.jwt.util.DateUtils;
+import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.assertions.AssertionDetails;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretJWT;
 import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
 import com.nimbusds.oauth2.sdk.id.*;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import net.jcip.annotations.Immutable;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -334,6 +335,6 @@ public class JWTAssertionDetails extends AssertionDetails {
 	public static JWTAssertionDetails parse(final JWTClaimsSet jwtClaimsSet)
 		throws ParseException {
 		
-		return parse(jwtClaimsSet.toJSONObject());
+		return parse(JSONObjectUtils.toJSONObject(jwtClaimsSet));
 	}
 }

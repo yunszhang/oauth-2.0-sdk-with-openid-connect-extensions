@@ -104,7 +104,7 @@ public class UserInfoSuccessResponseTest extends TestCase {
 
 		assertTrue(jwt.getState().equals(JWSObject.State.SIGNED));
 
-		claims = new UserInfo(response.getUserInfoJWT().getJWTClaimsSet().toJSONObject());
+		claims = new UserInfo(response.getUserInfoJWT().getJWTClaimsSet());
 
 		assertEquals("alice", claims.getSubject().getValue());
 		assertEquals("Alice Adams", claims.getName());

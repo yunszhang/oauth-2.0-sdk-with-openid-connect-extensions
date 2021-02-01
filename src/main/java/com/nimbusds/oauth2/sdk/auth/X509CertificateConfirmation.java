@@ -19,17 +19,18 @@ package com.nimbusds.oauth2.sdk.auth;
 
 
 import java.security.cert.X509Certificate;
-import java.text.ParseException;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Objects;
 
-import com.nimbusds.jose.util.Base64URL;
-import com.nimbusds.jose.util.JSONObjectUtils;
-import com.nimbusds.jose.util.X509CertUtils;
-import com.nimbusds.jwt.JWTClaimsSet;
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
+
+import com.nimbusds.jose.util.Base64URL;
+import com.nimbusds.jose.util.X509CertUtils;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
 
 /**
@@ -168,14 +169,18 @@ public final class X509CertificateConfirmation {
 	 */
 	public static X509CertificateConfirmation parse(final JWTClaimsSet jwtClaimsSet) {
 		
-		JSONObject cnf;
+		Map<String, Object> jsonObjectClaim;
 		try {
-			cnf = jwtClaimsSet.getJSONObjectClaim("cnf");
-		} catch (ParseException e) {
+			jsonObjectClaim = jwtClaimsSet.getJSONObjectClaim("cnf");
+		} catch (java.text.ParseException e) {
 			return null;
 		}
 		
-		return parseFromConfirmationJSONObject(cnf);
+		if (jsonObjectClaim == null) {
+			return null;
+		}
+		
+		return parseFromConfirmationJSONObject(new JSONObject(jsonObjectClaim));
 	}
 	
 	

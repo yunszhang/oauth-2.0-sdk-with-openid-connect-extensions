@@ -28,6 +28,10 @@ import java.util.*;
 
 import static net.jadler.Jadler.*;
 
+import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.crypto.RSASSASigner;
@@ -37,6 +41,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jose.proc.BadJWSException;
+import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.auth.Secret;
@@ -49,9 +54,6 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
-import junit.framework.TestCase;
-import org.junit.After;
-import org.junit.Before;
 
 
 /**
@@ -109,7 +111,7 @@ public class IDTokenValidatorWithHTTPTest extends TestCase {
 			.respond()
 			.withStatus(200)
 			.withHeader("Content-Type", "application/json")
-			.withBody(new JWKSet(Arrays.asList((JWK)rsaJWK1, (JWK)rsaJWK2)).toJSONObject().toJSONString());
+			.withBody(JSONObjectUtils.toJSONString(new JWKSet(Arrays.asList((JWK)rsaJWK1, (JWK)rsaJWK2)).toJSONObject()));
 
 		return new AbstractMap.SimpleImmutableEntry<>(opMetadata, Arrays.asList(rsaJWK1, rsaJWK2));
 	}

@@ -19,10 +19,7 @@ package com.nimbusds.openid.connect.sdk.federation.entities;
 
 
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
@@ -380,13 +377,13 @@ public class EntityStatementClaimsSetTest extends TestCase {
 		assertEquals(audList.get(0).getValue(), jwtClaimsSet.getAudience().get(0));
 		assertEquals(authorityHints.get(0).getValue(), jwtClaimsSet.getStringListClaim("authority_hints").get(0));
 		
-		JSONObject metadata = jwtClaimsSet.getJSONObjectClaim("metadata");
-		OIDCClientMetadata parsedRPMetadata = OIDCClientMetadata.parse(JSONObjectUtils.getJSONObject(metadata, "openid_relying_party"));
+		Map<String,Object> metadata = jwtClaimsSet.getJSONObjectClaim("metadata");
+		OIDCClientMetadata parsedRPMetadata = OIDCClientMetadata.parse(new JSONObject(com.nimbusds.jose.util.JSONObjectUtils.getJSONObject(metadata, "openid_relying_party")));
 		assertEquals(rpMetadata.toJSONObject(), parsedRPMetadata.toJSONObject());
 		assertEquals(1, metadata.size());
 		
 		assertEquals(metadataPolicy, jwtClaimsSet.getJSONObjectClaim("metadata_policy"));
-		assertEquals(constraints.toJSONObject().toJSONString(), jwtClaimsSet.getJSONObjectClaim("constraints").toJSONString());
+		assertEquals(constraints, TrustChainConstraints.parse(new JSONObject(jwtClaimsSet.getJSONObjectClaim("constraints"))));
 		assertEquals(crit, jwtClaimsSet.getStringListClaim("crit"));
 		assertEquals("be0Chi8U", jwtClaimsSet.getJWTID());
 		assertEquals(policyCrit, jwtClaimsSet.getStringListClaim("policy_language_crit"));
@@ -498,15 +495,15 @@ public class EntityStatementClaimsSetTest extends TestCase {
 		assertEquals(audList.get(0).getValue(), jwtClaimsSet.getAudience().get(0));
 		assertEquals(authorityHints.get(0).getValue(), jwtClaimsSet.getStringListClaim("authority_hints").get(0));
 		
-		JSONObject metadata = jwtClaimsSet.getJSONObjectClaim("metadata");
-		OIDCClientMetadata parsedRPMetadata = OIDCClientMetadata.parse(JSONObjectUtils.getJSONObject(metadata, "openid_relying_party"));
+		Map<String, Object> metadata = jwtClaimsSet.getJSONObjectClaim("metadata");
+		OIDCClientMetadata parsedRPMetadata = OIDCClientMetadata.parse(new JSONObject(com.nimbusds.jose.util.JSONObjectUtils.getJSONObject(metadata, "openid_relying_party")));
 		assertEquals(rpMetadata.toJSONObject(), parsedRPMetadata.toJSONObject());
 		assertEquals(1, metadata.size());
 		
 		assertEquals(trustAnchorID.getValue(), jwtClaimsSet.getStringClaim("trust_anchor_id"));
 		
 		assertEquals(metadataPolicy, jwtClaimsSet.getJSONObjectClaim("metadata_policy"));
-		assertEquals(constraints.toJSONObject().toJSONString(), jwtClaimsSet.getJSONObjectClaim("constraints").toJSONString());
+		assertEquals(constraints, TrustChainConstraints.parse(new JSONObject(jwtClaimsSet.getJSONObjectClaim("constraints"))));
 		assertEquals(crit, jwtClaimsSet.getStringListClaim("crit"));
 		assertEquals("be0Chi8U", jwtClaimsSet.getJWTID());
 		assertEquals(policyCrit, jwtClaimsSet.getStringListClaim("policy_language_crit"));
@@ -553,8 +550,8 @@ public class EntityStatementClaimsSetTest extends TestCase {
 		assertEquals(opMetadata.toJSONObject(), stmt.getOPMetadata().toJSONObject());
 		
 		JWTClaimsSet jwtClaimsSet = stmt.toJWTClaimsSet();
-		JSONObject metadata = jwtClaimsSet.getJSONObjectClaim("metadata");
-		assertEquals(opMetadata.toJSONObject(), JSONObjectUtils.getJSONObject(metadata, "openid_provider"));
+		Map<String, Object> metadata = jwtClaimsSet.getJSONObjectClaim("metadata");
+		assertEquals(opMetadata.toJSONObject(), new JSONObject(com.nimbusds.jose.util.JSONObjectUtils.getJSONObject(metadata, "openid_provider")));
 		
 		stmt = new EntityStatementClaimsSet(jwtClaimsSet);
 		assertEquals(opMetadata.toJSONObject(), stmt.getOPMetadata().toJSONObject());
@@ -588,8 +585,8 @@ public class EntityStatementClaimsSetTest extends TestCase {
 		assertEquals(asMetadata.toJSONObject(), stmt.getASMetadata().toJSONObject());
 		
 		JWTClaimsSet jwtClaimsSet = stmt.toJWTClaimsSet();
-		JSONObject metadata = jwtClaimsSet.getJSONObjectClaim("metadata");
-		assertEquals(asMetadata.toJSONObject(), JSONObjectUtils.getJSONObject(metadata, "oauth_authorization_server"));
+		Map<String,Object> metadata = jwtClaimsSet.getJSONObjectClaim("metadata");
+		assertEquals(asMetadata.toJSONObject(), new JSONObject(com.nimbusds.jose.util.JSONObjectUtils.getJSONObject(metadata, "oauth_authorization_server")));
 		
 		stmt = new EntityStatementClaimsSet(jwtClaimsSet);
 		assertEquals(asMetadata.toJSONObject(), stmt.getASMetadata().toJSONObject());
@@ -623,8 +620,8 @@ public class EntityStatementClaimsSetTest extends TestCase {
 		assertEquals(clientMetadata.toJSONObject(), stmt.getOAuthClientMetadata().toJSONObject());
 		
 		JWTClaimsSet jwtClaimsSet = stmt.toJWTClaimsSet();
-		JSONObject metadata = jwtClaimsSet.getJSONObjectClaim("metadata");
-		assertEquals(clientMetadata.toJSONObject(), JSONObjectUtils.getJSONObject(metadata, "oauth_client"));
+		Map<String, Object> metadata = jwtClaimsSet.getJSONObjectClaim("metadata");
+		assertEquals(clientMetadata.toJSONObject(), com.nimbusds.jose.util.JSONObjectUtils.getJSONObject(metadata, "oauth_client"));
 		
 		stmt = new EntityStatementClaimsSet(jwtClaimsSet);
 		assertEquals(clientMetadata.toJSONObject(), stmt.getOAuthClientMetadata().toJSONObject());
@@ -658,8 +655,8 @@ public class EntityStatementClaimsSetTest extends TestCase {
 		assertEquals(fedMetadata.toJSONObject(), stmt.getFederationEntityMetadata().toJSONObject());
 		
 		JWTClaimsSet jwtClaimsSet = stmt.toJWTClaimsSet();
-		JSONObject metadata = jwtClaimsSet.getJSONObjectClaim("metadata");
-		assertEquals(fedMetadata.toJSONObject(), JSONObjectUtils.getJSONObject(metadata, "federation_entity"));
+		Map<String, Object> metadata = jwtClaimsSet.getJSONObjectClaim("metadata");
+		assertEquals(fedMetadata.toJSONObject(), com.nimbusds.jose.util.JSONObjectUtils.getJSONObject(metadata, "federation_entity"));
 		
 		stmt = new EntityStatementClaimsSet(jwtClaimsSet);
 		assertEquals(fedMetadata.toJSONObject(), stmt.getFederationEntityMetadata().toJSONObject());
