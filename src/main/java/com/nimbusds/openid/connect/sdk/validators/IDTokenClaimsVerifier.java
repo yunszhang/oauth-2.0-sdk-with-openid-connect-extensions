@@ -21,6 +21,8 @@ package com.nimbusds.openid.connect.sdk.validators;
 import java.util.Date;
 import java.util.List;
 
+import net.jcip.annotations.ThreadSafe;
+
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.BadJWTException;
@@ -29,8 +31,8 @@ import com.nimbusds.jwt.proc.JWTClaimsSetVerifier;
 import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.openid.connect.sdk.Nonce;
-import net.jcip.annotations.ThreadSafe;
 
 
 /**
@@ -179,7 +181,7 @@ public class IDTokenClaimsVerifier implements JWTClaimsSetVerifier, ClockSkewAwa
 
 		final List<String> tokenAudience = claimsSet.getAudience();
 
-		if (tokenAudience == null || tokenAudience.isEmpty()) {
+		if (CollectionUtils.isEmpty(tokenAudience)) {
 			throw BadJWTExceptions.MISSING_AUD_CLAIM_EXCEPTION;
 		}
 
@@ -191,17 +193,18 @@ public class IDTokenClaimsVerifier implements JWTClaimsSetVerifier, ClockSkewAwa
 		if (tokenAudience.size() > 1) {
 
 			final String tokenAzp;
-
 			try {
 				tokenAzp = claimsSet.getStringClaim("azp");
 			} catch (java.text.ParseException e) {
 				throw new BadJWTException("Invalid JWT authorized party (azp) claim: " + e.getMessage());
 			}
-
-			if (tokenAzp != null) {
-				if (! expectedClientID.getValue().equals(tokenAzp)) {
-					throw new BadJWTException("Unexpected JWT authorized party (azp) claim: " + tokenAzp);
-				}
+			
+			if (tokenAzp == null) {
+				throw new BadJWTException("JWT authorized party (azp) claim required when multiple (aud) audiences present");
+			}
+			
+			if (! expectedClientID.getValue().equals(tokenAzp)) {
+				throw new BadJWTException("Unexpected JWT authorized party (azp) claim: " + tokenAzp);
 			}
 		}
 

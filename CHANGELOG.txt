@@ -1647,4 +1647,6 @@ version 9.0 (2021-02-01)
     * Adds new safe JSONObjectUtils.toJSONObject(com.nimbusds.jwt.JWTClaimsSet)
       method for obtaining a net.minidev.json.JSONObject representation of a
       JWT claims set.
+    * Fixes IDTokenClaimsVerifier to check for azp claim present when multiple
+      ID token aud claim values present (iss #263).
     * Updates to OpenSAML 3.4.6.

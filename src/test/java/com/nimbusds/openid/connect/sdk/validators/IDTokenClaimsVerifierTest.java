@@ -381,7 +381,41 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 	}
 
 
-	public void testAzpMismatch() {
+	public void testMultipleAudiencesRequiresAzpPresent() {
+
+		Issuer iss = new Issuer("https://c2id.com");
+		ClientID clientID = new ClientID("123");
+		Nonce nonce = new Nonce("xyz");
+
+		IDTokenClaimsVerifier verifier = new IDTokenClaimsVerifier(iss, clientID, nonce, 0);
+
+		assertEquals(iss, verifier.getExpectedIssuer());
+		assertEquals(clientID, verifier.getClientID());
+		assertEquals(nonce, verifier.getExpectedNonce());
+
+		Date now = new Date();
+		Date iat = new Date(now.getTime() - 5*60*1000);
+		Date exp = new Date(now.getTime() + 5*60*1000);
+
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+			.issuer(iss.getValue())
+			.subject("alice")
+			.audience(Arrays.asList(clientID.getValue(), "456", "789"))
+			.expirationTime(exp)
+			.issueTime(iat)
+			.claim("nonce", nonce.getValue())
+			.build();
+
+		try {
+			verifier.verify(claimsSet, null);
+			fail();
+		} catch (BadJWTException e) {
+			assertEquals("JWT authorized party (azp) claim required when multiple (aud) audiences present", e.getMessage());
+		}
+	}
+
+
+	public void testAzpDoesntMatchClientID() {
 
 		Issuer iss = new Issuer("https://c2id.com");
 		ClientID clientID = new ClientID("123");
