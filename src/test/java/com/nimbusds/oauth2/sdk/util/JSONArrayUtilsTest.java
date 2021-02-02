@@ -19,11 +19,15 @@ package com.nimbusds.oauth2.sdk.util;
 
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import junit.framework.TestCase;
 import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import org.opensaml.xmlsec.signature.J;
 
 
 public class JSONArrayUtilsTest extends TestCase {
@@ -91,8 +95,7 @@ public class JSONArrayUtilsTest extends TestCase {
 	}
 
 
-	public void testToURIList_parseException()
-		throws ParseException {
+	public void testToURIList_parseException() {
 
 		JSONArray jsonArray = new JSONArray();
 		jsonArray.add("https://example.com");
@@ -118,5 +121,25 @@ public class JSONArrayUtilsTest extends TestCase {
 		throws ParseException {
 
 		assertTrue(JSONArrayUtils.toURIList(new JSONArray()).isEmpty());
+	}
+	
+	
+	public void testToJSONObjectList_asMap()
+		throws ParseException {
+		
+		Map<String, Object> o1 = new HashMap<>();
+		o1.put("k1", "v1");
+		
+		Map<String, Object> o2 = new HashMap<>();
+		o2.put("k2", "v2");
+		
+		JSONArray jsonArray = new JSONArray();
+		jsonArray.add(o1);
+		jsonArray.add(o2);
+		
+		List<JSONObject> objectList = JSONArrayUtils.toJSONObjectList(jsonArray);
+		
+		assertEquals("v1", objectList.get(0).get("k1"));
+		assertEquals("v2", objectList.get(1).get("k2"));
 	}
 }

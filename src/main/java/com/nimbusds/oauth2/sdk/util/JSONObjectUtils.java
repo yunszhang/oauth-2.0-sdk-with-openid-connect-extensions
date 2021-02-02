@@ -829,7 +829,7 @@ public final class JSONObjectUtils {
 		throws ParseException {
 		
 		@SuppressWarnings("unchecked")
-		Map<String,Object> mapObject = getGeneric(o, key, Map.class);
+		Map<String, ?> mapObject = getGeneric(o, key, Map.class);
 		return new JSONObject(mapObject);
 	}
 	

@@ -23,10 +23,12 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-import com.nimbusds.oauth2.sdk.ParseException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+
+import com.nimbusds.oauth2.sdk.ParseException;
 
 
 /**
@@ -131,6 +133,17 @@ public final class JSONArrayUtils {
 	}
 	
 	
+	/**
+	 * Converts the specified JSON array to a JSON object list.
+	 *
+	 * @param jsonArray The JSON array. May be {@code null}.
+	 *
+	 * @return The corresponding JSON object list, empty list if the JSON
+	 *         array is {@code null} or empty.
+	 *
+	 * @throws ParseException If a JSON array item couldn't be parsed to a
+	 *                        JSON object.
+	 */
 	public static List<JSONObject> toJSONObjectList(final JSONArray jsonArray)
 		throws ParseException {
 		
@@ -140,16 +153,23 @@ public final class JSONArrayUtils {
 		
 		List<JSONObject> objectList = new ArrayList<>(jsonArray.size());
 		
+		int i=-1;
 		for (Object o: jsonArray) {
+			
+			i++;
 			
 			if (o == null) {
 				continue; // skip
 			}
 			
-			try {
-				objectList.add((JSONObject) o);
-			} catch (Exception e) {
-				throw new ParseException("Invalid JSON object: " + e.getMessage());
+			if (o instanceof JSONObject) {
+				objectList.add((JSONObject)o);
+			} else if (o instanceof Map) {
+				@SuppressWarnings("unchecked")
+				JSONObject jo = new JSONObject((Map<String, ?>)o);
+				objectList.add(jo);
+			} else {
+				throw new ParseException("Invalid JSON object at position " + i);
 			}
 		}
 		
