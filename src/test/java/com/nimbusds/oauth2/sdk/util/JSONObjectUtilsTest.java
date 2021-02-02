@@ -27,6 +27,10 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.junit.Assert;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.OctetSequenceKey;
+import com.nimbusds.jose.jwk.gen.OctetSequenceKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -591,7 +595,7 @@ public class JSONObjectUtilsTest extends TestCase {
 	
 	public void testJWTClaimsSetToJSONObject_null() {
 		
-		assertNull(JSONObjectUtils.toJSONObject(null));
+		assertNull(JSONObjectUtils.toJSONObject((JWTClaimsSet) null));
 	}
 	
 	
@@ -656,5 +660,26 @@ public class JSONObjectUtilsTest extends TestCase {
 		// scope
 		JSONArray jsonArray = JSONObjectUtils.getJSONArray(jsonObject, "scope");
 		assertEquals(Arrays.asList("read", "write"), JSONArrayUtils.toStringList(jsonArray));
+	}
+	
+	
+	public void testJWKSetToJSONObject_null() {
+		
+		assertNull(JSONObjectUtils.toJSONObject((JWKSet) null));
+	}
+	
+	
+	public void testJWKSetToJSONObject_convert()
+		throws JOSEException {
+		
+		OctetSequenceKey oct = new OctetSequenceKeyGenerator(256)
+			.keyIDFromThumbprint(true)
+			.generate();
+		
+		JWKSet jwkSet = new JWKSet(oct);
+		
+		JSONObject o = JSONObjectUtils.toJSONObject(jwkSet);
+		
+		assertEquals(jwkSet.toString(false), o.toJSONString());
 	}
 }

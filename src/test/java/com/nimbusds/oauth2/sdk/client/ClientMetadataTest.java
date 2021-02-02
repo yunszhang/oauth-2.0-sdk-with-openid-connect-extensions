@@ -1601,4 +1601,23 @@ public class ClientMetadataTest extends TestCase {
 		assertEquals(federationTypes, copy.getClientRegistrationTypes());
 		assertEquals(orgName, copy.getOrganizationName());
 	}
+	
+	
+	public void testSerializeAndParseWithJWKs()
+		throws JOSEException, ParseException {
+		
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.keyIDFromThumbprint(true)
+			.generate();
+		
+		JWKSet jwkSet = new JWKSet(rsaJWK.toPublicJWK());
+		
+		ClientMetadata metadata = new ClientMetadata();
+		metadata.setJWKSet(jwkSet);
+		metadata.applyDefaults();
+		
+		metadata = ClientMetadata.parse(metadata.toJSONObject());
+		
+		assertEquals(jwkSet.toJSONObject(), metadata.getJWKSet().toJSONObject());
+	}
 }

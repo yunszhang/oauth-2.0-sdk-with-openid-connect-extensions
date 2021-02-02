@@ -27,6 +27,7 @@ import java.util.*;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.ParseException;
 
@@ -878,6 +879,31 @@ public final class JSONObjectUtils {
 		
 		// Serialise and parse is the safest method
 		final String json = jwtClaimsSet.toString();
+		
+		try {
+			return parse(json);
+		} catch (ParseException e) {
+			// Should never happen
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Returns the JSON object representation of the specified JWK set.
+	 *
+	 * @param jwkSet The JWK set, {@code null} if not specified.
+	 *
+	 * @return The JSON object, {@code null} if not specified.
+	 */
+	public static JSONObject toJSONObject(final JWKSet jwkSet) {
+		
+		if (jwkSet == null) {
+			return null;
+		}
+		
+		// Serialise and parse is the safest method
+		final String json = jwkSet.toString(false);
 		
 		try {
 			return parse(json);

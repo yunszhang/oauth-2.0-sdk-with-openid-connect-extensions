@@ -2120,7 +2120,7 @@ public class ClientMetadata {
 
 
 		if (jwkSet != null)
-			o.put("jwks", jwkSet.toJSONObject(true)); // prevent private keys from leaking
+			o.put("jwks", JSONObjectUtils.toJSONObject(jwkSet.toPublicJWKSet())); // prevent private keys from leaking
 		
 		
 		if (requestObjectURIs != null) {

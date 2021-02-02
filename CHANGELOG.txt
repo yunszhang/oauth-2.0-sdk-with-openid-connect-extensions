@@ -1658,3 +1658,8 @@ version 9.0.1 (2021-02-02)
       representations.
     * Updates JSONArrayUtils.toJSONObjectList to handle generic Map<String, ?>
       representations.
+
+version 9.1 (2021-02-02)
+    * Adds new safe JSONObjectUtils.toJSONObject(JWKSet) method for obtaining a
+      net.minidev.json.JSONObject representation of a JWK set.
+    * Upgrades to Nimbus JOSE+JWT 9.5.
