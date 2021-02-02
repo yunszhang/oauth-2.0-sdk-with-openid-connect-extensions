@@ -31,6 +31,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.client.ClientType;
+import com.nimbusds.oauth2.sdk.id.Actor;
 
 
 /**
@@ -75,7 +76,7 @@ public class JSONObjectUtilsTest extends TestCase {
 		
 		JSONObject o = JSONObjectUtils.parse(s);
 
-		assertEquals(new Long(3), (Long)o.get("apples"));
+		assertEquals(Long.valueOf(3), (Long)o.get("apples"));
 		assertEquals("none", (String)o.get("pears"));
 		assertEquals(2, o.size());
 	}
@@ -622,5 +623,31 @@ public class JSONObjectUtilsTest extends TestCase {
 		
 		JSONObject obj = JSONObjectUtils.getJSONObject(out, "obj");
 		assertEquals(jwtClaimsSet.getJSONObjectClaim("obj"), obj);
+	}
+	
+	
+	public void testJWTClaimsSetToJSONObjectScenario()
+		throws ParseException, java.text.ParseException {
+		
+		Map<String,Object> actObject = new HashMap<>();
+		actObject.put("sub", "bob");
+		
+		actObject = com.nimbusds.jose.util.JSONObjectUtils.parse(JSONObject.toJSONString(actObject));
+		
+		JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+			.subject("alice")
+			.claim("act", actObject)
+			.build();
+		
+		JSONObject jsonObject = new JSONObject(jwtClaimsSet.toJSONObject());
+		
+		assertEquals("alice", JSONObjectUtils.getString(jsonObject, "sub"));
+		
+		Actor actor = Actor.parseTopLevel(jsonObject);
+		assertEquals("bob", actor.getSubject().getValue());
+		
+		JSONObject actJSONObject = JSONObjectUtils.getJSONObject(jsonObject, "act");
+		assertEquals("bob", JSONObjectUtils.getString(actJSONObject, "sub"));
+		assertEquals(1, actJSONObject.size());
 	}
 }

@@ -1650,3 +1650,7 @@ version 9.0 (2021-02-01)
     * Fixes IDTokenClaimsVerifier to check for azp claim present when multiple
       ID token aud claim values present (iss #263).
     * Updates to OpenSAML 3.4.6.
+
+version 9.0.1 (2021-02-02)
+    * Updates JSONObjectUtils.getJSONObject to handle generic
+      Map<String,Object> representations.

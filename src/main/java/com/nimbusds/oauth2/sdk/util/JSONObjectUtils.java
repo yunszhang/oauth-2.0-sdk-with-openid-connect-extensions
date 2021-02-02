@@ -825,7 +825,9 @@ public final class JSONObjectUtils {
 	public static JSONObject getJSONObject(final JSONObject o, final String key)
 		throws ParseException {
 		
-		return getGeneric(o, key, JSONObject.class);
+		@SuppressWarnings("unchecked")
+		Map<String,Object> mapObject = getGeneric(o, key, Map.class);
+		return new JSONObject(mapObject);
 	}
 	
 	
