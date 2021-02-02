@@ -637,17 +637,24 @@ public class JSONObjectUtilsTest extends TestCase {
 		JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
 			.subject("alice")
 			.claim("act", actObject)
+			.claim("scope", Arrays.asList("read", "write"))
 			.build();
 		
 		JSONObject jsonObject = new JSONObject(jwtClaimsSet.toJSONObject());
 		
+		// sub
 		assertEquals("alice", JSONObjectUtils.getString(jsonObject, "sub"));
 		
+		// act
 		Actor actor = Actor.parseTopLevel(jsonObject);
 		assertEquals("bob", actor.getSubject().getValue());
 		
 		JSONObject actJSONObject = JSONObjectUtils.getJSONObject(jsonObject, "act");
 		assertEquals("bob", JSONObjectUtils.getString(actJSONObject, "sub"));
 		assertEquals(1, actJSONObject.size());
+		
+		// scope
+		JSONArray jsonArray = JSONObjectUtils.getJSONArray(jsonObject, "scope");
+		assertEquals(Arrays.asList("read", "write"), JSONArrayUtils.toStringList(jsonArray));
 	}
 }

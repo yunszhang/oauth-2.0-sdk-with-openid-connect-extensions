@@ -1654,3 +1654,5 @@ version 9.0 (2021-02-01)
 version 9.0.1 (2021-02-02)
     * Updates JSONObjectUtils.getJSONObject to handle generic
       Map<String,Object> representations.
+    * Updates JSONObjectUtils.getJSONArray to handle generic List<?>
+      representations.

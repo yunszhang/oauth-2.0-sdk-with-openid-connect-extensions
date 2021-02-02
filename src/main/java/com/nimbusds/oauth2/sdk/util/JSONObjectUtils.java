@@ -595,7 +595,10 @@ public final class JSONObjectUtils {
 	public static JSONArray getJSONArray(final JSONObject o, final String key)
 		throws ParseException {
 		
-		return getGeneric(o, key, JSONArray.class);
+		List<?> list = getGeneric(o, key, List.class);
+		JSONArray jsonArray = new JSONArray();
+		jsonArray.addAll(list);
+		return jsonArray;
 	}
 	
 	
