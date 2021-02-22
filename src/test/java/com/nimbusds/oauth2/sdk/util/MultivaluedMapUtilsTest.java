@@ -74,4 +74,76 @@ public class MultivaluedMapUtilsTest extends TestCase {
 		assertEquals("1", out.get("a"));
 		assertEquals(1, out.size());
 	}
+	
+	
+	public void testGetKeysWithMoreThanOneValue_null() {
+		
+		assertTrue(MultivaluedMapUtils.getKeysWithMoreThanOneValue(null, null).isEmpty());
+	}
+	
+	
+	public void testGetKeysWithMoreThanOneValue_empty() {
+		
+		assertTrue(MultivaluedMapUtils.getKeysWithMoreThanOneValue(new HashMap<String,List<String>>(), null).isEmpty());
+	}
+	
+	
+	public void testGetKeysWithMoreThanOneValue_none() {
+		
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("client_id", Collections.singletonList("123"));
+		params.put("response_type", Collections.singletonList("code"));
+		params.put("scope", Collections.singletonList("read"));
+		
+		assertTrue(MultivaluedMapUtils.getKeysWithMoreThanOneValue(params, null).isEmpty());
+	}
+	
+	
+	public void testGetKeysWithMoreThanOneValue_one() {
+		
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("client_id", Arrays.asList("123", "456"));
+		params.put("response_type", Collections.singletonList("code"));
+		params.put("scope", Collections.singletonList("read"));
+		
+		Set<String> found = MultivaluedMapUtils.getKeysWithMoreThanOneValue(params, null);
+		assertEquals(Collections.singleton("client_id"), found);
+	}
+	
+	
+	public void testGetKeysWithMoreThanOneValue_two() {
+		
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("client_id", Arrays.asList("123", "456"));
+		params.put("response_type", Arrays.asList("code", "token"));
+		params.put("scope", Collections.singletonList("read"));
+		
+		Set<String> found = MultivaluedMapUtils.getKeysWithMoreThanOneValue(params, null);
+		assertEquals(new HashSet<>(Arrays.asList("client_id", "response_type")), found);
+	}
+	
+	
+	public void testGetKeysWithMoreThanOneValue_exception() {
+		
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("client_id", Collections.singletonList("123"));
+		params.put("response_type", Collections.singletonList("code"));
+		params.put("scope", Collections.singletonList("read"));
+		params.put("resource", Arrays.asList("a", "b"));
+		
+		assertTrue(MultivaluedMapUtils.getKeysWithMoreThanOneValue(params, Collections.singleton("resource")).isEmpty());
+	}
+	
+	
+	public void testGetKeysWithMoreThanOneValue_one_exception() {
+		
+		Map<String,List<String>> params = new HashMap<>();
+		params.put("client_id", Arrays.asList("123", "456"));
+		params.put("response_type", Collections.singletonList("code"));
+		params.put("scope", Collections.singletonList("read"));
+		params.put("resource", Arrays.asList("a", "b"));
+		
+		Set<String> found = MultivaluedMapUtils.getKeysWithMoreThanOneValue(params, Collections.singleton("resource"));
+		assertEquals(Collections.singleton("client_id"), found);
+	}
 }

@@ -18,9 +18,7 @@
 package com.nimbusds.oauth2.sdk.util;
 
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -94,6 +92,34 @@ public final class MultivaluedMapUtils {
 		}
 		
 		return valueList.get(0);
+	}
+	
+	
+	/**
+	 * Returns the keys with more than one value.
+	 *
+	 * @param map      The multi-valued map, {@code null} if not specified.
+	 * @param excepted The excepted keys, {@code null} or empty if none.
+	 *
+	 * @return The keys with more than one value, empty set if none.
+	 */
+	public static <K,V> Set<K> getKeysWithMoreThanOneValue(final Map<K,List<V>> map, final Set<K> excepted) {
+		
+		if (map == null || map.isEmpty()) {
+			return Collections.emptySet();
+		}
+		
+		Set<K> found = new HashSet<>();
+		for (Map.Entry<K,List<V>> en: map.entrySet()) {
+			if (CollectionUtils.contains(excepted, en.getKey())) {
+				continue;
+			}
+			
+			if (en.getValue() != null && en.getValue().size() > 1) {
+				found.add(en.getKey());
+			}
+		}
+		return found;
 	}
 	
 	

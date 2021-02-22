@@ -1663,3 +1663,6 @@ version 9.1 (2021-02-02)
     * Adds new safe JSONObjectUtils.toJSONObject(JWKSet) method for obtaining a
       net.minidev.json.JSONObject representation of a JWK set.
     * Upgrades to Nimbus JOSE+JWT 9.5.
+
+version 9.2 (2021-02-22)
+    * Adds MultivaluedMapUtils.getKeysWithMoreThanOneValue method.
