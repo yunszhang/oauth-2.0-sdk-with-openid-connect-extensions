@@ -486,6 +486,12 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 		// No fragment! May use query component!
 		Map<String,List<String>> params = httpRequest.getQueryParameters();
 		
+		Set<String> repeatParams = MultivaluedMapUtils.getKeysWithMoreThanOneValue(params, Collections.singleton("resource"));
+		if (! repeatParams.isEmpty()) {
+			String msg = "Parameter(s) present more than once: " + repeatParams;
+			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.setDescription(msg));
+		}
+		
 		// Multiple conflicting client auth methods (issue #203)?
 		if (clientAuth instanceof ClientSecretBasic) {
 			if (StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(params, "client_assertion")) || StringUtils.isNotBlank(MultivaluedMapUtils.getFirstValue(params, "client_assertion_type"))) {

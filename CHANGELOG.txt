@@ -1667,4 +1667,6 @@ version 9.1 (2021-02-02)
 version 9.2 (2021-02-22)
     * AuthorizationRequest.parse with a parameter included more than once, save
       for "resource", must throw ParseException (iss #345).
+    * TokenRequest.parse with a parameter included more than once, save for
+      "resource", must throw ParseException (iss #345).
     * Adds MultivaluedMapUtils.getKeysWithMoreThanOneValue method.

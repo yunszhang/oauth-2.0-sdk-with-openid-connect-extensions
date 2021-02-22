@@ -1691,4 +1691,38 @@ public class TokenRequestTest extends TestCase {
 		CIBAGrant cibaGrant = (CIBAGrant) tokenRequest.getAuthorizationGrant();
 		assertEquals(new AuthRequestID("1c266114-a1be-4252-8ad1-04986c5b9ac1"), cibaGrant.getAuthRequestID());
 	}
+	
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/345/token-and-authz-request-must-fail-with-400
+	public void testParse_repeatedParameter()
+		throws Exception {
+		
+		URI uri = new URI("https://c2id.com/token");
+		ClientAuthentication clientAuth = new ClientSecretBasic(new ClientID("123"), new Secret("secret"));
+		AuthorizationCodeGrant grant = new AuthorizationCodeGrant(new AuthorizationCode("abc"), null);
+		Scope scope = new Scope("openid", "email");
+		
+		TokenRequest request = new TokenRequest(uri, clientAuth, grant, scope);
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		Map<String, List<String>> params = httpRequest.getQueryParameters();
+		
+		// Duplicate param
+		for (String paramName: Arrays.asList("grant_type", "code", "scope")) {
+			Map<String, List<String>> paramsCopy = new HashMap<>(params);
+			String value = MultivaluedMapUtils.getFirstValue(params, paramName);
+			paramsCopy.put(paramName, Arrays.asList(value, value));
+			httpRequest.setQuery(URLUtils.serializeParameters(paramsCopy));
+			
+			try {
+				TokenRequest.parse(httpRequest);
+				fail();
+			} catch (ParseException e) {
+				assertEquals("Parameter(s) present more than once: [" + paramName  + "]", e.getMessage());
+				assertEquals(400, e.getErrorObject().getHTTPStatusCode());
+				assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+				assertEquals("Parameter(s) present more than once: [" + paramName  + "]", e.getErrorObject().getDescription());
+			}
+		}
+	}
 }
