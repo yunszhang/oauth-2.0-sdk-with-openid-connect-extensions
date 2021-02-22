@@ -19,6 +19,7 @@ package com.nimbusds.openid.connect.sdk;
 
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.KeyPair;
@@ -1025,6 +1026,38 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(new URI("https://client.com/request#123"), request.getRequestURI());
 		assertEquals(-1, request.getMaxAge());
 	}
+	
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/345/token-and-authz-request-must-fail-with-400
+	public void testParse_repeatedParameter_clientID()
+		throws URISyntaxException {
+		
+		URI uri = new URI("https://c2id.com/authz/");
+		
+		ResponseType rts = new ResponseType();
+		rts.add(ResponseType.Value.CODE);
+		
+		Scope scope = new Scope(OIDCScopeValue.OPENID);
+		
+		ClientID clientID = new ClientID("123456");
+		
+		URI redirectURI = new URI("https://example.com/cb");
+		
+		State state = new State();
+		
+		AuthenticationRequest req = new AuthenticationRequest(uri, rts, scope, clientID, redirectURI, state, null);
+		
+		Map<String,List<String>> params = req.toParameters();
+		params.put("client_id", Arrays.asList(clientID.getValue(), clientID.getValue()));
+		
+		try {
+			AuthorizationRequest.parse(uri, params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals("Parameter(s) present more than once: [client_id]", e.getErrorObject().getDescription());
+		}
+	}
 
 
 	public void testParseMissingRedirectionURI() {
@@ -1449,7 +1482,7 @@ public class AuthenticationRequestTest extends TestCase {
 	public void testParseWithCustomParams()
 		throws Exception {
 
-		String q = "https://example.com:9091/oidc-login?client_id=am6bae3a&response_type=id_token+token&redirect_uri=https%3A%2F%2Fexample.com%3A9090%2Fexample%2FimplicitFlow&scope=openid&nonce=CvJam5c9fpY&claims=%7B%22id_token%22%3A%7B%22given_name%22%3Anull%2C%22family_name%22%3Anull%7D%7D&scope=openid&language=zh&context=MS-GLOBAL01&response_mode=json";
+		String q = "https://example.com:9091/oidc-login?client_id=am6bae3a&response_type=id_token+token&redirect_uri=https%3A%2F%2Fexample.com%3A9090%2Fexample%2FimplicitFlow&scope=openid&nonce=CvJam5c9fpY&claims=%7B%22id_token%22%3A%7B%22given_name%22%3Anull%2C%22family_name%22%3Anull%7D%7D&language=zh&context=MS-GLOBAL01&response_mode=json";
 
 		AuthenticationRequest r = AuthenticationRequest.parse(URI.create(q));
 

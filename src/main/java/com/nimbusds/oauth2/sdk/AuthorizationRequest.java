@@ -1319,6 +1319,16 @@ public class AuthorizationRequest extends AbstractRequest {
 	public static AuthorizationRequest parse(final URI uri, final Map<String,List<String>> params)
 		throws ParseException {
 		
+		Set<String> repeatParams = MultivaluedMapUtils.getKeysWithMoreThanOneValue(params, Collections.singleton("resource"));
+		
+		if (! repeatParams.isEmpty()) {
+			// Always result in non-redirecting error. Technically
+			// only duplicate client_id, state, redirect_uri,
+			// response_type, request_uri and request should
+			String msg = "Parameter(s) present more than once: " + repeatParams;
+			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.setDescription(msg));
+		}
+		
 		// Parse response_mode, response_type, client_id, redirect_uri and state first,
 		// needed if parsing results in a error response
 		final ClientID clientID;

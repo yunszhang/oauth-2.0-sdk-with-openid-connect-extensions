@@ -20,6 +20,7 @@ package com.nimbusds.oauth2.sdk;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.*;
 
@@ -1641,6 +1642,32 @@ public class AuthorizationRequestTest extends TestCase {
 			assertEquals(URI.create("//example.io"), e.getRedirectionURI());
 			assertNull(e.getState());
 			assertEquals(new ClientID("123"), e.getClientID());
+		}
+	}
+	
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/345/token-and-authz-request-must-fail-with-400
+	public void testParse_repeatedParameter_clientID()
+		throws URISyntaxException {
+		
+		URI uri = new URI("https://c2id.com/authz/");
+		
+		ResponseType rts = new ResponseType();
+		rts.add(ResponseType.Value.CODE);
+		
+		ClientID clientID = new ClientID("123456");
+		
+		AuthorizationRequest req = new AuthorizationRequest(uri, rts, clientID);
+		
+		Map<String,List<String>> params = req.toParameters();
+		params.put("client_id", Arrays.asList(clientID.getValue(), clientID.getValue()));
+		
+		try {
+			AuthorizationRequest.parse(uri, params);
+			fail();
+		} catch (ParseException e) {
+			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals("Parameter(s) present more than once: [client_id]", e.getErrorObject().getDescription());
 		}
 	}
 }
