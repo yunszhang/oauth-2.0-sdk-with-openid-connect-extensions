@@ -1670,3 +1670,4 @@ version 9.2 (2021-02-22)
     * TokenRequest.parse with a parameter included more than once, save for
       "resource", must throw ParseException (iss #345).
     * Adds MultivaluedMapUtils.getKeysWithMoreThanOneValue method.
+    * Updates to com.nimbusds:nimbus-jose-jwt:9.6.1
