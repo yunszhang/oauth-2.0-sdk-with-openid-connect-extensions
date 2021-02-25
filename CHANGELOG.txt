@@ -1671,3 +1671,8 @@ version 9.2 (2021-02-22)
       "resource", must throw ParseException (iss #345).
     * Adds MultivaluedMapUtils.getKeysWithMoreThanOneValue method.
     * Updates to com.nimbusds:nimbus-jose-jwt:9.6.1
+
+version 9.2.1 (2021-02-25)
+    * Catches unexpected exceptions in JSONUtils.parseJSON(String) into
+      ParseException, see
+      https://github.com/netplex/json-smart-v1/issues/7 (iss #347).
