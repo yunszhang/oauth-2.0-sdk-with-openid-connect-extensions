@@ -120,7 +120,6 @@ public class JSONObjectUtilsTest extends TestCase {
 		try {
 			JSONObjectUtils.parse("{\"apples\":3, ");
 			fail();
-			
 		} catch (ParseException e) {
 			// ok
 		}
@@ -132,14 +131,8 @@ public class JSONObjectUtilsTest extends TestCase {
 		try {
 			JSONObjectUtils.parse(null);
 			fail();
-			
 		} catch (ParseException e) {
-		
-			fail();
-		
-		} catch (NullPointerException e) {
-		
-			// ok
+			assertEquals("The JSON string must not be null", e.getMessage());
 		}
 	}
 	
@@ -149,9 +142,7 @@ public class JSONObjectUtilsTest extends TestCase {
 		try {
 			JSONObjectUtils.parse("null");
 			fail();
-		
 		} catch (ParseException e) {
-		
 			// ok
 		}
 	}
@@ -161,11 +152,8 @@ public class JSONObjectUtilsTest extends TestCase {
 	
 		try {
 			JSONObjectUtils.parse("");
-			
 			fail("Failed to raise exception");
-		
 		} catch (ParseException e) {
-		
 			// ok
 		}
 	}
@@ -176,9 +164,7 @@ public class JSONObjectUtilsTest extends TestCase {
 		try {
 			JSONObjectUtils.parse(" ");
 			fail();
-		
 		} catch (ParseException e) {
-		
 			// ok
 		}
 	}
@@ -188,8 +174,8 @@ public class JSONObjectUtilsTest extends TestCase {
 		throws Exception {
 
 		JSONObject o = getTestJSONObject();
-
-		assertEquals(true, JSONObjectUtils.getBoolean(o, "bool"));
+		
+		assertTrue(JSONObjectUtils.getBoolean(o, "bool"));
 		assertEquals(100, JSONObjectUtils.getInt(o, "int"));
 		assertEquals(500L, JSONObjectUtils.getLong(o, "long"));
 		assertEquals(3.14f, JSONObjectUtils.getFloat(o, "float"));
@@ -307,7 +293,7 @@ public class JSONObjectUtilsTest extends TestCase {
 		assertEquals(def, JSONObjectUtils.getBoolean(o, "key", def));
 		
 		o.put("value", null);
-		assertEquals(false, JSONObjectUtils.getBoolean(o, "key", def));
+		assertFalse(JSONObjectUtils.getBoolean(o, "key", def));
 		
 		boolean value = true;
 		o.put("key", value);

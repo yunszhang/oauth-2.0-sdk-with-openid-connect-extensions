@@ -38,4 +38,16 @@ public class JSONUtilsTest extends TestCase {
 			assertTrue(e.getCause() instanceof NumberFormatException);
 		}
 	}
+	
+	
+	public void testNull() {
+		
+		try {
+			JSONUtils.parseJSON(null);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("The JSON string must not be null", e.getMessage());
+			assertTrue(e.getCause() instanceof NullPointerException);
+		}
+	}
 }
