@@ -2485,7 +2485,8 @@ public class ClientMetadata {
 			}
 
 			if (jsonObject.get("software_version") != null) {
-				metadata.setSoftwareVersion(new SoftwareVersion(JSONObjectUtils.getString(jsonObject, "software_version")));
+				// Normalize to string, in non-compliant OB profiles
+				metadata.setSoftwareVersion(new SoftwareVersion(jsonObject.get("software_version").toString()));
 				jsonObject.remove("software_version");
 			}
 			

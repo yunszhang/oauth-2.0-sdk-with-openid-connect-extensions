@@ -1276,6 +1276,55 @@ public class ClientMetadataTest extends TestCase {
 	}
 	
 	
+	public void testSoftwareVersion_string()
+		throws ParseException {
+		
+		ClientMetadata clientMetadata = new ClientMetadata();
+		clientMetadata.setSoftwareVersion(new SoftwareVersion("1.0"));
+		clientMetadata.applyDefaults();
+		
+		String json = clientMetadata.toJSONObject().toJSONString();
+		
+		clientMetadata = ClientMetadata.parse(JSONObjectUtils.parse(json));
+		
+		assertEquals("1.0", clientMetadata.getSoftwareVersion().getValue());
+	}
+	
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/348/clientmetadataparse-normalize
+	public void testSoftwareVersion_integer()
+		throws ParseException {
+		
+		ClientMetadata clientMetadata = new ClientMetadata();
+		clientMetadata.applyDefaults();
+		
+		JSONObject jsonObject = clientMetadata.toJSONObject();
+		jsonObject.put("software_version", 1);
+		String json = jsonObject.toJSONString();
+		
+		clientMetadata = ClientMetadata.parse(JSONObjectUtils.parse(json));
+		
+		assertEquals("1", clientMetadata.getSoftwareVersion().getValue());
+	}
+	
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/348/clientmetadataparse-normalize
+	public void testSoftwareVersion_float()
+		throws ParseException {
+		
+		ClientMetadata clientMetadata = new ClientMetadata();
+		clientMetadata.applyDefaults();
+		
+		JSONObject jsonObject = clientMetadata.toJSONObject();
+		jsonObject.put("software_version", 1.0);
+		String json = jsonObject.toJSONString();
+		
+		clientMetadata = ClientMetadata.parse(JSONObjectUtils.parse(json));
+		
+		assertEquals("1.0", clientMetadata.getSoftwareVersion().getValue());
+	}
+	
+	
 	public void testSoftwareStatement()
 		throws JOSEException, java.text.ParseException, ParseException {
 		

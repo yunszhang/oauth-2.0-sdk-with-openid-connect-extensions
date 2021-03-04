@@ -1676,3 +1676,8 @@ version 9.2.1 (2021-02-25)
     * Catches unexpected exceptions in JSONUtils.parseJSON(String) into
       ParseException, see
       https://github.com/netplex/json-smart-v1/issues/7 (iss #347).
+
+version 9.2.2 (2021-03-04)
+    * ClientMetadata.parse accepts software_version as JSON number and converts
+      it to string (iss #348).
+
