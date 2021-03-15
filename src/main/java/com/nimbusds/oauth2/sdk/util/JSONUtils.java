@@ -48,10 +48,12 @@ public final class JSONUtils {
 
 		try {
 			return new JSONParser(JSONParser.USE_HI_PRECISION_FLOAT | JSONParser.ACCEPT_TAILLING_SPACE).parse(s);
-
 		} catch (net.minidev.json.parser.ParseException e) {
-
 			throw new ParseException("Invalid JSON: " + e.getMessage(), e);
+		} catch (NullPointerException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ParseException("Unexpected exception: " + e.getMessage(), e);
 		}
 	}
 

@@ -1640,3 +1640,8 @@ version 8.35.1 (2021-01-29)
 
 version 8.36 (2021-01-29)
     * Adds CollectionUtils.contains static method.
+
+version 8.36.1 (2021-03-15)
+    * Catches unexpected exceptions in JSONUtils.parseJSON(String) into
+      ParseException, see
+      https://github.com/netplex/json-smart-v1/issues/7 (iss #347).
