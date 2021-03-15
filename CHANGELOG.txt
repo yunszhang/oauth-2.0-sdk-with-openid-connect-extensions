@@ -1264,3 +1264,8 @@ version 7.1.1 (2020-02-25)
     * Restores com.sun.mail:javax.mail:1.6.1 as non-optional dependency to
       prevent class loading issues with JSONObjectUtils, HTTPMessage and other
       classes (iss #291).
+
+version 7.1.2 (2021-03-15)
+    * Catches unexpected exceptions in JSONUtils.parseJSON(String) into
+      ParseException, see
+      https://github.com/netplex/json-smart-v1/issues/7 (iss #347).
