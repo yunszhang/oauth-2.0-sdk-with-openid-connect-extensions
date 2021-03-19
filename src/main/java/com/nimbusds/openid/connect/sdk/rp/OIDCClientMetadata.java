@@ -893,7 +893,10 @@ public class OIDCClientMetadata extends ClientMetadata {
 		if (defaultACRs != null) {
 
 			JSONArray acrList = new JSONArray();
-			acrList.addAll(defaultACRs);
+			
+			for (ACR acr: defaultACRs) {
+				acrList.add(acr.getValue());
+			}
 			o.put("default_acr_values", acrList);
 		}
 

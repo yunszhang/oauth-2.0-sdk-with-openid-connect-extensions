@@ -1096,4 +1096,15 @@ public class OIDCClientMetadataTest extends TestCase {
 			}
 		}
 	}
+	
+	
+	public void testDefaultACRValuesInJSONObject() {
+		
+		OIDCClientMetadata metadata = new OIDCClientMetadata();
+		metadata.setDefaultACRs(Arrays.asList(new ACR("bronze"), new ACR("gold")));
+		metadata.applyDefaults();
+		
+		JSONObject jsonObject = metadata.toJSONObject();
+		assertEquals(Arrays.asList("bronze", "gold"), jsonObject.get("default_acr_values"));
+	}
 }

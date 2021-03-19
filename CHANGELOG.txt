@@ -1681,3 +1681,6 @@ version 9.2.2 (2021-03-04)
     * ClientMetadata.parse accepts software_version as JSON number and converts
       it to string (iss #348).
 
+version 9.2.3 (2021-03-19)
+    * Updates default_acr_values output in OIDCClientMetadata.toJSONObject to
+      not rely on JSONAware.
