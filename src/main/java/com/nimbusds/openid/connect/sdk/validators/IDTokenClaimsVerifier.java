@@ -49,7 +49,7 @@ import com.nimbusds.openid.connect.sdk.Nonce;
  */
 @ThreadSafe
 public class IDTokenClaimsVerifier implements JWTClaimsSetVerifier, ClockSkewAware {
-	
+
 
 	/**
 	 * The expected ID token issuer.
@@ -198,11 +198,11 @@ public class IDTokenClaimsVerifier implements JWTClaimsSetVerifier, ClockSkewAwa
 			} catch (java.text.ParseException e) {
 				throw new BadJWTException("Invalid JWT authorized party (azp) claim: " + e.getMessage());
 			}
-			
+
 			if (tokenAzp == null) {
 				throw new BadJWTException("JWT authorized party (azp) claim required when multiple (aud) audiences present");
 			}
-			
+
 			if (! expectedClientID.getValue().equals(tokenAzp)) {
 				throw new BadJWTException("Unexpected JWT authorized party (azp) claim: " + tokenAzp);
 			}
@@ -228,8 +228,8 @@ public class IDTokenClaimsVerifier implements JWTClaimsSetVerifier, ClockSkewAwa
 			throw BadJWTExceptions.EXPIRED_EXCEPTION;
 		}
 
-		// Issue time must be before current time, given acceptable clock skew
-		if (! DateUtils.isBefore(iat, nowRef, maxClockSkew)) {
+		// Issue time must be before current time, given acceptable clock skew, or equal to current time
+		if (! (iat.equals(nowRef) || DateUtils.isBefore(iat, nowRef, maxClockSkew))) {
 			throw BadJWTExceptions.IAT_CLAIM_AHEAD_EXCEPTION;
 		}
 
