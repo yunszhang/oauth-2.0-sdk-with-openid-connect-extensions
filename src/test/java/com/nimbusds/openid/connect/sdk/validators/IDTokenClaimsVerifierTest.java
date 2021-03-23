@@ -33,7 +33,7 @@ import junit.framework.TestCase;
  * Tests the ID token claims verifier.
  */
 public class IDTokenClaimsVerifierTest extends TestCase {
-	
+
 
 	public void testHappyMinimalWithNonce()
 		throws BadJWTException {
@@ -515,6 +515,34 @@ public class IDTokenClaimsVerifierTest extends TestCase {
 		} catch (BadJWTException e) {
 			assertEquals("JWT issue time ahead of current time", e.getMessage());
 		}
+	}
+
+
+	public void testIssueTimeImmediately() throws BadJWTException {
+
+		Issuer iss = new Issuer("https://c2id.com");
+		ClientID clientID = new ClientID("123");
+		Nonce nonce = new Nonce("xyz");
+
+		IDTokenClaimsVerifier verifier = new IDTokenClaimsVerifier(iss, clientID, nonce, 0);
+
+		assertEquals(iss, verifier.getExpectedIssuer());
+		assertEquals(clientID, verifier.getClientID());
+		assertEquals(nonce, verifier.getExpectedNonce());
+
+		final Date now = new Date();
+		final Date inTwoHours = new Date(now.getTime() + 2*60*60*1000L);
+
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+			.issuer(iss.getValue())
+			.subject("alice")
+			.audience(clientID.getValue())
+			.expirationTime(inTwoHours)
+			.issueTime(now)
+			.claim("nonce", nonce.getValue())
+			.build();
+
+		verifier.verify(claimsSet, null);
 	}
 
 
