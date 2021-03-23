@@ -1686,5 +1686,7 @@ version 9.2.3 (2021-03-19)
       not rely on JSONAware.
 
 version 9.2.4 (2021-03-23)
+    * AuthenticationRequest must not require nonce with
+      response_type=code+token (iss #351).
     * Updates the IDTokenVerifier to not reject an ID token with an "iat"
       (Issued At) claim when it is equal to the current time (iss #350).

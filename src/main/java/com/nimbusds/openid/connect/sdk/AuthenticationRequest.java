@@ -1271,9 +1271,11 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			if (!scope.contains(OIDCScopeValue.OPENID))
 				throw new IllegalArgumentException("The scope must include an \"openid\" value");
 			
-			// Nonce required in the implicit and hybrid flows
-			if (nonce == null && (rt.impliesImplicitFlow() || rt.impliesHybridFlow()))
-				throw new IllegalArgumentException("Nonce is required in implicit / hybrid protocol flow");
+			// Check nonce requirement
+			// https://openid.net/specs/openid-connect-core-1_0-27.html#HybridAuthRequest
+			if (nonce == null && (rt.equals(new ResponseType("code", "id_token")) || rt.equals(new ResponseType("code", "id_token", "token")))) {
+				throw new IllegalArgumentException("Nonce required for response_type=" + rt);
+			}
 		}
 		
 		this.nonce = nonce;
@@ -1676,9 +1678,10 @@ public class AuthenticationRequest extends AuthorizationRequest {
 					ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState());
 			}
 			
-			// Nonce required in the implicit and hybrid flows
-			if (nonce == null && (ar.getResponseType().impliesImplicitFlow() || ar.getResponseType().impliesHybridFlow())) {
-				String msg = "Missing nonce parameter: Required in the implicit and hybrid flows";
+			// Check nonce requirement
+			// https://openid.net/specs/openid-connect-core-1_0-27.html#HybridAuthRequest
+			if (nonce == null && (ar.getResponseType().equals(new ResponseType("code", "id_token")) || ar.getResponseType().equals(new ResponseType("code", "id_token", "token")))) {
+				String msg = "Missing nonce parameter: Required for response_type=" + ar.getResponseType();
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 					ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState());
 			}

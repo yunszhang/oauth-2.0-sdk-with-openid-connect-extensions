@@ -1122,27 +1122,6 @@ public class AuthenticationRequestTest extends TestCase {
 	}
 
 
-	public void testParseMissingNonceInImplicitFlow() {
-
-		String query = "response_type=id_token%20token" +
-			"&client_id=s6BhdRkqt3" +
-			"&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb" +
-			"&scope=openid%20profile" +
-			"&state=af0ifjsldkj";
-
-		try {
-			AuthenticationRequest.parse(query);
-			fail();
-		} catch (ParseException e) {
-			assertEquals("Missing nonce parameter: Required in the implicit and hybrid flows", e.getMessage());
-			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing nonce parameter: Required in the implicit and hybrid flows", e.getErrorObject().getDescription());
-			assertEquals(ResponseMode.FRAGMENT, e.getResponseMode());
-			assertNull(e.getErrorObject().getURI());
-		}
-	}
-
-
 	public void testParseInvalidDisplay() {
 
 		String query = "response_type=code" +
@@ -1310,23 +1289,50 @@ public class AuthenticationRequestTest extends TestCase {
 	}
 
 
-	public void testRequireNonceInHybridFlow()
+	public void testNonceRequirement()
 		throws Exception {
 
 		// See https://bitbucket.org/openid/connect/issues/972/nonce-requirement-in-hybrid-auth-request
 		
 		// Spec discussion about nonce in hybrid flow https://bitbucket.org/openid/connect/issues/972/nonce-requirement-in-hybrid-auth-request
 		
-		// Test constructor
-
-		new AuthenticationRequest.Builder(
+		// response_type=code
+		AuthenticationRequest ar = new AuthenticationRequest.Builder(
 			ResponseType.parse("code"),
 			new Scope("openid"),
 			new ClientID("s6BhdRkqt3"),
 			URI.create("https://example.com/cb")) // redirect_uri
 			.state(new State("af0ifjsldkj"))
+			.endpointURI(new URI("https://c2id.com/login"))
 			.build();
+		
+		AuthenticationRequest.parse(ar.toURI());
+		
+		// response_type=code+token
+		ar = new AuthenticationRequest.Builder(
+			ResponseType.parse("code token"),
+			new Scope("openid"),
+			new ClientID("s6BhdRkqt3"),
+			URI.create("https://example.com/cb")) // redirect_uri
+			.state(new State("af0ifjsldkj"))
+			.endpointURI(new URI("https://c2id.com/login"))
+			.build();
+		
+		AuthenticationRequest.parse(ar.toURI());
+		
+		// response_type=id_token+token
+		ar = new AuthenticationRequest.Builder(
+			ResponseType.parse("id_token token"),
+			new Scope("openid"),
+			new ClientID("s6BhdRkqt3"),
+			URI.create("https://example.com/cb")) // redirect_uri
+			.state(new State("af0ifjsldkj"))
+			.endpointURI(new URI("https://c2id.com/login"))
+			.build();
+		
+		AuthenticationRequest.parse(ar.toURI());
 
+		// response_type=code+id_token
 		try {
 			new AuthenticationRequest.Builder(
 				ResponseType.parse("code id_token"),
@@ -1337,9 +1343,29 @@ public class AuthenticationRequestTest extends TestCase {
 				.build();
 			fail();
 		} catch (IllegalStateException e) {
-			assertEquals("Nonce is required in implicit / hybrid protocol flow", e.getMessage());
+			assertEquals("Nonce required for response_type=code id_token", e.getMessage());
+		}
+		
+		try {
+			AuthenticationRequest.parse(new URI(
+				"https://c2id.com/login?" +
+					"response_type=code%20id_token" +
+					"&client_id=s6BhdRkqt3" +
+					"&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb" +
+					"&scope=openid%20profile" +
+					"&state=af0ifjsldkj"));
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing nonce parameter: Required for response_type=code id_token", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals("Invalid request: Missing nonce parameter: Required for response_type=code id_token", e.getErrorObject().getDescription());
+			assertEquals(new ClientID("s6BhdRkqt3"), e.getClientID());
+			assertEquals(new URI("https://client.example.org/cb"), e.getRedirectionURI());
+			assertEquals(ResponseMode.FRAGMENT, e.getResponseMode());
+			assertEquals(new State("af0ifjsldkj"), e.getState());
 		}
 
+		// response_type=code+id_token+token
 		try {
 			new AuthenticationRequest.Builder(
 				ResponseType.parse("code id_token token"),
@@ -1350,37 +1376,41 @@ public class AuthenticationRequestTest extends TestCase {
 				.build();
 			fail();
 		} catch (IllegalStateException e) {
-			assertEquals("Nonce is required in implicit / hybrid protocol flow", e.getMessage());
-		}
-
-		try {
-			new AuthenticationRequest.Builder(
-				ResponseType.parse("id_token token"),
-				new Scope("openid"),
-				new ClientID("s6BhdRkqt3"),
-				URI.create("https://example.com/cb")) // redirect_uri
-				.state(new State("af0ifjsldkj"))
-				.build();
-			fail();
-		} catch (IllegalStateException e) {
-			assertEquals("Nonce is required in implicit / hybrid protocol flow", e.getMessage());
+			assertEquals("Nonce required for response_type=code id_token token", e.getMessage());
 		}
 		
-		// Test static parse method
 		try {
 			AuthenticationRequest.parse(new URI(
-				"https://server.example.com" +
-				"/authorize?" +
-				"response_type=code%20id_token" +
-				"&client_id=s6BhdRkqt3" +
-				"&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb" +
-				"&scope=openid%20profile" +
-				"&state=af0ifjsldkj"));
+				"https://c2id.com/login?" +
+					"response_type=code%20id_token" +
+					"&client_id=s6BhdRkqt3" +
+					"&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb" +
+					"&scope=openid%20profile" +
+					"&state=af0ifjsldkj"));
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Missing nonce parameter: Required in the implicit and hybrid flows", e.getMessage());
+			assertEquals("Missing nonce parameter: Required for response_type=code id_token", e.getMessage());
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing nonce parameter: Required in the implicit and hybrid flows", e.getErrorObject().getDescription());
+			assertEquals("Invalid request: Missing nonce parameter: Required for response_type=code id_token", e.getErrorObject().getDescription());
+			assertEquals(new ClientID("s6BhdRkqt3"), e.getClientID());
+			assertEquals(new URI("https://client.example.org/cb"), e.getRedirectionURI());
+			assertEquals(ResponseMode.FRAGMENT, e.getResponseMode());
+			assertEquals(new State("af0ifjsldkj"), e.getState());
+		}
+		
+		try {
+			AuthenticationRequest.parse(new URI(
+				"https://c2id.com/login?" +
+					"response_type=code%20id_token%20token" +
+					"&client_id=s6BhdRkqt3" +
+					"&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb" +
+					"&scope=openid%20profile" +
+					"&state=af0ifjsldkj"));
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing nonce parameter: Required for response_type=code id_token token", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals("Invalid request: Missing nonce parameter: Required for response_type=code id_token token", e.getErrorObject().getDescription());
 			assertEquals(new ClientID("s6BhdRkqt3"), e.getClientID());
 			assertEquals(new URI("https://client.example.org/cb"), e.getRedirectionURI());
 			assertEquals(ResponseMode.FRAGMENT, e.getResponseMode());
@@ -1681,6 +1711,18 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(CodeChallenge.compute(CodeChallengeMethod.S256, pkceVerifier), request.getCodeChallenge());
 		assertEquals(CodeChallengeMethod.S256, request.getCodeChallengeMethod());
 		assertTrue(request.getCustomParameters().isEmpty());
+	}
+	
+	
+	public void testResponseTypeCodeTokenMustNotRequireNonce() {
+		
+		AuthenticationRequest request = new AuthenticationRequest.Builder(
+			new ResponseType("code", "token"),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.build();
+		
 	}
 	
 	
