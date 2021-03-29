@@ -104,37 +104,37 @@ public class OAuth2ErrorTest extends TestCase {
 	
 	
 	public void testErrorCodeStringConstantsAreProvided() throws IllegalAccessException {
-		Set<String> errorCodeStringConstants = getPublicFinalStringConstantsFromOAuth2Error();
-		Set<ErrorObject> errorObjects = getErrorObjectsFromOAuth2Error();
-		for (ErrorObject eo : errorObjects) {
+		Set<String> errorCodeStringConstants = getErrorCodeStringConstants();
+		Set<ErrorObject> errorObjectConstants = getErrorObjectsConstants();
+		for (ErrorObject eo : errorObjectConstants) {
 			assertTrue(errorCodeStringConstants.contains(eo.getCode()));
 		}
 	}
 	
 	
-	private Set<String> getPublicFinalStringConstantsFromOAuth2Error() throws IllegalAccessException {
+	private Set<String> getErrorCodeStringConstants() throws IllegalAccessException {
 		Field[] oAuth2ErrorFields = OAuth2Error.class.getDeclaredFields();
 		Set<String> errorCodeStringConstants = new HashSet<>();
-		for (Field oAuth2ErrorField : oAuth2ErrorFields) {
-			if (oAuth2ErrorField.getType().equals(String.class)
-				&& Modifier.isPublic(oAuth2ErrorField.getModifiers())
-				&& Modifier.isFinal(oAuth2ErrorField.getModifiers())
-				&& Modifier.isStatic(oAuth2ErrorField.getModifiers())) {
-				errorCodeStringConstants.add((String) oAuth2ErrorField.get(this));
+		for (Field field : oAuth2ErrorFields) {
+			if (field.getType().equals(String.class)
+				&& Modifier.isPublic(field.getModifiers())
+				&& Modifier.isFinal(field.getModifiers())
+				&& Modifier.isStatic(field.getModifiers())) {
+				errorCodeStringConstants.add((String) field.get(this));
 			}
 		}
 		return errorCodeStringConstants;
 	}
 	
 	
-	private Set<ErrorObject> getErrorObjectsFromOAuth2Error() throws IllegalAccessException {
+	private Set<ErrorObject> getErrorObjectsConstants() throws IllegalAccessException {
 		Field[] oAuth2ErrorFields = OAuth2Error.class.getDeclaredFields();
-		Set<ErrorObject> errorCodeStringConstants = new HashSet<>();
-		for (Field oAuth2ErrorField : oAuth2ErrorFields) {
-			if (oAuth2ErrorField.getType().equals(ErrorObject.class)) {
-				errorCodeStringConstants.add((ErrorObject) oAuth2ErrorField.get(this));
+		Set<ErrorObject> errorObjectConstants = new HashSet<>();
+		for (Field field : oAuth2ErrorFields) {
+			if (field.getType().equals(ErrorObject.class)) {
+				errorObjectConstants.add((ErrorObject) field.get(this));
 			}
 		}
-		return errorCodeStringConstants;
+		return errorObjectConstants;
 	}
 }
