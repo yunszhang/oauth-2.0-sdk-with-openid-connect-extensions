@@ -18,15 +18,20 @@
 package com.nimbusds.openid.connect.sdk;
 
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.HashSet;
+import java.util.Set;
+
 import junit.framework.TestCase;
 
-import com.nimbusds.oauth2.sdk.OAuth2Error;
+import com.nimbusds.oauth2.sdk.ErrorObject;
 
 
 public class OIDCErrorTest extends TestCase {
 	
 
-	public void testCodes() {
+	public void testCodes() throws IllegalAccessException {
 		
 		assertEquals("interaction_required", OIDCError.INTERACTION_REQUIRED.getCode());
 		assertEquals("login_required", OIDCError.LOGIN_REQUIRED.getCode());
@@ -34,5 +39,43 @@ public class OIDCErrorTest extends TestCase {
 		assertEquals("consent_required", OIDCError.CONSENT_REQUIRED.getCode());
 		assertEquals("unmet_authentication_requirements", OIDCError.UNMET_AUTHENTICATION_REQUIREMENTS.getCode());
 		assertEquals("registration_not_supported", OIDCError.REGISTRATION_NOT_SUPPORTED.getCode());
+		
+		assertEquals(6, getErrorObjectConstants().size());
+	}
+	
+	
+	public void testErrorCodeStringConstantsAreProvided() throws IllegalAccessException {
+		Set<String> errorCodeStringConstants = getErrorCodeStringConstants();
+		Set<ErrorObject> errorObjectConstants = getErrorObjectConstants();
+		for (ErrorObject eo : errorObjectConstants) {
+			assertTrue(errorCodeStringConstants.contains(eo.getCode()));
+		}
+	}
+	
+	
+	private Set<String> getErrorCodeStringConstants() throws IllegalAccessException {
+		Field[] oidcErrorFields = OIDCError.class.getDeclaredFields();
+		Set<String> errorCodeStringConstants = new HashSet<>();
+		for (Field field : oidcErrorFields) {
+			if (field.getType().equals(String.class)
+				&& Modifier.isPublic(field.getModifiers())
+				&& Modifier.isFinal(field.getModifiers())
+				&& Modifier.isStatic(field.getModifiers())) {
+				errorCodeStringConstants.add((String) field.get(this));
+			}
+		}
+		return errorCodeStringConstants;
+	}
+	
+	
+	private Set<ErrorObject> getErrorObjectConstants() throws IllegalAccessException {
+		Field[] oidcErrorFields = OIDCError.class.getDeclaredFields();
+		Set<ErrorObject> errorObjectConstants = new HashSet<>();
+		for (Field field : oidcErrorFields) {
+			if (field.getType().equals(ErrorObject.class)) {
+				errorObjectConstants.add((ErrorObject) field.get(this));
+			}
+		}
+		return errorObjectConstants;
 	}
 }

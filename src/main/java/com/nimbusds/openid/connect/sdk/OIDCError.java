@@ -36,6 +36,13 @@ public final class OIDCError {
 	
 	// Authentication endpoint
 	
+	
+	/**
+	 * The {@link OIDCError#INTERACTION_REQUIRED} error code string.
+	 */
+	public static final String INTERACTION_REQUIRED_CODE = "interaction_required";
+	
+	
 	/**
 	 * The authorisation server requires end-user interaction of some form 
 	 * to proceed. This error may be returned when the {@link Prompt} 
@@ -46,8 +53,15 @@ public final class OIDCError {
 	 * displaying a user interface for end-user interaction.
 	 */
 	public static final ErrorObject INTERACTION_REQUIRED =
-		new ErrorObject("interaction_required", "User interaction required", HTTPResponse.SC_FOUND);
-
+		new ErrorObject(INTERACTION_REQUIRED_CODE, "User interaction required", HTTPResponse.SC_FOUND);
+	
+	
+	/**
+	 * The {@link OIDCError#LOGIN_REQUIRED} error code string.
+	 */
+	public static final String LOGIN_REQUIRED_CODE = "login_required";
+	
+	
 	/**
 	 * The authorisation server requires end-user authentication. This 
 	 * error may be returned when the prompt parameter in the 
@@ -58,7 +72,13 @@ public final class OIDCError {
 	 * authentication.
 	 */
 	public static final ErrorObject LOGIN_REQUIRED =
-		new ErrorObject("login_required", "Login required", HTTPResponse.SC_FOUND);
+		new ErrorObject(LOGIN_REQUIRED_CODE, "Login required", HTTPResponse.SC_FOUND);
+	
+	
+	/**
+	 * The {@link OIDCError#ACCOUNT_SELECTION_REQUIRED} error code string.
+	 */
+	public static final String ACCOUNT_SELECTION_REQUIRED_CODE = "account_selection_required";
 
 	
 	/**
@@ -73,8 +93,14 @@ public final class OIDCError {
 	 * displaying a user interface to prompt for a session to use.
 	 */
 	public static final ErrorObject ACCOUNT_SELECTION_REQUIRED =
-		new ErrorObject("account_selection_required", "Session selection required", HTTPResponse.SC_FOUND);
-
+		new ErrorObject(ACCOUNT_SELECTION_REQUIRED_CODE, "Session selection required", HTTPResponse.SC_FOUND);
+	
+	
+	/**
+	 * The {@link OIDCError#CONSENT_REQUIRED} error code string.
+	 */
+	public static final String CONSENT_REQUIRED_CODE = "consent_required";
+	
 	
 	/**
 	 * The authorisation server requires end-user consent. This error may 
@@ -86,7 +112,14 @@ public final class OIDCError {
 	 * displaying a user interface for end-user consent.
 	 */
 	public static final ErrorObject	CONSENT_REQUIRED =
-		new ErrorObject("consent_required", "Consent required", HTTPResponse.SC_FOUND);
+		new ErrorObject(CONSENT_REQUIRED_CODE, "Consent required", HTTPResponse.SC_FOUND);
+	
+	
+	/**
+	 * The {@link OIDCError#UNMET_AUTHENTICATION_REQUIREMENTS} error code
+	 * string.
+	 */
+	public static final String UNMET_AUTHENTICATION_REQUIREMENTS_CODE = "unmet_authentication_requirements";
 	
 	
 	/**
@@ -96,7 +129,13 @@ public final class OIDCError {
 	 * also be used in other appropriate cases.
 	 */
 	public static final ErrorObject UNMET_AUTHENTICATION_REQUIREMENTS =
-		new ErrorObject("unmet_authentication_requirements", "Unmet authentication requirements", HTTPResponse.SC_FOUND);
+		new ErrorObject(UNMET_AUTHENTICATION_REQUIREMENTS_CODE, "Unmet authentication requirements", HTTPResponse.SC_FOUND);
+	
+	
+	/**
+	 * The {@link OIDCError#REGISTRATION_NOT_SUPPORTED} error code string.
+	 */
+	public static final String REGISTRATION_NOT_SUPPORTED_CODE = "registration_not_supported";
 	
 	
 	/**
@@ -105,7 +144,7 @@ public final class OIDCError {
 	 * self-issued OpenID providers.
 	 */
 	public static final ErrorObject REGISTRATION_NOT_SUPPORTED =
-		new ErrorObject("registration_not_supported", "Registration parameter not supported", HTTPResponse.SC_FOUND);
+		new ErrorObject(REGISTRATION_NOT_SUPPORTED_CODE, "Registration parameter not supported", HTTPResponse.SC_FOUND);
 	
 	
 	/**
