@@ -1690,3 +1690,6 @@ version 9.2.4 (2021-03-23)
       response_type=code+token (iss #351).
     * Updates the IDTokenVerifier to not reject an ID token with an "iat"
       (Issued At) claim when it is equal to the current time (iss #350).
+
+version 9.3 (2021-03-29)
+    * Provides OAuth2Error and OIDCError code string constants (iss #346).
