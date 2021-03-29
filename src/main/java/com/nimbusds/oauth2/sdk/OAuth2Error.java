@@ -35,7 +35,7 @@ public final class OAuth2Error {
 	// Common OAuth 2.0 authorisation errors
 
 	/**
-	 * A string equivalent of {@link OAuth2Error#INVALID_REQUEST} code.
+	 * The {@link OAuth2Error#INVALID_REQUEST} error code string.
 	 */
 	public static final String INVALID_REQUEST_CODE = "invalid_request";
 
@@ -47,7 +47,7 @@ public final class OAuth2Error {
 		new ErrorObject(INVALID_REQUEST_CODE, "Invalid request", HTTPResponse.SC_BAD_REQUEST);
 
 	/**
-	 * A string equivalent of {@link OAuth2Error#UNAUTHORIZED_CLIENT} code.
+	 * The {@link OAuth2Error#UNAUTHORIZED_CLIENT} error code string.
 	 */
 	public static final String UNAUTHORIZED_CLIENT_CODE = "unauthorized_client";
 
@@ -59,7 +59,7 @@ public final class OAuth2Error {
 		new ErrorObject(UNAUTHORIZED_CLIENT_CODE, "Unauthorized client", HTTPResponse.SC_BAD_REQUEST);
 
 	/**
-	 * A string equivalent of {@link OAuth2Error#ACCESS_DENIED} code.
+	 * The {@link OAuth2Error#ACCESS_DENIED} error code string.
 	 */
 	public static final String ACCESS_DENIED_CODE = "access_denied";
 
@@ -70,7 +70,7 @@ public final class OAuth2Error {
 		new ErrorObject(ACCESS_DENIED_CODE, "Access denied by resource owner or authorization server", HTTPResponse.SC_FORBIDDEN);
 
 	/**
-	 * A string equivalent of {@link OAuth2Error#UNSUPPORTED_RESPONSE_TYPE} code.
+	 * The {@link OAuth2Error#UNSUPPORTED_RESPONSE_TYPE} error code string.
 	 */
 	public static final String UNSUPPORTED_RESPONSE_TYPE_CODE = "unsupported_response_type";
 
@@ -82,7 +82,7 @@ public final class OAuth2Error {
 		new ErrorObject(UNSUPPORTED_RESPONSE_TYPE_CODE, "Unsupported response type", HTTPResponse.SC_BAD_REQUEST);
 
 	/**
-	 * A string equivalent of {@link OAuth2Error#INVALID_SCOPE} code.
+	 * The {@link OAuth2Error#INVALID_SCOPE} error code string.
 	 */
 	public static final String INVALID_SCOPE_CODE = "invalid_scope";
 
@@ -93,7 +93,7 @@ public final class OAuth2Error {
 		new ErrorObject(INVALID_SCOPE_CODE, "Invalid, unknown or malformed scope", HTTPResponse.SC_BAD_REQUEST);
 
 	/**
-	 * A string equivalent of {@link OAuth2Error#SERVER_ERROR} code.
+	 * The {@link OAuth2Error#SERVER_ERROR} error code string.
 	 */
 	public static final String SERVER_ERROR_CODE = "server_error";
 
@@ -105,7 +105,7 @@ public final class OAuth2Error {
 		new ErrorObject(SERVER_ERROR_CODE, "Unexpected server error", HTTPResponse.SC_SERVER_ERROR);
 
 	/**
-	 * A string equivalent of {@link OAuth2Error#TEMPORARILY_UNAVAILABLE} code.
+	 * The {@link OAuth2Error#TEMPORARILY_UNAVAILABLE} error code string.
 	 */
 	public static final String TEMPORARILY_UNAVAILABLE_CODE = "temporarily_unavailable";
 
@@ -119,7 +119,7 @@ public final class OAuth2Error {
 	
 	// Token, Base OAuth 2.0 authorisation errors, section 5.2
 	/**
-	 * A string equivalent of {@link OAuth2Error#INVALID_CLIENT} code.
+	 * The {@link OAuth2Error#INVALID_CLIENT} error code string.
 	 */
 	public static final String INVALID_CLIENT_CODE = "invalid_client";
 
@@ -131,7 +131,7 @@ public final class OAuth2Error {
 		new ErrorObject(INVALID_CLIENT_CODE, "Client authentication failed", HTTPResponse.SC_UNAUTHORIZED);
 
 	/**
-	 * A string equivalent of {@link OAuth2Error#INVALID_GRANT} code.
+	 * The {@link OAuth2Error#INVALID_GRANT} error code string.
 	 */
 	public static final String INVALID_GRANT_CODE = "invalid_grant";
 
@@ -145,7 +145,7 @@ public final class OAuth2Error {
 		new ErrorObject(INVALID_GRANT_CODE, "Invalid grant", HTTPResponse.SC_BAD_REQUEST);
 
 	/**
-	 * A string equivalent of {@link OAuth2Error#UNSUPPORTED_GRANT_TYPE} code.
+	 * The {@link OAuth2Error#UNSUPPORTED_GRANT_TYPE} error code string.
 	 */
 	public static final String UNSUPPORTED_GRANT_TYPE_CODE = "unsupported_grant_type";
 
@@ -157,7 +157,7 @@ public final class OAuth2Error {
 		new ErrorObject(UNSUPPORTED_GRANT_TYPE_CODE, "Unsupported grant type", HTTPResponse.SC_BAD_REQUEST);
 
 	/**
-	 * A string equivalent of {@link OAuth2Error#INVALID_REQUEST_URI} code.
+	 * The {@link OAuth2Error#INVALID_REQUEST_URI} error code string.
 	 */
 	public static final String INVALID_REQUEST_URI_CODE = "invalid_request_uri";
 
@@ -169,7 +169,7 @@ public final class OAuth2Error {
 		new ErrorObject(INVALID_REQUEST_URI_CODE, "Invalid request URI", HTTPResponse.SC_FOUND);
 
 	/**
-	 * A string equivalent of {@link OAuth2Error#INVALID_REQUEST_OBJECT} code.
+	 * The {@link OAuth2Error#INVALID_REQUEST_OBJECT} error code string.
 	 */
 	public static final String INVALID_REQUEST_OBJECT_CODE = "invalid_request_object";
 
@@ -181,7 +181,7 @@ public final class OAuth2Error {
 		new ErrorObject(INVALID_REQUEST_OBJECT_CODE, "Invalid request JWT", HTTPResponse.SC_FOUND);
 
 	/**
-	 * A string equivalent of {@link OAuth2Error#REQUEST_URI_NOT_SUPPORTED} code.
+	 * The {@link OAuth2Error#REQUEST_URI_NOT_SUPPORTED} error code string.
 	 */
 	public static final String REQUEST_URI_NOT_SUPPORTED_CODE = "request_uri_not_supported";
 
@@ -193,7 +193,7 @@ public final class OAuth2Error {
 		new ErrorObject(REQUEST_URI_NOT_SUPPORTED_CODE, "Request URI parameter not supported", HTTPResponse.SC_FOUND);
 
 	/**
-	 * A string equivalent of {@link OAuth2Error#REQUEST_NOT_SUPPORTED} code.
+	 * The {@link OAuth2Error#REQUEST_NOT_SUPPORTED} error code string.
 	 */
 	public static final String REQUEST_NOT_SUPPORTED_CODE = "request_not_supported";
 
@@ -205,7 +205,7 @@ public final class OAuth2Error {
 		new ErrorObject(REQUEST_NOT_SUPPORTED_CODE, "Request parameter not supported", HTTPResponse.SC_FOUND);
 
 	/**
-	 * A string equivalent of {@link OAuth2Error#INVALID_RESOURCE} code.
+	 * The {@link OAuth2Error#INVALID_RESOURCE} error code string.
 	 */
 	public static final String INVALID_RESOURCE_CODE = "invalid_resource";
 
@@ -217,7 +217,7 @@ public final class OAuth2Error {
 		new ErrorObject(INVALID_RESOURCE_CODE, "Invalid or unaccepted resource", HTTPResponse.SC_BAD_REQUEST);
 
 	/**
-	 * A string equivalent of {@link OAuth2Error#OVERBROAD_SCOPE} code.
+	 * The {@link OAuth2Error#OVERBROAD_SCOPE} error code string.
 	 */
 	public static final String OVERBROAD_SCOPE_CODE = "overbroad_scope";
 
@@ -232,7 +232,7 @@ public final class OAuth2Error {
 	// OpenID Connect Federation 1.0
 
 	/**
-	 * A string equivalent of {@link OAuth2Error#MISSING_TRUST_ANCHOR} code.
+	 * The {@link OAuth2Error#MISSING_TRUST_ANCHOR} error code string.
 	 */
 	public static final String MISSING_TRUST_ANCHOR_CODE = "missing_trust_anchor";
 
@@ -245,7 +245,7 @@ public final class OAuth2Error {
 		new ErrorObject(MISSING_TRUST_ANCHOR_CODE, "No trusted anchor could be found", HTTPResponse.SC_BAD_REQUEST);
 
 	/**
-	 * A string equivalent of {@link OAuth2Error#VALIDATION_FAILED} code.
+	 * The {@link OAuth2Error#VALIDATION_FAILED} error code string.
 	 */
 	public static final String VALIDATION_FAILED_CODE = "validation_failed";
 
