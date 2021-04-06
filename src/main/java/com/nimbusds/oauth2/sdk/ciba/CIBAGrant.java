@@ -115,15 +115,15 @@ public class CIBAGrant extends AuthorizationGrant {
 	 * <p>Example:
 	 *
 	 * <pre>
-   	 * scope=openid%20email%20example-scope&
-   	 * client_notification_token=8d67dc78-7faa-4d41-aabd-67707b374255&
-   	 * binding_message=W4SCT&
+   	 * scope=openid%20email%20example-scope&amp;
+   	 * client_notification_token=8d67dc78-7faa-4d41-aabd-67707b374255&amp;
+   	 * binding_message=W4SCT&amp;
    	 * login_hint_token=eyJraWQiOiJsdGFjZXNidyIsImFsZyI6IkVTMjU2In0.eyJ
    	 * zdWJfaWQiOnsic3ViamVjdF90eXBlIjoicGhvbmUiLCJwaG9uZSI6IisxMzMwMjg
    	 * xODAwNCJ9fQ.Kk8jcUbHjJAQkRSHyDuFQr3NMEOSJEZc85VfER74tX6J9CuUllr8
-   	 * 9WKUHUR7MA0-mWlptMRRhdgW1ZDt7g1uwQ&
-   	 * client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3A
-   	 * client-assertion-type%3Ajwt-bearer&
+   	 * 9WKUHUR7MA0-mWlptMRRhdgW1ZDt7g1uwQ&amp;
+   	 * client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3A&amp;
+   	 * client-assertion-type%3Ajwt-bearer&amp;
    	 * client_assertion=eyJraWQiOiJsdGFjZXNidyIsImFsZyI6IkVTMjU2In0.eyJ
    	 * pc3MiOiJzNkJoZFJrcXQzIiwic3ViIjoiczZCaGRSa3F0MyIsImF1ZCI6Imh0dHB
    	 * zOi8vc2VydmVyLmV4YW1wbGUuY29tIiwianRpIjoiYmRjLVhzX3NmLTNZTW80RlN

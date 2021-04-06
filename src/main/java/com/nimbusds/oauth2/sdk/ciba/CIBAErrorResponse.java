@@ -41,7 +41,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
  *
  * <ul>
  * 	<li>{@link OAuth2Error#INVALID_REQUEST}
- * 	<li>{@link OAuth2Error#INVALID_SCOPE)}
+ * 	<li>{@link OAuth2Error#INVALID_SCOPE}
  * 	<li>{@link OAuth2Error#INVALID_CLIENT}
  * 	<li>{@link OAuth2Error#UNAUTHORIZED_CLIENT}
  * 	<li>{@link OAuth2Error#ACCESS_DENIED}

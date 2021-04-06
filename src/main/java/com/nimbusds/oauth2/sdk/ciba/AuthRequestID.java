@@ -114,6 +114,8 @@ public class AuthRequestID extends Identifier {
 	 *
 	 * @param value The CIBA request ID value.
 	 *
+	 * @return The CIBA request ID.
+	 *
 	 * @throws ParseException On a illegal value.
 	 */
 	public static AuthRequestID parse(final String value)
