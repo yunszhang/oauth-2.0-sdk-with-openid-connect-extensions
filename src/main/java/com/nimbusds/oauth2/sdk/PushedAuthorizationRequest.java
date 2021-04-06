@@ -48,7 +48,8 @@ import com.nimbusds.openid.connect.sdk.op.AuthenticationRequestDetector;
  * Authorization: Basic czZCaGRSa3F0Mzo3RmpmcDBaQnIxS3REUmJuZlZkbUl3
  *
  * response_type=code
- * &amp;client_id=s6BhdRkqt3&state=af0ifjsldkj
+ * &amp;client_id=s6BhdRkqt3
+ * &amp;state=af0ifjsldkj
  * &amp;redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb
  * </pre>
  *
