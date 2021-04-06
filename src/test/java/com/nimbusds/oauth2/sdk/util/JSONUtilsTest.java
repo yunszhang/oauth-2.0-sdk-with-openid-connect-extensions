@@ -34,8 +34,8 @@ public class JSONUtilsTest extends TestCase {
 			JSONUtils.parseJSON(json);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Unexpected exception: For input string: \"2e+\"", e.getMessage());
-			assertTrue(e.getCause() instanceof NumberFormatException);
+			assertEquals("Invalid JSON: Unexpected token 2e+ at position 3.", e.getMessage());
+			assertTrue(e.getCause() instanceof net.minidev.json.parser.ParseException);
 		}
 	}
 	
