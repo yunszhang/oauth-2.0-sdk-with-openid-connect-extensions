@@ -1693,3 +1693,8 @@ version 9.2.4 (2021-03-23)
 
 version 9.3 (2021-03-29)
     * Provides OAuth2Error and OIDCError code string constants (iss #346).
+
+version 9.3.1 (2021-04-07)
+    * Disables access to external entities in XML parsing in
+      SAML2AssertionValidator, closes potential vulnerability (iss #356).
+
