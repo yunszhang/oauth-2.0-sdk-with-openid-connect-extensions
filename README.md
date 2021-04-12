@@ -8,26 +8,27 @@ Connect based applications in Java. It is provided under the terms of the
 
 ## About OAuth 2.0 and 2.1
 
-OAuth 2.0 is an authorisation framework for a third-party application to obtain 
-limited access to an HTTP service, either on behalf of a resource owner (the 
-user), or by allowing the third-party application to obtain access on its own 
-behalf.
+[OAuth 2.0](https://connect2id.com/learn/oauth-2) is an authorisation framework 
+for a third-party application to obtain limited access to an HTTP service, 
+either on behalf of a resource owner (the user), or by allowing the third-party 
+application to obtain access on its own behalf.
 
 OAuth 2.0 is specified in [RFC 6749](http://tools.ietf.org/html/rfc6749) and 
 its companion specifications.
 
-OAuth 2.1 is a [working draft](https://tools.ietf.org/html/draft-ietf-oauth-v2-1-02)
-that rolls the original OAuth 2.0 RFC and best practises established over the 
-years into a simpler, safer and more streamlined authorisation framework.
+[OAuth 2.1](https://connect2id.com/learn/oauth-2-1) is a [working 
+draft](https://tools.ietf.org/html/draft-ietf-oauth-v2-1-02) that rolls the 
+original OAuth 2.0 RFC and best practises established over the years into a 
+simpler, safer and more streamlined authorisation framework.
 
 
 ## About OpenID Connect 1.0
 
-OpenID Connect 1.0 is a simple identity layer on top of the OAuth 2.0 
-framework. Relying parties (clients) verify the identity of the user based on
-the authentication performed by an authorisation server, as well as to obtain 
-basic profile information about the user in an interoperable and REST-like 
-manner.
+[OpenID Connect 1.0](https://connect2id.com/learn/openid-connect) is a simple 
+identity layer on top of the OAuth 2.0 framework. Relying parties (clients) 
+verify the identity of the user based on the authentication performed by an 
+authorisation server, as well as to obtain basic profile information about the 
+user in an interoperable and REST-like manner.
 
 OpenID Connect enables clients of all types, including Web-based, mobile, and 
 JavaScript clients, to request and receive information about authenticated 
@@ -37,6 +38,12 @@ session management.
 
 Go to the [OpenID Connect specifications](http://openid.net/connect/) for more 
 details.
+
+
+## Code examples
+
+The SDK page on the Connect2id website has a section with [code
+examples](https://connect2id.com/products/nimbus-oauth-openid-connect-sdk/examples).  
 
 
 ## Standards and drafts
@@ -132,4 +139,6 @@ This SDK version implements the following standards and drafts:
   Core 1.0 (draft 03)
 
 
-Questions or comments? Email support@connect2id.com
+## Questions or comments? 
+
+Email support@connect2id.com
