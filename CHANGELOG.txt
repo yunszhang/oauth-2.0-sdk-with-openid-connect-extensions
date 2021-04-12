@@ -1703,3 +1703,8 @@ version 9.3.1 (2021-04-07)
 
 version 9.3.2 (2021-04-12)
     * Bumps Nimbus LangTag to 1.5.
+
+version 9.3.3 (2021-04-12)
+    * Updates pom.xml to include javax.servlet 4.0 API in OSGI manifest (iss
+      #354).
+
