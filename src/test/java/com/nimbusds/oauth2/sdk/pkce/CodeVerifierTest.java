@@ -64,7 +64,7 @@ public class CodeVerifierTest extends TestCase {
 	// and a maximum length of 128 characters.
 	public void testValidCharacters() {
 
-		// check ascii char
+		// check ascii characters
 		for (char c = 0; c < 128; c++) {
 
 			if (c >= 0x41 && c <= 0x5a) {
@@ -80,7 +80,7 @@ public class CodeVerifierTest extends TestCase {
 			}
 		}
 
-		// check non-ascii char
+		// check non-ascii characters
 		for (char c = 128; c < 256; c++) {
 			assertFalse(CodeVerifier.isLegal(c));
 		}
