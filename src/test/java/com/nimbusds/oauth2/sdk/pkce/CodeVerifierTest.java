@@ -81,7 +81,7 @@ public class CodeVerifierTest extends TestCase {
 		}
 
 		// check non-ascii char
-		for (char c = 128; c <= 256; c++) {
+		for (char c = 128; c < 256; c++) {
 			assertFalse(CodeVerifier.isLegal(c));
 		}
 
