@@ -551,7 +551,7 @@ public class TokenRequestTest extends TestCase {
 		assertEquals(5, httpRequest.getQueryParameters().size());
 	}
 
-	public void testParseCodeGrantWithPKCE_invalidCodeVerifier()
+	public void testParseCodeGrantWithPKCE_illegalCodeVerifier()
 		throws Exception {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://connect2id.com/token/"));
