@@ -1645,3 +1645,8 @@ version 8.36.1 (2021-03-15)
     * Catches unexpected exceptions in JSONUtils.parseJSON(String) into
       ParseException, see
       https://github.com/netplex/json-smart-v1/issues/7 (iss #347).
+
+version 8.36.2 (2021-04-15)
+    * Disables access to external entities in XML parsing in
+      SAML2AssertionValidator, closes potential vulnerability (iss #356).
+
