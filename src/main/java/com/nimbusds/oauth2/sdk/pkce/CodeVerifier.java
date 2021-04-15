@@ -89,9 +89,18 @@ public class CodeVerifier extends Secret {
 	public boolean equals(final Object object) {
 		return object instanceof CodeVerifier && super.equals(object);
 	}
-
-
-	public static boolean isLegal(final String s) {
+	
+	
+	/**
+	 * Returns {@code true} if the specified string is legal for a code
+	 * verifier.
+	 *
+	 * @param s The string, {@code null} if not specified.
+	 *
+	 * @return {@code true} if legal or {@code null}, {@code false} if
+	 *         illegal.
+	 */
+	static boolean isLegal(final String s) {
 
 		if (s == null) {
 			return true;
@@ -105,8 +114,16 @@ public class CodeVerifier extends Secret {
 
 		return true;
 	}
-
-	public static boolean isLegal(final char c) {
+	
+	/**
+	 * Returns {@code true} if the specified character is legal for a code
+	 * verifier.
+	 *
+	 * @param c The character.
+	 *
+	 * @return {@code true} if legal, {@code false} if illegal.
+	 */
+	static boolean isLegal(final char c) {
 
 		// https://tools.ietf.org/html/rfc7636#page-8
 		//

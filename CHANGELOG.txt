@@ -1708,3 +1708,6 @@ version 9.3.3 (2021-04-12)
     * Updates pom.xml to include javax.servlet 4.0 API in OSGI manifest (iss
       #354).
 
+version 9.4 (2021-04-15)
+    * Updates the CodeVerifier to check the validity of the verifier string
+      according to RFC 7636.
