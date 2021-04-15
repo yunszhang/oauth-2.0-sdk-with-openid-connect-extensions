@@ -551,6 +551,29 @@ public class TokenRequestTest extends TestCase {
 		assertEquals(5, httpRequest.getQueryParameters().size());
 	}
 
+	public void testParseCodeGrantWithPKCE_illegalCodeVerifier()
+		throws Exception {
+
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://connect2id.com/token/"));
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
+
+		String postBody =
+			"grant_type=authorization_code" +
+			"&code=SplxlOBeZQQYbYS6WxSbIA" +
+			"&redirect_uri=https%3A%2F%2Fclient.example.com%2Fcb" +
+			"&code_verifier=dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjX%40" +
+			"&client_id=123";
+
+		httpRequest.setQuery(postBody);
+
+		try {
+			TokenRequest tr = TokenRequest.parse(httpRequest);
+		} catch (ParseException e) {
+			assertEquals("Illegal char(s) in code verifier, see RFC 7636, section 4.1", e.getMessage());
+		}
+
+	}
+
 
 	public void testParseRefreshTokenGrantWithBasicSecret()
 		throws Exception {

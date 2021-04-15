@@ -67,6 +67,10 @@ public class CodeVerifier extends Secret {
 		if (value.length() > MAX_LENGTH) {
 			throw new IllegalArgumentException("The code verifier must not be longer than " + MAX_LENGTH + " characters");
 		}
+
+		if (! isLegal(value)) {
+			throw new IllegalArgumentException("Illegal char(s) in code verifier, see RFC 7636, section 4.1");
+		}
 	}
 
 
@@ -84,5 +88,40 @@ public class CodeVerifier extends Secret {
 	@Override
 	public boolean equals(final Object object) {
 		return object instanceof CodeVerifier && super.equals(object);
+	}
+
+
+	public static boolean isLegal(final String s) {
+
+		if (s == null) {
+			return true;
+		}
+
+		for (char c : s.toCharArray()) {
+			if (!isLegal(c)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public static boolean isLegal(final char c) {
+
+		// https://tools.ietf.org/html/rfc7636#page-8
+		//
+		// ABNF for "code_verifier" is as follows.
+		//
+		// code-verifier = 43*128unreserved
+		// unreserved = ALPHA / DIGIT / "-" / "." / "_" / "~"
+		// ALPHA = %x41-5A / %x61-7A
+		// DIGIT = %x30-39
+
+		if (c > 0x7f) {
+			// Not ASCII
+			return false;
+		}
+
+		return c >= 0x41 && c <= 0x5a || c >= 0x61 && c <= 0x7a || c >= 0x30 && c <= 0x39 || c == '-' || c == '.' || c == '_' || c == '~';
 	}
 }

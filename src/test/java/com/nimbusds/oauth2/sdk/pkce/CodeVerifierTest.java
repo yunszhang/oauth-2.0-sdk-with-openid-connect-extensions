@@ -54,4 +54,36 @@ public class CodeVerifierTest extends TestCase {
 		assertFalse(new CodeVerifier().equals(new CodeVerifier()));
 		assertFalse(new CodeVerifier().equals(null));
 	}
+
+
+	// https://tools.ietf.org/html/rfc7636#page-8
+	//
+	// code_verifier = high-entropy cryptographic random STRING using the
+	// unreserved characters [A-Z] / [a-z] / [0-9] / "-" / "." / "_" / "~"
+	// from Section 2.3 of [RFC3986], with a minimum length of 43 characters
+	// and a maximum length of 128 characters.
+	public void testValidCharacters() {
+
+		// check ascii characters
+		for (char c = 0; c < 128; c++) {
+
+			if (c >= 0x41 && c <= 0x5a) {
+				assertTrue(CodeVerifier.isLegal(c));
+			} else if (c >= 0x61 && c <= 0x7a) {
+				assertTrue(CodeVerifier.isLegal(c));
+			} else if (c >= 0x30 && c <= 0x39) {
+				assertTrue(CodeVerifier.isLegal(c));
+			} else if (c == '-' || c == '.' || c == '_' || c == '~') {
+				assertTrue(CodeVerifier.isLegal(c));
+			} else {
+				assertFalse(CodeVerifier.isLegal(c));
+			}
+		}
+
+		// check non-ascii characters
+		for (char c = 128; c < 256; c++) {
+			assertFalse(CodeVerifier.isLegal(c));
+		}
+
+	}
 }
