@@ -173,9 +173,11 @@ public class BearerTokenError extends ErrorObject {
 	
 	/**
 	 * Regex pattern for matching the realm parameter of a WWW-Authenticate 
-	 * header.
+	 * header. Limits the realm string length to 256 chars to prevent
+	 * potential stack overflow exception for very long strings due to
+	 * recursive nature of regex.
 	 */
-	private static final Pattern realmPattern = Pattern.compile("realm=\"(([^\\\\\"]|\\\\.)*)\"");
+	private static final Pattern realmPattern = Pattern.compile("realm=\"(([^\\\\\"]|\\\\.){0,256})\"");
 
 	
 	/**

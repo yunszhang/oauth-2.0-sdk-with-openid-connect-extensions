@@ -76,6 +76,71 @@ public class BearerTokenErrorTest extends TestCase {
 	}
 
 
+	public void testEmptyRealm()
+		throws Exception {
+
+		String wwwAuth = "Bearer realm=\"\"";
+
+		BearerTokenError error = BearerTokenError.parse(wwwAuth);
+
+		assertEquals(error, BearerTokenError.MISSING_TOKEN);
+
+		assertEquals("", error.getRealm());
+		assertNull(error.getCode());
+	}
+
+
+	public void testBlankRealm()
+		throws Exception {
+
+		String wwwAuth = "Bearer realm=\" \"";
+
+		BearerTokenError error = BearerTokenError.parse(wwwAuth);
+
+		assertEquals(error, BearerTokenError.MISSING_TOKEN);
+
+		assertEquals(" ", error.getRealm());
+		assertNull(error.getCode());
+	}
+
+
+	public void testRealmAtCharLimit256()
+		throws Exception {
+
+		StringBuilder sb = new StringBuilder();
+		for (int i=0; i < 256; i++) {
+			sb.append('x');
+		}
+		
+		String wwwAuth = "Bearer realm=\"" + sb + "\"";
+
+		BearerTokenError error = BearerTokenError.parse(wwwAuth);
+
+		assertEquals(error, BearerTokenError.MISSING_TOKEN);
+
+		assertEquals(sb.toString(), error.getRealm());
+		assertNull(error.getCode());
+	}
+
+
+	public void testRealmBeyondCharLimit256()
+		throws Exception {
+
+		StringBuilder sb = new StringBuilder();
+		for (int i=0; i < 256 + 1; i++) {
+			sb.append('x');
+		}
+		
+		String wwwAuth = "Bearer realm=\"" + sb + "\"";
+
+		BearerTokenError error = BearerTokenError.parse(wwwAuth);
+
+		assertEquals(error, BearerTokenError.MISSING_TOKEN);
+		assertNull("Too long, not parsed", error.getRealm());
+		assertNull(error.getCode());
+	}
+
+
 	public void testInsufficientScope()
 		throws Exception {
 
