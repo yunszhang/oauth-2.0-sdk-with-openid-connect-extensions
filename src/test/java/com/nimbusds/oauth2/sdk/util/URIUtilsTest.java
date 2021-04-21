@@ -285,4 +285,44 @@ public class URIUtilsTest extends TestCase {
 			assertEquals("The URI scheme data is prohibited", e.getMessage());
 		}
 	}
+	
+	
+	public void testToStringList() {
+		
+		assertNull(URIUtils.toStringList(null, true));
+		assertNull(URIUtils.toStringList(null, false));
+		
+		assertTrue(URIUtils.toStringList(Collections.<URI>emptyList(), true).isEmpty());
+		assertTrue(URIUtils.toStringList(Collections.<URI>emptyList(), false).isEmpty());
+		
+		assertEquals(
+			Arrays.asList("https://one.example.com", "https://two.example.com"),
+			URIUtils.toStringList(
+				Arrays.asList(URI.create("https://one.example.com"), URI.create("https://two.example.com")),
+				true
+			)
+		);
+		assertEquals(
+			Arrays.asList("https://one.example.com", "https://two.example.com"),
+			URIUtils.toStringList(
+				Arrays.asList(URI.create("https://one.example.com"), URI.create("https://two.example.com")),
+				false
+			)
+		);
+		
+		assertEquals(
+			Collections.singletonList("https://one.example.com"),
+			URIUtils.toStringList(
+				Arrays.asList(URI.create("https://one.example.com"), null),
+				true
+			)
+		);
+		assertEquals(
+			Arrays.asList("https://one.example.com", null, "https://two.example.com"),
+			URIUtils.toStringList(
+				Arrays.asList(URI.create("https://one.example.com"), null, URI.create("https://two.example.com")),
+				false
+			)
+		);
+	}
 }

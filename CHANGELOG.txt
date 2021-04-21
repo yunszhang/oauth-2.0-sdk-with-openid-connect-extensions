@@ -1712,6 +1712,7 @@ version 9.4 (2021-04-15)
     * Updates the CodeVerifier to check the validity of the verifier string
       according to RFC 7636.
 
-version 9.5 (2021-04-20)
+version 9.5 (2021-04-21)
+    * Adds URIUtils.toStringList.
     * Updates Bearer token error realm parsing to prevent stack overflow
       exceptions with very long strings (iss #359).

@@ -1975,15 +1975,8 @@ public class ClientMetadata {
 			o = new JSONObject();
 
 
-		if (redirectURIs != null) {
-
-			JSONArray uriList = new JSONArray();
-
-			for (URI uri: redirectURIs)
-				uriList.add(uri.toString());
-
-			o.put("redirect_uris", uriList);
-		}
+		if (redirectURIs != null)
+			o.put("redirect_uris", URIUtils.toStringList(redirectURIs, true));
 
 
 		if (scope != null)
@@ -2123,16 +2116,8 @@ public class ClientMetadata {
 			o.put("jwks", JSONObjectUtils.toJSONObject(jwkSet.toPublicJWKSet())); // prevent private keys from leaking
 		
 		
-		if (requestObjectURIs != null) {
-			
-			JSONArray uriList = new JSONArray();
-			
-			for (URI uri: requestObjectURIs)
-				uriList.add(uri.toString());
-			
-			o.put("request_uris", uriList);
-		}
-		
+		if (requestObjectURIs != null)
+			o.put("request_uris", URIUtils.toStringList(requestObjectURIs, true));
 		
 		if (requestObjectJWSAlg != null)
 			o.put("request_object_signing_alg", requestObjectJWSAlg.getName());

@@ -1124,15 +1124,8 @@ public class AuthorizationRequest extends AbstractRequest {
 		if (includeGrantedScopes)
 			params.put("include_granted_scopes", Collections.singletonList("true"));
 		
-		if (resources != null) {
-			List<String> resourceValues = new LinkedList<>();
-			for (URI resourceURI: resources) {
-				if (resourceURI != null) {
-					resourceValues.add(resourceURI.toString());
-				}
-			}
-			params.put("resource", resourceValues);
-		}
+		if (resources != null)
+			params.put("resource", URIUtils.toStringList(resources, true));
 		
 		if (requestObject != null) {
 			try {

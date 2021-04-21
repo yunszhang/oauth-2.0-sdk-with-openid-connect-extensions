@@ -20,8 +20,7 @@ package com.nimbusds.oauth2.sdk.util;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -281,6 +280,38 @@ public final class URIUtils {
 		if (prohibitedURISchemes.contains(uri.getScheme().toLowerCase())) {
 			throw new IllegalArgumentException("The URI scheme " + uri.getScheme() + " is prohibited");
 		}
+	}
+	
+	
+	/**
+	 * Returns a string list representation of the specified URI
+	 * collection.
+	 *
+	 * @param uriList     The URI collection, {@code null} if not
+	 *                    specified.
+	 * @param ignoreNulls {@code true} to not include {@code null} values.
+	 *
+	 * @return The string list, {@code null} if not specified.
+	 */
+	public static List<String> toStringList(final Collection<URI> uriList, final boolean ignoreNulls) {
+		
+		if (uriList == null) {
+			return null;
+		}
+		
+		if (uriList.isEmpty()) {
+			return Collections.emptyList();
+		}
+		
+		List<String> out = new LinkedList<>();
+		for (URI uri: uriList) {
+			if (uri != null) {
+				out.add(uri.toString());
+			} else if (! ignoreNulls) {
+				out.add(null);
+			}
+		}
+		return out;
 	}
 
 
