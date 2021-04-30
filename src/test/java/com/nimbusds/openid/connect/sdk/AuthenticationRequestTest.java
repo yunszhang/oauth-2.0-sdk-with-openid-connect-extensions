@@ -1714,6 +1714,33 @@ public class AuthenticationRequestTest extends TestCase {
 	}
 	
 	
+	public void testBuilderWithOneResource() {
+		
+		URI resource = URI.create("https://api.example.com");
+		
+		AuthenticationRequest request = new AuthenticationRequest.Builder(
+			new ResponseType("code"),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.resource(resource)
+			.build();
+		
+		assertEquals(Collections.singletonList(resource), request.getResources());
+		
+		request = new AuthenticationRequest.Builder(
+			new ResponseType("code"),
+			new Scope("openid"),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.resource(resource)
+			.resource(null)
+			.build();
+		
+		assertNull(request.getResources());
+	}
+	
+	
 	public void testResponseTypeCodeTokenMustNotRequireNonce() {
 		
 		AuthenticationRequest request = new AuthenticationRequest.Builder(

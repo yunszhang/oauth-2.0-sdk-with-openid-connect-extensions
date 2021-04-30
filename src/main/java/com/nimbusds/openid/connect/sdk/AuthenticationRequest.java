@@ -19,7 +19,6 @@ package com.nimbusds.openid.connect.sdk;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 
 import net.jcip.annotations.Immutable;
@@ -870,6 +869,24 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			} else {
 				this.codeChallenge = null;
 				this.codeChallengeMethod = null;
+			}
+			return this;
+		}
+		
+		
+		/**
+		 * Sets the resource server URI.
+		 *
+		 * @param resource The resource URI, {@code null} if not
+		 *                 specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder resource(final URI resource) {
+			if (resource != null) {
+				this.resources = Collections.singletonList(resource);
+			} else {
+				this.resources = null;
 			}
 			return this;
 		}

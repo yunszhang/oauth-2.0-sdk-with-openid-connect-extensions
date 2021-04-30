@@ -723,6 +723,25 @@ public class AuthorizationRequestTest extends TestCase {
 	}
 	
 	
+	public void testBuilderWithOneResource() {
+		
+		URI resource = URI.create("https://api.example.com");
+		
+		AuthorizationRequest request = new AuthorizationRequest.Builder(new ResponseType("code"), new ClientID("123"))
+			.resource(resource)
+			.build();
+		
+		assertEquals(Collections.singletonList(resource), request.getResources());
+		
+		request = new AuthorizationRequest.Builder(new ResponseType("code"), new ClientID("123"))
+			.resource(resource)
+			.resource(null)
+			.build();
+		
+		assertNull(request.getResources());
+	}
+	
+	
 	public void testBuilderWithResource_rejectNonAbsoluteURI() {
 		
 		try {

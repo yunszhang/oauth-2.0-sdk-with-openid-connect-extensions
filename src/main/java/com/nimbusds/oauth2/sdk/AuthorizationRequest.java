@@ -515,6 +515,24 @@ public class AuthorizationRequest extends AbstractRequest {
 		
 		
 		/**
+		 * Sets the resource server URI.
+		 *
+		 * @param resource The resource URI, {@code null} if not
+		 *                 specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder resource(final URI resource) {
+			if (resource != null) {
+				this.resources = Collections.singletonList(resource);
+			} else {
+				this.resources = null;
+			}
+			return this;
+		}
+		
+		
+		/**
 		 * Sets the resource server URI(s).
 		 *
 		 * @param resources The resource URI(s), {@code null} if not
