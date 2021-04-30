@@ -285,6 +285,20 @@ public final class URIUtils {
 	
 	/**
 	 * Returns a string list representation of the specified URI
+	 * collection. Collection items that are {@code null} are not returned.
+	 *
+	 * @param uriList The URI collection, {@code null} if not specified.
+	 *
+	 * @return The string list, {@code null} if not specified.
+	 */
+	public static List<String> toStringList(final Collection<URI> uriList) {
+		
+		return toStringList(uriList, true);
+	}
+	
+	
+	/**
+	 * Returns a string list representation of the specified URI
 	 * collection.
 	 *
 	 * @param uriList     The URI collection, {@code null} if not

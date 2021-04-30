@@ -289,9 +289,11 @@ public class URIUtilsTest extends TestCase {
 	
 	public void testToStringList() {
 		
+		assertNull(URIUtils.toStringList(null));
 		assertNull(URIUtils.toStringList(null, true));
 		assertNull(URIUtils.toStringList(null, false));
 		
+		assertTrue(URIUtils.toStringList(Collections.<URI>emptyList()).isEmpty());
 		assertTrue(URIUtils.toStringList(Collections.<URI>emptyList(), true).isEmpty());
 		assertTrue(URIUtils.toStringList(Collections.<URI>emptyList(), false).isEmpty());
 		
@@ -305,8 +307,21 @@ public class URIUtilsTest extends TestCase {
 		assertEquals(
 			Arrays.asList("https://one.example.com", "https://two.example.com"),
 			URIUtils.toStringList(
+				Arrays.asList(URI.create("https://one.example.com"), URI.create("https://two.example.com"))
+			)
+		);
+		assertEquals(
+			Arrays.asList("https://one.example.com", "https://two.example.com"),
+			URIUtils.toStringList(
 				Arrays.asList(URI.create("https://one.example.com"), URI.create("https://two.example.com")),
 				false
+			)
+		);
+		
+		assertEquals(
+			Collections.singletonList("https://one.example.com"),
+			URIUtils.toStringList(
+				Arrays.asList(URI.create("https://one.example.com"), null)
 			)
 		);
 		

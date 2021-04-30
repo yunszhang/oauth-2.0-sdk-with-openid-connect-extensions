@@ -1976,7 +1976,7 @@ public class ClientMetadata {
 
 
 		if (redirectURIs != null)
-			o.put("redirect_uris", URIUtils.toStringList(redirectURIs, true));
+			o.put("redirect_uris", URIUtils.toStringList(redirectURIs));
 
 
 		if (scope != null)
@@ -2117,7 +2117,7 @@ public class ClientMetadata {
 		
 		
 		if (requestObjectURIs != null)
-			o.put("request_uris", URIUtils.toStringList(requestObjectURIs, true));
+			o.put("request_uris", URIUtils.toStringList(requestObjectURIs));
 		
 		if (requestObjectJWSAlg != null)
 			o.put("request_object_signing_alg", requestObjectJWSAlg.getName());

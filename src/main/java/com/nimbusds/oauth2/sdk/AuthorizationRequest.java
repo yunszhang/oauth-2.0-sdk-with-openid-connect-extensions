@@ -1125,7 +1125,7 @@ public class AuthorizationRequest extends AbstractRequest {
 			params.put("include_granted_scopes", Collections.singletonList("true"));
 		
 		if (resources != null)
-			params.put("resource", URIUtils.toStringList(resources, true));
+			params.put("resource", URIUtils.toStringList(resources));
 		
 		if (requestObject != null) {
 			try {
