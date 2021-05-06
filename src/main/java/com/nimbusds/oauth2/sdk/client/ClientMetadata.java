@@ -2540,7 +2540,7 @@ public class ClientMetadata {
 			// CIBA
 			
 			if (jsonObject.get("backchannel_token_delivery_mode") != null) {
-				metadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.parse(jsonObject.getAsString("backchannel_token_delivery_mode")));
+				metadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.parse(JSONObjectUtils.getString(jsonObject, "backchannel_token_delivery_mode")));
 				jsonObject.remove("backchannel_token_delivery_mode");
 			}
 			
