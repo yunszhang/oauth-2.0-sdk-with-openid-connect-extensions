@@ -1723,3 +1723,8 @@ version 9.5 (2021-04-30)
     * Adds AuthorizationRequest.Builder.resource and
       AuthenticationRequest.Builder.resource methods for single resource URI.
     * Adds URIUtils.toStringList(java.util.Collection<java.net.URI>) method.
+
+version 9.5.1 (2021-05-07)
+    * Updates ClientMetadata code to stick to JSON Smart 1.3.x API.
+    * Bumps Nimbus JOSE+JWT to 9.9.3.
+    * Bumps JSON Smart to [1.3.3,2.4.7].
