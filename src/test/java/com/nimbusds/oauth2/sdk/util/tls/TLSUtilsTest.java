@@ -75,6 +75,7 @@ public class TLSUtilsTest {
 	public void testHTTPSRequestWithCustomTrustStore_siteCertOnly()
 		throws Exception {
 		
+		// PEM cert chain needs to be updated once a year
 		List<X509Certificate> certChain = X509CertChainUtils.parse(new File("src/test/resources/c2id-net-chain.pem"));
 		
 		assertEquals(3, certChain.size());
