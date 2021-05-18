@@ -18,11 +18,14 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+
 import junit.framework.TestCase;
 
 
@@ -161,5 +164,34 @@ public class ClientSecretBasicTest extends TestCase {
 		} catch (ParseException e) {
 			assertEquals("Malformed client secret basic authentication (see RFC 6749, section 2.3.1): Invalid URL encoding", e.getMessage());
 		}
+	}
+	
+	// iss362
+	public void testWithPercentInUsernameAndPassword() throws ParseException {
+		
+		ClientID clientID = new ClientID("%123");
+		Secret secret = new Secret("lu3waigh%gooc9Ae");
+		
+		ClientSecretBasic clientSecretBasic = new ClientSecretBasic(clientID, secret);
+		
+		String authorizationHeader = clientSecretBasic.toHTTPAuthorizationHeader();
+		
+		String urlEncodedClientID = URLEncoder.encode(clientID.getValue(), StandardCharsets.UTF_8);
+		assertEquals("%25123", urlEncodedClientID);
+		
+		String urlEncodedSecret = URLEncoder.encode(secret.getValue(), StandardCharsets.UTF_8);
+		assertEquals("lu3waigh%25gooc9Ae", urlEncodedSecret);
+		
+		String concat = urlEncodedClientID + ":" + urlEncodedSecret;
+		String concatBase64Encoded = Base64.encode(concat).toString();
+		
+		assertEquals("Basic " + concatBase64Encoded, authorizationHeader);
+		
+		assertEquals("Basic JTI1MTIzOmx1M3dhaWdoJTI1Z29vYzlBZQ==", authorizationHeader);
+		
+		clientSecretBasic = ClientSecretBasic.parse(authorizationHeader);
+		
+		assertEquals(clientID, clientSecretBasic.getClientID());
+		assertEquals(secret, clientSecretBasic.getClientSecret());
 	}
 }
