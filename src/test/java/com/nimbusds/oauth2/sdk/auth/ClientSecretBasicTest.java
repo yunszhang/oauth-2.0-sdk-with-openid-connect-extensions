@@ -87,17 +87,16 @@ public class ClientSecretBasicTest extends TestCase {
 		ClientSecretBasic csb = new ClientSecretBasic(clientID, secret);
 
 		String header = csb.toHTTPAuthorizationHeader();csb = ClientSecretBasic.parse(header);
-
-		assertTrue(clientID.equals(csb.getClientID()));
-		assertTrue(secret.equals(csb.getClientSecret()));
+		
+		assertEquals(clientID, csb.getClientID());
+		assertEquals(secret, csb.getClientSecret());
 
 		assertEquals(id, csb.getClientID().getValue());
 		assertEquals(pw, csb.getClientSecret().getValue());
 	}
 
 
-	public void testNonEscapedSecretWithLegacyBasicAuth()
-		throws Exception {
+	public void testNonEscapedSecretWithLegacyBasicAuth() {
 
 		// Test legacy HTTP basic auth without HTTP URL escape of charc in username + password
 		// See http://tools.ietf.org/html/rfc6749#section-2.3.1
