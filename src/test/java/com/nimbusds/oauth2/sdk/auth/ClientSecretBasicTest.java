@@ -18,15 +18,15 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+
+import junit.framework.TestCase;
 
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-
-import junit.framework.TestCase;
 
 
 /**
@@ -167,7 +167,7 @@ public class ClientSecretBasicTest extends TestCase {
 	}
 	
 	// iss362
-	public void testWithPercentInUsernameAndPassword() throws ParseException {
+	public void testWithPercentInUsernameAndPassword() throws ParseException, UnsupportedEncodingException {
 		
 		ClientID clientID = new ClientID("%123");
 		Secret secret = new Secret("lu3waigh%gooc9Ae");
@@ -176,10 +176,10 @@ public class ClientSecretBasicTest extends TestCase {
 		
 		String authorizationHeader = clientSecretBasic.toHTTPAuthorizationHeader();
 		
-		String urlEncodedClientID = URLEncoder.encode(clientID.getValue(), StandardCharsets.UTF_8);
+		String urlEncodedClientID = URLEncoder.encode(clientID.getValue(), "UTF-8");
 		assertEquals("%25123", urlEncodedClientID);
 		
-		String urlEncodedSecret = URLEncoder.encode(secret.getValue(), StandardCharsets.UTF_8);
+		String urlEncodedSecret = URLEncoder.encode(secret.getValue(), "UTF-8");
 		assertEquals("lu3waigh%25gooc9Ae", urlEncodedSecret);
 		
 		String concat = urlEncodedClientID + ":" + urlEncodedSecret;
