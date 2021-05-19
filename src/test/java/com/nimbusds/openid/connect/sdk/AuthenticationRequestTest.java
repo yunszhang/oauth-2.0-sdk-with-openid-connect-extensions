@@ -1332,6 +1332,39 @@ public class AuthenticationRequestTest extends TestCase {
 		
 		AuthenticationRequest.parse(ar.toURI());
 
+		// response_type=id_token
+		try {
+			new AuthenticationRequest.Builder(
+				ResponseType.parse("id_token"),
+				new Scope("openid"),
+				new ClientID("s6BhdRkqt3"),
+				URI.create("https://example.com/cb")) // redirect_uri
+				.state(new State("af0ifjsldkj"))
+				.build();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Nonce required for response_type=id_token", e.getMessage());
+		}
+		
+		try {
+			AuthenticationRequest.parse(new URI(
+				"https://c2id.com/login?" +
+					"response_type=id_token" +
+					"&client_id=s6BhdRkqt3" +
+					"&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb" +
+					"&scope=openid%20profile" +
+					"&state=af0ifjsldkj"));
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing nonce parameter: Required for response_type=id_token", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals("Invalid request: Missing nonce parameter: Required for response_type=id_token", e.getErrorObject().getDescription());
+			assertEquals(new ClientID("s6BhdRkqt3"), e.getClientID());
+			assertEquals(new URI("https://client.example.org/cb"), e.getRedirectionURI());
+			assertEquals(ResponseMode.FRAGMENT, e.getResponseMode());
+			assertEquals(new State("af0ifjsldkj"), e.getState());
+		}
+
 		// response_type=code+id_token
 		try {
 			new AuthenticationRequest.Builder(
@@ -1377,25 +1410,6 @@ public class AuthenticationRequestTest extends TestCase {
 			fail();
 		} catch (IllegalStateException e) {
 			assertEquals("Nonce required for response_type=code id_token token", e.getMessage());
-		}
-		
-		try {
-			AuthenticationRequest.parse(new URI(
-				"https://c2id.com/login?" +
-					"response_type=code%20id_token" +
-					"&client_id=s6BhdRkqt3" +
-					"&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb" +
-					"&scope=openid%20profile" +
-					"&state=af0ifjsldkj"));
-			fail();
-		} catch (ParseException e) {
-			assertEquals("Missing nonce parameter: Required for response_type=code id_token", e.getMessage());
-			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals("Invalid request: Missing nonce parameter: Required for response_type=code id_token", e.getErrorObject().getDescription());
-			assertEquals(new ClientID("s6BhdRkqt3"), e.getClientID());
-			assertEquals(new URI("https://client.example.org/cb"), e.getRedirectionURI());
-			assertEquals(ResponseMode.FRAGMENT, e.getResponseMode());
-			assertEquals(new State("af0ifjsldkj"), e.getState());
 		}
 		
 		try {

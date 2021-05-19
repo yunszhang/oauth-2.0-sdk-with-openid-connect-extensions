@@ -1289,8 +1289,14 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				throw new IllegalArgumentException("The scope must include an \"openid\" value");
 			
 			// Check nonce requirement
+			// https://openid.net/specs/openid-connect-core-1_0.html#ImplicitAuthRequest
 			// https://openid.net/specs/openid-connect-core-1_0-27.html#HybridAuthRequest
-			if (nonce == null && (rt.equals(new ResponseType("code", "id_token")) || rt.equals(new ResponseType("code", "id_token", "token")))) {
+			if (nonce == null && (
+				rt.equals(new ResponseType(ResponseType.Value.CODE, OIDCResponseTypeValue.ID_TOKEN)) ||
+				rt.equals(new ResponseType(OIDCResponseTypeValue.ID_TOKEN)) ||
+				rt.equals(new ResponseType(ResponseType.Value.CODE, OIDCResponseTypeValue.ID_TOKEN, ResponseType.Value.TOKEN))
+				)
+			) {
 				throw new IllegalArgumentException("Nonce required for response_type=" + rt);
 			}
 		}
@@ -1696,8 +1702,14 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			}
 			
 			// Check nonce requirement
+			// https://openid.net/specs/openid-connect-core-1_0.html#ImplicitAuthRequest
 			// https://openid.net/specs/openid-connect-core-1_0-27.html#HybridAuthRequest
-			if (nonce == null && (ar.getResponseType().equals(new ResponseType("code", "id_token")) || ar.getResponseType().equals(new ResponseType("code", "id_token", "token")))) {
+			if (nonce == null && (
+					ar.getResponseType().equals(new ResponseType(ResponseType.Value.CODE, OIDCResponseTypeValue.ID_TOKEN)) ||
+					ar.getResponseType().equals(new ResponseType(OIDCResponseTypeValue.ID_TOKEN)) ||
+					ar.getResponseType().equals(new ResponseType(ResponseType.Value.CODE, OIDCResponseTypeValue.ID_TOKEN, ResponseType.Value.TOKEN))
+				)
+			) {
 				String msg = "Missing nonce parameter: Required for response_type=" + ar.getResponseType();
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 					ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState());
