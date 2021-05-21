@@ -1289,11 +1289,12 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				throw new IllegalArgumentException("The scope must include an \"openid\" value");
 			
 			// Check nonce requirement
-			// https://openid.net/specs/openid-connect-core-1_0.html#ImplicitAuthRequest
-			// https://openid.net/specs/openid-connect-core-1_0-27.html#HybridAuthRequest
 			if (nonce == null && (
-				rt.equals(new ResponseType(ResponseType.Value.CODE, OIDCResponseTypeValue.ID_TOKEN)) ||
+				// implicit https://openid.net/specs/openid-connect-core-1_0.html#ImplicitAuthRequest
 				rt.equals(new ResponseType(OIDCResponseTypeValue.ID_TOKEN)) ||
+				rt.equals(new ResponseType(OIDCResponseTypeValue.ID_TOKEN, ResponseType.Value.TOKEN)) ||
+				// hybrid https://openid.net/specs/openid-connect-core-1_0-27.html#HybridAuthRequest
+				rt.equals(new ResponseType(ResponseType.Value.CODE, OIDCResponseTypeValue.ID_TOKEN)) ||
 				rt.equals(new ResponseType(ResponseType.Value.CODE, OIDCResponseTypeValue.ID_TOKEN, ResponseType.Value.TOKEN))
 				)
 			) {
@@ -1702,11 +1703,12 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			}
 			
 			// Check nonce requirement
-			// https://openid.net/specs/openid-connect-core-1_0.html#ImplicitAuthRequest
-			// https://openid.net/specs/openid-connect-core-1_0-27.html#HybridAuthRequest
 			if (nonce == null && (
-					ar.getResponseType().equals(new ResponseType(ResponseType.Value.CODE, OIDCResponseTypeValue.ID_TOKEN)) ||
+					// implicit https://openid.net/specs/openid-connect-core-1_0.html#ImplicitAuthRequest
 					ar.getResponseType().equals(new ResponseType(OIDCResponseTypeValue.ID_TOKEN)) ||
+					ar.getResponseType().equals(new ResponseType(OIDCResponseTypeValue.ID_TOKEN, ResponseType.Value.TOKEN)) ||
+					// hybrid https://openid.net/specs/openid-connect-core-1_0-27.html#HybridAuthRequest
+					ar.getResponseType().equals(new ResponseType(ResponseType.Value.CODE, OIDCResponseTypeValue.ID_TOKEN)) ||
 					ar.getResponseType().equals(new ResponseType(ResponseType.Value.CODE, OIDCResponseTypeValue.ID_TOKEN, ResponseType.Value.TOKEN))
 				)
 			) {
