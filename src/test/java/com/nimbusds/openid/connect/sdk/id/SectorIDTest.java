@@ -22,6 +22,8 @@ import java.net.URI;
 
 import junit.framework.TestCase;
 
+import com.nimbusds.oauth2.sdk.id.Audience;
+
 
 public class SectorIDTest extends TestCase {
 	
@@ -59,5 +61,13 @@ public class SectorIDTest extends TestCase {
 		} catch (IllegalArgumentException e) {
 			assertEquals("The URI must have a https scheme", e.getMessage());
 		}
+	}
+	
+	
+	public void testAudienceConstructor() {
+		
+		Audience audience = new Audience("3f7951a7-0aa4-43cd-835a-1d3f6d024c24");
+		SectorID sectorID = new SectorID(audience);
+		assertEquals(audience.getValue(), sectorID.getValue());
 	}
 }

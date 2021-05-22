@@ -22,6 +22,7 @@ import java.security.SecureRandom;
 
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.util.Base64URL;
+import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import junit.framework.TestCase;
 
@@ -45,6 +46,26 @@ public class HashBasedPairwiseSubjectCodecTest extends TestCase {
 		assertNull(codec.getProvider());
 
 		SectorID sectorID = new SectorID("example.com");
+		Subject localSubject = new Subject("alice");
+
+		Subject pairwiseSubject = codec.encode(sectorID, localSubject);
+		System.out.println("Pairwise subject: " + pairwiseSubject);
+		assertEquals(256, new Base64URL(pairwiseSubject.getValue()).decode().length * 8);
+	}
+
+
+	public void testEncodeWithNonURIAudienceAsSectorID() {
+
+		// Generate salt
+		byte[] salt = new byte[16];
+		new SecureRandom().nextBytes(salt);
+
+		HashBasedPairwiseSubjectCodec codec = new HashBasedPairwiseSubjectCodec(salt);
+		assertEquals(salt, codec.getSalt());
+		assertNull(codec.getProvider());
+		
+		Audience audience = new Audience("3f7951a7-0aa4-43cd-835a-1d3f6d024c24");
+		SectorID sectorID = new SectorID(audience.getValue());
 		Subject localSubject = new Subject("alice");
 
 		Subject pairwiseSubject = codec.encode(sectorID, localSubject);

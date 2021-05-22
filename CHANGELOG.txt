@@ -1744,3 +1744,5 @@ version 9.6 (2021-05-22)
       type.
     * Static Nonce.isRequired(ResponseType) method.
 
+version 9.7 (2021-05-22)
+    * Adds SectorID(Audience) constructor.

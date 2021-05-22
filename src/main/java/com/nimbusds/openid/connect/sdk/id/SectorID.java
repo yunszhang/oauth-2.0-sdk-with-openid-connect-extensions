@@ -20,6 +20,7 @@ package com.nimbusds.openid.connect.sdk.id;
 
 import java.net.URI;
 
+import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Identifier;
 import net.jcip.annotations.Immutable;
 
@@ -35,8 +36,11 @@ import net.jcip.annotations.Immutable;
  */
 @Immutable
 public final class SectorID extends Identifier {
-
-
+	
+	
+	private static final long serialVersionUID = -3769967342420085584L;
+	
+	
 	/**
 	 * Ensures the specified URI has a {@code https} scheme.
 	 *
@@ -89,5 +93,15 @@ public final class SectorID extends Identifier {
 	 */
 	public SectorID(final URI sectorURI) {
 		super(ensureHostComponent(sectorURI));
+	}
+	
+	
+	/**
+	 * Creates a new sector identifier for the specified audience.
+	 *
+	 * @param audience The audience. Must not be empty or {@code null}.
+	 */
+	public SectorID(final Audience audience) {
+		super(audience.getValue());
 	}
 }
