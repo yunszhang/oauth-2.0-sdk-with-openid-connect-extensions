@@ -18,20 +18,21 @@
 package com.nimbusds.openid.connect.sdk;
 
 
+import net.jcip.annotations.Immutable;
+
+import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.id.Identifier;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
-import net.jcip.annotations.Immutable;
 
 
 /**
  * Nonce. This is a random, unique string value to associate a user-session 
  * with an ID Token and to mitigate replay attacks.
  *
- * <p>Example generation of a nonce with eight random mixed-case alphanumeric
- * characters:
+ * <p>Example generation of a 16 byte random nonce:
  *
  * <pre>
- * Nonce nonce = new Nonce(8);
+ * Nonce nonce = new Nonce(16);
  * </pre>
  *
  * <p>Related specifications:
@@ -105,5 +106,26 @@ public final class Nonce extends Identifier {
 			return null;
 		
 		return new Nonce(s);
+	}
+	
+	
+	/**
+	 * Returns {@code true} if the specified OAuth 2.0 response type
+	 * requires a nonce.
+	 *
+	 * @param responseType The response type. Must not be {@code null}.
+	 *
+	 * @return {@code true} if a nonce is required, {@code false} if not.
+	 */
+	public static boolean isRequired(final ResponseType responseType) {
+		
+		return
+			// implicit https://openid.net/specs/openid-connect-core-1_0-27.html#ImplicitAuthRequest
+			responseType.equals(ResponseType.IDTOKEN) || responseType.equals(ResponseType.IDTOKEN_TOKEN)
+			
+			||
+			
+			// hybrid https://openid.net/specs/openid-connect-core-1_0-27.html#HybridAuthRequest
+			responseType.equals(ResponseType.CODE_IDTOKEN) || responseType.equals(ResponseType.CODE_IDTOKEN_TOKEN);
 	}
 }

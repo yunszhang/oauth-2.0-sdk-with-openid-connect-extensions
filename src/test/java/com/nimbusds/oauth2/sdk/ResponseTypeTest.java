@@ -19,6 +19,8 @@ package com.nimbusds.oauth2.sdk;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -26,13 +28,83 @@ import junit.framework.TestCase;
 import com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue;
 
 
-/**
- * Tests the response type class.
- */
 public class ResponseTypeTest extends TestCase {
 	
 	
 	public void testConstants() {
+		
+		// OAuth 2.0
+		assertEquals(new ResponseType("code"), ResponseType.CODE);
+		assertEquals(new ResponseType("token"), ResponseType.TOKEN);
+		
+		// OpenID Connect implicit
+		assertEquals(new ResponseType("id_token", "token"), ResponseType.IDTOKEN_TOKEN);
+		assertEquals(new ResponseType("id_token"), ResponseType.IDTOKEN);
+		
+		// OpenID Connect hybrid
+		assertEquals(new ResponseType("code", "id_token"), ResponseType.CODE_IDTOKEN);
+		assertEquals(new ResponseType("code", "id_token", "token"), ResponseType.CODE_IDTOKEN_TOKEN);
+		assertEquals(new ResponseType("code", "token"), ResponseType.CODE_TOKEN);
+	}
+	
+	
+	public void testConstantsAreNotModifiable() {
+		
+		for (ResponseType rt: Arrays.asList(
+			ResponseType.CODE,
+			ResponseType.TOKEN,
+			ResponseType.IDTOKEN_TOKEN,
+			ResponseType.IDTOKEN,
+			ResponseType.CODE_IDTOKEN,
+			ResponseType.CODE_IDTOKEN_TOKEN,
+			ResponseType.CODE_TOKEN
+		)) {
+			try {
+				rt.add(ResponseType.Value.CODE);
+				fail();
+			} catch (UnsupportedOperationException e) {
+				assertNull(e.getMessage());
+			}
+			
+			try {
+				rt.remove(ResponseType.Value.CODE);
+				fail();
+			} catch (UnsupportedOperationException e) {
+				assertNull(e.getMessage());
+			}
+			
+			try {
+				rt.clear();
+				fail();
+			} catch (UnsupportedOperationException e) {
+				assertNull(e.getMessage());
+			}
+			
+			try {
+				rt.removeAll(Collections.singleton(ResponseType.Value.CODE));
+				fail();
+			} catch (UnsupportedOperationException e) {
+				assertNull(e.getMessage());
+			}
+			
+			try {
+				rt.addAll(Collections.singleton(ResponseType.Value.CODE));
+				fail();
+			} catch (UnsupportedOperationException e) {
+				assertNull(e.getMessage());
+			}
+			
+			try {
+				rt.retainAll(Collections.singleton(ResponseType.Value.CODE));
+				fail();
+			} catch (UnsupportedOperationException e) {
+				assertNull(e.getMessage());
+			}
+		}
+	}
+	
+	
+	public void testValueConstants() {
 
 		assertEquals("code", ResponseType.Value.CODE.toString());
 		assertEquals("token", ResponseType.Value.TOKEN.toString());
@@ -70,7 +142,7 @@ public class ResponseTypeTest extends TestCase {
 			new ResponseType((String)null);
 			fail();
 		} catch (IllegalArgumentException e) {
-			// ok
+			assertEquals("The value must not be null or empty string", e.getMessage());
 		}
 	}
 
@@ -111,19 +183,13 @@ public class ResponseTypeTest extends TestCase {
 	}
 
 
-	public void testSerializeAndParse() {
+	public void testSerializeAndParse() throws ParseException {
 
 		ResponseType rt = new ResponseType();
 		rt.add(ResponseType.Value.CODE);
 		rt.add(new ResponseType.Value("id_token"));
 
-		try {
-			rt = ResponseType.parse(rt.toString());
-
-		} catch (ParseException e) {
-
-			fail(e.getMessage());
-		}
+		rt = ResponseType.parse(rt.toString());
 
 		assertTrue(rt.contains(ResponseType.Value.CODE));
 		assertTrue(rt.contains(new ResponseType.Value("id_token")));
@@ -135,12 +201,9 @@ public class ResponseTypeTest extends TestCase {
 
 		try {
 			ResponseType.parse(null);
-
-			fail("Failed to raise exception");
-		
+			fail();
 		} catch (ParseException e) {
-
-			// ok
+			assertEquals("Null or empty response type string", e.getMessage());
 		}
 	}
 
@@ -149,12 +212,9 @@ public class ResponseTypeTest extends TestCase {
 
 		try {
 			ResponseType.parse(" ");
-
-			fail("Failed to raise exception");
-		
+			fail();
 		} catch (ParseException e) {
-
-			// ok
+			assertEquals("Null or empty response type string", e.getMessage());
 		}
 	}
 
@@ -200,7 +260,7 @@ public class ResponseTypeTest extends TestCase {
 
 	public void testMultipleEquality()
 		throws Exception {
-
-		assertTrue(ResponseType.parse("code id_token").equals(ResponseType.parse("id_token code")));
+		
+		assertEquals(ResponseType.parse("code id_token"), ResponseType.parse("id_token code"));
 	}
 }

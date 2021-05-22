@@ -66,7 +66,7 @@ import com.nimbusds.openid.connect.sdk.claims.ACR;
  *     <li>Proof Key for Code Exchange by OAuth Public Clients (RFC 7636).
  *     <li>Resource Indicators for OAuth 2.0 (RFC 8707)
  *     <li>The OAuth 2.0 Authorization Framework: JWT Secured Authorization
- *         Request (JAR) draft-ietf-oauth-jwsreq-21
+ *         Request (JAR) draft-ietf-oauth-jwsreq-34
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
  *     <li>OpenID Connect for Identity Assurance 1.0, section 8.
@@ -1289,15 +1289,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 				throw new IllegalArgumentException("The scope must include an \"openid\" value");
 			
 			// Check nonce requirement
-			if (nonce == null && (
-				// implicit https://openid.net/specs/openid-connect-core-1_0.html#ImplicitAuthRequest
-				rt.equals(new ResponseType(OIDCResponseTypeValue.ID_TOKEN)) ||
-				rt.equals(new ResponseType(OIDCResponseTypeValue.ID_TOKEN, ResponseType.Value.TOKEN)) ||
-				// hybrid https://openid.net/specs/openid-connect-core-1_0-27.html#HybridAuthRequest
-				rt.equals(new ResponseType(ResponseType.Value.CODE, OIDCResponseTypeValue.ID_TOKEN)) ||
-				rt.equals(new ResponseType(ResponseType.Value.CODE, OIDCResponseTypeValue.ID_TOKEN, ResponseType.Value.TOKEN))
-				)
-			) {
+			if (nonce == null && Nonce.isRequired(rt)) {
 				throw new IllegalArgumentException("Nonce required for response_type=" + rt);
 			}
 		}
@@ -1703,15 +1695,7 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			}
 			
 			// Check nonce requirement
-			if (nonce == null && (
-					// implicit https://openid.net/specs/openid-connect-core-1_0.html#ImplicitAuthRequest
-					ar.getResponseType().equals(new ResponseType(OIDCResponseTypeValue.ID_TOKEN)) ||
-					ar.getResponseType().equals(new ResponseType(OIDCResponseTypeValue.ID_TOKEN, ResponseType.Value.TOKEN)) ||
-					// hybrid https://openid.net/specs/openid-connect-core-1_0-27.html#HybridAuthRequest
-					ar.getResponseType().equals(new ResponseType(ResponseType.Value.CODE, OIDCResponseTypeValue.ID_TOKEN)) ||
-					ar.getResponseType().equals(new ResponseType(ResponseType.Value.CODE, OIDCResponseTypeValue.ID_TOKEN, ResponseType.Value.TOKEN))
-				)
-			) {
+			if (nonce == null && Nonce.isRequired(ar.getResponseType())) {
 				String msg = "Missing nonce parameter: Required for response_type=" + ar.getResponseType();
 				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg),
 					ar.getClientID(), ar.getRedirectionURI(), ar.impliedResponseMode(), ar.getState());

@@ -19,42 +19,41 @@ package com.nimbusds.oauth2.sdk;
 
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.StringTokenizer;
+
+import net.jcip.annotations.Immutable;
+import net.jcip.annotations.NotThreadSafe;
 
 import com.nimbusds.oauth2.sdk.id.Identifier;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue;
-import net.jcip.annotations.Immutable;
-import net.jcip.annotations.NotThreadSafe;
 
 
 /**
- * Authorisation response type. Can be single-valued or multiple-valued.
+ * Authorisation response type.
  *
- * <p>The following helper methods can be used to find out the OAuth 2.0
- * protocol flow that a particular response type implies:
+ * <p>Example response type implying an authorisation code flow:
+ *
+ * <pre>
+ * ResponseType rt = ResponseType.CODE;
+ * </pre>
+ *
+ * <p>Example response type from OpenID Connect specifying an ID token and an
+ * access token (implies implicit flow):
+ *
+ * <pre>
+ * ResponseType rt = ResponseType.IDTOKEN_TOKEN);
+ * </pre>
+ *
+ * <p>The following helper methods can be used to find out the implied OAuth
+ * 2.0 protocol flow for a response type:
  *
  * <ul>
  *     <li>{@link #impliesImplicitFlow}
  *     <li>{@link #impliesCodeFlow}
  * </ul>
- *
- * <p>Example response type implying an authorisation code flow:
- *
- * <pre>
- * ResponseType() rt = new ResponseType();
- * rt.add(ResponseType.Value.CODE);
- * </pre>
- *
- * <p>Example response type from OpenID Connect specifying an ID token and an 
- * access token (implies implicit flow):
- *
- * <pre>
- * ResponseType() rt = new ResponseType();
- * rt.add(OIDCResponseTypeValue.ID_TOKEN);
- * rt.add(ResponseType.Value.TOKEN);
- * </pre>
  *
  * <p>Related specifications:
  *
@@ -65,6 +64,51 @@ import net.jcip.annotations.NotThreadSafe;
  */
 @NotThreadSafe
 public class ResponseType extends HashSet<ResponseType.Value> {
+	
+	
+	/**
+	 * Constant for {@code response_type=code}.
+	 */
+	public static final ResponseType CODE = new ResponseType(true, Value.CODE);
+	
+	
+	/**
+	 * Constant for {@code response_type=token}.
+	 */
+	public static final ResponseType TOKEN = new ResponseType(true, Value.TOKEN);
+	
+	
+	/**
+	 * Constant for {@code response_type=id_token token}.
+	 */
+	public static final ResponseType IDTOKEN_TOKEN = new ResponseType(true, OIDCResponseTypeValue.ID_TOKEN, Value.TOKEN);
+	
+	
+	/**
+	 * Constant for {@code response_type=id_token}.
+	 */
+	public static final ResponseType IDTOKEN = new ResponseType(true, OIDCResponseTypeValue.ID_TOKEN);
+	
+	
+	/**
+	 * Constant for {@code response_type=code id_token}.
+	 */
+	public static final ResponseType CODE_IDTOKEN = new ResponseType(true, Value.CODE, OIDCResponseTypeValue.ID_TOKEN);
+	
+	
+	/**
+	 * Constant for {@code response_type=code token}.
+	 */
+	public static final ResponseType CODE_TOKEN = new ResponseType(true, Value.CODE, Value.TOKEN);
+	
+	
+	/**
+	 * Constant for {@code response_type=code id_token token}.
+	 */
+	public static final ResponseType CODE_IDTOKEN_TOKEN = new ResponseType(true, Value.CODE, OIDCResponseTypeValue.ID_TOKEN, Value.TOKEN);
+	
+	
+	private static final long serialVersionUID = 1351973244616920112L;
 	
 	
 	/**
@@ -83,7 +127,10 @@ public class ResponseType extends HashSet<ResponseType.Value> {
 		 * Access token, with optional refresh token.
 		 */
 		public static final Value TOKEN = new Value("token");
-
+		
+		
+		private static final long serialVersionUID = 5339971450891463852L;
+		
 		
 		/**
 		 * Creates a new response type value.
@@ -114,17 +161,22 @@ public class ResponseType extends HashSet<ResponseType.Value> {
 	 */
 	public static ResponseType getDefault() {
 		
-		ResponseType defaultResponseType = new ResponseType();
-		defaultResponseType.add(ResponseType.Value.CODE);
-		return defaultResponseType;
+		return ResponseType.CODE;
 	}
+	
+	
+	/**
+	 * If {@code true} flags the response type as unmodifiable.
+	 */
+	private final boolean unmodifiable;
 
 	
 	/**
 	 * Creates a new empty response type.
 	 */
 	public ResponseType() {
-		
+		super();
+		unmodifiable = false;
 	}
 
 
@@ -135,8 +187,11 @@ public class ResponseType extends HashSet<ResponseType.Value> {
 	 */
 	public ResponseType(final String ... values) {
 
-		for (String v: values)
+		for (String v: values) {
 			add(new Value(v));
+		}
+		
+		unmodifiable = false;
 	}
 
 
@@ -146,25 +201,25 @@ public class ResponseType extends HashSet<ResponseType.Value> {
 	 * @param values The values. Must not be {@code null}.
 	 */
 	public ResponseType(final Value ... values) {
+		this(false, values);
+	}
 
-		addAll(Arrays.asList(values));
+
+	/**
+	 * Creates a new response type with the specified values.
+	 *
+	 * @param unmodifiable If {@code true} flags the response type as
+	 *                     unmodifiable.
+	 * @param values       The values. Must not be {@code null}.
+	 */
+	private ResponseType(final boolean unmodifiable, final Value ... values) {
+		super(Arrays.asList(values));
+		this.unmodifiable = unmodifiable;
 	}
 	
 	
 	/**
 	 * Parses a set of authorisation response types.
-	 *
-	 * <p>Example serialised response type sets:
-	 *
-	 * <pre>
-	 * code
-	 * token
-	 * id_token
-	 * id_token token
-	 * code token
-	 * code id_token
-	 * code id_token token
-	 * </pre>
 	 *
 	 * @param s Space-delimited list of one or more authorisation response 
 	 *          types.
@@ -288,5 +343,59 @@ public class ResponseType extends HashSet<ResponseType.Value> {
 		}
 
 		return sb.toString();
+	}
+	
+	
+	@Override
+	public boolean add(Value value) {
+		if (unmodifiable) {
+			throw new UnsupportedOperationException();
+		}
+		return super.add(value);
+	}
+	
+	
+	@Override
+	public boolean remove(Object o) {
+		if (unmodifiable) {
+			throw new UnsupportedOperationException();
+		}
+		return super.remove(o);
+	}
+	
+	
+	@Override
+	public void clear() {
+		if (unmodifiable) {
+			throw new UnsupportedOperationException();
+		}
+		super.clear();
+	}
+	
+	
+	@Override
+	public boolean removeAll(Collection<?> c) {
+		if (unmodifiable) {
+			throw new UnsupportedOperationException();
+		}
+		return super.removeAll(c);
+	}
+	
+	
+	@Override
+	public boolean addAll(Collection<? extends Value> c) {
+		if (unmodifiable) {
+			throw new UnsupportedOperationException();
+		}
+		return super.addAll(c);
+	}
+	
+	
+	@Override
+	public boolean retainAll(Collection<?> c) {
+		if (unmodifiable) {
+			throw new UnsupportedOperationException();
+		}
+		return super.retainAll(c);
 	}
 }

@@ -18,16 +18,16 @@
 package com.nimbusds.openid.connect.sdk;
 
 
+import static org.junit.Assert.assertNotEquals;
+
 import junit.framework.TestCase;
 
 import com.nimbusds.jose.util.Base64;
 
+import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.id.Identifier;
 
 
-/**
- * Tests the Nonce class.
- */
 public class NonceTest extends TestCase {
 
 
@@ -44,10 +44,7 @@ public class NonceTest extends TestCase {
 	public void testIntConstructor() {
 
 		Nonce nonce =  new Nonce(1);
-
-		System.out.println("Generated nonce: " + nonce);
 		assertEquals(1, new Base64(nonce.getValue()).decode().length);
-
 	}
 
 
@@ -55,12 +52,9 @@ public class NonceTest extends TestCase {
 
 		try {
 			new Nonce(0);
-
 			fail();
-
 		} catch (IllegalArgumentException e) {
-
-			// ok
+			assertEquals("The byte length must be a positive integer", e.getMessage());
 		}
 	}
 
@@ -69,12 +63,9 @@ public class NonceTest extends TestCase {
 
 		try {
 			new Nonce(-1);
-
 			fail();
-
 		} catch (IllegalArgumentException e) {
-
-			// ok
+			assertEquals("The byte length must be a positive integer", e.getMessage());
 		}
 	}
 
@@ -83,8 +74,8 @@ public class NonceTest extends TestCase {
 
 		Nonce n1 = new Nonce("abc");
 		Nonce n2 = new Nonce("abc");
-
-		assertTrue(n1.equals(n2));
+		
+		assertEquals(n1, n2);
 	}
 
 
@@ -92,7 +83,24 @@ public class NonceTest extends TestCase {
 
 		Nonce n1 = new Nonce("abc");
 		Nonce n2 = new Nonce("xyz");
-
-		assertFalse(n1.equals(n2));
+		
+		assertNotEquals(n1, n2);
+	}
+	
+	
+	public void testNonceRequirement() {
+		
+		// code flow
+		assertFalse(Nonce.isRequired(ResponseType.CODE));
+		
+		// implicit
+		assertTrue(Nonce.isRequired(ResponseType.IDTOKEN));
+		assertTrue(Nonce.isRequired(ResponseType.IDTOKEN_TOKEN));
+		assertFalse(Nonce.isRequired(ResponseType.TOKEN)); // OAuth 2.0 only
+		
+		// hybrid
+		assertTrue(Nonce.isRequired(ResponseType.CODE_IDTOKEN));
+		assertTrue(Nonce.isRequired(ResponseType.CODE_IDTOKEN_TOKEN));
+		assertFalse(Nonce.isRequired(ResponseType.CODE_TOKEN));
 	}
 }
