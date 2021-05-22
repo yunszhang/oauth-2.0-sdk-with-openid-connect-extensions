@@ -42,8 +42,11 @@ import net.jcip.annotations.Immutable;
  */
 @Immutable
 public final class Nonce extends Identifier {
-
-
+	
+	
+	private static final long serialVersionUID = 1484679928325180239L;
+	
+	
 	/**
 	 * Creates a new nonce with the specified value.
 	 *
