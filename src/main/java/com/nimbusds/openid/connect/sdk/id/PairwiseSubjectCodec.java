@@ -24,8 +24,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.Provider;
 import java.util.Map;
 
-import com.nimbusds.oauth2.sdk.id.Subject;
 import net.jcip.annotations.ThreadSafe;
+
+import com.nimbusds.oauth2.sdk.id.Subject;
 
 
 /**
@@ -132,10 +133,9 @@ public abstract class PairwiseSubjectCodec {
 	 * Encodes a new pairwise subject identifier from the specified sector
 	 * identifier and local subject.
 	 *
-	 * @param sectorID The sector identifier. Must not be
-	 *                         {@code null}.
-	 * @param localSub         The local subject identifier. Must not be
-	 *                         {@code null}.
+	 * @param sectorID The sector identifier. Must not be {@code null}.
+	 * @param localSub The local subject identifier. Must not be
+	 *                 {@code null}.
 	 *
 	 * @return The pairwise subject identifier.
 	 */
