@@ -1107,4 +1107,42 @@ public class OIDCClientMetadataTest extends TestCase {
 		JSONObject jsonObject = metadata.toJSONObject();
 		assertEquals(Arrays.asList("bronze", "gold"), jsonObject.get("default_acr_values"));
 	}
+	
+	
+	public void testSectorIDURN() throws ParseException {
+		
+		URI sectorIDURN = URI.create("urn:c2id:sector_id:cae3Otae");
+		
+		OIDCClientMetadata metadata = new OIDCClientMetadata();
+		metadata.setRedirectionURI(URI.create("https://example.com/cb"));
+		
+		assertNull(metadata.getSectorIDURI());
+		
+		metadata.setSectorIDURI(sectorIDURN);
+		
+		assertEquals(sectorIDURN, metadata.getSectorIDURI());
+		
+		metadata.applyDefaults();
+		
+		OIDCClientMetadata out = OIDCClientMetadata.parse(metadata.toJSONObject());
+		assertEquals(sectorIDURN, out.getSectorIDURI());
+	}
+	
+	
+	public void testParseIllegalSectorID() {
+		
+		OIDCClientMetadata metadata = new OIDCClientMetadata();
+		metadata.setRedirectionURI(URI.create("https://example.com/cb"));
+		metadata.applyDefaults();
+		
+		JSONObject jsonObject = metadata.toJSONObject();
+		jsonObject.put("sector_identifier_uri", "http://example.com/cb");
+		
+		try {
+			OIDCClientMetadata.parse(jsonObject);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid sector_identifier_uri parameter: The URI must have a https scheme", e.getMessage());
+		}
+	}
 }

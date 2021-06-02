@@ -347,14 +347,18 @@ public class OIDCClientMetadata extends ClientMetadata {
 
 	/**
 	 * Sets the sector identifier URI. Corresponds to the 
-	 * {@code sector_identifier_uri} client metadata field.
+	 * {@code sector_identifier_uri} client metadata field. If set the URI
+	 * will be checked for having an {@code https} scheme and a host
+	 * component unless the URI is an URN.
 	 *
 	 * @param sectorIDURI The sector identifier URI, {@code null} if not 
 	 *                    specified.
+	 *
+	 * @throws IllegalArgumentException If the URI was found to be illegal.
 	 */
 	public void setSectorIDURI(final URI sectorIDURI) {
 
-		if (sectorIDURI != null) {
+		if (sectorIDURI != null && ! "urn".equalsIgnoreCase(sectorIDURI.getScheme())) {
 			SectorID.ensureHTTPScheme(sectorIDURI);
 			SectorID.ensureHostComponent(sectorIDURI);
 		}
@@ -965,7 +969,11 @@ public class OIDCClientMetadata extends ClientMetadata {
 			}
 
 			if (jsonObject.get("sector_identifier_uri") != null) {
-				metadata.setSectorIDURI(JSONObjectUtils.getURI(jsonObject, "sector_identifier_uri"));
+				try {
+					metadata.setSectorIDURI(JSONObjectUtils.getURI(jsonObject, "sector_identifier_uri"));
+				} catch (IllegalArgumentException e) {
+					throw new ParseException("Invalid sector_identifier_uri parameter: " + e.getMessage());
+				}
 				oidcFields.remove("sector_identifier_uri");
 			}
 

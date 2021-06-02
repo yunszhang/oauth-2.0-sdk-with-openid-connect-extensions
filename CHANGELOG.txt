@@ -1749,3 +1749,7 @@ version 9.7 (2021-05-22)
 
 version 9.8 (2021-06-02)
     * Adds SectorID(Identifier) constructor.
+    * OIDCClientMetadata.parse must throw a ParseException on illegal
+      sector_identifier_uri (iss #364).
+    * Updates OIDCClientMetadata to allow sector_identifier_uri URN values.
+
