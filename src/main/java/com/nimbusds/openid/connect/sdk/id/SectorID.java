@@ -20,9 +20,10 @@ package com.nimbusds.openid.connect.sdk.id;
 
 import java.net.URI;
 
+import net.jcip.annotations.Immutable;
+
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Identifier;
-import net.jcip.annotations.Immutable;
 
 
 /**
@@ -42,7 +43,7 @@ public final class SectorID extends Identifier {
 	
 	
 	/**
-	 * Ensures the specified URI has a {@code https} scheme.
+	 * Ensures the URI has a {@code https} scheme.
 	 *
 	 * @param sectorURI The URI. Must have a {@code https} scheme and not
 	 *                  be {@code null}.
@@ -56,7 +57,7 @@ public final class SectorID extends Identifier {
 
 
 	/**
-	 * Ensures the specified URI contains a host component.
+	 * Ensures the URI contains a host component.
 	 *
 	 * @param sectorURI The URI. Must contain a host component and not be
 	 *                  {@code null}.
@@ -76,9 +77,12 @@ public final class SectorID extends Identifier {
 	
 
 	/**
-	 * Creates a new sector identifier for the specified host.
+	 * Creates a new sector identifier based on a internet host.
 	 *
-	 * @param host The host. Must not be empty or {@code null}.
+	 * <p>Example host: client.example.com
+	 *
+	 * @param host The host. The value is not validated. Must not be empty
+	 *             or {@code null}.
 	 */
 	public SectorID(final String host) {
 		super(host);
@@ -86,22 +90,35 @@ public final class SectorID extends Identifier {
 
 
 	/**
-	 * Creates a new sector identifier for the specified URI.
+	 * Creates a new sector identifier based on the host component of an
+	 * URI.
 	 *
-	 * @param sectorURI The sector URI. Must contain a host component and
-	 *                  must not be {@code null}.
+	 * <p>Example URI: https://client.example.com
+	 *
+	 * @param uri The URI. Must contain a host component and must not be
+	 *            {@code null}.
 	 */
-	public SectorID(final URI sectorURI) {
-		super(ensureHostComponent(sectorURI));
+	public SectorID(final URI uri) {
+		super(ensureHostComponent(uri));
 	}
 	
 	
 	/**
-	 * Creates a new sector identifier for the specified audience.
+	 * Creates a new sector identifier based on a audience.
 	 *
 	 * @param audience The audience. Must not be empty or {@code null}.
 	 */
 	public SectorID(final Audience audience) {
 		super(audience.getValue());
+	}
+	
+	
+	/**
+	 * Creates a new sector identifier based on a generic identifier.
+	 *
+	 * @param identifier The identifier. Must not be empty or {@code null}.
+	 */
+	public SectorID(final Identifier identifier) {
+		super(identifier.getValue());
 	}
 }

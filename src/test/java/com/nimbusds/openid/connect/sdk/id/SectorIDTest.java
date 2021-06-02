@@ -23,25 +23,90 @@ import java.net.URI;
 import junit.framework.TestCase;
 
 import com.nimbusds.oauth2.sdk.id.Audience;
+import com.nimbusds.oauth2.sdk.id.Identifier;
 
 
 public class SectorIDTest extends TestCase {
 	
-
+	
+	public void testEnsureHTTPScheme_pass() {
+		
+		SectorID.ensureHTTPScheme(URI.create("https://example.com/callbacks.json"));
+	}
+	
+	
+	public void testEnsureHTTPScheme_fail() {
+		
+		String msg = null;
+		try {
+			SectorID.ensureHTTPScheme(URI.create("http://example.com/callbacks.json"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			msg = e.getMessage();
+		}
+		assertEquals("The URI must have a https scheme", msg);
+		
+		try {
+			SectorID.ensureHTTPScheme(URI.create("urn:c2id:sector_id:cae3Otae"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			msg = e.getMessage();
+		}
+		assertEquals("The URI must have a https scheme", msg);
+	}
+	
+	
+	public void testEnsureHostComponent_pass() {
+		
+		assertEquals("example.com", SectorID.ensureHostComponent(URI.create("https://example.com/callback")));
+	}
+	
+	
+	public void testEnsureHostComponent_fail() {
+		
+		String msg = null;
+		try {
+			SectorID.ensureHostComponent(URI.create("https:///callback"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			msg = e.getMessage();
+		}
+		assertEquals("The URI must contain a host component", msg);
+		
+		try {
+			SectorID.ensureHostComponent(URI.create("urn:c2id:sector_id:cae3Otae"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			msg = e.getMessage();
+		}
+		assertEquals("The URI must contain a host component", msg);
+	}
+	
+	
 	public void testStringConstructor() {
 
-		SectorID sectorID = new SectorID("example.com");
+		String host = "example.com";
+		SectorID sectorID = new SectorID(host);
+		assertEquals(host, sectorID.getValue());
+	}
+	
+	
+	public void testURIConstructor_https() {
+
+		URI url = URI.create("https://example.com/sector.json");
+		SectorID sectorID = new SectorID(url);
 		assertEquals("example.com", sectorID.getValue());
 	}
+	
+	
+	public void testURIConstructor_http() {
 
-
-	public void testURIConstructor() {
-
-		SectorID sectorID = new SectorID(URI.create("https://example.com"));
+		URI url = URI.create("http://example.com/sector.json");
+		SectorID sectorID = new SectorID(url);
 		assertEquals("example.com", sectorID.getValue());
 	}
-
-
+	
+	
 	public void testURIConstructor_missingHost() {
 
 		try {
@@ -51,17 +116,6 @@ public class SectorIDTest extends TestCase {
 			assertEquals("The URI must contain a host component", e.getMessage());
 		}
 	}
-
-
-	public void testEnsureHTTPScheme() {
-
-		try {
-			SectorID.ensureHTTPScheme(URI.create("http://example.com/callbacks.json"));
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The URI must have a https scheme", e.getMessage());
-		}
-	}
 	
 	
 	public void testAudienceConstructor() {
@@ -69,5 +123,13 @@ public class SectorIDTest extends TestCase {
 		Audience audience = new Audience("3f7951a7-0aa4-43cd-835a-1d3f6d024c24");
 		SectorID sectorID = new SectorID(audience);
 		assertEquals(audience.getValue(), sectorID.getValue());
+	}
+	
+	
+	public void testIdentifierConstructor() {
+		
+		Identifier identifier = new Identifier("cae3Otae");
+		SectorID sectorID = new SectorID(identifier);
+		assertEquals(identifier.getValue(), sectorID.getValue());
 	}
 }
