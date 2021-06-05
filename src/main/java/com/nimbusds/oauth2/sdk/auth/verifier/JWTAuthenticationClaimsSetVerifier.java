@@ -22,9 +22,9 @@ import java.util.Set;
 
 import net.jcip.annotations.Immutable;
 
+import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.BadJWTException;
-
 import com.nimbusds.oauth2.sdk.assertions.jwt.JWTAssertionDetailsVerifier;
 import com.nimbusds.oauth2.sdk.id.Audience;
 
@@ -68,10 +68,10 @@ class JWTAuthenticationClaimsSetVerifier extends JWTAssertionDetailsVerifier {
 
 
 	@Override
-	public void verify(final JWTClaimsSet claimsSet)
+	public void verify(final JWTClaimsSet claimsSet, final SecurityContext securityContext)
 		throws BadJWTException {
 
-		super.verify(claimsSet);
+		super.verify(claimsSet, securityContext);
 
 		// iss == sub
 		if (! claimsSet.getIssuer().equals(claimsSet.getSubject())) {

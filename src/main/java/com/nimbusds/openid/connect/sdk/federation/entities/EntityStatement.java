@@ -198,7 +198,7 @@ public final class EntityStatement {
 		// Double check claims with JWT framework
 		
 		try {
-			new EntityStatementClaimsVerifier(null).verify(statementJWT.getJWTClaimsSet());
+			new EntityStatementClaimsVerifier(null).verify(statementJWT.getJWTClaimsSet(), null);
 		} catch (java.text.ParseException e) {
 			throw new BadJOSEException(e.getMessage(), e);
 		}

@@ -27,7 +27,6 @@ import junit.framework.TestCase;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.BadJWTException;
-
 import com.nimbusds.oauth2.sdk.id.Audience;
 
 
@@ -67,14 +66,14 @@ public class JWTAuthenticationClaimsSetVerifierTest extends TestCase {
 					   final String expectedMessage) {
 
 		try {
-			createForAS().verify(claimsSet);
+			createForAS().verify(claimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals(expectedMessage, e.getMessage());
 		}
 
 		try {
-			createForOP().verify(claimsSet);
+			createForOP().verify(claimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals(expectedMessage, e.getMessage());
@@ -113,8 +112,8 @@ public class JWTAuthenticationClaimsSetVerifierTest extends TestCase {
 			.subject("123")
 			.build();
 
-		createForAS().verify(claimsSet);
-		createForOP().verify(claimsSet);
+		createForAS().verify(claimsSet, null);
+		createForOP().verify(claimsSet, null);
 	}
 
 
@@ -174,14 +173,14 @@ public class JWTAuthenticationClaimsSetVerifierTest extends TestCase {
 			.build();
 
 		try {
-			createForAS().verify(claimsSet);
+			createForAS().verify(claimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Invalid JWT audience claim, expected [https://c2id.com/token]", e.getMessage());
 		}
 
 		try {
-			createForOP().verify(claimsSet);
+			createForOP().verify(claimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Invalid JWT audience claim, expected [https://c2id.com/token, https://c2id.com]", e.getMessage());
@@ -189,8 +188,7 @@ public class JWTAuthenticationClaimsSetVerifierTest extends TestCase {
 	}
 
 
-	public void testMissingIssuer()
-		throws BadJWTException {
+	public void testMissingIssuer() {
 
 		Date now = new Date();
 		Date in5min = new Date(now.getTime() + 5*60*1000);
@@ -205,8 +203,7 @@ public class JWTAuthenticationClaimsSetVerifierTest extends TestCase {
 	}
 
 
-	public void testMissingSubject()
-		throws BadJWTException {
+	public void testMissingSubject() {
 
 		Date now = new Date();
 		Date in5min = new Date(now.getTime() + 5*60*1000);

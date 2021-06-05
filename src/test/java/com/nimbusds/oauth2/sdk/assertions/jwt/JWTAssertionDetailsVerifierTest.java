@@ -23,11 +23,12 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 
+import junit.framework.TestCase;
+
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
-import junit.framework.TestCase;
 
 
 public class JWTAssertionDetailsVerifierTest extends TestCase {
@@ -51,87 +52,103 @@ public class JWTAssertionDetailsVerifierTest extends TestCase {
 		assertEquals(2, verifier.getExpectedAudience().size());
 		
 		// good claims - aud = OP / AS issuer
-		verifier.verify(new JWTClaimsSet.Builder()
-			.issuer("123")
-			.subject("alice")
-			.audience(issuer.getValue())
-			.expirationTime(new Date(new Date().getTime() + 60*1000L))
-			.build());
+		verifier.verify(
+			new JWTClaimsSet.Builder()
+				.issuer("123")
+				.subject("alice")
+				.audience(issuer.getValue())
+				.expirationTime(new Date(new Date().getTime() + 60*1000L))
+				.build(),
+			null);
 		
 		// good claims - aud = token endpoint
-		verifier.verify(new JWTClaimsSet.Builder()
-			.issuer("123")
-			.subject("alice")
-			.audience(tokenEndpoint.toString())
-			.expirationTime(new Date(new Date().getTime() + 60*1000L))
-			.build());
+		verifier.verify(
+			new JWTClaimsSet.Builder()
+				.issuer("123")
+				.subject("alice")
+				.audience(tokenEndpoint.toString())
+				.expirationTime(new Date(new Date().getTime() + 60*1000L))
+				.build(),
+			null);
 		
 		// empty claims
 		try {
-			verifier.verify(new JWTClaimsSet.Builder().build());
+			verifier.verify(new JWTClaimsSet.Builder().build(), null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Missing JWT expiration claim", e.getMessage());
 		}
 		
 		try {
-			verifier.verify(new JWTClaimsSet.Builder()
-				.expirationTime(new Date(new Date().getTime() + 60*1000L))
-				.build());
+			verifier.verify(
+				new JWTClaimsSet.Builder()
+					.expirationTime(new Date(new Date().getTime() + 60*1000L))
+					.build(),
+				null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Missing JWT audience claim", e.getMessage());
 		}
 		
 		try {
-			verifier.verify(new JWTClaimsSet.Builder()
-				.expirationTime(new Date(new Date().getTime() + 60*1000L))
-				.audience(issuer.getValue())
-				.build());
+			verifier.verify(
+				new JWTClaimsSet.Builder()
+					.expirationTime(new Date(new Date().getTime() + 60*1000L))
+					.audience(issuer.getValue())
+					.build(),
+				null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Missing JWT issuer claim", e.getMessage());
 		}
 		
 		try {
-			verifier.verify(new JWTClaimsSet.Builder()
-				.expirationTime(new Date(new Date().getTime() + 60*1000L))
-				.audience(issuer.getValue())
-				.issuer("123")
-				.build());
+			verifier.verify(
+				new JWTClaimsSet.Builder()
+					.expirationTime(new Date(new Date().getTime() + 60*1000L))
+					.audience(issuer.getValue())
+					.issuer("123")
+					.build(),
+				null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Missing JWT subject claim", e.getMessage());
 		}
 		
 		try {
-			verifier.verify(new JWTClaimsSet.Builder()
-				.expirationTime(new Date(new Date().getTime() + 60*1000L))
-				.audience(issuer.getValue())
-				.issuer("123")
-				.build());
+			verifier.verify(
+				new JWTClaimsSet.Builder()
+					.expirationTime(new Date(new Date().getTime() + 60*1000L))
+					.audience(issuer.getValue())
+					.issuer("123")
+					.build(),
+				null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Missing JWT subject claim", e.getMessage());
 		}
 		
 		try {
-			verifier.verify(new JWTClaimsSet.Builder()
-				.expirationTime(new Date(new Date().getTime() - 60*1000L))
-				.audience(issuer.getValue())
-				.issuer("123")
-				.build());
+			verifier.verify(
+				new JWTClaimsSet.Builder()
+					.expirationTime(new Date(new Date().getTime() - 60*1000L))
+					.audience(issuer.getValue())
+					.issuer("123")
+					.build(),
+				null);
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Expired JWT", e.getMessage());
 		}
 		
 		try {
-			verifier.verify(new JWTClaimsSet.Builder()
-				.expirationTime(new Date(new Date().getTime() + 60*1000L))
-				.audience("bad-audience")
-				.issuer("123")
-				.build());
+			verifier.verify(
+				new JWTClaimsSet.Builder()
+					.expirationTime(new Date(new Date().getTime() + 60*1000L))
+					.audience("bad-audience")
+					.issuer("123")
+					.build(),
+				null);
 			fail();
 		} catch (BadJWTException e) {
 			assertTrue(e.getMessage().startsWith("Invalid JWT audience claim, expected"));

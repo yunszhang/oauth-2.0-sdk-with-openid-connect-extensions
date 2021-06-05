@@ -1753,3 +1753,7 @@ version 9.8 (2021-06-02)
       sector_identifier_uri (iss #364).
     * Updates OIDCClientMetadata to allow sector_identifier_uri URN values.
 
+version 9.8.1 (2021-06-05)
+    * Upgrades to Nimbus JOSE+JWT to 9.10.
+    * Updates to Tink 1.6.0.
+

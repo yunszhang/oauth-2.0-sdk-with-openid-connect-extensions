@@ -310,7 +310,7 @@ public class ClientAuthenticationVerifier<T> {
 
 			// Check claims first before requesting secret from backend
 			try {
-				claimsSetVerifier.verify(jwtAuth.getJWTAuthenticationClaimsSet().toJWTClaimsSet());
+				claimsSetVerifier.verify(jwtAuth.getJWTAuthenticationClaimsSet().toJWTClaimsSet(), null);
 			} catch (BadJWTException e) {
 				throw new InvalidClientException("Bad / expired JWT claims: " + e.getMessage());
 			}
@@ -346,7 +346,7 @@ public class ClientAuthenticationVerifier<T> {
 			
 			// Check claims first before requesting / retrieving public keys
 			try {
-				claimsSetVerifier.verify(jwtAuth.getJWTAuthenticationClaimsSet().toJWTClaimsSet());
+				claimsSetVerifier.verify(jwtAuth.getJWTAuthenticationClaimsSet().toJWTClaimsSet(), null);
 			} catch (BadJWTException e) {
 				throw new InvalidClientException("Bad / expired JWT claims: " + e.getMessage());
 			}
