@@ -1757,3 +1757,7 @@ version 9.8.1 (2021-06-05)
     * Upgrades to Nimbus JOSE+JWT to 9.10.
     * Updates to Tink 1.6.0.
 
+version 9.9 (2021-06-07)
+    * Adds SIVAESBasedPairwiseSubjectCodec option to pad local subjects.
+      Intended as additional measure against leaking end-user information and
+      hence correlation.

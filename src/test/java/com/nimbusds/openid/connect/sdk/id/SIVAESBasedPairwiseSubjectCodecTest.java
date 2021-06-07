@@ -20,6 +20,8 @@ package com.nimbusds.openid.connect.sdk.id;
 
 import java.net.URI;
 import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Random;
 import javax.crypto.spec.SecretKeySpec;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -33,87 +35,97 @@ import com.nimbusds.oauth2.sdk.id.Subject;
 public class SIVAESBasedPairwiseSubjectCodecTest extends TestCase {
 	
 	
-	public void testWith256BitKey()
+	public void testWithoutPadding()
 		throws Exception {
 		
-		int keyBitSize = 256;
-		byte[] keyBytes = new byte[ByteUtils.byteLength(keyBitSize)];
-		new SecureRandom().nextBytes(keyBytes);
-		
-		SIVAESBasedPairwiseSubjectCodec codec = new SIVAESBasedPairwiseSubjectCodec(new SecretKeySpec(keyBytes, "AES"));
-		
-		assertArrayEquals(keyBytes, codec.getSecretKey().getEncoded());
-		
-		SectorID sectorID = new SectorID(URI.create("https://example.com"));
-		Subject subject = new Subject("alice");
-		
-		Subject pairwiseSubject = codec.encode(sectorID, subject);
-		
-		System.out.println("Pairwise subject (" + keyBitSize + " bit key): " + pairwiseSubject);
-		
-		// Repeat
-		for (int i=0; i < 1000; i++) {
-			assertEquals(pairwiseSubject, codec.encode(sectorID, subject));
+		for (int keyBitSize: Arrays.asList(256, 384, 512)) {
+			
+			byte[] keyBytes = new byte[ByteUtils.byteLength(keyBitSize)];
+			new SecureRandom().nextBytes(keyBytes);
+			
+			SIVAESBasedPairwiseSubjectCodec codec = new SIVAESBasedPairwiseSubjectCodec(new SecretKeySpec(keyBytes, "AES"));
+			assertArrayEquals(keyBytes, codec.getSecretKey().getEncoded());
+			assertEquals(-1, codec.getPadSubjectToLength());
+			
+			SectorID sectorID = new SectorID(URI.create("https://example.com"));
+			Subject subject = new Subject("alice");
+			
+			Subject pairwiseSubject = codec.encode(sectorID, subject);
+			
+//			System.out.println("Pairwise subject (" + keyBitSize + " bit key): " + pairwiseSubject);
+			
+			// Repeat
+			for (int i = 0; i < 1000; i++) {
+				assertEquals(pairwiseSubject, codec.encode(sectorID, subject));
+			}
+			
+			assertEquals(sectorID, codec.decode(pairwiseSubject).getKey());
+			assertEquals(subject, codec.decode(pairwiseSubject).getValue());
 		}
-		
-		assertEquals(sectorID, codec.decode(pairwiseSubject).getKey());
-		assertEquals(subject, codec.decode(pairwiseSubject).getValue());
 	}
 	
 	
-	public void testWith384BitKey()
+	public void testWithPadding()
 		throws Exception {
 		
-		int keyBitSize = 384;
-		byte[] keyBytes = new byte[ByteUtils.byteLength(keyBitSize)];
-		new SecureRandom().nextBytes(keyBytes);
-		
-		SIVAESBasedPairwiseSubjectCodec codec = new SIVAESBasedPairwiseSubjectCodec(new SecretKeySpec(keyBytes, "AES"));
-		
-		assertArrayEquals(keyBytes, codec.getSecretKey().getEncoded());
-		
-		SectorID sectorID = new SectorID(URI.create("https://example.com"));
-		Subject subject = new Subject("alice");
-		
-		Subject pairwiseSubject = codec.encode(sectorID, subject);
-		
-		System.out.println("Pairwise subject (" + keyBitSize + " bit key): " + pairwiseSubject);
-		
-		// Repeat
-		for (int i=0; i < 1000; i++) {
-			assertEquals(pairwiseSubject, codec.encode(sectorID, subject));
+		for (int keyBitSize: Arrays.asList(256, 384, 512)) {
+			
+			byte[] keyBytes = new byte[ByteUtils.byteLength(keyBitSize)];
+			new SecureRandom().nextBytes(keyBytes);
+			
+			int padToLength = 8;
+			
+			SIVAESBasedPairwiseSubjectCodec codec = new SIVAESBasedPairwiseSubjectCodec(new SecretKeySpec(keyBytes, "AES"), padToLength);
+			assertArrayEquals(keyBytes, codec.getSecretKey().getEncoded());
+			assertEquals(padToLength, codec.getPadSubjectToLength());
+			
+			SectorID sectorID = new SectorID(URI.create("https://example.com"));
+			
+			int  pairwiseSubjectLength = -1;
+			
+			// Vary subject len from 1 to 8 chars
+			for (Subject subject: Arrays.asList(
+				new Subject("1"),
+				new Subject("12"),
+				new Subject("123"),
+				new Subject("1234"),
+				new Subject("12345"),
+				new Subject("123456"),
+				new Subject("1234567"),
+				new Subject("12345678"))) {
+				
+				Subject pairwiseSubject = codec.encode(sectorID, subject);
+				
+				if (pairwiseSubjectLength == -1) {
+					pairwiseSubjectLength = pairwiseSubject.getValue().length();
+				} else if (pairwiseSubjectLength != pairwiseSubject.getValue().length()) {
+					fail("Unexpected change in length");
+				}
+				
+//				System.out.println("Pairwise subject (" + keyBitSize + " bit key): " + pairwiseSubject);
+				
+				assertEquals(sectorID, codec.decode(pairwiseSubject).getKey());
+				assertEquals(subject, codec.decode(pairwiseSubject).getValue());
+			}
+			
+			// Vary subject len from 9 to 11 chars
+			for (Subject subject: Arrays.asList(
+				new Subject("123456789"),
+				new Subject("1234567890"),
+				new Subject("12345678901"))) {
+				
+				Subject pairwiseSubject = codec.encode(sectorID, subject);
+				
+				assertTrue(pairwiseSubjectLength < pairwiseSubject.getValue().length());
+				
+				pairwiseSubjectLength = pairwiseSubject.getValue().length();
+				
+//				System.out.println("Pairwise subject (" + keyBitSize + " bit key): " + pairwiseSubject);
+				
+				assertEquals(sectorID, codec.decode(pairwiseSubject).getKey());
+				assertEquals(subject, codec.decode(pairwiseSubject).getValue());
+			}
 		}
-		
-		assertEquals(sectorID, codec.decode(pairwiseSubject).getKey());
-		assertEquals(subject, codec.decode(pairwiseSubject).getValue());
-	}
-	
-	
-	public void testWith512BitKey()
-		throws Exception {
-		
-		int keyBitSize = 512;
-		byte[] keyBytes = new byte[ByteUtils.byteLength(keyBitSize)];
-		new SecureRandom().nextBytes(keyBytes);
-		
-		SIVAESBasedPairwiseSubjectCodec codec = new SIVAESBasedPairwiseSubjectCodec(new SecretKeySpec(keyBytes, "AES"));
-		
-		assertArrayEquals(keyBytes, codec.getSecretKey().getEncoded());
-		
-		SectorID sectorID = new SectorID(URI.create("https://example.com"));
-		Subject subject = new Subject("alice");
-		
-		Subject pairwiseSubject = codec.encode(sectorID, subject);
-		
-		System.out.println("Pairwise subject (" + keyBitSize + " bit key): " + pairwiseSubject);
-		
-		// Repeat
-		for (int i=0; i < 1000; i++) {
-			assertEquals(pairwiseSubject, codec.encode(sectorID, subject));
-		}
-		
-		assertEquals(sectorID, codec.decode(pairwiseSubject).getKey());
-		assertEquals(subject, codec.decode(pairwiseSubject).getValue());
 	}
 	
 	
@@ -127,6 +139,43 @@ public class SIVAESBasedPairwiseSubjectCodecTest extends TestCase {
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("The SIV AES secret key length must be 256, 384 or 512 bits", e.getMessage());
+		}
+	}
+	
+	
+	public void testWithEscapedSeparatorChars()
+		throws Exception {
+		
+		byte[] keyBytes = new byte[ByteUtils.byteLength(256)];
+		new SecureRandom().nextBytes(keyBytes);
+		
+		SIVAESBasedPairwiseSubjectCodec codec = new SIVAESBasedPairwiseSubjectCodec(new SecretKeySpec(keyBytes, "AES"));
+		
+		SectorID sectorID = new SectorID(URI.create("https://example.com"));
+		Subject subject = new Subject("a|b|c");
+		
+		Subject pairwiseSubject = codec.encode(sectorID, subject);
+		
+		assertEquals(sectorID, codec.decode(pairwiseSubject).getKey());
+		assertEquals(subject, codec.decode(pairwiseSubject).getValue());
+	}
+	
+	
+	public void testRandomLocalSubjectLength() throws InvalidPairwiseSubjectException {
+		
+		byte[] keyBytes = new byte[ByteUtils.byteLength(256)];
+		new SecureRandom().nextBytes(keyBytes);
+		
+		SIVAESBasedPairwiseSubjectCodec codec = new SIVAESBasedPairwiseSubjectCodec(new SecretKeySpec(keyBytes, "AES"));
+	
+		for (int i=0; i < 100; i++) {
+			
+			int subByteLen = new Random().nextInt(11) + 1; // 1 .. 12
+			Subject localSubject = new Subject(subByteLen);
+			
+			Subject pairWiseSubject = codec.encode(new SectorID("example.com"), localSubject);
+			System.out.println(pairWiseSubject);
+			assertEquals(localSubject, codec.decode(pairWiseSubject).getValue());
 		}
 	}
 	

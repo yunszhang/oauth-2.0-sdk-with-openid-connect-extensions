@@ -40,6 +40,21 @@ import org.cryptomator.siv.SivMode;
  * sector_id|local_sub
  * </pre>
  *
+ * <p>The encoder can be configured to pad the local subject up to a certain
+ * string length, typically the maximum expected length of the local subject
+ * identifiers, to ensure the output pairwise subject identifiers are output
+ * with a length that is uniform and doesn't vary with the local subject
+ * identifier length. This is intended as an additional measure against leaking
+ * end-user information and hence correlation. Note that local subjects that
+ * are longer than the configured length will appear as proportionally longer
+ * pairwise identifiers.
+ *
+ * <p>Pad local subjects that are shorter than 50 characters in length:
+ *
+ * <pre>
+ * new SIVAESBasedPairwiseSubjectCodec(secretKey, 50);
+ * </pre>
+ *
  * <p>Related specifications:
  *
  * <ul>
@@ -71,14 +86,37 @@ public class SIVAESBasedPairwiseSubjectCodec extends PairwiseSubjectCodec {
 	
 	
 	/**
+	 * Pads the local subject to the specified length, -1 for no padding.
+	 */
+	private final int padSubjectToLength;
+	
+	
+	/**
 	 * Creates a new SIV AES - based codec for pairwise subject
-	 * identifiers.
+	 * identifiers. Local subjects are not padded up to a certain length.
 	 *
 	 * @param secretKey A 256, 384, or 512-bit secret key. Must not be
 	 *                  {@code null}.
 	 */
 	public SIVAESBasedPairwiseSubjectCodec(final SecretKey secretKey) {
+		this(secretKey, -1);
+	}
+	
+	
+	/**
+	 * Creates a new SIV AES - based codec for pairwise subject
+	 * identifiers.
+	 *
+	 * @param secretKey          A 256, 384, or 512-bit secret key. Must
+	 *                           not be {@code null}.
+	 * @param padSubjectToLength Pads the local subject to the specified
+	 *                           length, -1 (negative integer) for no
+	 *                           padding.
+	 */
+	public SIVAESBasedPairwiseSubjectCodec(final SecretKey secretKey,
+					       final int padSubjectToLength) {
 		super(null);
+		
 		if (secretKey == null) {
 			throw new IllegalArgumentException("The SIV AES secret key must not be null");
 		}
@@ -101,6 +139,8 @@ public class SIVAESBasedPairwiseSubjectCodec extends PairwiseSubjectCodec {
 			default:
 				throw new IllegalArgumentException("The SIV AES secret key length must be 256, 384 or 512 bits");
 		}
+		
+		this.padSubjectToLength = padSubjectToLength;
 	}
 	
 	
@@ -115,11 +155,55 @@ public class SIVAESBasedPairwiseSubjectCodec extends PairwiseSubjectCodec {
 	}
 	
 	
+	/**
+	 * Returns the optional padded string length of local subjects.
+	 *
+	 * @return The padding string length, -1 (negative integer) for no
+	 *         padding.
+	 */
+	public int getPadSubjectToLength() {
+		
+		return padSubjectToLength;
+	}
+	
+	
+	private static String escapeSeparator(final String s) {
+		
+		return s.replace("|", "\\|");
+	}
+	
+	
 	@Override
 	public Subject encode(final SectorID sectorID, final Subject localSub) {
 		
-		// Join parameters, delimited by '\'
-		byte[] plainText = (sectorID.getValue().replace("|", "\\|") + '|' + localSub.getValue().replace("|", "\\|")).getBytes(CHARSET);
+		// Escape separator chars
+		final String escapedSectorIDString = escapeSeparator(sectorID.getValue());
+		final String escapedLocalSub = escapeSeparator(localSub.getValue());
+		
+		StringBuilder optionalPadding = new StringBuilder();
+		
+		if (padSubjectToLength > 0) {
+			// Apply padding
+			int paddingLength = padSubjectToLength - escapedLocalSub.length();
+			
+			if (paddingLength == 1) {
+				
+				optionalPadding = new StringBuilder("|");
+				
+			} else if (paddingLength > 1) {
+				
+				optionalPadding = new StringBuilder("|");
+				int i = paddingLength;
+				while (--i > 0) {
+					optionalPadding.append("0"); // pad with 0
+				}
+			}
+		}
+		
+		// Join parameters, delimited by '|'
+		final String plainTextString = (escapedSectorIDString + '|' + escapedLocalSub + optionalPadding);
+		
+		byte[] plainText = plainTextString.getBytes(CHARSET);
 		byte[] cipherText = AES_SIV.encrypt(aesCtrKey, macKey, plainText);
 		return new Subject(Base64URL.encode(cipherText).toString());
 	}
@@ -138,6 +222,7 @@ public class SIVAESBasedPairwiseSubjectCodec extends PairwiseSubjectCodec {
 			throw new InvalidPairwiseSubjectException("Decryption failed: " + e.getMessage(), e);
 		}
 		
+		// Split along the '|' delimiter
 		String[] parts = new String(plainText, CHARSET).split("(?<!\\\\)\\|");
 		
 		// Unescape delimiter
@@ -146,7 +231,7 @@ public class SIVAESBasedPairwiseSubjectCodec extends PairwiseSubjectCodec {
 		}
 		
 		// Check format
-		if (parts.length != 2) {
+		if (parts.length > 3) {
 			throw new InvalidPairwiseSubjectException("Invalid format: Unexpected number of tokens: " + parts.length);
 		}
 		
