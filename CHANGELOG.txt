@@ -1764,3 +1764,6 @@ version 9.9 (2021-06-07)
 
 version 9.9.1 (2021-07-03)
     * Updates Nimbus JOSE+JWT to 9.10.1.
+
+version 9.10 (2021-07-03)
+    * Adds OAuth2Error.INVALID_DPOP_PROOF constant.

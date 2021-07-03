@@ -229,6 +229,19 @@ public final class OAuth2Error {
 		new ErrorObject(OVERBROAD_SCOPE_CODE, "Overbroad scope", HTTPResponse.SC_BAD_REQUEST);
 	
 	
+	/**
+	 * The {@link OAuth2Error#INVALID_DPOP_PROOF} error code string.
+	 */
+	public static final String INVALID_DPOP_PROOF_CODE = "invalid_dpop_proof";
+	
+	
+	/**
+	 * The DPoP proof received by the authorisation server is invalid.
+	 */
+	public static final ErrorObject INVALID_DPOP_PROOF =
+		new ErrorObject(INVALID_DPOP_PROOF_CODE, "Invalid DPoP proof", HTTPResponse.SC_BAD_REQUEST);
+	
+	
 	// OpenID Connect Federation 1.0
 
 	/**

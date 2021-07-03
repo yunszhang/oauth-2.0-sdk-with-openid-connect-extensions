@@ -46,6 +46,7 @@ public class OAuth2ErrorTest extends TestCase {
 		assertEquals(400, OAuth2Error.UNSUPPORTED_RESPONSE_TYPE.getHTTPStatusCode());
 		assertEquals(400, OAuth2Error.INVALID_RESOURCE.getHTTPStatusCode());
 		assertEquals(400, OAuth2Error.OVERBROAD_SCOPE.getHTTPStatusCode());
+		assertEquals(400, OAuth2Error.INVALID_DPOP_PROOF.getHTTPStatusCode());
 		assertEquals(400, OAuth2Error.MISSING_TRUST_ANCHOR.getHTTPStatusCode());
 		assertEquals(400, OAuth2Error.VALIDATION_FAILED.getHTTPStatusCode());
 	}
@@ -88,6 +89,14 @@ public class OAuth2ErrorTest extends TestCase {
 		assertEquals("overbroad_scope", OAuth2Error.OVERBROAD_SCOPE.getCode());
 		assertEquals("Overbroad scope", OAuth2Error.OVERBROAD_SCOPE.getDescription());
 		assertEquals(400, OAuth2Error.OVERBROAD_SCOPE.getHTTPStatusCode());
+	}
+	
+	
+	public void testDPoPError() {
+		
+		assertEquals("invalid_dpop_proof", OAuth2Error.INVALID_DPOP_PROOF.getCode());
+		assertEquals("Invalid DPoP proof", OAuth2Error.INVALID_DPOP_PROOF.getDescription());
+		assertEquals(400, OAuth2Error.INVALID_DPOP_PROOF.getHTTPStatusCode());
 	}
 	
 	
