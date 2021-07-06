@@ -42,7 +42,7 @@ import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
 
 
-public class DefaultDPoPJWTFactoryTest extends TestCase {
+public class DefaultDPoPProofFactoryTest extends TestCase {
 	
 	
 	static final JWK RSA_JWK;
@@ -90,7 +90,7 @@ public class DefaultDPoPJWTFactoryTest extends TestCase {
 	static void testCycle(final JWK jwk, final JWSAlgorithm jwsAlg, final JWSVerifier jwsVerifier)
 		throws JOSEException, ParseException {
 		
-		DefaultDPoPJWTFactory factory = new DefaultDPoPJWTFactory(jwk, jwsAlg);
+		DefaultDPoPProofFactory factory = new DefaultDPoPProofFactory(jwk, jwsAlg);
 		
 		assertEquals(jwk.toPublicJWK(), factory.getPublicJWK());
 		
@@ -102,13 +102,13 @@ public class DefaultDPoPJWTFactoryTest extends TestCase {
 		
 		JWSHeader header = jwt.getHeader();
 		assertEquals(jwsAlg, header.getAlgorithm());
-		assertEquals(DefaultDPoPJWTFactory.TYPE, header.getType());
+		assertEquals(DefaultDPoPProofFactory.TYPE, header.getType());
 		assertEquals(factory.getPublicJWK(), header.getJWK());
 		assertEquals(3, header.getIncludedParams().size());
 		
 		JWTClaimsSet claimsSet = jwt.getJWTClaimsSet();
 		String jti = claimsSet.getJWTID();
-		assertEquals(DefaultDPoPJWTFactory.MINIMAL_JTI_BYTE_LENGTH, new Base64URL(jti).decode().length);
+		assertEquals(DefaultDPoPProofFactory.MINIMAL_JTI_BYTE_LENGTH, new Base64URL(jti).decode().length);
 		assertEquals(HTM, claimsSet.getStringClaim("htm"));
 		assertEquals(HTU, claimsSet.getURIClaim("htu"));
 		DateUtils.isWithin(claimsSet.getIssueTime(), new Date(), 2);

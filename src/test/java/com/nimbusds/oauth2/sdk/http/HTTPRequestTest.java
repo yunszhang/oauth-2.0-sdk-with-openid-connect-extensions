@@ -48,7 +48,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.dpop.DefaultDPoPJWTFactory;
+import com.nimbusds.oauth2.sdk.dpop.DefaultDPoPProofFactory;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
@@ -563,7 +563,7 @@ public class HTTPRequestTest {
 		RSAKey rsaJWK = new RSAKeyGenerator(2048)
 			.generate();
 		
-		SignedJWT dPoP = new DefaultDPoPJWTFactory(rsaJWK, JWSAlgorithm.RS256)
+		SignedJWT dPoP = new DefaultDPoPProofFactory(rsaJWK, JWSAlgorithm.RS256)
 			.createDPoPJWT(httpRequest.getMethod().name(), httpRequest.getURI());
 		
 		httpRequest.setDPoP(dPoP);

@@ -28,9 +28,9 @@ import com.nimbusds.oauth2.sdk.id.JWTID;
 
 
 /**
- * DPoP JWT factory.
+ * DPoP proof JWT factory.
  */
-public interface DPoPJWTFactory {
+public interface DPoPProofFactory {
 	
 	
 	/**
@@ -46,7 +46,7 @@ public interface DPoPJWTFactory {
 	
 	
 	/**
-	 * Creates a new DPoP JWT.
+	 * Creates a new DPoP proof.
 	 *
 	 * @param htm The HTTP request method. Must not be {@code null}.
 	 * @param htu The HTTP URI, without a query or fragment. Must not be
@@ -62,7 +62,7 @@ public interface DPoPJWTFactory {
 	
 	
 	/**
-	 * Creates a new DPoP JWT.
+	 * Creates a new DPoP proof.
 	 *
 	 * @param jti The JWT ID. Must not be {@code null}.
 	 * @param htm The HTTP request method. Must not be {@code null}.

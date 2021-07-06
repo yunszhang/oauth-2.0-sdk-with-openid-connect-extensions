@@ -1776,3 +1776,4 @@ version 9.10 (2021-07-06)
     * Removes deprecated BearerTokenError.isDescriptionWithValidChars.
     * Factors out common Bearer and DPoP token error logic into a
       TokenSchemeError class.
+    * Renames DPoPJWTFactory to DPoPProofFactory.

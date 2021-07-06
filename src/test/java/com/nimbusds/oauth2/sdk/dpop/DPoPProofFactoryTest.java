@@ -23,13 +23,13 @@ import junit.framework.TestCase;
 import com.nimbusds.jose.JOSEObjectType;
 
 
-public class DPoPJWTFactoryTest extends TestCase {
+public class DPoPProofFactoryTest extends TestCase {
 	
 	
 	public void testConstants() {
 		
-		assertEquals(new JOSEObjectType("dpop+jwt"), DPoPJWTFactory.TYPE);
+		assertEquals(new JOSEObjectType("dpop+jwt"), DPoPProofFactory.TYPE);
 		
-		assertEquals(96 / 8, DPoPJWTFactory.MINIMAL_JTI_BYTE_LENGTH);
+		assertEquals(96 / 8, DPoPProofFactory.MINIMAL_JTI_BYTE_LENGTH);
 	}
 }

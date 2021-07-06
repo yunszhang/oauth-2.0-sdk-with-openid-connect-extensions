@@ -34,9 +34,9 @@ import com.nimbusds.oauth2.sdk.id.JWTID;
 
 
 /**
- * Default DPoP JWT factory.
+ * Default DPoP proof factory.
  */
-public class DefaultDPoPJWTFactory implements DPoPJWTFactory {
+public class DefaultDPoPProofFactory implements DPoPProofFactory {
 	
 	
 	/**
@@ -46,7 +46,7 @@ public class DefaultDPoPJWTFactory implements DPoPJWTFactory {
 	
 	
 	/**
-	 * The signing JWS algorith.
+	 * The signing JWS algorithm.
 	 */
 	private final JWSAlgorithm jwsAlg;
 	
@@ -58,14 +58,14 @@ public class DefaultDPoPJWTFactory implements DPoPJWTFactory {
 	
 	
 	/**
-	 * Creates a new DPoP JWT factory using the default JCA provider.
+	 * Creates a new DPoP proof factory using the default JCA provider.
 	 *
 	 * @param jwk    The signing JWK. Must not be {@code null}.
 	 * @param jwsAlg The signing JWS algorithm. Must not be {@code null}.
 	 *
 	 * @throws JOSEException If signer creation failed.
 	 */
-	public DefaultDPoPJWTFactory(final JWK jwk, final JWSAlgorithm jwsAlg)
+	public DefaultDPoPProofFactory(final JWK jwk, final JWSAlgorithm jwsAlg)
 		throws JOSEException {
 		
 		this(jwk, jwsAlg, null);
@@ -73,7 +73,7 @@ public class DefaultDPoPJWTFactory implements DPoPJWTFactory {
 	
 	
 	/**
-	 * Creates a new DPoP JWT factory.
+	 * Creates a new DPoP proof factory.
 	 *
 	 * @param jwk         The signing JWK. Must not be {@code null}.
 	 * @param jwsAlg      The signing JWS algorithm. Must not be
@@ -83,7 +83,7 @@ public class DefaultDPoPJWTFactory implements DPoPJWTFactory {
 	 *
 	 * @throws JOSEException If signer creation failed.
 	 */
-	public DefaultDPoPJWTFactory(final JWK jwk, final JWSAlgorithm jwsAlg, final Provider jcaProvider)
+	public DefaultDPoPProofFactory(final JWK jwk, final JWSAlgorithm jwsAlg, final Provider jcaProvider)
 		throws JOSEException {
 		
 		if (! jwk.isPrivate()) {
