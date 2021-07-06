@@ -32,14 +32,14 @@ import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 
 /**
- * Bearer access token.
+ * DPoP access token.
  *
- * <p>Example bearer access token serialised to JSON:
+ * <p>Example DPoP access token serialised to JSON:
  *
  * <pre>
  * {
- *   "access_token" : "2YotnFZFEjr1zCsicMWpAA",
- *   "token_type"   : "bearer",
+ *   "access_token" : "aeniniu3oogh2quoot7Aipie9IeGh3te",
+ *   "token_type"   : "DPoP",
  *   "expires_in"   : 3600,
  *   "scope"        : "read write"
  * }
@@ -48,91 +48,38 @@ import com.nimbusds.oauth2.sdk.util.StringUtils;
  * <p>The above example token serialised to a HTTP Authorization header:
  *
  * <pre>
- * Authorization: Bearer 2YotnFZFEjr1zCsicMWpAA
+ * Authorization: DPoP aeniniu3oogh2quoot7Aipie9IeGh3te
  * </pre>
  *
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OAuth 2.0 (RFC 6749), sections 1.4 and 5.1.
- *     <li>OAuth 2.0 Bearer Token Usage (RFC 6750).
+ *     <li>OAuth 2.0 Demonstrating Proof-of-Possession at the Application Layer
+ *         (DPoP) (draft-ietf-oauth-dpop-03)
  * </ul>
  */
 @Immutable
-public class BearerAccessToken extends AccessToken {
+public class DPoPAccessToken extends AccessToken {
 	
 	
-	private static final long serialVersionUID = 2387121016151061194L;
-	
-	
-	/**
-	 * Creates a new minimal bearer access token with a randomly generated 
-	 * 256-bit (32-byte) value, Base64URL-encoded. The optional lifetime 
-	 * and scope are left undefined.
-	 */
-	public BearerAccessToken() {
-	
-		this(32);
-	}	
-
-
-	/**
-	 * Creates a new minimal bearer access token with a randomly generated 
-	 * value of the specified byte length, Base64URL-encoded. The optional 
-	 * lifetime and scope are left undefined.
-	 *
-	 * @param byteLength The byte length of the value to generate. Must be
-	 *                   greater than one.
-	 */
-	public BearerAccessToken(final int byteLength) {
-	
-		this(byteLength, 0L, null);
-	}
-
-
-	/**
-	 * Creates a new bearer access token with a randomly generated 256-bit 
-	 * (32-byte) value, Base64URL-encoded.
-	 *
-	 * @param lifetime The lifetime in seconds, 0 if not specified.
-	 * @param scope    The scope, {@code null} if not specified.
-	 */
-	public BearerAccessToken(final long lifetime, final Scope scope) {
-	
-		this(32, lifetime, scope);
-	}
-
-
-	/**
-	 * Creates a new bearer access token with a randomly generated value of 
-	 * the specified byte length, Base64URL-encoded.
-	 *
-	 * @param byteLength The byte length of the value to generate. Must be
-	 *                   greater than one.
-	 * @param lifetime   The lifetime in seconds, 0 if not specified.
-	 * @param scope      The scope, {@code null} if not specified.
-	 */
-	public BearerAccessToken(final int byteLength, final long lifetime, final Scope scope) {
-	
-		super(AccessTokenType.BEARER, byteLength, lifetime, scope);
-	}
+	private static final long serialVersionUID = 7745184045632691024L;
 	
 	
 	/**
-	 * Creates a new minimal bearer access token with the specified value.
+	 * Creates a new minimal DPoP access token with the specified value.
 	 * The optional lifetime and scope are left undefined.
 	 *
 	 * @param value The access token value. Must not be {@code null} or
 	 *              empty string.
 	 */
-	public BearerAccessToken(final String value) {
+	public DPoPAccessToken(final String value) {
 	
 		this(value, 0L, null);
 	}
 	
 	
 	/**
-	 * Creates a new bearer access token with the specified value and 
+	 * Creates a new DPoP access token with the specified value and
 	 * optional lifetime and scope.
 	 *
 	 * @param value    The access token value. Must not be {@code null} or
@@ -140,20 +87,20 @@ public class BearerAccessToken extends AccessToken {
 	 * @param lifetime The lifetime in seconds, 0 if not specified.
 	 * @param scope    The scope, {@code null} if not specified.
 	 */
-	public BearerAccessToken(final String value, final long lifetime, final Scope scope) {
+	public DPoPAccessToken(final String value, final long lifetime, final Scope scope) {
 	
-		super(AccessTokenType.BEARER, value, lifetime, scope);
+		super(AccessTokenType.DPOP, value, lifetime, scope);
 	}
 	
 	
 	/**
-	 * Returns the HTTP Authorization header value for this bearer access 
+	 * Returns the HTTP Authorization header value for this DPoP access
 	 * token.
 	 *
 	 * <p>Example:
 	 *
 	 * <pre>
-	 * Authorization: Bearer eyJhbGciOiJIUzI1NiJ9
+	 * Authorization: DPoP aeniniu3oogh2quoot7Aipie9IeGh3te
 	 * </pre>
 	 *
 	 * @return The HTTP Authorization header.
@@ -161,57 +108,57 @@ public class BearerAccessToken extends AccessToken {
 	@Override
 	public String toAuthorizationHeader(){
 	
-		return "Bearer " + getValue();
+		return "DPoP " + getValue();
 	}
 	
 	
 	@Override
 	public boolean equals(final Object object) {
 	
-		return object instanceof BearerAccessToken &&
+		return object instanceof DPoPAccessToken &&
 		       this.toString().equals(object.toString());
 	}
 
 
 	/**
-	 * Parses a bearer access token from a JSON object access token 
+	 * Parses a DPoP access token from a JSON object access token
 	 * response.
 	 *
 	 * @param jsonObject The JSON object to parse. Must not be 
 	 *                   {@code null}.
 	 *
-	 * @return The bearer access token.
+	 * @return The DPoP access token.
 	 *
 	 * @throws ParseException If the JSON object couldn't be parsed to a
-	 *                        bearer access token.
+	 *                        DPoP access token.
 	 */
-	public static BearerAccessToken parse(final JSONObject jsonObject)
+	public static DPoPAccessToken parse(final JSONObject jsonObject)
 		throws ParseException {
-		
-		AccessTokenUtils.parseAndEnsureType(jsonObject, AccessTokenType.BEARER);
+
+		AccessTokenUtils.parseAndEnsureType(jsonObject, AccessTokenType.DPOP);
 		String accessTokenValue = AccessTokenUtils.parseValue(jsonObject);
 		long lifetime = AccessTokenUtils.parseLifetime(jsonObject);
 		Scope scope = AccessTokenUtils.parseScope(jsonObject);
-		return new BearerAccessToken(accessTokenValue, lifetime, scope);
+		return new DPoPAccessToken(accessTokenValue, lifetime, scope);
 	}
 	
 	
 	/**
-	 * Parses an HTTP Authorization header for a bearer access token.
+	 * Parses an HTTP Authorization header for a DPoP access token.
 	 *
 	 * @param header The HTTP Authorization header value to parse. May be
 	 *               {@code null} if the header is missing, in which case
 	 *               an exception will be thrown.
 	 *
-	 * @return The bearer access token.
+	 * @return The DPoP access token.
 	 *
 	 * @throws ParseException If the HTTP Authorization header value 
-	 *                        couldn't be parsed to a bearer access token.
+	 *                        couldn't be parsed to a DPoP access token.
 	 */
-	public static BearerAccessToken parse(final String header)
+	public static DPoPAccessToken parse(final String header)
 		throws ParseException {
 		
-		return new BearerAccessToken(AccessTokenUtils.parseValueFromHeader(header, AccessTokenType.BEARER));
+		return new DPoPAccessToken(AccessTokenUtils.parseValueFromHeader(header, AccessTokenType.DPOP));
 	}
 	
 	
@@ -225,7 +172,7 @@ public class BearerAccessToken extends AccessToken {
 	 * @throws ParseException If a bearer access token wasn't found in the
 	 *                        parameters.
 	 */
-	public static BearerAccessToken parse(final Map<String,List<String>> parameters)
+	public static DPoPAccessToken parse(final Map<String,List<String>> parameters)
 		throws ParseException {
 		
 		if (! parameters.containsKey("access_token")) {
@@ -238,7 +185,7 @@ public class BearerAccessToken extends AccessToken {
 			throw new ParseException("Blank / empty access token", BearerTokenError.INVALID_REQUEST);
 		}
 		
-		return new BearerAccessToken(accessTokenValue);
+		return new DPoPAccessToken(accessTokenValue);
 	}
 	
 	
@@ -253,7 +200,7 @@ public class BearerAccessToken extends AccessToken {
 	 * @throws ParseException If a bearer access token wasn't found in the
 	 *                        HTTP request.
 	 */
-	public static BearerAccessToken parse(final HTTPRequest request)
+	public static DPoPAccessToken parse(final HTTPRequest request)
 		throws ParseException {
 
 		// See http://tools.ietf.org/html/rfc6750#section-2

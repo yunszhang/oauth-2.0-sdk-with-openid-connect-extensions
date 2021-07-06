@@ -19,21 +19,27 @@ package com.nimbusds.oauth2.sdk.token;
 
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.Scope;
 import junit.framework.TestCase;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.Scope;
 
-public class BearerTokenErrorTest extends TestCase {
+
+public class DPoPTokenErrorTest extends TestCase {
 
 
 	public void testConstantCodes() {
 
-		assertNull(BearerTokenError.MISSING_TOKEN.getCode());
-		assertEquals("invalid_request", BearerTokenError.INVALID_REQUEST.getCode());
-		assertEquals("invalid_token", BearerTokenError.INVALID_TOKEN.getCode());
-		assertEquals("insufficient_scope", BearerTokenError.INSUFFICIENT_SCOPE.getCode());
+		assertNull(DPoPTokenError.MISSING_TOKEN.getCode());
+		assertEquals("invalid_request", DPoPTokenError.INVALID_REQUEST.getCode());
+		assertEquals("invalid_token", DPoPTokenError.INVALID_TOKEN.getCode());
+		assertEquals("insufficient_scope", DPoPTokenError.INSUFFICIENT_SCOPE.getCode());
 	}
 	
 	
@@ -42,27 +48,29 @@ public class BearerTokenErrorTest extends TestCase {
 		
 		String code = "invalid_request";
 		String description = "Invalid request";
-		BearerTokenError error = new BearerTokenError(code, description);
-		assertEquals(AccessTokenType.BEARER, error.getScheme());
+		DPoPTokenError error = new DPoPTokenError(code, description);
+		assertEquals(AccessTokenType.DPOP, error.getScheme());
 		assertEquals(code, error.getCode());
 		assertEquals(description, error.getDescription());
 		assertNull(error.getURI());
 		assertEquals(0, error.getHTTPStatusCode());
 		assertNull(error.getRealm());
 		assertNull(error.getScope());
+		assertNull(error.getJWSAlgorithms());
 		
 		String wwwHeader = error.toWWWAuthenticateHeader();
-		assertEquals("Bearer error=\"invalid_request\", error_description=\"Invalid request\"", wwwHeader);
+		assertEquals("DPoP error=\"invalid_request\", error_description=\"Invalid request\"", wwwHeader);
 		
-		error = BearerTokenError.parse(wwwHeader);
+		error = DPoPTokenError.parse(wwwHeader);
 		
-		assertEquals(AccessTokenType.BEARER, error.getScheme());
+		assertEquals(AccessTokenType.DPOP, error.getScheme());
 		assertEquals(code, error.getCode());
 		assertEquals(description, error.getDescription());
 		assertNull(error.getURI());
 		assertEquals(0, error.getHTTPStatusCode());
 		assertNull(error.getRealm());
 		assertNull(error.getScope());
+		assertNull(error.getJWSAlgorithms());
 	}
 	
 	
@@ -72,26 +80,28 @@ public class BearerTokenErrorTest extends TestCase {
 		String code = "invalid_request";
 		String description = "Invalid request";
 		int statusCode = 400;
-		BearerTokenError error = new BearerTokenError(code, description, statusCode);
-		assertEquals(AccessTokenType.BEARER, error.getScheme());
+		DPoPTokenError error = new DPoPTokenError(code, description, statusCode);
+		assertEquals(AccessTokenType.DPOP, error.getScheme());
 		assertEquals(code, error.getCode());
 		assertEquals(description, error.getDescription());
 		assertNull(error.getURI());
 		assertEquals(400, error.getHTTPStatusCode());
 		assertNull(error.getRealm());
 		assertNull(error.getScope());
+		assertNull(error.getJWSAlgorithms());
 		
 		String wwwHeader = error.toWWWAuthenticateHeader();
-		assertEquals("Bearer error=\"invalid_request\", error_description=\"Invalid request\"", wwwHeader);
+		assertEquals("DPoP error=\"invalid_request\", error_description=\"Invalid request\"", wwwHeader);
 		
-		error = BearerTokenError.parse(wwwHeader);
-		assertEquals(AccessTokenType.BEARER, error.getScheme());
+		error = DPoPTokenError.parse(wwwHeader);
+		assertEquals(AccessTokenType.DPOP, error.getScheme());
 		assertEquals(code, error.getCode());
 		assertEquals(description, error.getDescription());
 		assertNull(error.getURI());
 		assertEquals(0, error.getHTTPStatusCode());
 		assertNull(error.getRealm());
 		assertNull(error.getScope());
+		assertNull(error.getJWSAlgorithms());
 	}
 	
 	
@@ -104,41 +114,44 @@ public class BearerTokenErrorTest extends TestCase {
 		URI uri = URI.create("https://c2id.com/errors/invalid_request");
 		String realm = "c2id.com";
 		Scope scope = new Scope("read", "write");
-		BearerTokenError error = new BearerTokenError(code, description, statusCode, uri, realm, scope);
-		assertEquals(AccessTokenType.BEARER, error.getScheme());
+		Set<JWSAlgorithm> jwsAlgs = new HashSet<>(Arrays.asList(JWSAlgorithm.RS256, JWSAlgorithm.ES256));
+		DPoPTokenError error = new DPoPTokenError(code, description, statusCode, uri, realm, scope, jwsAlgs);
+		assertEquals(AccessTokenType.DPOP, error.getScheme());
 		assertEquals(code, error.getCode());
 		assertEquals(description, error.getDescription());
 		assertEquals(uri, error.getURI());
 		assertEquals(400, error.getHTTPStatusCode());
 		assertEquals(realm, error.getRealm());
 		assertEquals(scope, error.getScope());
+		assertEquals(jwsAlgs, error.getJWSAlgorithms());
 		
 		String wwwHeader = error.toWWWAuthenticateHeader();
-		assertEquals("Bearer realm=\"c2id.com\", error=\"invalid_request\", error_description=\"Invalid request\", error_uri=\"https://c2id.com/errors/invalid_request\", scope=\"read write\"", wwwHeader);
+		assertEquals("DPoP realm=\"c2id.com\", error=\"invalid_request\", error_description=\"Invalid request\", error_uri=\"https://c2id.com/errors/invalid_request\", scope=\"read write\", algs=\"ES256 RS256\"", wwwHeader);
 		
-		error = BearerTokenError.parse(wwwHeader);
+		error = DPoPTokenError.parse(wwwHeader);
 		
-		assertEquals(AccessTokenType.BEARER, error.getScheme());
+		assertEquals(AccessTokenType.DPOP, error.getScheme());
 		assertEquals(code, error.getCode());
 		assertEquals(description, error.getDescription());
 		assertEquals(uri, error.getURI());
 		assertEquals(0, error.getHTTPStatusCode());
 		assertEquals(realm, error.getRealm());
 		assertEquals(scope, error.getScope());
+		assertEquals(jwsAlgs, error.getJWSAlgorithms());
 	}
 
 
 	public void testSerializeAndParseWWWAuthHeader()
 		throws Exception {
 
-		BearerTokenError error = BearerTokenError.INVALID_TOKEN.setRealm("example.com");
+		DPoPTokenError error = DPoPTokenError.INVALID_TOKEN.setRealm("example.com");
 
 		assertEquals("example.com", error.getRealm());
 		assertEquals("invalid_token", error.getCode());
 
 		String wwwAuth = error.toWWWAuthenticateHeader();
 
-		error = BearerTokenError.parse(wwwAuth);
+		error = DPoPTokenError.parse(wwwAuth);
 
 		assertEquals("example.com", error.getRealm());
 		assertEquals("invalid_token", error.getCode());
@@ -147,7 +160,7 @@ public class BearerTokenErrorTest extends TestCase {
 
 	public void testNullRealm() {
 
-		BearerTokenError error = BearerTokenError.INVALID_REQUEST.setRealm(null);
+		DPoPTokenError error = DPoPTokenError.INVALID_REQUEST.setRealm(null);
 
 		assertNull(error.getRealm());
 	}
@@ -156,11 +169,11 @@ public class BearerTokenErrorTest extends TestCase {
 	public void testNoErrorCode()
 		throws Exception {
 
-		String wwwAuth = "Bearer realm=\"example.com\"";
+		String wwwAuth = "DPoP realm=\"example.com\"";
 
-		BearerTokenError error = BearerTokenError.parse(wwwAuth);
+		DPoPTokenError error = DPoPTokenError.parse(wwwAuth);
 
-		assertEquals(error, BearerTokenError.MISSING_TOKEN);
+		assertEquals(error, DPoPTokenError.MISSING_TOKEN);
 
 		assertEquals("example.com", error.getRealm());
 		assertNull(error.getCode());
@@ -170,11 +183,11 @@ public class BearerTokenErrorTest extends TestCase {
 	public void testEmptyRealm()
 		throws Exception {
 
-		String wwwAuth = "Bearer realm=\"\"";
+		String wwwAuth = "DPoP realm=\"\"";
 
-		BearerTokenError error = BearerTokenError.parse(wwwAuth);
+		DPoPTokenError error = DPoPTokenError.parse(wwwAuth);
 
-		assertEquals(error, BearerTokenError.MISSING_TOKEN);
+		assertEquals(error, DPoPTokenError.MISSING_TOKEN);
 
 		assertEquals("", error.getRealm());
 		assertNull(error.getCode());
@@ -184,11 +197,11 @@ public class BearerTokenErrorTest extends TestCase {
 	public void testBlankRealm()
 		throws Exception {
 
-		String wwwAuth = "Bearer realm=\" \"";
+		String wwwAuth = "DPoP realm=\" \"";
 
-		BearerTokenError error = BearerTokenError.parse(wwwAuth);
+		DPoPTokenError error = DPoPTokenError.parse(wwwAuth);
 
-		assertEquals(error, BearerTokenError.MISSING_TOKEN);
+		assertEquals(error, DPoPTokenError.MISSING_TOKEN);
 
 		assertEquals(" ", error.getRealm());
 		assertNull(error.getCode());
@@ -203,11 +216,11 @@ public class BearerTokenErrorTest extends TestCase {
 			sb.append('x');
 		}
 		
-		String wwwAuth = "Bearer realm=\"" + sb + "\"";
+		String wwwAuth = "DPoP realm=\"" + sb + "\"";
 
-		BearerTokenError error = BearerTokenError.parse(wwwAuth);
+		DPoPTokenError error = DPoPTokenError.parse(wwwAuth);
 
-		assertEquals(error, BearerTokenError.MISSING_TOKEN);
+		assertEquals(error, DPoPTokenError.MISSING_TOKEN);
 
 		assertEquals(sb.toString(), error.getRealm());
 		assertNull(error.getCode());
@@ -222,11 +235,11 @@ public class BearerTokenErrorTest extends TestCase {
 			sb.append('x');
 		}
 		
-		String wwwAuth = "Bearer realm=\"" + sb + "\"";
+		String wwwAuth = "DPoP realm=\"" + sb + "\"";
 
-		BearerTokenError error = BearerTokenError.parse(wwwAuth);
+		DPoPTokenError error = DPoPTokenError.parse(wwwAuth);
 
-		assertEquals(error, BearerTokenError.MISSING_TOKEN);
+		assertEquals(error, DPoPTokenError.MISSING_TOKEN);
 		assertNull("Too long, not parsed", error.getRealm());
 		assertNull(error.getCode());
 	}
@@ -235,12 +248,12 @@ public class BearerTokenErrorTest extends TestCase {
 	public void testInsufficientScope()
 		throws Exception {
 
-		BearerTokenError error = BearerTokenError.INSUFFICIENT_SCOPE;
+		DPoPTokenError error = DPoPTokenError.INSUFFICIENT_SCOPE;
 		error = error.setScope(Scope.parse("offline_access"));
 
 		String wwwAuth = error.toWWWAuthenticateHeader();
 
-		error = BearerTokenError.parse(wwwAuth);
+		error = DPoPTokenError.parse(wwwAuth);
 
 		assertEquals(Scope.parse("offline_access"), error.getScope());
 	}
@@ -248,39 +261,53 @@ public class BearerTokenErrorTest extends TestCase {
 
 	public void testSetDescription() {
 
-		assertEquals("description", BearerTokenError.INSUFFICIENT_SCOPE.setDescription("description").getDescription());
+		assertEquals("description", DPoPTokenError.INSUFFICIENT_SCOPE.setDescription("description").getDescription());
 	}
 
 
 	public void testAppendDescription() {
 
-		assertEquals("Insufficient scope: offline_access", BearerTokenError.INSUFFICIENT_SCOPE.appendDescription(": offline_access").getDescription());
+		assertEquals("Insufficient scope: offline_access", DPoPTokenError.INSUFFICIENT_SCOPE.appendDescription(": offline_access").getDescription());
 	}
 
 
 	public void testSetHTTPStatusCode() {
 
-		assertEquals(400, BearerTokenError.INSUFFICIENT_SCOPE.setHTTPStatusCode(400).getHTTPStatusCode());
+		assertEquals(400, DPoPTokenError.INSUFFICIENT_SCOPE.setHTTPStatusCode(400).getHTTPStatusCode());
 	}
 
 
 	public void testSetURI()
 		throws Exception {
 
-		URI uri = new URI("http://example.com");
+		URI uri = new URI("https://example.com");
 
-		assertEquals(uri, BearerTokenError.INSUFFICIENT_SCOPE.setURI(uri).getURI());
+		assertEquals(uri, DPoPTokenError.INSUFFICIENT_SCOPE.setURI(uri).getURI());
+	}
+	
+	
+	public void testSetJWSAlgorithms() {
+		
+		Set<JWSAlgorithm> jwsAlgorithms = new HashSet<>(Arrays.asList(JWSAlgorithm.RS256, JWSAlgorithm.ES256));
+		
+		assertEquals(jwsAlgorithms, DPoPTokenError.INVALID_TOKEN.setJWSAlgorithms(jwsAlgorithms).getJWSAlgorithms());
+	}
+	
+	
+	public void testSetJWSAlgorithms_null() {
+		
+		assertNull(DPoPTokenError.INVALID_TOKEN.setJWSAlgorithms(null).getJWSAlgorithms());
 	}
 
 
 	public void testParseInvalidTokenHeader()
 		throws Exception {
 
-		String header = "Bearer error=\"invalid_token\", error_description=\"Invalid access token\"";
+		String header = "DPoP error=\"invalid_token\", error_description=\"Invalid access token\"";
 
-		BearerTokenError error = BearerTokenError.parse(header);
+		DPoPTokenError error = DPoPTokenError.parse(header);
 
-		assertEquals(BearerTokenError.INVALID_TOKEN, error);
+		assertEquals(DPoPTokenError.INVALID_TOKEN, error);
 		assertEquals("Invalid access token", error.getDescription());
 		assertNull(error.getURI());
 		assertNull(error.getRealm());
@@ -288,13 +315,13 @@ public class BearerTokenErrorTest extends TestCase {
 	
 	
 	// see https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/197/userinfo-error-response-by-google-not
-	public void testParseGoogleBearerTokenError()
+	public void testParseGoogleDPoPTokenError()
 		throws Exception {
 		
-		String header = "Bearer realm=\"https://acounts.google.com/\", error=invalid_token";
+		String header = "DPoP realm=\"https://acounts.google.com/\", error=invalid_token";
 		
-		BearerTokenError error = BearerTokenError.parse(header);
-		assertEquals(BearerTokenError.INVALID_TOKEN, error);
+		DPoPTokenError error = DPoPTokenError.parse(header);
+		assertEquals(DPoPTokenError.INVALID_TOKEN, error);
 		assertEquals("invalid_token", error.getCode());
 		assertNull(error.getDescription());
 		assertNull(error.getURI());
@@ -303,13 +330,13 @@ public class BearerTokenErrorTest extends TestCase {
 	
 	
 	// see https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/197/userinfo-error-response-by-google-not
-	public void testParseGoogleBearerTokenError_extended()
+	public void testParseGoogleDPoPTokenError_extended()
 		throws Exception {
 		
-		String header = "Bearer realm=\"https://acounts.google.com/\", error=invalid_token, error_description=\"Invalid access token\"";
+		String header = "DPoP realm=\"https://acounts.google.com/\", error=invalid_token, error_description=\"Invalid access token\"";
 		
-		BearerTokenError error = BearerTokenError.parse(header);
-		assertEquals(BearerTokenError.INVALID_TOKEN, error);
+		DPoPTokenError error = DPoPTokenError.parse(header);
+		assertEquals(DPoPTokenError.INVALID_TOKEN, error);
 		assertEquals("invalid_token", error.getCode());
 		assertEquals("Invalid access token", error.getDescription());
 		assertNull(error.getURI());
@@ -320,15 +347,15 @@ public class BearerTokenErrorTest extends TestCase {
 	public void testRealmWithEscapeDoubleQuotes()
 		throws Exception {
 		
-		BearerTokenError error = BearerTokenError.INVALID_TOKEN.setRealm("\"my-realm\"");
+		DPoPTokenError error = DPoPTokenError.INVALID_TOKEN.setRealm("\"my-realm\"");
 		
 		assertEquals("\"my-realm\"", error.getRealm());
 		
 		String wwwAuthHeader = error.toWWWAuthenticateHeader();
 		
-		assertEquals("Bearer realm=\"\\\"my-realm\\\"\", error=\"invalid_token\", error_description=\"Invalid access token\"", wwwAuthHeader);
+		assertEquals("DPoP realm=\"\\\"my-realm\\\"\", error=\"invalid_token\", error_description=\"Invalid access token\"", wwwAuthHeader);
 		
-		BearerTokenError parsed = BearerTokenError.parse(wwwAuthHeader);
+		DPoPTokenError parsed = DPoPTokenError.parse(wwwAuthHeader);
 		
 		assertEquals(error.getRealm(), parsed.getRealm());
 	}
@@ -337,7 +364,7 @@ public class BearerTokenErrorTest extends TestCase {
 	public void testInvalidCharsInErrorCode() {
 		
 		try {
-			new BearerTokenError("\"invalid_token\"", null);
+			new DPoPTokenError("\"invalid_token\"", null);
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("Illegal char(s) in code, see RFC 6749, section 5.2", e.getMessage());
@@ -348,7 +375,7 @@ public class BearerTokenErrorTest extends TestCase {
 	public void testInvalidCharsInErrorDescription() {
 		
 		try {
-			new BearerTokenError("invalid_token", "Invalid token: \"abc\"");
+			new DPoPTokenError("invalid_token", "Invalid token: \"abc\"");
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("Illegal char(s) in description, see RFC 6749, section 5.2", e.getMessage());
@@ -359,7 +386,7 @@ public class BearerTokenErrorTest extends TestCase {
 	public void testInvalidCharsInScope() {
 		
 		try {
-			BearerTokenError.INSUFFICIENT_SCOPE.setScope(new Scope("read", "\"write\""));
+			DPoPTokenError.INSUFFICIENT_SCOPE.setScope(new Scope("read", "\"write\""));
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("The scope contains illegal characters, see RFC 6750, section 3", e.getMessage());
@@ -371,29 +398,60 @@ public class BearerTokenErrorTest extends TestCase {
 		throws ParseException {
 		
 		// skip invalid error code
-		assertNull(BearerTokenError.parse("Bearer error=\"\"invalid token\"").getCode());
+		assertNull(DPoPTokenError.parse("DPoP error=\"\"invalid token\"").getCode());
 	}
 	
 	
 	public void testIgnoreParseInvalidErrorURI()
 		throws ParseException {
 		
-		BearerTokenError error = BearerTokenError.parse("Bearer error=invalid_token, error_uri=\"a b c\"");
+		DPoPTokenError error = DPoPTokenError.parse("DPoP error=invalid_token, error_uri=\"a b c\"");
 		
-		assertEquals(BearerTokenError.INVALID_TOKEN.getCode(), error.getCode());
+		assertEquals(DPoPTokenError.INVALID_TOKEN.getCode(), error.getCode());
 		assertNull(error.getURI());
 	}
 	
 	
-	// Test lenient parsing with comma after Bearer
+	// Test lenient parsing with comma after DPoP
 	//  https://tools.ietf.org/html/rfc6750#section-3.1
 	public void testParseWithCommaAfterBearer() throws ParseException {
 		
-		BearerTokenError error = BearerTokenError.parse("Bearer, error=\"invalid_token\", error_description=\"The Token was expired\"");
+		DPoPTokenError error = DPoPTokenError.parse("DPoP, error=\"invalid_token\", error_description=\"The Token was expired\"");
 		assertEquals("invalid_token", error.getCode());
 		assertEquals("The Token was expired", error.getDescription());
 		assertNull(error.getRealm());
 		assertNull(error.getScope());
 		assertEquals("HTTP status code not known", 0, error.getHTTPStatusCode()); // Not known
+	}
+	
+	
+	public void testParse_emptyAlgs() throws ParseException {
+		
+		DPoPTokenError error = DPoPTokenError.parse("DPoP algs=\"\"");
+		assertNull(error.getJWSAlgorithms());
+	}
+	
+	
+	public void testParse_oneAlg() throws ParseException {
+		
+		DPoPTokenError error = DPoPTokenError.parse("DPoP algs=\"RS256\"");
+		assertEquals(Collections.singleton(JWSAlgorithm.RS256), error.getJWSAlgorithms());
+	}
+	
+	
+	public void testParse_twoAlgs() throws ParseException {
+		
+		DPoPTokenError error = DPoPTokenError.parse("DPoP algs=\"RS256 ES256\"");
+		assertEquals(new HashSet<>(Arrays.asList(JWSAlgorithm.RS256, JWSAlgorithm.ES256)), error.getJWSAlgorithms());
+	}
+	
+	
+	public void testParseRFCExample() throws ParseException {
+		
+		String wwwHeader = "DPoP realm=\"WallyWorld\", algs=\"ES256 PS256\"";
+		
+		DPoPTokenError error = DPoPTokenError.parse(wwwHeader);
+		assertEquals("WallyWorld", error.getRealm());
+		assertEquals(new HashSet<>(Arrays.asList(JWSAlgorithm.ES256, JWSAlgorithm.PS256)), error.getJWSAlgorithms());
 	}
 }

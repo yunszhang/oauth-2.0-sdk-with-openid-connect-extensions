@@ -27,34 +27,33 @@ import java.util.Map;
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
-import com.nimbusds.jose.util.Base64;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 
 
-public class BearerAccessTokenTest extends TestCase {
+public class DPoPAccessTokenTest extends TestCase {
 
 
 	public void testMinimalConstructor()
 		throws Exception {
 		
-		AccessToken token = new BearerAccessToken("abc");
-		
+		AccessToken token = new DPoPAccessToken("abc");
+		assertEquals(AccessTokenType.DPOP, token.getType());
 		assertEquals("abc", token.getValue());
 		assertEquals(0L, token.getLifetime());
 		assertNull(token.getScope());
 		
-		assertEquals("Bearer abc", token.toAuthorizationHeader());
+		assertEquals("DPoP abc", token.toAuthorizationHeader());
 
 		JSONObject jsonObject = token.toJSONObject();
 
 		assertEquals("abc", jsonObject.get("access_token"));
-		assertEquals("Bearer", jsonObject.get("token_type"));
+		assertEquals("DPoP", jsonObject.get("token_type"));
 		assertEquals(2, jsonObject.size());
 
-		token = BearerAccessToken.parse(jsonObject);
-
+		token = DPoPAccessToken.parse(jsonObject);
+		assertEquals(AccessTokenType.DPOP, token.getType());
 		assertEquals("abc", token.getValue());
 		assertEquals(0L, token.getLifetime());
 		assertNull(token.getScope());
@@ -65,60 +64,29 @@ public class BearerAccessTokenTest extends TestCase {
 	}
 
 
-	public void testGenerate() {
-
-		AccessToken token = new BearerAccessToken(12);
-
-		assertNotNull(token);
-
-		assertEquals(12, new Base64(token.getValue()).decode().length);
-		assertEquals(0L, token.getLifetime());
-		assertNull(token.getScope());
-
-		String header = token.toAuthorizationHeader();
-		assertTrue(header.startsWith("Bearer "));
-		assertEquals(token.getValue(), header.substring("Bearer ".length()));
-	}
-
-
-	public void testGenerateDefault() {
-
-		AccessToken token = new BearerAccessToken();
-
-		assertNotNull(token);
-
-		assertEquals(32, new Base64(token.getValue()).decode().length);
-		assertEquals(0L, token.getLifetime());
-		assertNull(token.getScope());
-
-		String header = token.toAuthorizationHeader();
-		assertEquals("Bearer " + token.getValue(), header);
-	}
-
-
 	public void testFullConstructor()
 		throws Exception {
 		
-		Scope scope = Scope.parse("read write");
+		Scope scope = new Scope("read", "write");
 
-		AccessToken token = new BearerAccessToken("abc", 1500, scope);
-		
+		AccessToken token = new DPoPAccessToken("abc", 1500L, scope);
+		assertEquals(AccessTokenType.DPOP, token.getType());
 		assertEquals("abc", token.getValue());
 		assertEquals(1500L, token.getLifetime());
 		assertEquals(scope, token.getScope());
 		
-		assertEquals("Bearer abc", token.toAuthorizationHeader());
+		assertEquals("DPoP abc", token.toAuthorizationHeader());
 
 		JSONObject jsonObject = token.toJSONObject();
 
 		assertEquals("abc", jsonObject.get("access_token"));
-		assertEquals("Bearer", jsonObject.get("token_type"));
+		assertEquals("DPoP", jsonObject.get("token_type"));
 		assertEquals(1500L, jsonObject.get("expires_in"));
-		assertEquals(scope, Scope.parse((String) jsonObject.get("scope")));
+		assertEquals(scope.toString(), jsonObject.get("scope"));
 		assertEquals(4, jsonObject.size());
 
-		token = BearerAccessToken.parse(jsonObject);
-		
+		token = DPoPAccessToken.parse(jsonObject);
+		assertEquals(AccessTokenType.DPOP, token.getType());
 		assertEquals("abc", token.getValue());
 		assertEquals(1500L, token.getLifetime());
 		assertEquals(scope, token.getScope());
@@ -134,8 +102,8 @@ public class BearerAccessTokenTest extends TestCase {
 	public void testParseFromHeader()
 		throws Exception {
 	
-		AccessToken token = AccessToken.parse("Bearer abc");
-		
+		AccessToken token = AccessToken.parse("DPoP abc", AccessTokenType.DPOP);
+		assertEquals(AccessTokenType.DPOP, token.getType());
 		assertEquals("abc", token.getValue());
 		assertEquals(0L, token.getLifetime());
 		assertNull(token.getScope());
@@ -149,11 +117,11 @@ public class BearerAccessTokenTest extends TestCase {
 	public void testParseFromHeader_missing() {
 
 		try {
-			AccessToken.parse((String)null);
+			AccessToken.parse(null, AccessTokenType.DPOP);
 			fail();
 		} catch (ParseException e) {
-			assertEquals(BearerTokenError.MISSING_TOKEN.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
-			assertEquals(BearerTokenError.MISSING_TOKEN.getCode(), e.getErrorObject().getCode());
+			assertEquals(DPoPTokenError.MISSING_TOKEN.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
+			assertEquals(DPoPTokenError.MISSING_TOKEN.getCode(), e.getErrorObject().getCode());
 		}
 	}
 	
@@ -161,11 +129,12 @@ public class BearerAccessTokenTest extends TestCase {
 	public void testParseFromHeader_missingName() {
 	
 		try {
-			AccessToken.parse("abc");
+			AccessToken.parse("abc", AccessTokenType.DPOP);
 			fail();
 		} catch (ParseException e) {
-			assertEquals(BearerTokenError.INVALID_REQUEST.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
-			assertEquals(BearerTokenError.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			System.err.println(e.getMessage());
+			assertEquals(DPoPTokenError.INVALID_REQUEST.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
+			assertEquals(DPoPTokenError.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
 		}
 	}
 	
@@ -173,20 +142,12 @@ public class BearerAccessTokenTest extends TestCase {
 	public void testParseFromHeader_missingValue() {
 	
 		try {
-			AccessToken.parse("Bearer ", AccessTokenType.BEARER);
-			fail();
-		} catch (ParseException e) {
-			assertEquals("The token value must not be null or empty string", e.getMessage());
-			assertEquals(BearerTokenError.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
-			assertEquals(BearerTokenError.INVALID_REQUEST.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
-		}
-	
-		try {
 			AccessToken.parse("DPoP ", AccessTokenType.DPOP);
 			fail();
 		} catch (ParseException e) {
-			assertEquals(DPoPTokenError.INVALID_REQUEST.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
+			assertEquals("The token value must not be null or empty string", e.getMessage());
 			assertEquals(DPoPTokenError.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals(DPoPTokenError.INVALID_REQUEST.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
 		}
 	}
 	
@@ -197,7 +158,7 @@ public class BearerAccessTokenTest extends TestCase {
 		Map<String,List<String>> params = new HashMap<>();
 		params.put("access_token", Collections.singletonList("abc"));
 		
-		assertEquals("abc", BearerAccessToken.parse(params).getValue());
+		assertEquals("abc", DPoPAccessToken.parse(params).getValue());
 	}
 	
 	
@@ -207,12 +168,12 @@ public class BearerAccessTokenTest extends TestCase {
 		params.put("some_param", Collections.singletonList("abc"));
 		
 		try {
-			BearerAccessToken.parse(params);
+			DPoPAccessToken.parse(params);
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Missing access token parameter", e.getMessage());
-			assertEquals(BearerTokenError.MISSING_TOKEN.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
-			assertEquals(BearerTokenError.MISSING_TOKEN.getCode(), e.getErrorObject().getCode());
+			assertEquals(DPoPTokenError.MISSING_TOKEN.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
+			assertEquals(DPoPTokenError.MISSING_TOKEN.getCode(), e.getErrorObject().getCode());
 		}
 	}
 	
@@ -223,12 +184,12 @@ public class BearerAccessTokenTest extends TestCase {
 		params.put("access_token", Collections.singletonList(""));
 		
 		try {
-			BearerAccessToken.parse(params);
+			DPoPAccessToken.parse(params);
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Blank / empty access token", e.getMessage());
-			assertEquals(BearerTokenError.INVALID_REQUEST.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
-			assertEquals(BearerTokenError.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals(DPoPTokenError.INVALID_REQUEST.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
+			assertEquals(DPoPTokenError.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
 		}
 	}
 
@@ -237,9 +198,9 @@ public class BearerAccessTokenTest extends TestCase {
 		throws Exception {
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, new URL("https://c2id.com/reg/123"));
-		httpRequest.setAuthorization("Bearer abc");
+		httpRequest.setAuthorization("DPoP abc");
 
-		BearerAccessToken accessToken = BearerAccessToken.parse(httpRequest);
+		DPoPAccessToken accessToken = DPoPAccessToken.parse(httpRequest);
 
 		assertEquals("abc", accessToken.getValue());
 	}
@@ -251,7 +212,7 @@ public class BearerAccessTokenTest extends TestCase {
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, new URL("https://c2id.com/reg/123"));
 
 		try {
-			BearerAccessToken.parse(httpRequest);
+			DPoPAccessToken.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
 			assertEquals(401, e.getErrorObject().getHTTPStatusCode());
@@ -263,15 +224,15 @@ public class BearerAccessTokenTest extends TestCase {
 	public void testParseFromHTTPRequest_invalid()
 		throws Exception {
 
-		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, new URL("http://c2id.com/reg/123"));
-		httpRequest.setAuthorization("Bearer");
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, new URL("https://c2id.com/reg/123"));
+		httpRequest.setAuthorization("DPoP");
 
 		try {
-			BearerAccessToken.parse(httpRequest);
+			DPoPAccessToken.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
-			assertEquals(BearerTokenError.INVALID_REQUEST.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
-			assertEquals(BearerTokenError.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals(DPoPTokenError.INVALID_REQUEST.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
+			assertEquals(DPoPTokenError.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
 		}
 	}
 }

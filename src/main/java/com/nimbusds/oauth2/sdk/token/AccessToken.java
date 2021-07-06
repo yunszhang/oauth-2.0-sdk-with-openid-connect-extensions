@@ -25,6 +25,7 @@ import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
 
 /**
@@ -38,7 +39,10 @@ import com.nimbusds.oauth2.sdk.Scope;
  * </ul>
  */
 public abstract class AccessToken extends Token {
-
+	
+	
+	private static final long serialVersionUID = 2947643641344083799L;
+	
 	
 	/**
 	 * The access token type.
@@ -257,7 +261,7 @@ public abstract class AccessToken extends Token {
 
 	/**
 	 * Parses an access token from a JSON object access token response.
-	 * Only bearer access tokens are supported.
+	 * Only bearer and DPoP access tokens are supported.
 	 *
 	 * @param jsonObject The JSON object to parse. Must not be 
 	 *                   {@code null}.
@@ -270,7 +274,15 @@ public abstract class AccessToken extends Token {
 	public static AccessToken parse(final JSONObject jsonObject)
 		throws ParseException {
 
-		return BearerAccessToken.parse(jsonObject);
+		AccessTokenType tokenType = new AccessTokenType(JSONObjectUtils.getString(jsonObject, "token_type"));
+		
+		if (AccessTokenType.BEARER.equals(tokenType)) {
+			return BearerAccessToken.parse(jsonObject);
+		} else if (AccessTokenType.DPOP.equals(tokenType)){
+			return DPoPAccessToken.parse(jsonObject);
+		} else {
+			throw new ParseException("Unsupported token_type: " + tokenType);
+		}
 	}
 	
 	
@@ -285,10 +297,45 @@ public abstract class AccessToken extends Token {
 	 *
 	 * @throws ParseException If the {@code Authorization} header value 
 	 *                        couldn't be parsed to an access token.
+	 *
+	 * @see #parse(String, AccessTokenType)
 	 */
+	@Deprecated
 	public static AccessToken parse(final String header)
 		throws ParseException {
 	
 		return BearerAccessToken.parse(header);
+	}
+	
+	
+	/**
+	 * Parses an {@code Authorization} HTTP request header value for an
+	 * access token. Only bearer and DPoP access token are supported.
+	 *
+	 * @param header        The {@code Authorization} header value to
+	 *                      parse. Must not be {@code null}.
+	 * @param preferredType The preferred (primary) access token type.
+	 *                      Must be either {@link AccessTokenType#BEARER}
+	 *                      or {@link AccessTokenType#DPOP} and not
+	 *                      {@code null}.
+	 *
+	 * @return The access token.
+	 *
+	 * @throws ParseException If the {@code Authorization} header value
+	 *                        couldn't be parsed to an access token.
+	 */
+	public static AccessToken parse(final String header,
+					final AccessTokenType preferredType)
+		throws ParseException {
+	
+		if (! AccessTokenType.BEARER.equals(preferredType) && ! AccessTokenType.DPOP.equals(preferredType)) {
+			throw new IllegalArgumentException("Unsupported Authorization scheme: " + preferredType);
+		}
+		
+		if (header != null && header.startsWith(AccessTokenType.BEARER.getValue()) || AccessTokenType.BEARER.equals(preferredType)) {
+			return BearerAccessToken.parse(header);
+		} else {
+			return DPoPAccessToken.parse(header);
+		}
 	}
 }

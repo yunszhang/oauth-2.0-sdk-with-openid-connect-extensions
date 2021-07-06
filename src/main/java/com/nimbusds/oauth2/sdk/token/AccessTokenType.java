@@ -28,7 +28,10 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  */
 @Immutable
 public final class AccessTokenType extends Identifier {
-
+	
+	
+	private static final long serialVersionUID = 5636341646710940413L;
+	
 	
 	/**
 	 * Bearer, see OAuth 2.0 Bearer Token Usage (RFC 6750).
@@ -37,18 +40,25 @@ public final class AccessTokenType extends Identifier {
 	
 	
 	/**
-	 * MAC, see OAuth 2.0 Message Authentication Code (MAC) Tokens 
+	 * DPoP, see OAuth 2.0 Demonstrating Proof-of-Possession at the
+	 * Application Layer (DPoP) (draft-ietf-oauth-dpop-03).
+	 */
+	public static final AccessTokenType DPOP = new AccessTokenType("DPoP");
+	
+	
+	/**
+	 * MAC, see OAuth 2.0 Message Authentication Code (MAC) Tokens
 	 * (draft-ietf-oauth-v2-http-mac-05).
 	 */
 	public static final AccessTokenType MAC = new AccessTokenType("mac");
-
-
+	
+	
 	/**
 	 * Unknown.
 	 */
 	public static final AccessTokenType UNKNOWN = new AccessTokenType("unknown");
-
-
+	
+	
 	/**
 	 * Creates a new access token type with the specified value.
 	 *

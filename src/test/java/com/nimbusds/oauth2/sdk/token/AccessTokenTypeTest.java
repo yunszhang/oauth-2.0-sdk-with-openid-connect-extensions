@@ -18,25 +18,34 @@
 package com.nimbusds.oauth2.sdk.token;
 
 
+import static org.junit.Assert.assertNotEquals;
+
 import junit.framework.TestCase;
 
 
-/**
- * Tests the access token type class.
- */
 public class AccessTokenTypeTest extends TestCase {
+	
+	
+	public void testTypeConstants() {
+		
+		assertEquals("Bearer", AccessTokenType.BEARER.getValue());
+		assertEquals("DPoP", AccessTokenType.DPOP.getValue());
+		assertEquals("mac", AccessTokenType.MAC.getValue());
+		assertEquals("unknown", AccessTokenType.UNKNOWN.getValue());
+	}
 
 
 	public void testEquality() {
-
-		assertTrue(new AccessTokenType("bearer").equals(new AccessTokenType("bearer")));
-		assertTrue(new AccessTokenType("Bearer").equals(new AccessTokenType("Bearer")));
-		assertTrue(new AccessTokenType("Bearer").equals(new AccessTokenType("bearer")));
+		
+		assertEquals(new AccessTokenType("bearer"), new AccessTokenType("bearer"));
+		assertEquals(new AccessTokenType("Bearer"), new AccessTokenType("Bearer"));
+		assertEquals(new AccessTokenType("Bearer"), new AccessTokenType("bearer"));
+		assertEquals(new AccessTokenType("bearer"), new AccessTokenType("BEARER"));
 	}
 
 
 	public void testInequality() {
-
-		assertFalse(new AccessTokenType("bearer").equals(new AccessTokenType("mac")));
+		
+		assertNotEquals(new AccessTokenType("bearer"), new AccessTokenType("mac"));
 	}
 }
