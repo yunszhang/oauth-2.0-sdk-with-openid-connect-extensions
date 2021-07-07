@@ -19,10 +19,16 @@ package com.nimbusds.oauth2.sdk.dpop;
 
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.id.JWTID;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 
@@ -35,18 +41,26 @@ final class DPoPUtils {
 	/**
 	 * Creates a new DPoP JWT claims set.
 	 *
-	 * @param jti The JWT ID. Must not be {@code null}.
-	 * @param htm The HTTP request method. Must not be {@code null}.
-	 * @param htu The HTTP URI, without a query or fragment. Must not be
-	 *            {@code null}.
-	 * @param iat The issue time. Must not be {@code null}.
+	 * @param jti         The JWT ID. Must not be {@code null}.
+	 * @param htm         The HTTP request method. Must not be
+	 *                    {@code null}.
+	 * @param htu         The HTTP URI, without a query or fragment. Must
+	 *                    not be {@code null}.
+	 * @param iat         The issue time. Must not be {@code null}.
+	 * @param accessToken The access token for the access token hash
+	 *                    ("ath") claim computation, {@code null} if not
+	 *                    specified.
 	 *
 	 * @return The JWT claims set.
+	 *
+	 * @throws JOSEException If a cryptographic exception was encountered.
 	 */
 	static JWTClaimsSet createJWTClaimsSet(final JWTID jti,
 					       final String htm,
 					       final URI htu,
-					       final Date iat) {
+					       final Date iat,
+					       final AccessToken accessToken)
+		throws JOSEException {
 		
 		if (StringUtils.isBlank(htm)) {
 			throw new IllegalArgumentException("The HTTP method (htu) is required");
@@ -64,12 +78,41 @@ final class DPoPUtils {
 			throw new IllegalArgumentException("The issue time (iat) is required");
 		}
 		
-		return new JWTClaimsSet.Builder()
+		JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder()
 			.jwtID(jti.getValue())
 			.claim("htm", htm)
 			.claim("htu", htu.toString())
-			.issueTime(iat)
-			.build();
+			.issueTime(iat);
+		
+		if (accessToken != null) {
+			builder = builder.claim("ath", computeSHA256(accessToken).toString());
+		}
+		
+		return builder.build();
+	}
+	
+	
+	/**
+	 * Computes a SHA-256 hash for the specified access token.
+	 *
+	 * @param accessToken The access token. Must not be {@code null}.
+	 *
+	 * @return The hash, BASE64 URL encoded.
+	 *
+	 * @throws JOSEException If hashing failed.
+	 */
+	static Base64URL computeSHA256(final AccessToken accessToken)
+		throws JOSEException {
+		
+		byte[] hash;
+		try {
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			hash = md.digest(accessToken.getValue().getBytes(StandardCharsets.UTF_8));
+		} catch (NoSuchAlgorithmException e) {
+			throw new JOSEException(e.getMessage(), e);
+		}
+		
+		return Base64URL.encode(hash);
 	}
 	
 	

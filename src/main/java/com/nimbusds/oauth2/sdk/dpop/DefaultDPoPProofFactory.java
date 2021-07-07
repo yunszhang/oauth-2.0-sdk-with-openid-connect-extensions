@@ -31,6 +31,7 @@ import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.id.JWTID;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
 
 
 /**
@@ -141,7 +142,17 @@ public class DefaultDPoPProofFactory implements DPoPProofFactory {
 				       final URI htu)
 		throws JOSEException {
 		
-		return createDPoPJWT(new JWTID(MINIMAL_JTI_BYTE_LENGTH), htm, htu, new Date());
+		return createDPoPJWT(htm, htu, null);
+	}
+	
+	
+	@Override
+	public SignedJWT createDPoPJWT(final String htm,
+				       final URI htu,
+				       final AccessToken accessToken)
+		throws JOSEException {
+		
+		return createDPoPJWT(new JWTID(MINIMAL_JTI_BYTE_LENGTH), htm, htu, new Date(), null);
 	}
 	
 	
@@ -149,7 +160,8 @@ public class DefaultDPoPProofFactory implements DPoPProofFactory {
 	public SignedJWT createDPoPJWT(final JWTID jti,
 				       final String htm,
 				       final URI htu,
-				       final Date iat)
+				       final Date iat,
+				       final AccessToken accessToken)
 		throws JOSEException {
 		
 		JWSHeader jwsHeader = new JWSHeader.Builder(getJWSAlgorithm())
@@ -157,7 +169,7 @@ public class DefaultDPoPProofFactory implements DPoPProofFactory {
 			.jwk(getPublicJWK())
 			.build();
 		
-		JWTClaimsSet jwtClaimsSet = DPoPUtils.createJWTClaimsSet(jti, htm, htu, iat);
+		JWTClaimsSet jwtClaimsSet = DPoPUtils.createJWTClaimsSet(jti, htm, htu, iat, accessToken);
 		SignedJWT signedJWT = new SignedJWT(jwsHeader, jwtClaimsSet);
 		signedJWT.sign(getJWSSigner());
 		return signedJWT;

@@ -25,6 +25,7 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.id.JWTID;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
 
 
 /**
@@ -64,11 +65,36 @@ public interface DPoPProofFactory {
 	/**
 	 * Creates a new DPoP proof.
 	 *
-	 * @param jti The JWT ID. Must not be {@code null}.
-	 * @param htm The HTTP request method. Must not be {@code null}.
-	 * @param htu The HTTP URI, without a query or fragment. Must not be
-	 *            {@code null}.
-	 * @param iat The issue time. Must not be {@code null}.
+	 * @param htm         The HTTP request method. Must not be
+	 *                    {@code null}.
+	 * @param htu         The HTTP URI, without a query or fragment. Must
+	 *                    not be {@code null}.
+	 * @param accessToken The access token for the access token hash
+	 *                    ("ath") claim computation, {@code null} if not
+	 *                    specified.
+	 *
+	 * @return The signed DPoP JWT.
+	 *
+	 * @throws JOSEException If signing failed.
+	 */
+	SignedJWT createDPoPJWT(final String htm,
+				final URI htu,
+				final AccessToken accessToken)
+		throws JOSEException;
+	
+	
+	/**
+	 * Creates a new DPoP proof.
+	 *
+	 * @param jti         The JWT ID. Must not be {@code null}.
+	 * @param htm         The HTTP request method. Must not be
+	 *                    {@code null}.
+	 * @param htu         The HTTP URI, without a query or fragment. Must
+	 *                    not be {@code null}.
+	 * @param iat         The issue time. Must not be {@code null}.
+	 * @param accessToken The access token for the access token hash
+	 *                    ("ath") claim computation, {@code null} if not
+	 *                    specified.
 	 *
 	 * @return The signed DPoP JWT.
 	 *
@@ -77,6 +103,7 @@ public interface DPoPProofFactory {
 	SignedJWT createDPoPJWT(final JWTID jti,
 				final String htm,
 				final URI htu,
-				final Date iat)
-			throws JOSEException;
+				final Date iat,
+				final AccessToken accessToken)
+		throws JOSEException;
 }
