@@ -1779,4 +1779,10 @@ version 9.10 (2021-07-06)
     * Renames DPoPJWTFactory to DPoPProofFactory.
     * Updates DPoPProofFactory to handle "ath" (access token hash) claim
       computation.
+    * Makes DPoPUtils public.
+    * Adds package com.nimbusds.oauth2.sdk.util.singleuse with generic
+      SingleUseChecker interface and an AlreadyUsedException class.
+    * Adds package com.nimbusds.oauth2.sdk.dpop.verifier with DPoPProofVerifier
+      class for validating DPoP proof JWTs, with optional "ath" (access token
+      hash) claim support.
 

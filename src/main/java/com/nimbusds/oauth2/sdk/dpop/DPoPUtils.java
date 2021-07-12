@@ -35,7 +35,7 @@ import com.nimbusds.oauth2.sdk.util.StringUtils;
 /**
  * DPoP utilities.
  */
-final class DPoPUtils {
+public final class DPoPUtils {
 	
 	
 	/**
@@ -55,11 +55,11 @@ final class DPoPUtils {
 	 *
 	 * @throws JOSEException If a cryptographic exception was encountered.
 	 */
-	static JWTClaimsSet createJWTClaimsSet(final JWTID jti,
-					       final String htm,
-					       final URI htu,
-					       final Date iat,
-					       final AccessToken accessToken)
+	public static JWTClaimsSet createJWTClaimsSet(final JWTID jti,
+					              final String htm,
+					              final URI htu,
+					              final Date iat,
+					              final AccessToken accessToken)
 		throws JOSEException {
 		
 		if (StringUtils.isBlank(htm)) {
@@ -101,7 +101,7 @@ final class DPoPUtils {
 	 *
 	 * @throws JOSEException If hashing failed.
 	 */
-	static Base64URL computeSHA256(final AccessToken accessToken)
+	public static Base64URL computeSHA256(final AccessToken accessToken)
 		throws JOSEException {
 		
 		byte[] hash;

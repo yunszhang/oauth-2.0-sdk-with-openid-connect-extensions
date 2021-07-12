@@ -152,7 +152,7 @@ public class DefaultDPoPProofFactory implements DPoPProofFactory {
 				       final AccessToken accessToken)
 		throws JOSEException {
 		
-		return createDPoPJWT(new JWTID(MINIMAL_JTI_BYTE_LENGTH), htm, htu, new Date(), null);
+		return createDPoPJWT(new JWTID(MINIMAL_JTI_BYTE_LENGTH), htm, htu, new Date(), accessToken);
 	}
 	
 	
