@@ -1765,7 +1765,7 @@ version 9.9 (2021-06-07)
 version 9.9.1 (2021-07-03)
     * Updates Nimbus JOSE+JWT to 9.10.1.
 
-version 9.10 (2021-07-06)
+version 9.10 (2021-07-09)
     * Adds DPoPAccessToken class.
     * Adds DPoPTokenError class.
     * Adds AccessTokenType.DPoP constant.
@@ -1785,4 +1785,5 @@ version 9.10 (2021-07-06)
     * Adds package com.nimbusds.oauth2.sdk.dpop.verifier with DPoPProofVerifier
       class for validating DPoP proof JWTs, with optional "ath" (access token
       hash) claim support.
+    * Adds JWKThumbprintConfirmation class.
 
