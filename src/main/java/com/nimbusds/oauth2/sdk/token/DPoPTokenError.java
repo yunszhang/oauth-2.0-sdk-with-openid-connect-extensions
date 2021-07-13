@@ -354,6 +354,7 @@ public class DPoPTokenError extends TokenSchemeError {
 	 *
 	 * @return The {@code Www-Authenticate} header value.
 	 */
+	@Override
 	public String toWWWAuthenticateHeader() {
 
 		String header = super.toWWWAuthenticateHeader();
