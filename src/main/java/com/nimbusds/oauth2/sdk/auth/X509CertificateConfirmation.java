@@ -224,11 +224,6 @@ public final class X509CertificateConfirmation {
 		
 		try {
 			String x5tString = JSONObjectUtils.getString(cnf, "x5t#S256");
-			
-			if (x5tString == null) {
-				return null;
-			}
-			
 			return new X509CertificateConfirmation(new Base64URL(x5tString));
 			
 		} catch (ParseException e) {
