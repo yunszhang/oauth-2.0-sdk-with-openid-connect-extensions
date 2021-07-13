@@ -96,6 +96,22 @@ public class Tokens {
 
 		return null;
 	}
+	
+	
+	/**
+	 * Returns the access token as type DPoP.
+	 *
+	 * @return The DPoP access token, {@code null} if the type is
+	 *         different.
+	 */
+	public DPoPAccessToken getDPoPAccessToken() {
+		
+		if (accessToken instanceof DPoPAccessToken) {
+			return (DPoPAccessToken) accessToken;
+		}
+		
+		return null;
+	}
 
 
 	/**

@@ -34,7 +34,7 @@ import com.nimbusds.oauth2.sdk.Scope;
 public class TokensTest extends TestCase {
 
 
-	public void testAllDefined()
+	public void testBearerAllDefined()
 		throws ParseException {
 
 		AccessToken accessToken = new BearerAccessToken(60L, Scope.parse("openid email"));
@@ -44,6 +44,7 @@ public class TokensTest extends TestCase {
 
 		assertEquals(accessToken, tokens.getAccessToken());
 		assertEquals(accessToken, tokens.getBearerAccessToken());
+		assertNull(tokens.getDPoPAccessToken());
 		assertEquals(refreshToken, tokens.getRefreshToken());
 
 		assertTrue(tokens.getParameterNames().contains("token_type"));
@@ -55,6 +56,43 @@ public class TokensTest extends TestCase {
 
 		JSONObject jsonObject = tokens.toJSONObject();
 		assertEquals("Bearer", jsonObject.get("token_type"));
+		assertEquals(accessToken.getValue(), jsonObject.get("access_token"));
+		assertEquals(60L, jsonObject.get("expires_in"));
+		assertEquals("openid email", jsonObject.get("scope"));
+		assertEquals(refreshToken.getValue(), jsonObject.get("refresh_token"));
+		assertEquals(5, jsonObject.size());
+
+		tokens = Tokens.parse(jsonObject);
+
+		assertEquals(accessToken.getValue(), tokens.getAccessToken().getValue());
+		assertEquals(accessToken.getLifetime(), tokens.getAccessToken().getLifetime());
+		assertEquals(accessToken.getScope(), tokens.getAccessToken().getScope());
+		assertEquals(refreshToken.getValue(), tokens.getRefreshToken().getValue());
+	}
+
+
+	public void testDPoPAllDefined()
+		throws ParseException {
+
+		AccessToken accessToken = new DPoPAccessToken("Chei4euPai5Phai0mohnaexeex7shou4", 60L, Scope.parse("openid email"));
+		RefreshToken refreshToken = new RefreshToken();
+
+		Tokens tokens = new Tokens(accessToken, refreshToken);
+
+		assertEquals(accessToken, tokens.getAccessToken());
+		assertNull(tokens.getBearerAccessToken());
+		assertEquals(accessToken, tokens.getDPoPAccessToken());
+		assertEquals(refreshToken, tokens.getRefreshToken());
+
+		assertTrue(tokens.getParameterNames().contains("token_type"));
+		assertTrue(tokens.getParameterNames().contains("access_token"));
+		assertTrue(tokens.getParameterNames().contains("expires_in"));
+		assertTrue(tokens.getParameterNames().contains("scope"));
+		assertTrue(tokens.getParameterNames().contains("refresh_token"));
+		assertEquals(5, tokens.getParameterNames().size());
+
+		JSONObject jsonObject = tokens.toJSONObject();
+		assertEquals("DPoP", jsonObject.get("token_type"));
 		assertEquals(accessToken.getValue(), jsonObject.get("access_token"));
 		assertEquals(60L, jsonObject.get("expires_in"));
 		assertEquals("openid email", jsonObject.get("scope"));
