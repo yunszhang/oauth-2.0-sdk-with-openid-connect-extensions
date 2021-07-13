@@ -21,16 +21,18 @@ package com.nimbusds.oauth2.sdk;
 import java.util.Arrays;
 import java.util.Date;
 
+import junit.framework.TestCase;
+import net.minidev.json.JSONObject;
+
 import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.auth.X509CertificateConfirmation;
+import com.nimbusds.oauth2.sdk.dpop.JWKThumbprintConfirmation;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.*;
 import com.nimbusds.oauth2.sdk.token.AccessTokenType;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import junit.framework.TestCase;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -455,5 +457,92 @@ public class TokenIntrospectionSuccessResponseTest extends TestCase {
 		assertEquals(data, response.getJSONObjectParameter("data"));
 		
 		assertNull(response.getJSONObjectParameter("sub")); // invalid parameter
+	}
+	
+	
+	public void testDPoP() throws ParseException {
+	
+		Base64URL jkt = new Base64URL("0ZcOCORZNYy-DWpqq30jZyJGHTN0d2HglBV3uiguA4I");
+		JWKThumbprintConfirmation cnf = new JWKThumbprintConfirmation(jkt);
+		assertEquals(jkt, cnf.getValue());
+		
+		Subject subject = new Subject("alice");
+		Scope scope = new Scope("read", "write");
+		
+		TokenIntrospectionSuccessResponse response = new TokenIntrospectionSuccessResponse.Builder(true)
+			.subject(subject)
+			.scope(scope)
+			.jwkThumbprintConfirmation(cnf)
+			.build();
+		
+		assertEquals(cnf, response.getJWKThumbprintConfirmation());
+		
+		JSONObject jsonObject = response.toJSONObject();
+		assertTrue(JSONObjectUtils.getBoolean(jsonObject, "active"));
+		assertEquals(subject.getValue(), jsonObject.get("sub"));
+		assertEquals(scope.toString(), jsonObject.get("scope"));
+		JSONObject cnfObject = JSONObjectUtils.getJSONObject(jsonObject, "cnf");
+		assertEquals(jkt.toString(), JSONObjectUtils.getString(cnfObject, "jkt"));
+		assertEquals(1, cnfObject.size());
+		assertEquals(4, jsonObject.size());
+		
+		response = TokenIntrospectionSuccessResponse.parse(jsonObject);
+		
+		assertEquals(cnf, response.getJWKThumbprintConfirmation());
+	}
+	
+	
+	public void testDPoP_none() {
+	
+		Subject subject = new Subject("alice");
+		Scope scope = new Scope("read", "write");
+		
+		TokenIntrospectionSuccessResponse response = new TokenIntrospectionSuccessResponse.Builder(true)
+			.subject(subject)
+			.scope(scope)
+			.build();
+		
+		assertNull(response.getJWKThumbprintConfirmation());
+	}
+	
+	
+	public void testDPoP_builder_null() {
+	
+		Subject subject = new Subject("alice");
+		Scope scope = new Scope("read", "write");
+		
+		TokenIntrospectionSuccessResponse response = new TokenIntrospectionSuccessResponse.Builder(true)
+			.subject(subject)
+			.scope(scope)
+			.jwkThumbprintConfirmation(null)
+			.build();
+		
+		assertNull(response.getJWKThumbprintConfirmation());
+	}
+	
+	
+	public void testDPoP_example() throws ParseException {
+		
+		String json = "{" +
+			"\"active\": true," +
+			"\"sub\":\"someone@example.com\"," +
+			"\"iss\":\"https://server.example.com\"," +
+			"\"nbf\":1562262611," +
+			"\"exp\":1562266216," +
+			"\"cnf\":{\"jkt\":\"0ZcOCORZNYy-DWpqq30jZyJGHTN0d2HglBV3uiguA4I\"}" +
+			"}";
+		
+		JSONObject jsonObject = JSONObjectUtils.parse(json);
+		
+		TokenIntrospectionSuccessResponse response = TokenIntrospectionSuccessResponse.parse(jsonObject);
+		
+		assertTrue(response.isActive());
+		assertEquals(new Subject("someone@example.com"), response.getSubject());
+		assertEquals(new Issuer("https://server.example.com"), response.getIssuer());
+		assertEquals(DateUtils.fromSecondsSinceEpoch(1562262611L), response.getNotBeforeTime());
+		assertEquals(DateUtils.fromSecondsSinceEpoch(1562266216L), response.getExpirationTime());
+		
+		Base64URL jkt = new Base64URL("0ZcOCORZNYy-DWpqq30jZyJGHTN0d2HglBV3uiguA4I");
+		assertEquals(jkt, response.getJWKThumbprintConfirmation().getValue());
 	}
 }

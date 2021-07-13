@@ -29,6 +29,7 @@ import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.auth.X509CertificateConfirmation;
+import com.nimbusds.oauth2.sdk.dpop.JWKThumbprintConfirmation;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.*;
 import com.nimbusds.oauth2.sdk.token.AccessTokenType;
@@ -44,6 +45,8 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  *     <li>OAuth 2.0 Token Introspection (RFC 7662).
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
  *         Access Tokens (RFC 8705).
+ *     <li>OAuth 2.0 Demonstrating Proof-of-Possession at the Application Layer
+ *         (DPoP) (draft-ietf-oauth-dpop-03)
  * </ul>
  */
 @Immutable
@@ -295,6 +298,28 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 		 * @return This builder.
 		 */
 		public Builder x509CertificateConfirmation(final X509CertificateConfirmation cnf) {
+			
+			if (cnf != null) {
+				Map.Entry<String, JSONObject> param = cnf.toJWTClaim();
+				params.put(param.getKey(), param.getValue());
+			} else {
+				params.remove("cnf");
+			}
+			return this;
+		}
+		
+		
+		/**
+		 * Sets the JSON Web Key (JWK) SHA-256 thumbprint confirmation,
+		 * for OAuth 2.0 DPoP. Corresponds to the {@code cnf.jkt}
+		 * claim.
+		 *
+		 * @param cnf The JWK SHA-256 thumbprint confirmation,
+		 *            {@code null} if not specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder jwkThumbprintConfirmation(final JWKThumbprintConfirmation cnf) {
 			
 			if (cnf != null) {
 				Map.Entry<String, JSONObject> param = cnf.toJWTClaim();
@@ -592,6 +617,19 @@ public class TokenIntrospectionSuccessResponse extends TokenIntrospectionRespons
 	public X509CertificateConfirmation getX509CertificateConfirmation() {
 		
 		return X509CertificateConfirmation.parse(params);
+	}
+	
+	
+	/**
+	 * Returns the JSON Web Key (JWK) SHA-256 thumbprint confirmation, for
+	 * OAuth 2.0 DPoP. Corresponds to the {@code cnf.jkt} claim.
+	 *
+	 * @return The JWK SHA-256 thumbprint confirmation, {@code null} if not
+	 *         specified.
+	 */
+	public JWKThumbprintConfirmation getJWKThumbprintConfirmation() {
+		
+		return JWKThumbprintConfirmation.parse(params);
 	}
 	
 	
