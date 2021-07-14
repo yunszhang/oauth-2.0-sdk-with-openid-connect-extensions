@@ -1789,5 +1789,6 @@ version 9.10 (2021-07-14)
     * Adds JWK thumbprint confirmation support to
       TokenIntrospectionSuccessResponse.
     * Adds new Tokens.getDPoPAccessToken method.
+    * Makes com.github.stephenc.jcip:jcip-annotations:1.0-1 optional.
 
 
