@@ -18,6 +18,7 @@
 package com.nimbusds.oauth2.sdk.dpop;
 
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -35,10 +36,12 @@ import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.*;
+import com.nimbusds.oauth2.sdk.as.AuthorizationServerMetadata;
 import com.nimbusds.oauth2.sdk.dpop.verifiers.*;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.JWTID;
 import com.nimbusds.oauth2.sdk.token.DPoPAccessToken;
 import com.nimbusds.oauth2.sdk.token.Tokens;
@@ -212,7 +215,7 @@ public class DPoPExamples extends TestCase {
 	}
 	
 	
-	public void _testExtractCnfFromJWT() throws Exception {
+	public void _testExtractCnfFromJWT() {
 		
 		JWTClaimsSet tokenClaims = null;
 		
@@ -224,5 +227,18 @@ public class DPoPExamples extends TestCase {
 		}
 		
 		// Continue processing
+	}
+	
+	
+	public void _testSupportByAS() throws GeneralException, IOException {
+		
+		AuthorizationServerMetadata metadata = AuthorizationServerMetadata.resolve(new Issuer("https://demo.c2id.com"));
+		
+		if (metadata.getDPoPJWSAlgs() != null) {
+			System.out.println("Supported DPoP proof JWS algorithms:");
+			for (JWSAlgorithm jwsAlg: metadata.getDPoPJWSAlgs()) {
+				System.out.println(jwsAlg);
+			}
+		}
 	}
 }
