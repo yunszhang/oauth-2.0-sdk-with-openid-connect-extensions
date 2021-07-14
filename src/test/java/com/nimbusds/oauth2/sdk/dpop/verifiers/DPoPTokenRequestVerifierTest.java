@@ -85,6 +85,16 @@ public class DPoPTokenRequestVerifierTest extends TestCase {
 			assertEquals("Invalid DPoP proof: JWT \"htu\" claim has value https://op.example.com/userinfo, must be https://c2id.com/token", e.getMessage());
 		}
 		
+		// Invalid HTTP method
+		proof = dPoPProofFactory.createDPoPJWT("GET", htu);
+		
+		try {
+			verifier.verify(issuer, proof);
+			fail();
+		} catch (InvalidDPoPProofException e) {
+			assertEquals("Invalid DPoP proof: JWT \"htm\" claim has value GET, must be POST", e.getMessage());
+		}
+		
 		// JWS alg not accepted
 		proof = new DefaultDPoPProofFactory(
 			new ECKeyGenerator(Curve.P_256).generate(),
@@ -160,10 +170,31 @@ public class DPoPTokenRequestVerifierTest extends TestCase {
 		proof.sign(new RSASSASigner(rsaJWK));
 		
 		try {
-			verifier.verify(issuer, proof, null, null);
+			verifier.verify(issuer, proof);
 			fail();
 		} catch (InvalidDPoPProofException e) {
 			assertEquals("Invalid DPoP proof: JWS header alg / jwk mismatch: alg=RS256 jwk.kty=EC", e.getMessage());
 		}
+	}
+	
+	
+	public void testConstructor_nullEndpoint() {
+		
+		IllegalArgumentException exception = null;
+		try {
+			new DPoPTokenRequestVerifier(
+				Collections.singleton(JWSAlgorithm.RS256),
+				null,
+				2,
+				new DefaultDPoPSingleUseChecker(
+					10,
+					10
+				)
+			);
+		} catch (IllegalArgumentException e) {
+			exception = e;
+		}
+		
+		assertEquals("The token endpoint URI must not be null", exception.getMessage());
 	}
 }

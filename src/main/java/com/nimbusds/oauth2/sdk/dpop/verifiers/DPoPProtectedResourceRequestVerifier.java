@@ -45,12 +45,6 @@ public class DPoPProtectedResourceRequestVerifier extends DPoPCommonVerifier {
 	 *
 	 * @param acceptedJWSAlgs  The accepted JWS algorithms. Must be
 	 *                         supported and not {@code null}.
-	 * @param acceptedMethod   The accepted HTTP request method (case
-	 *                         insensitive). Must not be {@code null}.
-	 * @param acceptedURI      The accepted endpoint URI. Any query or
-	 *                         fragment component will be stripped from it
-	 *                         before performing the comparison. Must not
-	 *                         be {@code null}.
 	 * @param maxAgeSeconds    The maximum acceptable "iat" (issued-at)
 	 *                         claim age, in seconds. JWTs older than that
 	 *                         will be rejected.
@@ -58,13 +52,11 @@ public class DPoPProtectedResourceRequestVerifier extends DPoPCommonVerifier {
 	 *                         "jti" (JWT ID) claims, {@code null} if not
 	 *                         specified.
 	 */
-	DPoPProtectedResourceRequestVerifier(final Set<JWSAlgorithm> acceptedJWSAlgs,
-					     final String acceptedMethod,
-					     final URI acceptedURI,
-					     final long maxAgeSeconds,
-					     final SingleUseChecker<Map.Entry<DPoPIssuer, JWTID>> singleUseChecker) {
+	public DPoPProtectedResourceRequestVerifier(final Set<JWSAlgorithm> acceptedJWSAlgs,
+						    final long maxAgeSeconds,
+						    final SingleUseChecker<Map.Entry<DPoPIssuer, JWTID>> singleUseChecker) {
 		
-		super(acceptedJWSAlgs, acceptedMethod, acceptedURI, maxAgeSeconds, true, singleUseChecker);
+		super(acceptedJWSAlgs, maxAgeSeconds, true, singleUseChecker);
 	}
 	
 	
@@ -72,6 +64,11 @@ public class DPoPProtectedResourceRequestVerifier extends DPoPCommonVerifier {
 	 * Verifies the specified DPoP proof and its access token and JWK
 	 * SHA-256 thumbprint bindings.
 	 *
+	 * @param method      The HTTP request method (case insensitive). Must
+	 *                    not be {@code null}.
+	 * @param uri         The HTTP URI. Any query or fragment component
+	 *                    will be stripped from it before DPoP validation.
+	 *                    Must not be {@code null}.
 	 * @param issuer      Unique identifier for the the DPoP proof issuer,
 	 *                    such as its client ID. Must not be {@code null}.
 	 * @param proof       The DPoP proof JWT. Must not be {@code null}.
@@ -86,7 +83,9 @@ public class DPoPProtectedResourceRequestVerifier extends DPoPCommonVerifier {
 	 * @throws JOSEException                  If an internal JOSE exception
 	 *                                        is encountered.
 	 */
-	public void verify(final DPoPIssuer issuer,
+	public void verify(final String method,
+			   final URI uri,
+			   final DPoPIssuer issuer,
 			   final SignedJWT proof,
 			   final DPoPAccessToken accessToken,
 			   final JWKThumbprintConfirmation cnf)
@@ -95,6 +94,6 @@ public class DPoPProtectedResourceRequestVerifier extends DPoPCommonVerifier {
 		AccessTokenValidationException,
 		JOSEException {
 		
-		super.verify(issuer, proof, accessToken, cnf);
+		super.verify(method, uri, issuer, proof, accessToken, cnf);
 	}
 }

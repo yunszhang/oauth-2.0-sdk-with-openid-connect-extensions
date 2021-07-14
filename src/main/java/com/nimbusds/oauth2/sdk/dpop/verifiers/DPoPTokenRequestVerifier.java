@@ -40,6 +40,12 @@ public class DPoPTokenRequestVerifier extends DPoPCommonVerifier {
 	
 	
 	/**
+	 * The token endpoint URI.
+	 */
+	private final URI endpointURI;
+	
+	
+	/**
 	 * Creates a new DPoP proof JWT verifier for the OAuth 2.0 token
 	 * endpoint.
 	 *
@@ -61,7 +67,12 @@ public class DPoPTokenRequestVerifier extends DPoPCommonVerifier {
 					final long maxAgeSeconds,
 					final SingleUseChecker<Map.Entry<DPoPIssuer, JWTID>> singleUseChecker) {
 		
-		super(acceptedJWSAlgs, "POST", endpointURI, maxAgeSeconds, false, singleUseChecker);
+		super(acceptedJWSAlgs, maxAgeSeconds, false, singleUseChecker);
+		
+		if (endpointURI == null) {
+			throw new IllegalArgumentException("The token endpoint URI must not be null");
+		}
+		this.endpointURI = endpointURI;
 	}
 	
 	
@@ -80,7 +91,7 @@ public class DPoPTokenRequestVerifier extends DPoPCommonVerifier {
 		throws InvalidDPoPProofException, JOSEException {
 		
 		try {
-			super.verify(issuer, proof, null, null);
+			super.verify("POST", endpointURI, issuer, proof, null, null);
 		} catch (AccessTokenValidationException e) {
 			throw new RuntimeException("Unexpected exception", e);
 		}

@@ -29,7 +29,7 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  * {@link com.nimbusds.oauth2.sdk.id.ClientID}.
  */
 @Immutable
-class DPoPIssuer extends Identifier {
+public class DPoPIssuer extends Identifier {
 	
 	
 	private static final long serialVersionUID = 2801103134383988309L;

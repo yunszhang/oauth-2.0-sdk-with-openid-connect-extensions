@@ -65,10 +65,6 @@ class DPoPCommonVerifier {
 	
 	private final Set<JWSAlgorithm> acceptedJWSAlgs;
 	
-	private final String acceptedMethod;
-	
-	private final URI acceptedURI;
-	
 	private final long maxAgeSeconds;
 	
 	private final boolean requireATH;
@@ -81,12 +77,6 @@ class DPoPCommonVerifier {
 	 *
 	 * @param acceptedJWSAlgs  The accepted JWS algorithms. Must be
 	 *                         supported and not {@code null}.
-	 * @param acceptedMethod   The accepted HTTP request method (case
-	 *                         insensitive). Must not be {@code null}.
-	 * @param acceptedURI      The accepted endpoint URI. Any query or
-	 *                         fragment component will be stripped from it
-	 *                         before performing the comparison. Must not
-	 *                         be {@code null}.
 	 * @param maxAgeSeconds    The maximum acceptable "iat" (issued-at)
 	 *                         claim age, in seconds. JWTs older than that
 	 *                         will be rejected.
@@ -97,8 +87,6 @@ class DPoPCommonVerifier {
 	 *                         specified.
 	 */
 	DPoPCommonVerifier(final Set<JWSAlgorithm> acceptedJWSAlgs,
-			   final String acceptedMethod,
-			   final URI acceptedURI,
 			   final long maxAgeSeconds,
 			   final boolean requireATH,
 			   final SingleUseChecker<Map.Entry<DPoPIssuer, JWTID>> singleUseChecker) {
@@ -107,16 +95,6 @@ class DPoPCommonVerifier {
 			throw new IllegalArgumentException("Unsupported JWS algorithms: " + acceptedJWSAlgs.retainAll(SUPPORTED_JWS_ALGORITHMS));
 		}
 		this.acceptedJWSAlgs = acceptedJWSAlgs;
-		
-		if (StringUtils.isBlank(acceptedMethod)) {
-			throw new IllegalArgumentException("The accepted HTTP method must not be null or blank");
-		}
-		this.acceptedMethod = acceptedMethod;
-		
-		if (acceptedURI == null) {
-			throw new IllegalArgumentException("The accepted URI must not be null");
-		}
-		this.acceptedURI = URIUtils.getBaseURI(acceptedURI);
 		
 		this.maxAgeSeconds = maxAgeSeconds;
 		
@@ -130,6 +108,11 @@ class DPoPCommonVerifier {
 	 * Verifies the specified DPoP proof for a token or protected resource
 	 * request.
 	 *
+	 * @param method      The HTTP request method (case insensitive). Must
+	 *                    not be {@code null}.
+	 * @param uri         The HTTP URI. Any query or fragment component
+	 *                    will be stripped from it before DPoP validation.
+	 *                    Must not be {@code null}.
 	 * @param issuer      Unique identifier for the the DPoP proof issuer,
 	 *                    such as its client ID. Must not be {@code null}.
 	 * @param proof       The DPoP proof JWT. Must not be {@code null}.
@@ -145,7 +128,9 @@ class DPoPCommonVerifier {
 	 * @throws JOSEException                  If an internal JOSE exception
 	 *                                        is encountered.
 	 */
-	void verify(final DPoPIssuer issuer,
+	void verify(final String method,
+		    final URI uri,
+		    final DPoPIssuer issuer,
 		    final SignedJWT proof,
 		    final DPoPAccessToken accessToken,
 		    final JWKThumbprintConfirmation cnf)
@@ -153,6 +138,14 @@ class DPoPCommonVerifier {
 		InvalidDPoPProofException,
 		AccessTokenValidationException,
 		JOSEException {
+		
+		if (StringUtils.isBlank(method)) {
+			throw new IllegalArgumentException("The HTTP request method must not be null or blank");
+		}
+		
+		if (uri == null) {
+			throw new IllegalArgumentException("The HTTP URI must not be null");
+		}
 		
 		DefaultJWTProcessor<DPoPProofContext> proc = new DefaultJWTProcessor<>();
 		
@@ -164,8 +157,8 @@ class DPoPCommonVerifier {
 		
 		// Validate the JWT claims
 		proc.setJWTClaimsSetVerifier(new DPoPProofClaimsSetVerifier(
-			acceptedMethod,
-			acceptedURI,
+			method,
+			URIUtils.getBaseURI(uri),
 			maxAgeSeconds,
 			requireATH,
 			singleUseChecker

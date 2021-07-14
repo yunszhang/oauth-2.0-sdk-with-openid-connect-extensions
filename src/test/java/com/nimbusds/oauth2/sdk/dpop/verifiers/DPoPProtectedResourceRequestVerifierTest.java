@@ -40,7 +40,7 @@ public class DPoPProtectedResourceRequestVerifierTest extends TestCase {
 	
 	public void testCases() throws Exception {
 		
-		String htm = "POST";
+		String htm = "GET";
 		URI htu = URI.create("https://c2id.com/userinfo");
 		
 		DPoPAccessToken accessToken = new DPoPAccessToken("iat5luciwooSa8Ogh5eweicahG8soo8a");
@@ -56,8 +56,6 @@ public class DPoPProtectedResourceRequestVerifierTest extends TestCase {
 		
 		DPoPProtectedResourceRequestVerifier verifier = new DPoPProtectedResourceRequestVerifier(
 			Collections.singleton(JWSAlgorithm.ES256),
-			htm,
-			htu,
 			2,
 			new DefaultDPoPSingleUseChecker(
 				10,
@@ -69,20 +67,38 @@ public class DPoPProtectedResourceRequestVerifierTest extends TestCase {
 		SignedJWT proof = dPoPProofFactory.createDPoPJWT(htm, htu, accessToken);
 		assertNotNull(proof.getJWTClaimsSet().getStringClaim("ath"));
 		
-		verifier.verify(issuer, proof, accessToken, cnf);
+		verifier.verify(htm, htu, issuer, proof, accessToken, cnf);
 		
 		// Replay detection
 		try {
-			verifier.verify(issuer, proof, accessToken, cnf);
+			verifier.verify(htm, htu, issuer, proof, accessToken, cnf);
 			fail();
 		} catch (InvalidDPoPProofException e) {
 			assertEquals("Invalid DPoP proof: The jti was used before: " + proof.getJWTClaimsSet().getJWTID(), e.getMessage());
 		}
 		
+		// HTTP method doesn't match
+		proof = dPoPProofFactory.createDPoPJWT(htm, htu, accessToken);
+		try {
+			verifier.verify("POST", htu, issuer, proof, accessToken, cnf);
+			fail();
+		} catch (InvalidDPoPProofException e) {
+			assertEquals("Invalid DPoP proof: JWT \"htm\" claim has value GET, must be POST", e.getMessage());
+		}
+		
+		// HTTP URI doesn't match
+		proof = dPoPProofFactory.createDPoPJWT(htm, htu, accessToken);
+		try {
+			verifier.verify(htm, new URI("https://example.com/resource"), issuer, proof, accessToken, cnf);
+			fail();
+		} catch (InvalidDPoPProofException e) {
+			assertEquals("Invalid DPoP proof: JWT \"htu\" claim has value https://c2id.com/userinfo, must be https://example.com/resource", e.getMessage());
+		}
+		
 		// Missing access token
 		proof = dPoPProofFactory.createDPoPJWT(htm, htu, accessToken);
 		try {
-			verifier.verify(issuer, proof, null, cnf);
+			verifier.verify(htm, htu, issuer, proof, null, cnf);
 			fail();
 		} catch (AccessTokenValidationException e) {
 			assertEquals("Missing access token", e.getMessage());
@@ -91,7 +107,7 @@ public class DPoPProtectedResourceRequestVerifierTest extends TestCase {
 		// Missing cnf
 		proof = dPoPProofFactory.createDPoPJWT(htm, htu, accessToken);
 		try {
-			verifier.verify(issuer, proof, accessToken, null);
+			verifier.verify(htm, htu, issuer, proof, accessToken, null);
 			fail();
 		} catch (AccessTokenValidationException e) {
 			assertEquals("Missing JWK SHA-256 thumbprint confirmation", e.getMessage());
@@ -100,7 +116,7 @@ public class DPoPProtectedResourceRequestVerifierTest extends TestCase {
 		// Missing ath
 		proof = dPoPProofFactory.createDPoPJWT(htm, htu, null);
 		try {
-			verifier.verify(issuer, proof, accessToken, cnf);
+			verifier.verify(htm, htu, issuer, proof, accessToken, cnf);
 			fail();
 		} catch (InvalidDPoPProofException e) {
 			assertEquals("Invalid DPoP proof: JWT missing required claims: [ath]", e.getMessage());
@@ -110,7 +126,7 @@ public class DPoPProtectedResourceRequestVerifierTest extends TestCase {
 		proof = dPoPProofFactory.createDPoPJWT(htm, htu, new DPoPAccessToken("other-value"));
 		
 		try {
-			verifier.verify(issuer, proof, accessToken, cnf);
+			verifier.verify(htm, htu, issuer, proof, accessToken, cnf);
 			fail();
 		} catch (AccessTokenValidationException e) {
 			assertEquals("The access token hash doesn't match the JWT ath claim", e.getMessage());
@@ -122,7 +138,7 @@ public class DPoPProtectedResourceRequestVerifierTest extends TestCase {
 		JWKThumbprintConfirmation invalidCNF = new JWKThumbprintConfirmation(new ECKeyGenerator(Curve.P_256).generate().computeThumbprint());
 		
 		try {
-			verifier.verify(issuer, proof, accessToken, invalidCNF);
+			verifier.verify(htm, htu, issuer, proof, accessToken, invalidCNF);
 			fail();
 		} catch (AccessTokenValidationException e) {
 			assertEquals("The DPoP proof JWK doesn't match the JWK SHA-256 thumbprint confirmation", e.getMessage());
