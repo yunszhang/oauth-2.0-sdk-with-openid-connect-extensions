@@ -1790,5 +1790,6 @@ version 9.10 (2021-07-14)
       TokenIntrospectionSuccessResponse.
     * Adds new Tokens.getDPoPAccessToken method.
     * Makes com.github.stephenc.jcip:jcip-annotations:1.0-1 optional.
+    * Updates to com.nimbusds:nimbus-jose-jwt:9.11.1
 
 
