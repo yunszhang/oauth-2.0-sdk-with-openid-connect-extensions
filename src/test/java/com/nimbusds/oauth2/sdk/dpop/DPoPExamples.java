@@ -32,11 +32,9 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.oauth2.sdk.AuthorizationCode;
-import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
-import com.nimbusds.oauth2.sdk.TokenRequest;
-import com.nimbusds.oauth2.sdk.TokenResponse;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.dpop.verifiers.*;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
@@ -178,5 +176,53 @@ public class DPoPExamples extends TestCase {
 		}
 		
 		// The request processing can proceed
+	}
+	
+	
+	public void _testTokenIntrospection() throws Exception {
+		
+		// Parse the token introspection response
+		HTTPResponse httpResponse = null;
+		TokenIntrospectionResponse response = TokenIntrospectionResponse.parse(httpResponse);
+		
+		if (! response.indicatesSuccess()) {
+			// The introspection request failed
+			System.err.println(response.toErrorResponse().getErrorObject().getHTTPStatusCode());
+			System.err.println(response.toErrorResponse().getErrorObject().getCode());
+			return;
+		}
+		
+		TokenIntrospectionSuccessResponse tokenDetails = response.toSuccessResponse();
+		
+		if (! tokenDetails.isActive()) {
+			System.out.println("Invalid / expired access token");
+			return;
+		}
+
+		// Get the JWK SHA-256 thumbprint confirmation, found in the
+		// cnf.jkt parameter, for use in the DPoPProtectedResourceRequestVerifier
+		JWKThumbprintConfirmation cnf = tokenDetails.getJWKThumbprintConfirmation();
+		
+		if (cnf == null) {
+			System.out.println("The token is not DPoP bound");
+			return;
+		}
+		
+		// Continue processing
+	}
+	
+	
+	public void _testExtractCnfFromJWT() throws Exception {
+		
+		JWTClaimsSet tokenClaims = null;
+		
+		JWKThumbprintConfirmation cnf = JWKThumbprintConfirmation.parse(tokenClaims);
+		
+		if (cnf == null) {
+			System.out.println("The token is not DPoP bound");
+			return;
+		}
+		
+		// Continue processing
 	}
 }
