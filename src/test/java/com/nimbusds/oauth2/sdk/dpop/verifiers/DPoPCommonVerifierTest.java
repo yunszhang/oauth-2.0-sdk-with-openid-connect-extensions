@@ -15,11 +15,10 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package com.nimbusds.oauth2.sdk.dpop.verifier;
+package com.nimbusds.oauth2.sdk.dpop.verifiers;
 
 
 import java.net.URI;
-import java.text.ParseException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -27,7 +26,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.ECDSASigner;
@@ -35,16 +33,17 @@ import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
+import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.dpop.DPoPProofFactory;
 import com.nimbusds.oauth2.sdk.dpop.DefaultDPoPProofFactory;
+import com.nimbusds.oauth2.sdk.dpop.JWKThumbprintConfirmation;
 import com.nimbusds.oauth2.sdk.id.JWTID;
-import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.DPoPAccessToken;
 
 
-public class DPoPProofVerifierTest extends TestCase {
+public class DPoPCommonVerifierTest extends TestCase {
 
 
 	public void testSupportedJWSAlgorithms() {
@@ -53,9 +52,9 @@ public class DPoPProofVerifierTest extends TestCase {
 		jwsAlgorithms.addAll(JWSAlgorithm.Family.RSA);
 		jwsAlgorithms.addAll(JWSAlgorithm.Family.EC);
 		
-		assertEquals(jwsAlgorithms, DPoPProofVerifier.SUPPORTED_JWS_ALGORITHMS);
+		assertEquals(jwsAlgorithms, DPoPCommonVerifier.SUPPORTED_JWS_ALGORITHMS);
 		
-		new DPoPProofVerifier(
+		new DPoPCommonVerifier(
 			jwsAlgorithms,
 			"POST",
 			URI.create("https://c2id.com/token"),
@@ -69,7 +68,7 @@ public class DPoPProofVerifierTest extends TestCase {
 	}
 	
 	
-	public void testES256() throws JOSEException, InvalidDPoPProofException, ParseException {
+	public void testForTokenEndpoint_ES256() throws Exception {
 		
 		String htm = "POST";
 		URI htu = URI.create("https://c2id.com/token");
@@ -81,7 +80,7 @@ public class DPoPProofVerifierTest extends TestCase {
 			JWSAlgorithm.ES256
 		);
 		
-		DPoPProofVerifier verifier = new DPoPProofVerifier(
+		DPoPCommonVerifier verifier = new DPoPCommonVerifier(
 			Collections.singleton(JWSAlgorithm.ES256),
 			htm,
 			htu,
@@ -95,11 +94,11 @@ public class DPoPProofVerifierTest extends TestCase {
 		
 		SignedJWT proof = dPoPProofFactory.createDPoPJWT(htm, htu);
 		
-		verifier.verify(proof, issuer);
+		verifier.verify(issuer, proof, null, null);
 		
 		// Replay detection
 		try {
-			verifier.verify(proof, issuer);
+			verifier.verify(issuer, proof, null, null);
 			fail();
 		} catch (InvalidDPoPProofException e) {
 			assertEquals("Invalid DPoP proof: The jti was used before: " + proof.getJWTClaimsSet().getJWTID(), e.getMessage());
@@ -109,7 +108,7 @@ public class DPoPProofVerifierTest extends TestCase {
 		proof = dPoPProofFactory.createDPoPJWT("PUT", htu);
 		
 		try {
-			verifier.verify(proof, issuer);
+			verifier.verify(issuer, proof, null, null);
 			fail();
 		} catch (InvalidDPoPProofException e) {
 			assertEquals("Invalid DPoP proof: JWT \"htm\" claim has value PUT, must be POST", e.getMessage());
@@ -119,7 +118,7 @@ public class DPoPProofVerifierTest extends TestCase {
 		proof = dPoPProofFactory.createDPoPJWT(htm, URI.create("https://op.example.com/userinfo"));
 		
 		try {
-			verifier.verify(proof, issuer);
+			verifier.verify(issuer, proof, null, null);
 			fail();
 		} catch (InvalidDPoPProofException e) {
 			assertEquals("Invalid DPoP proof: JWT \"htu\" claim has value https://op.example.com/userinfo, must be https://c2id.com/token", e.getMessage());
@@ -132,7 +131,7 @@ public class DPoPProofVerifierTest extends TestCase {
 			).createDPoPJWT(htm, htu);
 		
 		try {
-			verifier.verify(proof, issuer);
+			verifier.verify(issuer, proof, null, null);
 			fail();
 		} catch (InvalidDPoPProofException e) {
 			assertEquals("Invalid DPoP proof: JWS header algorithm not accepted: RS256", e.getMessage());
@@ -152,7 +151,7 @@ public class DPoPProofVerifierTest extends TestCase {
 		proof.sign(new ECDSASigner(ecJWK));
 		
 		try {
-			verifier.verify(proof, issuer);
+			verifier.verify(issuer, proof, null, null);
 			fail();
 		} catch (InvalidDPoPProofException e) {
 			assertEquals("Invalid DPoP proof: Required JOSE header \"typ\" (type) parameter is missing", e.getMessage());
@@ -166,7 +165,7 @@ public class DPoPProofVerifierTest extends TestCase {
 		proof.sign(new ECDSASigner(ecJWK));
 		
 		try {
-			verifier.verify(proof, issuer);
+			verifier.verify(issuer, proof, null, null);
 			fail();
 		} catch (InvalidDPoPProofException e) {
 			assertEquals("Invalid DPoP proof: Missing JWS jwk header parameter", e.getMessage());
@@ -183,7 +182,7 @@ public class DPoPProofVerifierTest extends TestCase {
 		proof.sign(new ECDSASigner(ecJWK));
 		
 		try {
-			verifier.verify(proof, issuer);
+			verifier.verify(issuer, proof, null, null);
 			fail();
 		} catch (InvalidDPoPProofException e) {
 			assertEquals("Invalid DPoP proof: Signed JWT rejected: Invalid signature", e.getMessage());
@@ -200,7 +199,7 @@ public class DPoPProofVerifierTest extends TestCase {
 		proof.sign(new ECDSASigner(ecJWK));
 		
 		try {
-			verifier.verify(proof, issuer);
+			verifier.verify(issuer, proof, null, null);
 			fail();
 		} catch (InvalidDPoPProofException e) {
 			assertEquals("Invalid DPoP proof: JWS header alg / jwk mismatch: alg=ES256 jwk.kty=RSA", e.getMessage());
@@ -208,21 +207,23 @@ public class DPoPProofVerifierTest extends TestCase {
 	}
 	
 	
-	public void testWithAccessTokenHash() throws JOSEException, InvalidDPoPProofException, ParseException, AccessTokenValidationException {
+	public void testForProtectedResource() throws Exception {
 		
 		String htm = "POST";
 		URI htu = URI.create("https://c2id.com/userinfo");
 		
-		AccessToken accessToken = new DPoPAccessToken("iat5luciwooSa8Ogh5eweicahG8soo8a");
+		DPoPAccessToken accessToken = new DPoPAccessToken("iat5luciwooSa8Ogh5eweicahG8soo8a");
 		
 		DPoPIssuer issuer = new DPoPIssuer("client-123");
 		ECKey ecJWK = new ECKeyGenerator(Curve.P_256).generate();
+		Base64URL jkt = ecJWK.computeThumbprint();
+		JWKThumbprintConfirmation cnf = new JWKThumbprintConfirmation(jkt);
 		DPoPProofFactory dPoPProofFactory = new DefaultDPoPProofFactory(
 			ecJWK,
 			JWSAlgorithm.ES256
 		);
 		
-		DPoPProofVerifier verifier = new DPoPProofVerifier(
+		DPoPCommonVerifier verifier = new DPoPCommonVerifier(
 			Collections.singleton(JWSAlgorithm.ES256),
 			htm,
 			htu,
@@ -238,11 +239,11 @@ public class DPoPProofVerifierTest extends TestCase {
 		SignedJWT proof = dPoPProofFactory.createDPoPJWT(htm, htu, accessToken);
 		assertNotNull(proof.getJWTClaimsSet().getStringClaim("ath"));
 		
-		verifier.verify(proof, issuer, accessToken);
+		verifier.verify(issuer, proof, accessToken, cnf);
 		
 		// Replay detection
 		try {
-			verifier.verify(proof, issuer, accessToken);
+			verifier.verify(issuer, proof, accessToken, cnf);
 			fail();
 		} catch (InvalidDPoPProofException e) {
 			assertEquals("Invalid DPoP proof: The jti was used before: " + proof.getJWTClaimsSet().getJWTID(), e.getMessage());
@@ -251,34 +252,55 @@ public class DPoPProofVerifierTest extends TestCase {
 		// Missing access token
 		proof = dPoPProofFactory.createDPoPJWT(htm, htu, accessToken);
 		try {
-			verifier.verify(proof, issuer, null);
+			verifier.verify(issuer, proof, null, cnf);
 			fail();
 		} catch (AccessTokenValidationException e) {
 			assertEquals("Missing access token", e.getMessage());
 		}
 		
+		// Missing cnf
+		proof = dPoPProofFactory.createDPoPJWT(htm, htu, accessToken);
+		try {
+			verifier.verify(issuer, proof, accessToken, null);
+			fail();
+		} catch (AccessTokenValidationException e) {
+			assertEquals("Missing JWK SHA-256 thumbprint confirmation", e.getMessage());
+		}
+		
 		// Missing ath
 		proof = dPoPProofFactory.createDPoPJWT(htm, htu, null);
 		try {
-			verifier.verify(proof, issuer, accessToken);
+			verifier.verify(issuer, proof, accessToken, cnf);
 			fail();
 		} catch (InvalidDPoPProofException e) {
 			assertEquals("Invalid DPoP proof: JWT missing required claims: [ath]", e.getMessage());
 		}
 		
-		// Invalid access token
+		// Invalid ath - access token binding
 		proof = dPoPProofFactory.createDPoPJWT(htm, htu, new DPoPAccessToken("other-value"));
 		
 		try {
-			verifier.verify(proof, issuer, accessToken);
+			verifier.verify(issuer, proof, accessToken, cnf);
 			fail();
 		} catch (AccessTokenValidationException e) {
 			assertEquals("The access token hash doesn't match the JWT ath claim", e.getMessage());
 		}
+		
+		// Invalid cnf - access token binding
+		proof = dPoPProofFactory.createDPoPJWT(htm, htu, accessToken);
+		
+		JWKThumbprintConfirmation invalidCNF = new JWKThumbprintConfirmation(new ECKeyGenerator(Curve.P_256).generate().computeThumbprint());
+		
+		try {
+			verifier.verify(issuer, proof, accessToken, invalidCNF);
+			fail();
+		} catch (AccessTokenValidationException e) {
+			assertEquals("The DPoP proof JWK doesn't match the JWK SHA-256 thumbprint confirmation", e.getMessage());
+		}
 	}
 	
 	
-	public void testWithoutSingleUseChecker() throws JOSEException, InvalidDPoPProofException {
+	public void testWithoutSingleUseChecker() throws Exception {
 		
 		String htm = "POST";
 		URI htu = URI.create("https://c2id.com/token");
@@ -290,7 +312,7 @@ public class DPoPProofVerifierTest extends TestCase {
 			JWSAlgorithm.ES256
 		);
 		
-		DPoPProofVerifier verifier = new DPoPProofVerifier(
+		DPoPCommonVerifier verifier = new DPoPCommonVerifier(
 			Collections.singleton(JWSAlgorithm.ES256),
 			htm,
 			htu,
@@ -302,7 +324,7 @@ public class DPoPProofVerifierTest extends TestCase {
 		SignedJWT proof = dPoPProofFactory.createDPoPJWT(htm, htu);
 		
 		// Replay not detected
-		verifier.verify(proof, issuer);
-		verifier.verify(proof, issuer);
+		verifier.verify(issuer, proof, null, null);
+		verifier.verify(issuer, proof, null, null);
 	}
 }

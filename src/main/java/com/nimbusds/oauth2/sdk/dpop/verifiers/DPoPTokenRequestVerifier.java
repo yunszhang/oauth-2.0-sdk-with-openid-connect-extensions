@@ -1,0 +1,88 @@
+/*
+ * oauth2-oidc-sdk
+ *
+ * Copyright 2012-2021, Connect2id Ltd and contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
+package com.nimbusds.oauth2.sdk.dpop.verifiers;
+
+
+import java.net.URI;
+import java.util.Map;
+import java.util.Set;
+
+import net.jcip.annotations.ThreadSafe;
+
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.oauth2.sdk.id.JWTID;
+import com.nimbusds.oauth2.sdk.util.singleuse.SingleUseChecker;
+
+
+/**
+ * DPoP proof JWT verifier for the OAuth 2.0 token endpoint of an authorisation
+ * server.
+ */
+@ThreadSafe
+public class DPoPTokenRequestVerifier extends DPoPCommonVerifier {
+	
+	
+	/**
+	 * Creates a new DPoP proof JWT verifier for the OAuth 2.0 token
+	 * endpoint.
+	 *
+	 * @param acceptedJWSAlgs  The accepted JWS algorithms. Must be
+	 *                         supported and not {@code null}.
+	 * @param endpointURI      The token endpoint URI. Any query or
+	 *                         fragment component will be stripped from it
+	 *                         before performing the comparison. Must not
+	 *                         be {@code null}.
+	 * @param maxAgeSeconds    The maximum acceptable "iat" (issued-at)
+	 *                         claim age, in seconds. JWTs older than that
+	 *                         will be rejected.
+	 * @param singleUseChecker The single use checker for the DPoP proof
+	 *                         "jti" (JWT ID) claims, {@code null} if not
+	 *                         specified.
+	 */
+	public DPoPTokenRequestVerifier(final Set<JWSAlgorithm> acceptedJWSAlgs,
+					final URI endpointURI,
+					final long maxAgeSeconds,
+					final SingleUseChecker<Map.Entry<DPoPIssuer, JWTID>> singleUseChecker) {
+		
+		super(acceptedJWSAlgs, "POST", endpointURI, maxAgeSeconds, false, singleUseChecker);
+	}
+	
+	
+	/**
+	 * Verifies the specified DPoP proof.
+	 *
+	 * @param issuer Unique identifier for the the DPoP proof issuer,
+	 *               typically as its client ID. Must not be {@code null}.
+	 * @param proof  The DPoP proof JWT. Must not be {@code null}.
+	 *
+	 * @throws InvalidDPoPProofException If the DPoP proof is invalid.
+	 * @throws JOSEException             If an internal JOSE exception is
+	 *                                   encountered.
+	 */
+	public void verify(final DPoPIssuer issuer, final SignedJWT proof)
+		throws InvalidDPoPProofException, JOSEException {
+		
+		try {
+			super.verify(issuer, proof, null, null);
+		} catch (AccessTokenValidationException e) {
+			throw new RuntimeException("Unexpected exception", e);
+		}
+	}
+}

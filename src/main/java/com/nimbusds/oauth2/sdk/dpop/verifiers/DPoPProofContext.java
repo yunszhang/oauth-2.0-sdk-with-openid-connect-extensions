@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package com.nimbusds.oauth2.sdk.dpop.verifier;
+package com.nimbusds.oauth2.sdk.dpop.verifiers;
 
 
 import com.nimbusds.jose.proc.SecurityContext;

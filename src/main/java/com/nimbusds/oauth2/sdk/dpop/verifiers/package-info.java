@@ -15,6 +15,6 @@
  * specific language governing permissions and limitations under the License.
  */
 /**
- * DPoP proof JWT verifier.
+ * DPoP proof JWT verifiers for the token endpoint and protected resources.
  */
-package com.nimbusds.oauth2.sdk.dpop.verifier;
+package com.nimbusds.oauth2.sdk.dpop.verifiers;

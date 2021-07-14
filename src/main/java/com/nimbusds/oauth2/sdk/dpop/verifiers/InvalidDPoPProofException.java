@@ -15,24 +15,35 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package com.nimbusds.oauth2.sdk.dpop.verifier;
+package com.nimbusds.oauth2.sdk.dpop.verifiers;
 
 
 /**
- * DPoP related access token validation exception.
+ * Invalid DPoP proof exception.
  */
-public class AccessTokenValidationException extends Exception{
+public class InvalidDPoPProofException extends Exception {
 	
 	
-	private static final long serialVersionUID = 7290666898774398194L;
+	private static final long serialVersionUID = -379875576526526089L;
 	
 	
 	/**
-	 * Creates a new access token validation exception.
+	 * Creates a new invalid DPoP proof exception.
 	 *
 	 * @param message The message, {@code null} if not specified.
 	 */
-	public AccessTokenValidationException(final String message) {
+	public InvalidDPoPProofException(final String message) {
 		super(message);
+	}
+	
+	
+	/**
+	 * Creates a new invalid DPoP proof exception.
+	 *
+	 * @param message The message, {@code null} if not specified.
+	 * @param cause   The cause, {@code null} if not specified.
+	 */
+	public InvalidDPoPProofException(final String message, final Throwable cause) {
+		super(message, cause);
 	}
 }

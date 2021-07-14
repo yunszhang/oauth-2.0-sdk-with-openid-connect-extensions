@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package com.nimbusds.oauth2.sdk.dpop.verifier;
+package com.nimbusds.oauth2.sdk.dpop.verifiers;
 
 
 import java.net.URI;
@@ -36,18 +36,19 @@ import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.nimbusds.oauth2.sdk.dpop.DPoPProofFactory;
 import com.nimbusds.oauth2.sdk.dpop.DPoPUtils;
+import com.nimbusds.oauth2.sdk.dpop.JWKThumbprintConfirmation;
 import com.nimbusds.oauth2.sdk.id.JWTID;
-import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.oauth2.sdk.token.DPoPAccessToken;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.oauth2.sdk.util.singleuse.SingleUseChecker;
 
 
 /**
- * DPoP proof JWT verifier.
+ * DPoP proof JWT and access token binding verifier.
  */
 @ThreadSafe
-public class DPoPProofVerifier {
+class DPoPCommonVerifier {
 	
 	
 	/**
@@ -78,6 +79,8 @@ public class DPoPProofVerifier {
 	/**
 	 * Creates a new DPoP proof JWT verifier.
 	 *
+	 * @param acceptedJWSAlgs  The accepted JWS algorithms. Must be
+	 *                         supported and not {@code null}.
 	 * @param acceptedMethod   The accepted HTTP request method (case
 	 *                         insensitive). Must not be {@code null}.
 	 * @param acceptedURI      The accepted endpoint URI. Any query or
@@ -89,15 +92,16 @@ public class DPoPProofVerifier {
 	 *                         will be rejected.
 	 * @param requireATH       {@code true} to require an "ath" (access
 	 *                         token hash) claim.
-	 * @param singleUseChecker The single use checker for the "jti" (JWT
-	 *                         ID) claims, {@code null} if not specified.
+	 * @param singleUseChecker The single use checker for the DPoP proof
+	 *                         "jti" (JWT ID) claims, {@code null} if not
+	 *                         specified.
 	 */
-	public DPoPProofVerifier(final Set<JWSAlgorithm> acceptedJWSAlgs,
-				 final String acceptedMethod,
-				 final URI acceptedURI,
-				 final long maxAgeSeconds,
-				 final boolean requireATH,
-				 final SingleUseChecker<Map.Entry<DPoPIssuer, JWTID>> singleUseChecker) {
+	DPoPCommonVerifier(final Set<JWSAlgorithm> acceptedJWSAlgs,
+			   final String acceptedMethod,
+			   final URI acceptedURI,
+			   final long maxAgeSeconds,
+			   final boolean requireATH,
+			   final SingleUseChecker<Map.Entry<DPoPIssuer, JWTID>> singleUseChecker) {
 		
 		if (! SUPPORTED_JWS_ALGORITHMS.containsAll(acceptedJWSAlgs)) {
 			throw new IllegalArgumentException("Unsupported JWS algorithms: " + acceptedJWSAlgs.retainAll(SUPPORTED_JWS_ALGORITHMS));
@@ -123,35 +127,16 @@ public class DPoPProofVerifier {
 	
 	
 	/**
-	 * Verifies the specified DPoP proof.
+	 * Verifies the specified DPoP proof for a token or protected resource
+	 * request.
 	 *
-	 * @param proof  The DPoP proof JWT. Must not be {@code null}.
-	 * @param issuer Unique identifier for the the DPoP proof issuer, such
-	 *               as its client ID. Must not be {@code null}.
-	 *
-	 * @throws InvalidDPoPProofException If the DPoP proof is invalid.
-	 * @throws JOSEException             If an internal JOSE exception is
-	 *                                   encountered.
-	 */
-	public void verify(final SignedJWT proof, final DPoPIssuer issuer)
-		throws InvalidDPoPProofException, JOSEException {
-		
-		try {
-			verify(proof, issuer, null);
-		} catch (AccessTokenValidationException e) {
-			throw new RuntimeException("Unexpected exception", e);
-		}
-	}
-	
-	
-	/**
-	 * Verifies the specified DPoP proof.
-	 *
-	 * @param proof       The DPoP proof JWT. Must not be {@code null}.
 	 * @param issuer      Unique identifier for the the DPoP proof issuer,
 	 *                    such as its client ID. Must not be {@code null}.
-	 * @param accessToken The received access token, {@code null} if not
-	 *                    applicable.
+	 * @param proof       The DPoP proof JWT. Must not be {@code null}.
+	 * @param accessToken The received DPoP access token for a protected
+	 *                    resource request, {@code null} if not applicable.
+	 * @param cnf         The JWK SHA-256 thumbprint confirmation for the
+	 *                    DPoP access token, {@code null} if none.
 	 *
 	 * @throws InvalidDPoPProofException      If the DPoP proof is invalid.
 	 * @throws AccessTokenValidationException If an access token is
@@ -160,7 +145,10 @@ public class DPoPProofVerifier {
 	 * @throws JOSEException                  If an internal JOSE exception
 	 *                                        is encountered.
 	 */
-	public void verify(final SignedJWT proof, final DPoPIssuer issuer, final AccessToken accessToken)
+	void verify(final DPoPIssuer issuer,
+		    final SignedJWT proof,
+		    final DPoPAccessToken accessToken,
+		    final JWKThumbprintConfirmation cnf)
 		throws
 		InvalidDPoPProofException,
 		AccessTokenValidationException,
@@ -191,15 +179,26 @@ public class DPoPProofVerifier {
 		}
 		
 		if (context.getAccessTokenHash() != null) {
+			// Access token hash found in the DPoP proof
 			
 			if (accessToken == null) {
 				throw new AccessTokenValidationException("Missing access token");
 			}
 			
+			if (cnf == null) {
+				throw new AccessTokenValidationException("Missing JWK SHA-256 thumbprint confirmation");
+			}
+			
 			Base64URL accessTokenHash = DPoPUtils.computeSHA256(accessToken);
 			
+			// Check the DPoP proof - access token binding
 			if (! context.getAccessTokenHash().equals(accessTokenHash)) {
 				throw new AccessTokenValidationException("The access token hash doesn't match the JWT ath claim");
+			}
+			
+			// Check the DPoP proof - access token cnf.jkt binding
+			if (! proof.getHeader().getJWK().computeThumbprint().equals(cnf.getValue())) {
+				throw new AccessTokenValidationException("The DPoP proof JWK doesn't match the JWK SHA-256 thumbprint confirmation");
 			}
 		}
 	}
