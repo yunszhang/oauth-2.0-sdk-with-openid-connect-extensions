@@ -241,4 +241,9 @@ public class DPoPExamples extends TestCase {
 			}
 		}
 	}
+	
+	
+	public void testEmpty() {
+	
+	}
 }
