@@ -35,6 +35,7 @@ import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.util.*;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.Prompt;
 
 
@@ -379,7 +380,17 @@ public class AuthorizationRequest extends AbstractRequest {
 			requestObject = request.requestObject;
 			requestURI = request.requestURI;
 			prompt = request.prompt;
-			customParams.putAll(request.getCustomParameters());
+			
+			if (request instanceof AuthenticationRequest) {
+				AuthenticationRequest oidcRequest = (AuthenticationRequest) request;
+				for (Map.Entry<String,List<String>> oidcParam: oidcRequest.toParameters().entrySet()) {
+					if (! REGISTERED_PARAMETER_NAMES.contains(oidcParam.getKey())) {
+						customParams.put(oidcParam.getKey(), oidcParam.getValue());
+					}
+				}
+			} else {
+				customParams.putAll(request.getCustomParameters());
+			}
 		}
 		
 		

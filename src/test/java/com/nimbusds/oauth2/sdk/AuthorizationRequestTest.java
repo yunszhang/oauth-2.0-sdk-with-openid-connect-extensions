@@ -32,7 +32,6 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.KeyUse;
-import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.OctetSequenceKeyGenerator;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
@@ -40,6 +39,8 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.langtag.LangTag;
+import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
@@ -47,7 +48,9 @@ import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
-import com.nimbusds.openid.connect.sdk.Prompt;
+import com.nimbusds.openid.connect.sdk.*;
+import com.nimbusds.openid.connect.sdk.claims.ACR;
+import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
 
 
 public class AuthorizationRequestTest extends TestCase {
@@ -691,6 +694,8 @@ public class AuthorizationRequestTest extends TestCase {
 		assertEquals(in.getPrompt(), out.getPrompt());
 		assertEquals(in.getCustomParameters(), out.getCustomParameters());
 		assertEquals(in.getEndpointURI(), out.getEndpointURI());
+		
+		assertEquals(in.toParameters(), out.toParameters());
 	}
 	
 	
@@ -1688,5 +1693,33 @@ public class AuthorizationRequestTest extends TestCase {
 			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
 			assertEquals("Parameter(s) present more than once: [client_id]", e.getErrorObject().getDescription());
 		}
+	}
+	
+	
+	public void testCopyConstructorWithOIDCParameters() throws URISyntaxException, LangTagException {
+		
+		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
+			ResponseType.CODE,
+			new Scope("openid"),
+			new ClientID("123"),
+			new URI("https://example.com/cb"))
+			.nonce(new Nonce())
+			.display(Display.POPUP)
+			.maxAge(3600)
+			.uiLocales(Arrays.asList(LangTag.parse("en"), LangTag.parse("bg")))
+			.claimsLocales(Arrays.asList(LangTag.parse("en"), LangTag.parse("bg")))
+			.idTokenHint(new PlainJWT(new JWTClaimsSet.Builder().subject("alice").build()))
+			.loginHint("alice@wonderland.net")
+			.acrValues(Collections.singletonList(new ACR("0")))
+			.claims(new OIDCClaimsRequest()
+				.withUserInfoClaimsRequest(new ClaimsSetRequest().add("email"))
+			)
+			.purpose("Transaction")
+			.build();
+		
+		AuthorizationRequest copy = new AuthorizationRequest.Builder(authRequest)
+			.build();
+		
+		assertEquals(authRequest.toParameters(), copy.toParameters());
 	}
 }
