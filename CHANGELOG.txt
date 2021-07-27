@@ -1798,4 +1798,5 @@ version 9.10.1 (2021-07-15)
 version 9.10.2 (2021-07-27)
     * AuthorizationRequest.Builder(AuthorizationRequest) must copy the OpenID
       Connect parameters in a AuthenticationRequest argument (iss #367).
+    * Restores com.github.stephenc.jcip:jcip-annotations:1.0-1 as non-optional.
     * Updates to com.nimbusds:nimbus-jose-jwt:9.11.2
