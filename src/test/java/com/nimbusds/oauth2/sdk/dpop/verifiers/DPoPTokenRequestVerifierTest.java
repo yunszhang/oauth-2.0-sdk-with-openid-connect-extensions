@@ -35,6 +35,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.dpop.DPoPProofFactory;
 import com.nimbusds.oauth2.sdk.dpop.DefaultDPoPProofFactory;
+import com.nimbusds.oauth2.sdk.dpop.JWKThumbprintConfirmation;
 import com.nimbusds.oauth2.sdk.id.JWTID;
 
 
@@ -48,6 +49,7 @@ public class DPoPTokenRequestVerifierTest extends TestCase {
 		
 		DPoPIssuer issuer = new DPoPIssuer("client-123");
 		RSAKey rsaJWK = new RSAKeyGenerator(2048).generate();
+		JWKThumbprintConfirmation cnf = new JWKThumbprintConfirmation(rsaJWK.computeThumbprint());
 		DPoPProofFactory dPoPProofFactory = new DefaultDPoPProofFactory(
 			rsaJWK,
 			JWSAlgorithm.RS256
@@ -65,7 +67,7 @@ public class DPoPTokenRequestVerifierTest extends TestCase {
 		
 		SignedJWT proof = dPoPProofFactory.createDPoPJWT(htm, htu);
 		
-		verifier.verify(issuer, proof);
+		assertEquals(cnf, verifier.verify(issuer, proof));
 		
 		// Replay detection
 		try {

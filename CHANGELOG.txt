@@ -1800,3 +1800,7 @@ version 9.10.2 (2021-07-27)
       Connect parameters in a AuthenticationRequest argument (iss #367).
     * Restores com.github.stephenc.jcip:jcip-annotations:1.0-1 as non-optional.
     * Updates to com.nimbusds:nimbus-jose-jwt:9.11.2
+
+version 9.11 (2021-08-01)
+    * Updates DPoPTokenRequestVerifier.verify to return the
+      JWKThumbprintConfirmation (the JWK SHA-256 thumbprint) on success.

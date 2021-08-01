@@ -27,6 +27,7 @@ import net.jcip.annotations.ThreadSafe;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.oauth2.sdk.dpop.JWKThumbprintConfirmation;
 import com.nimbusds.oauth2.sdk.id.JWTID;
 import com.nimbusds.oauth2.sdk.util.singleuse.SingleUseChecker;
 
@@ -77,17 +78,20 @@ public class DPoPTokenRequestVerifier extends DPoPCommonVerifier {
 	
 	
 	/**
-	 * Verifies the specified DPoP proof.
+	 * Verifies the specified DPoP proof and returns the DPoP JWK SHA-256
+	 * thumbprint confirmation.
 	 *
 	 * @param issuer Unique identifier for the DPoP proof issuer, typically
 	 *               as its client ID. Must not be {@code null}.
 	 * @param proof  The DPoP proof JWT. Must not be {@code null}.
 	 *
+	 * @return The DPoP JWK SHA-256 thumbprint confirmation.
+	 *
 	 * @throws InvalidDPoPProofException If the DPoP proof is invalid.
 	 * @throws JOSEException             If an internal JOSE exception is
 	 *                                   encountered.
 	 */
-	public void verify(final DPoPIssuer issuer, final SignedJWT proof)
+	public JWKThumbprintConfirmation verify(final DPoPIssuer issuer, final SignedJWT proof)
 		throws InvalidDPoPProofException, JOSEException {
 		
 		try {
@@ -95,5 +99,7 @@ public class DPoPTokenRequestVerifier extends DPoPCommonVerifier {
 		} catch (AccessTokenValidationException e) {
 			throw new RuntimeException("Unexpected exception", e);
 		}
+		
+		return new JWKThumbprintConfirmation(proof.getHeader().getJWK().computeThumbprint());
 	}
 }
