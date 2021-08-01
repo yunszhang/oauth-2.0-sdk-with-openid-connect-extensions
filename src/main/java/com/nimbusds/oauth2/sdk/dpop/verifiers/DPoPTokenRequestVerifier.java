@@ -79,8 +79,8 @@ public class DPoPTokenRequestVerifier extends DPoPCommonVerifier {
 	/**
 	 * Verifies the specified DPoP proof.
 	 *
-	 * @param issuer Unique identifier for the the DPoP proof issuer,
-	 *               typically as its client ID. Must not be {@code null}.
+	 * @param issuer Unique identifier for the DPoP proof issuer, typically
+	 *               as its client ID. Must not be {@code null}.
 	 * @param proof  The DPoP proof JWT. Must not be {@code null}.
 	 *
 	 * @throws InvalidDPoPProofException If the DPoP proof is invalid.
