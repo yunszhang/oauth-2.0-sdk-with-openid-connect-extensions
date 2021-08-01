@@ -1804,3 +1804,7 @@ version 9.10.2 (2021-07-27)
 version 9.11 (2021-08-01)
     * Updates DPoPTokenRequestVerifier.verify to return the
       JWKThumbprintConfirmation (the JWK SHA-256 thumbprint) on success.
+    * Updates to com.nimbusds:nimbus-jose-jwt:9.11.3
+    * Updates to com.google.crypto.tink:tink:1.6.1
+    * Updates to org.cryptomator:siv-mode:1.4.3
+
