@@ -548,7 +548,7 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 				if (uriValue == null)
 					continue;
 				
-				String errMsg = "Illegal resource parameter: Must be an absolute URI and with no query or fragment: " + uriValue;
+				String errMsg = "Illegal resource parameter: Must be an absolute URI without a fragment: " + uriValue;
 				
 				URI resourceURI;
 				try {

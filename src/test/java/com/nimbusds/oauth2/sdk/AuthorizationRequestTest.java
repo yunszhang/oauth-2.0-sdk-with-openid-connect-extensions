@@ -728,6 +728,18 @@ public class AuthorizationRequestTest extends TestCase {
 	}
 	
 	
+	public void testBuilderResourceWithQueryComponent() {
+		
+		URI resource = URI.create("https://api.example.com?query=abc");
+		
+		AuthorizationRequest request = new AuthorizationRequest.Builder(new ResponseType("code"), new ClientID("123"))
+			.resource(resource)
+			.build();
+		
+		assertEquals(Collections.singletonList(resource), request.getResources());
+	}
+	
+	
 	public void testBuilderWithOneResource() {
 		
 		URI resource = URI.create("https://api.example.com");
@@ -751,24 +763,11 @@ public class AuthorizationRequestTest extends TestCase {
 		
 		try {
 			new AuthorizationRequest.Builder(new ResponseType("code"), new ClientID("123"))
-				.resources(URI.create("https:///api/v1"))
+				.resources(URI.create("/api/v1"))
 				.build();
 			fail();
 		} catch (IllegalStateException e) {
-			assertEquals("Resource URI must be absolute and with no query or fragment: https:///api/v1", e.getMessage());
-		}
-	}
-	
-	
-	public void testBuilderWithResource_rejectURIWithQuery() {
-		
-		try {
-			new AuthorizationRequest.Builder(new ResponseType("code"), new ClientID("123"))
-				.resources(URI.create("https://rs1.com/api/v1?query"))
-				.build();
-			fail();
-		} catch (IllegalStateException e) {
-			assertEquals("Resource URI must be absolute and with no query or fragment: https://rs1.com/api/v1?query", e.getMessage());
+			assertEquals("Resource URI must be absolute and without a fragment: /api/v1", e.getMessage());
 		}
 	}
 	
@@ -781,7 +780,7 @@ public class AuthorizationRequestTest extends TestCase {
 				.build();
 			fail();
 		} catch (IllegalStateException e) {
-			assertEquals("Resource URI must be absolute and with no query or fragment: https://rs1.com/api/v1#fragment", e.getMessage());
+			assertEquals("Resource URI must be absolute and without a fragment: https://rs1.com/api/v1#fragment", e.getMessage());
 		}
 	}
 	
@@ -805,35 +804,37 @@ public class AuthorizationRequestTest extends TestCase {
 	}
 	
 	
-	public void testParse_rejectResourceURIWithHostNotAbsolute() {
+	public void testParseResourceIndicatorsWithQueryComponent()
+		throws ParseException {
 		
-		try {
-			AuthorizationRequest.parse(URI.create("https://authorization-server.example.com" +
+		AuthorizationRequest request = AuthorizationRequest.parse(
+			URI.create(
+				"https://authorization-server.example.com" +
 				"/as/authorization.oauth2?response_type=token" +
 				"&client_id=s6BhdRkqt3&state=laeb" +
 				"&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb" +
-				"&resource=https%3A%2F%2F%2F"));
-			fail();
-		} catch (ParseException e) {
-			assertEquals(OAuth2Error.INVALID_RESOURCE, e.getErrorObject());
-			assertEquals("Illegal resource parameter: Must be an absolute URI and with no query or fragment: https:///", e.getErrorObject().getDescription());
-		}
+				"&resource=https%3A%2F%2Frs.example.com%2Fapi%2Fv1?query=abc"));
+		
+		assertEquals(new ClientID("s6BhdRkqt3"), request.getClientID());
+		assertEquals(new State("laeb"), request.getState());
+		assertEquals(new ResponseType("token"), request.getResponseType());
+		assertEquals(URI.create("https://client.example.com/cb"), request.getRedirectionURI());
+		assertEquals(Collections.singletonList(URI.create("https://rs.example.com/api/v1?query=abc")), request.getResources());
 	}
 	
 	
-	public void testParse_rejectResourceURIWithQuery()
-		throws UnsupportedEncodingException {
+	public void testParse_rejectResourceURINotAbsolute() {
 		
 		try {
 			AuthorizationRequest.parse(URI.create("https://authorization-server.example.com" +
 				"/as/authorization.oauth2?response_type=token" +
 				"&client_id=s6BhdRkqt3&state=laeb" +
 				"&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb" +
-				"&resource=" + URLEncoder.encode("https://rs.example.com/?query", "utf-8")));
+				"&resource=%2Fapi%2Fv1"));
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_RESOURCE, e.getErrorObject());
-			assertEquals("Illegal resource parameter: Must be an absolute URI and with no query or fragment: https://rs.example.com/?query", e.getErrorObject().getDescription());
+			assertEquals("Illegal resource parameter: Must be an absolute URI and with no query or fragment: /api/v1", e.getErrorObject().getDescription());
 		}
 	}
 	

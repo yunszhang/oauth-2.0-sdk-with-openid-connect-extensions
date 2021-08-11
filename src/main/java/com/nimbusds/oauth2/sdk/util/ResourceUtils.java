@@ -33,14 +33,11 @@ public final class ResourceUtils {
 	 * @param resourceURI The resource URI. Must not be {@code null}.
 	 *
 	 * @return {@code true} if the resource URI is valid, {@code false} if
-	 *         the URI is not absolute or has a query or fragment.
+	 *         the URI is not absolute or has a fragment.
 	 */
 	public static boolean isValidResourceURI(final URI resourceURI) {
 		
-		return
-			resourceURI.getHost() != null
-			&& resourceURI.getQuery() == null
-			&& resourceURI.getFragment() == null;
+		return resourceURI.isAbsolute() && resourceURI.getFragment() == null;
 	}
 	
 	

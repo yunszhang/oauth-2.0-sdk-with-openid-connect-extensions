@@ -32,14 +32,16 @@ public class ResourceUtilsTest extends TestCase {
 		assertTrue(ResourceUtils.isValidResourceURI(URI.create("https://rs1.com/")));
 		assertTrue(ResourceUtils.isValidResourceURI(URI.create("https://rs1.com:8080/")));
 		assertTrue(ResourceUtils.isValidResourceURI(URI.create("https://rs1.com/api")));
+		assertTrue(ResourceUtils.isValidResourceURI(URI.create("https:///api/v1")));
+		assertTrue(ResourceUtils.isValidResourceURI(URI.create("https://rs1.com/api?query")));
 		assertTrue(ResourceUtils.isValidResourceURI(URI.create("resource://rs1.com/api/v1")));
+		assertTrue(ResourceUtils.isValidResourceURI(URI.create("urn:uuid:33336dcd-a239-444a-90ae-76d381c3e6d5")));
 	}
 	
 	
 	public void testIsValidResourceURI_negative() {
 		
-		assertFalse(ResourceUtils.isValidResourceURI(URI.create("https:///path")));
-		assertFalse(ResourceUtils.isValidResourceURI(URI.create("https://rs1.com/api?query")));
 		assertFalse(ResourceUtils.isValidResourceURI(URI.create("https://rs1.com/api#fragment")));
+		assertFalse(ResourceUtils.isValidResourceURI(URI.create("/api#fragment")));
 	}
 }

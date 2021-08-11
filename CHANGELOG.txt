@@ -1815,3 +1815,5 @@ version 9.12 (2021-08-11)
     * If Tokens.getDPoPAccessToken cannot cast the token to DPoPAccessToken,
       but its getType returns AccessTokenType.DPOP the method will recreate the
       token as new DPoPAccessToken.
+    * ResourceUtils.isValidResourceURI must accept as valid resource URIs (RFC
+      8707) without a host as well as URIs with a query component (iss #371).

@@ -1635,32 +1635,14 @@ public class TokenRequestTest extends TestCase {
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://authorization-server.example.com/as/token.oauth2"));
 		httpRequest.setAuthorization("Basic czZCaGRSa3F0Mzpoc3FFelFsVW9IQUU5cHg0RlNyNHlJ");
 		httpRequest.setContentType("application/x-www-form-urlencoded");
-		httpRequest.setQuery("grant_type=refresh_token&refresh_token=4LTC8lb0acc6Oy4esc1Nk9BWC0imAwH&resource=https%3A%2F%2F%2F");
+		httpRequest.setQuery("grant_type=refresh_token&refresh_token=4LTC8lb0acc6Oy4esc1Nk9BWC0imAwH&resource=/api/v1");
 		
 		try {
 			TokenRequest.parse(httpRequest);
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_RESOURCE, e.getErrorObject());
-			assertEquals("Illegal resource parameter: Must be an absolute URI and with no query or fragment: https:///", e.getErrorObject().getDescription());
-		}
-	}
-	
-	
-	public void testParseResource_rejectURIWithQuery()
-		throws Exception {
-		
-		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://authorization-server.example.com/as/token.oauth2"));
-		httpRequest.setAuthorization("Basic czZCaGRSa3F0Mzpoc3FFelFsVW9IQUU5cHg0RlNyNHlJ");
-		httpRequest.setContentType("application/x-www-form-urlencoded");
-		httpRequest.setQuery("grant_type=refresh_token&refresh_token=4LTC8lb0acc6Oy4esc1Nk9BWC0imAwH&resource=https%3A%2F%2Frs.example.com%2F?query");
-		
-		try {
-			TokenRequest.parse(httpRequest);
-			fail();
-		} catch (ParseException e) {
-			assertEquals(OAuth2Error.INVALID_RESOURCE, e.getErrorObject());
-			assertEquals("Illegal resource parameter: Must be an absolute URI and with no query or fragment: https://rs.example.com/?query", e.getErrorObject().getDescription());
+			assertEquals("Illegal resource parameter: Must be an absolute URI without a fragment: /api/v1", e.getErrorObject().getDescription());
 		}
 	}
 	
@@ -1678,7 +1660,7 @@ public class TokenRequestTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_RESOURCE, e.getErrorObject());
-			assertEquals("Illegal resource parameter: Must be an absolute URI and with no query or fragment: https://rs.example.com/#fragment", e.getErrorObject().getDescription());
+			assertEquals("Illegal resource parameter: Must be an absolute URI without a fragment: https://rs.example.com/#fragment", e.getErrorObject().getDescription());
 		}
 	}
 	

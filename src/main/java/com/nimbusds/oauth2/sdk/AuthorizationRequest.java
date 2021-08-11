@@ -839,7 +839,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		if (resources != null) {
 			for (URI resourceURI: resources) {
 				if (! ResourceUtils.isValidResourceURI(resourceURI))
-					throw new IllegalArgumentException("Resource URI must be absolute and with no query or fragment: " + resourceURI);
+					throw new IllegalArgumentException("Resource URI must be absolute and without a fragment: " + resourceURI);
 			}
 		}
 		
