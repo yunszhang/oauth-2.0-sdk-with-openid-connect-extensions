@@ -93,6 +93,11 @@ public class Tokens {
 		if (accessToken instanceof BearerAccessToken) {
 			return (BearerAccessToken) accessToken;
 		}
+		
+		if (AccessTokenType.BEARER.equals(accessToken.getType())) {
+			// Create from AccessToken with Bearer access token type
+			return new BearerAccessToken(accessToken.getValue(), accessToken.getLifetime(), accessToken.getScope());
+		}
 
 		return null;
 	}
@@ -107,7 +112,13 @@ public class Tokens {
 	public DPoPAccessToken getDPoPAccessToken() {
 		
 		if (accessToken instanceof DPoPAccessToken) {
+			// Cast
 			return (DPoPAccessToken) accessToken;
+		}
+		
+		if (AccessTokenType.DPOP.equals(accessToken.getType())) {
+			// Create from AccessToken with DPoP access token type
+			return new DPoPAccessToken(accessToken.getValue(), accessToken.getLifetime(), accessToken.getScope());
 		}
 		
 		return null;

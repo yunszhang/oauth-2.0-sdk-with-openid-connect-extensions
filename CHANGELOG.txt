@@ -1808,3 +1808,10 @@ version 9.11 (2021-08-01)
     * Updates to com.google.crypto.tink:tink:1.6.1
     * Updates to org.cryptomator:siv-mode:1.4.3
 
+version 9.12 (2021-08-11)
+    * If Tokens.getBearerAccessToken cannot cast the token to
+      BearerAccessToken, but its getType returns AccessTokenType.BEARER the
+      method will recreate the token as new BearerAccessToken.
+    * If Tokens.getDPoPAccessToken cannot cast the token to DPoPAccessToken,
+      but its getType returns AccessTokenType.DPOP the method will recreate the
+      token as new DPoPAccessToken.

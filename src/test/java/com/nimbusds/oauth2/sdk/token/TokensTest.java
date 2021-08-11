@@ -21,7 +21,6 @@ package com.nimbusds.oauth2.sdk.token;
 import java.util.Collections;
 
 import junit.framework.TestCase;
-
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -155,5 +154,51 @@ public class TokensTest extends TestCase {
 		} catch (IllegalArgumentException e) {
 			assertEquals("The access token must not be null", e.getMessage());
 		}
+	}
+	
+	
+	public void testToBearerAccessToken_recreate() {
+		
+		String value = "a45e77b1-5af1-4a84-b500-e94d123b1103";
+		long lifetime = 3600;
+		Scope scope = new Scope("read", "write");
+		
+		AccessToken accessToken = new AccessToken(AccessTokenType.BEARER, value, lifetime, scope) {
+			@Override
+			public String toAuthorizationHeader() {
+				throw new UnsupportedOperationException();
+			}
+		};
+		
+		Tokens tokens = new Tokens(accessToken, null);
+		
+		BearerAccessToken bearerAccessToken = tokens.getBearerAccessToken();
+		assertEquals(AccessTokenType.BEARER, bearerAccessToken.getType());
+		assertEquals(value, bearerAccessToken.getValue());
+		assertEquals(lifetime, bearerAccessToken.getLifetime());
+		assertEquals(scope, bearerAccessToken.getScope());
+	}
+	
+	
+	public void testToDPoPAccessToken_recreate() {
+		
+		String value = "a45e77b1-5af1-4a84-b500-e94d123b1103";
+		long lifetime = 3600;
+		Scope scope = new Scope("read", "write");
+		
+		AccessToken accessToken = new AccessToken(AccessTokenType.DPOP, value, lifetime, scope) {
+			@Override
+			public String toAuthorizationHeader() {
+				throw new UnsupportedOperationException();
+			}
+		};
+		
+		Tokens tokens = new Tokens(accessToken, null);
+		
+		DPoPAccessToken dPoPAccessToken = tokens.getDPoPAccessToken();
+		assertEquals(AccessTokenType.DPOP, dPoPAccessToken.getType());
+		assertEquals(value, dPoPAccessToken.getValue());
+		assertEquals(lifetime, dPoPAccessToken.getLifetime());
+		assertEquals(scope, dPoPAccessToken.getScope());
 	}
 }
