@@ -1817,3 +1817,6 @@ version 9.12 (2021-08-11)
       token as new DPoPAccessToken.
     * ResourceUtils.isValidResourceURI must accept as valid resource URIs (RFC
       8707) without a host as well as URIs with a query component (iss #371).
+
+version 9.13 (2021-08-18)
+    * Updates to com.nimbusds:nimbus-jose-jwt:9.12.1
