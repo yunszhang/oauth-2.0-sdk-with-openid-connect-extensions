@@ -34,13 +34,28 @@ import com.nimbusds.oauth2.sdk.Scope;
 public class DPoPTokenErrorTest extends TestCase {
 
 
-	public void testConstantCodes() {
+	public void testConstants() {
 
 		assertNull(DPoPTokenError.MISSING_TOKEN.getCode());
+		assertNull(DPoPTokenError.MISSING_TOKEN.getDescription());
+		assertEquals(401, DPoPTokenError.MISSING_TOKEN.getHTTPStatusCode());
+		assertNull(DPoPTokenError.MISSING_TOKEN.getJWSAlgorithms());
+		
 		assertEquals("invalid_request", DPoPTokenError.INVALID_REQUEST.getCode());
+		assertEquals("Invalid request", DPoPTokenError.INVALID_REQUEST.getDescription());
+		assertEquals(400, DPoPTokenError.INVALID_REQUEST.getHTTPStatusCode());
+		
 		assertEquals("invalid_token", DPoPTokenError.INVALID_TOKEN.getCode());
+		assertEquals("Invalid access token", DPoPTokenError.INVALID_TOKEN.getDescription());
+		assertEquals(401, DPoPTokenError.INVALID_TOKEN.getHTTPStatusCode());
+		
 		assertEquals("insufficient_scope", DPoPTokenError.INSUFFICIENT_SCOPE.getCode());
+		assertEquals("Insufficient scope", DPoPTokenError.INSUFFICIENT_SCOPE.getDescription());
+		assertEquals(403, DPoPTokenError.INSUFFICIENT_SCOPE.getHTTPStatusCode());
+		
 		assertEquals("invalid_dpop_proof", DPoPTokenError.INVALID_DPOP_PROOF.getCode());
+		assertEquals("Invalid DPoP proof", DPoPTokenError.INVALID_DPOP_PROOF.getDescription());
+		assertEquals(401, DPoPTokenError.INVALID_DPOP_PROOF.getHTTPStatusCode());
 	}
 	
 	

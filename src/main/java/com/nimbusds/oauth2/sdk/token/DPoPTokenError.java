@@ -124,12 +124,12 @@ public class DPoPTokenError extends TokenSchemeError {
 	
 	
 	/**
-	 * The request has a DPoP proof that is invalid or missing. The HTTP
-	 * status code is set to 400 (Bad Request).
+	 * The request has a DPoP proof that is invalid. The HTTP status code
+	 * is set to 401 (Unauthorized).
 	 */
 	public static final DPoPTokenError INVALID_DPOP_PROOF =
-		new DPoPTokenError("invalid_dpop_proof", "Invalid or missing DPoP proof",
-			HTTPResponse.SC_BAD_REQUEST);
+		new DPoPTokenError("invalid_dpop_proof", "Invalid DPoP proof",
+			HTTPResponse.SC_UNAUTHORIZED);
 	
 	
 	/**
