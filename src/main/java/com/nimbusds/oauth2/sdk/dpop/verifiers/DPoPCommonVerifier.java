@@ -113,7 +113,7 @@ class DPoPCommonVerifier {
 	 * @param uri         The HTTP URI. Any query or fragment component
 	 *                    will be stripped from it before DPoP validation.
 	 *                    Must not be {@code null}.
-	 * @param issuer      Unique identifier for the the DPoP proof issuer,
+	 * @param issuer      Unique identifier for the DPoP proof issuer,
 	 *                    such as its client ID. Must not be {@code null}.
 	 * @param proof       The DPoP proof JWT. Must not be {@code null}.
 	 * @param accessToken The received DPoP access token for a protected

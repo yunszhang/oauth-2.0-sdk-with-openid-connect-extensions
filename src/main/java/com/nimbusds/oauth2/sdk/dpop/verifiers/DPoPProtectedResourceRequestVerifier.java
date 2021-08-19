@@ -64,13 +64,13 @@ public class DPoPProtectedResourceRequestVerifier extends DPoPCommonVerifier {
 	 * Verifies the specified DPoP proof and its access token and JWK
 	 * SHA-256 thumbprint bindings.
 	 *
-	 * @param method      The HTTP request method (case insensitive). Must
+	 * @param method      The HTTP request method (case-insensitive). Must
 	 *                    not be {@code null}.
 	 * @param uri         The HTTP URI. Any query or fragment component
 	 *                    will be stripped from it before DPoP validation.
 	 *                    Must not be {@code null}.
-	 * @param issuer      Unique identifier for the the DPoP proof issuer,
-	 *                    such as its client ID. Must not be {@code null}.
+	 * @param issuer      Unique identifier for the DPoP proof issuer, such
+	 *                    as its client ID. Must not be {@code null}.
 	 * @param proof       The DPoP proof JWT. Must not be {@code null}.
 	 * @param accessToken The received DPoP access token. Must not be
 	 *                    {@code null}.
