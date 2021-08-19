@@ -1819,6 +1819,8 @@ version 9.12 (2021-08-11)
       8707) without a host as well as URIs with a query component (iss #371).
 
 version 9.13 (2021-08-18)
+    * Adds DPoPTokenError.INVALID_DPOP_PROOF in anticipation of
+      draft-ietf-oauth-dpop-03.
     * Refactors iat checking in DPoPProofClaimsSetVerifier.
     * DPoPProofClaimsSetVerifier must reject iat too far in future (iss #372).
     * Updates to com.nimbusds:nimbus-jose-jwt:9.12.1

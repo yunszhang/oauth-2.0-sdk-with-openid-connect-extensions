@@ -40,6 +40,7 @@ public class DPoPTokenErrorTest extends TestCase {
 		assertEquals("invalid_request", DPoPTokenError.INVALID_REQUEST.getCode());
 		assertEquals("invalid_token", DPoPTokenError.INVALID_TOKEN.getCode());
 		assertEquals("insufficient_scope", DPoPTokenError.INSUFFICIENT_SCOPE.getCode());
+		assertEquals("invalid_dpop_proof", DPoPTokenError.INVALID_DPOP_PROOF.getCode());
 	}
 	
 	

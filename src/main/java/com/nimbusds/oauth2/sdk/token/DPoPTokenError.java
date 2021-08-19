@@ -35,8 +35,9 @@ import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 
 /**
  * OAuth 2.0 DPoP token error. Used to indicate that access to a resource
- * protected by a DPoP access token is denied, due to the request or token
- * being invalid, or due to the access token having insufficient scope.
+ * protected by a DPoP access token is denied, due to the request, token or
+ * DPoP proof being invalid, or due to the access token having insufficient
+ * scope.
  *
  * <p>Standard DPoP access token errors:
  *
@@ -45,6 +46,7 @@ import com.nimbusds.oauth2.sdk.util.CollectionUtils;
  *     <li>{@link #INVALID_REQUEST}
  *     <li>{@link #INVALID_TOKEN}
  *     <li>{@link #INSUFFICIENT_SCOPE}
+ *     <li>{@link #INVALID_DPOP_PROOF}
  * </ul>
  *
  * <p>Example HTTP response:
@@ -119,6 +121,15 @@ public class DPoPTokenError extends TokenSchemeError {
 	public static final DPoPTokenError INSUFFICIENT_SCOPE =
 		new DPoPTokenError("insufficient_scope", "Insufficient scope",
 			             HTTPResponse.SC_FORBIDDEN);
+	
+	
+	/**
+	 * The request has a DPoP proof that is invalid or missing. The HTTP
+	 * status code is set to 400 (Bad Request).
+	 */
+	public static final DPoPTokenError INVALID_DPOP_PROOF =
+		new DPoPTokenError("invalid_dpop_proof", "Invalid or missing DPoP proof",
+			HTTPResponse.SC_BAD_REQUEST);
 	
 	
 	/**
