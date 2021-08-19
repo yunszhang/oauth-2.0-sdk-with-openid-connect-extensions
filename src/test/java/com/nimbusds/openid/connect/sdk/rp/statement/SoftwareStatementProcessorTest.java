@@ -436,7 +436,7 @@ public class SoftwareStatementProcessorTest {
 			processor.process(clientMetadata);
 			fail();
 		} catch (InvalidSoftwareStatementException e) {
-			assertEquals("Invalid software statement JWT: JWT \"iss\" claim has value https://some-other-issuer.com, must be https://issuer.com", e.getMessage());
+			assertEquals("Invalid software statement JWT: JWT iss claim has value https://some-other-issuer.com, must be https://issuer.com", e.getMessage());
 		}
 	}
 }

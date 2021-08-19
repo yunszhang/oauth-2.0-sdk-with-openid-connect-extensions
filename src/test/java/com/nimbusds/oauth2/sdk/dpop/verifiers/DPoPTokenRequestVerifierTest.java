@@ -84,7 +84,7 @@ public class DPoPTokenRequestVerifierTest extends TestCase {
 			verifier.verify(issuer, proof);
 			fail();
 		} catch (InvalidDPoPProofException e) {
-			assertEquals("Invalid DPoP proof: JWT \"htu\" claim has value https://op.example.com/userinfo, must be https://c2id.com/token", e.getMessage());
+			assertEquals("Invalid DPoP proof: JWT htu claim has value https://op.example.com/userinfo, must be https://c2id.com/token", e.getMessage());
 		}
 		
 		// Invalid HTTP method
@@ -94,7 +94,7 @@ public class DPoPTokenRequestVerifierTest extends TestCase {
 			verifier.verify(issuer, proof);
 			fail();
 		} catch (InvalidDPoPProofException e) {
-			assertEquals("Invalid DPoP proof: JWT \"htm\" claim has value GET, must be POST", e.getMessage());
+			assertEquals("Invalid DPoP proof: JWT htm claim has value GET, must be POST", e.getMessage());
 		}
 		
 		// JWS alg not accepted
@@ -127,7 +127,7 @@ public class DPoPTokenRequestVerifierTest extends TestCase {
 			verifier.verify(issuer, proof);
 			fail();
 		} catch (InvalidDPoPProofException e) {
-			assertEquals("Invalid DPoP proof: Required JOSE header \"typ\" (type) parameter is missing", e.getMessage());
+			assertEquals("Invalid DPoP proof: Required JOSE header typ (type) parameter is missing", e.getMessage());
 		}
 		
 		// Missing jwk header

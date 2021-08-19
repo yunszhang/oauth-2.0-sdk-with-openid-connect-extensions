@@ -83,7 +83,7 @@ public class DPoPProtectedResourceRequestVerifierTest extends TestCase {
 			verifier.verify("POST", htu, issuer, proof, accessToken, cnf);
 			fail();
 		} catch (InvalidDPoPProofException e) {
-			assertEquals("Invalid DPoP proof: JWT \"htm\" claim has value GET, must be POST", e.getMessage());
+			assertEquals("Invalid DPoP proof: JWT htm claim has value GET, must be POST", e.getMessage());
 		}
 		
 		// HTTP URI doesn't match
@@ -92,7 +92,7 @@ public class DPoPProtectedResourceRequestVerifierTest extends TestCase {
 			verifier.verify(htm, new URI("https://example.com/resource"), issuer, proof, accessToken, cnf);
 			fail();
 		} catch (InvalidDPoPProofException e) {
-			assertEquals("Invalid DPoP proof: JWT \"htu\" claim has value https://c2id.com/userinfo, must be https://example.com/resource", e.getMessage());
+			assertEquals("Invalid DPoP proof: JWT htu claim has value https://c2id.com/userinfo, must be https://example.com/resource", e.getMessage());
 		}
 		
 		// Missing access token

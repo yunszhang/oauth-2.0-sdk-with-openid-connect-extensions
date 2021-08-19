@@ -239,7 +239,7 @@ public class IDTokenValidatorTest extends TestCase {
 			idTokenValidator.validate(idToken, null);
 			fail();
 		} catch (BadJOSEException e) {
-			assertEquals("JOSE header \"typ\" (type) \"at+jwt\" not allowed", e.getMessage());
+			assertEquals("JOSE header typ (type) at+jwt not allowed", e.getMessage());
 		}
 	}
 

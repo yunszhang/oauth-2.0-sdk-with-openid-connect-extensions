@@ -118,7 +118,7 @@ public class DPoPCommonVerifierTest extends TestCase {
 			verifier.verify(htm, htu, issuer, proof, null, null);
 			fail();
 		} catch (InvalidDPoPProofException e) {
-			assertEquals("Invalid DPoP proof: JWT \"htm\" claim has value PUT, must be POST", e.getMessage());
+			assertEquals("Invalid DPoP proof: JWT htm claim has value PUT, must be POST", e.getMessage());
 		}
 		
 		// Invalid HTTP URL
@@ -128,7 +128,7 @@ public class DPoPCommonVerifierTest extends TestCase {
 			verifier.verify(htm, htu, issuer, proof, null, null);
 			fail();
 		} catch (InvalidDPoPProofException e) {
-			assertEquals("Invalid DPoP proof: JWT \"htu\" claim has value https://op.example.com/userinfo, must be https://c2id.com/token", e.getMessage());
+			assertEquals("Invalid DPoP proof: JWT htu claim has value https://op.example.com/userinfo, must be https://c2id.com/token", e.getMessage());
 		}
 		
 		// JWS alg not accepted
@@ -161,7 +161,7 @@ public class DPoPCommonVerifierTest extends TestCase {
 			verifier.verify(htm, htu, issuer, proof, null, null);
 			fail();
 		} catch (InvalidDPoPProofException e) {
-			assertEquals("Invalid DPoP proof: Required JOSE header \"typ\" (type) parameter is missing", e.getMessage());
+			assertEquals("Invalid DPoP proof: Required JOSE header typ (type) parameter is missing", e.getMessage());
 		}
 		
 		// Missing jwk header
