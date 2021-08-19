@@ -1823,4 +1823,6 @@ version 9.13 (2021-08-18)
       draft-ietf-oauth-dpop-03.
     * Refactors iat checking in DPoPProofClaimsSetVerifier.
     * DPoPProofClaimsSetVerifier must reject iat too far in future (iss #372).
+    * Updates DPoPProtectedResourceRequestVerifier.verify to handle missing
+      DPoP proof with InvalidDPoPProofException.
     * Updates to com.nimbusds:nimbus-jose-jwt:9.12.1

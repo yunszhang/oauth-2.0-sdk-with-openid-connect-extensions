@@ -95,6 +95,14 @@ public class DPoPProtectedResourceRequestVerifierTest extends TestCase {
 			assertEquals("Invalid DPoP proof: JWT htu claim has value https://c2id.com/userinfo, must be https://example.com/resource", e.getMessage());
 		}
 		
+		// Missing DPoP proof
+		try {
+			verifier.verify(htm, htu, issuer, null, accessToken, cnf);
+			fail();
+		} catch (InvalidDPoPProofException e) {
+			assertEquals("Missing required DPoP proof", e.getMessage());
+		}
+		
 		// Missing access token
 		proof = dPoPProofFactory.createDPoPJWT(htm, htu, accessToken);
 		try {

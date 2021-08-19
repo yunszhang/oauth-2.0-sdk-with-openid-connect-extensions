@@ -72,13 +72,14 @@ public class DPoPProtectedResourceRequestVerifier extends DPoPCommonVerifier {
 	 *                    Must not be {@code null}.
 	 * @param issuer      Unique identifier for the DPoP proof issuer, such
 	 *                    as its client ID. Must not be {@code null}.
-	 * @param proof       The DPoP proof JWT. Must not be {@code null}.
+	 * @param proof       The DPoP proof JWT, {@code null} if not received.
 	 * @param accessToken The received DPoP access token. Must not be
 	 *                    {@code null}.
 	 * @param cnf         The JWK SHA-256 thumbprint confirmation for the
 	 *                    DPoP access token. Must not be {@code null}.
 	 *
-	 * @throws InvalidDPoPProofException      If the DPoP proof is invalid.
+	 * @throws InvalidDPoPProofException      If the DPoP proof is invalid
+	 *                                        or missing.
 	 * @throws AccessTokenValidationException If the DPoP access token
 	 *                                        binding validation failed.
 	 * @throws JOSEException                  If an internal JOSE exception
@@ -94,6 +95,10 @@ public class DPoPProtectedResourceRequestVerifier extends DPoPCommonVerifier {
 		InvalidDPoPProofException,
 		AccessTokenValidationException,
 		JOSEException {
+		
+		if (proof == null) {
+			throw new InvalidDPoPProofException("Missing required DPoP proof");
+		}
 		
 		super.verify(method, uri, issuer, proof, accessToken, cnf);
 	}
