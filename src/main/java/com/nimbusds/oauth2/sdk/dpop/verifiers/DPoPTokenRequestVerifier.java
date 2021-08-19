@@ -50,25 +50,26 @@ public class DPoPTokenRequestVerifier extends DPoPCommonVerifier {
 	 * Creates a new DPoP proof JWT verifier for the OAuth 2.0 token
 	 * endpoint.
 	 *
-	 * @param acceptedJWSAlgs  The accepted JWS algorithms. Must be
-	 *                         supported and not {@code null}.
-	 * @param endpointURI      The token endpoint URI. Any query or
-	 *                         fragment component will be stripped from it
-	 *                         before performing the comparison. Must not
-	 *                         be {@code null}.
-	 * @param maxAgeSeconds    The maximum acceptable "iat" (issued-at)
-	 *                         claim age, in seconds. JWTs older than that
-	 *                         will be rejected.
-	 * @param singleUseChecker The single use checker for the DPoP proof
-	 *                         "jti" (JWT ID) claims, {@code null} if not
-	 *                         specified.
+	 * @param acceptedJWSAlgs     The accepted JWS algorithms. Must be
+	 *                            supported and not {@code null}.
+	 * @param endpointURI         The token endpoint URI. Any query or
+	 *                            fragment component will be stripped from
+	 *                            it before performing the comparison. Must
+	 *                            not be {@code null}.
+	 * @param maxClockSkewSeconds The max acceptable clock skew for the
+	 *                            "iat" (issued-at) claim checks, in
+	 *                            seconds. Should be in the order of a few
+	 *                            seconds.
+	 * @param singleUseChecker    The single use checker for the DPoP proof
+	 *                            "jti" (JWT ID) claims, {@code null} if
+	 *                            not specified.
 	 */
 	public DPoPTokenRequestVerifier(final Set<JWSAlgorithm> acceptedJWSAlgs,
 					final URI endpointURI,
-					final long maxAgeSeconds,
+					final long maxClockSkewSeconds,
 					final SingleUseChecker<Map.Entry<DPoPIssuer, JWTID>> singleUseChecker) {
 		
-		super(acceptedJWSAlgs, maxAgeSeconds, false, singleUseChecker);
+		super(acceptedJWSAlgs, maxClockSkewSeconds, false, singleUseChecker);
 		
 		if (endpointURI == null) {
 			throw new IllegalArgumentException("The token endpoint URI must not be null");

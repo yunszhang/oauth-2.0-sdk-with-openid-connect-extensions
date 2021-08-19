@@ -65,7 +65,7 @@ class DPoPCommonVerifier {
 	
 	private final Set<JWSAlgorithm> acceptedJWSAlgs;
 	
-	private final long maxAgeSeconds;
+	private final long maxClockSkewSeconds;
 	
 	private final boolean requireATH;
 	
@@ -75,19 +75,20 @@ class DPoPCommonVerifier {
 	/**
 	 * Creates a new DPoP proof JWT verifier.
 	 *
-	 * @param acceptedJWSAlgs  The accepted JWS algorithms. Must be
-	 *                         supported and not {@code null}.
-	 * @param maxAgeSeconds    The maximum acceptable "iat" (issued-at)
-	 *                         claim age, in seconds. JWTs older than that
-	 *                         will be rejected.
-	 * @param requireATH       {@code true} to require an "ath" (access
-	 *                         token hash) claim.
-	 * @param singleUseChecker The single use checker for the DPoP proof
-	 *                         "jti" (JWT ID) claims, {@code null} if not
-	 *                         specified.
+	 * @param acceptedJWSAlgs     The accepted JWS algorithms. Must be
+	 *                            supported and not {@code null}.
+	 * @param maxClockSkewSeconds The max acceptable clock skew for the
+	 *                            "iat" (issued-at) claim checks, in
+	 *                            seconds. Should be in the order of a few
+	 *                            seconds.
+	 * @param requireATH          {@code true} to require an "ath" (access
+	 *                            token hash) claim.
+	 * @param singleUseChecker    The single use checker for the DPoP proof
+	 *                            "jti" (JWT ID) claims, {@code null} if
+	 *                            not specified.
 	 */
 	DPoPCommonVerifier(final Set<JWSAlgorithm> acceptedJWSAlgs,
-			   final long maxAgeSeconds,
+			   final long maxClockSkewSeconds,
 			   final boolean requireATH,
 			   final SingleUseChecker<Map.Entry<DPoPIssuer, JWTID>> singleUseChecker) {
 		
@@ -96,7 +97,7 @@ class DPoPCommonVerifier {
 		}
 		this.acceptedJWSAlgs = acceptedJWSAlgs;
 		
-		this.maxAgeSeconds = maxAgeSeconds;
+		this.maxClockSkewSeconds = maxClockSkewSeconds;
 		
 		this.requireATH = requireATH;
 		
@@ -159,7 +160,7 @@ class DPoPCommonVerifier {
 		proc.setJWTClaimsSetVerifier(new DPoPProofClaimsSetVerifier(
 			method,
 			URIUtils.getBaseURI(uri),
-			maxAgeSeconds,
+			maxClockSkewSeconds,
 			requireATH,
 			singleUseChecker
 		));

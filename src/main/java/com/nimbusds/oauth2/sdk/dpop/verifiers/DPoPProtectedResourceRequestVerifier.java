@@ -43,20 +43,21 @@ public class DPoPProtectedResourceRequestVerifier extends DPoPCommonVerifier {
 	/**
 	 * Creates a new DPoP proof JWT verifier for a protected resource.
 	 *
-	 * @param acceptedJWSAlgs  The accepted JWS algorithms. Must be
-	 *                         supported and not {@code null}.
-	 * @param maxAgeSeconds    The maximum acceptable "iat" (issued-at)
-	 *                         claim age, in seconds. JWTs older than that
-	 *                         will be rejected.
-	 * @param singleUseChecker The single use checker for the DPoP proof
-	 *                         "jti" (JWT ID) claims, {@code null} if not
-	 *                         specified.
+	 * @param acceptedJWSAlgs     The accepted JWS algorithms. Must be
+	 *                            supported and not {@code null}.
+	 * @param maxClockSkewSeconds The max acceptable clock skew for the
+	 *                            "iat" (issued-at) claim checks, in
+	 *                            seconds. Should be in the order of a few
+	 *                            seconds.
+	 * @param singleUseChecker    The single use checker for the DPoP proof
+	 *                            "jti" (JWT ID) claims, {@code null} if
+	 *                            not specified.
 	 */
 	public DPoPProtectedResourceRequestVerifier(final Set<JWSAlgorithm> acceptedJWSAlgs,
-						    final long maxAgeSeconds,
+						    final long maxClockSkewSeconds,
 						    final SingleUseChecker<Map.Entry<DPoPIssuer, JWTID>> singleUseChecker) {
 		
-		super(acceptedJWSAlgs, maxAgeSeconds, true, singleUseChecker);
+		super(acceptedJWSAlgs, maxClockSkewSeconds, true, singleUseChecker);
 	}
 	
 	

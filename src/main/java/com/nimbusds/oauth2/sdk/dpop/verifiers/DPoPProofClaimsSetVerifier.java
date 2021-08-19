@@ -28,7 +28,6 @@ import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
-import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.id.JWTID;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.oauth2.sdk.util.singleuse.AlreadyUsedException;
@@ -43,9 +42,9 @@ class DPoPProofClaimsSetVerifier extends DefaultJWTClaimsVerifier<DPoPProofConte
 	
 	
 	/**
-	 * The max acceptable "iat" age, in seconds.
+	 * The max acceptable clock skew for the "iat" checks, in seconds.
 	 */
-	private final long maxAgeSeconds;
+	private final long maxClockSkewSeconds;
 	
 	
 	/**
@@ -58,23 +57,25 @@ class DPoPProofClaimsSetVerifier extends DefaultJWTClaimsVerifier<DPoPProofConte
 	/**
 	 * Creates a new DPoP proof JWT claims set verifier.
 	 *
-	 * @param acceptedMethod   The accepted HTTP request method (case
-	 *                         insensitive). Must not be {@code null}.
-	 * @param acceptedURI      The accepted endpoint URI. Any query or
-	 *                         fragment component will be stripped from it
-	 *                         before performing the comparison. Must not
-	 *                         be {@code null}.
-	 * @param maxAgeSeconds    The maximum acceptable "iat" (issued-at)
-	 *                         claim age, in seconds. JWTs older than that
-	 *                         will be rejected.
-	 * @param requireATH       {@code true} to require an "ath" (access
-	 *                         token hash) claim.
-	 * @param singleUseChecker The single use checker for the "jti" (JWT
-	 *                         ID) claims, {@code null} if not specified.
+	 * @param acceptedMethod      The accepted HTTP request method (case-
+	 *                            insensitive). Must not be {@code null}.
+	 * @param acceptedURI         The accepted endpoint URI. Any query or
+	 *                            fragment component will be stripped from
+	 *                            it before performing the comparison. Must
+	 *                            not be {@code null}.
+	 * @param maxClockSkewSeconds The max acceptable clock skew for the
+	 *                            "iat" (issued-at) claim checks, in
+	 *                            seconds. Should be in the order of a few
+	 *                            seconds.
+	 * @param requireATH          {@code true} to require an "ath" (access
+	 *                            token hash) claim.
+	 * @param singleUseChecker    The single use checker for the "jti" (JWT
+	 *                            ID) claims, {@code null} if not
+	 *                            specified.
 	 */
 	public DPoPProofClaimsSetVerifier(final String acceptedMethod,
 					  final URI acceptedURI,
-					  final long maxAgeSeconds,
+					  final long maxClockSkewSeconds,
 					  final boolean requireATH,
 					  final SingleUseChecker<Map.Entry<DPoPIssuer, JWTID>> singleUseChecker) {
 		
@@ -88,7 +89,7 @@ class DPoPProofClaimsSetVerifier extends DefaultJWTClaimsVerifier<DPoPProofConte
 			)
 		);
 		
-		this.maxAgeSeconds = maxAgeSeconds;
+		this.maxClockSkewSeconds = maxClockSkewSeconds;
 		
 		this.singleUseChecker = singleUseChecker;
 	}
@@ -102,12 +103,18 @@ class DPoPProofClaimsSetVerifier extends DefaultJWTClaimsVerifier<DPoPProofConte
 		super.verify(claimsSet, context);
 		
 		// Check time window
-		Date now = new Date();
-		Date oldestIAT = new Date(now.getTime() - maxAgeSeconds * 1000);
-		
 		Date iat = claimsSet.getIssueTime();
-		if (DateUtils.isBefore(iat, oldestIAT, 0L)) {
-			throw new BadJWTException("JWT age older than acceptable age of " + maxAgeSeconds + " seconds");
+		
+		Date now = new Date();
+		Date maxPast = new Date(now.getTime() - maxClockSkewSeconds * 1000L);
+		Date maxAhead = new Date(now.getTime() + maxClockSkewSeconds * 1000L);
+		
+		if (iat.before(maxPast)) {
+			throw new BadJWTException("The JWT iat claim is behind the current time by more than " + maxClockSkewSeconds + " seconds");
+		}
+		
+		if (iat.after(maxAhead)) {
+			throw new BadJWTException("The JWT iat claim is ahead of the current time by more than " + maxClockSkewSeconds + " seconds");
 		}
 		
 		if (singleUseChecker != null) {

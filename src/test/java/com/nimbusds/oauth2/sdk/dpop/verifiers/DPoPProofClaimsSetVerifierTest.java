@@ -42,6 +42,9 @@ public class DPoPProofClaimsSetVerifierTest extends TestCase {
 	
 	
 	private static final DPoPIssuer ISSUER = new DPoPIssuer(new ClientID("123"));
+	
+	
+	private static final int MAX_CLOCK_SKEW_SECONDS = 5;
 
 	
 	public void testPass() throws BadJWTException {
@@ -58,7 +61,7 @@ public class DPoPProofClaimsSetVerifierTest extends TestCase {
 			.jwtID(jti.getValue())
 			.build();
 		
-		new DPoPProofClaimsSetVerifier(method, endpoint, 60, false, null)
+		new DPoPProofClaimsSetVerifier(method, endpoint, MAX_CLOCK_SKEW_SECONDS, false, null)
 			.verify(claimsSet, new DPoPProofContext(ISSUER));
 	}
 
@@ -78,11 +81,11 @@ public class DPoPProofClaimsSetVerifierTest extends TestCase {
 			.build();
 		
 		try {
-			new DPoPProofClaimsSetVerifier(method, endpoint, 60, false, null)
+			new DPoPProofClaimsSetVerifier(method, endpoint, MAX_CLOCK_SKEW_SECONDS, false, null)
 				.verify(claimsSet, new DPoPProofContext(ISSUER));
 			fail();
 		} catch (BadJWTException e) {
-			assertEquals("JWT \"htm\" claim has value PUT, must be POST", e.getMessage());
+			assertEquals("JWT htm claim has value PUT, must be POST", e.getMessage());
 		}
 	}
 
@@ -102,22 +105,22 @@ public class DPoPProofClaimsSetVerifierTest extends TestCase {
 			.build();
 		
 		try {
-			new DPoPProofClaimsSetVerifier(method, endpoint, 60, false, null)
+			new DPoPProofClaimsSetVerifier(method, endpoint, MAX_CLOCK_SKEW_SECONDS, false, null)
 				.verify(claimsSet, new DPoPProofContext(ISSUER));
 			fail();
 		} catch (BadJWTException e) {
-			assertEquals("JWT \"htu\" claim has value https://example.com, must be https://c2id.com/token", e.getMessage());
+			assertEquals("JWT htu claim has value https://example.com, must be https://c2id.com/token", e.getMessage());
 		}
 	}
 
 	
-	public void test_tooOld() {
+	public void test_iatBehindMaxClockSkew() {
 		
 		String method = "POST";
 		URI endpoint = URI.create("https://c2id.com/token");
 		JWTID jti = new JWTID(12);
 		Date now = new Date();
-		Date twoMinAgo = new Date(now.getTime() - 2 * 60 * 1000);
+		Date twoMinAgo = new Date(now.getTime() - (MAX_CLOCK_SKEW_SECONDS + 1) * 1000);
 		
 		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
 			.claim("htm", "POST")
@@ -127,11 +130,36 @@ public class DPoPProofClaimsSetVerifierTest extends TestCase {
 			.build();
 		
 		try {
-			new DPoPProofClaimsSetVerifier(method, endpoint, 60, false, null)
+			new DPoPProofClaimsSetVerifier(method, endpoint, MAX_CLOCK_SKEW_SECONDS, false, null)
 				.verify(claimsSet, new DPoPProofContext(ISSUER));
 			fail();
 		} catch (BadJWTException e) {
-			assertEquals("JWT age older than acceptable age of 60 seconds", e.getMessage());
+			assertEquals("The JWT iat claim is behind the current time by more than " + MAX_CLOCK_SKEW_SECONDS + " seconds", e.getMessage());
+		}
+	}
+
+	
+	public void test_iatAheadMaxClockSkew() {
+		
+		String method = "POST";
+		URI endpoint = URI.create("https://c2id.com/token");
+		JWTID jti = new JWTID(12);
+		Date now = new Date();
+		Date tenSecondsAhead = new Date(now.getTime() + (MAX_CLOCK_SKEW_SECONDS + 1) * 1000);
+		
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+			.claim("htm", "POST")
+			.claim("htu", endpoint.toString())
+			.issueTime(tenSecondsAhead)
+			.jwtID(jti.getValue())
+			.build();
+		
+		try {
+			new DPoPProofClaimsSetVerifier(method, endpoint, MAX_CLOCK_SKEW_SECONDS, false, null)
+				.verify(claimsSet, new DPoPProofContext(ISSUER));
+			fail();
+		} catch (BadJWTException e) {
+			assertEquals("The JWT iat claim is ahead of the current time by more than " + MAX_CLOCK_SKEW_SECONDS + " seconds", e.getMessage());
 		}
 	}
 	
@@ -150,7 +178,7 @@ public class DPoPProofClaimsSetVerifierTest extends TestCase {
 			.build();
 		
 		try {
-			new DPoPProofClaimsSetVerifier(method, endpoint, 60, false, null)
+			new DPoPProofClaimsSetVerifier(method, endpoint, MAX_CLOCK_SKEW_SECONDS, false, null)
 				.verify(claimsSet, new DPoPProofContext(ISSUER));
 			fail();
 		} catch (BadJWTException e) {
@@ -173,7 +201,7 @@ public class DPoPProofClaimsSetVerifierTest extends TestCase {
 			.build();
 		
 		try {
-			new DPoPProofClaimsSetVerifier(method, endpoint, 60, false, null)
+			new DPoPProofClaimsSetVerifier(method, endpoint, MAX_CLOCK_SKEW_SECONDS, false, null)
 				.verify(claimsSet, new DPoPProofContext(ISSUER));
 			fail();
 		} catch (BadJWTException e) {
@@ -195,7 +223,7 @@ public class DPoPProofClaimsSetVerifierTest extends TestCase {
 			.build();
 		
 		try {
-			new DPoPProofClaimsSetVerifier(method, endpoint, 60, false, null)
+			new DPoPProofClaimsSetVerifier(method, endpoint, MAX_CLOCK_SKEW_SECONDS, false, null)
 				.verify(claimsSet, new DPoPProofContext(ISSUER));
 			fail();
 		} catch (BadJWTException e) {
@@ -217,7 +245,7 @@ public class DPoPProofClaimsSetVerifierTest extends TestCase {
 			.build();
 		
 		try {
-			new DPoPProofClaimsSetVerifier(method, endpoint, 60, false, null)
+			new DPoPProofClaimsSetVerifier(method, endpoint, MAX_CLOCK_SKEW_SECONDS, false, null)
 				.verify(claimsSet, new DPoPProofContext(ISSUER));
 			fail();
 		} catch (BadJWTException e) {
@@ -241,7 +269,7 @@ public class DPoPProofClaimsSetVerifierTest extends TestCase {
 			.build();
 		
 		try {
-			new DPoPProofClaimsSetVerifier(method, endpoint, 60, true, null)
+			new DPoPProofClaimsSetVerifier(method, endpoint, MAX_CLOCK_SKEW_SECONDS, true, null)
 				.verify(claimsSet, new DPoPProofContext(ISSUER));
 			fail();
 		} catch (BadJWTException e) {
@@ -266,7 +294,7 @@ public class DPoPProofClaimsSetVerifierTest extends TestCase {
 			.createDPoPJWT(jti, method, endpoint, now, token)
 			.getJWTClaimsSet();
 		
-		DPoPProofClaimsSetVerifier verifier = new DPoPProofClaimsSetVerifier(method, endpoint, 60, true, null);
+		DPoPProofClaimsSetVerifier verifier = new DPoPProofClaimsSetVerifier(method, endpoint, MAX_CLOCK_SKEW_SECONDS, true, null);
 		
 		// Pass
 		DPoPProofContext context = new DPoPProofContext(ISSUER);
