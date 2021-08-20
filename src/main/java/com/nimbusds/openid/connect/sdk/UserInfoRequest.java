@@ -27,18 +27,27 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ProtectedResourceRequest;
 import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
-import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
 
 
 /**
  * UserInfo request. Used to retrieve the consented claims about the end-user.
  *
- * <p>Example HTTP GET request:
+ * <p>Example HTTP GET request with a Bearer token:
  *
  * <pre>
  * GET /userinfo HTTP/1.1
  * Host: server.example.com
- * Authorization: Bearer SlAV32hkKG
+ * Authorization: Bearer Eabeeduphee3aiviehahreacaoNg2thu
+ * </pre>
+ *
+ * <p>Example HTTP GET request with a DPoP token and proof:
+ *
+ * <pre>
+ * GET /userinfo HTTP/1.1
+ * Host: server.example.com
+ * Authorization: DPoP jo4kahphoh1ath4INaochohLeeshaiyo
+ * DPoP: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6Ik...
  * </pre>
  *
  * <p>Related specifications:
@@ -46,6 +55,8 @@ import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
  * <ul>
  *     <li>OpenID Connect Core 1.0, section 5.3.1.
  *     <li>OAuth 2.0 Bearer Token Usage (RFC6750), section 2.
+ *     <li>OAuth 2.0 Demonstrating Proof-of-Possession at the Application Layer
+ *         (DPoP) (draft-ietf-oauth-dpop-03), section 7.
  * </ul>
  */
 @Immutable
@@ -64,10 +75,10 @@ public class UserInfoRequest extends ProtectedResourceRequest {
 	 * @param uri         The URI of the UserInfo endpoint. May be
 	 *                    {@code null} if the {@link #toHTTPRequest} method
 	 *                    will not be used.
-	 * @param accessToken An OAuth 2.0 Bearer access token for the request.
-	 *                    Must not be {@code null}.
+	 * @param accessToken An access token for the request. Must not be
+	 *                    {@code null}.
 	 */
-	public UserInfoRequest(final URI uri, final BearerAccessToken accessToken) {
+	public UserInfoRequest(final URI uri, final AccessToken accessToken) {
 	
 		this(uri, HTTPRequest.Method.GET, accessToken);
 	}
@@ -81,10 +92,10 @@ public class UserInfoRequest extends ProtectedResourceRequest {
 	 *                    will not be used.
 	 * @param httpMethod  The HTTP method. Must be HTTP GET or POST and not 
 	 *                    {@code null}.
-	 * @param accessToken An OAuth 2.0 Bearer access token for the request.
-	 *                    Must not be {@code null}.
+	 * @param accessToken An access token for the request. Must not be
+	 *                    {@code null}.
 	 */
-	public UserInfoRequest(final URI uri, final HTTPRequest.Method httpMethod, final BearerAccessToken accessToken) {
+	public UserInfoRequest(final URI uri, final HTTPRequest.Method httpMethod, final AccessToken accessToken) {
 	
 		super(uri, accessToken);
 		
@@ -153,7 +164,7 @@ public class UserInfoRequest extends ProtectedResourceRequest {
 		return new UserInfoRequest(
 			httpRequest.getURI(),
 			httpRequest.getMethod(),
-			BearerAccessToken.parse(httpRequest)
+			AccessToken.parse(httpRequest)
 		);
 	}
 }
