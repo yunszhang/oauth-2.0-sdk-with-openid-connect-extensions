@@ -19,12 +19,15 @@ package com.nimbusds.oauth2.sdk.token;
 
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
 
@@ -337,5 +340,40 @@ public abstract class AccessToken extends Token {
 		} else {
 			return DPoPAccessToken.parse(header);
 		}
+	}
+	
+	
+	/**
+	 * Parses an HTTP request header value for an access token.
+	 *
+	 * @param request The HTTP request to parse. Must not be {@code null}.
+	 *
+	 * @return The access token.
+	 *
+	 * @throws ParseException If an access token wasn't found in the HTTP
+	 *                        request.
+	 */
+	public static AccessToken parse(final HTTPRequest request)
+		throws ParseException {
+		
+		if (request.getAuthorization() != null) {
+			
+			AccessTokenType tokenType = AccessTokenUtils.determineAccessTokenTypeFromAuthorizationHeader(request.getAuthorization());
+			
+			if (AccessTokenType.BEARER.equals(tokenType)) {
+				return BearerAccessToken.parse(request.getAuthorization());
+			}
+			
+			if (AccessTokenType.DPOP.equals(tokenType)) {
+				return DPoPAccessToken.parse(request.getAuthorization());
+			}
+			
+			throw new ParseException("Couldn't determine access token type from Authorization header");
+		}
+		
+		// Try alternative token locations, form and query string are
+		// parameters are not differentiated here
+		Map<String, List<String>> params = request.getQueryParameters();
+		return new TypelessAccessToken(AccessTokenUtils.parseValueFromQueryParameters(params));
 	}
 }

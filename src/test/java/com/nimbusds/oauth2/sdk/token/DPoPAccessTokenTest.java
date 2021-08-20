@@ -117,7 +117,7 @@ public class DPoPAccessTokenTest extends TestCase {
 	public void testParseFromHeader_missing() {
 
 		try {
-			AccessToken.parse(null, AccessTokenType.DPOP);
+			AccessToken.parse((String)null, AccessTokenType.DPOP);
 			fail();
 		} catch (ParseException e) {
 			assertEquals(DPoPTokenError.MISSING_TOKEN.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());

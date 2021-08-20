@@ -199,15 +199,25 @@ class AccessTokenUtils {
 		
 		ensureSupported(type);
 		
-		try {
-			return parseValueFromQueryParameters(parameters);
-		} catch (ParseException e) {
+		if (! parameters.containsKey("access_token")) {
 			TokenSchemeError schemeError = BearerTokenError.MISSING_TOKEN;
 			if (AccessTokenType.DPOP.equals(type)) {
 				schemeError = DPoPTokenError.MISSING_TOKEN;
 			}
-			throw new ParseException(e.getMessage(), schemeError);
+			throw new ParseException("Missing access token parameter", schemeError);
 		}
+		
+		String accessTokenValue = MultivaluedMapUtils.getFirstValue(parameters, "access_token");
+		
+		if (StringUtils.isBlank(accessTokenValue)) {
+			TokenSchemeError schemeError = BearerTokenError.INVALID_REQUEST;
+			if (AccessTokenType.DPOP.equals(type)) {
+				schemeError = DPoPTokenError.INVALID_REQUEST;
+			}
+			throw new ParseException("Blank / empty access token", schemeError);
+		}
+		
+		return accessTokenValue;
 	}
 	
 	
