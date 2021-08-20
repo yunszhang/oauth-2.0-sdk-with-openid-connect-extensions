@@ -113,28 +113,27 @@ class AccessTokenUtils {
 	
 	
 	/**
-	 * Parses an access token value from the specified Authorization header
-	 * value.
+	 * Parses an access token value from an {@code Authorization} HTTP
+	 * request header.
 	 *
-	 * @param headerValue The Authorisation header value, {@code null} if
-	 *                    not specified or missing.
-	 * @param type        The expected access token type. Must be
-	 *                    {@link AccessTokenType#BEARER} or
-	 *                    {@link AccessTokenType#DPOP} and not
-	 *                    {@code null}.
+	 * @param header The {@code Authorization} header value, {@code null}
+	 *               if not specified.
+	 * @param type   The expected access token type. Must be
+	 *               {@link AccessTokenType#BEARER} or
+	 *               {@link AccessTokenType#DPOP} and not {@code null}.
 	 *
 	 * @return The access token value.
 	 *
 	 * @throws ParseException If parsing failed.
 	 */
-	static String parseValueFromHeader(final String headerValue, final AccessTokenType type)
+	static String parseValueFromHeader(final String header, final AccessTokenType type)
 		throws ParseException {
 		
 		if (! AccessTokenType.BEARER.equals(type) && ! AccessTokenType.DPOP.equals(type)) {
 			throw new IllegalArgumentException("Unsupported access token type, must be Bearer or DPoP: " + type);
 		}
 		
-		if (StringUtils.isBlank(headerValue)) {
+		if (StringUtils.isBlank(header)) {
 			TokenSchemeError schemeError = BearerTokenError.MISSING_TOKEN;
 			if (AccessTokenType.DPOP.equals(type)) {
 				schemeError = DPoPTokenError.MISSING_TOKEN;
@@ -142,7 +141,7 @@ class AccessTokenUtils {
 			throw new ParseException("Missing HTTP Authorization header", schemeError);
 		}
 		
-		String[] parts = headerValue.split("\\s", 2);
+		String[] parts = header.split("\\s", 2);
 		
 		if (parts.length != 2) {
 			TokenSchemeError schemeError = BearerTokenError.INVALID_REQUEST;
@@ -169,6 +168,37 @@ class AccessTokenUtils {
 		}
 		
 		return parts[1];
+	}
+	
+	
+	/**
+	 * Determines the access token type from an {@code Authorization} HTTP
+	 * request header.
+	 *
+	 * @param header The {@code Authorization} header value, {@code null}
+	 *               if not specified.
+	 *
+	 * @return A {@link AccessTokenType#BEARER} or
+	 *         {@link AccessTokenType#DPOP} access token type.
+	 *
+	 * @throws ParseException If the access token type couldn't be
+	 *                        determined.
+	 */
+	static AccessTokenType determineAccessTokenTypeFromAuthorizationHeader(final String header)
+		throws ParseException {
+		
+		if (StringUtils.isNotBlank(header)) {
+			
+			if (header.toLowerCase().startsWith(AccessTokenType.BEARER.getValue().toLowerCase() + " ")) {
+				return AccessTokenType.BEARER;
+			}
+			
+			if (header.toLowerCase().startsWith(AccessTokenType.DPOP.getValue().toLowerCase() + " ")) {
+				return AccessTokenType.DPOP;
+			}
+		}
+		
+		throw new ParseException("Couldn't determine access token type from Authorization header");
 	}
 	
 	
