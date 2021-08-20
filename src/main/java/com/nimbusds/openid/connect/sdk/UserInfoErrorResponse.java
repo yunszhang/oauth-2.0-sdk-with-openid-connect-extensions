@@ -29,7 +29,10 @@ import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ErrorResponse;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.token.AccessTokenType;
 import com.nimbusds.oauth2.sdk.token.BearerTokenError;
+import com.nimbusds.oauth2.sdk.token.DPoPTokenError;
+import com.nimbusds.oauth2.sdk.token.TokenSchemeError;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 
@@ -59,6 +62,8 @@ import com.nimbusds.oauth2.sdk.util.StringUtils;
  * <ul>
  *     <li>OpenID Connect Core 1.0, section 5.3.3.
  *     <li>OAuth 2.0 Bearer Token Usage (RFC 6750), section 3.1.
+ *     <li>OAuth 2.0 Demonstrating Proof-of-Possession at the Application Layer
+ *         (DPoP) (draft-ietf-oauth-dpop-03), section 7.
  * </ul>
  */
 @Immutable
@@ -91,8 +96,8 @@ public class UserInfoErrorResponse
 
 
 	/**
-	 * Creates a new UserInfo error response. No OAuth 2.0 bearer token
-	 * error / general error object is specified.
+	 * Creates a new UserInfo error response. No OAuth 2.0 token error /
+	 * general error object is specified.
 	 */
 	private UserInfoErrorResponse() {
 
@@ -109,6 +114,19 @@ public class UserInfoErrorResponse
 	 *              UserInfo error response. Must not be {@code null}.
 	 */
 	public UserInfoErrorResponse(final BearerTokenError error) {
+
+		this((ErrorObject) error);
+	}
+	
+
+	/**
+	 * Creates a new UserInfo error response indicating a DPoP token error.
+	 *
+	 * @param error The OAuth 2.0 DPoP token error. Should match one of
+	 *              the {@link #getStandardErrors standard errors} for a
+	 *              UserInfo error response. Must not be {@code null}.
+	 */
+	public UserInfoErrorResponse(final DPoPTokenError error) {
 
 		this((ErrorObject) error);
 	}
@@ -168,8 +186,8 @@ public class UserInfoErrorResponse
 		}
 
 		// Add the WWW-Authenticate header
-		if (error instanceof BearerTokenError) {
-			httpResponse.setWWWAuthenticate(((BearerTokenError) error).toWWWAuthenticateHeader());
+		if (error instanceof TokenSchemeError) {
+			httpResponse.setWWWAuthenticate(((TokenSchemeError) error).toWWWAuthenticateHeader());
 		} else if (error != null){
 			httpResponse.setEntityContentType(ContentType.APPLICATION_JSON);
 			httpResponse.setContent(error.toJSONObject().toJSONString());
@@ -223,20 +241,43 @@ public class UserInfoErrorResponse
 		String wwwAuth = httpResponse.getWWWAuthenticate();
 		
 		if (StringUtils.isNotBlank(wwwAuth)) {
-			// Bearer token error?
-			try {
-				BearerTokenError bte = BearerTokenError.parse(wwwAuth);
+			
+			if (wwwAuth.toLowerCase().startsWith(AccessTokenType.BEARER.getValue().toLowerCase())) {
 				
-				return new UserInfoErrorResponse(
-					new BearerTokenError(
-						bte.getCode(),
-						bte.getDescription(),
-						httpResponse.getStatusCode(), // override HTTP status code
-						bte.getURI(),
-						bte.getRealm(),
-						bte.getScope()));
-			} catch (ParseException e) {
-				// Ignore parse exception for WWW-auth header and continue
+				// Bearer token error?
+				try {
+					BearerTokenError bte = BearerTokenError.parse(wwwAuth);
+					
+					return new UserInfoErrorResponse(
+						new BearerTokenError(
+							bte.getCode(),
+							bte.getDescription(),
+							httpResponse.getStatusCode(), // override HTTP status code
+							bte.getURI(),
+							bte.getRealm(),
+							bte.getScope()));
+				} catch (ParseException e) {
+					// Ignore parse exception for WWW-auth header and continue
+				}
+				
+			} else if (wwwAuth.toLowerCase().startsWith(AccessTokenType.DPOP.getValue().toLowerCase())) {
+				
+				// Bearer token error?
+				try {
+					DPoPTokenError dte = DPoPTokenError.parse(wwwAuth);
+					
+					return new UserInfoErrorResponse(
+						new DPoPTokenError(
+							dte.getCode(),
+							dte.getDescription(),
+							httpResponse.getStatusCode(), // override HTTP status code
+							dte.getURI(),
+							dte.getRealm(),
+							dte.getScope(),
+							dte.getJWSAlgorithms()));
+				} catch (ParseException e) {
+					// Ignore parse exception for WWW-auth header and continue
+				}
 			}
 		}
 		

@@ -32,7 +32,7 @@ import com.nimbusds.oauth2.sdk.Scope;
  * The base abstract class for token scheme errors. Concrete extending classes
  * should be immutable.
  */
-abstract class TokenSchemeError extends ErrorObject {
+public abstract class TokenSchemeError extends ErrorObject {
 	
 	
 	/**

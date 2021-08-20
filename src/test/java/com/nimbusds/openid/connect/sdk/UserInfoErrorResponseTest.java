@@ -18,17 +18,21 @@
 package com.nimbusds.openid.connect.sdk;
 
 
-import com.nimbusds.oauth2.sdk.ErrorObject;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.oauth2.sdk.token.BearerTokenError;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.oauth2.sdk.ErrorObject;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.token.BearerTokenError;
+import com.nimbusds.oauth2.sdk.token.DPoPTokenError;
 
-/**
- * Tests the UserInfo error response class.
- */
+
 public class UserInfoErrorResponseTest extends TestCase {
 
 
@@ -42,10 +46,14 @@ public class UserInfoErrorResponseTest extends TestCase {
 	}
 
 
-	public void testConstructAndParse()
+	public void testBearerConstructAndParse()
 		throws Exception {
 
-		UserInfoErrorResponse errorResponse = new UserInfoErrorResponse(BearerTokenError.INVALID_TOKEN);
+		BearerTokenError bearerTokenError = BearerTokenError.INVALID_TOKEN
+			.setRealm("c2id.com")
+			.setScope(new Scope(OIDCScopeValue.OPENID));
+		
+		UserInfoErrorResponse errorResponse = new UserInfoErrorResponse(bearerTokenError);
 
 		assertFalse(errorResponse.indicatesSuccess());
 
@@ -53,13 +61,54 @@ public class UserInfoErrorResponseTest extends TestCase {
 
 		assertEquals(401, httpResponse.getStatusCode());
 
-		assertEquals("Bearer error=\"invalid_token\", error_description=\"Invalid access token\"", httpResponse.getWWWAuthenticate());
+		assertEquals("Bearer realm=\"c2id.com\", error=\"invalid_token\", error_description=\"Invalid access token\", scope=\"openid\"", httpResponse.getWWWAuthenticate());
+
+		errorResponse = UserInfoErrorResponse.parse(httpResponse);
+
+		assertFalse(errorResponse.indicatesSuccess());
+		
+		BearerTokenError parsedBearerTokenError = (BearerTokenError) errorResponse.getErrorObject();
+		
+		assertEquals(401, parsedBearerTokenError.getHTTPStatusCode());
+		
+		assertEquals(bearerTokenError.getScheme(), parsedBearerTokenError.getScheme());
+		assertEquals(bearerTokenError.getRealm(), parsedBearerTokenError.getRealm());
+		assertEquals(bearerTokenError.getCode(), parsedBearerTokenError.getCode());
+		assertEquals(bearerTokenError.getDescription(), parsedBearerTokenError.getDescription());
+		assertEquals(bearerTokenError.getURI(), parsedBearerTokenError.getURI());
+		assertEquals(bearerTokenError.getScope(), parsedBearerTokenError.getScope());
+	}
+	
+	
+	public void testDPoPConstructAndParse()
+		throws Exception {
+
+		DPoPTokenError dPoPTokenError = DPoPTokenError.INVALID_TOKEN
+			.setJWSAlgorithms(new LinkedHashSet<>(Arrays.asList(JWSAlgorithm.RS256, JWSAlgorithm.PS256)));
+		
+		UserInfoErrorResponse errorResponse = new UserInfoErrorResponse(dPoPTokenError);
+
+		assertFalse(errorResponse.indicatesSuccess());
+
+		HTTPResponse httpResponse = errorResponse.toHTTPResponse();
+
+		assertEquals(401, httpResponse.getStatusCode());
+
+		assertEquals("DPoP error=\"invalid_token\", error_description=\"Invalid access token\", algs=\"RS256 PS256\"", httpResponse.getWWWAuthenticate());
 
 		errorResponse = UserInfoErrorResponse.parse(httpResponse);
 
 		assertFalse(errorResponse.indicatesSuccess());
 
-		assertEquals(BearerTokenError.INVALID_TOKEN, errorResponse.getErrorObject());
+		DPoPTokenError parsedDPoPError = (DPoPTokenError) errorResponse.getErrorObject();
+		
+		assertEquals(401, parsedDPoPError.getHTTPStatusCode());
+		
+		assertEquals(dPoPTokenError.getScheme(), parsedDPoPError.getScheme());
+		assertEquals(dPoPTokenError.getCode(), parsedDPoPError.getCode());
+		assertEquals(dPoPTokenError.getDescription(), parsedDPoPError.getDescription());
+		assertEquals(dPoPTokenError.getURI(), parsedDPoPError.getURI());
+		assertEquals(dPoPTokenError.getJWSAlgorithms(), parsedDPoPError.getJWSAlgorithms());
 	}
 	
 	
