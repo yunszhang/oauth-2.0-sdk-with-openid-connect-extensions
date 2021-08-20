@@ -18,11 +18,15 @@
 package com.nimbusds.oauth2.sdk.token;
 
 
+import java.util.List;
+import java.util.Map;
+
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 
@@ -112,6 +116,14 @@ class AccessTokenUtils {
 	}
 	
 	
+	private static void ensureSupported(final AccessTokenType type) {
+		
+		if (! AccessTokenType.BEARER.equals(type) && ! AccessTokenType.DPOP.equals(type)) {
+			throw new IllegalArgumentException("Unsupported access token type, must be Bearer or DPoP: " + type);
+		}
+	}
+	
+	
 	/**
 	 * Parses an access token value from an {@code Authorization} HTTP
 	 * request header.
@@ -129,9 +141,7 @@ class AccessTokenUtils {
 	static String parseValueFromHeader(final String header, final AccessTokenType type)
 		throws ParseException {
 		
-		if (! AccessTokenType.BEARER.equals(type) && ! AccessTokenType.DPOP.equals(type)) {
-			throw new IllegalArgumentException("Unsupported access token type, must be Bearer or DPoP: " + type);
-		}
+		ensureSupported(type);
 		
 		if (StringUtils.isBlank(header)) {
 			TokenSchemeError schemeError = BearerTokenError.MISSING_TOKEN;
@@ -168,6 +178,62 @@ class AccessTokenUtils {
 		}
 		
 		return parts[1];
+	}
+	
+	
+	/**
+	 * Parses a query or form parameters map for an access token value.
+	 *
+	 * @param parameters The query parameters. Must not be {@code null}.
+	 * @param type       The expected access token type. Must be
+	 *                   {@link AccessTokenType#BEARER} or
+	 *                   {@link AccessTokenType#DPOP} and not {@code null}.
+	 *
+	 * @return The access token value.
+	 *
+	 * @throws ParseException If parsing failed.
+	 */
+	static String parseValueFromQueryParameters(final Map<String, List<String>> parameters,
+						    final AccessTokenType type)
+		throws ParseException {
+		
+		ensureSupported(type);
+		
+		try {
+			return parseValueFromQueryParameters(parameters);
+		} catch (ParseException e) {
+			TokenSchemeError schemeError = BearerTokenError.MISSING_TOKEN;
+			if (AccessTokenType.DPOP.equals(type)) {
+				schemeError = DPoPTokenError.MISSING_TOKEN;
+			}
+			throw new ParseException(e.getMessage(), schemeError);
+		}
+	}
+	
+	
+	/**
+	 * Parses a query or form parameters map for an access token value.
+	 *
+	 * @param parameters The query parameters. Must not be {@code null}.
+	 *
+	 * @return The access token value.
+	 *
+	 * @throws ParseException If parsing failed.
+	 */
+	static String parseValueFromQueryParameters(final Map<String, List<String>> parameters)
+		throws ParseException {
+		
+		if (! parameters.containsKey("access_token")) {
+			throw new ParseException("Missing access token parameter");
+		}
+		
+		String accessTokenValue = MultivaluedMapUtils.getFirstValue(parameters, "access_token");
+		
+		if (StringUtils.isBlank(accessTokenValue)) {
+			throw new ParseException("Blank / empty access token");
+		}
+		
+		return accessTokenValue;
 	}
 	
 	

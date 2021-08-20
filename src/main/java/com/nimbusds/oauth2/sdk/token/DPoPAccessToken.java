@@ -27,8 +27,6 @@ import net.minidev.json.JSONObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
-import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
-import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 
 /**
@@ -175,17 +173,7 @@ public class DPoPAccessToken extends AccessToken {
 	public static DPoPAccessToken parse(final Map<String,List<String>> parameters)
 		throws ParseException {
 		
-		if (! parameters.containsKey("access_token")) {
-			throw new ParseException("Missing access token parameter", BearerTokenError.MISSING_TOKEN);
-		}
-		
-		String accessTokenValue = MultivaluedMapUtils.getFirstValue(parameters, "access_token");
-		
-		if (StringUtils.isBlank(accessTokenValue)) {
-			throw new ParseException("Blank / empty access token", BearerTokenError.INVALID_REQUEST);
-		}
-		
-		return new DPoPAccessToken(accessTokenValue);
+		return new DPoPAccessToken(AccessTokenUtils.parseValueFromQueryParameters(parameters, AccessTokenType.DPOP));
 	}
 	
 	
@@ -204,19 +192,15 @@ public class DPoPAccessToken extends AccessToken {
 		throws ParseException {
 
 		// See http://tools.ietf.org/html/rfc6750#section-2
-
 		String authzHeader = request.getAuthorization();
 
 		if (authzHeader != null) {
-
 			return parse(authzHeader);
 		}
 
 		// Try alternative token locations, form and query string are
 		// parameters are not differentiated here
-
 		Map<String,List<String>> params = request.getQueryParameters();
-			
 		return parse(params);
 	}
 }
