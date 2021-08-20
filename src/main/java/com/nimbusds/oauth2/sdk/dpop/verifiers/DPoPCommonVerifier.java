@@ -67,8 +67,6 @@ class DPoPCommonVerifier {
 	
 	private final long maxClockSkewSeconds;
 	
-	private final boolean requireATH;
-	
 	private final SingleUseChecker<Map.Entry<DPoPIssuer, JWTID>> singleUseChecker;
 	
 	
@@ -81,15 +79,12 @@ class DPoPCommonVerifier {
 	 *                            "iat" (issued-at) claim checks, in
 	 *                            seconds. Should be in the order of a few
 	 *                            seconds.
-	 * @param requireATH          {@code true} to require an "ath" (access
-	 *                            token hash) claim.
 	 * @param singleUseChecker    The single use checker for the DPoP proof
 	 *                            "jti" (JWT ID) claims, {@code null} if
 	 *                            not specified.
 	 */
 	DPoPCommonVerifier(final Set<JWSAlgorithm> acceptedJWSAlgs,
 			   final long maxClockSkewSeconds,
-			   final boolean requireATH,
 			   final SingleUseChecker<Map.Entry<DPoPIssuer, JWTID>> singleUseChecker) {
 		
 		if (! SUPPORTED_JWS_ALGORITHMS.containsAll(acceptedJWSAlgs)) {
@@ -99,8 +94,6 @@ class DPoPCommonVerifier {
 		
 		this.maxClockSkewSeconds = maxClockSkewSeconds;
 		
-		this.requireATH = requireATH;
-		
 		this.singleUseChecker = singleUseChecker;
 	}
 	
@@ -109,7 +102,7 @@ class DPoPCommonVerifier {
 	 * Verifies the specified DPoP proof for a token or protected resource
 	 * request.
 	 *
-	 * @param method      The HTTP request method (case insensitive). Must
+	 * @param method      The HTTP request method (case-insensitive). Must
 	 *                    not be {@code null}.
 	 * @param uri         The HTTP URI. Any query or fragment component
 	 *                    will be stripped from it before DPoP validation.
@@ -117,8 +110,9 @@ class DPoPCommonVerifier {
 	 * @param issuer      Unique identifier for the DPoP proof issuer,
 	 *                    such as its client ID. Must not be {@code null}.
 	 * @param proof       The DPoP proof JWT. Must not be {@code null}.
-	 * @param accessToken The received DPoP access token for a protected
-	 *                    resource request, {@code null} if not applicable.
+	 * @param accessToken The received and successfully validated DPoP
+	 *                    access token for a protected resource request,
+	 *                    {@code null} if not applicable.
 	 * @param cnf         The JWK SHA-256 thumbprint confirmation for the
 	 *                    DPoP access token, {@code null} if none.
 	 *
@@ -161,7 +155,7 @@ class DPoPCommonVerifier {
 			method,
 			URIUtils.getBaseURI(uri),
 			maxClockSkewSeconds,
-			requireATH,
+			accessToken != null,
 			singleUseChecker
 		));
 		
@@ -172,16 +166,9 @@ class DPoPCommonVerifier {
 			throw new InvalidDPoPProofException("Invalid DPoP proof: " + e.getMessage(), e);
 		}
 		
-		if (context.getAccessTokenHash() != null) {
-			// Access token hash found in the DPoP proof
+		if (accessToken != null) {
 			
-			if (accessToken == null) {
-				throw new AccessTokenValidationException("Missing access token");
-			}
-			
-			if (cnf == null) {
-				throw new AccessTokenValidationException("Missing JWK SHA-256 thumbprint confirmation");
-			}
+			// Protected resource request
 			
 			Base64URL accessTokenHash = DPoPUtils.computeSHA256(accessToken);
 			

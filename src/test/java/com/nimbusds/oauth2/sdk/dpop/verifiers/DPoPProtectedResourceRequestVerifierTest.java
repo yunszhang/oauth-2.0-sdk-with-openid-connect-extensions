@@ -77,6 +77,15 @@ public class DPoPProtectedResourceRequestVerifierTest extends TestCase {
 			assertEquals("Invalid DPoP proof: The jti was used before: " + proof.getJWTClaimsSet().getJWTID(), e.getMessage());
 		}
 		
+		// Missing HTTP method
+		proof = dPoPProofFactory.createDPoPJWT(htm, htu, accessToken);
+		try {
+			verifier.verify(null, htu, issuer, proof, accessToken, cnf);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The HTTP request method must not be null or blank", e.getMessage());
+		}
+		
 		// HTTP method doesn't match
 		proof = dPoPProofFactory.createDPoPJWT(htm, htu, accessToken);
 		try {
@@ -84,6 +93,15 @@ public class DPoPProtectedResourceRequestVerifierTest extends TestCase {
 			fail();
 		} catch (InvalidDPoPProofException e) {
 			assertEquals("Invalid DPoP proof: JWT htm claim has value GET, must be POST", e.getMessage());
+		}
+		
+		// Missing HTTP URI
+		proof = dPoPProofFactory.createDPoPJWT(htm, htu, accessToken);
+		try {
+			verifier.verify(htm, null, issuer, proof, accessToken, cnf);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The HTTP URI must not be null", e.getMessage());
 		}
 		
 		// HTTP URI doesn't match
@@ -103,22 +121,22 @@ public class DPoPProtectedResourceRequestVerifierTest extends TestCase {
 			assertEquals("Missing required DPoP proof", e.getMessage());
 		}
 		
-		// Missing access token
+		// Missing access token (required by API)
 		proof = dPoPProofFactory.createDPoPJWT(htm, htu, accessToken);
 		try {
 			verifier.verify(htm, htu, issuer, proof, null, cnf);
 			fail();
-		} catch (AccessTokenValidationException e) {
-			assertEquals("Missing access token", e.getMessage());
+		} catch (NullPointerException e) {
+			assertEquals("The access token must not be null", e.getMessage());
 		}
 		
-		// Missing cnf
+		// Missing cnf (required by API)
 		proof = dPoPProofFactory.createDPoPJWT(htm, htu, accessToken);
 		try {
 			verifier.verify(htm, htu, issuer, proof, accessToken, null);
 			fail();
-		} catch (AccessTokenValidationException e) {
-			assertEquals("Missing JWK SHA-256 thumbprint confirmation", e.getMessage());
+		} catch (NullPointerException e) {
+			assertEquals("The DPoP JWK thumbprint confirmation must not be null", e.getMessage());
 		}
 		
 		// Missing ath

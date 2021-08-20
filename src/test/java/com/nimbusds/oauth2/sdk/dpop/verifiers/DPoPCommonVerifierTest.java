@@ -69,7 +69,6 @@ public class DPoPCommonVerifierTest extends TestCase {
 		new DPoPCommonVerifier(
 			jwsAlgorithms,
 			2,
-			false,
 			new DefaultDPoPSingleUseChecker(
 				10,
 				10
@@ -92,7 +91,6 @@ public class DPoPCommonVerifierTest extends TestCase {
 		DPoPCommonVerifier verifier = new DPoPCommonVerifier(
 			Collections.singleton(JWSAlgorithm.ES256),
 			2,
-			false,
 			new DefaultDPoPSingleUseChecker(
 				10,
 				10
@@ -233,7 +231,6 @@ public class DPoPCommonVerifierTest extends TestCase {
 		DPoPCommonVerifier verifier = new DPoPCommonVerifier(
 			Collections.singleton(JWSAlgorithm.ES256),
 			2,
-			true,
 			new DefaultDPoPSingleUseChecker(
 				10,
 				10
@@ -254,23 +251,16 @@ public class DPoPCommonVerifierTest extends TestCase {
 			assertEquals("Invalid DPoP proof: The jti was used before: " + proof.getJWTClaimsSet().getJWTID(), e.getMessage());
 		}
 		
-		// Missing access token
-		proof = dPoPProofFactory.createDPoPJWT(htm, htu, accessToken);
-		try {
-			verifier.verify(htm, htu, issuer, proof, null, cnf);
-			fail();
-		} catch (AccessTokenValidationException e) {
-			assertEquals("Missing access token", e.getMessage());
-		}
-		
 		// Missing cnf
 		proof = dPoPProofFactory.createDPoPJWT(htm, htu, accessToken);
+		NullPointerException npe = null;
 		try {
 			verifier.verify(htm, htu, issuer, proof, accessToken, null);
 			fail();
-		} catch (AccessTokenValidationException e) {
-			assertEquals("Missing JWK SHA-256 thumbprint confirmation", e.getMessage());
+		} catch (NullPointerException e) {
+			npe = e;
 		}
+		assertNotNull(npe);
 		
 		// Missing ath
 		proof = dPoPProofFactory.createDPoPJWT(htm, htu, null);
@@ -320,7 +310,6 @@ public class DPoPCommonVerifierTest extends TestCase {
 		DPoPCommonVerifier verifier = new DPoPCommonVerifier(
 			Collections.singleton(JWSAlgorithm.ES256),
 			2,
-			false,
 			null
 		);
 		
@@ -346,7 +335,6 @@ public class DPoPCommonVerifierTest extends TestCase {
 		DPoPCommonVerifier verifier = new DPoPCommonVerifier(
 			Collections.singleton(JWSAlgorithm.ES256),
 			2,
-			false,
 			null
 		);
 		
@@ -380,7 +368,6 @@ public class DPoPCommonVerifierTest extends TestCase {
 		DPoPCommonVerifier verifier = new DPoPCommonVerifier(
 			Collections.singleton(JWSAlgorithm.ES256),
 			2,
-			false,
 			null
 		);
 		
@@ -411,7 +398,6 @@ public class DPoPCommonVerifierTest extends TestCase {
 		DPoPCommonVerifier verifier = new DPoPCommonVerifier(
 			Collections.singleton(JWSAlgorithm.ES256),
 			2,
-			false,
 			null
 		);
 		

@@ -69,7 +69,7 @@ public class DPoPTokenRequestVerifier extends DPoPCommonVerifier {
 					final long maxClockSkewSeconds,
 					final SingleUseChecker<Map.Entry<DPoPIssuer, JWTID>> singleUseChecker) {
 		
-		super(acceptedJWSAlgs, maxClockSkewSeconds, false, singleUseChecker);
+		super(acceptedJWSAlgs, maxClockSkewSeconds, singleUseChecker);
 		
 		if (endpointURI == null) {
 			throw new IllegalArgumentException("The token endpoint URI must not be null");

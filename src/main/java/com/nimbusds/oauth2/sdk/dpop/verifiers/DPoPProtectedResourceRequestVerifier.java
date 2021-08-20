@@ -20,6 +20,7 @@ package com.nimbusds.oauth2.sdk.dpop.verifiers;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import net.jcip.annotations.ThreadSafe;
@@ -57,7 +58,7 @@ public class DPoPProtectedResourceRequestVerifier extends DPoPCommonVerifier {
 						    final long maxClockSkewSeconds,
 						    final SingleUseChecker<Map.Entry<DPoPIssuer, JWTID>> singleUseChecker) {
 		
-		super(acceptedJWSAlgs, maxClockSkewSeconds, true, singleUseChecker);
+		super(acceptedJWSAlgs, maxClockSkewSeconds, singleUseChecker);
 	}
 	
 	
@@ -73,8 +74,8 @@ public class DPoPProtectedResourceRequestVerifier extends DPoPCommonVerifier {
 	 * @param issuer      Unique identifier for the DPoP proof issuer, such
 	 *                    as its client ID. Must not be {@code null}.
 	 * @param proof       The DPoP proof JWT, {@code null} if not received.
-	 * @param accessToken The received DPoP access token. Must not be
-	 *                    {@code null}.
+	 * @param accessToken The received and successfully validated DPoP
+	 *                    access token. Must not be {@code null}.
 	 * @param cnf         The JWK SHA-256 thumbprint confirmation for the
 	 *                    DPoP access token. Must not be {@code null}.
 	 *
@@ -99,6 +100,10 @@ public class DPoPProtectedResourceRequestVerifier extends DPoPCommonVerifier {
 		if (proof == null) {
 			throw new InvalidDPoPProofException("Missing required DPoP proof");
 		}
+		
+		Objects.requireNonNull(accessToken, "The access token must not be null");
+		
+		Objects.requireNonNull(cnf, "The DPoP JWK thumbprint confirmation must not be null");
 		
 		super.verify(method, uri, issuer, proof, accessToken, cnf);
 	}
