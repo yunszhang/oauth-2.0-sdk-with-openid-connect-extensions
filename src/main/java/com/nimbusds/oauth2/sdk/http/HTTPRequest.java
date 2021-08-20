@@ -347,7 +347,11 @@ public class HTTPRequest extends HTTPMessage {
 	 */
 	public void setDPoP(final SignedJWT dPoPJWT) {
 	
-		setHeader("DPoP", dPoPJWT.serialize());
+		if (dPoPJWT != null) {
+			setHeader("DPoP", dPoPJWT.serialize());
+		} else {
+			setHeader("DPoP", (String[]) null);
+		}
 	}
 
 

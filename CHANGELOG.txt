@@ -1832,3 +1832,6 @@ version 9.14 (2021-08-19)
     * Updates UserInfoRequest to support DPoPAccessToken.
     * Adds static AccessToken.parse(HTTPRequest) method.
     * Updates AccessTokenUtils.
+
+version 9.14.1 (2021-08-19)
+    * Fixes NPE in HTTPRequest.setDPoP.

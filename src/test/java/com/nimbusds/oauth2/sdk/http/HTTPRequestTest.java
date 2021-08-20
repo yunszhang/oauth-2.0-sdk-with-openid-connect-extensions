@@ -583,4 +583,13 @@ public class HTTPRequestTest {
 		
 		assertNull(httpRequest.getDPoP());
 	}
+	
+	
+	@Test
+	public void testDPoP_setNull() throws MalformedURLException {
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, new URL("https://c2id.com/token"));
+		httpRequest.setDPoP(null);
+		assertNull(httpRequest.getDPoP());
+	}
 }
