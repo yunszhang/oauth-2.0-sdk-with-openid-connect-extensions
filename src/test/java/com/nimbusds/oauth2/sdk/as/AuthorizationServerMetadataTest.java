@@ -19,6 +19,7 @@ package com.nimbusds.oauth2.sdk.as;
 
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -666,5 +667,28 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		} catch (ParseException e) {
 			assertEquals("Illegal op_tos_uri parameter: The URI scheme must be https or http", e.getMessage());
 		}
+	}
+	
+	
+	public void testParseWithMTLSEndpointAliases()
+		throws URISyntaxException, ParseException {
+	
+		AuthorizationServerMetadata metadata = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
+		
+		AuthorizationServerEndpointMetadata endpointMetadata = new AuthorizationServerEndpointMetadata();
+		URI tokenEndpoint = new URI("https://c2id.com/token");
+		endpointMetadata.setTokenEndpointURI(tokenEndpoint);
+		JSONObject endpointsJSONObject = endpointMetadata.toJSONObject();
+		assertEquals(tokenEndpoint.toString(), endpointsJSONObject.get("token_endpoint"));
+		assertEquals(1, endpointsJSONObject.size());
+		
+		metadata.setMtlsEndpointAliases(endpointMetadata);
+		
+		metadata.applyDefaults();
+		
+		AuthorizationServerMetadata parsed = AuthorizationServerMetadata.parse(metadata.toJSONObject().toJSONString());
+		
+		assertEquals(endpointMetadata.toJSONObject(), parsed.getMtlsEndpointAliases().toJSONObject());
+		assertEquals(metadata.toJSONObject(), parsed.toJSONObject());
 	}
 }
