@@ -18,6 +18,7 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import com.nimbusds.oauth2.sdk.tokenexchange.TokenExchangeGrant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
