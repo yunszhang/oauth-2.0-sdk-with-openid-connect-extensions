@@ -269,6 +269,10 @@ public final class GrantType extends Identifier {
 
 			return GrantType.CIBA;
 
+		} else if (grantType.equals(GrantType.TOKEN_EXCHANGE)) {
+
+			return GrantType.TOKEN_EXCHANGE;
+
 		} else {
 
 			return grantType;

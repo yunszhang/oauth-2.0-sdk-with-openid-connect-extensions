@@ -165,6 +165,26 @@ public class AuthorizationGrantTest extends TestCase {
 		assertEquals(GrantType.CIBA, grant.getType());
 		assertEquals("1c266114-a1be-4252-8ad1-04986c5b9ac1", grant.getAuthRequestID().getValue());
 	}
+
+	public void testParseTokenExchange() throws Exception {
+
+		Map<String, List<String>> params = new HashMap<>();
+		params.put("grant_type", Collections.singletonList(GrantType.TOKEN_EXCHANGE.getValue()));
+		params.put("requested_token_type", Collections.singletonList("requestedTokenType"));
+		params.put("subject_token", Collections.singletonList("subjectToken"));
+		params.put("subject_token_type", Collections.singletonList("subjectTokenType"));
+		params.put("actor_token", Collections.singletonList("actorToken"));
+		params.put("actor_token_type", Collections.singletonList("actorTokenType"));
+
+		TokenExchangeGrant grant = (TokenExchangeGrant) AuthorizationGrant.parse(params);
+
+		assertEquals(GrantType.TOKEN_EXCHANGE, grant.getType());
+		assertEquals("requestedTokenType", grant.getRequestedTokenType().getValue());
+		assertEquals("subjectToken", grant.getSubjectToken().getValue());
+		assertEquals("subjectTokenType", grant.getSubjectTokenType().getValue());
+		assertEquals("actorToken", grant.getActorToken().getValue());
+		assertEquals("actorTokenType", grant.getActorTokenType().getValue());
+	}
 	
 	
 	public void testParseException_missingGrantTypeParameter() {
