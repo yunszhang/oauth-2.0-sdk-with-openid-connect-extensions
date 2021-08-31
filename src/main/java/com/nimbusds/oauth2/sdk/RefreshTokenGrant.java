@@ -32,8 +32,6 @@ import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 /**
  * Refresh token grant. Used in refresh token requests.
  *
- * <p>Note that the optional scope parameter is not supported.
- *
  * <p>Related specifications:
  *
  * <ul>
