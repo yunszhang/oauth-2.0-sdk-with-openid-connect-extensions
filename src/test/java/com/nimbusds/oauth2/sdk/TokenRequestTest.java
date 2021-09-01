@@ -1762,4 +1762,29 @@ public class TokenRequestTest extends TestCase {
 		assertNull(tokenExchangeGrant.getActorToken());
 		assertNull(tokenExchangeGrant.getActorTokenType());
 	}
+
+	public void testParseTokenExchangeWithMultipleAudience() throws MalformedURLException, ParseException {
+
+		URL endpoint = new URL("https://server.example.com/token");
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, endpoint);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
+		httpRequest.setQuery("grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&"
+				+ "audience=urn%3Aexample%3Acooperation-context1&audience=urn%3Aexample%3Acooperation-context2&"
+				+ "subject_token=subjectToken&subject_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Aaccess_token");
+
+		TokenRequest tokenRequest = TokenRequest.parse(httpRequest);
+
+		ClientAuthentication clientAuthentication = tokenRequest.getClientAuthentication();
+		assertNull(clientAuthentication);
+		assertEquals(GrantType.TOKEN_EXCHANGE, tokenRequest.getAuthorizationGrant().getType());
+		TokenExchangeGrant tokenExchangeGrant = (TokenExchangeGrant) tokenRequest.getAuthorizationGrant();
+		assertEquals(Arrays.asList("urn:example:cooperation-context1", "urn:example:cooperation-context2"),
+				tokenExchangeGrant.getAudiences());
+		assertNull(tokenRequest.getScope());
+		assertNull(tokenExchangeGrant.getRequestedTokenType());
+		assertEquals("subjectToken", tokenExchangeGrant.getSubjectToken().getValue());
+		assertEquals("urn:ietf:params:oauth:token-type:access_token", tokenExchangeGrant.getSubjectTokenType().getValue());
+		assertNull(tokenExchangeGrant.getActorToken());
+		assertNull(tokenExchangeGrant.getActorTokenType());
+	}
 }
