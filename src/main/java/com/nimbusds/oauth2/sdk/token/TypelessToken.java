@@ -6,7 +6,7 @@ import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
 
 /**
- * Introduced to represent tokens without explicity used in TokenExchangeGrant
+ * Introduced to represent tokens without a fixed type, used in TokenExchangeGrant.
  */
 @Immutable
 public class TypelessToken extends Token {
@@ -18,21 +18,6 @@ public class TypelessToken extends Token {
    */
   public TypelessToken(String value) {
     super(value);
-  }
-
-  /**
-   * Creates a new typeless token with a randomly generated value of the specified byte length, Base64URL-encoded.
-   *
-   * @param byteLength The byte length of the value to generate. Must be greater than one.
-   */
-  public TypelessToken(int byteLength) {
-    super(byteLength);
-  }
-
-  /**
-   * Creates a new typeless token with a randomly generated 256-bit (32-byte) value, Base64URL-encoded.
-   */
-  public TypelessToken() {
   }
 
   @Override
