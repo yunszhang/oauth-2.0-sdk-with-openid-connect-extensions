@@ -5,10 +5,9 @@ import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.token.Token;
-import com.nimbusds.oauth2.sdk.token.TokenType;
+import com.nimbusds.oauth2.sdk.token.TokenTypeURI;
 import com.nimbusds.oauth2.sdk.token.TypelessToken;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
-import com.nimbusds.oauth2.sdk.util.ResourceUtils;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -35,7 +34,7 @@ public class TokenExchangeGrant extends AuthorizationGrant {
   /**
    * The optional requested token type for token exchange
    */
-  private final TokenType requestedTokenType;
+  private final TokenTypeURI requestedTokenType;
 
   /**
    * The subject token for token exchange
@@ -45,7 +44,7 @@ public class TokenExchangeGrant extends AuthorizationGrant {
   /**
    * The subject token type for token exchange
    */
-  private final TokenType subjectTokenType;
+  private final TokenTypeURI subjectTokenType;
 
   /**
    * The actor token for token exchange
@@ -55,7 +54,7 @@ public class TokenExchangeGrant extends AuthorizationGrant {
   /**
    * The actor token type for token exchange
    */
-  private final TokenType actorTokenType;
+  private final TokenTypeURI actorTokenType;
 
 
   /**
@@ -66,11 +65,11 @@ public class TokenExchangeGrant extends AuthorizationGrant {
    * @param subjectToken Subject token. Must not be {@code null}.
    * @param subjectTokenType Subject token type. Must not be {@code null}.
    * @param actorToken Actor token. Can be {@code null}.
-   * @param actorTokenType Actor token type. Must not be {@code null}.
+   * @param actorTokenType Actor token type. Can be {@code null}.
    */
-  protected TokenExchangeGrant(List<String> audiences, TokenType requestedTokenType,
-      TypelessToken subjectToken, TokenType subjectTokenType,
-      TypelessToken actorToken, TokenType actorTokenType) {
+  protected TokenExchangeGrant(List<String> audiences, TokenTypeURI requestedTokenType,
+      TypelessToken subjectToken, TokenTypeURI subjectTokenType,
+      TypelessToken actorToken, TokenTypeURI actorTokenType) {
     super(GRANT_TYPE);
 
     this.audiences = audiences;
@@ -87,7 +86,7 @@ public class TokenExchangeGrant extends AuthorizationGrant {
     return audiences;
   }
 
-  public TokenType getRequestedTokenType() {
+  public TokenTypeURI getRequestedTokenType() {
     return requestedTokenType;
   }
 
@@ -95,7 +94,7 @@ public class TokenExchangeGrant extends AuthorizationGrant {
     return subjectToken;
   }
 
-  public TokenType getSubjectTokenType() {
+  public TokenTypeURI getSubjectTokenType() {
     return subjectTokenType;
   }
 
@@ -103,7 +102,7 @@ public class TokenExchangeGrant extends AuthorizationGrant {
     return actorToken;
   }
 
-  public TokenType getActorTokenType() {
+  public TokenTypeURI getActorTokenType() {
     return actorTokenType;
   }
 
@@ -122,17 +121,17 @@ public class TokenExchangeGrant extends AuthorizationGrant {
     }
 
     if (requestedTokenType != null) {
-      params.put("requested_token_type", Collections.singletonList(requestedTokenType.toString()));
+      params.put("requested_token_type", Collections.singletonList(requestedTokenType.getUri().toString()));
     }
 
     params.put("subject_token", Collections.singletonList(subjectToken.getValue()));
-    params.put("subject_token_type", Collections.singletonList(subjectTokenType.toString()));
+    params.put("subject_token_type", Collections.singletonList(subjectTokenType.getUri().toString()));
 
     if (actorToken != null) {
       params.put("actor_token", Collections.singletonList(actorToken.getValue()));
     }
     if (actorTokenType != null) {
-      params.put("actor_token_type", Collections.singletonList(actorTokenType.toString()));
+      params.put("actor_token_type", Collections.singletonList(actorTokenType.getUri().toString()));
     }
 
     return params;
@@ -154,7 +153,7 @@ public class TokenExchangeGrant extends AuthorizationGrant {
     return audiences;
   }
 
-  private static TokenType parseTokenType(Map<String, List<String>> params, String key, boolean mandatory) throws ParseException {
+  private static TokenTypeURI parseTokenType(Map<String, List<String>> params, String key, boolean mandatory) throws ParseException {
     String tokenTypeString = MultivaluedMapUtils.getFirstValue(params, key);
 
     if (tokenTypeString == null || tokenTypeString.trim().isEmpty()) {
@@ -166,7 +165,12 @@ public class TokenExchangeGrant extends AuthorizationGrant {
       }
     }
 
-    return new TokenType(tokenTypeString);
+    try {
+      return TokenTypeURI.parse(tokenTypeString);
+    } catch (URISyntaxException uriSyntaxException) {
+      String msg = "Invalid " + key + " " + tokenTypeString;
+      throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
+    }
   }
 
   private static TypelessToken parseToken(Map<String, List<String>> params, String key, boolean mandatory) throws ParseException {
@@ -188,14 +192,13 @@ public class TokenExchangeGrant extends AuthorizationGrant {
     GrantType.ensure(GRANT_TYPE, params);
 
     List<String> audiences = parseAudience(params);
-    TokenType requestedTokenType = parseTokenType(params, "requested_token_type", false);
+    TokenTypeURI requestedTokenType = parseTokenType(params, "requested_token_type", false);
     TypelessToken subjectToken = parseToken(params, "subject_token", true);
-    TokenType subjectTokenType = parseTokenType(params, "subject_token_type", true);
+    TokenTypeURI subjectTokenType = parseTokenType(params, "subject_token_type", true);
     TypelessToken actorToken = parseToken(params, "actor_token", false);
-    TokenType actorTokenType = parseTokenType(params, "actor_token_type", false);
+    TokenTypeURI actorTokenType = parseTokenType(params, "actor_token_type", false);
 
-    return new TokenExchangeGrant(audiences, requestedTokenType, subjectToken, subjectTokenType, actorToken,
-        actorTokenType);
+    return new TokenExchangeGrant(audiences, requestedTokenType, subjectToken, subjectTokenType, actorToken, actorTokenType);
   }
 
   @Override

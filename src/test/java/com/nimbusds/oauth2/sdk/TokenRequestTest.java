@@ -1760,7 +1760,7 @@ public class TokenRequestTest extends TestCase {
 				+ "RjQGV4YW1wbGUubmV0Iiwic2NvcGUiOiJvcmRlcnMgcHJvZmlsZSBoaXN0b3J5In0.PRBg-jXn4cJuj1gmYXFiGkZzRuzbXZ_sDxdE98ddW44"
 				+ "ufsbWLKd3JJ1VZhF64pbTtfjy4VXFVBDaQpKjn5JzAw";
 		assertEquals(expectedSubjectToken, tokenExchangeGrant.getSubjectToken().getValue());
-		assertEquals("urn:ietf:params:oauth:token-type:jwt", tokenExchangeGrant.getSubjectTokenType().getValue());
+		assertEquals("urn:ietf:params:oauth:token-type:jwt", tokenExchangeGrant.getSubjectTokenType().getUri().toString());
 		assertNull(tokenExchangeGrant.getActorToken());
 		assertNull(tokenExchangeGrant.getActorTokenType());
 	}
@@ -1788,7 +1788,7 @@ public class TokenRequestTest extends TestCase {
 		assertNull(tokenRequest.getScope());
 		assertNull(tokenExchangeGrant.getRequestedTokenType());
 		assertEquals("subjectToken", tokenExchangeGrant.getSubjectToken().getValue());
-		assertEquals("urn:ietf:params:oauth:token-type:access_token", tokenExchangeGrant.getSubjectTokenType().getValue());
+		assertEquals("urn:ietf:params:oauth:token-type:access_token", tokenExchangeGrant.getSubjectTokenType().getUri().toString());
 		assertNull(tokenExchangeGrant.getActorToken());
 		assertNull(tokenExchangeGrant.getActorTokenType());
 	}

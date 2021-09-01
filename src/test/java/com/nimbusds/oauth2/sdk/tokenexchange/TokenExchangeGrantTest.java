@@ -3,9 +3,9 @@ package com.nimbusds.oauth2.sdk.tokenexchange;
 import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.token.TokenType;
+import com.nimbusds.oauth2.sdk.token.TokenTypeURI;
 import com.nimbusds.oauth2.sdk.token.TypelessToken;
-import com.nimbusds.oauth2.sdk.tokenexchange.TokenExchangeGrant;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -17,11 +17,11 @@ public class TokenExchangeGrantTest extends TestCase {
   public void testConstructor() throws Exception {
 
     List<String> audiences = Collections.singletonList("audience");
-    TokenType requestedTokenType = new TokenType("requestedTokenType");
+    TokenTypeURI requestedTokenType = TokenTypeURI.parse("requestedTokenType");
     TypelessToken subjectToken = new TypelessToken("subjectToken");
-    TokenType subjectTokenType = new TokenType("subjectTokenType");
+    TokenTypeURI subjectTokenType = TokenTypeURI.parse("subjectTokenType");
     TypelessToken actorToken = new TypelessToken("actorToken");
-    TokenType actorTokenType = new TokenType("actorTokenType");
+    TokenTypeURI actorTokenType = TokenTypeURI.parse("actorTokenType");
 
     TokenExchangeGrant grant = new TokenExchangeGrant(audiences, requestedTokenType, subjectToken, subjectTokenType,
         actorToken, actorTokenType);
@@ -55,11 +55,11 @@ public class TokenExchangeGrantTest extends TestCase {
     assertEquals(actorTokenType, grant.getActorTokenType());
   }
 
-  public void testToParametersMissingOptionalActorTokenAndActorTokenType() {
+  public void testToParametersMissingOptionalActorTokenAndActorTokenType() throws URISyntaxException {
     List<String> audiences = Collections.singletonList("audience");
-    TokenType requestedTokenType = new TokenType("requestedTokenType");
+    TokenTypeURI requestedTokenType = TokenTypeURI.parse("requestedTokenType");
     TypelessToken subjectToken = new TypelessToken("subjectToken");
-    TokenType subjectTokenType = new TokenType("subjectTokenType");
+    TokenTypeURI subjectTokenType = TokenTypeURI.parse("subjectTokenType");
 
     TokenExchangeGrant grant = new TokenExchangeGrant(audiences, requestedTokenType, subjectToken, subjectTokenType,
         null, null);
@@ -90,11 +90,11 @@ public class TokenExchangeGrantTest extends TestCase {
 
     assertEquals(GrantType.TOKEN_EXCHANGE, grant.getType());
     assertEquals(Collections.singletonList("audience"), grant.getAudiences());
-    assertEquals("requestedTokenType", grant.getRequestedTokenType().getValue());
+    assertEquals("requestedTokenType", grant.getRequestedTokenType().getUri().toString());
     assertEquals("subjectToken", grant.getSubjectToken().getValue());
-    assertEquals("subjectTokenType", grant.getSubjectTokenType().getValue());
+    assertEquals("subjectTokenType", grant.getSubjectTokenType().getUri().toString());
     assertEquals("actorToken", grant.getActorToken().getValue());
-    assertEquals("actorTokenType", grant.getActorTokenType().getValue());
+    assertEquals("actorTokenType", grant.getActorTokenType().getUri().toString());
   }
 
   public void testParseMissingGrantType() {
@@ -171,20 +171,20 @@ public class TokenExchangeGrantTest extends TestCase {
     TokenExchangeGrant grant = TokenExchangeGrant.parse(params);
     assertEquals(GrantType.TOKEN_EXCHANGE, grant.getType());
     assertEquals(Collections.singletonList("audience"), grant.getAudiences());
-    assertEquals("requestedTokenType", grant.getRequestedTokenType().getValue());
+    assertEquals("requestedTokenType", grant.getRequestedTokenType().getUri().toString());
     assertEquals("subjectToken", grant.getSubjectToken().getValue());
-    assertEquals("subjectTokenType", grant.getSubjectTokenType().getValue());
+    assertEquals("subjectTokenType", grant.getSubjectTokenType().getUri().toString());
     assertNull("actorToken", grant.getActorToken());
     assertNull("actorTokenType", grant.getActorTokenType());
   }
 
-  public void testEquality() {
+  public void testEquality() throws ParseException, URISyntaxException {
     List<String> audiences = Collections.singletonList("audience");
-    TokenType requestedTokenType = new TokenType("requestedTokenType");
+    TokenTypeURI requestedTokenType = TokenTypeURI.parse("requestedTokenType");
     TypelessToken subjectToken = new TypelessToken("subjectToken");
-    TokenType subjectTokenType = new TokenType("subjectTokenType");
+    TokenTypeURI subjectTokenType = TokenTypeURI.parse("subjectTokenType");
     TypelessToken actorToken = new TypelessToken("actorToken");
-    TokenType actorTokenType = new TokenType("actorTokenType");
+    TokenTypeURI actorTokenType = TokenTypeURI.parse("actorTokenType");
 
     TokenExchangeGrant grant1 = new TokenExchangeGrant(audiences, requestedTokenType, subjectToken, subjectTokenType,
         actorToken, actorTokenType);
@@ -195,14 +195,14 @@ public class TokenExchangeGrantTest extends TestCase {
     assertEquals(grant1, grant2);
   }
 
-  public void testInequality() {
+  public void testInequality() throws ParseException, URISyntaxException {
     List<String> audiences = Collections.singletonList("audience");
-    TokenType requestedTokenType = new TokenType("requestedTokenType");
+    TokenTypeURI requestedTokenType = TokenTypeURI.parse("requestedTokenType");
     TypelessToken subjectToken = new TypelessToken("subjectToken");
-    TokenType subjectTokenType = new TokenType("subjectTokenType");
+    TokenTypeURI subjectTokenType = TokenTypeURI.parse("subjectTokenType");
     TypelessToken actorToken = new TypelessToken("actorToken");
-    TokenType actorTokenType = new TokenType("actorTokenType");
-    TokenType anotherActorTokenType = new TokenType("anotherActorTokenType");
+    TokenTypeURI actorTokenType = TokenTypeURI.parse("actorTokenType");
+    TokenTypeURI anotherActorTokenType = TokenTypeURI.parse("anotherActorTokenType");
 
     TokenExchangeGrant grant1 = new TokenExchangeGrant(audiences, requestedTokenType, subjectToken, subjectTokenType,
         actorToken, actorTokenType);
