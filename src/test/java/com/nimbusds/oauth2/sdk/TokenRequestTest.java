@@ -18,6 +18,7 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import com.nimbusds.oauth2.sdk.tokenexchange.TokenExchangeGrant;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -1729,5 +1730,36 @@ public class TokenRequestTest extends TestCase {
 				assertEquals("Parameter(s) present more than once: [" + paramName  + "]", e.getErrorObject().getDescription());
 			}
 		}
+	}
+
+	public void testParseTokenExchangeExample() throws MalformedURLException, ParseException {
+
+		URL endpoint = new URL("https://server.example.com/token");
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, endpoint);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
+		httpRequest.setQuery("grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&"
+				+ "audience=urn%3Aexample%3Acooperation-context&"
+				+ "subject_token=eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0.eyJhdWQiOiJodHRwczovL2FzLmV4YW1wbGUuY29tIiwiaXNzIjoiaHR0c"
+				+ "HM6Ly9vcmlnaW5hbC1pc3N1ZXIuZXhhbXBsZS5uZXQiLCJleHAiOjE0NDE5MTA2MDAsIm5iZiI6MTQ0MTkwOTAwMCwic3ViIjoiYmRjQGV4"
+				+ "YW1wbGUubmV0Iiwic2NvcGUiOiJvcmRlcnMgcHJvZmlsZSBoaXN0b3J5In0.PRBg-jXn4cJuj1gmYXFiGkZzRuzbXZ_sDxdE98ddW44ufsb"
+				+ "WLKd3JJ1VZhF64pbTtfjy4VXFVBDaQpKjn5JzAw&subject_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Ajwt");
+
+		TokenRequest tokenRequest = TokenRequest.parse(httpRequest);
+
+		ClientAuthentication clientAuthentication = tokenRequest.getClientAuthentication();
+		assertNull(clientAuthentication);
+		assertEquals(GrantType.TOKEN_EXCHANGE, tokenRequest.getAuthorizationGrant().getType());
+		TokenExchangeGrant tokenExchangeGrant = (TokenExchangeGrant) tokenRequest.getAuthorizationGrant();
+		assertEquals(Collections.singletonList("urn:example:cooperation-context"), tokenExchangeGrant.getAudiences());
+		assertNull(tokenRequest.getScope());
+		assertNull(tokenExchangeGrant.getRequestedTokenType());
+		String expectedSubjectToken = "eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0.eyJhdWQiOiJodHRwczovL2FzLmV4YW1wbGUuY29tIiwiaXNzI"
+				+ "joiaHR0cHM6Ly9vcmlnaW5hbC1pc3N1ZXIuZXhhbXBsZS5uZXQiLCJleHAiOjE0NDE5MTA2MDAsIm5iZiI6MTQ0MTkwOTAwMCwic3ViIjoiYm"
+				+ "RjQGV4YW1wbGUubmV0Iiwic2NvcGUiOiJvcmRlcnMgcHJvZmlsZSBoaXN0b3J5In0.PRBg-jXn4cJuj1gmYXFiGkZzRuzbXZ_sDxdE98ddW44"
+				+ "ufsbWLKd3JJ1VZhF64pbTtfjy4VXFVBDaQpKjn5JzAw";
+		assertEquals(expectedSubjectToken, tokenExchangeGrant.getSubjectToken().getValue());
+		assertEquals("urn:ietf:params:oauth:token-type:jwt", tokenExchangeGrant.getSubjectTokenType().getValue());
+		assertNull(tokenExchangeGrant.getActorToken());
+		assertNull(tokenExchangeGrant.getActorTokenType());
 	}
 }
