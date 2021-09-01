@@ -61,6 +61,12 @@ public class TokenExchangeGrant extends AuthorizationGrant {
   /**
    * Creates a new token exchange grant.
    *
+   * @param audiences The audiences. Can be {@code null}.
+   * @param requestedTokenType Requested token type. Can be {@code null}.
+   * @param subjectToken Subject token. Must not be {@code null}.
+   * @param subjectTokenType Subject token type. Must not be {@code null}.
+   * @param actorToken Actor token. Can be {@code null}.
+   * @param actorTokenType Actor token type. Must not be {@code null}.
    */
   protected TokenExchangeGrant(List<String> audiences, TokenType requestedTokenType,
       TypelessToken subjectToken, TokenType subjectTokenType,
