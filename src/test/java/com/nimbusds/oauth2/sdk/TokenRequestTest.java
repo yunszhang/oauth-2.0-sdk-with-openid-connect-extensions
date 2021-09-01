@@ -21,6 +21,7 @@ package com.nimbusds.oauth2.sdk;
 import com.nimbusds.oauth2.sdk.tokenexchange.TokenExchangeGrant;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import javax.crypto.spec.SecretKeySpec;
@@ -1749,6 +1750,7 @@ public class TokenRequestTest extends TestCase {
 		ClientAuthentication clientAuthentication = tokenRequest.getClientAuthentication();
 		assertNull(clientAuthentication);
 		assertEquals(GrantType.TOKEN_EXCHANGE, tokenRequest.getAuthorizationGrant().getType());
+		assertNull(tokenRequest.getResources());
 		TokenExchangeGrant tokenExchangeGrant = (TokenExchangeGrant) tokenRequest.getAuthorizationGrant();
 		assertEquals(Collections.singletonList("urn:example:cooperation-context"), tokenExchangeGrant.getAudiences());
 		assertNull(tokenRequest.getScope());
@@ -1763,13 +1765,15 @@ public class TokenRequestTest extends TestCase {
 		assertNull(tokenExchangeGrant.getActorTokenType());
 	}
 
-	public void testParseTokenExchangeWithMultipleAudience() throws MalformedURLException, ParseException {
+	public void testParseTokenExchangeWithMultipleAudience()
+			throws MalformedURLException, ParseException, URISyntaxException {
 
 		URL endpoint = new URL("https://server.example.com/token");
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, endpoint);
 		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
 		httpRequest.setQuery("grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&"
 				+ "audience=urn%3Aexample%3Acooperation-context1&audience=urn%3Aexample%3Acooperation-context2&"
+				+ "resource=https%3A%2F%2Fbackend.example.com%2Fapi&"
 				+ "subject_token=subjectToken&subject_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Aaccess_token");
 
 		TokenRequest tokenRequest = TokenRequest.parse(httpRequest);
@@ -1777,6 +1781,7 @@ public class TokenRequestTest extends TestCase {
 		ClientAuthentication clientAuthentication = tokenRequest.getClientAuthentication();
 		assertNull(clientAuthentication);
 		assertEquals(GrantType.TOKEN_EXCHANGE, tokenRequest.getAuthorizationGrant().getType());
+		assertEquals(Collections.singletonList(new URI("https://backend.example.com/api")), tokenRequest.getResources());
 		TokenExchangeGrant tokenExchangeGrant = (TokenExchangeGrant) tokenRequest.getAuthorizationGrant();
 		assertEquals(Arrays.asList("urn:example:cooperation-context1", "urn:example:cooperation-context2"),
 				tokenExchangeGrant.getAudiences());
