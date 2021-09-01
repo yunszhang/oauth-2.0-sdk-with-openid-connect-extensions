@@ -55,7 +55,22 @@ public class TokenExchangeGrantTest extends TestCase {
     assertEquals(actorTokenType, grant.getActorTokenType());
   }
 
-  public void testToParametersMissingOptionalActorTokenAndActorTokenType() throws URISyntaxException {
+  public void testConstructorOfMissingMandatorySubjectToken() throws URISyntaxException {
+    List<String> audiences = Collections.singletonList("audience");
+    TokenTypeURI requestedTokenType = TokenTypeURI.parse("requestedTokenType");
+    TypelessToken actorToken = new TypelessToken("actorToken");
+    TokenTypeURI actorTokenType = TokenTypeURI.parse("actorTokenType");
+
+    try {
+      new TokenExchangeGrant(audiences, requestedTokenType, null, null, actorToken, actorTokenType);
+      fail();
+    } catch (Exception e) {
+      assertTrue(e instanceof IllegalArgumentException);
+      assertEquals("The subject token must not be null", e.getMessage());
+    }
+  }
+
+  public void testToParametersMissingOptionalActorTokenAndActorTokenType() throws URISyntaxException, ParseException {
     List<String> audiences = Collections.singletonList("audience");
     TokenTypeURI requestedTokenType = TokenTypeURI.parse("requestedTokenType");
     TypelessToken subjectToken = new TypelessToken("subjectToken");

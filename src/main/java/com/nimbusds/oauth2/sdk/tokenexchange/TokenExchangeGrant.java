@@ -67,7 +67,7 @@ public class TokenExchangeGrant extends AuthorizationGrant {
    * @param actorToken Actor token. Can be {@code null}.
    * @param actorTokenType Actor token type. Can be {@code null}.
    */
-  protected TokenExchangeGrant(List<String> audiences, TokenTypeURI requestedTokenType,
+  public TokenExchangeGrant(List<String> audiences, TokenTypeURI requestedTokenType,
       TypelessToken subjectToken, TokenTypeURI subjectTokenType,
       TypelessToken actorToken, TokenTypeURI actorTokenType) {
     super(GRANT_TYPE);
@@ -75,7 +75,14 @@ public class TokenExchangeGrant extends AuthorizationGrant {
     this.audiences = audiences;
     this.requestedTokenType = requestedTokenType;
 
+    if (subjectToken == null) {
+      throw new IllegalArgumentException("The subject token must not be null");
+    }
     this.subjectToken = subjectToken;
+    if (subjectTokenType == null) {
+      throw new IllegalArgumentException("The subject token type must not be null");
+    }
+
     this.subjectTokenType = subjectTokenType;
 
     this.actorToken = actorToken;
