@@ -179,11 +179,11 @@ public class AuthorizationGrantTest extends TestCase {
 		TokenExchangeGrant grant = (TokenExchangeGrant) AuthorizationGrant.parse(params);
 
 		assertEquals(GrantType.TOKEN_EXCHANGE, grant.getType());
-		assertEquals("requestedTokenType", grant.getRequestedTokenType().getUri().toString());
+		assertEquals("requestedTokenType", grant.getRequestedTokenType().getURI().toString());
 		assertEquals("subjectToken", grant.getSubjectToken().getValue());
-		assertEquals("subjectTokenType", grant.getSubjectTokenType().getUri().toString());
+		assertEquals("subjectTokenType", grant.getSubjectTokenType().getURI().toString());
 		assertEquals("actorToken", grant.getActorToken().getValue());
-		assertEquals("actorTokenType", grant.getActorTokenType().getUri().toString());
+		assertEquals("actorTokenType", grant.getActorTokenType().getURI().toString());
 	}
 	
 	

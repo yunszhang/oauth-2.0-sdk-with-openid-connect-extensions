@@ -40,11 +40,11 @@ public class TokenTypeURI {
 
   static {
     Map<String, TokenTypeURI> knownTokenTypeUris = new HashMap<>();
-    knownTokenTypeUris.put(ACCESS_TOKEN.getUri().toString(), ACCESS_TOKEN);
-    knownTokenTypeUris.put(REFRESH_TOKEN.getUri().toString(), REFRESH_TOKEN);
-    knownTokenTypeUris.put(ID_TOKEN.getUri().toString(), ID_TOKEN);
-    knownTokenTypeUris.put(SAML1.getUri().toString(), SAML1);
-    knownTokenTypeUris.put(SAML2.getUri().toString(), SAML2);
+    knownTokenTypeUris.put(ACCESS_TOKEN.getURI().toString(), ACCESS_TOKEN);
+    knownTokenTypeUris.put(REFRESH_TOKEN.getURI().toString(), REFRESH_TOKEN);
+    knownTokenTypeUris.put(ID_TOKEN.getURI().toString(), ID_TOKEN);
+    knownTokenTypeUris.put(SAML1.getURI().toString(), SAML1);
+    knownTokenTypeUris.put(SAML2.getURI().toString(), SAML2);
     KNOWN_TOKEN_TYPE_URIS = Collections.unmodifiableMap(knownTokenTypeUris);
   }
 
@@ -58,7 +58,7 @@ public class TokenTypeURI {
     this.uri = uri;
   }
 
-  public URI getUri() {
+  public URI getURI() {
     return uri;
   }
 
@@ -89,7 +89,7 @@ public class TokenTypeURI {
 
     TokenTypeURI that = (TokenTypeURI) o;
 
-    return uri.equals(that.getUri());
+    return uri.equals(that.getURI());
   }
 
   @Override

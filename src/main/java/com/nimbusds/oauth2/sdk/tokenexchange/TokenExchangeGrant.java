@@ -128,17 +128,17 @@ public class TokenExchangeGrant extends AuthorizationGrant {
     }
 
     if (requestedTokenType != null) {
-      params.put("requested_token_type", Collections.singletonList(requestedTokenType.getUri().toString()));
+      params.put("requested_token_type", Collections.singletonList(requestedTokenType.getURI().toString()));
     }
 
     params.put("subject_token", Collections.singletonList(subjectToken.getValue()));
-    params.put("subject_token_type", Collections.singletonList(subjectTokenType.getUri().toString()));
+    params.put("subject_token_type", Collections.singletonList(subjectTokenType.getURI().toString()));
 
     if (actorToken != null) {
       params.put("actor_token", Collections.singletonList(actorToken.getValue()));
     }
     if (actorTokenType != null) {
-      params.put("actor_token_type", Collections.singletonList(actorTokenType.getUri().toString()));
+      params.put("actor_token_type", Collections.singletonList(actorTokenType.getURI().toString()));
     }
 
     return params;
