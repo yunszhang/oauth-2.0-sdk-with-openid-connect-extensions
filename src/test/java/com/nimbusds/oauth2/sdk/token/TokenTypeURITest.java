@@ -24,6 +24,7 @@ public class TokenTypeURITest extends TestCase {
   public void testParseNullUri() {
     try {
       TokenTypeURI.parse(null);
+      fail();
     } catch (Exception e) {
       assertTrue(e instanceof IllegalArgumentException);
       assertEquals("The uri value must not be null", e.getMessage());
