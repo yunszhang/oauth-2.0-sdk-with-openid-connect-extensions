@@ -1,10 +1,13 @@
-package com.nimbusds.oauth2.sdk;
+package tokenexchange;
 
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.token.TokenTypeURI;
 import com.nimbusds.oauth2.sdk.token.Tokens;
+import com.nimbusds.oauth2.sdk.tokenexchange.TokenExchangeResponse;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import java.util.HashMap;
 import java.util.Map;
