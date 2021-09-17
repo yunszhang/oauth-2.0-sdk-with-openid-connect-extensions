@@ -101,7 +101,7 @@ public class BearerAccessTokenTest extends TestCase {
 		
 		Scope scope = Scope.parse("read write");
 
-		AccessToken token = new BearerAccessToken("abc", 1500, scope);
+		AccessToken token = new BearerAccessToken("abc", 1500, scope, TokenTypeURI.ACCESS_TOKEN);
 		
 		assertEquals("abc", token.getValue());
 		assertEquals(1500L, token.getLifetime());
@@ -115,7 +115,8 @@ public class BearerAccessTokenTest extends TestCase {
 		assertEquals("Bearer", jsonObject.get("token_type"));
 		assertEquals(1500L, jsonObject.get("expires_in"));
 		assertEquals(scope, Scope.parse((String) jsonObject.get("scope")));
-		assertEquals(4, jsonObject.size());
+		assertEquals(TokenTypeURI.ACCESS_TOKEN, TokenTypeURI.parse((String) jsonObject.get("issued_token_type")));
+		assertEquals(5, jsonObject.size());
 
 		token = BearerAccessToken.parse(jsonObject);
 		
@@ -127,7 +128,8 @@ public class BearerAccessTokenTest extends TestCase {
 		assertTrue(token.getParameterNames().contains("token_type"));
 		assertTrue(token.getParameterNames().contains("expires_in"));
 		assertTrue(token.getParameterNames().contains("scope"));
-		assertEquals(4, token.getParameterNames().size());
+		assertTrue(token.getParameterNames().contains("issued_token_type"));
+		assertEquals(5, token.getParameterNames().size());
 	}
 	
 	
@@ -272,6 +274,21 @@ public class BearerAccessTokenTest extends TestCase {
 		} catch (ParseException e) {
 			assertEquals(BearerTokenError.INVALID_REQUEST.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());
 			assertEquals(BearerTokenError.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+		}
+	}
+
+
+	public void testParseFromJsonObject_invalidIssuedTokenType() {
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("access_token", "abc");
+		jsonObject.put("token_type", "Bearer");
+		jsonObject.put("issued_token_type", "invalid uri");
+
+		try {
+			BearerAccessToken.parse(jsonObject);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid issued_token_type parameter, must be an URI", e.getMessage());
 		}
 	}
 }

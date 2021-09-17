@@ -125,7 +125,21 @@ public class BearerAccessToken extends AccessToken {
 	 */
 	public BearerAccessToken(final String value) {
 	
-		this(value, 0L, null);
+		this(value, 0L, null, null);
+	}
+
+	/**
+	 * Creates a new bearer access token with the specified value and
+	 * optional lifetime and scope.
+	 *
+	 * @param value    The access token value. Must not be {@code null} or
+	 *                 empty string.
+	 * @param lifetime The lifetime in seconds, 0 if not specified.
+	 * @param scope    The scope, {@code null} if not specified.
+	 */
+	public BearerAccessToken(final String value, final long lifetime, final Scope scope) {
+
+		this(value, lifetime, scope, null);
 	}
 	
 	
@@ -137,10 +151,11 @@ public class BearerAccessToken extends AccessToken {
 	 *                 empty string.
 	 * @param lifetime The lifetime in seconds, 0 if not specified.
 	 * @param scope    The scope, {@code null} if not specified.
+	 * @param issuedTokenType The issued token type, {@code null} if not specified.
 	 */
-	public BearerAccessToken(final String value, final long lifetime, final Scope scope) {
+	public BearerAccessToken(final String value, final long lifetime, final Scope scope, TokenTypeURI issuedTokenType) {
 	
-		super(AccessTokenType.BEARER, value, lifetime, scope);
+		super(AccessTokenType.BEARER, value, lifetime, scope, issuedTokenType);
 	}
 	
 	
@@ -190,7 +205,8 @@ public class BearerAccessToken extends AccessToken {
 		String accessTokenValue = AccessTokenUtils.parseValue(jsonObject);
 		long lifetime = AccessTokenUtils.parseLifetime(jsonObject);
 		Scope scope = AccessTokenUtils.parseScope(jsonObject);
-		return new BearerAccessToken(accessTokenValue, lifetime, scope);
+		TokenTypeURI issuedTokenType = AccessTokenUtils.parseIssuedTokenType(jsonObject);
+		return new BearerAccessToken(accessTokenValue, lifetime, scope, issuedTokenType);
 	}
 	
 	

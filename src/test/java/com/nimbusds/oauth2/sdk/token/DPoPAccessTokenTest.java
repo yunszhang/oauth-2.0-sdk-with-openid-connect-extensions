@@ -69,7 +69,7 @@ public class DPoPAccessTokenTest extends TestCase {
 		
 		Scope scope = new Scope("read", "write");
 
-		AccessToken token = new DPoPAccessToken("abc", 1500L, scope);
+		AccessToken token = new DPoPAccessToken("abc", 1500L, scope, TokenTypeURI.ACCESS_TOKEN);
 		assertEquals(AccessTokenType.DPOP, token.getType());
 		assertEquals("abc", token.getValue());
 		assertEquals(1500L, token.getLifetime());
@@ -83,7 +83,8 @@ public class DPoPAccessTokenTest extends TestCase {
 		assertEquals("DPoP", jsonObject.get("token_type"));
 		assertEquals(1500L, jsonObject.get("expires_in"));
 		assertEquals(scope.toString(), jsonObject.get("scope"));
-		assertEquals(4, jsonObject.size());
+		assertEquals(TokenTypeURI.ACCESS_TOKEN, TokenTypeURI.parse((String) jsonObject.get("issued_token_type")));
+		assertEquals(5, jsonObject.size());
 
 		token = DPoPAccessToken.parse(jsonObject);
 		assertEquals(AccessTokenType.DPOP, token.getType());
@@ -95,7 +96,8 @@ public class DPoPAccessTokenTest extends TestCase {
 		assertTrue(token.getParameterNames().contains("token_type"));
 		assertTrue(token.getParameterNames().contains("expires_in"));
 		assertTrue(token.getParameterNames().contains("scope"));
-		assertEquals(4, token.getParameterNames().size());
+		assertTrue(token.getParameterNames().contains("issued_token_type"));
+		assertEquals(5, token.getParameterNames().size());
 	}
 	
 	
