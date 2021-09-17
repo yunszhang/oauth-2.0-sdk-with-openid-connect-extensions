@@ -1,8 +1,5 @@
-package com.nimbusds.oauth2.sdk.tokenexchange;
+package com.nimbusds.oauth2.sdk;
 
-import com.nimbusds.oauth2.sdk.AccessTokenResponse;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.token.AccessTokenType;
 import com.nimbusds.oauth2.sdk.token.TokenTypeURI;
