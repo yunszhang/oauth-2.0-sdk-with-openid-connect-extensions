@@ -94,7 +94,7 @@ This SDK version implements the following standards and drafts:
 * OAuth 2.0 Incremental Authorization (draft-ietf-oauth-incremental-authz-04)
 
 * The OAuth 2.0 Authorization Framework: JWT Secured Authorization Request 
-  (JAR) (draft-ietf-oauth-jwsreq-29)
+  (JAR) (RFC 9101)
 
 * OAuth 2.0 Pushed Authorization Requests (RFC 9126)
 

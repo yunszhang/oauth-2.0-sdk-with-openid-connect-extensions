@@ -56,7 +56,7 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  *     <li>Financial-grade API - Part 2: Read and Write API Security Profile,
  *         section 7.
  *     <li>The OAuth 2.0 Authorization Framework: JWT Secured Authorization
- *         Request (JAR) (draft-ietf-oauth-jwsreq-17).
+ *         Request (JAR) (RFC 9101).
  * </ul>
  */
 @Deprecated

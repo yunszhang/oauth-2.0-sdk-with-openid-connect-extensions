@@ -68,7 +68,7 @@ import com.nimbusds.openid.connect.sdk.Prompt;
  *     <li>OAuth 2.0 Incremental Authorization
  *         (draft-ietf-oauth-incremental-authz-04)
  *     <li>The OAuth 2.0 Authorization Framework: JWT Secured Authorization
- *         Request (JAR) draft-ietf-oauth-jwsreq-29
+ *         Request (JAR) (RFC 9101)
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
  * </ul>

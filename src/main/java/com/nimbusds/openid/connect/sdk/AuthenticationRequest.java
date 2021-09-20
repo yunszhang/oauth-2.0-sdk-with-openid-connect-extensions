@@ -66,7 +66,7 @@ import com.nimbusds.openid.connect.sdk.claims.ACR;
  *     <li>Proof Key for Code Exchange by OAuth Public Clients (RFC 7636).
  *     <li>Resource Indicators for OAuth 2.0 (RFC 8707)
  *     <li>The OAuth 2.0 Authorization Framework: JWT Secured Authorization
- *         Request (JAR) draft-ietf-oauth-jwsreq-34
+ *         Request (JAR) (RFC 9101)
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
  *     <li>OpenID Connect for Identity Assurance 1.0, section 8.
