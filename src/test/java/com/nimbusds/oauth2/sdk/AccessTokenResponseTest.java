@@ -18,6 +18,7 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import com.nimbusds.oauth2.sdk.token.TokenTypeURI;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -281,5 +282,32 @@ public class AccessTokenResponseTest extends TestCase {
 		assertEquals(1800L, response.getTokens().getBearerAccessToken().getLifetime());
 		assertEquals("valid refresh token", response.getTokens().getRefreshToken().getValue());
 		assertNull(response.getTokens().getAccessToken().getScope());
+	}
+
+	// https://datatracker.ietf.org/doc/html/rfc8693#section-2.3
+	public void testParseTokenExchangeResponse() throws Exception {
+		String jsonString = "\n"
+				+ "    {\n"
+				+ "     \"access_token\":\"eyJhbGciOiJFUzI1NiIsImtpZCI6IjllciJ9.eyJhdWQiOiJodHRwczovL2JhY2tlbmQuZXhhbXBsZS5jb20i"
+				+ "LCJpc3MiOiJodHRwczovL2FzLmV4YW1wbGUuY29tIiwiZXhwIjoxNDQxOTE3NTkzLCJpYXQiOjE0NDE5MTc1MzMsInN1YiI6ImJkY0BleGFt"
+				+ "cGxlLmNvbSIsInNjb3BlIjoiYXBpIn0.40y3ZgQedw6rxf59WlwHDD9jryFOr0_Wh3CGozQBihNBhnXEQgU85AI9x3KmsPottVMLPIWvmDCMy"
+				+ "5-kdXjwhw\",\n"
+				+ "     \"issued_token_type\":\n"
+				+ "         \"urn:ietf:params:oauth:token-type:access_token\",\n"
+				+ "     \"token_type\":\"Bearer\",\n"
+				+ "     \"expires_in\":60\n"
+				+ "    }";
+
+		String expectedAccessToken = "eyJhbGciOiJFUzI1NiIsImtpZCI6IjllciJ9.eyJhdWQiOiJodHRwczovL2JhY2tlbmQuZXhhbXBsZS5jb20i"
+				+ "LCJpc3MiOiJodHRwczovL2FzLmV4YW1wbGUuY29tIiwiZXhwIjoxNDQxOTE3NTkzLCJpYXQiOjE0NDE5MTc1MzMsInN1YiI6ImJkY0BleGFt"
+				+ "cGxlLmNvbSIsInNjb3BlIjoiYXBpIn0.40y3ZgQedw6rxf59WlwHDD9jryFOr0_Wh3CGozQBihNBhnXEQgU85AI9x3KmsPottVMLPIWvmDCMy"
+				+ "5-kdXjwhw";
+
+		AccessTokenResponse response = AccessTokenResponse.parse(JSONObjectUtils.parse(jsonString));
+		BearerAccessToken bearerAccessToken = response.getTokens().getBearerAccessToken();
+		assertEquals(expectedAccessToken, bearerAccessToken.getValue());
+		assertEquals(60, bearerAccessToken.getLifetime());
+		assertEquals(TokenTypeURI.ACCESS_TOKEN, bearerAccessToken.getIssuedTokenType());
+		assertNull(bearerAccessToken.getScope());
 	}
 }

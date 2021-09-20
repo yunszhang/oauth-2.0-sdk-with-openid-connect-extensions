@@ -95,7 +95,15 @@ public final class GrantType extends Identifier {
 	 * Core 1.0. Explicit client authentication is optional.
 	 */
 	public static final GrantType CIBA = new GrantType("urn:openid:params:grant-type:ciba", true, true, Collections.singleton("auth_req_id"));
-	
+
+	/**
+	 * Token Exchange, as defined in RFC 8693. Explicit client authentication is optional.
+	 */
+	public static final GrantType TOKEN_EXCHANGE = new GrantType("urn:ietf:params:oauth:grant-type:token-exchange",
+			false, false,
+			new HashSet<>(Arrays.asList(
+					"audience", "requested_token_type", "subject_token", "subject_token_type", "actor_token", "actor_token_type"
+			)));
 	
 	private static final long serialVersionUID = -5367937758427680765L;
 	
@@ -259,6 +267,10 @@ public final class GrantType extends Identifier {
 		} else if (grantType.equals(GrantType.CIBA)) {
 
 			return GrantType.CIBA;
+
+		} else if (grantType.equals(GrantType.TOKEN_EXCHANGE)) {
+
+			return GrantType.TOKEN_EXCHANGE;
 
 		} else {
 

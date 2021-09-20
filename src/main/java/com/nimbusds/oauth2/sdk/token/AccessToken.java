@@ -64,6 +64,11 @@ public abstract class AccessToken extends Token {
 	 */
 	private final Scope scope;
 
+	/**
+	 * Optional issued token type, used in OAuth 2.0 Token Exchange(RFC8693).
+	 */
+	private final TokenTypeURI issuedTokenType;
+
 
 	/**
 	 * Creates a new minimal access token with a randomly generated 256-bit 
@@ -125,6 +130,27 @@ public abstract class AccessToken extends Token {
 		           final long lifetime, 
 		           final Scope scope) {
 	
+		this(type, byteLength, lifetime, scope, null);
+	}
+
+	/**
+	 * Creates a new access token with a randomly generated value
+	 * of the specified byte length, Base64URL-encoded, and optional
+	 * lifetime and scope.
+	 *
+	 * @param type       The access token type. Must not be {@code null}.
+	 * @param byteLength The byte length of the value to generate. Must be
+	 *                   greater than one.
+	 * @param lifetime   The lifetime in seconds, 0 if not specified.
+	 * @param scope      The scope, {@code null} if not specified.
+	 * @param scope      The issued token type. {@code null} if not specified.
+	 */
+	public AccessToken(final AccessTokenType type,
+			final int byteLength,
+			final long lifetime,
+			final Scope scope,
+			final TokenTypeURI issuedTokenType) {
+
 		super(byteLength);
 
 		if (type == null)
@@ -134,6 +160,7 @@ public abstract class AccessToken extends Token {
 
 		this.lifetime = lifetime;
 		this.scope = scope;
+		this.issuedTokenType = issuedTokenType;
 	}
 	
 	
@@ -165,7 +192,24 @@ public abstract class AccessToken extends Token {
 		           final String value, 
 		           final long lifetime, 
 		           final Scope scope) {
-	
+		this(type, value, lifetime, scope, null);
+	}
+
+	/**
+	 * Creates a new access token with the specified value and optional
+	 * lifetime and scope.
+	 *
+	 * @param type             The access token type. Must not be {@code null}.
+	 * @param value            The access token value. Must not be {@code null} or empty string.
+	 * @param lifetime         The lifetime in seconds, 0 if not specified.
+	 * @param scope            The scope, {@code null} if not specified.
+	 * @param issuedTokenType  The issued token type, {@code null} if not specified.
+	 */
+	public AccessToken(final AccessTokenType type,
+			final String value,
+			final long lifetime,
+			final Scope scope,
+			final TokenTypeURI issuedTokenType) {
 		super(value);
 
 		if (type == null)
@@ -175,6 +219,7 @@ public abstract class AccessToken extends Token {
 
 		this.lifetime = lifetime;
 		this.scope = scope;
+		this.issuedTokenType = issuedTokenType;
 	}
 
 
@@ -210,6 +255,14 @@ public abstract class AccessToken extends Token {
 		return scope;
 	}
 
+	/**
+	 * Returns the issued token type of this access token.
+	 *
+	 * @return The issued token type, {@code null} if not specified.
+	 */
+	public TokenTypeURI getIssuedTokenType() {
+		return issuedTokenType;
+	}
 
 	@Override
 	public Set<String> getParameterNames() {
@@ -223,6 +276,10 @@ public abstract class AccessToken extends Token {
 
 		if (getScope() != null)
 			paramNames.add("scope");
+
+		if (getIssuedTokenType() != null) {
+			paramNames.add("issued_token_type");
+		}
 
 		return paramNames;
 	}
@@ -241,6 +298,10 @@ public abstract class AccessToken extends Token {
 
 		if (getScope() != null)
 			o.put("scope", scope.toString());
+
+		if (getIssuedTokenType() != null) {
+			o.put("issued_token_type", getIssuedTokenType().getURI().toString());
+		}
 		
 		return o;
 	}

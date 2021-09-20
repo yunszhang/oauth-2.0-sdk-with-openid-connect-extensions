@@ -96,6 +96,8 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 	 */
 	private final Map<String,List<String>> customParams;
 
+	private static final Set<String> ALLOWED_REPEATED_PARAMS = new HashSet<>(Arrays.asList("resource", "audience"));
+
 
 	/**
 	 * Creates a new token request with the specified client
@@ -486,7 +488,7 @@ public class TokenRequest extends AbstractOptionallyIdentifiedRequest {
 		// No fragment! May use query component!
 		Map<String,List<String>> params = httpRequest.getQueryParameters();
 		
-		Set<String> repeatParams = MultivaluedMapUtils.getKeysWithMoreThanOneValue(params, Collections.singleton("resource"));
+		Set<String> repeatParams = MultivaluedMapUtils.getKeysWithMoreThanOneValue(params, ALLOWED_REPEATED_PARAMS);
 		if (! repeatParams.isEmpty()) {
 			String msg = "Parameter(s) present more than once: " + repeatParams;
 			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.setDescription(msg));

@@ -18,6 +18,7 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import com.nimbusds.oauth2.sdk.tokenexchange.TokenExchangeGrant;
 import java.util.List;
 import java.util.Map;
 
@@ -152,6 +153,10 @@ public abstract class AuthorizationGrant {
 		} else if (grantType.equals(GrantType.CIBA)) {
 
 			return CIBAGrant.parse(params);
+
+		} else if (grantType.equals(GrantType.TOKEN_EXCHANGE)) {
+
+			return TokenExchangeGrant.parse(params);
 
 		} else {
 

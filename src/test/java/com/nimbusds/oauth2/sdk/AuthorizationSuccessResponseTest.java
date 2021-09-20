@@ -57,7 +57,7 @@ public class AuthorizationSuccessResponseTest extends TestCase {
 	private static final AuthorizationCode CODE = new AuthorizationCode("SplxlOBeZQQYbYS6WxSbIA");
 
 
-	private static final AccessToken TOKEN = new BearerAccessToken("2YotnFZFEjr1zCsicMWpAA", 3600, null);
+	private static final AccessToken TOKEN = new BearerAccessToken("2YotnFZFEjr1zCsicMWpAA", 3600, null, null);
 
 
 	private static final State STATE = new State();

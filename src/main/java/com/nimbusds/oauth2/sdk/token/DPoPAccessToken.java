@@ -87,7 +87,22 @@ public class DPoPAccessToken extends AccessToken {
 	 */
 	public DPoPAccessToken(final String value, final long lifetime, final Scope scope) {
 	
-		super(AccessTokenType.DPOP, value, lifetime, scope);
+		this(value, lifetime, scope, null);
+	}
+
+	/**
+	 * Creates a new DPoP access token with the specified value and
+	 * optional lifetime and scope.
+	 *
+	 * @param value           The access token value. Must not be {@code null} or empty string.
+	 * @param lifetime        The lifetime in seconds, 0 if not specified.
+	 * @param scope           The scope, {@code null} if not specified.
+	 * @param issuedTokenType The issuedTokenType, {@code null} if not specified.
+	 */
+	public DPoPAccessToken(final String value, final long lifetime, final Scope scope,
+			final TokenTypeURI issuedTokenType) {
+
+		super(AccessTokenType.DPOP, value, lifetime, scope, issuedTokenType);
 	}
 	
 	
@@ -137,7 +152,8 @@ public class DPoPAccessToken extends AccessToken {
 		String accessTokenValue = AccessTokenUtils.parseValue(jsonObject);
 		long lifetime = AccessTokenUtils.parseLifetime(jsonObject);
 		Scope scope = AccessTokenUtils.parseScope(jsonObject);
-		return new DPoPAccessToken(accessTokenValue, lifetime, scope);
+		TokenTypeURI issuedTokenType = AccessTokenUtils.parseIssuedTokenType(jsonObject);
+		return new DPoPAccessToken(accessTokenValue, lifetime, scope, issuedTokenType);
 	}
 	
 	
