@@ -21,9 +21,6 @@ package com.nimbusds.oauth2.sdk;
 import junit.framework.TestCase;
 
 
-/**
- * Tests the grant type class.
- */
 public class GrantTypeTest extends TestCase {
 
 
@@ -38,6 +35,7 @@ public class GrantTypeTest extends TestCase {
 		assertEquals("urn:ietf:params:oauth:grant-type:saml2-bearer", GrantType.SAML2_BEARER.toString());
 		assertEquals("urn:ietf:params:oauth:grant-type:device_code", GrantType.DEVICE_CODE.toString());
 		assertEquals("urn:openid:params:grant-type:ciba", GrantType.CIBA.toString());
+		assertEquals("urn:ietf:params:oauth:grant-type:token-exchange", GrantType.TOKEN_EXCHANGE.toString());
 	}
 
 
@@ -52,6 +50,7 @@ public class GrantTypeTest extends TestCase {
 		assertFalse(GrantType.SAML2_BEARER.requiresClientAuthentication());
 		assertFalse(GrantType.DEVICE_CODE.requiresClientAuthentication());
 		assertTrue(GrantType.CIBA.requiresClientAuthentication());
+		assertFalse(GrantType.TOKEN_EXCHANGE.requiresClientAuthentication());
 	}
 
 
@@ -66,6 +65,7 @@ public class GrantTypeTest extends TestCase {
 		assertFalse(GrantType.SAML2_BEARER.requiresClientID());
 		assertTrue(GrantType.DEVICE_CODE.requiresClientID());
 		assertTrue(GrantType.CIBA.requiresClientID());
+		assertFalse(GrantType.TOKEN_EXCHANGE.requiresClientID());
 	}
 
 
@@ -95,6 +95,14 @@ public class GrantTypeTest extends TestCase {
 		
 		assertTrue(GrantType.CIBA.getRequestParameterNames().contains("auth_req_id"));
 		assertEquals(1, GrantType.DEVICE_CODE.getRequestParameterNames().size());
+		
+		assertTrue(GrantType.TOKEN_EXCHANGE.getRequestParameterNames().contains("audience"));
+		assertTrue(GrantType.TOKEN_EXCHANGE.getRequestParameterNames().contains("requested_token_type"));
+		assertTrue(GrantType.TOKEN_EXCHANGE.getRequestParameterNames().contains("subject_token"));
+		assertTrue(GrantType.TOKEN_EXCHANGE.getRequestParameterNames().contains("subject_token_type"));
+		assertTrue(GrantType.TOKEN_EXCHANGE.getRequestParameterNames().contains("actor_token"));
+		assertTrue(GrantType.TOKEN_EXCHANGE.getRequestParameterNames().contains("actor_token_type"));
+		assertEquals(6, GrantType.TOKEN_EXCHANGE.getRequestParameterNames().size());
 	}
 
 
@@ -119,6 +127,7 @@ public class GrantTypeTest extends TestCase {
 		assertEquals(GrantType.SAML2_BEARER, GrantType.parse(GrantType.SAML2_BEARER.getValue()));
 		assertEquals(GrantType.DEVICE_CODE, GrantType.parse(GrantType.DEVICE_CODE.getValue()));
 		assertEquals(GrantType.CIBA, GrantType.parse(GrantType.CIBA.getValue()));
+		assertEquals(GrantType.TOKEN_EXCHANGE, GrantType.parse(GrantType.TOKEN_EXCHANGE.getValue()));
 	}
 
 
