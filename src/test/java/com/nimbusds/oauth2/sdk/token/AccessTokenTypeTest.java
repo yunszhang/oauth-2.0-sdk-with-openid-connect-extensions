@@ -32,6 +32,7 @@ public class AccessTokenTypeTest extends TestCase {
 		assertEquals("DPoP", AccessTokenType.DPOP.getValue());
 		assertEquals("mac", AccessTokenType.MAC.getValue());
 		assertEquals("unknown", AccessTokenType.UNKNOWN.getValue());
+		assertEquals("N_A", AccessTokenType.N_A.getValue());
 	}
 
 

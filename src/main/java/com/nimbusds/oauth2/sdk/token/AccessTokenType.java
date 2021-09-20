@@ -59,7 +59,7 @@ public final class AccessTokenType extends Identifier {
 	public static final AccessTokenType UNKNOWN = new AccessTokenType("unknown");
 
 	/**
-	 * N_A, see OAuth 2.0 Token Exchange (RFC 8693).
+	 * Not applicable (N/A), see OAuth 2.0 Token Exchange (RFC 8693).
 	 */
 	public static final AccessTokenType N_A = new AccessTokenType("N_A");
 	
