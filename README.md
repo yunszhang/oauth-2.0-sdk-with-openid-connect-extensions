@@ -96,7 +96,7 @@ This SDK version implements the following standards and drafts:
 * The OAuth 2.0 Authorization Framework: JWT Secured Authorization Request 
   (JAR) (draft-ietf-oauth-jwsreq-29)
 
-* OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-06)
+* OAuth 2.0 Pushed Authorization Requests (RFC 9126)
 
 * OAuth 2.0 Authorization Server Issuer Identifier in Authorization Response 
   (draft-ietf-oauth-iss-auth-resp-00)

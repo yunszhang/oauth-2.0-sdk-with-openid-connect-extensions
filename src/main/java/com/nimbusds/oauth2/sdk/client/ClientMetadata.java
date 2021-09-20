@@ -75,7 +75,7 @@ import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistratio
  *         Access Tokens (RFC 8705), sections 2.1.2 and 3.4.
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM).
- *     <li>OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-05)
+ *     <li>OAuth 2.0 Pushed Authorization Requests (RFC 9126)
  *     <li>OpenID Connect Client Initiated Backchannel Authentication Flow -
  * 	   Core 1.0 (draft 03)
  *     <li>OpenID Connect Federation 1.0 (draft 13)

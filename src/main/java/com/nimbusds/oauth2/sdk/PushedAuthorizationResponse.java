@@ -27,7 +27,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-02)
+ *     <li>OAuth 2.0 Pushed Authorization Requests (RFC 9126)
  * </ul>
  */
 public abstract class PushedAuthorizationResponse implements Response {

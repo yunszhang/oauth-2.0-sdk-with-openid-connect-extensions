@@ -39,7 +39,7 @@ import com.nimbusds.oauth2.sdk.util.OrderedJSONObject;
  *     <li>OAuth 2.0 Authorization Server Metadata (RFC 8414)
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
  *         Access Tokens (RFC 8705)
- *     <li>OAuth 2.0 Pushed Authorization Requests (draft-ietf-oauth-par-05)
+ *     <li>OAuth 2.0 Pushed Authorization Requests (RFC 9126)
  *     <li>OAuth 2.0 Device Authorization Grant (RFC 8628)
  *     <li>OpenID Connect Client Initiated Backchannel Authentication Flow -
  * 	   Core 1.0 (draft 03)
