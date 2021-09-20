@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -94,11 +93,11 @@ public class DeviceCodeGrantTest extends TestCase {
 		params.put("device_code", Collections.singletonList("abc"));
 
 		try {
-			AuthorizationCodeGrant.parse(params);
+			DeviceCodeGrant.parse(params);
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.UNSUPPORTED_GRANT_TYPE.getCode(), e.getErrorObject().getCode());
-			assertEquals("Unsupported grant type: The grant_type must be authorization_code",
+			assertEquals("Unsupported grant type: The grant_type must be urn:ietf:params:oauth:grant-type:device_code",
 			                e.getErrorObject().getDescription());
 			assertNull(e.getErrorObject().getURI());
 		}
