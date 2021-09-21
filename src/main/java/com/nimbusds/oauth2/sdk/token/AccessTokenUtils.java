@@ -18,7 +18,6 @@
 package com.nimbusds.oauth2.sdk.token;
 
 
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -116,6 +115,7 @@ class AccessTokenUtils {
 		return Scope.parse(JSONObjectUtils.getString(params, "scope", null));
 	}
 
+	
 	/**
 	 * Parses a {@code issued_token_type} parameter.
 	 *
@@ -125,15 +125,17 @@ class AccessTokenUtils {
 	 *
 	 * @throws ParseException If parsing failed.
 	 */
-	static TokenTypeURI parseIssuedTokenType(final JSONObject params) throws ParseException {
+	static TokenTypeURI parseIssuedTokenType(final JSONObject params)
+		throws ParseException {
+		
 		String issuedTokenTypeString = JSONObjectUtils.getString(params, "issued_token_type", null);
 		if (issuedTokenTypeString == null) {
 			return null;
 		}
 		try {
 			return TokenTypeURI.parse(issuedTokenTypeString);
-		} catch (URISyntaxException uriSyntaxException) {
-			throw new ParseException("Invalid issued_token_type parameter, must be an URI");
+		} catch (ParseException e) {
+			throw new ParseException("Invalid issued_token_type parameter: " + e.getMessage());
 		}
 	}
 	

@@ -9,6 +9,8 @@ import java.util.Map;
 
 import net.jcip.annotations.Immutable;
 
+import com.nimbusds.oauth2.sdk.ParseException;
+
 
 /**
  * Token type URI. A URN used to identify the type of token in a token
@@ -100,21 +102,26 @@ public final class TokenTypeURI {
 	 *
 	 * @return The token type URI.
 	 *
-	 * @throws URISyntaxException If the URI value is illegal.
+	 * @throws ParseException If the token type URI value is illegal.
 	 */
 	public static TokenTypeURI parse(final String uriValue)
-		throws URISyntaxException {
+		throws ParseException {
 		
 		if (uriValue == null) {
 			throw new IllegalArgumentException("The URI value must not be null");
 		}
 		
-		if (KNOWN_TOKEN_TYPE_URIS.containsKey(uriValue)) {
-			return KNOWN_TOKEN_TYPE_URIS.get(uriValue);
+		TokenTypeURI knownURI = KNOWN_TOKEN_TYPE_URIS.get(uriValue);
+		
+		if (knownURI != null) {
+			return knownURI;
 		}
 		
-		URI uri = new URI(uriValue);
-		return new TokenTypeURI(uri);
+		try {
+			return new TokenTypeURI(new URI(uriValue));
+		} catch (URISyntaxException e) {
+			throw new ParseException("Illegal token type URI: " + uriValue);
+		}
 	}
 	
 	

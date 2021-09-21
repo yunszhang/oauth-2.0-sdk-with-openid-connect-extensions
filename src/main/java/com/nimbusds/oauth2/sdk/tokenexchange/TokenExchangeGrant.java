@@ -174,7 +174,7 @@ public class TokenExchangeGrant extends AuthorizationGrant {
 
     try {
       return TokenTypeURI.parse(tokenTypeString);
-    } catch (URISyntaxException uriSyntaxException) {
+    } catch (ParseException uriSyntaxException) {
       String msg = "Invalid " + key + " " + tokenTypeString;
       throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
     }

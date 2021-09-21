@@ -2,9 +2,10 @@ package com.nimbusds.oauth2.sdk.token;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import junit.framework.TestCase;
+
+import com.nimbusds.oauth2.sdk.ParseException;
 
 
 public class TokenTypeURITest extends TestCase {
@@ -20,7 +21,8 @@ public class TokenTypeURITest extends TestCase {
 	}
 	
 	
-	public void testParseKnownUri() throws URISyntaxException {
+	public void testParseKnownUri() throws ParseException {
+		
 		TokenTypeURI tokenTypeURI1 = TokenTypeURI.parse("urn:ietf:params:oauth:token-type:access_token");
 		TokenTypeURI tokenTypeURI2 = TokenTypeURI.parse("urn:ietf:params:oauth:token-type:access_token");
 		
@@ -29,7 +31,8 @@ public class TokenTypeURITest extends TestCase {
 	}
 	
 	
-	public void testParseUnknownUri() throws URISyntaxException {
+	public void testParseUnknownUri() throws ParseException {
+		
 		TokenTypeURI tokenTypeURI1 = TokenTypeURI.parse("urn:ietf:params:oauth:token-type:unknown_token");
 		TokenTypeURI tokenTypeURI2 = TokenTypeURI.parse("urn:ietf:params:oauth:token-type:unknown_token");
 		
@@ -45,6 +48,16 @@ public class TokenTypeURITest extends TestCase {
 		} catch (Exception e) {
 			assertTrue(e instanceof IllegalArgumentException);
 			assertEquals("The URI value must not be null", e.getMessage());
+		}
+	}
+	
+	
+	public void testParseIllegalUri() {
+		try {
+			TokenTypeURI.parse("a b");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Illegal token type URI: a b", e.getMessage());
 		}
 	}
 }

@@ -1,16 +1,19 @@
 package com.nimbusds.oauth2.sdk.tokenexchange;
 
-import com.nimbusds.oauth2.sdk.GrantType;
-import com.nimbusds.oauth2.sdk.OAuth2Error;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.token.TokenTypeURI;
-import com.nimbusds.oauth2.sdk.token.TypelessToken;
+
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import junit.framework.TestCase;
+
+import com.nimbusds.oauth2.sdk.GrantType;
+import com.nimbusds.oauth2.sdk.OAuth2Error;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.token.TokenTypeURI;
+import com.nimbusds.oauth2.sdk.token.TypelessToken;
 
 public class TokenExchangeGrantTest extends TestCase {
 
@@ -55,7 +58,7 @@ public class TokenExchangeGrantTest extends TestCase {
     assertEquals(actorTokenType, grant.getActorTokenType());
   }
 
-  public void testConstructorOfMissingMandatorySubjectToken() throws URISyntaxException {
+  public void testConstructorOfMissingMandatorySubjectToken() throws ParseException {
     List<String> audiences = Collections.singletonList("audience");
     TokenTypeURI requestedTokenType = TokenTypeURI.parse("requestedTokenType");
     TypelessToken actorToken = new TypelessToken("actorToken");
