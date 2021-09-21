@@ -19,7 +19,6 @@ package com.nimbusds.oauth2.sdk.ciba;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 
 import net.jcip.annotations.Immutable;
