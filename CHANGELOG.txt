@@ -1850,3 +1850,5 @@ version 9.16 (2021-09-21)
 
 version 9.16 (2021-09-21)
     * Adds minimal TokenExchangeGrant constructor.
+    * Updates TokenExchangeGrant constructors to accept general Token instead
+      of TypelessToken.

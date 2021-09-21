@@ -18,9 +18,6 @@
 package com.nimbusds.oauth2.sdk;
 
 
-import com.nimbusds.oauth2.sdk.token.TokenTypeURI;
-import com.nimbusds.oauth2.sdk.token.TypelessToken;
-import com.nimbusds.oauth2.sdk.tokenexchange.TokenExchangeGrant;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -49,7 +46,8 @@ import com.nimbusds.oauth2.sdk.ciba.CIBAGrant;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.*;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
-import com.nimbusds.oauth2.sdk.token.RefreshToken;
+import com.nimbusds.oauth2.sdk.token.*;
+import com.nimbusds.oauth2.sdk.tokenexchange.TokenExchangeGrant;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 
@@ -1850,6 +1848,38 @@ public class TokenRequestTest extends TestCase {
 		assertEquals("urn:ietf:params:oauth:token-type:access_token", tokenExchangeGrant.getSubjectTokenType().getURI().toString());
 		assertNull(tokenExchangeGrant.getActorToken());
 		assertNull(tokenExchangeGrant.getActorTokenType());
+	}
+	
+	
+	public void testTokenExchangeDocExample() throws Exception {
+	
+		// The client credentials for a basic authentication
+		ClientID clientID = new ClientID("rs08");
+		Secret clientSecret = new Secret("eij8teegie3aequuQu9quahp7Vea7ohf");
+		ClientSecretBasic clientSecretBasic = new ClientSecretBasic(clientID, clientSecret);
+		
+		// The upstream access token (must be validated)
+		AccessToken accessToken = new BearerAccessToken("accVkjcJyb4BWCxGsndESCJQbdFMogUC5PbRDqceLTC");
+		
+		// Compose the token exchange request
+		List<URI> resources = Collections.singletonList(new URI("https://backend.example.com/api"));
+		Scope scope = null; // default scope for resource
+		
+		TokenRequest tokenRequest = new TokenRequest(
+			new URI("https://as.example.com"),
+			clientSecretBasic,
+			new TokenExchangeGrant(
+				accessToken,
+				TokenTypeURI.ACCESS_TOKEN
+			),
+			scope,
+			resources,
+			null
+		);
+		
+		// Send the token request
+		HTTPRequest httpRequest = tokenRequest.toHTTPRequest();
+		// HTTPResponse httpResponse = httpRequest.send();
 	}
 	
 

@@ -41,7 +41,7 @@ public class TokenExchangeGrant extends AuthorizationGrant {
 	 * The subject token representing the identity of the party on behalf
 	 * of whom the request is being made.
 	 */
-	private final TypelessToken subjectToken;
+	private final Token subjectToken;
 	
 	
 	/**
@@ -53,7 +53,7 @@ public class TokenExchangeGrant extends AuthorizationGrant {
 	/**
 	 * Optional token representing the identity of the acting party.
 	 */
-	private final TypelessToken actorToken;
+	private final Token actorToken;
 	
 	
 	/**
@@ -83,7 +83,7 @@ public class TokenExchangeGrant extends AuthorizationGrant {
 	 * @param subjectTokenType Identifier for the type of the subject
 	 *                         token. Must not be {@code null}.
 	 */
-	public TokenExchangeGrant(final TypelessToken subjectToken,
+	public TokenExchangeGrant(final Token subjectToken,
 				  final TokenTypeURI subjectTokenType) {
 		
 		this(subjectToken, subjectTokenType, null, null, null, null);
@@ -111,9 +111,9 @@ public class TokenExchangeGrant extends AuthorizationGrant {
 	 *                           security token, {@code null} if not
 	 *                           specified.
 	 */
-	public TokenExchangeGrant(final TypelessToken subjectToken,
+	public TokenExchangeGrant(final Token subjectToken,
 				  final TokenTypeURI subjectTokenType,
-				  final TypelessToken actorToken,
+				  final Token actorToken,
 				  final TokenTypeURI actorTokenType,
 				  final TokenTypeURI requestedTokenType,
 				  final List<Audience> audience) {
