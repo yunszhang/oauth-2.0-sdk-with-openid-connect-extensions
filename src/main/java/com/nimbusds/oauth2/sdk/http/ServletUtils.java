@@ -79,10 +79,21 @@ public class ServletUtils {
 			// IPv3 address
 			sb.append(localAddress);
 		} else if (localAddress.contains(":")) {
+			
 			// IPv6 address, see RFC 2732
-			sb.append('[');
+			
+			// Handle non-compliant "Jetty" formatting of IPv6 address:
+			// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/376/
+			
+			if (! localAddress.startsWith("[")) {
+				sb.append('[');
+			}
+			
 			sb.append(localAddress);
-			sb.append(']');
+			
+			if (! localAddress.endsWith("]")) {
+				sb.append(']');
+			}
 		}
 
 		if (! request.isSecure() && request.getLocalPort() != 80) {

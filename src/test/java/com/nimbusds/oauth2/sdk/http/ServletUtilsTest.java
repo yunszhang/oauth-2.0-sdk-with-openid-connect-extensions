@@ -37,7 +37,7 @@ import com.nimbusds.oauth2.sdk.util.X509CertificateUtilsTest;
 
 
 /**
- * Tests the HTTP to / from servet request / response.
+ * Tests the HTTP to / from servlet request / response.
  */
 public class ServletUtilsTest extends TestCase {
 
@@ -78,7 +78,7 @@ public class ServletUtilsTest extends TestCase {
 		servletRequest.setHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
 		servletRequest.setHeader("Multivalued-Header", "A", "B", "C");
 		servletRequest.setLocalAddr("c2id.com");
-		servletRequest.setLocalPort(8080);
+		servletRequest.setLocalPort(80);
 		servletRequest.setRequestURI("/clients");
 		servletRequest.setQueryString(null);
 		String entityBody = "{\"grant_types\":[\"code\"]}";
@@ -86,6 +86,7 @@ public class ServletUtilsTest extends TestCase {
 
 		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(servletRequest);
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
+		assertEquals("http://c2id.com/clients", httpRequest.getURI().toString());
 		assertEquals(ContentType.APPLICATION_JSON.toString(), httpRequest.getEntityContentType().toString());
 		assertNull(httpRequest.getAccept());
 		assertNull(httpRequest.getAuthorization());
@@ -111,11 +112,35 @@ public class ServletUtilsTest extends TestCase {
 
 		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(servletRequest);
 		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
+		assertEquals("http://c2id.com:8080/", httpRequest.getURI().toString());
 		assertNull(httpRequest.getEntityContentType());
 		assertNull(httpRequest.getAccept());
 		assertNull(httpRequest.getAuthorization());
 		assertNull(httpRequest.getQuery());
 		assertEquals("192.168.0.1", httpRequest.getClientIPAddress());
+	}
+
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/376/servletutilscreatehttprequest-issue-with
+	public void testConstructFromServletRequestWithJettyStyleIPv6AddressFormatting()
+		throws Exception {
+		
+		String localIPv6Address = "FE80:0000:0000:0000:0202:B3FF:FE1E:8329";
+
+		MockServletRequest servletRequest = new MockServletRequest();
+		servletRequest.setMethod("GET");
+		servletRequest.setLocalAddr("[" + localIPv6Address + "]");
+		servletRequest.setLocalPort(8080);
+		servletRequest.setRequestURI("/");
+		servletRequest.setQueryString(null);
+
+		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(servletRequest);
+		assertEquals(HTTPRequest.Method.GET, httpRequest.getMethod());
+		assertEquals("http://[" + localIPv6Address + "]:8080/", httpRequest.getURI().toString());
+		assertNull(httpRequest.getEntityContentType());
+		assertNull(httpRequest.getAccept());
+		assertNull(httpRequest.getAuthorization());
+		assertNull(httpRequest.getQuery());
 	}
 
 
