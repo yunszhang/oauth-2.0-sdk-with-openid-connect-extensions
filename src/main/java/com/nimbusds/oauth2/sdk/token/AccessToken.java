@@ -356,8 +356,10 @@ public abstract class AccessToken extends Token {
 		
 		if (AccessTokenType.BEARER.equals(tokenType)) {
 			return BearerAccessToken.parse(jsonObject);
-		} else if (AccessTokenType.DPOP.equals(tokenType)){
+		} else if (AccessTokenType.DPOP.equals(tokenType)) {
 			return DPoPAccessToken.parse(jsonObject);
+		} else if (AccessTokenType.N_A.equals(tokenType)) {
+			return NAAccessToken.parse(jsonObject);
 		} else {
 			throw new ParseException("Unsupported token_type: " + tokenType);
 		}

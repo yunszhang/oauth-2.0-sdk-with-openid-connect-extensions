@@ -135,6 +135,49 @@ public class AccessTokenResponseTest extends TestCase {
 	}
 
 
+	public void testTokenExchange_withTokenTypeNotApplicable()
+		throws ParseException {
+		
+		String tokenValue = "paip0cotheCh0Quahshaithoono1fie4";
+		NAAccessToken naToken = new NAAccessToken(tokenValue, 0L, null, TokenTypeURI.JWT);
+		
+		assertEquals(AccessTokenType.N_A, naToken.getType());
+		assertEquals(tokenValue, naToken.getValue());
+		assertEquals(TokenTypeURI.JWT, naToken.getIssuedTokenType());
+		
+		Tokens tokens = new Tokens(naToken, null);
+
+		AccessTokenResponse response = new AccessTokenResponse(tokens, null);
+
+		assertTrue(response.indicatesSuccess());
+		assertEquals(tokens.getAccessToken(), response.getTokens().getAccessToken());
+		assertNull(response.getTokens().getBearerAccessToken());
+		assertNull(response.getTokens().getDPoPAccessToken());
+		assertNull(response.getTokens().getRefreshToken());
+		assertTrue(response.getCustomParameters().isEmpty());
+		assertTrue(response.getCustomParams().isEmpty());
+
+		HTTPResponse httpResponse = response.toHTTPResponse();
+		
+		JSONObject jsonObject = httpResponse.getContentAsJSONObject();
+		assertEquals(naToken.getType().getValue(), jsonObject.get("token_type"));
+		assertEquals(naToken.getValue(), jsonObject.get("access_token"));
+		assertEquals(naToken.getIssuedTokenType().toString(), jsonObject.get("issued_token_type"));
+		assertEquals(3, jsonObject.size());
+		
+		response = AccessTokenResponse.parse(httpResponse);
+
+		assertTrue(response.indicatesSuccess());
+		assertEquals(tokens.getAccessToken().getValue(), response.getTokens().getAccessToken().getValue());
+		assertEquals(naToken.getLifetime(), response.getTokens().getAccessToken().getLifetime());
+		assertEquals(naToken.getScope(), response.getTokens().getAccessToken().getScope());
+		assertEquals(naToken.getIssuedTokenType(), response.getTokens().getAccessToken().getIssuedTokenType());
+		assertNull(response.getTokens().getRefreshToken());
+		assertTrue(response.getCustomParameters().isEmpty());
+		assertTrue(response.getCustomParams().isEmpty());
+	}
+
+
 	public void testConstructorWithCustomParams()
 		throws ParseException {
 

@@ -1849,6 +1849,10 @@ version 9.16 (2021-09-21)
     * Updates to com.nimbusds:nimbus-jose-jwt:9.14
 
 version 9.17 (2021-09-21)
+    * New NAAccessToken class for representing access tokens of type N_A for
+      use in token exchange scenarios.
+    * Updates AccessToken.parse(JSONObject) to support access tokens of type
+      N_A used in token exchange scenarios.
     * Adds minimal TokenExchangeGrant constructor.
     * Updates TokenExchangeGrant constructors to accept general Token instead
       of TypelessToken.
