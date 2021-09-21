@@ -18,7 +18,6 @@
 package com.nimbusds.oauth2.sdk;
 
 
-import com.nimbusds.oauth2.sdk.token.TokenTypeURI;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -29,10 +28,7 @@ import net.minidev.json.JSONObject;
 
 import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.oauth2.sdk.token.AccessToken;
-import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
-import com.nimbusds.oauth2.sdk.token.RefreshToken;
-import com.nimbusds.oauth2.sdk.token.Tokens;
+import com.nimbusds.oauth2.sdk.token.*;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
 
@@ -87,6 +83,52 @@ public class AccessTokenResponseTest extends TestCase {
 		assertTrue(response.indicatesSuccess());
 		assertEquals(tokens.getAccessToken(), response.getTokens().getAccessToken());
 		assertEquals(tokens.getAccessToken(), response.getTokens().getBearerAccessToken());
+		assertNull(response.getTokens().getRefreshToken());
+		assertTrue(response.getCustomParameters().isEmpty());
+		assertTrue(response.getCustomParams().isEmpty());
+	}
+
+
+	public void testConstructorForTokenExchange()
+		throws ParseException {
+
+		BearerAccessToken accessToken = new BearerAccessToken(
+			"paip0cotheCh0Quahshaithoono1fie4",
+			60,
+			new Scope("read", "write"),
+			TokenTypeURI.ACCESS_TOKEN
+		);
+		
+		Tokens tokens = new Tokens(accessToken, null);
+
+		AccessTokenResponse response = new AccessTokenResponse(tokens, null);
+
+		assertTrue(response.indicatesSuccess());
+		assertEquals(tokens.getAccessToken(), response.getTokens().getAccessToken());
+		assertEquals(tokens.getAccessToken(), response.getTokens().getBearerAccessToken());
+		assertNull(response.getTokens().getRefreshToken());
+		assertTrue(response.getCustomParameters().isEmpty());
+		assertTrue(response.getCustomParams().isEmpty());
+
+		HTTPResponse httpResponse = response.toHTTPResponse();
+		
+		JSONObject jsonObject = httpResponse.getContentAsJSONObject();
+		assertEquals(accessToken.getType().getValue(), jsonObject.get("token_type"));
+		assertEquals(accessToken.getValue(), jsonObject.get("access_token"));
+		assertEquals(accessToken.getLifetime(), jsonObject.get("expires_in"));
+		assertEquals(accessToken.getScope().toString(), jsonObject.get("scope"));
+		assertEquals(accessToken.getIssuedTokenType().toString(), jsonObject.get("issued_token_type"));
+		assertEquals(5, jsonObject.size());
+		
+		response = AccessTokenResponse.parse(httpResponse);
+
+		assertTrue(response.indicatesSuccess());
+		assertEquals(tokens.getAccessToken(), response.getTokens().getAccessToken());
+		assertEquals(accessToken.getLifetime(), response.getTokens().getAccessToken().getLifetime());
+		assertEquals(accessToken.getScope(), response.getTokens().getAccessToken().getScope());
+		assertEquals(accessToken.getIssuedTokenType(), response.getTokens().getAccessToken().getIssuedTokenType());
+		assertEquals(tokens.getAccessToken(), response.getTokens().getBearerAccessToken());
+		assertEquals(accessToken.getValue(), response.getTokens().getAccessToken().getValue());
 		assertNull(response.getTokens().getRefreshToken());
 		assertTrue(response.getCustomParameters().isEmpty());
 		assertTrue(response.getCustomParams().isEmpty());
