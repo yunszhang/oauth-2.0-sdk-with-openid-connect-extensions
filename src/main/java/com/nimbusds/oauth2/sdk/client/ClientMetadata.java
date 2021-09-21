@@ -400,7 +400,6 @@ public class ClientMetadata {
 		logoURIEntries = new HashMap<>();
 		uriEntries = new HashMap<>();
 		policyURIEntries = new HashMap<>();
-		policyURIEntries = new HashMap<>();
 		tosURIEntries = new HashMap<>();
 		customFields = new JSONObject();
 	}
