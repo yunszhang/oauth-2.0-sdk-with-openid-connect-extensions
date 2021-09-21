@@ -1848,7 +1848,7 @@ version 9.16 (2021-09-21)
       in Jetty for HttpServletRequest.getLocalAddr (iss #376).
     * Updates to com.nimbusds:nimbus-jose-jwt:9.14
 
-version 9.16 (2021-09-21)
+version 9.17 (2021-09-21)
     * Adds minimal TokenExchangeGrant constructor.
     * Updates TokenExchangeGrant constructors to accept general Token instead
       of TypelessToken.

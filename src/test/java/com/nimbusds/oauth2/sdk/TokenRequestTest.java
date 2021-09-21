@@ -44,6 +44,7 @@ import com.nimbusds.oauth2.sdk.auth.*;
 import com.nimbusds.oauth2.sdk.ciba.AuthRequestID;
 import com.nimbusds.oauth2.sdk.ciba.CIBAGrant;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.*;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.token.*;
@@ -1851,35 +1852,58 @@ public class TokenRequestTest extends TestCase {
 	}
 	
 	
-	public void testTokenExchangeDocExample() throws Exception {
+	public void _testTokenExchangeDocExample() throws Exception {
 	
 		// The client credentials for a basic authentication
 		ClientID clientID = new ClientID("rs08");
 		Secret clientSecret = new Secret("eij8teegie3aequuQu9quahp7Vea7ohf");
 		ClientSecretBasic clientSecretBasic = new ClientSecretBasic(clientID, clientSecret);
 		
-		// The upstream access token (must be validated)
+		// The upstream access token (must have been validated)
 		AccessToken accessToken = new BearerAccessToken("accVkjcJyb4BWCxGsndESCJQbdFMogUC5PbRDqceLTC");
 		
 		// Compose the token exchange request
+		URI tokenEndpoint = new URI("https://as.example.com/as/token.oauth2");
 		List<URI> resources = Collections.singletonList(new URI("https://backend.example.com/api"));
 		Scope scope = null; // default scope for resource
 		
 		TokenRequest tokenRequest = new TokenRequest(
-			new URI("https://as.example.com"),
+			tokenEndpoint,
 			clientSecretBasic,
 			new TokenExchangeGrant(
 				accessToken,
-				TokenTypeURI.ACCESS_TOKEN
-			),
+				TokenTypeURI.ACCESS_TOKEN),
 			scope,
 			resources,
-			null
-		);
+			null);
 		
 		// Send the token request
 		HTTPRequest httpRequest = tokenRequest.toHTTPRequest();
-		// HTTPResponse httpResponse = httpRequest.send();
+		HTTPResponse httpResponse = httpRequest.send();
+		
+		// Parse the token response
+		TokenResponse tokenResponse = TokenResponse.parse(httpResponse);
+		
+		if (! tokenResponse.indicatesSuccess()) {
+			// The token request failed
+			ErrorObject errorObject = tokenResponse.toErrorResponse().getErrorObject();
+			System.out.println(errorObject.getHTTPStatusCode());
+			return;
+		}
+		
+		AccessTokenResponse tokenSuccessResponse = tokenResponse.toSuccessResponse();
+		
+		// Expecting access token of type Bearer
+		AccessToken downstreamToken = tokenSuccessResponse.getTokens().getAccessToken();
+		
+		if (! AccessTokenType.BEARER.equals(downstreamToken.getType()) &&
+		    ! TokenTypeURI.ACCESS_TOKEN.equals(downstreamToken.getIssuedTokenType())) {
+			// Unexpected token type
+			System.out.println("Received unexpected token:" + downstreamToken.getIssuedTokenType());
+			return;
+		}
+		
+		// Use the downstream token...
 	}
 	
 
