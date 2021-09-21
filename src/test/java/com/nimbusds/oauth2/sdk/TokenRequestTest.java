@@ -18,6 +18,8 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import com.nimbusds.oauth2.sdk.token.TokenTypeURI;
+import com.nimbusds.oauth2.sdk.token.TypelessToken;
 import com.nimbusds.oauth2.sdk.tokenexchange.TokenExchangeGrant;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -1732,7 +1734,64 @@ public class TokenRequestTest extends TestCase {
 			}
 		}
 	}
+	
+	
+	public void testBasicTokenExchange()
+		throws URISyntaxException, MalformedURLException, ParseException {
+		
+		URI endpoint = new URI("https://c2id.com/token");
+		
+		ClientID clientID = new ClientID("123");
+		Secret clientSecret = new Secret("eef7cheemooPhohp2aihaesah7ohzais");
+		ClientSecretBasic basicAuth = new ClientSecretBasic(clientID, clientSecret);
+		
+		TypelessToken subjectToken = new TypelessToken("aexo7OMaiphivoot");
+		TokenTypeURI subjectTokenType = TokenTypeURI.ACCESS_TOKEN;
+		AuthorizationGrant grant = new TokenExchangeGrant(
+			subjectToken,
+			subjectTokenType,
+			null,
+			null,
+			null,
+			null
+		);
+		
+		Scope scope = new Scope("read", "write");
+		
+		TokenRequest tokenRequest = new TokenRequest(endpoint, basicAuth, grant, scope);
+		
+		assertEquals(endpoint, tokenRequest.getEndpointURI());
+		assertEquals(basicAuth, tokenRequest.getClientAuthentication());
+		assertEquals(grant, tokenRequest.getAuthorizationGrant());
+		assertEquals(scope, tokenRequest.getScope());
+		
+		HTTPRequest httpRequest = tokenRequest.toHTTPRequest();
+		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
+		assertEquals(endpoint.toURL(), httpRequest.getURL());
+		assertEquals(basicAuth.toHTTPAuthorizationHeader(), httpRequest.getAuthorization());
+		assertEquals(ContentType.APPLICATION_URLENCODED, httpRequest.getEntityContentType());
+		
+		Map<String,List<String>> params = httpRequest.getQueryParameters();
+		assertEquals(Collections.singletonList(GrantType.TOKEN_EXCHANGE.getValue()), params.get("grant_type"));
+		assertEquals(Collections.singletonList(subjectToken.getValue()), params.get("subject_token"));
+		assertEquals(Collections.singletonList(subjectTokenType.toString()), params.get("subject_token_type"));
+		assertEquals(Collections.singletonList(scope.toString()), params.get("scope"));
+		assertEquals(4, params.size());
+		
+		tokenRequest = TokenRequest.parse(httpRequest);
+		
+		assertEquals(endpoint, tokenRequest.getEndpointURI());
+		assertEquals(basicAuth.getClientID(), tokenRequest.getClientAuthentication().getClientID());
+		assertEquals(basicAuth.getClientSecret(), ((ClientSecretBasic)tokenRequest.getClientAuthentication()).getClientSecret());
+		assertTrue(tokenRequest.getAuthorizationGrant() instanceof TokenExchangeGrant);
+		TokenExchangeGrant parsedGrant = (TokenExchangeGrant)tokenRequest.getAuthorizationGrant();
+		assertEquals(subjectToken, parsedGrant.getSubjectToken());
+		assertEquals(subjectTokenType, parsedGrant.getSubjectTokenType());
+		assertEquals(grant.toParameters(), parsedGrant.toParameters());
+		assertEquals(scope, tokenRequest.getScope());
+	}
 
+	
 	public void testParseTokenExchangeExample() throws MalformedURLException, ParseException {
 
 		URL endpoint = new URL("https://server.example.com/token");
@@ -1764,6 +1823,7 @@ public class TokenRequestTest extends TestCase {
 		assertNull(tokenExchangeGrant.getActorToken());
 		assertNull(tokenExchangeGrant.getActorTokenType());
 	}
+	
 
 	public void testParseTokenExchangeWithMultipleAudience()
 			throws MalformedURLException, ParseException, URISyntaxException {
@@ -1790,5 +1850,27 @@ public class TokenRequestTest extends TestCase {
 		assertEquals("urn:ietf:params:oauth:token-type:access_token", tokenExchangeGrant.getSubjectTokenType().getURI().toString());
 		assertNull(tokenExchangeGrant.getActorToken());
 		assertNull(tokenExchangeGrant.getActorTokenType());
+	}
+	
+
+	public void testParseTokenExchange_missingSubjectToken()
+			throws MalformedURLException {
+
+		URL endpoint = new URL("https://server.example.com/token");
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, endpoint);
+		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
+		httpRequest.setQuery(
+			"grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&" +
+			"subject_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Aaccess_token"
+		);
+
+		try{
+			TokenRequest.parse(httpRequest);
+			fail();
+		} catch (ParseException e) {
+			assertEquals(400, e.getErrorObject().getHTTPStatusCode());
+			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals("Invalid request: Missing or empty subject_token parameter", e.getErrorObject().getDescription());
+		}
 	}
 }
