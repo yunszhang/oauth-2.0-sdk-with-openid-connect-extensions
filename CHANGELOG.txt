@@ -1844,3 +1844,4 @@ version 9.16 (2021-09-21)
     * Adds support for OAuth 2.0 Token Exchange (RFC 8693).
     * Adds missing serialVersionUID fields where required by the class
       contract.
+    * Updates to com.nimbusds:nimbus-jose-jwt:9.14
