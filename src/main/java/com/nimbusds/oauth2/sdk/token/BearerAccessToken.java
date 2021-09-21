@@ -54,6 +54,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
  * <ul>
  *     <li>OAuth 2.0 (RFC 6749), sections 1.4 and 5.1.
  *     <li>OAuth 2.0 Bearer Token Usage (RFC 6750).
+ *     <li>OAuth 2.0 Token Exchange (RFC 8693), section 3.
  * </ul>
  */
 @Immutable
@@ -65,8 +66,8 @@ public class BearerAccessToken extends AccessToken {
 	
 	/**
 	 * Creates a new minimal bearer access token with a randomly generated 
-	 * 256-bit (32-byte) value, Base64URL-encoded. The optional lifetime 
-	 * and scope are left undefined.
+	 * 256-bit (32-byte) value, Base64URL-encoded. The optional lifetime,
+	 * scope and token type URI are left unspecified.
 	 */
 	public BearerAccessToken() {
 	
@@ -77,7 +78,7 @@ public class BearerAccessToken extends AccessToken {
 	/**
 	 * Creates a new minimal bearer access token with a randomly generated 
 	 * value of the specified byte length, Base64URL-encoded. The optional 
-	 * lifetime and scope are left undefined.
+	 * lifetime, scope and token type URI are left unspecified.
 	 *
 	 * @param byteLength The byte length of the value to generate. Must be
 	 *                   greater than one.
@@ -90,7 +91,8 @@ public class BearerAccessToken extends AccessToken {
 
 	/**
 	 * Creates a new bearer access token with a randomly generated 256-bit 
-	 * (32-byte) value, Base64URL-encoded.
+	 * (32-byte) value, Base64URL-encoded. The optional token type URI is
+	 * left unspecified.
 	 *
 	 * @param lifetime The lifetime in seconds, 0 if not specified.
 	 * @param scope    The scope, {@code null} if not specified.
@@ -103,7 +105,8 @@ public class BearerAccessToken extends AccessToken {
 
 	/**
 	 * Creates a new bearer access token with a randomly generated value of 
-	 * the specified byte length, Base64URL-encoded.
+	 * the specified byte length, Base64URL-encoded. The optional token
+	 * type URI is left unspecified.
 	 *
 	 * @param byteLength The byte length of the value to generate. Must be
 	 *                   greater than one.
@@ -118,7 +121,8 @@ public class BearerAccessToken extends AccessToken {
 	
 	/**
 	 * Creates a new minimal bearer access token with the specified value.
-	 * The optional lifetime and scope are left undefined.
+	 * The optional lifetime, scope and token type URI are left
+	 * unspecified.
 	 *
 	 * @param value The access token value. Must not be {@code null} or
 	 *              empty string.
@@ -128,9 +132,10 @@ public class BearerAccessToken extends AccessToken {
 		this(value, 0L, null, null);
 	}
 
+	
 	/**
-	 * Creates a new bearer access token with the specified value and
-	 * optional lifetime and scope.
+	 * Creates a new bearer access token with the specified value. The
+	 * token type URI is left unspecified.
 	 *
 	 * @param value    The access token value. Must not be {@code null} or
 	 *                 empty string.
@@ -144,16 +149,16 @@ public class BearerAccessToken extends AccessToken {
 	
 	
 	/**
-	 * Creates a new bearer access token with the specified value and 
-	 * optional lifetime and scope.
+	 * Creates a new bearer access token with the specified value.
 	 *
-	 * @param value    The access token value. Must not be {@code null} or
-	 *                 empty string.
-	 * @param lifetime The lifetime in seconds, 0 if not specified.
-	 * @param scope    The scope, {@code null} if not specified.
-	 * @param issuedTokenType The issued token type, {@code null} if not specified.
+	 * @param value           The access token value. Must not be
+	 *                        {@code null} or empty string.
+	 * @param lifetime        The lifetime in seconds, 0 if not specified.
+	 * @param scope           The scope, {@code null} if not specified.
+	 * @param issuedTokenType The token type URI, {@code null} if not
+	 *                        specified.
 	 */
-	public BearerAccessToken(final String value, final long lifetime, final Scope scope, TokenTypeURI issuedTokenType) {
+	public BearerAccessToken(final String value, final long lifetime, final Scope scope, final TokenTypeURI issuedTokenType) {
 	
 		super(AccessTokenType.BEARER, value, lifetime, scope, issuedTokenType);
 	}

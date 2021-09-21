@@ -52,8 +52,10 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
  * <p>Related specifications:
  *
  * <ul>
+ *     <li>OAuth 2.0 (RFC 6749), sections 1.4 and 5.1.
  *     <li>OAuth 2.0 Demonstrating Proof-of-Possession at the Application Layer
  *         (DPoP) (draft-ietf-oauth-dpop-03)
+ *     <li>OAuth 2.0 Token Exchange (RFC 8693), section 3.
  * </ul>
  */
 @Immutable
@@ -65,7 +67,8 @@ public class DPoPAccessToken extends AccessToken {
 	
 	/**
 	 * Creates a new minimal DPoP access token with the specified value.
-	 * The optional lifetime and scope are left undefined.
+	 * The optional lifetime, scope and token type URI are left
+	 * unspecified.
 	 *
 	 * @param value The access token value. Must not be {@code null} or
 	 *              empty string.
@@ -77,8 +80,8 @@ public class DPoPAccessToken extends AccessToken {
 	
 	
 	/**
-	 * Creates a new DPoP access token with the specified value and
-	 * optional lifetime and scope.
+	 * Creates a new DPoP access token with the specified value. The
+	 * optional token type URI is left unspecified.
 	 *
 	 * @param value    The access token value. Must not be {@code null} or
 	 *                 empty string.
@@ -91,16 +94,16 @@ public class DPoPAccessToken extends AccessToken {
 	}
 
 	/**
-	 * Creates a new DPoP access token with the specified value and
-	 * optional lifetime and scope.
+	 * Creates a new DPoP access token with the specified value.
 	 *
-	 * @param value           The access token value. Must not be {@code null} or empty string.
+	 * @param value           The access token value. Must not be
+	 *                        {@code null} or empty string.
 	 * @param lifetime        The lifetime in seconds, 0 if not specified.
 	 * @param scope           The scope, {@code null} if not specified.
-	 * @param issuedTokenType The issuedTokenType, {@code null} if not specified.
+	 * @param issuedTokenType The token type URI, {@code null} if not
+	 *                        specified.
 	 */
-	public DPoPAccessToken(final String value, final long lifetime, final Scope scope,
-			final TokenTypeURI issuedTokenType) {
+	public DPoPAccessToken(final String value, final long lifetime, final Scope scope, final TokenTypeURI issuedTokenType) {
 
 		super(AccessTokenType.DPOP, value, lifetime, scope, issuedTokenType);
 	}
