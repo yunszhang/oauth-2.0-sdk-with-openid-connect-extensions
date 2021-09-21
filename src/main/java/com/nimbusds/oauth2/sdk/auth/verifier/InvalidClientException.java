@@ -29,56 +29,59 @@ import com.nimbusds.oauth2.sdk.OAuth2Error;
  */
 public class InvalidClientException extends GeneralException {
 	
-
+	
+	private static final long serialVersionUID = 6966319043404932893L;
+	
+	
 	/**
 	 * Bad {@code client_id}.
 	 */
 	public static final InvalidClientException BAD_ID = new InvalidClientException("Bad client ID");
-
-
+	
+	
 	/**
 	 * The client is not registered for the requested authentication
 	 * method.
 	 */
 	public static final InvalidClientException NOT_REGISTERED_FOR_AUTH_METHOD = new InvalidClientException("The client is not registered for the requested authentication method");
-
-
+	
+	
 	/**
 	 * The client has no registered {@code client_secret}.
 	 */
 	public static final InvalidClientException NO_REGISTERED_SECRET = new InvalidClientException("The client has no registered secret");
-
-
+	
+	
 	/**
 	 * The client has no registered JWK set.
 	 */
 	public static final InvalidClientException NO_REGISTERED_JWK_SET = new InvalidClientException("The client has no registered JWK set");
-
-
+	
+	
 	/**
 	 * Expired {@code client_secret}.
 	 */
 	public static final InvalidClientException EXPIRED_SECRET = new InvalidClientException("Expired client secret");
-
-
+	
+	
 	/**
 	 * Bad {@code client_secret}.
 	 */
 	public static final InvalidClientException BAD_SECRET = new InvalidClientException("Bad client secret");
-
-
+	
+	
 	/**
 	 * Bad JWT HMAC.
 	 */
 	public static final InvalidClientException BAD_JWT_HMAC = new InvalidClientException("Bad JWT HMAC");
-
-
+	
+	
 	/**
 	 * No matching public JWKs for JWT signature verification found.
 	 */
 	public static final InvalidClientException NO_MATCHING_JWK = new InvalidClientException("No matching JWKs found");
-
-
+	
+	
 	/**
 	 * Bad JWT signature.
 	 */
@@ -89,8 +92,8 @@ public class InvalidClientException extends GeneralException {
 	 * Bad self-signed client X.509 certificate.
 	 */
 	public static final InvalidClientException BAD_SELF_SIGNED_CLIENT_CERTIFICATE = new InvalidClientException("Couldn't validate client X.509 certificate signature: No matching registered client JWK found");
-
-
+	
+	
 	/**
 	 * Creates a new invalid client exception.
 	 *

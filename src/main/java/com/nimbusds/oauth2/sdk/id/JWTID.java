@@ -26,8 +26,11 @@ import net.jcip.annotations.Immutable;
  */
 @Immutable
 public final class JWTID extends Identifier {
-
-
+	
+	
+	private static final long serialVersionUID = 6958512198352608856L;
+	
+	
 	/**
 	 * Creates a new JWT identifier with the specified value.
 	 *

@@ -35,7 +35,10 @@ import net.jcip.annotations.Immutable;
  */
 @Immutable
 public class TypelessAccessToken extends AccessToken {
-
+	
+	
+	private static final long serialVersionUID = 2520352130331160789L;
+	
 	
 	/**
 	 * Creates a new minimal typeless access token with the specified 

@@ -42,8 +42,11 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  */
 @Immutable
 public final class AuthorizedParty extends Identifier {
-
-
+	
+	
+	private static final long serialVersionUID = 3112051874363693975L;
+	
+	
 	/**
 	 * Creates a new authorised party identifier with the specified value.
 	 *

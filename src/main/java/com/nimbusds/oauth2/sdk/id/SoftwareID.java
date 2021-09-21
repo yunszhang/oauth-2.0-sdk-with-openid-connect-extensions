@@ -35,8 +35,11 @@ import net.jcip.annotations.Immutable;
  */
 @Immutable
 public final class SoftwareID extends Identifier {
-
-
+	
+	
+	private static final long serialVersionUID = -5570812158568461305L;
+	
+	
 	/**
 	 * Creates a new OAuth 2.0 client software identifier with the
 	 * specified value.

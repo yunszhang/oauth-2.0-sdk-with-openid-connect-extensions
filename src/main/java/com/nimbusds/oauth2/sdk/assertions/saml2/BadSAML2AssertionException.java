@@ -23,7 +23,10 @@ package com.nimbusds.oauth2.sdk.assertions.saml2;
  */
 public class BadSAML2AssertionException extends Exception {
 	
-
+	
+	private static final long serialVersionUID = 7849539907246003512L;
+	
+	
 	/**
 	 * Creates a new bad SAML 2.0 assertion exception.
 	 *

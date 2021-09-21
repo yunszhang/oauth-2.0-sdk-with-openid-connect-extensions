@@ -30,6 +30,9 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
 public final class OperationName extends Identifier {
 	
 	
+	private static final long serialVersionUID = 1496506482155366452L;
+	
+	
 	/**
 	 * Creates a new policy operation name.
 	 *

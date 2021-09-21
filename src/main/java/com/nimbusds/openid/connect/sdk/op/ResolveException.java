@@ -28,8 +28,11 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
  * Resolve exception.
  */
 public class ResolveException extends GeneralException {
-
-
+	
+	
+	private static final long serialVersionUID = 1014725420232885505L;
+	
+	
 	/**
 	 * Creates a new resolve exception.
 	 *

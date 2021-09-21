@@ -28,8 +28,11 @@ import com.nimbusds.oauth2.sdk.id.State;
  * The base class for checked exceptions defined in this SDK.
  */
 public class GeneralException extends Exception {
-
-
+	
+	
+	private static final long serialVersionUID = -1641787397301043615L;
+	
+	
 	/**
 	 * The associated error, {@code null} if not specified.
 	 */

@@ -35,8 +35,11 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  */
 @Immutable
 public final class AuthorizationCode extends Identifier {
-
-
+	
+	
+	private static final long serialVersionUID = 8793105384344282267L;
+	
+	
 	/**
 	 * Creates a new authorisation code with the specified value.
 	 *

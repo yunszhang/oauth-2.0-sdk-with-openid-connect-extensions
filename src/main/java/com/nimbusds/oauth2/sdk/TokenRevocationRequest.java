@@ -217,7 +217,10 @@ public final class TokenRevocationRequest extends AbstractOptionallyIdentifiedRe
 
 			// Can be both access or refresh token
 			token = new Token() {
-
+				
+				private static final long serialVersionUID = 8606135001277432930L;
+				
+				
 				@Override
 				public String getValue() {
 

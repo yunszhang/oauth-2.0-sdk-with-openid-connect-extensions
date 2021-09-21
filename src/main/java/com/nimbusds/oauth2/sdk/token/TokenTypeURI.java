@@ -1,6 +1,7 @@
 package com.nimbusds.oauth2.sdk.token;
 
 
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -24,7 +25,10 @@ import com.nimbusds.oauth2.sdk.ParseException;
  * </ul>
  */
 @Immutable
-public final class TokenTypeURI {
+public final class TokenTypeURI implements Serializable {
+	
+	
+	private static final long serialVersionUID = 1371197657238309877L;
 	
 	
 	/**

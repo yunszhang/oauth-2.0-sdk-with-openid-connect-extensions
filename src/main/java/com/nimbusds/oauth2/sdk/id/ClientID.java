@@ -38,8 +38,11 @@ import net.jcip.annotations.Immutable;
  */
 @Immutable
 public final class ClientID extends Identifier {
-
-
+	
+	
+	private static final long serialVersionUID = 8098426263125084877L;
+	
+	
 	/**
 	 * Creates a new client identifier with the specified value.
 	 *

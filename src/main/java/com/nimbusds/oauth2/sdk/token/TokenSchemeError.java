@@ -35,6 +35,9 @@ import com.nimbusds.oauth2.sdk.Scope;
 public abstract class TokenSchemeError extends ErrorObject {
 	
 	
+	private static final long serialVersionUID = -1132784406578139418L;
+	
+	
 	/**
 	 * Regex pattern for matching the realm parameter of a WWW-Authenticate
 	 * header. Limits the realm string length to 256 chars to prevent
@@ -369,6 +372,10 @@ public abstract class TokenSchemeError extends ErrorObject {
 		
 		
 		return new TokenSchemeError(AccessTokenType.UNKNOWN, errorCode, errorDescription, 0, errorURI, realm, scope) {
+			
+			private static final long serialVersionUID = -1629382220440634919L;
+			
+			
 			@Override
 			public TokenSchemeError setDescription(String description) {
 				return null;

@@ -28,8 +28,11 @@ import net.jcip.annotations.Immutable;
  */
 @Immutable
 public final class State extends Identifier {
-
-
+	
+	
+	private static final long serialVersionUID = 5357710275974915335L;
+	
+	
 	/**
 	 * Creates a new state with the specified value.
 	 *

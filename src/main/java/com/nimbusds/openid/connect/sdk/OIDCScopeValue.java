@@ -38,25 +38,28 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
  * </ul>
  */
 public class OIDCScopeValue extends Scope.Value {
-
-
+	
+	
+	private static final long serialVersionUID = -652181533676125742L;
+	
+	
 	/**
-	 * Informs the authorisation server that the client is making an OpenID 
+	 * Informs the authorisation server that the client is making an OpenID
 	 * Connect request (REQUIRED). This scope value requests access to the
-	 * {@code sub} claim. 
+	 * {@code sub} claim.
 	 */
 	public static final OIDCScopeValue OPENID =
 		new OIDCScopeValue("openid", Scope.Value.Requirement.REQUIRED, new String[]{"sub"});
 	
 	
 	/**
-	 * Requests that access to the end-user's default profile claims at the 
-	 * UserInfo endpoint be granted by the issued access token. These 
-	 * claims are: {@code name}, {@code family_name}, {@code given_name}, 
-	 * {@code middle_name}, {@code nickname}, {@code preferred_username}, 
-	 * {@code profile}, {@code picture}, {@code website}, {@code gender}, 
-	 * {@code birthdate}, {@code zoneinfo}, {@code locale}, and 
-	 * {@code updated_at}. 
+	 * Requests that access to the end-user's default profile claims at the
+	 * UserInfo endpoint be granted by the issued access token. These
+	 * claims are: {@code name}, {@code family_name}, {@code given_name},
+	 * {@code middle_name}, {@code nickname}, {@code preferred_username},
+	 * {@code profile}, {@code picture}, {@code website}, {@code gender},
+	 * {@code birthdate}, {@code zoneinfo}, {@code locale}, and
+	 * {@code updated_at}.
 	 */
 	public static final OIDCScopeValue PROFILE =
 		new OIDCScopeValue("profile", new String[]{"name",
@@ -77,7 +80,7 @@ public class OIDCScopeValue extends Scope.Value {
 	
 	/**
 	 * Requests that access to the {@code email} and {@code email_verified}
-	 * claims at the UserInfo endpoint be granted by the issued access 
+	 * claims at the UserInfo endpoint be granted by the issued access
 	 * token.
 	 */
 	public static final OIDCScopeValue EMAIL =
@@ -85,8 +88,8 @@ public class OIDCScopeValue extends Scope.Value {
 	
 	
 	/**
-	 * Requests that access to {@code address} claim at the UserInfo 
-	 * endpoint be granted by the issued access token. 
+	 * Requests that access to {@code address} claim at the UserInfo
+	 * endpoint be granted by the issued access token.
 	 */
 	public static final OIDCScopeValue ADDRESS =
 		new OIDCScopeValue("address", new String[]{"address"});
@@ -94,14 +97,14 @@ public class OIDCScopeValue extends Scope.Value {
 	
 	/**
 	 * Requests that access to the {@code phone_number} and
-	 * {@code phone_number_verified} claims at the UserInfo endpoint be 
-	 * granted by the issued access token. 
+	 * {@code phone_number_verified} claims at the UserInfo endpoint be
+	 * granted by the issued access token.
 	 */
 	public static final OIDCScopeValue PHONE =
 		new OIDCScopeValue("phone", new String[]{"phone_number",
 		                                         "phone_number_verified"});
-
-
+	
+	
 	/**
 	 * Requests that an OAuth 2.0 refresh token be issued that can be used
 	 * to obtain an access token that grants access the end-user's UserInfo
@@ -109,8 +112,8 @@ public class OIDCScopeValue extends Scope.Value {
 	 */
 	public static final OIDCScopeValue OFFLINE_ACCESS =
 		new OIDCScopeValue("offline_access", null);
-
-
+	
+	
 	/**
 	 * Returns the standard OpenID Connect scope values declared in this
 	 * class.

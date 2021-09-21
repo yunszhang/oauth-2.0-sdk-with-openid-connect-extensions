@@ -38,6 +38,9 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 public class FederationAPIError extends ErrorObject {
 	
 	
+	private static final long serialVersionUID = 2116693118039606386L;
+	
+	
 	/**
 	 * The operation type.
 	 */

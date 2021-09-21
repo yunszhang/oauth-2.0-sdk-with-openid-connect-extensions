@@ -34,6 +34,9 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
 public final class IdentityEvidenceType extends Identifier {
 	
 	
+	private static final long serialVersionUID = -8665674793321133128L;
+	
+	
 	/**
 	 * Verification based on any kind of government issued identity
 	 * document.

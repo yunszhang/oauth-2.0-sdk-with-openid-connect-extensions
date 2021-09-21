@@ -36,8 +36,11 @@ import net.jcip.annotations.Immutable;
  */
 @Immutable
 public final class Audience extends Identifier {
-
-
+	
+	
+	private static final long serialVersionUID = 9149519511538940783L;
+	
+	
 	/**
 	 * Creates a new audience identifier with the specified value.
 	 *

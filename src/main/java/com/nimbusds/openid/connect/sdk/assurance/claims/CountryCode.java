@@ -28,6 +28,9 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
 public abstract class CountryCode extends Identifier {
 	
 	
+	private static final long serialVersionUID = -6171424661935191539L;
+	
+	
 	/**
 	 * Creates a new country code.
 	 *

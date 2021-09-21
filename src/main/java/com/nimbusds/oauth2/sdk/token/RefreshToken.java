@@ -40,8 +40,11 @@ import com.nimbusds.oauth2.sdk.ParseException;
  */
 @Immutable
 public final class RefreshToken extends Token {
-
-
+	
+	
+	private static final long serialVersionUID = 1482806259791531877L;
+	
+	
 	/**
 	 * Creates a new refresh token with a randomly generated 256-bit 
 	 * (32-byte) value, Base64URL-encoded.

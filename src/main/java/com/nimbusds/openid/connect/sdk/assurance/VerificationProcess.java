@@ -35,6 +35,10 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
 @Immutable
 public final class VerificationProcess extends Identifier {
 	
+	
+	private static final long serialVersionUID = -6981905244217816233L;
+	
+	
 	/**
 	 * Creates a new verification process identifier.
 	 *

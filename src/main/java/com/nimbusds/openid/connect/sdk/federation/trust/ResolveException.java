@@ -31,6 +31,9 @@ import com.nimbusds.oauth2.sdk.GeneralException;
 public class ResolveException extends GeneralException {
 	
 	
+	private static final long serialVersionUID = 1039304462191728890L;
+	
+	
 	/**
 	 * For multiple causes.
 	 */

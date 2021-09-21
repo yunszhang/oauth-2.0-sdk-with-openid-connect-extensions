@@ -60,8 +60,10 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
  */
 @Immutable
 public class BearerTokenError extends TokenSchemeError {
-
-
+	
+	
+	private static final long serialVersionUID = -5209789923955060584L;
+	
 	/**
 	 * The request does not contain an access token. No error code or
 	 * description is specified for this error, just the HTTP status code
@@ -76,34 +78,35 @@ public class BearerTokenError extends TokenSchemeError {
 	 */
 	public static final BearerTokenError MISSING_TOKEN =
 		new BearerTokenError(null, null, HTTPResponse.SC_UNAUTHORIZED);
-
+	
+	
 	/**
 	 * The request is missing a required parameter, includes an unsupported
 	 * parameter or parameter value, repeats the same parameter, uses more
-	 * than one method for including an access token, or is otherwise 
+	 * than one method for including an access token, or is otherwise
 	 * malformed. The HTTP status code is set to 400 (Bad Request).
 	 */
-	public static final BearerTokenError INVALID_REQUEST = 
-		new BearerTokenError("invalid_request", "Invalid request", 
+	public static final BearerTokenError INVALID_REQUEST =
+		new BearerTokenError("invalid_request", "Invalid request",
 			             HTTPResponse.SC_BAD_REQUEST);
-
-
+	
+	
 	/**
 	 * The access token provided is expired, revoked, malformed, or invalid
-	 * for other reasons.  The HTTP status code is set to 401 
+	 * for other reasons.  The HTTP status code is set to 401
 	 * (Unauthorized).
 	 */
 	public static final BearerTokenError INVALID_TOKEN =
-		new BearerTokenError("invalid_token", "Invalid access token", 
+		new BearerTokenError("invalid_token", "Invalid access token",
 			             HTTPResponse.SC_UNAUTHORIZED);
 	
 	
 	/**
-	 * The request requires higher privileges than provided by the access 
+	 * The request requires higher privileges than provided by the access
 	 * token. The HTTP status code is set to 403 (Forbidden).
 	 */
 	public static final BearerTokenError INSUFFICIENT_SCOPE =
-		new BearerTokenError("insufficient_scope", "Insufficient scope", 
+		new BearerTokenError("insufficient_scope", "Insufficient scope",
 			             HTTPResponse.SC_FORBIDDEN);
 	
 	

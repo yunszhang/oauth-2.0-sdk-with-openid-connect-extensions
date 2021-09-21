@@ -37,8 +37,11 @@ import com.nimbusds.oauth2.sdk.ResponseType;
  */
 @Immutable
 public final class CodeHash extends HashClaim {
-
-
+	
+	
+	private static final long serialVersionUID = 4627813971222806593L;
+	
+	
 	/**
 	 * Checks if an authorisation code hash claim must be included in ID
 	 * tokens for the specified response type.

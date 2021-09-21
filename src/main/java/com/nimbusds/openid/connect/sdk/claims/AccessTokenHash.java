@@ -37,8 +37,11 @@ import com.nimbusds.oauth2.sdk.token.AccessToken;
  */
 @Immutable
 public final class AccessTokenHash extends HashClaim {
-
-
+	
+	
+	private static final long serialVersionUID = -2260085393906006318L;
+	
+	
 	/**
 	 * Checks if an access token hash claim must be included in ID tokens
 	 * for the specified response type.

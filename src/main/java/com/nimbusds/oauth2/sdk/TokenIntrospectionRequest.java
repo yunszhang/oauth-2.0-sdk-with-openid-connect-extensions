@@ -346,7 +346,10 @@ public class TokenIntrospectionRequest extends AbstractOptionallyAuthenticatedRe
 
 			// Can be both access or refresh token
 			token = new Token() {
-
+				
+				private static final long serialVersionUID = 8491102820261331059L;
+				
+				
 				@Override
 				public String getValue() {
 

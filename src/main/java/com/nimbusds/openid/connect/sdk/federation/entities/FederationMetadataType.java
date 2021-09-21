@@ -36,6 +36,9 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
 public final class FederationMetadataType extends Identifier {
 	
 	
+	private static final long serialVersionUID = 345842707286531482L;
+	
+	
 	/**
 	 * OpenID relying party ({@code openid_relying_party}).
 	 */

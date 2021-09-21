@@ -33,6 +33,9 @@ import net.minidev.json.JSONObject;
 public class OrderedJSONObject extends JSONObject {
 	
 	
+	private static final long serialVersionUID = -8682025379611131137L;
+	
+	
 	/**
 	 * Keeps an ordered copy of the JSON object members.
 	 */

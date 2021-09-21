@@ -47,6 +47,9 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
 public final class ACR extends Identifier {
 	
 	
+	private static final long serialVersionUID = 7234490015365923377L;
+	
+	
 	/**
 	 * Phishing-Resistant. An authentication mechanism where a party
 	 * potentially under the control of the Relying Party cannot gain

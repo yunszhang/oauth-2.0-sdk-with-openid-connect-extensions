@@ -37,7 +37,10 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  */
 public class CodeChallenge extends Identifier {
 	
-
+	
+	private static final long serialVersionUID = 1353706942392517197L;
+	
+	
 	/**
 	 * Creates a new code challenge with the specified value.
 	 *

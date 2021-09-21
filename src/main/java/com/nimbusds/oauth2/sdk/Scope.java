@@ -47,14 +47,20 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  */
 @NotThreadSafe
 public class Scope extends LinkedHashSet<Scope.Value> {
-
+	
+	
+	private static final long serialVersionUID = -553103514038936007L;
+	
 	
 	/**
 	 * Authorisation scope value.
 	 */
 	@Immutable
 	public static class Value extends Identifier {
-
+		
+		
+		private static final long serialVersionUID = -1885648673808651565L;
+		
 		
 		/**
 		 * Enumeration of the scope value requirements for 

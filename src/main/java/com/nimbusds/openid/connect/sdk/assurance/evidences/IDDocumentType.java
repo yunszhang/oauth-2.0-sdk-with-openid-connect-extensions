@@ -37,6 +37,9 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
 public final class IDDocumentType extends Identifier {
 	
 	
+	private static final long serialVersionUID = -6631671451012338520L;
+	
+	
 	/**
 	 * An identity document issued by a country's government for the
 	 * purpose of identifying a citizen.

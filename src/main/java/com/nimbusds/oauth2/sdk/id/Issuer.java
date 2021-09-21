@@ -34,8 +34,11 @@ import com.nimbusds.oauth2.sdk.util.StringUtils;
  */
 @Immutable
 public final class Issuer extends Identifier {
-
-
+	
+	
+	private static final long serialVersionUID = -8033463330193076151L;
+	
+	
 	/**
 	 * Checks if the specified string represents a valid issuer identifier.
 	 * This method is {@code null}-safe.

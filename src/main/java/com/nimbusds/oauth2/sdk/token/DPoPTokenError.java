@@ -71,13 +71,15 @@ import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 public class DPoPTokenError extends TokenSchemeError {
 	
 	
+	private static final long serialVersionUID = 7399517620661603486L;
+	
+	
 	/**
 	 * Regex pattern for matching the JWS algorithms parameter of a
 	 * WWW-Authenticate header.
 	 */
 	static final Pattern ALGS_PATTERN = Pattern.compile("algs=\"([^\"]+)");
-
-
+	
 	/**
 	 * The request does not contain an access token. No error code or
 	 * description is specified for this error, just the HTTP status code
@@ -92,7 +94,8 @@ public class DPoPTokenError extends TokenSchemeError {
 	 */
 	public static final DPoPTokenError MISSING_TOKEN =
 		new DPoPTokenError(null, null, HTTPResponse.SC_UNAUTHORIZED);
-
+	
+	
 	/**
 	 * The request is missing a required parameter, includes an unsupported
 	 * parameter or parameter value, repeats the same parameter, uses more
@@ -102,8 +105,8 @@ public class DPoPTokenError extends TokenSchemeError {
 	public static final DPoPTokenError INVALID_REQUEST =
 		new DPoPTokenError("invalid_request", "Invalid request",
 			             HTTPResponse.SC_BAD_REQUEST);
-
-
+	
+	
 	/**
 	 * The access token provided is expired, revoked, malformed, or invalid
 	 * for other reasons.  The HTTP status code is set to 401

@@ -36,6 +36,9 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
 public final class IdentityTrustFramework extends Identifier {
 	
 	
+	private static final long serialVersionUID = 378614456182831323L;
+	
+	
 	/**
 	 * The OP verifies and maintains user identities in conforms with the
 	 * German Anti-Money Laundering Law.

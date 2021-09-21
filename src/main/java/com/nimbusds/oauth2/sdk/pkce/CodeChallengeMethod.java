@@ -33,20 +33,23 @@ import net.jcip.annotations.Immutable;
  */
 @Immutable
 public final class CodeChallengeMethod extends Identifier {
-
-
+	
+	
+	private static final long serialVersionUID = -8125202768444965372L;
+	
+	
 	/**
 	 * Plain code challenge method.
 	 */
 	public static final CodeChallengeMethod PLAIN = new CodeChallengeMethod("plain");
-
-
+	
+	
 	/**
 	 * SHA-256 code challenge method.
 	 */
 	public static final CodeChallengeMethod S256 = new CodeChallengeMethod("S256");
-
-
+	
+	
 	/**
 	 * Gets the default code challenge method.
 	 *

@@ -28,8 +28,11 @@ import com.nimbusds.oauth2.sdk.id.State;
  * Parse exception.
  */
 public class ParseException extends GeneralException {
-
-
+	
+	
+	private static final long serialVersionUID = 5717029305138222869L;
+	
+	
 	/**
 	 * Creates a new parse exception.
 	 *

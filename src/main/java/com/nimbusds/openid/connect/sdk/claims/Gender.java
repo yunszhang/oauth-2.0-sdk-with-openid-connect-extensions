@@ -30,7 +30,10 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  */
 @Immutable
 public class Gender extends Identifier {
-
+	
+	
+	private static final long serialVersionUID = 3616234558991226411L;
+	
 	
 	/**
 	 * Female gender claim value.
@@ -43,7 +46,7 @@ public class Gender extends Identifier {
 	 */
 	public static final Gender MALE = new Gender("male");
 	
-	 
+	
 	/**
 	 * Creates a new gender with the specified value.
 	 *

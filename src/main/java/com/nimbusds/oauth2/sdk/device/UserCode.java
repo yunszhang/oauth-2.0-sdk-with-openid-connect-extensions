@@ -35,14 +35,17 @@ import com.nimbusds.oauth2.sdk.util.StringUtils;
  */
 @Immutable
 public final class UserCode extends Identifier {
-
+	
+	
+	private static final long serialVersionUID = 6249537737406015901L;
+	
 	
 	public static final String LETTER_CHAR_SET = "BCDFGHJKLMNPQRSTVWXZ";
-
-
+	
+	
 	public static final String DIGIT_CHAR_SET = "0123456789";
-
-
+	
+	
 	/**
 	 * The character set used by the identifier. The identifier can only
 	 * contain characters from this set.

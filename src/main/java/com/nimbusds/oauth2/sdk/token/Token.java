@@ -36,8 +36,11 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  * </ul>
  */
 public abstract class Token extends Identifier {
-
-
+	
+	
+	private static final long serialVersionUID = 1797025947209047077L;
+	
+	
 	/**
 	 * Creates a new token with the specified value.
 	 *

@@ -32,6 +32,9 @@ import com.nimbusds.openid.connect.sdk.federation.trust.constraints.TrustChainCo
 public class TrustChainSet extends HashSet<TrustChain> {
 	
 	
+	private static final long serialVersionUID = -2449324224888772451L;
+	
+	
 	/**
 	 * Returns the shortest trust chain in this set.
 	 *

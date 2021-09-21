@@ -33,8 +33,11 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  * The base class for SHA-2 based claims.
  */
 public abstract class HashClaim extends Identifier {
-
-
+	
+	
+	private static final long serialVersionUID = -3163141692378087888L;
+	
+	
 	/**
 	 * Creates a new SHA-2 based claim with the specified value.
 	 *

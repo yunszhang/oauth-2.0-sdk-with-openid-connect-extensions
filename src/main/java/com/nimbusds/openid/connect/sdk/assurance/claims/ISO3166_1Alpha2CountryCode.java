@@ -30,6 +30,9 @@ import com.nimbusds.oauth2.sdk.ParseException;
 public final class ISO3166_1Alpha2CountryCode extends CountryCode {
 	
 	
+	private static final long serialVersionUID = -7659886425656766569L;
+	
+	
 	/**
 	 * Creates a new ISO 3166-1 alpha-2 country code. Normalises the code
 	 * to upper case.

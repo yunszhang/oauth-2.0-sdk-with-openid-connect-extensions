@@ -34,6 +34,9 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
 public final class IdentityVerificationMethod extends Identifier {
 	
 	
+	private static final long serialVersionUID = -1448312497675040627L;
+	
+	
 	/**
 	 * Physical In-Person Proofing.
 	 */

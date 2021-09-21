@@ -42,6 +42,9 @@ import com.nimbusds.oauth2.sdk.util.StringUtils;
 public class Identifier implements Serializable, Comparable<Identifier>, JSONAware {
 	
 	
+	private static final long serialVersionUID = 365052911829193101L;
+	
+	
 	/**
 	 * The default byte length of generated identifiers.
 	 */

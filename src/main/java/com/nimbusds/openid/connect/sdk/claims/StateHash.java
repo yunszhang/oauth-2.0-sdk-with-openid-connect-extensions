@@ -37,6 +37,9 @@ import net.jcip.annotations.Immutable;
 public class StateHash extends HashClaim {
 	
 	
+	private static final long serialVersionUID = 6043322975168115376L;
+	
+	
 	/**
 	 * Creates a new state hash with the specified value.
 	 *

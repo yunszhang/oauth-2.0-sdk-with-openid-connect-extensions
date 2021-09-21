@@ -28,8 +28,11 @@ import net.jcip.annotations.Immutable;
 @Deprecated
 @Immutable
 public final class AuthorizedParty extends Identifier {
-
-
+	
+	
+	private static final long serialVersionUID = -3566098638112409284L;
+	
+	
 	/**
 	 * Creates a new authorised party identifier with the specified value.
 	 *

@@ -29,6 +29,9 @@ import net.jcip.annotations.Immutable;
 public final class SessionID extends Identifier {
 	
 	
+	private static final long serialVersionUID = -5364591694625967813L;
+	
+	
 	/**
 	 * Creates a new session identifier.
 	 *

@@ -37,6 +37,9 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
 public final class TXN extends Identifier {
 	
 	
+	private static final long serialVersionUID = 6919844477369481587L;
+	
+	
 	/**
 	 * Creates a new transaction identifier with the specified value.
 	 *

@@ -24,6 +24,9 @@ package com.nimbusds.openid.connect.sdk.federation.policy.language;
 public class PolicyViolationException extends Exception {
 	
 	
+	private static final long serialVersionUID = -1953769818688720916L;
+	
+	
 	/**
 	 * Creates a new policy violation exception.
 	 *

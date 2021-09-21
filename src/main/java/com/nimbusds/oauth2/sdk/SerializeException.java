@@ -22,8 +22,11 @@ package com.nimbusds.oauth2.sdk;
  * Serialization exception (unchecked).
  */
 public class SerializeException extends RuntimeException {
-
-
+	
+	
+	private static final long serialVersionUID = -1441994426154259304L;
+	
+	
 	/**
 	 * Creates a new serialisation exception.
 	 *

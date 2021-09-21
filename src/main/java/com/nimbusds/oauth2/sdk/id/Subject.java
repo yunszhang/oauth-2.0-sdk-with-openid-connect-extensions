@@ -26,8 +26,11 @@ import net.jcip.annotations.Immutable;
  */
 @Immutable
 public final class Subject extends Identifier {
-
-
+	
+	
+	private static final long serialVersionUID = 4305952346483638353L;
+	
+	
 	/**
 	 * Creates a new subject identifier with the specified value.
 	 *
