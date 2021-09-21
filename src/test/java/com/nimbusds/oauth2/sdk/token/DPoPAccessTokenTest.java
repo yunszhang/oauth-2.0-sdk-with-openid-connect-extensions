@@ -35,7 +35,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 public class DPoPAccessTokenTest extends TestCase {
 
 
-	public void testMinimalConstructor()
+	public void testValueConstructor()
 		throws Exception {
 		
 		AccessToken token = new DPoPAccessToken("abc");
@@ -64,7 +64,44 @@ public class DPoPAccessTokenTest extends TestCase {
 	}
 
 
-	public void testFullConstructor()
+	public void testValueConstructor_lifetime_scope()
+		throws Exception {
+		
+		Scope scope = new Scope("read", "write");
+
+		AccessToken token = new DPoPAccessToken("abc", 1500L, scope);
+		assertEquals(AccessTokenType.DPOP, token.getType());
+		assertEquals("abc", token.getValue());
+		assertEquals(1500L, token.getLifetime());
+		assertEquals(scope, token.getScope());
+		assertNull(token.getIssuedTokenType());
+		
+		assertEquals("DPoP abc", token.toAuthorizationHeader());
+
+		JSONObject jsonObject = token.toJSONObject();
+
+		assertEquals("abc", jsonObject.get("access_token"));
+		assertEquals("DPoP", jsonObject.get("token_type"));
+		assertEquals(1500L, jsonObject.get("expires_in"));
+		assertEquals(scope.toString(), jsonObject.get("scope"));
+		assertEquals(4, jsonObject.size());
+
+		token = DPoPAccessToken.parse(jsonObject);
+		assertEquals(AccessTokenType.DPOP, token.getType());
+		assertEquals("abc", token.getValue());
+		assertEquals(1500L, token.getLifetime());
+		assertEquals(scope, token.getScope());
+		assertNull(token.getIssuedTokenType());
+
+		assertTrue(token.getParameterNames().contains("access_token"));
+		assertTrue(token.getParameterNames().contains("token_type"));
+		assertTrue(token.getParameterNames().contains("expires_in"));
+		assertTrue(token.getParameterNames().contains("scope"));
+		assertEquals(4, token.getParameterNames().size());
+	}
+
+
+	public void testValueConstructor_lifetime_scope_uri()
 		throws Exception {
 		
 		Scope scope = new Scope("read", "write");
@@ -74,6 +111,7 @@ public class DPoPAccessTokenTest extends TestCase {
 		assertEquals("abc", token.getValue());
 		assertEquals(1500L, token.getLifetime());
 		assertEquals(scope, token.getScope());
+		assertEquals(TokenTypeURI.ACCESS_TOKEN, token.getIssuedTokenType());
 		
 		assertEquals("DPoP abc", token.toAuthorizationHeader());
 
@@ -91,6 +129,7 @@ public class DPoPAccessTokenTest extends TestCase {
 		assertEquals("abc", token.getValue());
 		assertEquals(1500L, token.getLifetime());
 		assertEquals(scope, token.getScope());
+		assertEquals(TokenTypeURI.ACCESS_TOKEN, token.getIssuedTokenType());
 
 		assertTrue(token.getParameterNames().contains("access_token"));
 		assertTrue(token.getParameterNames().contains("token_type"));
@@ -119,7 +158,7 @@ public class DPoPAccessTokenTest extends TestCase {
 	public void testParseFromHeader_missing() {
 
 		try {
-			AccessToken.parse((String)null, AccessTokenType.DPOP);
+			AccessToken.parse(null, AccessTokenType.DPOP);
 			fail();
 		} catch (ParseException e) {
 			assertEquals(DPoPTokenError.MISSING_TOKEN.getHTTPStatusCode(), e.getErrorObject().getHTTPStatusCode());

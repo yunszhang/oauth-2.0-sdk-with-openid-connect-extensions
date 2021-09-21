@@ -34,38 +34,25 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 
 
 public class BearerAccessTokenTest extends TestCase {
-
-
-	public void testMinimalConstructor()
-		throws Exception {
+	
+	
+	public void testGenerateConstructor() {
 		
-		AccessToken token = new BearerAccessToken("abc");
+		AccessToken token = new BearerAccessToken();
 		
-		assertEquals("abc", token.getValue());
+		assertNotNull(token);
+		
+		assertEquals(32, new Base64(token.getValue()).decode().length);
 		assertEquals(0L, token.getLifetime());
 		assertNull(token.getScope());
+		assertNull(token.getIssuedTokenType());
 		
-		assertEquals("Bearer abc", token.toAuthorizationHeader());
-
-		JSONObject jsonObject = token.toJSONObject();
-
-		assertEquals("abc", jsonObject.get("access_token"));
-		assertEquals("Bearer", jsonObject.get("token_type"));
-		assertEquals(2, jsonObject.size());
-
-		token = BearerAccessToken.parse(jsonObject);
-
-		assertEquals("abc", token.getValue());
-		assertEquals(0L, token.getLifetime());
-		assertNull(token.getScope());
-
-		assertTrue(token.getParameterNames().contains("access_token"));
-		assertTrue(token.getParameterNames().contains("token_type"));
-		assertEquals(2, token.getParameterNames().size());
+		String header = token.toAuthorizationHeader();
+		assertEquals("Bearer " + token.getValue(), header);
 	}
-
-
-	public void testGenerate() {
+	
+	
+	public void testGenerateConstructor_bytes() {
 
 		AccessToken token = new BearerAccessToken(12);
 
@@ -74,29 +61,121 @@ public class BearerAccessTokenTest extends TestCase {
 		assertEquals(12, new Base64(token.getValue()).decode().length);
 		assertEquals(0L, token.getLifetime());
 		assertNull(token.getScope());
+		assertNull(token.getIssuedTokenType());
 
 		String header = token.toAuthorizationHeader();
 		assertTrue(header.startsWith("Bearer "));
 		assertEquals(token.getValue(), header.substring("Bearer ".length()));
 	}
+	
+	
+	public void testGenerateConstructor_lifetime_scope() {
+		
+		Scope scope = Scope.parse("read write");
 
-
-	public void testGenerateDefault() {
-
-		AccessToken token = new BearerAccessToken();
+		AccessToken token = new BearerAccessToken(1500, scope);
 
 		assertNotNull(token);
 
 		assertEquals(32, new Base64(token.getValue()).decode().length);
-		assertEquals(0L, token.getLifetime());
-		assertNull(token.getScope());
+		assertEquals(1500L, token.getLifetime());
+		assertEquals(scope, token.getScope());
+		assertNull(token.getIssuedTokenType());
 
 		String header = token.toAuthorizationHeader();
-		assertEquals("Bearer " + token.getValue(), header);
+		assertTrue(header.startsWith("Bearer "));
+		assertEquals(token.getValue(), header.substring("Bearer ".length()));
+	}
+	
+	
+	public void testGenerateConstructor_bytes_lifetime_scope() {
+		
+		Scope scope = Scope.parse("read write");
+
+		AccessToken token = new BearerAccessToken(12, 1500, scope);
+
+		assertNotNull(token);
+
+		assertEquals(12, new Base64(token.getValue()).decode().length);
+		assertEquals(1500L, token.getLifetime());
+		assertEquals(scope, token.getScope());
+		assertNull(token.getIssuedTokenType());
+
+		String header = token.toAuthorizationHeader();
+		assertTrue(header.startsWith("Bearer "));
+		assertEquals(token.getValue(), header.substring("Bearer ".length()));
+	}
+	
+	
+	public void testValueConstructor()
+		throws Exception {
+		
+		AccessToken token = new BearerAccessToken("abc");
+		
+		assertEquals("abc", token.getValue());
+		assertEquals(0L, token.getLifetime());
+		assertNull(token.getScope());
+		assertNull(token.getIssuedTokenType());
+		
+		assertEquals("Bearer abc", token.toAuthorizationHeader());
+		
+		JSONObject jsonObject = token.toJSONObject();
+		
+		assertEquals("abc", jsonObject.get("access_token"));
+		assertEquals("Bearer", jsonObject.get("token_type"));
+		assertEquals(2, jsonObject.size());
+		
+		token = BearerAccessToken.parse(jsonObject);
+		
+		assertEquals("abc", token.getValue());
+		assertEquals(0L, token.getLifetime());
+		assertNull(token.getScope());
+		assertNull(token.getIssuedTokenType());
+		
+		assertTrue(token.getParameterNames().contains("access_token"));
+		assertTrue(token.getParameterNames().contains("token_type"));
+		assertEquals(2, token.getParameterNames().size());
 	}
 
 
-	public void testFullConstructor()
+	public void testValueConstructor_lifetime_scope()
+		throws Exception {
+		
+		Scope scope = Scope.parse("read write");
+
+		AccessToken token = new BearerAccessToken("abc", 1500, scope);
+		
+		assertEquals("abc", token.getValue());
+		assertEquals(1500L, token.getLifetime());
+		assertEquals(scope, token.getScope());
+		assertNull(token.getIssuedTokenType());
+		
+		assertEquals("Bearer abc", token.toAuthorizationHeader());
+
+		JSONObject jsonObject = token.toJSONObject();
+
+		assertEquals("abc", jsonObject.get("access_token"));
+		assertEquals("Bearer", jsonObject.get("token_type"));
+		assertEquals(1500L, jsonObject.get("expires_in"));
+		assertEquals(scope, Scope.parse((String) jsonObject.get("scope")));
+		assertEquals(4, jsonObject.size());
+
+		token = BearerAccessToken.parse(jsonObject);
+		
+		assertEquals("abc", token.getValue());
+		assertEquals(1500L, token.getLifetime());
+		assertEquals(scope, token.getScope());
+		assertNull(token.getIssuedTokenType());
+
+		assertTrue(token.getParameterNames().contains("access_token"));
+		assertTrue(token.getParameterNames().contains("token_type"));
+		assertTrue(token.getParameterNames().contains("expires_in"));
+		assertTrue(token.getParameterNames().contains("scope"));
+		assertEquals(4, token.getParameterNames().size());
+	}
+
+
+	public void testValueConstructor_lifetime_scope_uri()
 		throws Exception {
 		
 		Scope scope = Scope.parse("read write");
@@ -106,6 +185,7 @@ public class BearerAccessTokenTest extends TestCase {
 		assertEquals("abc", token.getValue());
 		assertEquals(1500L, token.getLifetime());
 		assertEquals(scope, token.getScope());
+		assertEquals(TokenTypeURI.ACCESS_TOKEN, token.getIssuedTokenType());
 		
 		assertEquals("Bearer abc", token.toAuthorizationHeader());
 
@@ -123,6 +203,7 @@ public class BearerAccessTokenTest extends TestCase {
 		assertEquals("abc", token.getValue());
 		assertEquals(1500L, token.getLifetime());
 		assertEquals(scope, token.getScope());
+		assertEquals(TokenTypeURI.ACCESS_TOKEN, token.getIssuedTokenType());
 
 		assertTrue(token.getParameterNames().contains("access_token"));
 		assertTrue(token.getParameterNames().contains("token_type"));
@@ -279,6 +360,7 @@ public class BearerAccessTokenTest extends TestCase {
 
 
 	public void testParseFromJsonObject_invalidIssuedTokenType() {
+		
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("access_token", "abc");
 		jsonObject.put("token_type", "Bearer");
@@ -288,7 +370,7 @@ public class BearerAccessTokenTest extends TestCase {
 			BearerAccessToken.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid issued_token_type parameter, must be an URI", e.getMessage());
+			assertEquals("Invalid issued_token_type parameter: Illegal token type URI: invalid uri", e.getMessage());
 		}
 	}
 }
