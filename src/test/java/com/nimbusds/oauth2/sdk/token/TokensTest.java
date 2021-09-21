@@ -36,7 +36,12 @@ public class TokensTest extends TestCase {
 	public void testBearerAllDefined()
 		throws ParseException {
 
-		AccessToken accessToken = new BearerAccessToken(60L, Scope.parse("openid email"));
+		AccessToken accessToken = new BearerAccessToken(
+			"Chei4euPai5Phai0mohnaexeex7shou4",
+			60L,
+			Scope.parse("openid email"),
+			TokenTypeURI.ACCESS_TOKEN
+		);
 		RefreshToken refreshToken = new RefreshToken();
 
 		Tokens tokens = new Tokens(accessToken, refreshToken);
@@ -50,22 +55,25 @@ public class TokensTest extends TestCase {
 		assertTrue(tokens.getParameterNames().contains("access_token"));
 		assertTrue(tokens.getParameterNames().contains("expires_in"));
 		assertTrue(tokens.getParameterNames().contains("scope"));
+		assertTrue(tokens.getParameterNames().contains("issued_token_type"));
 		assertTrue(tokens.getParameterNames().contains("refresh_token"));
-		assertEquals(5, tokens.getParameterNames().size());
+		assertEquals(6, tokens.getParameterNames().size());
 
 		JSONObject jsonObject = tokens.toJSONObject();
 		assertEquals("Bearer", jsonObject.get("token_type"));
 		assertEquals(accessToken.getValue(), jsonObject.get("access_token"));
 		assertEquals(60L, jsonObject.get("expires_in"));
 		assertEquals("openid email", jsonObject.get("scope"));
+		assertEquals(TokenTypeURI.ACCESS_TOKEN.getURI().toString(), jsonObject.get("issued_token_type"));
 		assertEquals(refreshToken.getValue(), jsonObject.get("refresh_token"));
-		assertEquals(5, jsonObject.size());
+		assertEquals(6, jsonObject.size());
 
 		tokens = Tokens.parse(jsonObject);
 
 		assertEquals(accessToken.getValue(), tokens.getAccessToken().getValue());
 		assertEquals(accessToken.getLifetime(), tokens.getAccessToken().getLifetime());
 		assertEquals(accessToken.getScope(), tokens.getAccessToken().getScope());
+		assertEquals(accessToken.getIssuedTokenType(), tokens.getAccessToken().getIssuedTokenType());
 		assertEquals(refreshToken.getValue(), tokens.getRefreshToken().getValue());
 	}
 
@@ -73,7 +81,12 @@ public class TokensTest extends TestCase {
 	public void testDPoPAllDefined()
 		throws ParseException {
 
-		AccessToken accessToken = new DPoPAccessToken("Chei4euPai5Phai0mohnaexeex7shou4", 60L, Scope.parse("openid email"));
+		AccessToken accessToken = new DPoPAccessToken(
+			"Chei4euPai5Phai0mohnaexeex7shou4",
+			60L,
+			Scope.parse("openid email"),
+			TokenTypeURI.ACCESS_TOKEN
+		);
 		RefreshToken refreshToken = new RefreshToken();
 
 		Tokens tokens = new Tokens(accessToken, refreshToken);
@@ -88,21 +101,24 @@ public class TokensTest extends TestCase {
 		assertTrue(tokens.getParameterNames().contains("expires_in"));
 		assertTrue(tokens.getParameterNames().contains("scope"));
 		assertTrue(tokens.getParameterNames().contains("refresh_token"));
-		assertEquals(5, tokens.getParameterNames().size());
+		assertTrue(tokens.getParameterNames().contains("issued_token_type"));
+		assertEquals(6, tokens.getParameterNames().size());
 
 		JSONObject jsonObject = tokens.toJSONObject();
 		assertEquals("DPoP", jsonObject.get("token_type"));
 		assertEquals(accessToken.getValue(), jsonObject.get("access_token"));
 		assertEquals(60L, jsonObject.get("expires_in"));
 		assertEquals("openid email", jsonObject.get("scope"));
+		assertEquals(TokenTypeURI.ACCESS_TOKEN.getURI().toString(), jsonObject.get("issued_token_type"));
 		assertEquals(refreshToken.getValue(), jsonObject.get("refresh_token"));
-		assertEquals(5, jsonObject.size());
+		assertEquals(6, jsonObject.size());
 
 		tokens = Tokens.parse(jsonObject);
 
 		assertEquals(accessToken.getValue(), tokens.getAccessToken().getValue());
 		assertEquals(accessToken.getLifetime(), tokens.getAccessToken().getLifetime());
 		assertEquals(accessToken.getScope(), tokens.getAccessToken().getScope());
+		assertEquals(accessToken.getIssuedTokenType(), tokens.getAccessToken().getIssuedTokenType());
 		assertEquals(refreshToken.getValue(), tokens.getRefreshToken().getValue());
 	}
 
@@ -130,8 +146,9 @@ public class TokensTest extends TestCase {
 		tokens = Tokens.parse(jsonObject);
 
 		assertEquals(accessToken.getValue(), tokens.getAccessToken().getValue());
-		assertEquals(accessToken.getLifetime(), tokens.getAccessToken().getLifetime());
-		assertEquals(accessToken.getScope(), tokens.getAccessToken().getScope());
+		assertEquals(0, tokens.getAccessToken().getLifetime());
+		assertNull(tokens.getAccessToken().getScope());
+		assertNull(tokens.getAccessToken().getIssuedTokenType());
 		assertNull(tokens.getRefreshToken());
 	}
 	
@@ -162,8 +179,9 @@ public class TokensTest extends TestCase {
 		String value = "a45e77b1-5af1-4a84-b500-e94d123b1103";
 		long lifetime = 3600;
 		Scope scope = new Scope("read", "write");
+		TokenTypeURI tokenTypeURI = TokenTypeURI.ACCESS_TOKEN;
 		
-		AccessToken accessToken = new AccessToken(AccessTokenType.BEARER, value, lifetime, scope) {
+		AccessToken accessToken = new AccessToken(AccessTokenType.BEARER, value, lifetime, scope, tokenTypeURI) {
 			@Override
 			public String toAuthorizationHeader() {
 				throw new UnsupportedOperationException();
@@ -177,6 +195,7 @@ public class TokensTest extends TestCase {
 		assertEquals(value, bearerAccessToken.getValue());
 		assertEquals(lifetime, bearerAccessToken.getLifetime());
 		assertEquals(scope, bearerAccessToken.getScope());
+		assertEquals(tokenTypeURI, bearerAccessToken.getIssuedTokenType());
 	}
 	
 	
@@ -185,8 +204,9 @@ public class TokensTest extends TestCase {
 		String value = "a45e77b1-5af1-4a84-b500-e94d123b1103";
 		long lifetime = 3600;
 		Scope scope = new Scope("read", "write");
+		TokenTypeURI tokenTypeURI = TokenTypeURI.ACCESS_TOKEN;
 		
-		AccessToken accessToken = new AccessToken(AccessTokenType.DPOP, value, lifetime, scope) {
+		AccessToken accessToken = new AccessToken(AccessTokenType.DPOP, value, lifetime, scope, tokenTypeURI) {
 			@Override
 			public String toAuthorizationHeader() {
 				throw new UnsupportedOperationException();
@@ -200,5 +220,6 @@ public class TokensTest extends TestCase {
 		assertEquals(value, dPoPAccessToken.getValue());
 		assertEquals(lifetime, dPoPAccessToken.getLifetime());
 		assertEquals(scope, dPoPAccessToken.getScope());
+		assertEquals(tokenTypeURI, dPoPAccessToken.getIssuedTokenType());
 	}
 }

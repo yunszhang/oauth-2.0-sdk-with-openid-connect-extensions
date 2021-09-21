@@ -96,8 +96,12 @@ public class Tokens {
 		
 		if (AccessTokenType.BEARER.equals(accessToken.getType())) {
 			// Create from AccessToken with Bearer access token type
-			return new BearerAccessToken(accessToken.getValue(), accessToken.getLifetime(), accessToken.getScope(),
-					accessToken.getIssuedTokenType());
+			return new BearerAccessToken(
+				accessToken.getValue(),
+				accessToken.getLifetime(),
+				accessToken.getScope(),
+				accessToken.getIssuedTokenType()
+			);
 		}
 
 		return null;
@@ -119,8 +123,12 @@ public class Tokens {
 		
 		if (AccessTokenType.DPOP.equals(accessToken.getType())) {
 			// Create from AccessToken with DPoP access token type
-			return new DPoPAccessToken(accessToken.getValue(), accessToken.getLifetime(), accessToken.getScope(),
-					accessToken.getIssuedTokenType());
+			return new DPoPAccessToken(
+				accessToken.getValue(),
+				accessToken.getLifetime(),
+				accessToken.getScope(),
+				accessToken.getIssuedTokenType()
+			);
 		}
 		
 		return null;
