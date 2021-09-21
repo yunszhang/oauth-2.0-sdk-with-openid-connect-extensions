@@ -1840,3 +1840,5 @@ version 9.15 (2021-08-20)
     * Updates UserInfoErrorResponse to handle DPoPTokenError.
     * Makes TokenSchemeError public.
 
+version 9.16 (2021-09-21)
+    * Adds support for OAuth 2.0 Token Exchange (RFC 8693).

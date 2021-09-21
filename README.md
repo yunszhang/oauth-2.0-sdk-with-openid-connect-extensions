@@ -91,6 +91,8 @@ This SDK version implements the following standards and drafts:
 
 * OAuth 2.0 Device Authorization Grant (RFC 8628)
 
+* OAuth 2.0 Token Exchange (RFC 8693)
+
 * OAuth 2.0 Incremental Authorization (draft-ietf-oauth-incremental-authz-04)
 
 * The OAuth 2.0 Authorization Framework: JWT Secured Authorization Request 
