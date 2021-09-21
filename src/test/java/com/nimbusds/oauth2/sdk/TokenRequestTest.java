@@ -1752,7 +1752,7 @@ public class TokenRequestTest extends TestCase {
 		assertEquals(GrantType.TOKEN_EXCHANGE, tokenRequest.getAuthorizationGrant().getType());
 		assertNull(tokenRequest.getResources());
 		TokenExchangeGrant tokenExchangeGrant = (TokenExchangeGrant) tokenRequest.getAuthorizationGrant();
-		assertEquals(Collections.singletonList("urn:example:cooperation-context"), tokenExchangeGrant.getAudiences());
+		assertEquals(new Audience("urn:example:cooperation-context").toSingleAudienceList(), tokenExchangeGrant.getAudience());
 		assertNull(tokenRequest.getScope());
 		assertNull(tokenExchangeGrant.getRequestedTokenType());
 		String expectedSubjectToken = "eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0.eyJhdWQiOiJodHRwczovL2FzLmV4YW1wbGUuY29tIiwiaXNzI"
@@ -1783,8 +1783,7 @@ public class TokenRequestTest extends TestCase {
 		assertEquals(GrantType.TOKEN_EXCHANGE, tokenRequest.getAuthorizationGrant().getType());
 		assertEquals(Collections.singletonList(new URI("https://backend.example.com/api")), tokenRequest.getResources());
 		TokenExchangeGrant tokenExchangeGrant = (TokenExchangeGrant) tokenRequest.getAuthorizationGrant();
-		assertEquals(Arrays.asList("urn:example:cooperation-context1", "urn:example:cooperation-context2"),
-				tokenExchangeGrant.getAudiences());
+		assertEquals(Audience.create("urn:example:cooperation-context1", "urn:example:cooperation-context2"), tokenExchangeGrant.getAudience());
 		assertNull(tokenRequest.getScope());
 		assertNull(tokenExchangeGrant.getRequestedTokenType());
 		assertEquals("subjectToken", tokenExchangeGrant.getSubjectToken().getValue());

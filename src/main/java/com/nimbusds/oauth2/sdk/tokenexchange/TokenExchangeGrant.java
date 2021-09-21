@@ -1,228 +1,329 @@
 package com.nimbusds.oauth2.sdk.tokenexchange;
 
+
+import java.util.*;
+
+import net.jcip.annotations.Immutable;
+
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.token.Token;
 import com.nimbusds.oauth2.sdk.token.TokenTypeURI;
 import com.nimbusds.oauth2.sdk.token.TypelessToken;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
-import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import net.jcip.annotations.Immutable;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 
 /**
- * Implementation of token exchange extension grant type as specified in https://datatracker.ietf.org/doc/html/rfc8693
+ * OAuth 2.0 token exchange grant.
+ *
+ * <p>Related specifications:
+ *
+ * <ul>
+ *     <li>OAuth 2.0 Token Exchange (RFC 8693).
+ * </ul>
  */
 @Immutable
 public class TokenExchangeGrant extends AuthorizationGrant {
-
-  public static final GrantType GRANT_TYPE = GrantType.TOKEN_EXCHANGE;
-
-  /**
-   * The optional audiences for token exchange
-   */
-  private final List<String> audiences;
-
-  /**
-   * The optional requested token type for token exchange
-   */
-  private final TokenTypeURI requestedTokenType;
-
-  /**
-   * The subject token for token exchange
-   */
-  private final TypelessToken subjectToken;
-
-  /**
-   * The subject token type for token exchange
-   */
-  private final TokenTypeURI subjectTokenType;
-
-  /**
-   * The actor token for token exchange
-   */
-  private final TypelessToken actorToken;
-
-  /**
-   * The actor token type for token exchange
-   */
-  private final TokenTypeURI actorTokenType;
-
-
-  /**
-   * Creates a new token exchange grant.
-   *
-   * @param audiences The audiences. Can be {@code null}.
-   * @param requestedTokenType Requested token type. Can be {@code null}.
-   * @param subjectToken Subject token. Must not be {@code null}.
-   * @param subjectTokenType Subject token type. Must not be {@code null}.
-   * @param actorToken Actor token. Can be {@code null}.
-   * @param actorTokenType Actor token type. Can be {@code null}.
-   */
-  public TokenExchangeGrant(List<String> audiences, TokenTypeURI requestedTokenType,
-      TypelessToken subjectToken, TokenTypeURI subjectTokenType,
-      TypelessToken actorToken, TokenTypeURI actorTokenType) {
-    super(GRANT_TYPE);
-
-    this.audiences = audiences;
-    this.requestedTokenType = requestedTokenType;
-
-    if (subjectToken == null) {
-      throw new IllegalArgumentException("The subject token must not be null");
-    }
-    this.subjectToken = subjectToken;
-    if (subjectTokenType == null) {
-      throw new IllegalArgumentException("The subject token type must not be null");
-    }
-
-    this.subjectTokenType = subjectTokenType;
-
-    this.actorToken = actorToken;
-    this.actorTokenType = actorTokenType;
-  }
-
-  public List<String> getAudiences() {
-    return audiences;
-  }
-
-  public TokenTypeURI getRequestedTokenType() {
-    return requestedTokenType;
-  }
-
-  public Token getSubjectToken() {
-    return subjectToken;
-  }
-
-  public TokenTypeURI getSubjectTokenType() {
-    return subjectTokenType;
-  }
-
-  public Token getActorToken() {
-    return actorToken;
-  }
-
-  public TokenTypeURI getActorTokenType() {
-    return actorTokenType;
-  }
-
-  /**
-   * Returns the request body parameters for the authorisation grant.
-   *
-   * @return The parameters.
-   */
-  @Override
-  public Map<String, List<String>> toParameters() {
-    Map<String,List<String>> params = new LinkedHashMap<>();
-    params.put("grant_type", Collections.singletonList(GRANT_TYPE.getValue()));
-
-    if (audiences != null) {
-      params.put("audience", audiences);
-    }
-
-    if (requestedTokenType != null) {
-      params.put("requested_token_type", Collections.singletonList(requestedTokenType.getURI().toString()));
-    }
-
-    params.put("subject_token", Collections.singletonList(subjectToken.getValue()));
-    params.put("subject_token_type", Collections.singletonList(subjectTokenType.getURI().toString()));
-
-    if (actorToken != null) {
-      params.put("actor_token", Collections.singletonList(actorToken.getValue()));
-    }
-    if (actorTokenType != null) {
-      params.put("actor_token_type", Collections.singletonList(actorTokenType.getURI().toString()));
-    }
-
-    return params;
-  }
-
-  private static List<String> parseAudience(Map<String, List<String>> params) {
-    List<String> audiences = null;
-    List<String> audienceList = params.get("audience");
-
-    if (audienceList != null) {
-      audiences = new LinkedList<>();
-
-      for (String audience: audienceList) {
-        if (audience == null)
-          continue;
-        audiences.add(audience);
-      }
-    }
-    return audiences;
-  }
-
-  private static TokenTypeURI parseTokenType(Map<String, List<String>> params, String key, boolean mandatory) throws ParseException {
-    String tokenTypeString = MultivaluedMapUtils.getFirstValue(params, key);
-
-    if (tokenTypeString == null || tokenTypeString.trim().isEmpty()) {
-      if (mandatory) {
-        String msg = String.format("Missing or empty %s parameter", key);
-        throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
-      } else {
-        return null;
-      }
-    }
-
-    try {
-      return TokenTypeURI.parse(tokenTypeString);
-    } catch (ParseException uriSyntaxException) {
-      String msg = "Invalid " + key + " " + tokenTypeString;
-      throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
-    }
-  }
-
-  private static TypelessToken parseToken(Map<String, List<String>> params, String key, boolean mandatory) throws ParseException {
-    String tokenString = MultivaluedMapUtils.getFirstValue(params, key);
-
-    if (tokenString == null || tokenString.trim().isEmpty()) {
-      if (mandatory) {
-        String msg = String.format("Missing or empty %s parameter", key);
-        throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
-      } else {
-        return null;
-      }
-    }
-
-    return new TypelessToken(tokenString);
-  }
-
-  public static TokenExchangeGrant parse(final Map<String, List<String>> params) throws ParseException {
-    GrantType.ensure(GRANT_TYPE, params);
-
-    List<String> audiences = parseAudience(params);
-    TokenTypeURI requestedTokenType = parseTokenType(params, "requested_token_type", false);
-    TypelessToken subjectToken = parseToken(params, "subject_token", true);
-    TokenTypeURI subjectTokenType = parseTokenType(params, "subject_token_type", true);
-    TypelessToken actorToken = parseToken(params, "actor_token", false);
-    TokenTypeURI actorTokenType = parseTokenType(params, "actor_token_type", false);
-
-    return new TokenExchangeGrant(audiences, requestedTokenType, subjectToken, subjectTokenType, actorToken, actorTokenType);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof TokenExchangeGrant)) return false;
-    TokenExchangeGrant that = (TokenExchangeGrant) o;
-    return requestedTokenType.equals(that.requestedTokenType) &&
-        subjectToken.equals(that.subjectToken) &&
-        subjectTokenType.equals(that.subjectTokenType) &&
-        Objects.equals(actorToken, that.actorToken) &&
-        Objects.equals(actorTokenType, that.actorTokenType);
-  }
-
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(requestedTokenType, subjectToken, subjectTokenType, actorToken, actorTokenType);
-  }
+	
+	
+	/**
+	 * The grant type.
+	 */
+	public static final GrantType GRANT_TYPE = GrantType.TOKEN_EXCHANGE;
+	
+	
+	/**
+	 * The subject token representing the identity of the party on behalf
+	 * of whom the request is being made.
+	 */
+	private final TypelessToken subjectToken;
+	
+	
+	/**
+	 * Identifier for the type of the subject token.
+	 */
+	private final TokenTypeURI subjectTokenType;
+	
+	
+	/**
+	 * Optional token representing the identity of the acting party.
+	 */
+	private final TypelessToken actorToken;
+	
+	
+	/**
+	 * Identifier for the type of the actor token, if present.
+	 */
+	private final TokenTypeURI actorTokenType;
+	
+	
+	/**
+	 * Optional identifier for the requested type of security token.
+	 */
+	private final TokenTypeURI requestedTokenType;
+	
+	
+	/**
+	 * Optional audience for the requested security token.
+	 */
+	private final List<Audience> audience;
+	
+	
+	/**
+	 * Creates a new token exchange grant.
+	 *
+	 * @param subjectToken       The subject token representing the
+	 *                           identity of the party on behalf of whom
+	 *                           the request is being made. Must not be
+	 *                           {@code null}.
+	 * @param subjectTokenType   Identifier for the type of the subject
+	 *                           token. Must not be {@code null}.
+	 * @param actorToken         Optional token representing the identity
+	 *                           of the acting party, {@code null} if not
+	 *                           specified.
+	 * @param actorTokenType     Identifier for the type of the actor
+	 *                           token, if present.
+	 * @param requestedTokenType Optional identifier for the requested type
+	 *                           of security token, {@code null} if not
+	 *                           specified.
+	 * @param audience           Optional audience for the requested
+	 *                           security token, {@code null} if not
+	 *                           specified.
+	 */
+	public TokenExchangeGrant(final TypelessToken subjectToken, final TokenTypeURI subjectTokenType, final TypelessToken actorToken, final TokenTypeURI actorTokenType, final TokenTypeURI requestedTokenType, final List<Audience> audience) {
+		
+		super(GRANT_TYPE);
+		
+		if (subjectToken == null) {
+			throw new IllegalArgumentException("The subject token must not be null");
+		}
+		this.subjectToken = subjectToken;
+		
+		if (subjectTokenType == null) {
+			throw new IllegalArgumentException("The subject token type must not be null");
+		}
+		this.subjectTokenType = subjectTokenType;
+		
+		this.actorToken = actorToken;
+		
+		if (actorToken != null && actorTokenType == null) {
+			throw new IllegalArgumentException("If an actor token is specified the actor token type must not be null");
+		}
+		this.actorTokenType = actorTokenType;
+		
+		this.requestedTokenType = requestedTokenType;
+		
+		this.audience = audience;
+	}
+	
+	
+	/**
+	 * Returns the subject token representing the identity of the party on
+	 * behalf of whom the request is being made.
+	 *
+	 * @return The subject token, {@code null} if not specified.
+	 */
+	public Token getSubjectToken() {
+		
+		return subjectToken;
+	}
+	
+	
+	/**
+	 * Returns the identifier for the type of the subject token.
+	 *
+	 * @return The subject token type identifier.
+	 */
+	public TokenTypeURI getSubjectTokenType() {
+		
+		return subjectTokenType;
+	}
+	
+	
+	/**
+	 * Returns the optional token representing the identity of the acting
+	 * party.
+	 *
+	 * @return The actor token, {@code null} if not specified.
+	 */
+	public Token getActorToken() {
+		
+		return actorToken;
+	}
+	
+	
+	/**
+	 * Returns the identifier for the type of the optional actor token, if
+	 * present.
+	 *
+	 * @return The actor token type identifier, {@code null} if not
+	 *         present.
+	 */
+	public TokenTypeURI getActorTokenType() {
+		
+		return actorTokenType;
+	}
+	
+	
+	/**
+	 * Returns the optional identifier for the requested type of security
+	 * token.
+	 *
+	 * @return The requested token type, {@code null} if not specified.
+	 */
+	public TokenTypeURI getRequestedTokenType() {
+		
+		return requestedTokenType;
+	}
+	
+	
+	/**
+	 * Returns the optional audience for the requested security token.
+	 *
+	 * @return The audience, {@code null} if not specified.
+	 */
+	public List<Audience> getAudience() {
+		
+		return audience;
+	}
+	
+	
+	@Override
+	public Map<String, List<String>> toParameters() {
+		
+		Map<String, List<String>> params = new LinkedHashMap<>();
+		
+		params.put("grant_type", Collections.singletonList(GRANT_TYPE.getValue()));
+		
+		if (CollectionUtils.isNotEmpty(audience)) {
+			params.put("audience", Audience.toStringList(audience));
+		}
+		
+		if (requestedTokenType != null) {
+			params.put("requested_token_type", Collections.singletonList(requestedTokenType.getURI().toString()));
+		}
+		
+		params.put("subject_token", Collections.singletonList(subjectToken.getValue()));
+		params.put("subject_token_type", Collections.singletonList(subjectTokenType.getURI().toString()));
+		
+		if (actorToken != null) {
+			params.put("actor_token", Collections.singletonList(actorToken.getValue()));
+			params.put("actor_token_type", Collections.singletonList(actorTokenType.getURI().toString()));
+		}
+		
+		return params;
+	}
+	
+	
+	private static List<Audience> parseAudience(final Map<String, List<String>> params) {
+		
+		List<String> audienceList = params.get("audience");
+		
+		if (CollectionUtils.isEmpty(audienceList)) {
+			return null;
+		}
+		
+		return Audience.create(audienceList);
+	}
+	
+	
+	private static TokenTypeURI parseTokenType(final Map<String, List<String>> params, final String key, final boolean mandatory)
+		throws ParseException {
+		
+		String tokenTypeString = MultivaluedMapUtils.getFirstValue(params, key);
+		
+		if (StringUtils.isBlank(tokenTypeString)) {
+			if (mandatory) {
+				String msg = String.format("Missing or empty %s parameter", key);
+				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
+			} else {
+				return null;
+			}
+		}
+		
+		try {
+			return TokenTypeURI.parse(tokenTypeString);
+		} catch (ParseException uriSyntaxException) {
+			String msg = "Invalid " + key + " " + tokenTypeString;
+			throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
+		}
+	}
+	
+	
+	private static TypelessToken parseToken(final Map<String, List<String>> params, final String key, final boolean mandatory)
+		throws ParseException {
+		
+		String tokenString = MultivaluedMapUtils.getFirstValue(params, key);
+		
+		if (StringUtils.isBlank(tokenString)) {
+			
+			if (mandatory) {
+				String msg = String.format("Missing or empty %s parameter", key);
+				throw new ParseException(msg, OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg));
+			} else {
+				return null;
+			}
+		}
+		
+		return new TypelessToken(tokenString);
+	}
+	
+	
+	/**
+	 * Parses a token exchange grant from the specified request body
+	 * parameters.
+	 *
+	 * <p>Example:
+	 *
+	 * <pre>
+	 * grant_type=urn:ietf:params:oauth:grant-type:token-exchange
+	 * resource=https://backend.example.com/api
+	 * subject_token=accVkjcJyb4BWCxGsndESCJQbdFMogUC5PbRDqceLTC
+	 * subject_token_type=urn:ietf:params:oauth:token-type:access_token
+	 * </pre>
+	 *
+	 * @param params The parameters.
+	 *
+	 * @return The token exchange grant.
+	 *
+	 * @throws ParseException If parsing failed.
+	 */
+	public static TokenExchangeGrant parse(final Map<String, List<String>> params)
+		throws ParseException {
+		
+		GrantType.ensure(GRANT_TYPE, params);
+		
+		List<Audience> audience = parseAudience(params);
+		TokenTypeURI requestedTokenType = parseTokenType(params, "requested_token_type", false);
+		TypelessToken subjectToken = parseToken(params, "subject_token", true);
+		TokenTypeURI subjectTokenType = parseTokenType(params, "subject_token_type", true);
+		TypelessToken actorToken = parseToken(params, "actor_token", false);
+		TokenTypeURI actorTokenType = parseTokenType(params, "actor_token_type", false);
+		
+		return new TokenExchangeGrant(subjectToken, subjectTokenType, actorToken, actorTokenType, requestedTokenType, audience);
+	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof TokenExchangeGrant)) return false;
+		TokenExchangeGrant that = (TokenExchangeGrant) o;
+		return requestedTokenType.equals(that.requestedTokenType) &&
+			subjectToken.equals(that.subjectToken) &&
+			subjectTokenType.equals(that.subjectTokenType) &&
+			Objects.equals(actorToken, that.actorToken) &&
+			Objects.equals(actorTokenType, that.actorTokenType);
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(requestedTokenType, subjectToken, subjectTokenType, actorToken, actorTokenType);
+	}
 }
