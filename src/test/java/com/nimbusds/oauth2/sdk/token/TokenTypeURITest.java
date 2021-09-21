@@ -22,6 +22,12 @@ public class TokenTypeURITest extends TestCase {
 	}
 	
 	
+	public void testToString() {
+		
+		assertEquals("urn:ietf:params:oauth:token-type:access_token", TokenTypeURI.ACCESS_TOKEN.toString());
+	}
+	
+	
 	public void testParseKnownUri() throws ParseException {
 		
 		TokenTypeURI tokenTypeURI1 = TokenTypeURI.parse("urn:ietf:params:oauth:token-type:access_token");
