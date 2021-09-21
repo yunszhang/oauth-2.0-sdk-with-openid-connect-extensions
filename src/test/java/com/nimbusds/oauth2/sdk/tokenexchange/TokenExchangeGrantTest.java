@@ -26,7 +26,7 @@ public class TokenExchangeGrantTest extends TestCase {
 		TypelessToken subjectToken = new TypelessToken("subjectToken");
 		TokenTypeURI subjectTokenType = TokenTypeURI.ACCESS_TOKEN;
 		
-		TokenExchangeGrant grant = new TokenExchangeGrant(subjectToken, subjectTokenType, null, null, null, null);
+		TokenExchangeGrant grant = new TokenExchangeGrant(subjectToken, subjectTokenType);
 		
 		assertEquals(GrantType.TOKEN_EXCHANGE, grant.getType());
 		assertEquals(subjectToken, grant.getSubjectToken());

@@ -1847,3 +1847,6 @@ version 9.16 (2021-09-21)
     * Updates ServletUtils to work around non-compliant IPv6 address formatting
       in Jetty for HttpServletRequest.getLocalAddr (iss #376).
     * Updates to com.nimbusds:nimbus-jose-jwt:9.14
+
+version 9.16 (2021-09-21)
+    * Adds minimal TokenExchangeGrant constructor.

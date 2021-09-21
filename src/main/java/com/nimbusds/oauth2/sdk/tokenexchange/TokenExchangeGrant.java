@@ -77,6 +77,22 @@ public class TokenExchangeGrant extends AuthorizationGrant {
 	/**
 	 * Creates a new token exchange grant.
 	 *
+	 * @param subjectToken     The subject token representing the identity
+	 *                         of the party on behalf of whom the request
+	 *                         is being made. Must not be {@code null}.
+	 * @param subjectTokenType Identifier for the type of the subject
+	 *                         token. Must not be {@code null}.
+	 */
+	public TokenExchangeGrant(final TypelessToken subjectToken,
+				  final TokenTypeURI subjectTokenType) {
+		
+		this(subjectToken, subjectTokenType, null, null, null, null);
+	}
+	
+	
+	/**
+	 * Creates a new token exchange grant.
+	 *
 	 * @param subjectToken       The subject token representing the
 	 *                           identity of the party on behalf of whom
 	 *                           the request is being made. Must not be
@@ -95,7 +111,12 @@ public class TokenExchangeGrant extends AuthorizationGrant {
 	 *                           security token, {@code null} if not
 	 *                           specified.
 	 */
-	public TokenExchangeGrant(final TypelessToken subjectToken, final TokenTypeURI subjectTokenType, final TypelessToken actorToken, final TokenTypeURI actorTokenType, final TokenTypeURI requestedTokenType, final List<Audience> audience) {
+	public TokenExchangeGrant(final TypelessToken subjectToken,
+				  final TokenTypeURI subjectTokenType,
+				  final TypelessToken actorToken,
+				  final TokenTypeURI actorTokenType,
+				  final TokenTypeURI requestedTokenType,
+				  final List<Audience> audience) {
 		
 		super(GRANT_TYPE);
 		
