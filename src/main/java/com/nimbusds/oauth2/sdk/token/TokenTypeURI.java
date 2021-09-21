@@ -57,6 +57,12 @@ public final class TokenTypeURI {
 	public static final TokenTypeURI SAML2 = new TokenTypeURI(URI.create("urn:ietf:params:oauth:token-type:saml2"));
 	
 	
+	/**
+	 * The token type URI for a JSON Web Token (JWT).
+	 */
+	public static final TokenTypeURI JWT = new TokenTypeURI(URI.create("urn:ietf:params:oauth:token-type:jwt"));
+	
+	
 	private static final Map<String, TokenTypeURI> KNOWN_TOKEN_TYPE_URIS;
 	
 	static {
@@ -66,6 +72,7 @@ public final class TokenTypeURI {
 		knownTokenTypeUris.put(ID_TOKEN.getURI().toString(), ID_TOKEN);
 		knownTokenTypeUris.put(SAML1.getURI().toString(), SAML1);
 		knownTokenTypeUris.put(SAML2.getURI().toString(), SAML2);
+		knownTokenTypeUris.put(JWT.getURI().toString(), JWT);
 		KNOWN_TOKEN_TYPE_URIS = Collections.unmodifiableMap(knownTokenTypeUris);
 	}
 	
