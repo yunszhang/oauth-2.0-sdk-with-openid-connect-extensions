@@ -21,7 +21,6 @@ package com.nimbusds.openid.connect.sdk.claims;
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.jose.JWSAlgorithm;
-
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.ResponseType;
 
@@ -56,9 +55,7 @@ public final class CodeHash extends HashClaim {
 
 		// Only required in hybrid flow for 'code id_token' and 'code id_token token'
 		// Disregard authz / token endpoint!
-		return new ResponseType("code", "id_token").equals(responseType) ||
-			new ResponseType("code", "id_token", "token").equals(responseType);
-
+		return ResponseType.CODE_IDTOKEN.equals(responseType) || ResponseType.CODE_IDTOKEN_TOKEN.equals(responseType);
 	}
 
 
