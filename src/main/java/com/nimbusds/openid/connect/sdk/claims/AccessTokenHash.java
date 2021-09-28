@@ -21,6 +21,7 @@ package com.nimbusds.openid.connect.sdk.claims;
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 
@@ -82,10 +83,40 @@ public final class AccessTokenHash extends HashClaim {
 	 *
 	 * @return The access token hash, or {@code null} if the JWS algorithm
 	 *         is not supported.
+	 *
+	 * @deprecated Use {@link #getMessageDigestInstance(JWSAlgorithm, Curve)}
+	 * instead.
 	 */
+	@Deprecated
 	public static AccessTokenHash compute(final AccessToken accessToken, final JWSAlgorithm alg) {
 
 		String value = computeValue(accessToken, alg);
+
+		if (value == null)
+			return null;
+
+		return new AccessTokenHash(value);
+	}
+
+
+	/**
+	 * Computes the hash for the specified access token and reference JSON
+	 * Web Signature (JWS) algorithm.
+	 *
+	 * @param accessToken The access token. Must not be {@code null}.
+	 * @param alg         The reference JWS algorithm. Must not be
+	 *                    {@code null}.
+	 * @param crv         The JWK curve used with the JWS algorithm,
+	 *                    {@code null} if not applicable.
+	 *
+	 * @return The access token hash, or {@code null} if the JWS algorithm
+	 *         is not supported.
+	 */
+	public static AccessTokenHash compute(final AccessToken accessToken,
+					      final JWSAlgorithm alg,
+					      final Curve crv) {
+
+		String value = computeValue(accessToken, alg, crv);
 
 		if (value == null)
 			return null;

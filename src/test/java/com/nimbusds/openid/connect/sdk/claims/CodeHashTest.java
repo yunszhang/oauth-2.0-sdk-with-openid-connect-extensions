@@ -18,29 +18,93 @@
 package com.nimbusds.openid.connect.sdk.claims;
 
 
+import java.util.Arrays;
+
 import junit.framework.TestCase;
 
 import com.nimbusds.jose.JWSAlgorithm;
-
-import com.nimbusds.oauth2.sdk.ResponseType;
+import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
+import com.nimbusds.oauth2.sdk.ResponseType;
 
 
-/**
- * Tests the authorisation code hash.
- */
 public class CodeHashTest extends TestCase {
 
 
 	public void testComputeAgainstSpecExample() {
-
+		
 		AuthorizationCode code = new AuthorizationCode("Qcb0Orv1zh30vL1MPRsbm-diHiMwcLyZvn1arpZv-Jxf_11jnpEX3Tgfvk");
 
-		CodeHash computedHash = CodeHash.compute(code, JWSAlgorithm.RS256);
-
-		CodeHash expectedHash = new CodeHash("LDktKdoQak3Pk0cnXxCltA");
-
-		assertEquals(expectedHash.getValue(), computedHash.getValue());
+		assertEquals(new CodeHash("LDktKdoQak3Pk0cnXxCltA"), CodeHash.compute(code, JWSAlgorithm.RS256));
+		assertEquals(new CodeHash("LDktKdoQak3Pk0cnXxCltA"), CodeHash.compute(code, JWSAlgorithm.RS256, null));
+	}
+	
+	
+	// https://bitbucket.org/openid/connect/issues/1125/_hash-algorithm-for-eddsa-id-tokens#comment-57040192
+	public void testComputeWithSHA256() {
+		
+		AuthorizationCode code = new AuthorizationCode("YmJiZTAwYmYtMzgyOC00NzhkLTkyOTItNjJjNDM3MGYzOWIy9sFhvH8K_x8UIHj1osisS57f5DduL");
+		
+		CodeHash expectedHash = new CodeHash("xsZZrUssMXjL3FBlzoSh2g");
+		
+		for (JWSAlgorithm jwsAlgorithm: Arrays.asList(
+			JWSAlgorithm.HS256,
+			JWSAlgorithm.RS256,
+			JWSAlgorithm.PS256,
+			JWSAlgorithm.ES256,
+			JWSAlgorithm.ES256K)) {
+			
+			assertEquals(expectedHash, CodeHash.compute(code, jwsAlgorithm));
+			assertEquals(expectedHash, CodeHash.compute(code, jwsAlgorithm, null));
+		}
+	}
+	
+	
+	// https://bitbucket.org/openid/connect/issues/1125/_hash-algorithm-for-eddsa-id-tokens#comment-57040192
+	public void testComputeWithSHA384() {
+		
+		AuthorizationCode code = new AuthorizationCode("YmJiZTAwYmYtMzgyOC00NzhkLTkyOTItNjJjNDM3MGYzOWIy9sFhvH8K_x8UIHj1osisS57f5DduL");
+		
+		CodeHash expectedHash = new CodeHash("adt46pcdiB-l6eTNifgoVM-5AIJAxq84");
+		
+		for (JWSAlgorithm jwsAlgorithm: Arrays.asList(
+			JWSAlgorithm.HS384,
+			JWSAlgorithm.RS384,
+			JWSAlgorithm.PS384,
+			JWSAlgorithm.ES384)) {
+			
+			assertEquals(expectedHash, CodeHash.compute(code, jwsAlgorithm));
+			assertEquals(expectedHash, CodeHash.compute(code, jwsAlgorithm, null));
+		}
+	}
+	
+	
+	// https://bitbucket.org/openid/connect/issues/1125/_hash-algorithm-for-eddsa-id-tokens#comment-57040192
+	public void testComputeWithSHA512() {
+		
+		AuthorizationCode code = new AuthorizationCode("YmJiZTAwYmYtMzgyOC00NzhkLTkyOTItNjJjNDM3MGYzOWIy9sFhvH8K_x8UIHj1osisS57f5DduL");
+		
+		CodeHash expectedHash = new CodeHash("p2LHG4H-8pYDc0hyVOo3iIHvZJUqe9tbj3jESOuXbkY");
+		
+		for (JWSAlgorithm jwsAlgorithm: Arrays.asList(
+			JWSAlgorithm.HS512,
+			JWSAlgorithm.RS512,
+			JWSAlgorithm.PS512,
+			JWSAlgorithm.ES512)) {
+			
+			assertEquals(expectedHash, CodeHash.compute(code, jwsAlgorithm));
+			assertEquals(expectedHash, CodeHash.compute(code, jwsAlgorithm, null));
+		}
+	}
+	
+	// https://bitbucket.org/openid/connect/issues/1125/_hash-algorithm-for-eddsa-id-tokens#comment-57040192
+	public void testComputeWithSHA512_EdDSA() {
+		
+		AuthorizationCode code = new AuthorizationCode("YmJiZTAwYmYtMzgyOC00NzhkLTkyOTItNjJjNDM3MGYzOWIy9sFhvH8K_x8UIHj1osisS57f5DduL");
+		
+		CodeHash expectedHash = new CodeHash("p2LHG4H-8pYDc0hyVOo3iIHvZJUqe9tbj3jESOuXbkY");
+		
+		assertEquals(expectedHash, CodeHash.compute(code, JWSAlgorithm.EdDSA, Curve.Ed25519));
 	}
 
 
@@ -48,11 +112,8 @@ public class CodeHashTest extends TestCase {
 
 		AuthorizationCode code = new AuthorizationCode();
 
-		CodeHash hash1 = CodeHash.compute(code, JWSAlgorithm.HS512);
-
-		CodeHash hash2 = CodeHash.compute(code, JWSAlgorithm.HS512);
-
-		assertTrue(hash1.equals(hash2));
+		assertEquals(CodeHash.compute(code, JWSAlgorithm.HS512), CodeHash.compute(code, JWSAlgorithm.HS512));
+		assertEquals(CodeHash.compute(code, JWSAlgorithm.HS512, null), CodeHash.compute(code, JWSAlgorithm.HS512, null));
 	}
 
 
@@ -61,6 +122,7 @@ public class CodeHashTest extends TestCase {
 		AuthorizationCode code = new AuthorizationCode();
 
 		assertNull(CodeHash.compute(code, new JWSAlgorithm("no-such-alg")));
+		assertNull(CodeHash.compute(code, new JWSAlgorithm("no-such-alg"), null));
 	}
 
 

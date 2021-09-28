@@ -24,8 +24,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.util.Base64URL;
-
 import com.nimbusds.oauth2.sdk.id.Identifier;
 
 
@@ -57,8 +57,30 @@ public abstract class HashClaim extends Identifier {
 	 *
 	 * @return The SHA-2 message digest, {@code null} if the JWS algorithm
 	 *         or its corresponding SHA-2 message digest are not supported.
+	 *
+	 * @deprecated Use {@link #getMessageDigestInstance(JWSAlgorithm, Curve)}
+	 * instead.
 	 */
+	@Deprecated
 	public static MessageDigest getMessageDigestInstance(final JWSAlgorithm alg) {
+
+		return getMessageDigestInstance(alg, null);
+	}
+
+
+	/**
+	 * Gets the matching SHA-2 message digest for the specified JSON Web
+	 * Signature (JWS) algorithm.
+	 *
+	 * @param alg The JWS algorithm. Must not be {@code null}.
+	 * @param crv The JWK curve used with the JWS algorithm, {@code null}
+	 *            if not applicable.
+	 *
+	 * @return The SHA-2 message digest, {@code null} if the JWS algorithm
+	 *         or its corresponding SHA-2 message digest are not supported.
+	 */
+	public static MessageDigest getMessageDigestInstance(final JWSAlgorithm alg,
+							     final Curve crv) {
 
 		String mdAlg;
 
@@ -80,7 +102,8 @@ public abstract class HashClaim extends Identifier {
 		} else if (alg.equals(JWSAlgorithm.HS512) ||
 			   alg.equals(JWSAlgorithm.RS512) ||
 			   alg.equals(JWSAlgorithm.ES512) ||
-			   alg.equals(JWSAlgorithm.PS512)    ) {
+			   alg.equals(JWSAlgorithm.PS512) ||
+			   alg.equals(JWSAlgorithm.EdDSA) && Curve.Ed25519.equals(crv)) {
 
 			mdAlg = "SHA-512";
 
@@ -105,16 +128,43 @@ public abstract class HashClaim extends Identifier {
 	 *
 	 * @param identifier The identifier, typically an authorisation code or
 	 *                   an access token.  Must not be {@code null}.
-	 * @param alg        The reference JSON Web Signature (JWS) algorithm.
-	 *                   Must not be {@code null}.
+	 * @param alg        The reference JWS algorithm. Must not be
+	 *                   {@code null}.
+	 *
+	 * @return The matching (truncated to first half) SHA-2 claim value,
+	 *         or {@code null} if the JWS algorithm or its corresponding
+	 *         SHA-2 message digest are not supported.
+	 *
+	 * @deprecated Use {@link #computeValue(Identifier, JWSAlgorithm, Curve)}
+	 * instead.
+	 */
+	@Deprecated
+	public static String computeValue(final Identifier identifier,
+					  final JWSAlgorithm alg) {
+
+		return computeValue(identifier, alg, null);
+	}
+
+
+	/**
+	 * Computes the SHA-2 claim value for the specified identifier.
+	 *
+	 * @param identifier The identifier, typically an authorisation code or
+	 *                   an access token.  Must not be {@code null}.
+	 * @param alg        The reference JWS algorithm. Must not be
+	 *                   {@code null}.
+	 * @param crv        The JWK curve used with the JWS algorithm,
+	 *                   {@code null} if not applicable.
 	 *
 	 * @return The matching (truncated to first half) SHA-2 claim value,
 	 *         or {@code null} if the JWS algorithm or its corresponding
 	 *         SHA-2 message digest are not supported.
 	 */
-	public static String computeValue(final Identifier identifier, final JWSAlgorithm alg) {
+	public static String computeValue(final Identifier identifier,
+					  final JWSAlgorithm alg,
+					  final Curve crv) {
 
-		MessageDigest md = getMessageDigestInstance(alg);
+		MessageDigest md = getMessageDigestInstance(alg, crv);
 
 		if (md == null)
 			return null;

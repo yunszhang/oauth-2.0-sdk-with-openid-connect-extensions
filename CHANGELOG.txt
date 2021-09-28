@@ -1860,3 +1860,11 @@ version 9.17 (2021-09-21)
 version 9.18 (2021-09-28)
     * Updates HashClaim.getMessageDigestInstance to support the ES256K JWS
       algorithm.
+    * Updates HashClaim.getMessageDigestInstance to support the EdDSA JWS
+      algorithm with curve Ed25519.
+    * Adds new HashClaim.computeValue(Identifier, JWSAlgorithm, Curve) method,
+      deprecates the old method.
+    * Adds new AccessTokenHash.compute(AccessToken, JWSAlgorithm, Curve)
+      method, deprecates the old method.
+    * Adds new CodeHash.compute(AuthorizationCode, JWSAlgorithm, Curve)
+      method, deprecates the old method.

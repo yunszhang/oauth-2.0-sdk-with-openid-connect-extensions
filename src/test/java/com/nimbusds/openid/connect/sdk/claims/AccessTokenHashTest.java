@@ -23,6 +23,7 @@ import java.util.Arrays;
 import junit.framework.TestCase;
 
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.TypelessAccessToken;
@@ -35,13 +36,8 @@ public class AccessTokenHashTest extends TestCase {
 
 		AccessToken token = new TypelessAccessToken("jHkWEdUXMU1BwAsC4vtUsZwnNvTIxEl0z9K3vx5KF0Y");
 
-		AccessTokenHash computedHash = AccessTokenHash.compute(token, JWSAlgorithm.RS256);
-		
-		assertNotNull(computedHash);
-
-		AccessTokenHash expectedHash = new AccessTokenHash("77QmUPtjPfzWtF2AnpK9RQ");
-
-		assertEquals(expectedHash.getValue(), computedHash.getValue());
+		assertEquals(new AccessTokenHash("77QmUPtjPfzWtF2AnpK9RQ"), AccessTokenHash.compute(token, JWSAlgorithm.RS256));
+		assertEquals(new AccessTokenHash("77QmUPtjPfzWtF2AnpK9RQ"), AccessTokenHash.compute(token, JWSAlgorithm.RS256, null));
 	}
 	
 	
@@ -60,6 +56,7 @@ public class AccessTokenHashTest extends TestCase {
 			JWSAlgorithm.ES256K)) {
 			
 			assertEquals(expectedHash, AccessTokenHash.compute(token, jwsAlgorithm));
+			assertEquals(expectedHash, AccessTokenHash.compute(token, jwsAlgorithm, null));
 		}
 	}
 	
@@ -78,6 +75,7 @@ public class AccessTokenHashTest extends TestCase {
 			JWSAlgorithm.ES384)) {
 			
 			assertEquals(expectedHash, AccessTokenHash.compute(token, jwsAlgorithm));
+			assertEquals(expectedHash, AccessTokenHash.compute(token, jwsAlgorithm, null));
 		}
 	}
 	
@@ -96,7 +94,18 @@ public class AccessTokenHashTest extends TestCase {
 			JWSAlgorithm.ES512)) {
 			
 			assertEquals(expectedHash, AccessTokenHash.compute(token, jwsAlgorithm));
+			assertEquals(expectedHash, AccessTokenHash.compute(token, jwsAlgorithm, null));
 		}
+	}
+	
+	// https://bitbucket.org/openid/connect/issues/1125/_hash-algorithm-for-eddsa-id-tokens#comment-57040192
+	public void testComputeWithSHA512_EdDSA() {
+		
+		AccessToken token = new TypelessAccessToken("YmJiZTAwYmYtMzgyOC00NzhkLTkyOTItNjJjNDM3MGYzOWIy9sFhvH8K_x8UIHj1osisS57f5DduL");
+		
+		AccessTokenHash expectedHash = new AccessTokenHash("p2LHG4H-8pYDc0hyVOo3iIHvZJUqe9tbj3jESOuXbkY");
+		
+		assertEquals(expectedHash, AccessTokenHash.compute(token, JWSAlgorithm.EdDSA, Curve.Ed25519));
 	}
 
 
@@ -104,9 +113,9 @@ public class AccessTokenHashTest extends TestCase {
 
 		AccessToken token = new TypelessAccessToken("12345678");
 
-		AccessTokenHash hash1 = AccessTokenHash.compute(token, JWSAlgorithm.HS512);
+		AccessTokenHash hash1 = AccessTokenHash.compute(token, JWSAlgorithm.HS512, null);
 
-		AccessTokenHash hash2 = AccessTokenHash.compute(token, JWSAlgorithm.HS512);
+		AccessTokenHash hash2 = AccessTokenHash.compute(token, JWSAlgorithm.HS512, null);
 		
 		assertNotNull(hash1);
 		
@@ -121,6 +130,7 @@ public class AccessTokenHashTest extends TestCase {
 		AccessToken token = new TypelessAccessToken("12345678");
 
 		assertNull(AccessTokenHash.compute(token, new JWSAlgorithm("no-such-alg")));
+		assertNull(AccessTokenHash.compute(token, new JWSAlgorithm("no-such-alg"), null));
 	}
 
 

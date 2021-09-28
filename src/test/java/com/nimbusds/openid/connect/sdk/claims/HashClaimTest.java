@@ -24,6 +24,7 @@ import java.util.Arrays;
 import junit.framework.TestCase;
 
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.Curve;
 
 
 public class HashClaimTest extends TestCase {
@@ -72,5 +73,12 @@ public class HashClaimTest extends TestCase {
 			
 			assertEquals("SHA-512", md.getAlgorithm());
 		}
+	}
+
+
+	public void testGetMessageDigestInstance_SHA_512_EdDSA() {
+		
+		MessageDigest md = HashClaim.getMessageDigestInstance(JWSAlgorithm.EdDSA, Curve.Ed25519);
+		assertEquals("SHA-512", md.getAlgorithm());
 	}
 }
