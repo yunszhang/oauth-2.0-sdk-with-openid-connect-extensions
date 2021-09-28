@@ -65,6 +65,7 @@ public abstract class HashClaim extends Identifier {
 		if (alg.equals(JWSAlgorithm.HS256) ||
 		    alg.equals(JWSAlgorithm.RS256) ||
 		    alg.equals(JWSAlgorithm.ES256) ||
+		    alg.equals(JWSAlgorithm.ES256K) ||
 		    alg.equals(JWSAlgorithm.PS256)    ) {
 
 			mdAlg = "SHA-256";

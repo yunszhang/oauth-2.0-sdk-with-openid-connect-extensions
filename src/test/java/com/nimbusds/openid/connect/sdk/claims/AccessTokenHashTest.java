@@ -18,23 +18,20 @@
 package com.nimbusds.openid.connect.sdk.claims;
 
 
+import java.util.Arrays;
+
 import junit.framework.TestCase;
 
 import com.nimbusds.jose.JWSAlgorithm;
-
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.TypelessAccessToken;
 
 
-/**
- * Tests the access token hash.
- */
 public class AccessTokenHashTest extends TestCase {
 
 
-	public void testComputeAgainstSpecExample()
-		throws Exception {
+	public void testComputeAgainstSpecExample() {
 
 		AccessToken token = new TypelessAccessToken("jHkWEdUXMU1BwAsC4vtUsZwnNvTIxEl0z9K3vx5KF0Y");
 
@@ -45,6 +42,61 @@ public class AccessTokenHashTest extends TestCase {
 		AccessTokenHash expectedHash = new AccessTokenHash("77QmUPtjPfzWtF2AnpK9RQ");
 
 		assertEquals(expectedHash.getValue(), computedHash.getValue());
+	}
+	
+	
+	// https://bitbucket.org/openid/connect/issues/1125/_hash-algorithm-for-eddsa-id-tokens#comment-57040192
+	public void testComputeWithSHA256() {
+		
+		AccessToken token = new TypelessAccessToken("YmJiZTAwYmYtMzgyOC00NzhkLTkyOTItNjJjNDM3MGYzOWIy9sFhvH8K_x8UIHj1osisS57f5DduL");
+		
+		AccessTokenHash expectedHash = new AccessTokenHash("xsZZrUssMXjL3FBlzoSh2g");
+		
+		for (JWSAlgorithm jwsAlgorithm: Arrays.asList(
+			JWSAlgorithm.HS256,
+			JWSAlgorithm.RS256,
+			JWSAlgorithm.PS256,
+			JWSAlgorithm.ES256,
+			JWSAlgorithm.ES256K)) {
+			
+			assertEquals(expectedHash, AccessTokenHash.compute(token, jwsAlgorithm));
+		}
+	}
+	
+	
+	// https://bitbucket.org/openid/connect/issues/1125/_hash-algorithm-for-eddsa-id-tokens#comment-57040192
+	public void testComputeWithSHA384() {
+		
+		AccessToken token = new TypelessAccessToken("YmJiZTAwYmYtMzgyOC00NzhkLTkyOTItNjJjNDM3MGYzOWIy9sFhvH8K_x8UIHj1osisS57f5DduL");
+		
+		AccessTokenHash expectedHash = new AccessTokenHash("adt46pcdiB-l6eTNifgoVM-5AIJAxq84");
+		
+		for (JWSAlgorithm jwsAlgorithm: Arrays.asList(
+			JWSAlgorithm.HS384,
+			JWSAlgorithm.RS384,
+			JWSAlgorithm.PS384,
+			JWSAlgorithm.ES384)) {
+			
+			assertEquals(expectedHash, AccessTokenHash.compute(token, jwsAlgorithm));
+		}
+	}
+	
+	
+	// https://bitbucket.org/openid/connect/issues/1125/_hash-algorithm-for-eddsa-id-tokens#comment-57040192
+	public void testComputeWithSHA512() {
+		
+		AccessToken token = new TypelessAccessToken("YmJiZTAwYmYtMzgyOC00NzhkLTkyOTItNjJjNDM3MGYzOWIy9sFhvH8K_x8UIHj1osisS57f5DduL");
+		
+		AccessTokenHash expectedHash = new AccessTokenHash("p2LHG4H-8pYDc0hyVOo3iIHvZJUqe9tbj3jESOuXbkY");
+		
+		for (JWSAlgorithm jwsAlgorithm: Arrays.asList(
+			JWSAlgorithm.HS512,
+			JWSAlgorithm.RS512,
+			JWSAlgorithm.PS512,
+			JWSAlgorithm.ES512)) {
+			
+			assertEquals(expectedHash, AccessTokenHash.compute(token, jwsAlgorithm));
+		}
 	}
 
 
@@ -59,8 +111,8 @@ public class AccessTokenHashTest extends TestCase {
 		assertNotNull(hash1);
 		
 		assertNotNull(hash2);
-
-		assertTrue(hash1.equals(hash2));
+		
+		assertEquals(hash1, hash2);
 	}
 
 

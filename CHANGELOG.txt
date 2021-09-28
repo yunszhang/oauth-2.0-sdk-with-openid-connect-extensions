@@ -1856,3 +1856,7 @@ version 9.17 (2021-09-21)
     * Adds minimal TokenExchangeGrant constructor.
     * Updates TokenExchangeGrant constructors to accept general Token instead
       of TypelessToken.
+
+version 9.18 (2021-09-28)
+    * Updates HashClaim.getMessageDigestInstance to support the ES256K JWS
+      algorithm.
