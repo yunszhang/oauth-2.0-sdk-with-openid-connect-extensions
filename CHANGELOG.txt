@@ -1868,3 +1868,7 @@ version 9.18 (2021-09-28)
       method, deprecates the old method.
     * Adds new CodeHash.compute(AuthorizationCode, JWSAlgorithm, Curve)
       method, deprecates the old method.
+
+version 9.19 (2021-10-20)
+    * Adds new StateHash.compute(AccessToken, JWSAlgorithm, Curve) method,
+      deprecates the old method.

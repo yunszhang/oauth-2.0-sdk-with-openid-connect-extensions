@@ -18,9 +18,11 @@
 package com.nimbusds.openid.connect.sdk.claims;
 
 
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.oauth2.sdk.id.State;
 import net.jcip.annotations.Immutable;
+
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.oauth2.sdk.id.State;
 
 
 /**
@@ -60,10 +62,39 @@ public class StateHash extends HashClaim {
 	 *
 	 * @return The state hash, or {@code null} if the JWS algorithm is not
 	 *         supported.
+	 *
+	 * @deprecated Use {@link #compute(State, JWSAlgorithm, Curve)}
+	 * instead.
 	 */
+	@Deprecated
 	public static StateHash compute(final State state, final JWSAlgorithm alg) {
 		
 		String value = computeValue(state, alg);
+		
+		if (value == null)
+			return null;
+		
+		return new StateHash(value);
+	}
+	
+	
+	/**
+	 * Computes the hash for the specified state and reference JSON
+	 * Web Signature (JWS) algorithm.
+	 *
+	 * @param state The state. Must not be {@code null}.
+	 * @param alg   The reference JWS algorithm. Must not be {@code null}.
+	 * @param crv   The JWK curve used with the JWS algorithm, {@code null}
+	 *              if not applicable.
+	 *
+	 * @return The state hash, or {@code null} if the JWS algorithm is not
+	 *         supported.
+	 */
+	public static StateHash compute(final State state,
+					final JWSAlgorithm alg,
+					final Curve crv) {
+		
+		String value = computeValue(state, alg, crv);
 		
 		if (value == null)
 			return null;
