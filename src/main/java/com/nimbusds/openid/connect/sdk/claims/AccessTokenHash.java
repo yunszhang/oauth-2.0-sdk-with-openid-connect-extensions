@@ -84,7 +84,7 @@ public final class AccessTokenHash extends HashClaim {
 	 * @return The access token hash, or {@code null} if the JWS algorithm
 	 *         is not supported.
 	 *
-	 * @deprecated Use {@link #getMessageDigestInstance(JWSAlgorithm, Curve)}
+	 * @deprecated Use {@link #compute(AccessToken, JWSAlgorithm, Curve)}
 	 * instead.
 	 */
 	@Deprecated
