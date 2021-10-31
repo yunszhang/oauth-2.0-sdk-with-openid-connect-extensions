@@ -53,6 +53,17 @@ public abstract class CountryCode extends Identifier {
 	
 	
 	/**
+	 * Casts this code to an ISO 3166-1 alpha-3 (three-letter) country code.
+	 *
+	 * @return The ISO 3166-1 alpha-3 (three-letter) country code.
+	 */
+	public ISO3166_1Alpha3CountryCode toISO3166_1Alpha3CountryCode() {
+		
+		return (ISO3166_1Alpha3CountryCode)this;
+	}
+	
+	
+	/**
 	 * Parses a country code.
 	 *
 	 * @param s The string to parse. Must not be {@code null}.
@@ -64,7 +75,13 @@ public abstract class CountryCode extends Identifier {
 	public static CountryCode parse(final String s)
 		throws ParseException {
 		
-		return ISO3166_1Alpha2CountryCode.parse(s);
+		if (3 == s.length()) {
+			return ISO3166_1Alpha3CountryCode.parse(s);
+		} else if (2 == s.length()) {
+			return ISO3166_1Alpha2CountryCode.parse(s);
+		} else {
+			throw new ParseException("The country code must be 3 or 2 letters");
+		}
 	}
 	
 	

@@ -25,36 +25,36 @@ import junit.framework.TestCase;
 import com.nimbusds.oauth2.sdk.ParseException;
 
 
-public class ISO3166_1Alpha2CountryCodeTest extends TestCase {
+public class ISO3166_1Alpha3CountryCodeTest extends TestCase {
 	
 
 	public void testConstructor() throws ParseException {
 		
-		ISO3166_1Alpha2CountryCode code = new ISO3166_1Alpha2CountryCode("BG");
-		assertEquals("BG", code.getValue());
+		ISO3166_1Alpha3CountryCode code = new ISO3166_1Alpha3CountryCode("SWE");
+		assertEquals("SWE", code.getValue());
 		
-		code = ISO3166_1Alpha2CountryCode.parse(code.getValue());
-		assertEquals("BG", code.getValue());
+		code = ISO3166_1Alpha3CountryCode.parse(code.getValue());
+		assertEquals("SWE", code.getValue());
 		
-		assertEquals(code, new ISO3166_1Alpha2CountryCode("BG"));
-		assertEquals(code, new ISO3166_1Alpha2CountryCode("bg"));
+		assertEquals(code, new ISO3166_1Alpha3CountryCode("SWE"));
+		assertEquals(code, new ISO3166_1Alpha3CountryCode("swe"));
 	}
 	
 	
 	public void testLength() {
 		
 		try {
-			new ISO3166_1Alpha2CountryCode("A");
+			new ISO3166_1Alpha3CountryCode("A");
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("The ISO 3166-1 alpha-2 country code must be 2 letters", e.getMessage());
+			assertEquals("The ISO 3166-1 alpha-3 country code must be 3 letters", e.getMessage());
 		}
 		
 		try {
-			new ISO3166_1Alpha2CountryCode("ABD");
+			new ISO3166_1Alpha3CountryCode("ABCD");
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("The ISO 3166-1 alpha-2 country code must be 2 letters", e.getMessage());
+			assertEquals("The ISO 3166-1 alpha-3 country code must be 3 letters", e.getMessage());
 		}
 	}
 	
@@ -62,22 +62,22 @@ public class ISO3166_1Alpha2CountryCodeTest extends TestCase {
 	public void testParseException() {
 		
 		try {
-			ISO3166_1Alpha2CountryCode.parse("ABC");
+			ISO3166_1Alpha3CountryCode.parse("AB");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("The ISO 3166-1 alpha-2 country code must be 2 letters", e.getMessage());
+			assertEquals("The ISO 3166-1 alpha-3 country code must be 3 letters", e.getMessage());
 		}
 	}
 	
 	
 	public void testNormalization() {
 		
-		assertEquals("BG", new ISO3166_1Alpha2CountryCode("bg").getValue());
+		assertEquals("SWE", new ISO3166_1Alpha3CountryCode("swe").getValue());
 	}
 	
 	
 	public void testInequality() {
 		
-		assertNotEquals(new ISO3166_1Alpha2CountryCode("BG"), new ISO3166_1Alpha2CountryCode("GB"));
+		assertNotEquals(new ISO3166_1Alpha3CountryCode("SWE"), new ISO3166_1Alpha3CountryCode("BUL"));
 	}
 }

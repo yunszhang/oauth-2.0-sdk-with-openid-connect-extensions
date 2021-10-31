@@ -24,25 +24,25 @@ import com.nimbusds.oauth2.sdk.ParseException;
 
 
 /**
- * ISO 3166-1 alpha-2 (two-letter) country code.
+ * ISO 3166-1 alpha-3 (three-letter) country code.
  */
 @Immutable
-public final class ISO3166_1Alpha2CountryCode extends CountryCode {
+public final class ISO3166_1Alpha3CountryCode extends CountryCode {
 	
 	
 	private static final long serialVersionUID = -7659886425656766569L;
 	
 	
 	/**
-	 * Creates a new ISO 3166-1 alpha-2 country code. Normalises the code
+	 * Creates a new ISO 3166-1 alpha-3 country code. Normalises the code
 	 * to upper case.
 	 *
-	 * @param value The country code value, must be two-letter.
+	 * @param value The country code value, must be three-letter.
 	 */
-	public ISO3166_1Alpha2CountryCode(final String value) {
+	public ISO3166_1Alpha3CountryCode(final String value) {
 		super(value.toUpperCase());
-		if (value.length() != 2) {
-			throw new IllegalArgumentException("The ISO 3166-1 alpha-2 country code must be 2 letters");
+		if (value.length() != 3) {
+			throw new IllegalArgumentException("The ISO 3166-1 alpha-3 country code must be 3 letters");
 		}
 	}
 	
@@ -50,25 +50,25 @@ public final class ISO3166_1Alpha2CountryCode extends CountryCode {
 	@Override
 	public boolean equals(final Object object) {
 		
-		return object instanceof ISO3166_1Alpha2CountryCode &&
+		return object instanceof ISO3166_1Alpha3CountryCode &&
 			this.toString().equals(object.toString());
 	}
 	
 	
 	/**
-	 * Parses an ISO 3166-1 alpha-2 (two-letter) country code.
+	 * Parses an ISO 3166-1 alpha-3 (three-letter) country code.
 	 *
 	 * @param s The string to parse. Must not be {@code null}.
 	 *
-	 * @return The ISO 3166-1 alpha-2 (two-letter) country code.
+	 * @return The ISO 3166-1 alpha-3 (three-letter) country code.
 	 *
 	 * @throws ParseException If parsing failed.
 	 */
-	public static ISO3166_1Alpha2CountryCode parse(final String s)
+	public static ISO3166_1Alpha3CountryCode parse(final String s)
 		throws ParseException {
 		
 		try {
-			return new ISO3166_1Alpha2CountryCode(s);
+			return new ISO3166_1Alpha3CountryCode(s);
 		} catch (IllegalArgumentException e) {
 			throw new ParseException(e.getMessage());
 		}
