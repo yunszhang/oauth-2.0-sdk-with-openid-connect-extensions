@@ -1872,3 +1872,7 @@ version 9.18 (2021-09-28)
 version 9.19 (2021-10-20)
     * Adds new StateHash.compute(AccessToken, JWSAlgorithm, Curve) method,
       deprecates the old method.
+
+version 9.20 (2021-10-31)
+    * Upgrades to OpenID Connect for Identity Assurance 1.0, draft 12.
+    * Adds support for the also_known_as OpenID claim.

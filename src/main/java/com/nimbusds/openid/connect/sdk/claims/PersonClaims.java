@@ -39,7 +39,7 @@ import com.nimbusds.openid.connect.sdk.assurance.claims.CountryCode;
  *
  * <ul>
  *     <li>OpenID Connect Core 1.0, sections 5.1 and 5.6.
- *     <li>OpenID Connect for Identity Assurance 1.0, section 3.1.
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 4.1.
  * </ul>
  */
 public class PersonClaims extends ClaimsSet {
@@ -216,6 +216,13 @@ public class PersonClaims extends ClaimsSet {
 	
 	
 	/**
+	 * The also known as claim name (OpenID Connect for Identity Assurance
+	 * 1.0).
+	 */
+	public static final String ALSO_KNOWN_AS = "also_known_as";
+	
+	
+	/**
 	 * Gets the names of the standard top-level UserInfo claims.
 	 *
 	 * @return The names of the standard top-level UserInfo claims
@@ -251,7 +258,8 @@ public class PersonClaims extends ClaimsSet {
 			BIRTH_GIVEN_NAME_CLAIM_NAME,
 			BIRTH_MIDDLE_NAME_CLAIM_NAME,
 			SALUTATION_CLAIM_NAME,
-			TITLE_CLAIM_NAME
+			TITLE_CLAIM_NAME,
+			ALSO_KNOWN_AS
 		));
 		return Collections.unmodifiableSet(names);
 	}
@@ -1567,5 +1575,77 @@ public class PersonClaims extends ClaimsSet {
 	public void setTitle(final String title, final LangTag langTag) {
 		
 		setClaim(TITLE_CLAIM_NAME, title, langTag);
+	}
+	
+	
+	// also_known_as
+	
+	
+	/**
+	 * Gets the also known as. Corresponds to the {@code also_known_as}
+	 * claim from OpenID Connect for Identity Assurance 1.0, with no
+	 * language tag.
+	 *
+	 * @return The also_known_as, {@code null} if not specified.
+	 */
+	public String getAlsoKnownAs() {
+		
+		return getStringClaim(ALSO_KNOWN_AS);
+	}
+	
+	
+	/**
+	 * Gets the also known as. Corresponds to the {@code also_known_as}
+	 * claim from OpenID Connect for Identity Assurance 1.0, with an
+	 * optional language tag.
+	 *
+	 * @param langTag The language tag of the entry, {@code null} to get
+	 *                the non-tagged entry.
+	 *
+	 * @return The also known as, {@code null} if not specified.
+	 */
+	public String getAlsoKnownAs(final LangTag langTag) {
+		
+		return getStringClaim(ALSO_KNOWN_AS, langTag);
+	}
+	
+	
+	/**
+	 * Gets the also known as entries. Correspond to the
+	 * {@code also_known_as} claim from OpenID Connect for Identity
+	 * Assurance 1.0.
+	 *
+	 * @return The also known as entries, empty map if none.
+	 */
+	public Map<LangTag,String> getAlsoKnownAsEntries() {
+		
+		return getLangTaggedClaim(ALSO_KNOWN_AS, String.class);
+	}
+	
+	
+	/**
+	 * Sets the also known as. Corresponds to the {@code also_known_as}
+	 * claim from OpenID Connect for Identity Assurance 1.0.
+	 *
+	 * @param alsoKnownAs The also known as, {@code null} if not specified.
+	 */
+	public void setAlsoKnownAs(final String alsoKnownAs) {
+		
+		setClaim(ALSO_KNOWN_AS, alsoKnownAs);
+	}
+	
+	
+	/**
+	 * Sets the also known as. Corresponds to the {@code also_known_as}
+	 * claim from OpenID Connect for Identity Assurance 1.0, with an
+	 * optional language tag.
+	 *
+	 * @param alsoKnownAs The also known as. If {@code null} the claim will
+	 *                    be removed.
+	 * @param langTag     The language tag, {@code null} if not specified.
+	 */
+	public void setAlsoKnownAs(final String alsoKnownAs, final LangTag langTag) {
+		
+		setClaim(ALSO_KNOWN_AS, alsoKnownAs, langTag);
 	}
 }

@@ -92,9 +92,10 @@ public class UserInfoTest extends TestCase {
 		assertTrue(UserInfo.getStandardClaimNames().contains("birth_middle_name"));
 		assertTrue(UserInfo.getStandardClaimNames().contains("salutation"));
 		assertTrue(UserInfo.getStandardClaimNames().contains("title"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("also_known_as"));
 		assertTrue(UserInfo.getStandardClaimNames().contains("verified_claims"));
 		
-		assertEquals(31, UserInfo.getStandardClaimNames().size());
+		assertEquals(32, UserInfo.getStandardClaimNames().size());
 	}
 
 
@@ -228,6 +229,7 @@ public class UserInfoTest extends TestCase {
 		assertNull(userInfo.getSalutation());
 		assertNull(userInfo.getTitle());
 		assertNull(userInfo.getVerifiedClaims());
+		assertNull(userInfo.getAlsoKnownAs());
 		
 		// No external claims
 		assertNull(userInfo.getAggregatedClaims());
@@ -1425,8 +1427,14 @@ public class UserInfoTest extends TestCase {
 		assertEquals(salutation, userInfo.getSalutation());
 		
 		assertNull(userInfo.getTitle());
-		String title = "Mrs.";		userInfo.setTitle(title);
+		String title = "Mrs.";
+		userInfo.setTitle(title);
 		assertEquals(title, userInfo.getTitle());
+		
+		assertNull(userInfo.getAlsoKnownAs());
+		String aka = "aka";
+		userInfo.setAlsoKnownAs(aka);
+		assertEquals(aka, userInfo.getAlsoKnownAs());
 		
 		String json = userInfo.toJSONString();
 		
@@ -1444,6 +1452,7 @@ public class UserInfoTest extends TestCase {
 		assertEquals(birthMiddleName, userInfo.getBirthMiddleName());
 		assertEquals(salutation, userInfo.getSalutation());
 		assertEquals(title, userInfo.getTitle());
+		assertEquals(aka, userInfo.getAlsoKnownAs());
 	}
 	
 	
@@ -1495,6 +1504,14 @@ public class UserInfoTest extends TestCase {
 		assertEquals(title + "#en", userInfo.getTitle(en));
 		assertEquals(title + "#de", userInfo.getTitle(de));
 		
+		assertNull(userInfo.getAlsoKnownAs(en));
+		assertNull(userInfo.getAlsoKnownAs(de));
+		String aka = "aka";
+		userInfo.setAlsoKnownAs(aka + "#en", en);
+		userInfo.setAlsoKnownAs(aka + "#de", de);
+		assertEquals(aka + "#en", userInfo.getAlsoKnownAs(en));
+		assertEquals(aka + "#de", userInfo.getAlsoKnownAs(de));
+		
 		Map<LangTag, String> map = userInfo.getBirthFamilyNameEntries();
 		assertEquals(birthFamilyName + "#en", map.get(en));
 		assertEquals(birthFamilyName + "#de", map.get(de));
@@ -1520,6 +1537,11 @@ public class UserInfoTest extends TestCase {
 		assertEquals(title + "#de", map.get(de));
 		assertEquals(2, map.size());
 		
+		map = userInfo.getAlsoKnownAsEntries();
+		assertEquals(aka + "#en", map.get(en));
+		assertEquals(aka + "#de", map.get(de));
+		assertEquals(2, map.size());
+		
 		String json = userInfo.toJSONString();
 		
 		userInfo = UserInfo.parse(json);
@@ -1534,6 +1556,8 @@ public class UserInfoTest extends TestCase {
 		assertEquals(salutation + "#de", userInfo.getSalutation(de));
 		assertEquals(title + "#en", userInfo.getTitle(en));
 		assertEquals(title + "#de", userInfo.getTitle(de));
+		assertEquals(aka + "#en", userInfo.getAlsoKnownAs(en));
+		assertEquals(aka + "#de", userInfo.getAlsoKnownAs(de));
 		
 		map = userInfo.getBirthFamilyNameEntries();
 		assertEquals(birthFamilyName + "#en", map.get(en));
@@ -1558,6 +1582,11 @@ public class UserInfoTest extends TestCase {
 		map = userInfo.getTitleEntries();
 		assertEquals(title + "#en", map.get(en));
 		assertEquals(title + "#de", map.get(de));
+		assertEquals(2, map.size());
+		
+		map = userInfo.getAlsoKnownAsEntries();
+		assertEquals(aka + "#en", map.get(en));
+		assertEquals(aka + "#de", map.get(de));
 		assertEquals(2, map.size());
 	}
 	
