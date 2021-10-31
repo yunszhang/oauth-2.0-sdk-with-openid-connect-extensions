@@ -691,4 +691,53 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertEquals(endpointMetadata.toJSONObject(), parsed.getMtlsEndpointAliases().toJSONObject());
 		assertEquals(metadata.toJSONObject(), parsed.toJSONObject());
 	}
+	
+	
+	// https://datatracker.ietf.org/doc/html/rfc8705#section-5
+	public void testParseWithMTLSEndpointAliasesExample()
+		throws ParseException, URISyntaxException {
+		
+		String json = 
+			"{" +
+			"  \"issuer\": \"https://server.example.com\"," +
+			"  \"authorization_endpoint\": \"https://server.example.com/authz\"," +
+			"  \"token_endpoint\": \"https://server.example.com/token\"," +
+			"  \"introspection_endpoint\": \"https://server.example.com/introspect\"," +
+			"  \"revocation_endpoint\": \"https://server.example.com/revo\"," +
+			"  \"jwks_uri\": \"https://server.example.com/jwks\"," +
+			"  \"response_types_supported\": [\"code\"]," +
+			"  \"response_modes_supported\": [\"fragment\",\"query\",\"form_post\"]," +
+			"  \"grant_types_supported\": [\"authorization_code\", \"refresh_token\"]," +
+			"  \"token_endpoint_auth_methods_supported\":" +
+			"                  [\"tls_client_auth\",\"client_secret_basic\",\"none\"]," +
+			"  \"tls_client_certificate_bound_access_tokens\": true," +
+			"  \"mtls_endpoint_aliases\": {" +
+			"    \"token_endpoint\": \"https://mtls.example.com/token\"," +
+			"    \"revocation_endpoint\": \"https://mtls.example.com/revo\"," +
+			"    \"introspection_endpoint\": \"https://mtls.example.com/introspect\"" +
+			"  }" +
+			"}";
+	
+		AuthorizationServerMetadata metadata = AuthorizationServerMetadata.parse(json);
+		
+		assertEquals(new Issuer("https://server.example.com"), metadata.getIssuer());
+		assertEquals(new URI("https://server.example.com/authz"), metadata.getAuthorizationEndpointURI());
+		assertEquals(new URI("https://server.example.com/token"), metadata.getTokenEndpointURI());
+		assertEquals(new URI("https://server.example.com/introspect"), metadata.getIntrospectionEndpointURI());
+		assertEquals(new URI("https://server.example.com/revo"), metadata.getRevocationEndpointURI());
+		assertEquals(new URI("https://server.example.com/jwks"), metadata.getJWKSetURI());
+		assertEquals(Collections.singletonList(ResponseType.CODE), metadata.getResponseTypes());
+		assertEquals(Arrays.asList(ResponseMode.FRAGMENT, ResponseMode.QUERY, ResponseMode.FORM_POST), metadata.getResponseModes());
+		assertEquals(Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.REFRESH_TOKEN), metadata.getGrantTypes());
+		assertEquals(Arrays.asList(ClientAuthenticationMethod.TLS_CLIENT_AUTH, ClientAuthenticationMethod.CLIENT_SECRET_BASIC, ClientAuthenticationMethod.NONE), metadata.getTokenEndpointAuthMethods());
+		assertTrue(metadata.supportsTLSClientCertificateBoundAccessTokens());
+		
+		// Aliases
+		assertEquals(new URI("https://mtls.example.com/token"), metadata.getMtlsEndpointAliases().getTokenEndpointURI());
+		assertEquals(new URI("https://mtls.example.com/revo"), metadata.getMtlsEndpointAliases().getRevocationEndpointURI());
+		assertEquals(new URI("https://mtls.example.com/introspect"), metadata.getMtlsEndpointAliases().getIntrospectionEndpointURI());
+		assertEquals(3, metadata.getMtlsEndpointAliases().toJSONObject().size());
+		
+		assertEquals(12, metadata.toJSONObject().size());
+	}
 }
