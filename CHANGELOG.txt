@@ -1881,4 +1881,5 @@ version 9.20 (2021-11-01)
       letter country codes.
     * Adds CountryCode.length method.
     * Adds country_code claim to Address.
+    * Adds IdentityAssuranceLevel class.
     * Adds static StringUtils.isAlpha and isNumeric methods.
