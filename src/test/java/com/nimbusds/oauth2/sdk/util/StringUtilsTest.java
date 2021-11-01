@@ -37,4 +37,19 @@ public class StringUtilsTest extends TestCase {
 		assertFalse(StringUtils.isAlpha("123"));
 		assertFalse(StringUtils.isAlpha("123abc"));
 	}
+
+
+	public void testIsNumeric() {
+	
+		String s = "1234567890";
+		
+		assertTrue(StringUtils.isNumeric(s));
+		
+		assertTrue(StringUtils.isNumeric(null));
+		assertTrue(StringUtils.isNumeric(""));
+		
+		assertFalse(StringUtils.isNumeric(" "));
+		assertFalse(StringUtils.isNumeric("abc"));
+		assertFalse(StringUtils.isNumeric("abc123"));
+	}
 }
