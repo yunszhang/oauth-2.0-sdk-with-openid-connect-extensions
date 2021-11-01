@@ -30,8 +30,8 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  *
  * <ul>
  *     <li>Security Event Token (SET) (RFC 8417), section 2.2.
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 4.2.
  * </ul>
- * <p>See
  */
 @Immutable
 public final class TXN extends Identifier {
