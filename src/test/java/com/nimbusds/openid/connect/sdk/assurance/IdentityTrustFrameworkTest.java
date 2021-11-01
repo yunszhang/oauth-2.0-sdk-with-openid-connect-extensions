@@ -18,10 +18,37 @@
 package com.nimbusds.openid.connect.sdk.assurance;
 
 
+import static org.junit.Assert.assertNotEquals;
+
 import junit.framework.TestCase;
 
 
 public class IdentityTrustFrameworkTest extends TestCase {
+	
+	
+	public void testConstants() {
+	
+		assertEquals("de_aml", IdentityTrustFramework.DE_AML.getValue());
+		assertEquals("eidas", IdentityTrustFramework.EIDAS.getValue());
+		assertEquals("nist_800_63A", IdentityTrustFramework.NIST_800_63A.getValue());
+		assertEquals("jp_aml", IdentityTrustFramework.JP_AML.getValue());
+		assertEquals("jp_mpiupa", IdentityTrustFramework.JP_MPIUPA.getValue());
+		assertEquals("cz_aml", IdentityTrustFramework.CZ_AML.getValue());
+		assertEquals("de_tkg111", IdentityTrustFramework.DE_TKG111.getValue());
+		assertEquals("be_itsme", IdentityTrustFramework.BE_ITSME.getValue());
+		assertEquals("se_bankid", IdentityTrustFramework.SE_BANKID.getValue());
+		assertEquals("it_spid", IdentityTrustFramework.IT_SPID.getValue());
+		assertEquals("nl_eHerkenning", IdentityTrustFramework.NL_EHERKENNING.getValue());
+		assertEquals("uk_tfida", IdentityTrustFramework.UK_TFIDA.getValue());
+		assertEquals("au_tdif", IdentityTrustFramework.AU_TDIF.getValue());
+		
+		// deprecated
+		assertEquals("eidas_ial_substantial", IdentityTrustFramework.EIDAS_IAL_SUBSTANTIAL.getValue());
+		assertEquals("eidas_ial_high", IdentityTrustFramework.EIDAS_IAL_HIGH.getValue());
+		
+		assertEquals("nist_800_63A_ial_2", IdentityTrustFramework.NIST_800_63A_IAL_2.getValue());
+		assertEquals("nist_800_63A_ial_3", IdentityTrustFramework.NIST_800_63A_IAL_3.getValue());
+	}
 	
 	
 	public void testValue() {
@@ -30,12 +57,12 @@ public class IdentityTrustFrameworkTest extends TestCase {
 		IdentityTrustFramework tf = new IdentityTrustFramework(value);
 		assertEquals(value, tf.getValue());
 		
-		assertTrue(tf.equals(new IdentityTrustFramework(value)));
+		assertEquals(tf, new IdentityTrustFramework(value));
 	}
 	
 	
 	public void testInequality() {
 		
-		assertFalse(new IdentityTrustFramework("tf01").equals(new IdentityTrustFramework("TF01")));
+		assertNotEquals(new IdentityTrustFramework("tf01"), new IdentityTrustFramework("TF01"));
 	}
 }
