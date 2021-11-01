@@ -18,6 +18,8 @@
 package secevent.sdk.claims;
 
 
+import static org.junit.Assert.assertNotEquals;
+
 import junit.framework.TestCase;
 
 import com.nimbusds.secevent.sdk.claims.TXN;
@@ -38,13 +40,13 @@ public class TXNTest extends TestCase {
 	
 	public void testEquality() {
 		
-		assertTrue(new TXN("abc").equals(new TXN("abc")));
+		assertEquals(new TXN("abc"), new TXN("abc"));
 	}
 	
 	
 	public void testInEquality() {
 		
-		assertFalse(new TXN("abc").equals(new TXN("ABC")));
-		assertFalse(new TXN("abc").equals(new TXN("123")));
+		assertNotEquals(new TXN("abc"), new TXN("ABC"));
+		assertNotEquals(new TXN("abc"), new TXN("123"));
 	}
 }
