@@ -144,18 +144,18 @@ public class UserInfoTest extends TestCase {
 	public void testWithAddress()
 		throws Exception {
 
-		String json = "{\n" +
-			"\"sub\": \"248289761001\",\n" +
-			"\"name\": \"Jane Doe\",\n" +
-			"\"email\": \"janedoe@example.com\",\n" +
-			"\"address\": {\n" +
-			"\"formatted\":\"Some formatted\",\n" +
-			"\"street_address\":\"Some street\",\n" +
-			"\"locality\":\"Some locality\",\n" +
-			"\"region\":\"Some region\",\n" +
-			"\"postal_code\":\"1000\",\n" +
-			"\"country\":\"Some country\"\n" +
-			"}   \n" +
+		String json = "{" +
+			"\"sub\": \"248289761001\"," +
+			"\"name\": \"Jane Doe\"," +
+			"\"email\": \"janedoe@example.com\"," +
+			"\"address\": {" +
+			"	\"formatted\":\"Some formatted\"," +
+			"	\"street_address\":\"Some street\"," +
+			"	\"locality\":\"Some locality\"," +
+			"	\"region\":\"Some region\"," +
+			"	\"postal_code\":\"1000\"," +
+			"	\"country\":\"Some country\"" +
+			"	}" +
 			"}";
 
 		UserInfo userInfo = UserInfo.parse(json);
@@ -189,6 +189,7 @@ public class UserInfoTest extends TestCase {
 		assertEquals("Some region", address.getRegion());
 		assertEquals("1000", address.getPostalCode());
 		assertEquals("Some country", address.getCountry());
+		assertNull(address.getCountryCode());
 	}
 
 
