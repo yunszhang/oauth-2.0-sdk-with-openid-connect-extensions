@@ -42,6 +42,17 @@ public abstract class CountryCode extends Identifier {
 	
 	
 	/**
+	 * Returns the length of this country code.
+	 *
+	 * @return The length.
+	 */
+	public int length() {
+		
+		return getValue().length();
+	}
+	
+	
+	/**
 	 * Casts this code to an ISO 3166-1 alpha-2 (two-letter) country code.
 	 *
 	 * @return The ISO 3166-1 alpha-2 (two-letter) country code.

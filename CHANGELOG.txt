@@ -1878,5 +1878,6 @@ version 9.20 (2021-11-01)
     * Adds support for the also_known_as OpenID claim.
     * Adds ISO3166_1Alpha2CountryCode class for representing ISO 3166-1 3
       letter country codes.
+    * Adds CountryCode.length method.
     * Adds country_code claim to Address.
     * Adds static StringUtils.isAlpha method.

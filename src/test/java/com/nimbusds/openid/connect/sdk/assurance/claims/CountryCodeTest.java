@@ -29,6 +29,7 @@ public class CountryCodeTest extends TestCase {
 	public void testParse_2() throws ParseException {
 		
 		CountryCode countryCode = CountryCode.parse("BG");
+		assertEquals(2, countryCode.length());
 		ISO3166_1Alpha2CountryCode iso3166_1Alpha2CountryCode = countryCode.toISO3166_1Alpha2CountryCode();
 		assertEquals("BG", iso3166_1Alpha2CountryCode.getValue());
 		
@@ -44,6 +45,7 @@ public class CountryCodeTest extends TestCase {
 	public void testParse_3() throws ParseException {
 		
 		CountryCode countryCode = CountryCode.parse("SWE");
+		assertEquals(3, countryCode.length());
 		ISO3166_1Alpha3CountryCode iso3166_1Alpha3CountryCode = countryCode.toISO3166_1Alpha3CountryCode();
 		assertEquals("SWE", iso3166_1Alpha3CountryCode.getValue());
 		
