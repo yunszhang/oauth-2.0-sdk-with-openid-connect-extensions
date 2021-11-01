@@ -32,6 +32,6 @@ public class VerificationProcessTest extends TestCase {
 		VerificationProcess p = new VerificationProcess(value);
 		assertEquals(value, p.getValue());
 		
-		assertTrue(p.equals(new VerificationProcess(value)));
+		assertEquals(p, new VerificationProcess(value));
 	}
 }
