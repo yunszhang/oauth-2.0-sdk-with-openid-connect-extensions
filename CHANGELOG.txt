@@ -1882,4 +1882,6 @@ version 9.20 (2021-11-01)
     * Adds CountryCode.length method.
     * Adds country_code claim to Address.
     * Adds IdentityAssuranceLevel class.
+    * Adds IdentityAssuranceProcess class.
+    * Adds Policy, Procedure and Status classes.
     * Adds static StringUtils.isAlpha and isNumeric methods.
