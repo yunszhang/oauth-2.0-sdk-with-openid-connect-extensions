@@ -41,7 +41,7 @@ public final class Birthplace extends ClaimsSet {
 	
 	
 	/**
-	 * The country claim name.
+	 * The country code claim name.
 	 */
 	public static final String COUNTRY_CLAIM_NAME = "country";
 	
@@ -85,17 +85,17 @@ public final class Birthplace extends ClaimsSet {
 	/**
 	 * Creates a new birthplace claims set.
 	 *
-	 * @param country  The country, as ISO3166-1 Alpha-2 or ISO3166-3 code,
-	 *                 {@code null} if not specified.
-	 * @param region   State, province, prefecture, or region component,
-	 *                 {@code null} if not specified.
-	 * @param locality City or other locality, {@code null} if not
-	 *                 specified.       .
+	 * @param countryCode The country code, as ISO3166-1 Alpha-2 or
+	 *                    ISO3166-3 code, {@code null} if not specified.
+	 * @param region      State, province, prefecture, or region component,
+	 *                    {@code null} if not specified.
+	 * @param locality    City or other locality, {@code null} if not
+	 *                    specified.
 	 */
-	public Birthplace(final CountryCode country, final String region, final String locality) {
+	public Birthplace(final CountryCode countryCode, final String region, final String locality) {
 	
-		if (country != null) {
-			setClaim(COUNTRY_CLAIM_NAME, country.getValue());
+		if (countryCode != null) {
+			setClaim(COUNTRY_CLAIM_NAME, countryCode.getValue());
 		}
 		
 		setClaim(REGION_CLAIM_NAME, region);
@@ -115,9 +115,9 @@ public final class Birthplace extends ClaimsSet {
 	
 	
 	/**
-	 * Gets the country.
+	 * Gets the country code.
 	 *
-	 * @return The country, {@code null} if not specified or illegal
+	 * @return The country code, {@code null} if not specified or illegal
 	 *         ISO 3166-1 alpha-2 (two-letter) country code.
 	 */
 	public CountryCode getCountry() {
