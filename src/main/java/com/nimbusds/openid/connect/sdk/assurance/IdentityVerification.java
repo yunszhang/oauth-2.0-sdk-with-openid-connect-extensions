@@ -30,6 +30,7 @@ import net.minidev.json.JSONObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONArrayUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.nimbusds.oauth2.sdk.util.date.DateWithTimeZoneOffset;
 import com.nimbusds.openid.connect.sdk.assurance.evidences.IdentityEvidence;
 
@@ -40,7 +41,7 @@ import com.nimbusds.openid.connect.sdk.assurance.evidences.IdentityEvidence;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OpenID Connect for Identity Assurance 1.0, section 4.1.
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.
  * </ul>
  */
 @Immutable
@@ -51,6 +52,18 @@ public final class IdentityVerification implements JSONAware {
 	 * The trust framework.
 	 */
 	private final IdentityTrustFramework trustFramework;
+	
+	
+	/**
+	 * The assurance level if required by the trust framework.
+	 */
+	private final IdentityAssuranceLevel assuranceLevel;
+	
+	
+	/**
+	 * The assurance process if required by the trust framework.
+	 */
+	private final IdentityAssuranceProcess assuranceProcess;
 	
 	
 	/**
@@ -86,6 +99,7 @@ public final class IdentityVerification implements JSONAware {
 	 * @param evidence            The identity evidence, {@code null} if
 	 *                            not specified.
 	 */
+	@Deprecated
 	public IdentityVerification(final IdentityTrustFramework trustFramework,
 				    final DateWithTimeZoneOffset time,
 				    final VerificationProcess verificationProcess,
@@ -96,7 +110,38 @@ public final class IdentityVerification implements JSONAware {
 	
 	
 	/**
-	 * Creates a new identity verification
+	 * Creates a new identity verification with a single evidence.
+	 *
+	 * @param trustFramework      The trust framework. Must not be
+	 *                            {@code null}.
+	 * @param assuranceLevel      The assurance level if required by the
+	 *                            trust framework, {@code null} if not
+	 *                            required.
+	 * @param assuranceProcess    The assurance process if required by the
+	 *                            trust framework, {@code null} if not
+	 *                            required.
+	 * @param time                The verification timestamp if required by
+	 *                            the trust framework, {@code null} if not
+	 *                            required.
+	 * @param verificationProcess The verification process reference if
+	 *                            required by the trust framework,
+	 *                            {@code null} if not required.
+	 * @param evidence            The identity evidence, {@code null} if
+	 *                            not specified.
+	 */
+	public IdentityVerification(final IdentityTrustFramework trustFramework,
+				    final IdentityAssuranceLevel assuranceLevel,
+				    final IdentityAssuranceProcess assuranceProcess,
+				    final DateWithTimeZoneOffset time,
+				    final VerificationProcess verificationProcess,
+				    final IdentityEvidence evidence) {
+		
+		this(trustFramework, assuranceLevel, assuranceProcess, time, verificationProcess, Collections.singletonList(evidence));
+	}
+	
+	
+	/**
+	 * Creates a new identity verification with multiple evidences.
 	 *
 	 * @param trustFramework      The trust framework. Must not be
 	 *                            {@code null}.
@@ -109,7 +154,39 @@ public final class IdentityVerification implements JSONAware {
 	 * @param evidence            The identity evidences, {@code null} if
 	 *                            not specified.
 	 */
+	@Deprecated
 	public IdentityVerification(final IdentityTrustFramework trustFramework,
+				    final DateWithTimeZoneOffset time,
+				    final VerificationProcess verificationProcess,
+				    final List<IdentityEvidence> evidence) {
+		
+		this(trustFramework, null, null, time, verificationProcess, evidence);
+	}
+	
+	
+	/**
+	 * Creates a new identity verification with multiple evidences.
+	 *
+	 * @param trustFramework      The trust framework. Must not be
+	 *                            {@code null}.
+	 * @param assuranceLevel      The assurance level if required by the
+	 *                            trust framework, {@code null} if not
+	 *                            required.
+	 * @param assuranceProcess    The assurance process if required by the
+	 *                            trust framework, {@code null} if not
+	 *                            required.
+	 * @param time                The verification timestamp if required by
+	 *                            the trust framework, {@code null} if not
+	 *                            required.
+	 * @param verificationProcess The verification process reference if
+	 *                            required by the trust framework,
+	 *                            {@code null} if not required.
+	 * @param evidence            The identity evidences, {@code null} if
+	 *                            not specified.
+	 */
+	public IdentityVerification(final IdentityTrustFramework trustFramework,
+				    final IdentityAssuranceLevel assuranceLevel,
+				    final IdentityAssuranceProcess assuranceProcess,
 				    final DateWithTimeZoneOffset time,
 				    final VerificationProcess verificationProcess,
 				    final List<IdentityEvidence> evidence) {
@@ -119,6 +196,8 @@ public final class IdentityVerification implements JSONAware {
 		}
 		this.trustFramework = trustFramework;
 		
+		this.assuranceLevel = assuranceLevel;
+		this.assuranceProcess = assuranceProcess;
 		this.time = time;
 		this.verificationProcess = verificationProcess;
 		this.evidence = evidence;
@@ -132,6 +211,28 @@ public final class IdentityVerification implements JSONAware {
 	 */
 	public IdentityTrustFramework getTrustFramework() {
 		return trustFramework;
+	}
+	
+	
+	/**
+	 * Returns the assurance level.
+	 *
+	 * @return The assurance level if required by the trust framework,
+	 *         {@code null} if not specified.
+	 */
+	public IdentityAssuranceLevel getAssuranceLevel() {
+		return assuranceLevel;
+	}
+	
+	
+	/**
+	 * Returns the assurance process.
+	 *
+	 * @return The assurance process if required by the trust framework,
+	 *         {@code null} if not specified.
+	 */
+	public IdentityAssuranceProcess getAssuranceProcess() {
+		return assuranceProcess;
 	}
 	
 	
@@ -178,6 +279,14 @@ public final class IdentityVerification implements JSONAware {
 		JSONObject o = new JSONObject();
 		o.put("trust_framework", getTrustFramework().getValue());
 		
+		if (getAssuranceLevel() != null) {
+			o.put("assurance_level", getAssuranceLevel().getValue());
+		}
+		
+		if (getAssuranceProcess() != null) {
+			o.put("assurance_process", getAssuranceProcess().toJSONObject());
+		}
+		
 		if (getVerificationTime() != null) {
 			o.put("time", getVerificationTime().toISO8601String());
 		}
@@ -223,14 +332,28 @@ public final class IdentityVerification implements JSONAware {
 		
 		IdentityTrustFramework trustFramework = new IdentityTrustFramework(JSONObjectUtils.getString(jsonObject, "trust_framework"));
 		
+		IdentityAssuranceLevel assuranceLevel = null;
+		String stringValue = JSONObjectUtils.getString(jsonObject, "assurance_level", null);
+		if (StringUtils.isNotBlank(stringValue)) {
+			assuranceLevel = new IdentityAssuranceLevel(stringValue);
+		}
+		
+		IdentityAssuranceProcess assuranceProcess = null;
+		JSONObject jsonObjectValue = JSONObjectUtils.getJSONObject(jsonObject, "assurance_process", null);
+		if (jsonObjectValue != null) {
+			assuranceProcess = IdentityAssuranceProcess.parse(jsonObjectValue);
+		}
+		
 		DateWithTimeZoneOffset time = null;
-		if (jsonObject.get("time") != null) {
-			time = DateWithTimeZoneOffset.parseISO8601String(JSONObjectUtils.getString(jsonObject, "time"));
+		stringValue = JSONObjectUtils.getString(jsonObject, "time", null);
+		if (StringUtils.isNotBlank(stringValue)) {
+			time = DateWithTimeZoneOffset.parseISO8601String(stringValue);
 		}
 		
 		VerificationProcess verificationProcess = null;
-		if (jsonObject.get("verification_process") != null) {
-			verificationProcess = new VerificationProcess(JSONObjectUtils.getString(jsonObject, "verification_process"));
+		stringValue = JSONObjectUtils.getString(jsonObject, "verification_process", null);
+		if (StringUtils.isNotBlank(stringValue)) {
+			verificationProcess = new VerificationProcess(stringValue);
 		}
 		
 		List<IdentityEvidence> evidence = null;
@@ -242,6 +365,6 @@ public final class IdentityVerification implements JSONAware {
 			}
 		}
 		
-		return new IdentityVerification(trustFramework, time, verificationProcess, evidence);
+		return new IdentityVerification(trustFramework, assuranceLevel, assuranceProcess, time, verificationProcess, evidence);
 	}
 }
