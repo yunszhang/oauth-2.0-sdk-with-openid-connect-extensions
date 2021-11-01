@@ -21,6 +21,7 @@ package com.nimbusds.openid.connect.sdk.assurance.claims;
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 
 /**
@@ -41,7 +42,7 @@ public final class ISO3166_1Alpha3CountryCode extends CountryCode {
 	 */
 	public ISO3166_1Alpha3CountryCode(final String value) {
 		super(value.toUpperCase());
-		if (value.length() != 3) {
+		if (value.length() != 3 || !StringUtils.isAlpha(value)) {
 			throw new IllegalArgumentException("The ISO 3166-1 alpha-3 country code must be 3 letters");
 		}
 	}

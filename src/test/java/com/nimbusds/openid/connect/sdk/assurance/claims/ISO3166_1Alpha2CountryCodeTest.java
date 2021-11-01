@@ -59,10 +59,21 @@ public class ISO3166_1Alpha2CountryCodeTest extends TestCase {
 	}
 	
 	
-	public void testParseException() {
+	public void testParseException_incorrectLength() {
 		
 		try {
 			ISO3166_1Alpha2CountryCode.parse("ABC");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("The ISO 3166-1 alpha-2 country code must be 2 letters", e.getMessage());
+		}
+	}
+	
+	
+	public void testParseException_notLetters() {
+		
+		try {
+			ISO3166_1Alpha2CountryCode.parse("A1");
 			fail();
 		} catch (ParseException e) {
 			assertEquals("The ISO 3166-1 alpha-2 country code must be 2 letters", e.getMessage());
