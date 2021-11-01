@@ -42,10 +42,7 @@ import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
 import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
 import com.nimbusds.openid.connect.sdk.assurance.IdentityVerification;
 import com.nimbusds.openid.connect.sdk.assurance.VerificationProcess;
-import com.nimbusds.openid.connect.sdk.assurance.claims.Birthplace;
-import com.nimbusds.openid.connect.sdk.assurance.claims.CountryCode;
-import com.nimbusds.openid.connect.sdk.assurance.claims.ISO3166_1Alpha2CountryCode;
-import com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSet;
+import com.nimbusds.openid.connect.sdk.assurance.claims.*;
 import com.nimbusds.openid.connect.sdk.assurance.evidences.*;
 
 
@@ -92,10 +89,11 @@ public class UserInfoTest extends TestCase {
 		assertTrue(UserInfo.getStandardClaimNames().contains("birth_middle_name"));
 		assertTrue(UserInfo.getStandardClaimNames().contains("salutation"));
 		assertTrue(UserInfo.getStandardClaimNames().contains("title"));
+		assertTrue(UserInfo.getStandardClaimNames().contains("msisdn"));
 		assertTrue(UserInfo.getStandardClaimNames().contains("also_known_as"));
 		assertTrue(UserInfo.getStandardClaimNames().contains("verified_claims"));
 		
-		assertEquals(32, UserInfo.getStandardClaimNames().size());
+		assertEquals(33, UserInfo.getStandardClaimNames().size());
 	}
 
 
@@ -229,8 +227,9 @@ public class UserInfoTest extends TestCase {
 		assertNull(userInfo.getBirthMiddleName());
 		assertNull(userInfo.getSalutation());
 		assertNull(userInfo.getTitle());
-		assertNull(userInfo.getVerifiedClaims());
+		assertNull(userInfo.getMSISDN());
 		assertNull(userInfo.getAlsoKnownAs());
+		assertNull(userInfo.getVerifiedClaims());
 		
 		// No external claims
 		assertNull(userInfo.getAggregatedClaims());
@@ -959,7 +958,6 @@ public class UserInfoTest extends TestCase {
 	}
 	
 	
-	
 	public void testAudienceClaim_single()
 		throws Exception {
 		
@@ -1432,6 +1430,11 @@ public class UserInfoTest extends TestCase {
 		userInfo.setTitle(title);
 		assertEquals(title, userInfo.getTitle());
 		
+		assertNull(userInfo.getMSISDN());
+		MSISDN msisdn = new MSISDN("359861000000");
+		userInfo.setMSISDN(msisdn);
+		assertEquals(msisdn, userInfo.getMSISDN());
+		
 		assertNull(userInfo.getAlsoKnownAs());
 		String aka = "aka";
 		userInfo.setAlsoKnownAs(aka);
@@ -1453,6 +1456,7 @@ public class UserInfoTest extends TestCase {
 		assertEquals(birthMiddleName, userInfo.getBirthMiddleName());
 		assertEquals(salutation, userInfo.getSalutation());
 		assertEquals(title, userInfo.getTitle());
+		assertEquals(msisdn, userInfo.getMSISDN());
 		assertEquals(aka, userInfo.getAlsoKnownAs());
 	}
 	

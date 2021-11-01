@@ -27,6 +27,7 @@ import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.assurance.claims.Birthplace;
 import com.nimbusds.openid.connect.sdk.assurance.claims.CountryCode;
+import com.nimbusds.openid.connect.sdk.assurance.claims.MSISDN;
 
 
 /**
@@ -216,6 +217,12 @@ public class PersonClaims extends ClaimsSet {
 	
 	
 	/**
+	 * The MSISDN claim name (OpenID Connect for Identity Assurance 1.0).
+	 */
+	public static final String MSISDN_CLAIM_NAME = "msisdn";
+	
+	
+	/**
 	 * The also known as claim name (OpenID Connect for Identity Assurance
 	 * 1.0).
 	 */
@@ -259,6 +266,7 @@ public class PersonClaims extends ClaimsSet {
 			BIRTH_MIDDLE_NAME_CLAIM_NAME,
 			SALUTATION_CLAIM_NAME,
 			TITLE_CLAIM_NAME,
+			MSISDN_CLAIM_NAME,
 			ALSO_KNOWN_AS
 		));
 		return Collections.unmodifiableSet(names);
@@ -1575,6 +1583,46 @@ public class PersonClaims extends ClaimsSet {
 	public void setTitle(final String title, final LangTag langTag) {
 		
 		setClaim(TITLE_CLAIM_NAME, title, langTag);
+	}
+	
+	
+	// msisdn
+	
+	
+	/**
+	 * Gets the mobile subscriber ISDN number. Corresponds to the
+	 * {@code msisdn} claim.
+	 *
+	 * @return The mobile subscriber ISDN number, {@code null} if not
+	 *         specified.
+	 */
+	public MSISDN getMSISDN() {
+		
+		String value = getStringClaim(MSISDN_CLAIM_NAME);
+		
+		if (value == null) {
+			return null;
+		}
+		
+		try {
+			return MSISDN.parse(value);
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Sets the mobile subscriber ISDN number. Corresponds to the
+	 * {@code msisdn} claim.
+	 *
+	 * @param msisdn The mobile subscriber ISDN number. If {@code null} the
+	 *              claim will be removed.
+	 */
+	public void setMSISDN(final MSISDN msisdn) {
+		
+		String value = msisdn != null ? msisdn.getValue() : null;
+		setClaim(MSISDN_CLAIM_NAME, value);
 	}
 	
 	
