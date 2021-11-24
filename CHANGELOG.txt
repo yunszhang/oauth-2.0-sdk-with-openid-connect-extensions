@@ -1887,3 +1887,4 @@ version 9.20 (2021-11-24)
     * Adds IdentityAssuranceProcess class.
     * Adds Policy, Procedure and Status classes.
     * Adds static StringUtils.isAlpha and isNumeric methods.
+    * Updates to com.nimbusds:content-type:2.2
