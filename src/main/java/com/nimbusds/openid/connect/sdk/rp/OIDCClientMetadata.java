@@ -722,6 +722,10 @@ public class OIDCClientMetadata extends ClientMetadata {
 	 */
 	public void setFrontChannelLogoutURI(final URI frontChannelLogoutURI) {
 		
+		if (frontChannelLogoutURI != null && frontChannelLogoutURI.getScheme() == null) {
+			throw new IllegalArgumentException("Missing URI scheme");
+		}
+		
 		this.frontChannelLogoutURI = frontChannelLogoutURI;
 	}
 	

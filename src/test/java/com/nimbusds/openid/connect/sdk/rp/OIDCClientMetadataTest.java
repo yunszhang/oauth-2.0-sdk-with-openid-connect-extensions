@@ -1067,6 +1067,31 @@ public class OIDCClientMetadataTest extends TestCase {
 	}
 	
 	
+	public void testFrontChannelLogout_requireURIScheme() {
+		
+		OIDCClientMetadata metadata = new OIDCClientMetadata();
+		metadata.applyDefaults();
+		
+		URI uriWithoutScheme = URI.create("/test/logout");
+		try {
+			metadata.setFrontChannelLogoutURI(uriWithoutScheme);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("Missing URI scheme", e.getMessage());
+		}
+		
+		JSONObject jsonObject = metadata.toJSONObject();
+		jsonObject.put("frontchannel_logout_uri", uriWithoutScheme.toString());
+		
+		try {
+			OIDCClientMetadata.parse(jsonObject);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid frontchannel_logout_uri parameter: Missing URI scheme", e.getMessage());
+		}
+	}
+	
+	
 	public void testBackChannelLogoutURIMustBeHTTPSorHTTP() {
 		
 		OIDCClientMetadata metadata = new OIDCClientMetadata();
