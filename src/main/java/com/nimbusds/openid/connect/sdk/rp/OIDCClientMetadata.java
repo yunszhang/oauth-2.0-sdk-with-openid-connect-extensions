@@ -718,12 +718,10 @@ public class OIDCClientMetadata extends ClientMetadata {
 	 * {@code frontchannel_logout_uri} client metadata field.
 	 *
 	 * @param frontChannelLogoutURI The front-channel logout URI,
-	 *                              {@code null} if not specified. The URI
-	 *                              scheme must be https or http.
+	 *                              {@code null} if not specified.
 	 */
 	public void setFrontChannelLogoutURI(final URI frontChannelLogoutURI) {
 		
-		URIUtils.ensureSchemeIsHTTPSorHTTP(frontChannelLogoutURI);
 		this.frontChannelLogoutURI = frontChannelLogoutURI;
 	}
 	

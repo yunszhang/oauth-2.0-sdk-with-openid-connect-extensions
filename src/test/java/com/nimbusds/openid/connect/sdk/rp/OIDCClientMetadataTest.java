@@ -1016,28 +1016,54 @@ public class OIDCClientMetadataTest extends TestCase {
 	}
 	
 	
-	public void testFrontChannelLogoutURIMustBeHTTPSorHTTP() {
+	public void testFrontChannelLogout_https()
+		throws ParseException {
 		
 		OIDCClientMetadata metadata = new OIDCClientMetadata();
-		metadata.setFrontChannelLogoutURI(URI.create("https://rp.example.com/front-channel-logout"));
-		metadata.setFrontChannelLogoutURI(URI.create("http://rp.example.com/front-channel-logout"));
+		metadata.applyDefaults();
 		
-		try {
-			metadata.setFrontChannelLogoutURI(URI.create("ftp://rp.example.com/front-channel-logout"));
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The URI scheme must be https or http", e.getMessage());
-		}
+		URI httpsURI = URI.create("https://rp.example.com/logout");
+		metadata.setFrontChannelLogoutURI(httpsURI);
+		assertEquals(httpsURI, metadata.getFrontChannelLogoutURI());
 		
 		JSONObject jsonObject = metadata.toJSONObject();
-		jsonObject.put("frontchannel_logout_uri", "ftp://rp.example.com/front-channel-logout");
+		metadata = OIDCClientMetadata.parse(jsonObject);
 		
-		try {
-			OIDCClientMetadata.parse(jsonObject);
-			fail();
-		} catch (ParseException e) {
-			assertEquals("Invalid frontchannel_logout_uri parameter: The URI scheme must be https or http", e.getMessage());
-		}
+		assertEquals(httpsURI, metadata.getFrontChannelLogoutURI());
+	}
+	
+	
+	public void testFrontChannelLogout_http()
+		throws ParseException {
+		
+		OIDCClientMetadata metadata = new OIDCClientMetadata();
+		metadata.applyDefaults();
+		
+		URI httpURI = URI.create("http://rp.example.com/logout");
+		metadata.setFrontChannelLogoutURI(httpURI);
+		assertEquals(httpURI, metadata.getFrontChannelLogoutURI());
+		
+		JSONObject jsonObject = metadata.toJSONObject();
+		metadata = OIDCClientMetadata.parse(jsonObject);
+		
+		assertEquals(httpURI, metadata.getFrontChannelLogoutURI());
+	}
+	
+	
+	public void testFrontChannelLogout_mobile()
+		throws ParseException {
+		
+		OIDCClientMetadata metadata = new OIDCClientMetadata();
+		metadata.applyDefaults();
+		
+		URI customURI = URI.create("myapp:logout");
+		metadata.setFrontChannelLogoutURI(customURI);
+		assertEquals(customURI, metadata.getFrontChannelLogoutURI());
+		
+		JSONObject jsonObject = metadata.toJSONObject();
+		metadata = OIDCClientMetadata.parse(jsonObject);
+		
+		assertEquals(customURI, metadata.getFrontChannelLogoutURI());
 	}
 	
 	
