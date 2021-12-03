@@ -240,7 +240,8 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
 				codeVerifier = new CodeVerifier(codeVerifierString);
 			} catch (IllegalArgumentException e) {
 				// Illegal code verifier
-				throw new ParseException(e.getMessage(), e);
+				String msg = "Illegal code verifier: " + e.getMessage();
+				throw new ParseException(e.getMessage(), OAuth2Error.INVALID_REQUEST.appendDescription(": " + msg), e);
 			}
 		}
 
