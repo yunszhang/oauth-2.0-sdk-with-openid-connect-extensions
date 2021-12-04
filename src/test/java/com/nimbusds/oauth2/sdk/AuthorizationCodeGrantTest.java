@@ -29,9 +29,6 @@ import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import junit.framework.TestCase;
 
 
-/**
- * Tests the authorisation code grant class.
- */
 public class AuthorizationCodeGrantTest extends TestCase {
 
 
@@ -132,8 +129,7 @@ public class AuthorizationCodeGrantTest extends TestCase {
 	}
 
 
-	public void testParse_codeVerifierTooShort()
-		throws Exception {
+	public void testParse_codeVerifierTooShort() {
 
 		Map<String,List<String>> params = new HashMap<>();
 		params.put("grant_type", Collections.singletonList("authorization_code"));
@@ -146,6 +142,8 @@ public class AuthorizationCodeGrantTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals("The code verifier must be at least 43 characters", e.getMessage());
+			assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), e.getErrorObject().getCode());
+			assertEquals("Invalid request: Illegal code verifier: The code verifier must be at least 43 characters", e.getErrorObject().getDescription());
 		}
 	}
 
