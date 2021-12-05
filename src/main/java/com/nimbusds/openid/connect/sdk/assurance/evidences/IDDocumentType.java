@@ -33,6 +33,7 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  *         11.2.
  * </ul>
  */
+@Deprecated
 @Immutable
 public final class IDDocumentType extends Identifier {
 	
@@ -184,3 +185,4 @@ public final class IDDocumentType extends Identifier {
 			this.toString().equals(object.toString());
 	}
 }
+
