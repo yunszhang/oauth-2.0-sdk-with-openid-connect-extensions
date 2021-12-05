@@ -116,8 +116,6 @@ public class EmbeddedAttachment extends Attachment {
 	public static EmbeddedAttachment parse(final JSONObject jsonObject)
 		throws ParseException {
 		
-		String description = JSONObjectUtils.getString(jsonObject, "desc", null);
-		
 		ContentType contentType;
 		try {
 			contentType = ContentType.parse(JSONObjectUtils.getString(jsonObject, "content_type"));
@@ -130,6 +128,8 @@ public class EmbeddedAttachment extends Attachment {
 		if (content.toString().trim().isEmpty()) {
 			throw new ParseException("Empty or blank content");
 		}
+		
+		String description = JSONObjectUtils.getString(jsonObject, "desc", null);
 		
 		return new EmbeddedAttachment(contentType, content, description);
 	}

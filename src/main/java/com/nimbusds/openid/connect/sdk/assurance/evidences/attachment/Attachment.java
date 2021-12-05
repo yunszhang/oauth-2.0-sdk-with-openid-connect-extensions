@@ -20,6 +20,8 @@ package com.nimbusds.openid.connect.sdk.assurance.evidences.attachment;
 
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.oauth2.sdk.ParseException;
+
 
 /**
  * Identity evidence attachment.
@@ -64,12 +66,61 @@ public abstract class Attachment {
 	 *
 	 * @return The JSON object.
 	 */
-	public JSONObject toJSONObject() {
+	protected JSONObject toJSONObject() {
 		
 		JSONObject o = new JSONObject();
 		if (getDescriptionString() != null) {
 			o.put("desc", getDescriptionString());
 		}
 		return o;
+	}
+	
+	
+	/**
+	 * Casts this attachment to an embedded attachment.
+	 *
+	 * @return The embedded attachment.
+	 *
+	 * @throws ClassCastException If the cast failed.
+	 */
+	public EmbeddedAttachment toEmbeddedAttachment() {
+		
+		return (EmbeddedAttachment) this;
+	}
+	
+	
+	/**
+	 * Casts this attachment to an external attachment.
+	 *
+	 * @return The external attachment.
+	 *
+	 * @throws ClassCastException If the cast failed.
+	 */
+	public ExternalAttachment toExternalAttachment() {
+		
+		return (ExternalAttachment) this;
+	}
+	
+	
+	/**
+	 * Parses an identity evidence attachment from the specified JSON
+	 * object.
+	 *
+	 * @param jsonObject The JSON object. Must not be {@code null}.
+	 *
+	 * @return The identity evidence attachment.
+	 *
+	 * @throws ParseException If parsing failed.
+	 */
+	public static Attachment parse(final JSONObject jsonObject)
+		throws ParseException {
+		
+		if (jsonObject.get("content") != null) {
+			return EmbeddedAttachment.parse(jsonObject);
+		} else if (jsonObject.get("url") != null) {
+			return ExternalAttachment.parse(jsonObject);
+		} else {
+			throw new ParseException("Missing required attachment parameter(s)");
+		}
 	}
 }
