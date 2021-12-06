@@ -22,6 +22,7 @@ import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.secevent.sdk.claims.TXN;
 
 
@@ -55,5 +56,19 @@ public class IdentityVerifierTest extends TestCase {
 		identityVerifier = IdentityVerifier.parse(jsonObject);
 		assertEquals(org, identityVerifier.getOrganization());
 		assertEquals(txn, identityVerifier.getTXN());
+	}
+	
+	
+	public void testParseExample() throws ParseException {
+		
+		String json =
+			"{" +
+			"  \"organization\": \"Deutsche Post\"," +
+			"  \"txn\": \"1aa05779-0775-470f-a5c4-9f1f5e56cf06\"" +
+			"}";
+		
+		IdentityVerifier verifier = IdentityVerifier.parse(JSONObjectUtils.parse(json));
+		assertEquals("Deutsche Post", verifier.getOrganization());
+		assertEquals(new TXN("1aa05779-0775-470f-a5c4-9f1f5e56cf06"), verifier.getTXN());
 	}
 }
