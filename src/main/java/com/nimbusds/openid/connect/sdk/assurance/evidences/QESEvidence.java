@@ -19,7 +19,6 @@ package com.nimbusds.openid.connect.sdk.assurance.evidences;
 
 
 import net.jcip.annotations.Immutable;
-import net.minidev.json.JSONAware;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -34,11 +33,14 @@ import com.nimbusds.oauth2.sdk.util.date.DateWithTimeZoneOffset;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OpenID Connect for Identity Assurance 1.0, section 4.1.1.
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.1.5.
  * </ul>
+ *
+ * @deprecated Use {@link ElectronicSignatureEvidence} instead.
  */
+@Deprecated
 @Immutable
-public final class QESEvidence extends IdentityEvidence implements JSONAware {
+public final class QESEvidence extends IdentityEvidence {
 	
 	
 	/**
