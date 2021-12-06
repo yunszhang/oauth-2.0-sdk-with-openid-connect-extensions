@@ -27,7 +27,8 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  * Identity verification method.
  *
  * <ul>
- *     <li>OpenID Connect for Identity Assurance 1.0, section 4.1.1.1.
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.1.1.
+ *     <li>https://bitbucket.org/openid/ekyc-ida/wiki/identifiers
  * </ul>
  */
 @Immutable
@@ -38,13 +39,13 @@ public final class IdentityVerificationMethod extends Identifier {
 	
 	
 	/**
-	 * Physical In-Person Proofing.
+	 * Physical in-Person proofing.
 	 */
 	public static final IdentityVerificationMethod PIPP = new IdentityVerificationMethod("pipp");
 	
 	
 	/**
-	 * Supervised remote In-Person Proofing.
+	 * Supervised remote in-person proofing.
 	 */
 	public static final IdentityVerificationMethod SRIPP = new IdentityVerificationMethod("sripp");
 	
@@ -60,6 +61,13 @@ public final class IdentityVerificationMethod extends Identifier {
 	 * document, user self-portrait video and liveness checks.
 	 */
 	public static final IdentityVerificationMethod URIPP = new IdentityVerificationMethod("uripp");
+	
+	
+	/**
+	 * Electronic onsite reading of the document’s chip using an
+	 * authorisation certificate and card access number.
+	 */
+	public static final IdentityVerificationMethod ONSITE = new IdentityVerificationMethod("onsite");
 	
 	
 	/**
