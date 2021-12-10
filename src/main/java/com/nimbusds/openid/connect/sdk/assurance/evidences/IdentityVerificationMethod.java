@@ -26,10 +26,10 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
 /**
  * Identity verification method.
  *
- * <p>Implementers should use a combination of {@link ValidationMethodType} and
- * {@link VerificationMethodType}, unless required by the
- * {@link com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework}.
- * Use of this parameter will be deprecated.
+ * <p>Implementers should use a combination of a {@link ValidationMethod} and a
+ * {@link VerificationMethod}, unless required to use this coarser method by
+ * the {@link com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework}.
+ * Use of this parameter will eventually be deprecated.
  *
  * <ul>
  *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.1.

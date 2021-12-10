@@ -24,7 +24,8 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
 
 
 /**
- * The type of method used to verify that a person is the owner of claims.
+ * The type of method used to verify that a person is the owner of a set of
+ * claims.
  *
  * <p>Related specifications:
  *
