@@ -36,7 +36,8 @@ public final class Status extends Identifier {
 	/**
 	 * Creates a new status.
 	 *
-	 * @param value The status value.
+	 * @param value The status value. Must not be {@code null} or empty
+	 * 	        string.
 	 */
 	public Status(final String value) {
 		super(value);

@@ -43,7 +43,7 @@ public final class VerificationProcess extends Identifier {
 	 * Creates a new verification process identifier.
 	 *
 	 * @param value The verification process identifier value. Must not be
-	 *              {@code null}.
+	 *              {@code null} or empty string.
 	 */
 	public VerificationProcess(final String value) {
 		super(value);

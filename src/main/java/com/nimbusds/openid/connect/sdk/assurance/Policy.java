@@ -36,7 +36,8 @@ public final class Policy extends Identifier {
 	/**
 	 * Creates a new policy.
 	 *
-	 * @param value The policy value.
+	 * @param value The policy value. Must not be {@code null} or empty
+	 * 	        string.
 	 */
 	public Policy(final String value) {
 		super(value);

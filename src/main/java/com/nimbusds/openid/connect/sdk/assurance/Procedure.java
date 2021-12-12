@@ -36,7 +36,8 @@ public final class Procedure extends Identifier {
 	/**
 	 * Creates a new procedure.
 	 *
-	 * @param value The procedure value.
+	 * @param value The procedure value. Must not be {@code null} or empty
+	 * 	        string.
 	 */
 	public Procedure(final String value) {
 		super(value);
