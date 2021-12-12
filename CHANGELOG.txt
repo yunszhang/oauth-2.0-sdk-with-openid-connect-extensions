@@ -1873,7 +1873,7 @@ version 9.19 (2021-10-20)
     * Adds new StateHash.compute(AccessToken, JWSAlgorithm, Curve) method,
       deprecates the old method.
 
-version 9.20 (2021-11-24)
+version 9.20 (2021-12-12)
     * Upgrades to OpenID Connect for Identity Assurance 1.0, draft 12.
     * Adds support for the also_known_as OpenID claim.
     * Adds support for the msisdn OpenID claim.
@@ -1887,4 +1887,5 @@ version 9.20 (2021-11-24)
     * Adds IdentityAssuranceProcess class.
     * Adds Policy, Procedure and Status classes.
     * Adds static StringUtils.isAlpha and isNumeric methods.
+    * Adds static CollectionUtils.intersect method.
     * Updates to com.nimbusds:content-type:2.2

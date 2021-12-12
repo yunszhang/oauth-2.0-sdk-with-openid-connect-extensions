@@ -18,8 +18,7 @@
 package com.nimbusds.oauth2.sdk.util;
 
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.*;
 
 import junit.framework.TestCase;
 
@@ -43,5 +42,20 @@ public class CollectionUtilsTest extends TestCase {
 		
 		assertFalse(CollectionUtils.contains(null, "d"));
 		assertFalse(CollectionUtils.contains(null, null));
+	}
+	
+	
+	public void testIntersect() {
+		
+		assertFalse(CollectionUtils.intersect(null, null));
+		assertFalse(CollectionUtils.intersect(null, Collections.emptySet()));
+		assertFalse(CollectionUtils.intersect(Collections.emptySet(), Collections.emptySet()));
+		assertFalse(CollectionUtils.intersect(Collections.emptySet(), null));
+		
+		assertTrue(CollectionUtils.intersect(Collections.singleton("1"), Collections.singleton("1")));
+		assertTrue(CollectionUtils.intersect(new HashSet<>(Arrays.asList("1", "2")), new HashSet<>(Arrays.asList("2", "3"))));
+		
+		assertFalse(CollectionUtils.intersect(new HashSet<>(Arrays.asList("1", "2")), new HashSet<>(Arrays.asList("3", "4"))));
+		assertFalse(CollectionUtils.intersect(Collections.singleton("1"), Collections.singleton("2")));
 	}
 }
