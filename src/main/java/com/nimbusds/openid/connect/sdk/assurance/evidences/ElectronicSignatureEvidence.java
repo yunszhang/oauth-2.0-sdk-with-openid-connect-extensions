@@ -55,9 +55,9 @@ public final class ElectronicSignatureEvidence extends IdentityEvidence {
 	
 	
 	/**
-	 * The signature serial number.
+	 * The certificate serial number.
 	 */
-	private final String serialNumber;
+	private final SerialNumber certificateSerialNumber;
 	
 	
 	/**
@@ -69,24 +69,25 @@ public final class ElectronicSignatureEvidence extends IdentityEvidence {
 	/**
 	 * Creates a new signature used as identity evidence.
 	 *
-	 * @param signatureType The signature type. Must not be {@code null}.
-	 * @param issuer        The signature issuer, {@code null} if not
-	 *                      specified.
-	 * @param serialNumber  The signature serial number, {@code null} if
-	 *                      not specified.
-	 * @param createdAt     The signature creation time, {@code null} if
-	 *                      not specified.
+	 * @param signatureType            The signature type. Must not be
+	 *                                 {@code null}.
+	 * @param issuer                   The signature issuer, {@code null}
+	 *                                 if not specified.
+	 * @param certificateSerialNumber  The certificate serial number,
+	 *                                 {@code null} if not specified.
+	 * @param createdAt                The signature creation time,
+	 *                                 {@code null} if not specified.
 	 */
 	public ElectronicSignatureEvidence(final SignatureType signatureType,
 					   final Issuer issuer,
-					   final String serialNumber,
+					   final SerialNumber certificateSerialNumber,
 					   final DateWithTimeZoneOffset createdAt) {
 		
 		super(IdentityEvidenceType.ELECTRONIC_SIGNATURE);
 		Objects.requireNonNull(signatureType);
 		this.signatureType = signatureType;
 		this.issuer = issuer;
-		this.serialNumber = serialNumber;
+		this.certificateSerialNumber = certificateSerialNumber;
 		this.createdAt = createdAt;
 	}
 	
@@ -112,13 +113,13 @@ public final class ElectronicSignatureEvidence extends IdentityEvidence {
 	
 	
 	/**
-	 * Returns the signature serial number.
+	 * Returns the certificate serial number.
 	 *
-	 * @return The signature serial number string, {@code null} if not
+	 * @return The certificate serial number string, {@code null} if not
 	 *         specified.
 	 */
-	public String getSerialNumberString() {
-		return serialNumber;
+	public SerialNumber getCertificateSerialNumber() {
+		return certificateSerialNumber;
 	}
 	
 	
@@ -142,8 +143,8 @@ public final class ElectronicSignatureEvidence extends IdentityEvidence {
 		if (getIssuer() != null) {
 			o.put("issuer", getIssuer().getValue());
 		}
-		if (getSerialNumberString() != null) {
-			o.put("serial_number", getSerialNumberString());
+		if (getCertificateSerialNumber() != null) {
+			o.put("serial_number", getCertificateSerialNumber().getValue());
 		}
 		if (getCreationTime() != null) {
 			o.put("created_at", getCreationTime().toISO8601String());
@@ -173,7 +174,10 @@ public final class ElectronicSignatureEvidence extends IdentityEvidence {
 			issuer = new Issuer(JSONObjectUtils.getString(jsonObject, "issuer"));
 		}
 		
-		String serialNumber = JSONObjectUtils.getString(jsonObject, "serial_number", null);
+		SerialNumber serialNumber = null;
+		if (jsonObject.get("serial_number") != null) {
+			serialNumber = new SerialNumber(JSONObjectUtils.getString(jsonObject, "serial_number", null));
+		}
 		
 		DateWithTimeZoneOffset createdAt = null;
 		if (jsonObject.get("created_at") != null) {

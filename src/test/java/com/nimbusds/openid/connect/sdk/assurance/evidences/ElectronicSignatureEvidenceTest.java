@@ -38,7 +38,7 @@ public class ElectronicSignatureEvidenceTest extends TestCase {
 		
 		assertEquals(QES, evidence.getSignatureType());
 		assertNull(evidence.getIssuer());
-		assertNull(evidence.getSerialNumberString());
+		assertNull(evidence.getCertificateSerialNumber());
 		assertNull(evidence.getCreationTime());
 		
 		JSONObject jsonObject = evidence.toJSONObject();
@@ -50,7 +50,7 @@ public class ElectronicSignatureEvidenceTest extends TestCase {
 		
 		assertEquals(QES, evidence.getSignatureType());
 		assertNull(evidence.getIssuer());
-		assertNull(evidence.getSerialNumberString());
+		assertNull(evidence.getCertificateSerialNumber());
 		assertNull(evidence.getCreationTime());
 	}
 	
@@ -58,7 +58,7 @@ public class ElectronicSignatureEvidenceTest extends TestCase {
 	public void testMethods() throws ParseException {
 		
 		Issuer issuer = new Issuer("QES issuer");
-		String number = "6efe7fa4-91d8-4821-9859-eaab40f321b6";
+		SerialNumber number = new SerialNumber("6efe7fa4-91d8-4821-9859-eaab40f321b6");
 		DateWithTimeZoneOffset ts = DateWithTimeZoneOffset.parseISO8601String("2012-04-23T18:25Z");
 		
 		ElectronicSignatureEvidence evidence = new ElectronicSignatureEvidence(QES, issuer, number, ts);
@@ -66,14 +66,14 @@ public class ElectronicSignatureEvidenceTest extends TestCase {
 		assertEquals(IdentityEvidenceType.ELECTRONIC_SIGNATURE, evidence.getEvidenceType());
 		assertEquals(QES, evidence.getSignatureType());
 		assertEquals(issuer, evidence.getIssuer());
-		assertEquals(number, evidence.getSerialNumberString());
+		assertEquals(number, evidence.getCertificateSerialNumber());
 		assertEquals(ts, evidence.getCreationTime());
 		
 		JSONObject jsonObject = evidence.toJSONObject();
 		assertEquals(IdentityEvidenceType.ELECTRONIC_SIGNATURE.getValue(), jsonObject.get("type"));
 		assertEquals(QES.getValue(), jsonObject.get("signature_type"));
 		assertEquals(issuer.getValue(), jsonObject.get("issuer"));
-		assertEquals(number, jsonObject.get("serial_number"));
+		assertEquals(number.getValue(), jsonObject.get("serial_number"));
 		assertEquals(ts.toISO8601String(), jsonObject.get("created_at"));
 		assertEquals(5, jsonObject.size());
 		
@@ -82,7 +82,7 @@ public class ElectronicSignatureEvidenceTest extends TestCase {
 		assertEquals(IdentityEvidenceType.ELECTRONIC_SIGNATURE, evidence.getEvidenceType());
 		assertEquals(QES, evidence.getSignatureType());
 		assertEquals(issuer, evidence.getIssuer());
-		assertEquals(number, evidence.getSerialNumberString());
+		assertEquals(number, evidence.getCertificateSerialNumber());
 		assertEquals(ts, evidence.getCreationTime());
 	}
 }
