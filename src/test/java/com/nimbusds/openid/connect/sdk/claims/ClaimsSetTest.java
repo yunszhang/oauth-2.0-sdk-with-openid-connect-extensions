@@ -29,6 +29,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.util.DateUtils;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Audience;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
 
@@ -71,5 +72,42 @@ public class ClaimsSetTest extends TestCase {
 		
 		ClaimsSet newClaimsSet = new ClaimsSet(jsonObject);
 		assertEquals(expWithSecondPrecision, newClaimsSet.getDateClaim("exp"));
+	}
+	
+	
+	public void testEquality_empty() {
+		
+		assertEquals(new ClaimsSet(), new ClaimsSet());
+		assertEquals(new ClaimsSet().hashCode(), new ClaimsSet().hashCode());
+	}
+	
+	
+	public void testEquality_set() {
+		
+		ClaimsSet a = new ClaimsSet();
+		a.setIssuer(new Issuer("https://c2id.com"));
+		a.setClaim("name", "Alice");
+		
+		ClaimsSet b = new ClaimsSet();
+		b.setIssuer(new Issuer("https://c2id.com"));
+		b.setClaim("name", "Alice");
+		
+		assertEquals(a, b);
+		assertEquals(a.hashCode(), b.hashCode());
+	}
+	
+	
+	public void testInequality() {
+		
+		ClaimsSet a = new ClaimsSet();
+		a.setIssuer(new Issuer("https://c2id.com"));
+		a.setClaim("name", "Alice");
+		
+		ClaimsSet b = new ClaimsSet();
+		b.setIssuer(new Issuer("https://idp.example.com"));
+		b.setClaim("name", "Bob");
+		
+		assertNotSame(a, b);
+		assertNotSame(a.hashCode(), b.hashCode());
 	}
 }

@@ -589,4 +589,19 @@ public class ClaimsSet implements JSONAware {
 			throw new ParseException(e.getMessage(), e);
 		}
 	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof ClaimsSet)) return false;
+		ClaimsSet claimsSet = (ClaimsSet) o;
+		return claims.equals(claimsSet.claims);
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(claims);
+	}
 }
