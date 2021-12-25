@@ -32,9 +32,12 @@ import com.nimbusds.oauth2.sdk.util.date.DateWithTimeZoneOffset;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OpenID Connect for Identity Assurance 1.0, section 4.1.1.
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.1.1.
  * </ul>
+ *
+ * @deprecated Use {@link DocumentEvidence} instead.
  */
+@Deprecated
 @Immutable
 public final class IDDocumentEvidence extends IdentityEvidence {
 	
@@ -80,7 +83,7 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 				  final DateWithTimeZoneOffset dtz,
 				  final IDDocumentDescription idDocument) {
 		
-		super(IdentityEvidenceType.ID_DOCUMENT);
+		super(IdentityEvidenceType.ID_DOCUMENT, null);
 		
 		this.method = method;
 		this.dtz = dtz;

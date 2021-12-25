@@ -34,8 +34,8 @@ public class ElectronicSignatureEvidenceTest extends TestCase {
 	
 	public void testMinimal() throws ParseException {
 		
-		ElectronicSignatureEvidence evidence = new ElectronicSignatureEvidence(QES, null, null, null);
-		
+		ElectronicSignatureEvidence evidence = new ElectronicSignatureEvidence(QES, null, null, null, null);
+		assertEquals(IdentityEvidenceType.ELECTRONIC_SIGNATURE, evidence.getEvidenceType());
 		assertEquals(QES, evidence.getSignatureType());
 		assertNull(evidence.getIssuer());
 		assertNull(evidence.getCertificateSerialNumber());
@@ -47,7 +47,7 @@ public class ElectronicSignatureEvidenceTest extends TestCase {
 		assertEquals(2, jsonObject.size());
 		
 		evidence = ElectronicSignatureEvidence.parse(jsonObject);
-		
+		assertEquals(IdentityEvidenceType.ELECTRONIC_SIGNATURE, evidence.getEvidenceType());
 		assertEquals(QES, evidence.getSignatureType());
 		assertNull(evidence.getIssuer());
 		assertNull(evidence.getCertificateSerialNumber());
@@ -61,13 +61,13 @@ public class ElectronicSignatureEvidenceTest extends TestCase {
 		SerialNumber number = new SerialNumber("6efe7fa4-91d8-4821-9859-eaab40f321b6");
 		DateWithTimeZoneOffset ts = DateWithTimeZoneOffset.parseISO8601String("2012-04-23T18:25Z");
 		
-		ElectronicSignatureEvidence evidence = new ElectronicSignatureEvidence(QES, issuer, number, ts);
-		
+		ElectronicSignatureEvidence evidence = new ElectronicSignatureEvidence(QES, issuer, number, ts, null);
 		assertEquals(IdentityEvidenceType.ELECTRONIC_SIGNATURE, evidence.getEvidenceType());
 		assertEquals(QES, evidence.getSignatureType());
 		assertEquals(issuer, evidence.getIssuer());
 		assertEquals(number, evidence.getCertificateSerialNumber());
 		assertEquals(ts, evidence.getCreationTime());
+		assertNull(evidence.getAttachments());
 		
 		JSONObject jsonObject = evidence.toJSONObject();
 		assertEquals(IdentityEvidenceType.ELECTRONIC_SIGNATURE.getValue(), jsonObject.get("type"));
@@ -84,5 +84,17 @@ public class ElectronicSignatureEvidenceTest extends TestCase {
 		assertEquals(issuer, evidence.getIssuer());
 		assertEquals(number, evidence.getCertificateSerialNumber());
 		assertEquals(ts, evidence.getCreationTime());
+		assertNull(evidence.getAttachments());
+	}
+	
+	
+	public void testParseEmpty() {
+		
+		try {
+			ElectronicSignatureEvidence.parse(new JSONObject());
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing JSON object member with key type", e.getMessage());
+		}
 	}
 }

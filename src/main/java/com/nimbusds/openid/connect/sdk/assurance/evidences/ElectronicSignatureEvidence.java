@@ -18,6 +18,7 @@
 package com.nimbusds.openid.connect.sdk.assurance.evidences;
 
 
+import java.util.List;
 import java.util.Objects;
 
 import net.jcip.annotations.Immutable;
@@ -27,6 +28,7 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.date.DateWithTimeZoneOffset;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.Attachment;
 
 
 /**
@@ -77,13 +79,16 @@ public final class ElectronicSignatureEvidence extends IdentityEvidence {
 	 *                                 {@code null} if not specified.
 	 * @param createdAt                The signature creation time,
 	 *                                 {@code null} if not specified.
+	 * @param attachments              The optional attachments,
+	 *                                 {@code null} if not specified.
 	 */
 	public ElectronicSignatureEvidence(final SignatureType signatureType,
 					   final Issuer issuer,
 					   final SerialNumber certificateSerialNumber,
-					   final DateWithTimeZoneOffset createdAt) {
+					   final DateWithTimeZoneOffset createdAt,
+					   final List<Attachment> attachments) {
 		
-		super(IdentityEvidenceType.ELECTRONIC_SIGNATURE);
+		super(IdentityEvidenceType.ELECTRONIC_SIGNATURE, attachments);
 		Objects.requireNonNull(signatureType);
 		this.signatureType = signatureType;
 		this.issuer = issuer;
@@ -184,6 +189,11 @@ public final class ElectronicSignatureEvidence extends IdentityEvidence {
 			createdAt = DateWithTimeZoneOffset.parseISO8601String(JSONObjectUtils.getString(jsonObject, "created_at"));
 		}
 		
-		return new ElectronicSignatureEvidence(signatureType, issuer, serialNumber, createdAt);
+		List<Attachment> attachments = null;
+		if (jsonObject.get("attachments") != null) {
+			attachments = Attachment.parseList(JSONObjectUtils.getJSONArray(jsonObject, "attachments"));
+		}
+		
+		return new ElectronicSignatureEvidence(signatureType, issuer, serialNumber, createdAt, attachments);
 	}
 }

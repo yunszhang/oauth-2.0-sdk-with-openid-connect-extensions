@@ -18,14 +18,20 @@
 package com.nimbusds.openid.connect.sdk.assurance.evidences;
 
 
+import java.util.Collections;
+import java.util.List;
+
 import junit.framework.TestCase;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.date.DateWithTimeZoneOffset;
 import com.nimbusds.oauth2.sdk.util.date.SimpleDate;
-import com.nimbusds.openid.connect.sdk.assurance.claims.ISO3166_1Alpha2CountryCode;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.Attachment;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.EmbeddedAttachment;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.EmbeddedAttachmentTest;
 import com.nimbusds.openid.connect.sdk.claims.Address;
 
 
@@ -86,7 +92,7 @@ public class UtilityBillEvidenceTest extends TestCase {
 	
 	public void testMinimal() throws ParseException {
 		
-		UtilityBillEvidence utilityBillEvidence = new UtilityBillEvidence(null, null, null, null, null);
+		UtilityBillEvidence utilityBillEvidence = new UtilityBillEvidence(null, null, null, null, null, null);
 		
 		assertNull(utilityBillEvidence.getUtilityProviderName());
 		assertNull(utilityBillEvidence.getUtilityProviderAddress());
@@ -117,7 +123,14 @@ public class UtilityBillEvidenceTest extends TestCase {
 		DateWithTimeZoneOffset dtz = DateWithTimeZoneOffset.parseISO8601String("2012-04-23T18:25Z");
 		IdentityVerificationMethod method = IdentityVerificationMethod.ONSITE;
 		
-		UtilityBillEvidence evidence = new UtilityBillEvidence(name, address, ts, dtz, method);;
+		Attachment attachment = new EmbeddedAttachment(
+			EmbeddedAttachmentTest.IMAGE_JPG,
+			EmbeddedAttachmentTest.SAMPLE_ID_CARD_JPEG,
+			"Some description"
+		);
+		List<Attachment> attachments = Collections.singletonList(attachment);
+		
+		UtilityBillEvidence evidence = new UtilityBillEvidence(name, address, ts, dtz, method, attachments);;
 		
 		assertEquals(IdentityEvidenceType.UTILITY_BILL, evidence.getEvidenceType());
 		assertEquals(name, evidence.getUtilityProviderName());
@@ -125,6 +138,7 @@ public class UtilityBillEvidenceTest extends TestCase {
 		assertEquals(ts, evidence.getUtilityBillDate());
 		assertEquals(dtz, evidence.getVerificationTime());
 		assertEquals(method, evidence.getVerificationMethod());
+		assertEquals(attachments, evidence.getAttachments());
 		
 		JSONObject jsonObject = evidence.toJSONObject();
 		assertEquals("utility_bill", jsonObject.get("type"));
@@ -135,7 +149,10 @@ public class UtilityBillEvidenceTest extends TestCase {
 		assertEquals(ts.toISO8601String(), jsonObject.get("date"));
 		assertEquals(dtz.toISO8601String(), jsonObject.get("time"));
 		assertEquals(method.getValue(), jsonObject.get("method"));
-		assertEquals(5, jsonObject.size());
+		JSONArray attachmentArray = JSONObjectUtils.getJSONArray(jsonObject, "attachments");
+		assertEquals(attachments, Attachment.parseList(attachmentArray));
+		assertEquals(1, attachmentArray.size());
+		assertEquals(6, jsonObject.size());
 		
 		evidence = UtilityBillEvidence.parse(jsonObject);
 		
@@ -145,6 +162,7 @@ public class UtilityBillEvidenceTest extends TestCase {
 		assertEquals(ts, evidence.getUtilityBillDate());
 		assertEquals(dtz, evidence.getVerificationTime());
 		assertEquals(method, evidence.getVerificationMethod());
+		assertEquals(attachments, evidence.getAttachments());
 	}
 	
 	

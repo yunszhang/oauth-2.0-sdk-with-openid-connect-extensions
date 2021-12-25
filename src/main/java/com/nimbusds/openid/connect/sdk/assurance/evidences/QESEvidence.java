@@ -72,7 +72,7 @@ public final class QESEvidence extends IdentityEvidence {
 	 */
 	public QESEvidence(final Issuer issuer, final String serialNumber, final DateWithTimeZoneOffset createdAt) {
 		
-		super(IdentityEvidenceType.QES);
+		super(IdentityEvidenceType.QES, null);
 		this.issuer = issuer;
 		this.serialNumber = serialNumber;
 		this.createdAt = createdAt;

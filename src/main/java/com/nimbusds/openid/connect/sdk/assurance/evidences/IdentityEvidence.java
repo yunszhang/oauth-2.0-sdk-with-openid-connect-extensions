@@ -18,11 +18,16 @@
 package com.nimbusds.openid.connect.sdk.assurance.evidences;
 
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.minidev.json.JSONAware;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.Attachment;
 
 
 /**
@@ -31,7 +36,7 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OpenID Connect for Identity Assurance 1.0, section 4.1.1.
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.1.
  * </ul>
  */
 public abstract class IdentityEvidence implements JSONAware {
@@ -44,15 +49,26 @@ public abstract class IdentityEvidence implements JSONAware {
 	
 	
 	/**
+	 * The optional attachments.
+	 */
+	private final List<Attachment> attachments;
+	
+	
+	/**
 	 * Creates a new evidence with the specified type.
 	 *
 	 * @param evidenceType The evidence type. Must not be {@code null}.
+	 * @param attachments  The optional attachments, {@code null} if not
+	 *                     specified.
 	 */
-	protected IdentityEvidence(final IdentityEvidenceType evidenceType) {
+	protected IdentityEvidence(final IdentityEvidenceType evidenceType,
+				   final List<Attachment> attachments) {
 		if (evidenceType == null) {
 			throw new IllegalArgumentException("The evidence type must not be null");
 		}
 		this.evidenceType = evidenceType;
+		
+		this.attachments = attachments;
 	}
 	
 	
@@ -63,6 +79,27 @@ public abstract class IdentityEvidence implements JSONAware {
 	 */
 	public IdentityEvidenceType getEvidenceType() {
 		return evidenceType;
+	}
+	
+	
+	/**
+	 * Returns the optional attachments.
+	 *
+	 * @return The attachments, {@code null} if not specified.
+	 */
+	public List<Attachment> getAttachments() {
+		return attachments;
+	}
+	
+	
+	/**
+	 * Casts this identity evidence to a document evidence.
+	 *
+	 * @return The document evidence.
+	 */
+	public DocumentEvidence toDocumentEvidence() {
+		
+		return (DocumentEvidence)this;
 	}
 	
 	
@@ -89,6 +126,17 @@ public abstract class IdentityEvidence implements JSONAware {
 	
 	
 	/**
+	 * Casts this identity evidence to an electronic signature evidence.
+	 *
+	 * @return The electronic signature evidence.
+	 */
+	public ElectronicSignatureEvidence toElectronicSignatureEvidence() {
+		
+		return (ElectronicSignatureEvidence)this;
+	}
+	
+	
+	/**
 	 * Casts this identity evidence to a QES evidence.
 	 *
 	 * @return The QES evidence.
@@ -108,6 +156,13 @@ public abstract class IdentityEvidence implements JSONAware {
 	
 		JSONObject o = new JSONObject();
 		o.put("type", getEvidenceType().getValue());
+		if (CollectionUtils.isNotEmpty(getAttachments())) {
+			List<Object> attachmentsJSONArray = new LinkedList<>();
+			for (Attachment attachment: getAttachments()) {
+				attachmentsJSONArray.add(attachment.toJSONObject());
+			}
+			o.put("attachments", attachmentsJSONArray);
+		}
 		return o;
 	}
 	
@@ -123,7 +178,8 @@ public abstract class IdentityEvidence implements JSONAware {
 	 *
 	 * @param jsonObject The JSON object. Must not be {@code null}.
 	 *
-	 * @return A {@link IDDocumentEvidence}, {@link QESEvidence} or
+	 * @return A {@link DocumentEvidence}, {@link IDDocumentEvidence},
+	 *         {@link QESEvidence}, {@link ElectronicSignatureEvidence}, or
 	 *         {@link UtilityBillEvidence} instance.
 	 *
 	 * @throws ParseException If parsing failed or the evidence type isn't
@@ -134,15 +190,16 @@ public abstract class IdentityEvidence implements JSONAware {
 		
 		IdentityEvidenceType type = new IdentityEvidenceType(JSONObjectUtils.getString(jsonObject, "type"));
 		
-		if (IdentityEvidenceType.ID_DOCUMENT.equals(type)) {
+		if (IdentityEvidenceType.DOCUMENT.equals(type)) {
+			return DocumentEvidence.parse(jsonObject);
+		} else if (IdentityEvidenceType.ID_DOCUMENT.equals(type)) {
 			return IDDocumentEvidence.parse(jsonObject);
-			
+		} else if (IdentityEvidenceType.ELECTRONIC_SIGNATURE.equals(type)) {
+			return ElectronicSignatureEvidence.parse(jsonObject);
 		} else if (IdentityEvidenceType.QES.equals(type)) {
 			return QESEvidence.parse(jsonObject);
-		
 		} else if (IdentityEvidenceType.UTILITY_BILL.equals(type)) {
 			return UtilityBillEvidence.parse(jsonObject);
-		
 		} else {
 			throw new ParseException("Unsupported type: " + type);
 		}

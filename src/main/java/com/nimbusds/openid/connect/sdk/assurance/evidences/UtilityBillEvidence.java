@@ -18,6 +18,8 @@
 package com.nimbusds.openid.connect.sdk.assurance.evidences;
 
 
+import java.util.List;
+
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
 
@@ -25,6 +27,7 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.date.DateWithTimeZoneOffset;
 import com.nimbusds.oauth2.sdk.util.date.SimpleDate;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.Attachment;
 import com.nimbusds.openid.connect.sdk.claims.Address;
 
 
@@ -85,7 +88,7 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 	@Deprecated
 	public UtilityBillEvidence(final String providerName, final Address providerAddress, final SimpleDate date) {
 		
-		this(providerName, providerAddress, date, null, null);
+		this(providerName, providerAddress, date, null, null, null);
 	}
 	
 	
@@ -102,14 +105,17 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 	 *                        {@code null} if not specified.
 	 * @param method          The identity verification method,
 	 *                        {@code null} if not specified.
+	 * @param attachments     The optional attachments, {@code null} if not
+	 *                        specified.
 	 */
 	public UtilityBillEvidence(final String providerName,
 				   final Address providerAddress,
 				   final SimpleDate date,
 				   final DateWithTimeZoneOffset dtz,
-				   final IdentityVerificationMethod method) {
+				   final IdentityVerificationMethod method,
+				   final List<Attachment> attachments) {
 		
-		super(IdentityEvidenceType.UTILITY_BILL);
+		super(IdentityEvidenceType.UTILITY_BILL, attachments);
 		this.providerName = providerName;
 		this.providerAddress = providerAddress;
 		this.date = date;
@@ -247,6 +253,11 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 			method = new IdentityVerificationMethod(JSONObjectUtils.getString(jsonObject, "method"));
 		}
 		
-		return new UtilityBillEvidence(providerName, providerAddress, date, dtz, method);
+		List<Attachment> attachments = null;
+		if (jsonObject.get("attachments") != null) {
+			attachments = Attachment.parseList(JSONObjectUtils.getJSONArray(jsonObject, "attachments"));
+		}
+		
+		return new UtilityBillEvidence(providerName, providerAddress, date, dtz, method, attachments);
 	}
 }
