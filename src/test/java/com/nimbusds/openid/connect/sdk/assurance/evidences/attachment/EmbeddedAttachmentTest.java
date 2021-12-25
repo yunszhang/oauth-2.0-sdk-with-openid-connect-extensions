@@ -29,10 +29,10 @@ import com.nimbusds.oauth2.sdk.ParseException;
 public class EmbeddedAttachmentTest extends TestCase {
 	
 	
-	private static final ContentType IMAGE_JPG = new ContentType("image", "jpg");
+	public static final ContentType IMAGE_JPG = new ContentType("image", "jpg");
 	
 	
-	private static final Base64 SAMPLE_ID_CARD_JPEG = new Base64(
+	public static final Base64 SAMPLE_ID_CARD_JPEG = new Base64(
 		"/9j/4AAQSkZJRgABAQEBLAEsAAD/2wBDAAoHBwgHBgoICAgLCgoLDhgQDg0NDh0VFhEYIx8lJCIf" +
 		"IiEmKzcvJik0KSEiMEExNDk7Pj4+JS5ESUM8SDc9Pjv/2wBDAQoLCw4NDhwQEBw7KCIoOzs7Ozs7" +
 		"Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozv/wgARCAA8AGQDAREA" +
@@ -93,6 +93,9 @@ public class EmbeddedAttachmentTest extends TestCase {
 		assertEquals(IMAGE_JPG, attachment.getContentType());
 		assertEquals(SAMPLE_ID_CARD_JPEG, attachment.getContent());
 		assertEquals(description, attachment.getDescriptionString());
+		
+		assertEquals(attachment, EmbeddedAttachment.parse(jsonObject));
+		assertEquals(attachment.hashCode(), EmbeddedAttachment.parse(jsonObject).hashCode());
 	}
 
 
@@ -115,6 +118,19 @@ public class EmbeddedAttachmentTest extends TestCase {
 		assertEquals(IMAGE_JPG, attachment.getContentType());
 		assertEquals(SAMPLE_ID_CARD_JPEG, attachment.getContent());
 		assertNull(attachment.getDescriptionString());
+		
+		assertEquals(attachment, EmbeddedAttachment.parse(jsonObject));
+		assertEquals(attachment.hashCode(), EmbeddedAttachment.parse(jsonObject).hashCode());
+	}
+	
+	
+	public void testInequality() {
+		
+		EmbeddedAttachment a = new EmbeddedAttachment(IMAGE_JPG, SAMPLE_ID_CARD_JPEG, null);
+		EmbeddedAttachment b = new EmbeddedAttachment(IMAGE_JPG, SAMPLE_ID_CARD_JPEG, "Some description");
+		
+		assertNotSame(a, b);
+		assertNotSame(a.hashCode(), b.hashCode());
 	}
 	
 	

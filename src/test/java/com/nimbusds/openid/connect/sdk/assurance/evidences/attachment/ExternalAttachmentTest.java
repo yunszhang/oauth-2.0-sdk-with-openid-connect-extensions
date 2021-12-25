@@ -69,6 +69,9 @@ public class ExternalAttachmentTest extends TestCase {
 		assertEquals(0L, attachment.getExpiresIn());
 		assertEquals(digest, attachment.getDigest());
 		assertNull(attachment.getDescriptionString());
+		
+		assertEquals(attachment, ExternalAttachment.parse(jsonObject));
+		assertEquals(attachment.hashCode(), ExternalAttachment.parse(jsonObject).hashCode());
 	}
 
 
@@ -110,6 +113,9 @@ public class ExternalAttachmentTest extends TestCase {
 		assertEquals(0L, attachment.getExpiresIn());
 		assertEquals(digest, attachment.getDigest());
 		assertNull(attachment.getDescriptionString());
+		
+		assertEquals(attachment, ExternalAttachment.parse(jsonObject));
+		assertEquals(attachment.hashCode(), ExternalAttachment.parse(jsonObject).hashCode());
 	}
 
 
@@ -154,6 +160,22 @@ public class ExternalAttachmentTest extends TestCase {
 		assertEquals(60L, attachment.getExpiresIn());
 		assertEquals(digest, attachment.getDigest());
 		assertEquals(description, attachment.getDescriptionString());
+		
+		assertEquals(attachment, ExternalAttachment.parse(jsonObject));
+		assertEquals(attachment.hashCode(), ExternalAttachment.parse(jsonObject).hashCode());
+	}
+	
+	
+	public void testInequality() throws URISyntaxException {
+		
+		
+		Digest digest = new Digest(HashAlgorithm.SHA_256, new Base64("i3O7U79LiyKmmesIgULKT2Q8LAxNO0CpwJVcbepaYf8"));
+		
+		ExternalAttachment a = new ExternalAttachment(new URI("https://example.com/attachment/1"), null, 60L, digest, null);
+		ExternalAttachment b = new ExternalAttachment(new URI("https://example.org/attachment/2"), null, 60L, digest, null);
+		
+		assertNotSame(a, b);
+		assertNotSame(a.hashCode(), b.hashCode());
 	}
 	
 	

@@ -18,9 +18,15 @@
 package com.nimbusds.openid.connect.sdk.assurance.evidences.attachment;
 
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.util.JSONArrayUtils;
 
 
 /**
@@ -66,13 +72,28 @@ public abstract class Attachment {
 	 *
 	 * @return The JSON object.
 	 */
-	protected JSONObject toJSONObject() {
+	public JSONObject toJSONObject() {
 		
 		JSONObject o = new JSONObject();
 		if (getDescriptionString() != null) {
 			o.put("desc", getDescriptionString());
 		}
 		return o;
+	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Attachment)) return false;
+		Attachment that = (Attachment) o;
+		return Objects.equals(description, that.description);
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(description);
 	}
 	
 	
@@ -122,5 +143,31 @@ public abstract class Attachment {
 		} else {
 			throw new ParseException("Missing required attachment parameter(s)");
 		}
+	}
+	
+	
+	/**
+	 * Parses a list of identity evidence attachments from the specified
+	 * JSON array.
+	 *
+	 * @param jsonArray The JSON array, {@code null} if not specified.
+	 *
+	 * @return The list of identity evidence attachments, {@code null} if
+	 *         not specified.
+	 *
+	 * @throws ParseException If parsing failed.
+	 */
+	public static List<Attachment> parseList(final JSONArray jsonArray)
+		throws ParseException {
+		
+		if (jsonArray == null) {
+			return null;
+		}
+		
+		List<Attachment> attachments = new LinkedList<>();
+		for (JSONObject attachmentObject: JSONArrayUtils.toJSONObjectList(jsonArray)) {
+			attachments.add(Attachment.parse(attachmentObject));
+		}
+		return attachments;
 	}
 }

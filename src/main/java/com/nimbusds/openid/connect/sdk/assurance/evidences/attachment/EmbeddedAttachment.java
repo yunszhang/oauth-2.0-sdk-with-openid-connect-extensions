@@ -104,6 +104,22 @@ public class EmbeddedAttachment extends Attachment {
 	}
 	
 	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof EmbeddedAttachment)) return false;
+		if (!super.equals(o)) return false;
+		EmbeddedAttachment that = (EmbeddedAttachment) o;
+		return Objects.equals(getContentType(), that.getContentType()) && Objects.equals(getContent(), that.getContent());
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), getContentType(), getContent());
+	}
+	
+	
 	/**
 	 * Parses an embedded attachment from the specified JSON object.
 	 *

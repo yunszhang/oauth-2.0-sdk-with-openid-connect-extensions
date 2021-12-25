@@ -160,6 +160,25 @@ public class ExternalAttachment extends Attachment {
 	}
 	
 	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof ExternalAttachment)) return false;
+		if (!super.equals(o)) return false;
+		ExternalAttachment that = (ExternalAttachment) o;
+		return getExpiresIn() == that.getExpiresIn() &&
+			url.equals(that.url) &&
+			Objects.equals(accessToken, that.accessToken) &&
+			getDigest().equals(that.getDigest());
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), url, accessToken, getExpiresIn(), getDigest());
+	}
+	
+	
 	/**
 	 * Parses an external attachment from the specified JSON object.
 	 *
