@@ -64,7 +64,7 @@ public final class ElectronicRecordEvidence extends IdentityEvidence {
 	/**
 	 * The electronic record verification timestamp.
 	 */
-	private final DateWithTimeZoneOffset dtz;
+	private final DateWithTimeZoneOffset time;
 	
 	
 	/**
@@ -82,7 +82,7 @@ public final class ElectronicRecordEvidence extends IdentityEvidence {
 	 *                           {@code null} if not specified.
 	 * @param verifier           Optional verifier if not the OpenID
 	 *                           provider itself, {@code null} if none.
-	 * @param dtz                The electronic record verification
+	 * @param time                The electronic record verification
 	 *                           timestamp, {@code null} if not specified.
 	 * @param recordDetails      The electronic record details,
 	 *                           {@code null} if not specified.
@@ -92,13 +92,13 @@ public final class ElectronicRecordEvidence extends IdentityEvidence {
 	public ElectronicRecordEvidence(final ValidationMethod validationMethod,
 					final VerificationMethod verificationMethod,
 					final IdentityVerifier verifier,
-					final DateWithTimeZoneOffset dtz,
+					final DateWithTimeZoneOffset time,
 					final ElectronicRecordDetails recordDetails,
 					final List<Attachment> attachments) {
 		super(IdentityEvidenceType.ELECTRONIC_RECORD, attachments);
 		this.validationMethod = validationMethod;
 		this.verificationMethod = verificationMethod;
-		this.dtz = dtz;
+		this.time = time;
 		this.verifier = verifier;
 		this.recordDetails = recordDetails;
 	}
@@ -144,7 +144,7 @@ public final class ElectronicRecordEvidence extends IdentityEvidence {
 	 *         if not specified.
 	 */
 	public DateWithTimeZoneOffset getVerificationTime() {
-		return dtz;
+		return time;
 	}
 	
 	
@@ -171,8 +171,8 @@ public final class ElectronicRecordEvidence extends IdentityEvidence {
 		if (verifier != null) {
 			o.put("verifier", verifier.toJSONObject());
 		}
-		if (dtz != null) {
-			o.put("time", dtz.toISO8601String());
+		if (time != null) {
+			o.put("time", time.toISO8601String());
 		}
 		if (recordDetails != null) {
 			o.put("record", recordDetails.toJSONObject());
@@ -189,14 +189,14 @@ public final class ElectronicRecordEvidence extends IdentityEvidence {
 		return Objects.equals(getValidationMethod(), that.getValidationMethod()) &&
 			Objects.equals(getVerificationMethod(), that.getVerificationMethod()) &&
 			Objects.equals(getVerifier(), that.getVerifier()) &&
-			Objects.equals(dtz, that.dtz) &&
+			Objects.equals(time, that.time) &&
 			Objects.equals(getRecordDetails(), that.getRecordDetails());
 	}
 	
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(getValidationMethod(), getVerificationMethod(), getVerifier(), dtz, getRecordDetails());
+		return Objects.hash(getValidationMethod(), getVerificationMethod(), getVerifier(), time, getRecordDetails());
 	}
 	
 	

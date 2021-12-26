@@ -71,7 +71,7 @@ public final class DocumentEvidence extends IdentityEvidence {
 	/**
 	 * The document verification timestamp.
 	 */
-	private final DateWithTimeZoneOffset dtz;
+	private final DateWithTimeZoneOffset time;
 	
 	
 	/**
@@ -92,7 +92,7 @@ public final class DocumentEvidence extends IdentityEvidence {
 	 *                           specified.
 	 * @param verifier           Optional verifier if not the OpenID
 	 *                           provider itself, {@code null} if none.
-	 * @param dtz                The document verification timestamp,
+	 * @param time                The document verification timestamp,
 	 *                           {@code null} if not specified.
 	 * @param documentDetails    The document details, {@code null} if not
 	 *                           specified.
@@ -103,14 +103,14 @@ public final class DocumentEvidence extends IdentityEvidence {
 				final VerificationMethod verificationMethod,
 				final IdentityVerificationMethod method,
 				final IdentityVerifier verifier,
-				final DateWithTimeZoneOffset dtz,
+				final DateWithTimeZoneOffset time,
 				final DocumentDetails documentDetails,
 				final List<Attachment> attachments) {
 		super(IdentityEvidenceType.DOCUMENT, attachments);
 		this.validationMethod = validationMethod;
 		this.verificationMethod = verificationMethod;
 		this.method = method;
-		this.dtz = dtz;
+		this.time = time;
 		this.verifier = verifier;
 		this.documentDetails = documentDetails;
 	}
@@ -168,7 +168,7 @@ public final class DocumentEvidence extends IdentityEvidence {
 	 *         specified.
 	 */
 	public DateWithTimeZoneOffset getVerificationTime() {
-		return dtz;
+		return time;
 	}
 	
 	
@@ -197,8 +197,8 @@ public final class DocumentEvidence extends IdentityEvidence {
 		if (verifier != null) {
 			o.put("verifier", verifier.toJSONObject());
 		}
-		if (dtz != null) {
-			o.put("time", dtz.toISO8601String());
+		if (time != null) {
+			o.put("time", time.toISO8601String());
 		}
 		if (documentDetails != null) {
 			o.put("document_details", documentDetails.toJSONObject());
@@ -212,13 +212,13 @@ public final class DocumentEvidence extends IdentityEvidence {
 		if (this == o) return true;
 		if (!(o instanceof DocumentEvidence)) return false;
 		DocumentEvidence that = (DocumentEvidence) o;
-		return Objects.equals(getValidationMethod(), that.getValidationMethod()) && Objects.equals(getVerificationMethod(), that.getVerificationMethod()) && Objects.equals(getMethod(), that.getMethod()) && Objects.equals(getVerifier(), that.getVerifier()) && Objects.equals(dtz, that.dtz) && Objects.equals(getDocumentDetails(), that.getDocumentDetails());
+		return Objects.equals(getValidationMethod(), that.getValidationMethod()) && Objects.equals(getVerificationMethod(), that.getVerificationMethod()) && Objects.equals(getMethod(), that.getMethod()) && Objects.equals(getVerifier(), that.getVerifier()) && Objects.equals(time, that.time) && Objects.equals(getDocumentDetails(), that.getDocumentDetails());
 	}
 	
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(getValidationMethod(), getVerificationMethod(), getMethod(), getVerifier(), dtz, getDocumentDetails());
+		return Objects.hash(getValidationMethod(), getVerificationMethod(), getMethod(), getVerifier(), time, getDocumentDetails());
 	}
 	
 	

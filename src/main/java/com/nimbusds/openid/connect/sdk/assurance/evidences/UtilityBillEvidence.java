@@ -66,7 +66,7 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 	/**
 	 * The utility bill verification timestamp.
 	 */
-	private final DateWithTimeZoneOffset dtz;
+	private final DateWithTimeZoneOffset time;
 	
 	
 	/**
@@ -101,7 +101,7 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 	 *                        {@code null} if not specified.
 	 * @param date            The utility bill date, {@code null} if not
 	 *                        specified.
-	 * @param dtz             The utility bill verification timestamp,
+	 * @param time             The utility bill verification timestamp,
 	 *                        {@code null} if not specified.
 	 * @param method          The identity verification method,
 	 *                        {@code null} if not specified.
@@ -111,7 +111,7 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 	public UtilityBillEvidence(final String providerName,
 				   final Address providerAddress,
 				   final SimpleDate date,
-				   final DateWithTimeZoneOffset dtz,
+				   final DateWithTimeZoneOffset time,
 				   final IdentityVerificationMethod method,
 				   final List<Attachment> attachments) {
 		
@@ -119,7 +119,7 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 		this.providerName = providerName;
 		this.providerAddress = providerAddress;
 		this.date = date;
-		this.dtz = dtz;
+		this.time = time;
 		this.method = method;
 	}
 	
@@ -162,7 +162,7 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 	 *         specified.
 	 */
 	public DateWithTimeZoneOffset getVerificationTime() {
-		return dtz;
+		return time;
 	}
 	
 	

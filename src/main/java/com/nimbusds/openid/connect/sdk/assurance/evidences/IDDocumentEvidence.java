@@ -51,7 +51,7 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 	/**
 	 * The document verification timestamp.
 	 */
-	private final DateWithTimeZoneOffset dtz;
+	private final DateWithTimeZoneOffset time;
 	
 	
 	/**
@@ -73,20 +73,20 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 	 *                   not specified.
 	 * @param verifier   Optional verifier if not the OpenID provider
 	 *                   itself, {@code null} if none.
-	 * @param dtz        The document verification timestamp, {@code null}
+	 * @param time        The document verification timestamp, {@code null}
 	 *                   if not specified.
 	 * @param idDocument The identity document description, {@code null} if
 	 *                   not specified.
 	 */
 	public IDDocumentEvidence(final IdentityVerificationMethod method,
 				  final IdentityVerifier verifier,
-				  final DateWithTimeZoneOffset dtz,
+				  final DateWithTimeZoneOffset time,
 				  final IDDocumentDescription idDocument) {
 		
 		super(IdentityEvidenceType.ID_DOCUMENT, null);
 		
 		this.method = method;
-		this.dtz = dtz;
+		this.time = time;
 		this.verifier = verifier;
 		this.idDocument = idDocument;
 	}
@@ -110,7 +110,7 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 	 *         specified.
 	 */
 	public DateWithTimeZoneOffset getVerificationTime() {
-		return dtz;
+		return time;
 	}
 	
 	
@@ -142,7 +142,7 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 		if (getVerificationMethod() != null) {
 			o.put("method", getVerificationMethod().getValue());
 		}
-		if (dtz != null) {
+		if (time != null) {
 			o.put("time", getVerificationTime().toISO8601String());
 		}
 		if (verifier != null) {
