@@ -38,24 +38,24 @@ import com.nimbusds.openid.connect.sdk.claims.Address;
  * </ul>
  */
 @Immutable
-public final class RecordSource extends CommonOriginatorAttributes {
+public final class ElectronicRecordSource extends CommonOriginatorAttributes {
 	
 	
 	/**
 	 * Creates a new electronic record source.
 	 *
-	 * @param name         The issuer name, {@code null} if not specified.
-	 * @param address      The issuer address elements, {@code null} if not
+	 * @param name         The source name, {@code null} if not specified.
+	 * @param address      The source address elements, {@code null} if not
 	 *                     specified.
-	 * @param countryCode  The issuer country code, {@code null} if not
+	 * @param countryCode  The source country code, {@code null} if not
 	 *                     specified.
-	 * @param jurisdiction The issuer jurisdiction, {@code null} if not
+	 * @param jurisdiction The source jurisdiction, {@code null} if not
 	 *                     specified.
 	 */
-	public RecordSource(final Name name,
-			    final Address address,
-			    final CountryCode countryCode,
-			    final Jurisdiction jurisdiction) {
+	public ElectronicRecordSource(final Name name,
+				      final Address address,
+				      final CountryCode countryCode,
+				      final Jurisdiction jurisdiction) {
 		
 		super(name, address, countryCode, jurisdiction);
 	}
@@ -64,8 +64,8 @@ public final class RecordSource extends CommonOriginatorAttributes {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (!(o instanceof RecordSource)) return false;
-		RecordSource that = (RecordSource) o;
+		if (!(o instanceof ElectronicRecordSource)) return false;
+		ElectronicRecordSource that = (ElectronicRecordSource) o;
 		return Objects.equals(
 			getName(), that.getName()) &&
 			Objects.equals(getAddress(), that.getAddress()) &&
@@ -83,12 +83,12 @@ public final class RecordSource extends CommonOriginatorAttributes {
 	 *
 	 * @throws ParseException If parsing failed.
 	 */
-	public static RecordSource parse(final JSONObject jsonObject)
+	public static ElectronicRecordSource parse(final JSONObject jsonObject)
 		throws ParseException {
 		
 		CommonOriginatorAttributes commonOriginatorAttributes = CommonOriginatorAttributes.parse(jsonObject);
 		
-		return new RecordSource(
+		return new ElectronicRecordSource(
 			commonOriginatorAttributes.getName(),
 			commonOriginatorAttributes.getAddress(),
 			commonOriginatorAttributes.getCountryCode(),

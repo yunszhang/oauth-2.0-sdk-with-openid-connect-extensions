@@ -27,12 +27,12 @@ import com.nimbusds.openid.connect.sdk.assurance.claims.ISO3166_1Alpha2CountryCo
 import com.nimbusds.openid.connect.sdk.claims.Address;
 
 
-public class RecordSourceTest extends TestCase {
+public class ElectronicRecordSourceTest extends TestCase {
 
 
 	public void testEmpty() throws ParseException {
 		
-		RecordSource documentIssuer = new RecordSource(null, null, null, null);
+		ElectronicRecordSource documentIssuer = new ElectronicRecordSource(null, null, null, null);
 		
 		assertNull(documentIssuer.getName());
 		assertNull(documentIssuer.getAddress());
@@ -43,7 +43,7 @@ public class RecordSourceTest extends TestCase {
 		
 		assertTrue(jsonObject.isEmpty());
 		
-		documentIssuer = RecordSource.parse(jsonObject);
+		documentIssuer = ElectronicRecordSource.parse(jsonObject);
 		
 		assertNull(documentIssuer.getName());
 		assertNull(documentIssuer.getAddress());
@@ -51,8 +51,8 @@ public class RecordSourceTest extends TestCase {
 		assertNull(documentIssuer.getJurisdiction());
 		
 		
-		assertEquals(documentIssuer, new RecordSource(null, null, null, null));
-		assertEquals(documentIssuer.hashCode(), new RecordSource(null, null, null, null).hashCode());
+		assertEquals(documentIssuer, new ElectronicRecordSource(null, null, null, null));
+		assertEquals(documentIssuer.hashCode(), new ElectronicRecordSource(null, null, null, null).hashCode());
 	}
 	
 	
@@ -69,7 +69,7 @@ public class RecordSourceTest extends TestCase {
 		CountryCode countryCode = new ISO3166_1Alpha2CountryCode("BG");
 		Jurisdiction jurisdiction = new Jurisdiction("BG-BUL");
 		
-		RecordSource documentIssuer = new RecordSource(name, address, countryCode, jurisdiction);
+		ElectronicRecordSource documentIssuer = new ElectronicRecordSource(name, address, countryCode, jurisdiction);
 		
 		assertEquals(name, documentIssuer.getName());
 		assertEquals(address, documentIssuer.getAddress());
@@ -86,21 +86,21 @@ public class RecordSourceTest extends TestCase {
 		assertEquals(jurisdiction.getValue(), jsonObject.get("jurisdiction"));
 		assertEquals(7, jsonObject.size());
 		
-		documentIssuer = RecordSource.parse(jsonObject);
+		documentIssuer = ElectronicRecordSource.parse(jsonObject);
 		assertEquals(name, documentIssuer.getName());
 		assertEquals(address, documentIssuer.getAddress());
 		assertEquals(countryCode, documentIssuer.getCountryCode());
 		assertEquals(jurisdiction, documentIssuer.getJurisdiction());
 		
-		assertEquals(documentIssuer, new RecordSource(name, address, countryCode, jurisdiction));
-		assertEquals(documentIssuer.hashCode(), new RecordSource(name, address, countryCode, jurisdiction).hashCode());
+		assertEquals(documentIssuer, new ElectronicRecordSource(name, address, countryCode, jurisdiction));
+		assertEquals(documentIssuer.hashCode(), new ElectronicRecordSource(name, address, countryCode, jurisdiction).hashCode());
 	}
 	
 	
 	public void testInequality() {
 		
-		RecordSource a = new RecordSource(new Name("Alice"), null, new ISO3166_1Alpha2CountryCode("BG"), null);
-		RecordSource b = new RecordSource(new Name("Bob"), null, new ISO3166_1Alpha2CountryCode("US"), null);
+		ElectronicRecordSource a = new ElectronicRecordSource(new Name("Alice"), null, new ISO3166_1Alpha2CountryCode("BG"), null);
+		ElectronicRecordSource b = new ElectronicRecordSource(new Name("Bob"), null, new ISO3166_1Alpha2CountryCode("US"), null);
 		
 		assertNotSame(a, b);
 		assertNotSame(a.hashCode(), b.hashCode());
