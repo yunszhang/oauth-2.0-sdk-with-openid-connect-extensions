@@ -29,6 +29,7 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.date.DateWithTimeZoneOffset;
 import com.nimbusds.oauth2.sdk.util.date.SimpleDate;
 import com.nimbusds.openid.connect.sdk.assurance.claims.ISO3166_1Alpha2CountryCode;
+import com.nimbusds.openid.connect.sdk.assurance.claims.ISO3166_1Alpha3CountryCode;
 
 
 public class IdentityEvidenceTest {
@@ -103,6 +104,44 @@ public class IdentityEvidenceTest {
 		assertEquals("123456", evidence.getIdentityDocument().getNumber());
 		assertEquals(new ISO3166_1Alpha2CountryCode("BG"), evidence.getIdentityDocument().getIssuerCountry());
 		assertEquals("ID issuer", evidence.getIdentityDocument().getIssuerName());
+	}
+	
+	
+	@Test
+	public void parseElectronicRecord() throws ParseException {
+		
+		String json = "{" +
+			"  \"type\": \"electronic_record\"," +
+			"  \"validation_method\": {" +
+			"    \"type\": \"data\"" +
+			"  }," +
+			"  \"verification_method\": {" +
+			"    \"type\": \"token\"" +
+			"  }," +
+			"  \"time\": \"2021-02-15T16:51Z\"," +
+			"  \"record\": {" +
+			"    \"type\": \"population_register\"," +
+			"    \"source\": {" +
+			"        \"name\": \"Skatteverket\"," +
+			"        \"country\": \"Sverige\"," +
+			"        \"country_code\": \"SWE\"" +
+			"    }," +
+			"    \"personal_number\": \"4901224131\"," +
+			"    \"created_at\": \"1979-01-22T12:15Z\"" +
+			"  }" +
+			"}";
+		
+		ElectronicRecordEvidence evidence = IdentityEvidence.parse(JSONObjectUtils.parse(json)).toElectronicRecordEvidence();
+		assertEquals(IdentityEvidenceType.ELECTRONIC_RECORD, evidence.getEvidenceType());
+		assertEquals(ValidationMethodType.DATA, evidence.getValidationMethod().getType());
+		assertEquals(VerificationMethodType.TOKEN, evidence.getVerificationMethod().getType());
+		assertEquals(DateWithTimeZoneOffset.parseISO8601String("2021-02-15T16:51Z"), evidence.getVerificationTime());
+		assertEquals(ElectronicRecordType.POPULATION_REGISTER, evidence.getRecordDetails().getType());
+		assertEquals(new Name("Skatteverket"), evidence.getRecordDetails().getSource().getName());
+		assertEquals("Sverige", evidence.getRecordDetails().getSource().getAddress().getCountry());
+		assertEquals(new ISO3166_1Alpha3CountryCode("SWE"), evidence.getRecordDetails().getSource().getCountryCode());
+		assertEquals(new PersonalNumber("4901224131"), evidence.getRecordDetails().getPersonalNumber());
+		assertEquals(DateWithTimeZoneOffset.parseISO8601String("1979-01-22T12:15Z"), evidence.getRecordDetails().getCreatedAt());
 	}
 	
 	@Test

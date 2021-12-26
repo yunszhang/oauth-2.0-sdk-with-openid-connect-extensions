@@ -115,6 +115,17 @@ public abstract class IdentityEvidence implements JSONAware {
 	
 	
 	/**
+	 * Casts this identity evidence to an electronic record evidence.
+	 *
+	 * @return The electronic record evidence.
+	 */
+	public ElectronicRecordEvidence toElectronicRecordEvidence() {
+		
+		return (ElectronicRecordEvidence)this;
+	}
+	
+	
+	/**
 	 * Casts this identity evidence to a utility bill evidence.
 	 *
 	 * @return The utility bill evidence.
@@ -155,7 +166,9 @@ public abstract class IdentityEvidence implements JSONAware {
 	public JSONObject toJSONObject() {
 	
 		JSONObject o = new JSONObject();
+		
 		o.put("type", getEvidenceType().getValue());
+		
 		if (CollectionUtils.isNotEmpty(getAttachments())) {
 			List<Object> attachmentsJSONArray = new LinkedList<>();
 			for (Attachment attachment: getAttachments()) {
@@ -179,7 +192,8 @@ public abstract class IdentityEvidence implements JSONAware {
 	 * @param jsonObject The JSON object. Must not be {@code null}.
 	 *
 	 * @return A {@link DocumentEvidence}, {@link IDDocumentEvidence},
-	 *         {@link QESEvidence}, {@link ElectronicSignatureEvidence}, or
+	 *         {@link ElectronicRecordEvidence}, {@link QESEvidence},
+	 *         {@link ElectronicSignatureEvidence}, or
 	 *         {@link UtilityBillEvidence} instance.
 	 *
 	 * @throws ParseException If parsing failed or the evidence type isn't
@@ -194,6 +208,8 @@ public abstract class IdentityEvidence implements JSONAware {
 			return DocumentEvidence.parse(jsonObject);
 		} else if (IdentityEvidenceType.ID_DOCUMENT.equals(type)) {
 			return IDDocumentEvidence.parse(jsonObject);
+		} else if (IdentityEvidenceType.ELECTRONIC_RECORD.equals(type)) {
+			return ElectronicRecordEvidence.parse(jsonObject);
 		} else if (IdentityEvidenceType.ELECTRONIC_SIGNATURE.equals(type)) {
 			return ElectronicSignatureEvidence.parse(jsonObject);
 		} else if (IdentityEvidenceType.QES.equals(type)) {

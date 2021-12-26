@@ -30,7 +30,8 @@ import com.nimbusds.openid.connect.sdk.claims.Address;
 
 
 /**
- * Common attributes in a {@link DocumentIssuer} and {@link RecordSource}.
+ * Common attributes in a {@link DocumentIssuer} and
+ * {@link ElectronicRecordSource}.
  */
 class CommonOriginatorAttributes {
 	
