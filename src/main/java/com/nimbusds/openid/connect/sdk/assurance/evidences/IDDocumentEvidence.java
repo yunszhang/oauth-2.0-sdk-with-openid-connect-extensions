@@ -18,7 +18,8 @@
 package com.nimbusds.openid.connect.sdk.assurance.evidences;
 
 
-import net.jcip.annotations.Immutable;
+import java.util.Objects;
+
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -38,8 +39,7 @@ import com.nimbusds.oauth2.sdk.util.date.DateWithTimeZoneOffset;
  * @deprecated Use {@link DocumentEvidence} instead.
  */
 @Deprecated
-@Immutable
-public final class IDDocumentEvidence extends IdentityEvidence {
+public class IDDocumentEvidence extends IdentityEvidence {
 	
 	
 	/**
@@ -142,16 +142,34 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 		if (getVerificationMethod() != null) {
 			o.put("method", getVerificationMethod().getValue());
 		}
-		if (time != null) {
+		if (getVerificationTime() != null) {
 			o.put("time", getVerificationTime().toISO8601String());
 		}
-		if (verifier != null) {
+		if (getVerifier() != null) {
 			o.put("verifier", getVerifier().toJSONObject());
 		}
 		if (getIdentityDocument() != null) {
 			o.put("document", getIdentityDocument().toJSONObject());
 		}
 		return o;
+	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof IDDocumentEvidence)) return false;
+		IDDocumentEvidence that = (IDDocumentEvidence) o;
+		return Objects.equals(getVerificationMethod(), that.getVerificationMethod()) &&
+			Objects.equals(getVerificationTime(), that.getVerificationTime()) &&
+			Objects.equals(getVerifier(), that.getVerifier()) &&
+			Objects.equals(getIdentityDocument(), that.getIdentityDocument());
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(method, time, getVerifier(), idDocument);
 	}
 	
 	

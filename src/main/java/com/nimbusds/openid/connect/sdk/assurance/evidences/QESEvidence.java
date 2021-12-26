@@ -18,7 +18,8 @@
 package com.nimbusds.openid.connect.sdk.assurance.evidences;
 
 
-import net.jcip.annotations.Immutable;
+import java.util.Objects;
+
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -39,8 +40,7 @@ import com.nimbusds.oauth2.sdk.util.date.DateWithTimeZoneOffset;
  * @deprecated Use {@link ElectronicSignatureEvidence} instead.
  */
 @Deprecated
-@Immutable
-public final class QESEvidence extends IdentityEvidence {
+public class QESEvidence extends IdentityEvidence {
 	
 	
 	/**
@@ -122,6 +122,23 @@ public final class QESEvidence extends IdentityEvidence {
 			o.put("created_at", getQESCreationTime().toISO8601String());
 		}
 		return o;
+	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof QESEvidence)) return false;
+		QESEvidence evidence = (QESEvidence) o;
+		return Objects.equals(getQESIssuer(), evidence.getQESIssuer()) &&
+			Objects.equals(getQESSerialNumberString(), evidence.getQESSerialNumberString()) &&
+			Objects.equals(getQESCreationTime(), evidence.getQESCreationTime());
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(getQESIssuer(), getQESSerialNumberString(), getQESCreationTime());
 	}
 	
 	

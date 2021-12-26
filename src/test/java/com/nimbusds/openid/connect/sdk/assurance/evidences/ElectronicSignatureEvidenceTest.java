@@ -52,6 +52,9 @@ public class ElectronicSignatureEvidenceTest extends TestCase {
 		assertNull(evidence.getIssuer());
 		assertNull(evidence.getCertificateSerialNumber());
 		assertNull(evidence.getCreationTime());
+		
+		assertEquals("Equality", evidence, ElectronicSignatureEvidence.parse(jsonObject));
+		assertEquals("Hash code", evidence.hashCode(), ElectronicSignatureEvidence.parse(jsonObject).hashCode());
 	}
 	
 	
@@ -85,6 +88,9 @@ public class ElectronicSignatureEvidenceTest extends TestCase {
 		assertEquals(number, evidence.getCertificateSerialNumber());
 		assertEquals(ts, evidence.getCreationTime());
 		assertNull(evidence.getAttachments());
+		
+		assertEquals("Equality", evidence, ElectronicSignatureEvidence.parse(jsonObject));
+		assertEquals("Hash code", evidence.hashCode(), ElectronicSignatureEvidence.parse(jsonObject).hashCode());
 	}
 	
 	

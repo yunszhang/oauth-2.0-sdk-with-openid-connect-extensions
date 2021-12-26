@@ -20,7 +20,6 @@ package com.nimbusds.openid.connect.sdk.assurance.evidences;
 
 import java.util.Objects;
 
-import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONAware;
 import net.minidev.json.JSONObject;
 
@@ -39,8 +38,7 @@ import com.nimbusds.secevent.sdk.claims.TXN;
  *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.1.
  * </ul>
  */
-@Immutable
-public final class IdentityVerifier implements JSONAware {
+public class IdentityVerifier implements JSONAware {
 	
 	
 	/**

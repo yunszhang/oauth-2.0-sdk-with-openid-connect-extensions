@@ -21,7 +21,6 @@ package com.nimbusds.openid.connect.sdk.assurance.evidences;
 import java.util.List;
 import java.util.Objects;
 
-import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -40,8 +39,7 @@ import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.Attachment
  *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.1.5.
  * </ul>
  */
-@Immutable
-public final class ElectronicSignatureEvidence extends IdentityEvidence {
+public class ElectronicSignatureEvidence extends IdentityEvidence {
 	
 	
 	/**
@@ -155,6 +153,24 @@ public final class ElectronicSignatureEvidence extends IdentityEvidence {
 			o.put("created_at", getCreationTime().toISO8601String());
 		}
 		return o;
+	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof ElectronicSignatureEvidence)) return false;
+		ElectronicSignatureEvidence evidence = (ElectronicSignatureEvidence) o;
+		return getSignatureType().equals(evidence.getSignatureType()) &&
+			Objects.equals(getIssuer(), evidence.getIssuer()) &&
+			Objects.equals(getCertificateSerialNumber(), evidence.getCertificateSerialNumber()) &&
+			Objects.equals(createdAt, evidence.createdAt);
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(getSignatureType(), getIssuer(), getCertificateSerialNumber(), createdAt);
 	}
 	
 	

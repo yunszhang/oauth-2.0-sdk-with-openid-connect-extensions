@@ -196,14 +196,14 @@ public class DocumentDetails {
 	public JSONObject toJSONObject() {
 		JSONObject o = new JSONObject();
 		o.put("type", getType().getValue());
-		if (documentNumber != null) {
-			o.put("document_number", documentNumber.getValue());
+		if (getDocumentNumber() != null) {
+			o.put("document_number", getDocumentNumber().getValue());
 		}
-		if (personalNumber != null) {
-			o.put("personal_number", personalNumber.getValue());
+		if (getPersonalNumber() != null) {
+			o.put("personal_number", getPersonalNumber().getValue());
 		}
-		if (serialNumber != null) {
-			o.put("serial_number", serialNumber.getValue());
+		if (getSerialNumber() != null) {
+			o.put("serial_number", getSerialNumber().getValue());
 		}
 		if (getDateOfIssuance() != null) {
 			o.put("date_of_issuance", getDateOfIssuance().toISO8601String());
@@ -211,8 +211,8 @@ public class DocumentDetails {
 		if (getDateOfExpiry() != null) {
 			o.put("date_of_expiry", getDateOfExpiry().toISO8601String());
 		}
-		if (issuer != null) {
-			JSONObject issuerObject = issuer.toJSONObject();
+		if (getIssuer() != null) {
+			JSONObject issuerObject = getIssuer().toJSONObject();
 			if (! issuerObject.isEmpty()) {
 				o.put("issuer", issuerObject);
 			}

@@ -131,17 +131,17 @@ class CommonOriginatorAttributes {
 	public JSONObject toJSONObject() {
 		
 		JSONObject o = new JSONObject();
-		if (name != null) {
-			o.put("name", name.getValue());
+		if (getName() != null) {
+			o.put("name", getName().getValue());
 		}
-		if (address != null) {
-			o.putAll(address.toJSONObject());
+		if (getAddress() != null) {
+			o.putAll(getAddress().toJSONObject());
 		}
-		if (countryCode != null) {
-			o.put("country_code", countryCode.getValue());
+		if (getCountryCode() != null) {
+			o.put("country_code", getCountryCode().getValue());
 		}
-		if (jurisdiction != null) {
-			o.put("jurisdiction", jurisdiction.getValue());
+		if (getJurisdiction() != null) {
+			o.put("jurisdiction", getJurisdiction().getValue());
 		}
 		
 		return o;

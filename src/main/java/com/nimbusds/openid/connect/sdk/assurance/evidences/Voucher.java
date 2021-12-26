@@ -38,8 +38,7 @@ import com.nimbusds.openid.connect.sdk.claims.Address;
  *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.1.3.
  * </ul>
  */
-@Immutable
-public final class Voucher {
+public class Voucher {
 	
 	
 	/**

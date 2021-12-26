@@ -21,7 +21,6 @@ package com.nimbusds.openid.connect.sdk.assurance.evidences;
 import java.util.List;
 import java.util.Objects;
 
-import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -39,8 +38,7 @@ import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.Attachment
  *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.1.1.
  * </ul>
  */
-@Immutable
-public final class DocumentEvidence extends IdentityEvidence {
+public class DocumentEvidence extends IdentityEvidence {
 	
 	
 	/**
@@ -185,23 +183,23 @@ public final class DocumentEvidence extends IdentityEvidence {
 	@Override
 	public JSONObject toJSONObject() {
 		JSONObject o = super.toJSONObject();
-		if (validationMethod != null) {
-			o.put("validation_method", validationMethod.toJSONObject());
+		if (getValidationMethod() != null) {
+			o.put("validation_method", getValidationMethod().toJSONObject());
 		}
-		if (verificationMethod != null) {
-			o.put("verification_method", verificationMethod.toJSONObject());
+		if (getVerificationMethod() != null) {
+			o.put("verification_method", getVerificationMethod().toJSONObject());
 		}
-		if (method != null) {
-			o.put("method", method.getValue());
+		if (getMethod() != null) {
+			o.put("method", getMethod().getValue());
 		}
-		if (verifier != null) {
-			o.put("verifier", verifier.toJSONObject());
+		if (getVerifier() != null) {
+			o.put("verifier", getVerifier().toJSONObject());
 		}
-		if (time != null) {
-			o.put("time", time.toISO8601String());
+		if (getVerificationTime() != null) {
+			o.put("time", getVerificationTime().toISO8601String());
 		}
-		if (documentDetails != null) {
-			o.put("document_details", documentDetails.toJSONObject());
+		if (getDocumentDetails() != null) {
+			o.put("document_details", getDocumentDetails().toJSONObject());
 		}
 		return o;
 	}
@@ -212,13 +210,18 @@ public final class DocumentEvidence extends IdentityEvidence {
 		if (this == o) return true;
 		if (!(o instanceof DocumentEvidence)) return false;
 		DocumentEvidence that = (DocumentEvidence) o;
-		return Objects.equals(getValidationMethod(), that.getValidationMethod()) && Objects.equals(getVerificationMethod(), that.getVerificationMethod()) && Objects.equals(getMethod(), that.getMethod()) && Objects.equals(getVerifier(), that.getVerifier()) && Objects.equals(time, that.time) && Objects.equals(getDocumentDetails(), that.getDocumentDetails());
+		return Objects.equals(getValidationMethod(), that.getValidationMethod()) &&
+			Objects.equals(getVerificationMethod(), that.getVerificationMethod()) &&
+			Objects.equals(getMethod(), that.getMethod()) &&
+			Objects.equals(getVerifier(), that.getVerifier()) &&
+			Objects.equals(getVerificationTime(), that.getVerificationTime()) &&
+			Objects.equals(getDocumentDetails(), that.getDocumentDetails());
 	}
 	
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(getValidationMethod(), getVerificationMethod(), getMethod(), getVerifier(), time, getDocumentDetails());
+		return Objects.hash(getValidationMethod(), getVerificationMethod(), getMethod(), getVerifier(), getVerificationTime(), getDocumentDetails());
 	}
 	
 	

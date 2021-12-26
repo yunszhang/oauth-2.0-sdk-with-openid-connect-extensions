@@ -21,7 +21,6 @@ package com.nimbusds.openid.connect.sdk.assurance.evidences;
 import java.util.List;
 import java.util.Objects;
 
-import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -39,8 +38,7 @@ import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.Attachment
  *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.1.2.
  * </ul>
  */
-@Immutable
-public final class ElectronicRecordEvidence extends IdentityEvidence {
+public class ElectronicRecordEvidence extends IdentityEvidence {
 	
 	
 	/**
@@ -162,20 +160,20 @@ public final class ElectronicRecordEvidence extends IdentityEvidence {
 	@Override
 	public JSONObject toJSONObject() {
 		JSONObject o = super.toJSONObject();
-		if (validationMethod != null) {
-			o.put("validation_method", validationMethod.toJSONObject());
+		if (getValidationMethod() != null) {
+			o.put("validation_method", getValidationMethod().toJSONObject());
 		}
-		if (verificationMethod != null) {
-			o.put("verification_method", verificationMethod.toJSONObject());
+		if (getVerificationMethod() != null) {
+			o.put("verification_method", getVerificationMethod().toJSONObject());
 		}
-		if (verifier != null) {
-			o.put("verifier", verifier.toJSONObject());
+		if (getVerifier() != null) {
+			o.put("verifier", getVerifier().toJSONObject());
 		}
-		if (time != null) {
-			o.put("time", time.toISO8601String());
+		if (getVerificationTime() != null) {
+			o.put("time", getVerificationTime().toISO8601String());
 		}
-		if (recordDetails != null) {
-			o.put("record", recordDetails.toJSONObject());
+		if (getRecordDetails() != null) {
+			o.put("record", getRecordDetails().toJSONObject());
 		}
 		return o;
 	}
@@ -189,14 +187,14 @@ public final class ElectronicRecordEvidence extends IdentityEvidence {
 		return Objects.equals(getValidationMethod(), that.getValidationMethod()) &&
 			Objects.equals(getVerificationMethod(), that.getVerificationMethod()) &&
 			Objects.equals(getVerifier(), that.getVerifier()) &&
-			Objects.equals(time, that.time) &&
+			Objects.equals(getVerificationTime(), that.getVerificationTime()) &&
 			Objects.equals(getRecordDetails(), that.getRecordDetails());
 	}
 	
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(getValidationMethod(), getVerificationMethod(), getVerifier(), time, getRecordDetails());
+		return Objects.hash(getValidationMethod(), getVerificationMethod(), getVerifier(), getVerificationTime(), getRecordDetails());
 	}
 	
 	

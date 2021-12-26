@@ -186,14 +186,20 @@ public class VouchEvidence extends IdentityEvidence {
 		return Objects.equals(getValidationMethod(), that.getValidationMethod()) &&
 			Objects.equals(getVerificationMethod(), that.getVerificationMethod()) &&
 			Objects.equals(getVerifier(), that.getVerifier()) &&
-			Objects.equals(time, that.time) &&
+			Objects.equals(getVerificationTime(), that.getVerificationTime()) &&
 			Objects.equals(getAttestation(), that.getAttestation());
 	}
 	
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(getValidationMethod(), getVerificationMethod(), getVerifier(), time, getAttestation());
+		return Objects.hash(
+			getValidationMethod(),
+			getVerificationMethod(),
+			getVerifier(),
+			getVerificationTime(),
+			getAttestation()
+		);
 	}
 	
 	

@@ -19,8 +19,8 @@ package com.nimbusds.openid.connect.sdk.assurance.evidences;
 
 
 import java.util.List;
+import java.util.Objects;
 
-import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -41,8 +41,7 @@ import com.nimbusds.openid.connect.sdk.claims.Address;
  * </ul>
  */
 @Deprecated
-@Immutable
-public final class UtilityBillEvidence extends IdentityEvidence {
+public class UtilityBillEvidence extends IdentityEvidence {
 	
 	
 	/**
@@ -206,6 +205,31 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 		}
 		
 		return o;
+	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof UtilityBillEvidence)) return false;
+		UtilityBillEvidence evidence = (UtilityBillEvidence) o;
+		return Objects.equals(getUtilityProviderName(), evidence.getUtilityProviderName()) &&
+			Objects.equals(getUtilityProviderAddress(), evidence.getUtilityProviderAddress()) &&
+			Objects.equals(getUtilityBillDate(), evidence.getUtilityBillDate()) &&
+			Objects.equals(getVerificationTime(), evidence.getVerificationTime()) &&
+			Objects.equals(getVerificationMethod(), evidence.getVerificationMethod());
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(
+			getUtilityProviderName(),
+			getUtilityProviderAddress(),
+			getUtilityBillDate(),
+			getVerificationTime(),
+			getVerificationMethod()
+		);
 	}
 	
 	

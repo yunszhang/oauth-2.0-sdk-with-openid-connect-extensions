@@ -20,7 +20,6 @@ package com.nimbusds.openid.connect.sdk.assurance.evidences;
 
 import java.util.Objects;
 
-import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -37,8 +36,7 @@ import com.nimbusds.openid.connect.sdk.claims.Address;
  *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.1.1.
  * </ul>
  */
-@Immutable
-public final class DocumentIssuer extends CommonOriginatorAttributes {
+public class DocumentIssuer extends CommonOriginatorAttributes {
 	
 	
 	/**

@@ -40,21 +40,24 @@ public class UtilityBillEvidenceTest extends TestCase {
 	
 	public void testMinimal_deprecatedConstructor() throws ParseException {
 		
-		UtilityBillEvidence utilityBillEvidence = new UtilityBillEvidence(null, null, null);
+		UtilityBillEvidence evidence = new UtilityBillEvidence(null, null, null);
 		
-		assertNull(utilityBillEvidence.getUtilityProviderName());
-		assertNull(utilityBillEvidence.getUtilityProviderAddress());
-		assertNull(utilityBillEvidence.getUtilityBillDate());
+		assertNull(evidence.getUtilityProviderName());
+		assertNull(evidence.getUtilityProviderAddress());
+		assertNull(evidence.getUtilityBillDate());
 		
-		JSONObject jsonObject = utilityBillEvidence.toJSONObject();
+		JSONObject jsonObject = evidence.toJSONObject();
 		assertEquals(IdentityEvidenceType.UTILITY_BILL.getValue(), jsonObject.get("type"));
 		assertEquals(1, jsonObject.size());
 		
-		utilityBillEvidence = UtilityBillEvidence.parse(jsonObject);
+		evidence = UtilityBillEvidence.parse(jsonObject);
 		
-		assertNull(utilityBillEvidence.getUtilityProviderName());
-		assertNull(utilityBillEvidence.getUtilityProviderAddress());
-		assertNull(utilityBillEvidence.getUtilityBillDate());
+		assertNull(evidence.getUtilityProviderName());
+		assertNull(evidence.getUtilityProviderAddress());
+		assertNull(evidence.getUtilityBillDate());
+		
+		assertEquals("Equality", evidence, UtilityBillEvidence.parse(jsonObject));
+		assertEquals("Hash code", evidence.hashCode(), UtilityBillEvidence.parse(jsonObject).hashCode());
 	}
 	
 	
@@ -87,30 +90,36 @@ public class UtilityBillEvidenceTest extends TestCase {
 		assertEquals(name, evidence.getUtilityProviderName());
 		assertEquals(address.toJSONObject(), evidence.getUtilityProviderAddress().toJSONObject());
 		assertEquals(ts, evidence.getUtilityBillDate());
+		
+		assertEquals("Equality", evidence, UtilityBillEvidence.parse(jsonObject));
+		assertEquals("Hash code", evidence.hashCode(), UtilityBillEvidence.parse(jsonObject).hashCode());
 	}
 	
 	
 	public void testMinimal() throws ParseException {
 		
-		UtilityBillEvidence utilityBillEvidence = new UtilityBillEvidence(null, null, null, null, null, null);
+		UtilityBillEvidence evidence = new UtilityBillEvidence(null, null, null, null, null, null);
 		
-		assertNull(utilityBillEvidence.getUtilityProviderName());
-		assertNull(utilityBillEvidence.getUtilityProviderAddress());
-		assertNull(utilityBillEvidence.getUtilityBillDate());
-		assertNull(utilityBillEvidence.getVerificationTime());
-		assertNull(utilityBillEvidence.getVerificationMethod());
+		assertNull(evidence.getUtilityProviderName());
+		assertNull(evidence.getUtilityProviderAddress());
+		assertNull(evidence.getUtilityBillDate());
+		assertNull(evidence.getVerificationTime());
+		assertNull(evidence.getVerificationMethod());
 		
-		JSONObject jsonObject = utilityBillEvidence.toJSONObject();
+		JSONObject jsonObject = evidence.toJSONObject();
 		assertEquals(IdentityEvidenceType.UTILITY_BILL.getValue(), jsonObject.get("type"));
 		assertEquals(1, jsonObject.size());
 		
-		utilityBillEvidence = UtilityBillEvidence.parse(jsonObject);
+		evidence = UtilityBillEvidence.parse(jsonObject);
 		
-		assertNull(utilityBillEvidence.getUtilityProviderName());
-		assertNull(utilityBillEvidence.getUtilityProviderAddress());
-		assertNull(utilityBillEvidence.getUtilityBillDate());
-		assertNull(utilityBillEvidence.getVerificationTime());
-		assertNull(utilityBillEvidence.getVerificationMethod());
+		assertNull(evidence.getUtilityProviderName());
+		assertNull(evidence.getUtilityProviderAddress());
+		assertNull(evidence.getUtilityBillDate());
+		assertNull(evidence.getVerificationTime());
+		assertNull(evidence.getVerificationMethod());
+		
+		assertEquals("Equality", evidence, UtilityBillEvidence.parse(jsonObject));
+		assertEquals("Hash code", evidence.hashCode(), UtilityBillEvidence.parse(jsonObject).hashCode());
 	}
 	
 	
@@ -163,6 +172,9 @@ public class UtilityBillEvidenceTest extends TestCase {
 		assertEquals(dtz, evidence.getVerificationTime());
 		assertEquals(method, evidence.getVerificationMethod());
 		assertEquals(attachments, evidence.getAttachments());
+		
+		assertEquals("Equality", evidence, UtilityBillEvidence.parse(jsonObject));
+		assertEquals("Hash code", evidence.hashCode(), UtilityBillEvidence.parse(jsonObject).hashCode());
 	}
 	
 	

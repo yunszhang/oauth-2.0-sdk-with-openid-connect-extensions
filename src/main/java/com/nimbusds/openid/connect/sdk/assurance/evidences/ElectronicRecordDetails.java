@@ -157,8 +157,8 @@ public class ElectronicRecordDetails {
 	public JSONObject toJSONObject() {
 		JSONObject o = new JSONObject();
 		o.put("type", getType().getValue());
-		if (personalNumber != null) {
-			o.put("personal_number", personalNumber.getValue());
+		if (getPersonalNumber() != null) {
+			o.put("personal_number", getPersonalNumber().getValue());
 		}
 		if (getCreatedAt() != null) {
 				o.put("created_at", getCreatedAt().toISO8601String());
@@ -166,8 +166,8 @@ public class ElectronicRecordDetails {
 		if (getDateOfExpiry() != null) {
 			o.put("date_of_expiry", getDateOfExpiry().toISO8601String());
 		}
-		if (source != null) {
-			JSONObject sourceObject = source.toJSONObject();
+		if (getSource() != null) {
+			JSONObject sourceObject = getSource().toJSONObject();
 			if (! sourceObject.isEmpty()) {
 				o.put("source", sourceObject);
 			}
