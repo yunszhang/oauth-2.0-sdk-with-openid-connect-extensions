@@ -51,7 +51,7 @@ public class DocumentEvidenceTest extends TestCase {
 		
 		assertNull(documentEvidence.getValidationMethod());
 		assertNull(documentEvidence.getVerificationMethod());
-		assertNull(documentEvidence.getVerificationMethod());
+		assertNull(documentEvidence.getMethod());
 		assertNull(documentEvidence.getVerifier());
 		assertNull(documentEvidence.getVerificationTime());
 		assertNull(documentEvidence.getDocumentDetails());
@@ -65,7 +65,7 @@ public class DocumentEvidenceTest extends TestCase {
 		
 		assertNull(documentEvidence.getValidationMethod());
 		assertNull(documentEvidence.getVerificationMethod());
-		assertNull(documentEvidence.getVerificationMethod());
+		assertNull(documentEvidence.getMethod());
 		assertNull(documentEvidence.getVerifier());
 		assertNull(documentEvidence.getVerificationTime());
 		assertNull(documentEvidence.getDocumentDetails());
