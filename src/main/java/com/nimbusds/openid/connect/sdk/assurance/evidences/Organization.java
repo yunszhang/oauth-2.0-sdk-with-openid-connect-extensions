@@ -29,7 +29,8 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.1.3.
+ *     <li>OpenID Connect for Identity Assurance 1.0, sections 5.1.1.1,
+ *         5.1.1.2 and 5.1.1.3.
  * </ul>
  */
 @Immutable
