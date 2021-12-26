@@ -159,8 +159,7 @@ public class Attestation {
 	/**
 	 * Returns the voucher information.
 	 *
-	 * @return The voucher information, {@code null} if not
-	 *         specified.
+	 * @return The voucher information, {@code null} if not specified.
 	 */
 	public Voucher getVoucher() {
 		return voucher;
