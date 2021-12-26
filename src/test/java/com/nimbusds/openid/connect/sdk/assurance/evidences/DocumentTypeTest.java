@@ -69,4 +69,11 @@ public class DocumentTypeTest extends TestCase {
 		assertEquals(new DocumentType("idcard"), DocumentType.IDCARD);
 		assertEquals(new DocumentType("idcard").hashCode(), DocumentType.IDCARD.hashCode());
 	}
+	
+	
+	public void testInequality() {
+		
+		assertNotSame(DocumentType.IDCARD, DocumentType.VISA);
+		assertNotSame(DocumentType.IDCARD.hashCode(), DocumentType.VISA.hashCode());
+	}
 }
