@@ -34,11 +34,16 @@ public class IdentityVerifierTest extends TestCase {
 		IdentityVerifier identityVerifier = new IdentityVerifier(null, null);
 		assertNull(identityVerifier.getOrganization());
 		assertNull(identityVerifier.getTXN());
+		
 		JSONObject jsonObject = identityVerifier.toJSONObject();
 		assertTrue(jsonObject.isEmpty());
+		
 		identityVerifier = IdentityVerifier.parse(jsonObject);
 		assertNull(identityVerifier.getOrganization());
 		assertNull(identityVerifier.getTXN());
+		
+		assertEquals("Equality", identityVerifier, IdentityVerifier.parse(jsonObject));
+		assertEquals("Hash code", identityVerifier.hashCode(), IdentityVerifier.parse(jsonObject).hashCode());
 	}
 	
 	
@@ -49,13 +54,19 @@ public class IdentityVerifierTest extends TestCase {
 		IdentityVerifier identityVerifier = new IdentityVerifier(org, txn);
 		assertEquals(org, identityVerifier.getOrganization());
 		assertEquals(txn, identityVerifier.getTXN());
+		
 		JSONObject jsonObject = identityVerifier.toJSONObject();
 		assertEquals(org, jsonObject.get("organization"));
 		assertEquals(txn.getValue(), jsonObject.get("txn"));
 		assertEquals(2, jsonObject.size());
+		
 		identityVerifier = IdentityVerifier.parse(jsonObject);
+		
 		assertEquals(org, identityVerifier.getOrganization());
 		assertEquals(txn, identityVerifier.getTXN());
+		
+		assertEquals("Equality", identityVerifier, IdentityVerifier.parse(jsonObject));
+		assertEquals("Hash code", identityVerifier.hashCode(), IdentityVerifier.parse(jsonObject).hashCode());
 	}
 	
 	

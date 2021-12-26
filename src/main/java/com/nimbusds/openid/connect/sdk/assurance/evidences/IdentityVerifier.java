@@ -117,8 +117,7 @@ public final class IdentityVerifier implements JSONAware {
 		if (this == o) return true;
 		if (!(o instanceof IdentityVerifier)) return false;
 		IdentityVerifier verifier = (IdentityVerifier) o;
-		return getOrganization().equals(verifier.getOrganization()) &&
-			txn.equals(verifier.txn);
+		return Objects.equals(getOrganization(), verifier.getOrganization()) && Objects.equals(txn, verifier.txn);
 	}
 	
 	
