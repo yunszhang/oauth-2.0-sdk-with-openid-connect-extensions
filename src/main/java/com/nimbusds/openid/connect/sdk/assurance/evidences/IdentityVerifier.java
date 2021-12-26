@@ -69,11 +69,25 @@ public final class IdentityVerifier implements JSONAware {
 	
 	
 	/**
+	 * Returns the organisation string.
+	 *
+	 * @return The organisation string, {@code null} if not specified.
+	 */
+	public String getOrganizationString() {
+		return organization;
+	}
+	
+	
+	/**
 	 * Returns the organisation.
 	 *
 	 * @return The organisation, {@code null} if not specified.
+	 *
+	 * @deprecated Use {@link #getOrganizationString()} instead.
 	 */
+	@Deprecated
 	public String getOrganization() {
+		// Deprecated to allow for strongly typed Organization in future
 		return organization;
 	}
 	

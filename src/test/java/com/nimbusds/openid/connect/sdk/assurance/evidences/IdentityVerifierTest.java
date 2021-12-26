@@ -32,6 +32,7 @@ public class IdentityVerifierTest extends TestCase {
 	public void testNullParams() throws ParseException {
 		
 		IdentityVerifier identityVerifier = new IdentityVerifier(null, null);
+		assertNull(identityVerifier.getOrganizationString());
 		assertNull(identityVerifier.getOrganization());
 		assertNull(identityVerifier.getTXN());
 		
@@ -39,6 +40,7 @@ public class IdentityVerifierTest extends TestCase {
 		assertTrue(jsonObject.isEmpty());
 		
 		identityVerifier = IdentityVerifier.parse(jsonObject);
+		assertNull(identityVerifier.getOrganizationString());
 		assertNull(identityVerifier.getOrganization());
 		assertNull(identityVerifier.getTXN());
 		
@@ -52,6 +54,7 @@ public class IdentityVerifierTest extends TestCase {
 		String org = "example.com";
 		TXN txn = new TXN("c9155d5d-8b8d-4d85-8a0c-caae01032c1f");
 		IdentityVerifier identityVerifier = new IdentityVerifier(org, txn);
+		assertEquals(org, identityVerifier.getOrganizationString());
 		assertEquals(org, identityVerifier.getOrganization());
 		assertEquals(txn, identityVerifier.getTXN());
 		
@@ -62,11 +65,22 @@ public class IdentityVerifierTest extends TestCase {
 		
 		identityVerifier = IdentityVerifier.parse(jsonObject);
 		
+		assertEquals(org, identityVerifier.getOrganizationString());
 		assertEquals(org, identityVerifier.getOrganization());
 		assertEquals(txn, identityVerifier.getTXN());
 		
 		assertEquals("Equality", identityVerifier, IdentityVerifier.parse(jsonObject));
 		assertEquals("Hash code", identityVerifier.hashCode(), IdentityVerifier.parse(jsonObject).hashCode());
+	}
+	
+	
+	public void testInequality() {
+		
+		IdentityVerifier a = new IdentityVerifier("a", null);
+		IdentityVerifier b = new IdentityVerifier("b", null);
+		
+		assertNotSame(a, b);
+		assertNotSame(a.hashCode(), b.hashCode());
 	}
 	
 	
@@ -79,6 +93,7 @@ public class IdentityVerifierTest extends TestCase {
 			"}";
 		
 		IdentityVerifier verifier = IdentityVerifier.parse(JSONObjectUtils.parse(json));
+		assertEquals("Deutsche Post", verifier.getOrganizationString());
 		assertEquals("Deutsche Post", verifier.getOrganization());
 		assertEquals(new TXN("1aa05779-0775-470f-a5c4-9f1f5e56cf06"), verifier.getTXN());
 	}
