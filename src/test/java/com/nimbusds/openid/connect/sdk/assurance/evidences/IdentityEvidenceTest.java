@@ -28,6 +28,8 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.date.DateWithTimeZoneOffset;
 import com.nimbusds.oauth2.sdk.util.date.SimpleDate;
+import com.nimbusds.openid.connect.sdk.assurance.Policy;
+import com.nimbusds.openid.connect.sdk.assurance.Procedure;
 import com.nimbusds.openid.connect.sdk.assurance.claims.ISO3166_1Alpha2CountryCode;
 import com.nimbusds.openid.connect.sdk.assurance.claims.ISO3166_1Alpha3CountryCode;
 
@@ -143,6 +145,94 @@ public class IdentityEvidenceTest {
 		assertEquals(new PersonalNumber("4901224131"), evidence.getRecordDetails().getPersonalNumber());
 		assertEquals(DateWithTimeZoneOffset.parseISO8601String("1979-01-22T12:15Z"), evidence.getRecordDetails().getCreatedAt());
 	}
+	
+	
+	@Test
+	public void parseVouchEvidenceExample_writtenAttestation() throws ParseException {
+		
+		String json = "{" +
+			"  \"type\": \"vouch\"," +
+			"  \"validation_method\": {" +
+			"    \"type\": \"vpip\"," +
+			"    \"policy\": \"gpg45\"," +
+			"    \"procedure\": \"score_3\"" +
+			"  }," +
+			"  \"verification_method\": {" +
+			"    \"type\": \"pvr\"," +
+			"    \"policy\": \"gpg45\"," +
+			"    \"procedure\": \"score_3\"" +
+			"  }," +
+			"  \"time\": \"2020-02-23T07:52Z\"," +
+			"  \"attestation\": {" +
+			"    \"type\": \"written_attestation\"," +
+			"    \"reference_number\": \"6485-1619-3976-6671\"," +
+			"    \"date_of_issuance\": \"2020-02-13\"," +
+			"    \"voucher\": {" +
+			"        \"name\": \"Peter Crowe\"," +
+			"        \"occupation\": \"Executive Principal\"," +
+			"        \"organization\": \"Kristin School\"" +
+			"    }" +
+			"  }," +
+			"  \"attachments\": [" +
+			"    {" +
+			"      \"desc\": \"scan of vouch\"," +
+			"      \"content_type\": \"application/pdf\"," +
+			"      \"content\": \"d16d2552e35582810e5a40e523716504525b6016ae96844ddc533163059b3067==\"" +
+			"    }" +
+			"  ]" +
+			"}";
+		
+		VouchEvidence evidence = IdentityEvidence.parse(JSONObjectUtils.parse(json)).toVouchEvidence();
+		
+		assertEquals(IdentityEvidenceType.VOUCH, evidence.getEvidenceType());
+		assertEquals(ValidationMethodType.VPIP, evidence.getValidationMethod().getType());
+		assertEquals(new Policy("gpg45"), evidence.getValidationMethod().getPolicy());
+		assertEquals(new Procedure("score_3"), evidence.getValidationMethod().getProcedure());
+		assertEquals(VerificationMethodType.PVR, evidence.getVerificationMethod().getType());
+		assertEquals(new Policy("gpg45"), evidence.getVerificationMethod().getPolicy());
+		assertEquals(new Procedure("score_3"), evidence.getVerificationMethod().getProcedure());
+		assertEquals(DateWithTimeZoneOffset.parseISO8601String("2020-02-23T07:52Z"), evidence.getVerificationTime());
+		assertEquals(VouchType.WRITTEN_ATTESTATION, evidence.getAttestation().getType());
+		assertEquals(new ReferenceNumber("6485-1619-3976-6671"), evidence.getAttestation().getReferenceNumber());
+		assertEquals(new SimpleDate(2020, 2, 13), evidence.getAttestation().getDateOfIssuance());
+		assertEquals(new Name("Peter Crowe"), evidence.getAttestation().getVoucher().getName());
+	}
+	
+	
+	@Test
+	public void parseVouchEvidenceExample_digitalAttestation() throws ParseException {
+		
+		String json = "{" +
+			"  \"type\": \"vouch\"," +
+			"  \"validation_method\": {" +
+			"    \"type\": \"vcrypt\"" +
+			"  }," +
+			"  \"verification_method\": {" +
+			"    \"type\": \"bvr\"" +
+			"  }," +
+			"  \"time\": \"2020-03-19T12:42Z\"," +
+			"  \"attestation\": {" +
+			"    \"type\": \"digital_attestation\"," +
+			"    \"reference_number\": \"6485-1619-3976-6671\"," +
+			"    \"date_of_issuance\": \"2021-06-04\"," +
+			"    \"voucher\": {" +
+			"        \"organization\": \"HMP Dartmoor\"" +
+			"    }" +
+			"  }" +
+			"}";
+		
+		VouchEvidence evidence = IdentityEvidence.parse(JSONObjectUtils.parse(json)).toVouchEvidence();
+		
+		assertEquals(IdentityEvidenceType.VOUCH, evidence.getEvidenceType());
+		assertEquals(ValidationMethodType.VCRYPT, evidence.getValidationMethod().getType());
+		assertEquals(VerificationMethodType.BVR, evidence.getVerificationMethod().getType());
+		assertEquals(DateWithTimeZoneOffset.parseISO8601String("2020-03-19T12:42Z"), evidence.getVerificationTime());
+		assertEquals(VouchType.DIGITAL_ATTESTATION, evidence.getAttestation().getType());
+		assertEquals(new ReferenceNumber("6485-1619-3976-6671"), evidence.getAttestation().getReferenceNumber());
+		assertEquals(new SimpleDate(2021, 6, 4), evidence.getAttestation().getDateOfIssuance());
+		assertEquals(new Organization("HMP Dartmoor"), evidence.getAttestation().getVoucher().getOrganization());
+	}
+	
 	
 	@Test
 	public void parseElectronicSignatureExample() throws ParseException {

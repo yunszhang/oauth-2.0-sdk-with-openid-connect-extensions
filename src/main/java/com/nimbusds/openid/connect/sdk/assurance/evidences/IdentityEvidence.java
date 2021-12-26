@@ -126,6 +126,17 @@ public abstract class IdentityEvidence implements JSONAware {
 	
 	
 	/**
+	 * Casts this identity evidence to a vouch evidence.
+	 *
+	 * @return The vouch evidence.
+	 */
+	public VouchEvidence toVouchEvidence() {
+		
+		return (VouchEvidence)this;
+	}
+	
+	
+	/**
 	 * Casts this identity evidence to a utility bill evidence.
 	 *
 	 * @return The utility bill evidence.
@@ -192,8 +203,8 @@ public abstract class IdentityEvidence implements JSONAware {
 	 * @param jsonObject The JSON object. Must not be {@code null}.
 	 *
 	 * @return A {@link DocumentEvidence}, {@link IDDocumentEvidence},
-	 *         {@link ElectronicRecordEvidence}, {@link QESEvidence},
-	 *         {@link ElectronicSignatureEvidence}, or
+	 *         {@link ElectronicRecordEvidence}, {@link VouchEvidence},
+	 *         {@link QESEvidence}, {@link ElectronicSignatureEvidence}, or
 	 *         {@link UtilityBillEvidence} instance.
 	 *
 	 * @throws ParseException If parsing failed or the evidence type isn't
@@ -210,6 +221,8 @@ public abstract class IdentityEvidence implements JSONAware {
 			return IDDocumentEvidence.parse(jsonObject);
 		} else if (IdentityEvidenceType.ELECTRONIC_RECORD.equals(type)) {
 			return ElectronicRecordEvidence.parse(jsonObject);
+		} else if (IdentityEvidenceType.VOUCH.equals(type)) {
+			return VouchEvidence.parse(jsonObject);
 		} else if (IdentityEvidenceType.ELECTRONIC_SIGNATURE.equals(type)) {
 			return ElectronicSignatureEvidence.parse(jsonObject);
 		} else if (IdentityEvidenceType.QES.equals(type)) {
