@@ -65,7 +65,7 @@ public class EmbeddedAttachment extends Attachment {
 				  final Base64 content,
 				  final String description) {
 		
-		super(description);
+		super(AttachmentType.EMBEDDED, description);
 		
 		Objects.requireNonNull(contentType, "The content type must not be null");
 		this.contentType = contentType;

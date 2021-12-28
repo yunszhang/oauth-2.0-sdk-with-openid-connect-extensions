@@ -78,6 +78,7 @@ public class EmbeddedAttachmentTest extends TestCase {
 		
 		EmbeddedAttachment attachment = new EmbeddedAttachment(IMAGE_JPG, SAMPLE_ID_CARD_JPEG, description);
 		
+		assertEquals(AttachmentType.EMBEDDED, attachment.getType());
 		assertEquals(IMAGE_JPG, attachment.getContentType());
 		assertEquals(SAMPLE_ID_CARD_JPEG, attachment.getContent());
 		assertEquals(description, attachment.getDescriptionString());
@@ -90,6 +91,7 @@ public class EmbeddedAttachmentTest extends TestCase {
 		
 		attachment = EmbeddedAttachment.parse(jsonObject);
 		
+		assertEquals(AttachmentType.EMBEDDED, attachment.getType());
 		assertEquals(IMAGE_JPG, attachment.getContentType());
 		assertEquals(SAMPLE_ID_CARD_JPEG, attachment.getContent());
 		assertEquals(description, attachment.getDescriptionString());
@@ -104,6 +106,7 @@ public class EmbeddedAttachmentTest extends TestCase {
 	
 		EmbeddedAttachment attachment = new EmbeddedAttachment(IMAGE_JPG, SAMPLE_ID_CARD_JPEG, null);
 		
+		assertEquals(AttachmentType.EMBEDDED, attachment.getType());
 		assertEquals(IMAGE_JPG, attachment.getContentType());
 		assertEquals(SAMPLE_ID_CARD_JPEG, attachment.getContent());
 		assertNull(attachment.getDescriptionString());
@@ -115,6 +118,7 @@ public class EmbeddedAttachmentTest extends TestCase {
 		
 		attachment = EmbeddedAttachment.parse(jsonObject);
 		
+		assertEquals(AttachmentType.EMBEDDED, attachment.getType());
 		assertEquals(IMAGE_JPG, attachment.getContentType());
 		assertEquals(SAMPLE_ID_CARD_JPEG, attachment.getContent());
 		assertNull(attachment.getDescriptionString());
@@ -253,6 +257,7 @@ public class EmbeddedAttachmentTest extends TestCase {
 		
 		EmbeddedAttachment attachment = EmbeddedAttachment.parse(jsonObject);
 		
+		assertEquals(AttachmentType.EMBEDDED, attachment.getType());
 		assertEquals(IMAGE_JPG, attachment.getContentType());
 		assertEquals("{}{}{}", attachment.getContent().toString());
 		assertNull(attachment.getDescriptionString());

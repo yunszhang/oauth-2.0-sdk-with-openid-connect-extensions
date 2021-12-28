@@ -47,6 +47,7 @@ public class ExternalAttachmentTest extends TestCase {
 			null
 		);
 		
+		assertEquals(AttachmentType.EXTERNAL, attachment.getType());
 		assertEquals(url, attachment.getURL());
 		assertNull(attachment.getBearerAccessToken());
 		assertEquals(0L, attachment.getExpiresIn());
@@ -64,6 +65,7 @@ public class ExternalAttachmentTest extends TestCase {
 		
 		attachment = ExternalAttachment.parse(jsonObject);
 		
+		assertEquals(AttachmentType.EXTERNAL, attachment.getType());
 		assertEquals(url, attachment.getURL());
 		assertNull(attachment.getBearerAccessToken());
 		assertEquals(0L, attachment.getExpiresIn());
@@ -90,6 +92,7 @@ public class ExternalAttachmentTest extends TestCase {
 			null
 		);
 		
+		assertEquals(AttachmentType.EXTERNAL, attachment.getType());
 		assertEquals(url, attachment.getURL());
 		assertEquals(token, attachment.getBearerAccessToken());
 		assertEquals(0L, attachment.getExpiresIn());
@@ -108,6 +111,7 @@ public class ExternalAttachmentTest extends TestCase {
 		
 		attachment = ExternalAttachment.parse(jsonObject);
 		
+		assertEquals(AttachmentType.EXTERNAL, attachment.getType());
 		assertEquals(url, attachment.getURL());
 		assertEquals(token, attachment.getBearerAccessToken());
 		assertEquals(0L, attachment.getExpiresIn());
@@ -135,6 +139,7 @@ public class ExternalAttachmentTest extends TestCase {
 			description
 		);
 		
+		assertEquals(AttachmentType.EXTERNAL, attachment.getType());
 		assertEquals(url, attachment.getURL());
 		assertEquals(token, attachment.getBearerAccessToken());
 		assertEquals(60L, attachment.getExpiresIn());
@@ -154,6 +159,7 @@ public class ExternalAttachmentTest extends TestCase {
 		
 		attachment = ExternalAttachment.parse(jsonObject);
 		
+		assertEquals(AttachmentType.EXTERNAL, attachment.getType());
 		assertEquals(url, attachment.getURL());
 		assertEquals(token, attachment.getBearerAccessToken());
 		assertEquals(60L, attachment.getBearerAccessToken().getLifetime());

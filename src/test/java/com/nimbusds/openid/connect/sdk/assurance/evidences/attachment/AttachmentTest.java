@@ -44,6 +44,8 @@ public class AttachmentTest extends TestCase {
 		
 		Attachment attachment = Attachment.parse(JSONObjectUtils.parse(json));
 		
+		assertEquals(AttachmentType.EMBEDDED, attachment.getType());
+		
 		assertEquals("Front of id document", attachment.getDescriptionString());
 		
 		EmbeddedAttachment embeddedAttachment = attachment.toEmbeddedAttachment();
@@ -68,6 +70,8 @@ public class AttachmentTest extends TestCase {
 			"}";
 		
 		Attachment attachment = Attachment.parse(JSONObjectUtils.parse(json));
+		
+		assertEquals(AttachmentType.EXTERNAL, attachment.getType());
 		
 		assertEquals("Signed document", attachment.getDescriptionString());
 		

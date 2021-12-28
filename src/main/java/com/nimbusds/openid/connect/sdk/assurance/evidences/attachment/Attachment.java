@@ -42,6 +42,12 @@ public abstract class Attachment {
 	
 	
 	/**
+	 * The attachment type.
+	 */
+	private final AttachmentType type;
+	
+	
+	/**
 	 * The optional description.
 	 */
 	private final String description;
@@ -50,10 +56,23 @@ public abstract class Attachment {
 	/**
 	 * Creates a new attachment with the specified description.
 	 *
+	 * @param type        The type. Must not be {@code null}.
 	 * @param description The description, {@code null} if not specified.
 	 */
-	protected Attachment(final String description) {
+	protected Attachment(final AttachmentType type, final String description) {
+		Objects.requireNonNull(type);
+		this.type = type;
 		this.description = description;
+	}
+	
+	
+	/**
+	 * Returns the type of this attachment.
+	 *
+	 * @return The type.
+	 */
+	public AttachmentType getType() {
+		return type;
 	}
 	
 	

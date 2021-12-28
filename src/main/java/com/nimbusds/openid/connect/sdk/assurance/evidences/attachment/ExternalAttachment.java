@@ -85,7 +85,7 @@ public class ExternalAttachment extends Attachment {
 				  final long expiresIn,
 				  final Digest digest,
 				  final String description) {
-		super(description);
+		super(AttachmentType.EXTERNAL, description);
 		
 		Objects.requireNonNull(url);
 		this.url = url;
