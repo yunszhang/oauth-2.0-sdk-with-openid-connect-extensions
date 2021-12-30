@@ -1892,6 +1892,7 @@ version 9.20 (2021-12-30)
       documents_methods_supported, documents_validation_methods_supported,
       documents_verification_methods_supported, electronic_records_supported,
       attachments_supported and digest_algorithms_supported metadata fields.
+    * Updates OIDCClientMetadata to support the digest_algorithm field.
     * Adds static StringUtils.isAlpha and isNumeric methods.
     * Adds static CollectionUtils.intersect method.
     * Adds ClaimsSet.equals and hashCode methods.

@@ -35,6 +35,7 @@ import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.openid.connect.sdk.SubjectType;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.HashAlgorithm;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.id.SectorID;
 
@@ -49,6 +50,7 @@ import com.nimbusds.openid.connect.sdk.id.SectorID;
  *     <li>OpenID Connect Session Management 1.0, section 5.1.1 (draft 28).
  *     <li>OpenID Connect Front-Channel Logout 1.0, section 2 (draft 02).
  *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.2 (draft 04).
+ *     <li>OpenID Connect for Identity Assurance 1.0 (draft 12).
  *     <li>OpenID Connect Federation 1.0 (draft 14).
  *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section
  *         2.
@@ -94,6 +96,9 @@ public class OIDCClientMetadata extends ClientMetadata {
 		p.add("frontchannel_logout_session_required");
 		p.add("backchannel_logout_uri");
 		p.add("backchannel_logout_session_required");
+		
+		// OIDC identity assurance
+		p.add("digest_algorithm");
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -215,6 +220,13 @@ public class OIDCClientMetadata extends ClientMetadata {
 	 * logout.
 	 */
 	private boolean backChannelLogoutSessionRequired = false;
+	
+	
+	/**
+	 * The digest algorithms for external attachments in OpenID Connect
+	 * for Identity Assurance 1.0.
+	 */
+	private HashAlgorithm attachmentDigestAlg;
 
 
 	/** 
@@ -267,6 +279,7 @@ public class OIDCClientMetadata extends ClientMetadata {
 		frontChannelLogoutSessionRequired = metadata.requiresFrontChannelLogoutSession();
 		backChannelLogoutURI = metadata.getBackChannelLogoutURI();
 		backChannelLogoutSessionRequired = metadata.requiresBackChannelLogoutSession();
+		attachmentDigestAlg = metadata.getAttachmentDigestAlg();
 	}
 
 
@@ -816,6 +829,32 @@ public class OIDCClientMetadata extends ClientMetadata {
 	
 	
 	/**
+	 * Gets the digest algorithm for the external evidence attachments in
+	 * OpenID Connect for Identity Assurance 1.0. Corresponds to the
+	 * {@code digest_algorithm} client metadata field.
+	 *
+	 * @return The digest algorithm, {@code null} if not specified.
+	 */
+	public HashAlgorithm getAttachmentDigestAlg() {
+		
+		return attachmentDigestAlg;
+	}
+	
+	
+	/**
+	 * Sets the digest algorithm for the external evidence attachments in
+	 * OpenID Connect for Identity Assurance 1.0. Corresponds to the
+	 * {@code digest_algorithm} client metadata field.
+	 *
+	 * @param hashAlg The digest algorithm, {@code null} if not specified.
+	 */
+	public void setAttachmentDigestAlg(final HashAlgorithm hashAlg) {
+		
+		attachmentDigestAlg = hashAlg;
+	}
+	
+	
+	/**
 	 * Applies the client metadata defaults where no values have been
 	 * specified.
 	 * 
@@ -927,6 +966,10 @@ public class OIDCClientMetadata extends ClientMetadata {
 		if (backChannelLogoutURI != null) {
 			o.put("backchannel_logout_uri", backChannelLogoutURI.toString());
 			o.put("backchannel_logout_session_required", backChannelLogoutSessionRequired);
+		}
+		
+		if (attachmentDigestAlg != null) {
+			o.put("digest_algorithm", attachmentDigestAlg.getValue());
 		}
 
 		return o;
@@ -1100,6 +1143,11 @@ public class OIDCClientMetadata extends ClientMetadata {
 					metadata.requiresBackChannelLogoutSession(JSONObjectUtils.getBoolean(jsonObject, "backchannel_logout_session_required"));
 					oidcFields.remove("backchannel_logout_session_required");
 				}
+			}
+			
+			if (jsonObject.get("digest_algorithm") != null) {
+				metadata.setAttachmentDigestAlg(new HashAlgorithm(JSONObjectUtils.getString(jsonObject, "digest_algorithm")));
+				oidcFields.remove("digest_algorithm");
 			}
 			
 		} catch (ParseException e) {

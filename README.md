@@ -120,7 +120,7 @@ This SDK version implements the following standards and drafts:
 * OpenID Connect Extended Authentication Profile (EAP) ACR Values 1.0 -
   draft 00
 
-* OpenID Connect for Identity Assurance 1.0 - draft 11
+* OpenID Connect for Identity Assurance 1.0 - draft 12
 
 * OpenID Connect Federation 1.0 - draft 13
 
