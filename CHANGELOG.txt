@@ -1873,7 +1873,7 @@ version 9.19 (2021-10-20)
     * Adds new StateHash.compute(AccessToken, JWSAlgorithm, Curve) method,
       deprecates the old method.
 
-version 9.20 (2021-12-26)
+version 9.20 (2021-12-30)
     * Upgrades to OpenID Connect for Identity Assurance 1.0, draft 12.
     * Adds support for the also_known_as OpenID claim.
     * Adds support for the msisdn OpenID claim.
@@ -1888,6 +1888,10 @@ version 9.20 (2021-12-26)
     * Adds Policy, Procedure and Status classes.
     * Adds IdentityVerifier.getOrganizationString method, deprecates
       IdentityVerifier.getOrganization.
+    * Updates OIDCProviderMetadata to support the documents_supported,
+      documents_methods_supported, documents_validation_methods_supported,
+      documents_verification_methods_supported, electronic_records_supported,
+      attachments_supported and digest_algorithms_supported metadata fields.
     * Adds static StringUtils.isAlpha and isNumeric methods.
     * Adds static CollectionUtils.intersect method.
     * Adds ClaimsSet.equals and hashCode methods.

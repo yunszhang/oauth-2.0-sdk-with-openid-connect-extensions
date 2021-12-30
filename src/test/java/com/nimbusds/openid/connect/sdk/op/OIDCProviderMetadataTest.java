@@ -41,9 +41,9 @@ import com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue;
 import com.nimbusds.openid.connect.sdk.OIDCScopeValue;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
-import com.nimbusds.openid.connect.sdk.assurance.evidences.IDDocumentType;
-import com.nimbusds.openid.connect.sdk.assurance.evidences.IdentityEvidenceType;
-import com.nimbusds.openid.connect.sdk.assurance.evidences.IdentityVerificationMethod;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.*;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.AttachmentType;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.HashAlgorithm;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimType;
 import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
@@ -120,14 +120,21 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("verified_claims_supported"));
 		assertTrue(paramNames.contains("trust_frameworks_supported"));
 		assertTrue(paramNames.contains("evidence_supported"));
+		assertTrue(paramNames.contains("documents_supported"));
+		assertTrue(paramNames.contains("documents_methods_supported"));
+		assertTrue(paramNames.contains("documents_validation_methods_supported"));
+		assertTrue(paramNames.contains("documents_verification_methods_supported"));
 		assertTrue(paramNames.contains("id_documents_supported"));
 		assertTrue(paramNames.contains("id_documents_verification_methods_supported"));
+		assertTrue(paramNames.contains("electronic_records_supported"));
 		assertTrue(paramNames.contains("claims_in_verified_claims_supported"));
+		assertTrue(paramNames.contains("attachments_supported"));
+		assertTrue(paramNames.contains("digest_algorithms_supported"));
 		assertTrue(paramNames.contains("client_registration_types_supported"));
 		assertTrue(paramNames.contains("client_registration_authn_methods_supported"));
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("federation_registration_endpoint"));
-		assertEquals(74, paramNames.size());
+		assertEquals(81, paramNames.size());
 	}
 
 
@@ -1189,6 +1196,43 @@ public class OIDCProviderMetadataTest extends TestCase {
 	}
 	
 	
+	public void testIdentityAssurance_ignoreDocumentRelatedMetadataInJSONOutput()
+		throws ParseException {
+		
+		OIDCProviderMetadata metadata = new OIDCProviderMetadata(new Issuer("https://c2id.com"), Collections.singletonList(SubjectType.PUBLIC), URI.create("https://c2id.com/jwks.json"));
+		metadata.setSupportsVerifiedClaims(true);
+		metadata.setIdentityTrustFrameworks(Collections.singletonList(IdentityTrustFramework.EIDAS));
+		metadata.setIdentityEvidenceTypes(Collections.singletonList(IdentityEvidenceType.ELECTRONIC_SIGNATURE));
+		metadata.setVerifiedClaims(Arrays.asList("email", "given_name", "family_name"));
+		
+		// Must be ignored in JSON output
+		metadata.setDocumentTypes(Arrays.asList(DocumentType.IDCARD, DocumentType.PASSPORT));
+		metadata.setDocumentMethods(Arrays.asList(IdentityVerificationMethod.EID, IdentityVerificationMethod.PIPP));
+		metadata.setDocumentValidationMethods(Arrays.asList(ValidationMethodType.VPIP, ValidationMethodType.DATA));
+		metadata.setDocumentVerificationMethods(Arrays.asList(VerificationMethodType.PVR, VerificationMethodType.PVP));
+		
+		JSONObject jsonObject = metadata.toJSONObject();
+		
+		List<String> mustNotBePresent = Arrays.asList(
+			"documents_supported",
+			"documents_methods_supported",
+			"documents_validation_methods_supported",
+			"documents_verification_methods_supported"
+		);
+		
+		for (String fieldName: mustNotBePresent) {
+			assertFalse(jsonObject.containsKey(fieldName));
+		}
+		
+		metadata = OIDCProviderMetadata.parse(jsonObject);
+		
+		assertTrue(metadata.supportsVerifiedClaims());
+		assertEquals(Collections.singletonList(IdentityTrustFramework.EIDAS), metadata.getIdentityTrustFrameworks());
+		assertEquals(Collections.singletonList(IdentityEvidenceType.ELECTRONIC_SIGNATURE), metadata.getIdentityEvidenceTypes());
+		assertEquals(Arrays.asList("email", "given_name", "family_name"), metadata.getVerifiedClaims());
+	}
+	
+	
 	public void testIdentityAssurance()
 		throws ParseException {
 		
@@ -1196,94 +1240,224 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertFalse(metadata.supportsVerifiedClaims());
 		assertNull(metadata.getIdentityTrustFrameworks());
 		assertNull(metadata.getIdentityEvidenceTypes());
+		assertNull(metadata.getDocumentTypes());
+		assertNull(metadata.getDocumentMethods());
+		assertNull(metadata.getDocumentValidationMethods());
+		assertNull(metadata.getDocumentVerificationMethods());
 		assertNull(metadata.getIdentityDocumentTypes());
 		assertNull(metadata.getIdentityVerificationMethods());
+		assertNull(metadata.getElectronicRecordTypes());
 		assertNull(metadata.getVerifiedClaims());
+		assertNull(metadata.getAttachmentTypes());
+		assertNull(metadata.getAttachmentDigestAlgs());
+		
+		List<String> iaMetadataFieldNames = Arrays.asList(
+			"verified_claims_supported",
+			"trust_frameworks_supported",
+			"evidence_supported",
+			"documents_supported",
+			"documents_methods_supported",
+			"documents_validation_methods_supported",
+			"documents_verification_methods_supported",
+			"id_documents_supported",
+			"id_documents_verification_methods_supported",
+			"electronic_records_supported",
+			"claims_in_verified_claims_supported",
+			"attachments_supported",
+			"digest_algorithms_supported"
+		);
 		
 		JSONObject jsonObject = metadata.toJSONObject();
-		assertFalse(jsonObject.containsKey("verified_claims_supported"));
-		assertFalse(jsonObject.containsKey("trust_frameworks_supported"));
-		assertFalse(jsonObject.containsKey("evidence_supported"));
-		assertFalse(jsonObject.containsKey("id_documents_supported"));
-		assertFalse(jsonObject.containsKey("id_documents_verification_methods_supported"));
-		assertFalse(jsonObject.containsKey("claims_in_verified_claims_supported"));
+		for (String fieldName: iaMetadataFieldNames) {
+			assertFalse("Must not be present: " + fieldName, jsonObject.containsKey(fieldName));
+		}
 		
 		metadata.setSupportsVerifiedClaims(true);
-		metadata.setIdentityTrustFrameworks(Arrays.asList(IdentityTrustFramework.NIST_800_63A_IAL_2, IdentityTrustFramework.NIST_800_63A_IAL_3));
-		metadata.setIdentityEvidenceTypes(Arrays.asList(IdentityEvidenceType.ID_DOCUMENT, IdentityEvidenceType.QES));
+		metadata.setIdentityTrustFrameworks(Arrays.asList(IdentityTrustFramework.NIST_800_63A, IdentityTrustFramework.EIDAS));
+		metadata.setIdentityEvidenceTypes(Arrays.asList(IdentityEvidenceType.DOCUMENT, IdentityEvidenceType.ID_DOCUMENT, IdentityEvidenceType.ELECTRONIC_SIGNATURE, IdentityEvidenceType.QES));
+		metadata.setDocumentTypes(Arrays.asList(DocumentType.IDCARD, DocumentType.PASSPORT));
+		metadata.setDocumentMethods(Arrays.asList(IdentityVerificationMethod.EID, IdentityVerificationMethod.PIPP));
+		metadata.setDocumentValidationMethods(Arrays.asList(ValidationMethodType.VPIP, ValidationMethodType.DATA));
+		metadata.setDocumentVerificationMethods(Arrays.asList(VerificationMethodType.PVR, VerificationMethodType.PVP));
 		metadata.setIdentityDocumentTypes(Arrays.asList(IDDocumentType.IDCARD, IDDocumentType.PASSPORT));
 		metadata.setIdentityVerificationMethods(Arrays.asList(IdentityVerificationMethod.EID, IdentityVerificationMethod.PIPP));
+		metadata.setElectronicRecordTypes(Arrays.asList(ElectronicRecordType.POPULATION_REGISTER, ElectronicRecordType.BANK_ACCOUNT));
 		metadata.setVerifiedClaims(Arrays.asList("email", "address"));
+		metadata.setAttachmentTypes(Arrays.asList(AttachmentType.EMBEDDED, AttachmentType.EXTERNAL));
+		metadata.setAttachmentDigestAlgs(Arrays.asList(HashAlgorithm.SHA_256, HashAlgorithm.SHA_384, HashAlgorithm.SHA_512));
 		
 		assertTrue(metadata.supportsVerifiedClaims());
-		assertEquals(Arrays.asList(IdentityTrustFramework.NIST_800_63A_IAL_2, IdentityTrustFramework.NIST_800_63A_IAL_3), metadata.getIdentityTrustFrameworks());
-		assertEquals(Arrays.asList(IdentityEvidenceType.ID_DOCUMENT, IdentityEvidenceType.QES), metadata.getIdentityEvidenceTypes());
+		assertEquals(Arrays.asList(IdentityTrustFramework.NIST_800_63A, IdentityTrustFramework.EIDAS), metadata.getIdentityTrustFrameworks());
+		assertEquals(Arrays.asList(IdentityEvidenceType.DOCUMENT, IdentityEvidenceType.ID_DOCUMENT, IdentityEvidenceType.ELECTRONIC_SIGNATURE, IdentityEvidenceType.QES), metadata.getIdentityEvidenceTypes());
+		assertEquals(Arrays.asList(DocumentType.IDCARD, DocumentType.PASSPORT), metadata.getDocumentTypes());
+		assertEquals(Arrays.asList(IdentityVerificationMethod.EID, IdentityVerificationMethod.PIPP), metadata.getDocumentMethods());
+		assertEquals(Arrays.asList(ValidationMethodType.VPIP, ValidationMethodType.DATA), metadata.getDocumentValidationMethods());
+		assertEquals(Arrays.asList(VerificationMethodType.PVR, VerificationMethodType.PVP), metadata.getDocumentVerificationMethods());
 		assertEquals(Arrays.asList(IDDocumentType.IDCARD, IDDocumentType.PASSPORT), metadata.getIdentityDocumentTypes());
 		assertEquals(Arrays.asList(IdentityVerificationMethod.EID, IdentityVerificationMethod.PIPP), metadata.getIdentityVerificationMethods());
+		assertEquals(Arrays.asList(ElectronicRecordType.POPULATION_REGISTER, ElectronicRecordType.BANK_ACCOUNT), metadata.getElectronicRecordTypes());
 		assertEquals(Arrays.asList("email", "address"), metadata.getVerifiedClaims());
+		assertEquals(Arrays.asList(AttachmentType.EMBEDDED, AttachmentType.EXTERNAL), metadata.getAttachmentTypes());
+		assertEquals(Arrays.asList(HashAlgorithm.SHA_256, HashAlgorithm.SHA_384, HashAlgorithm.SHA_512), metadata.getAttachmentDigestAlgs());
 		
 		jsonObject = metadata.toJSONObject();
-		assertTrue(jsonObject.containsKey("verified_claims_supported"));
-		assertTrue(jsonObject.containsKey("trust_frameworks_supported"));
-		assertTrue(jsonObject.containsKey("evidence_supported"));
-		assertTrue(jsonObject.containsKey("id_documents_supported"));
-		assertTrue(jsonObject.containsKey("id_documents_verification_methods_supported"));
-		assertTrue(jsonObject.containsKey("claims_in_verified_claims_supported"));
+		for (String fieldName: iaMetadataFieldNames) {
+			assertTrue("Must be present: " + fieldName, jsonObject.containsKey(fieldName));
+		}
 		
 		assertTrue(JSONObjectUtils.getBoolean(jsonObject, "verified_claims_supported"));
-		assertEquals(Arrays.asList("nist_800_63A_ial_2","nist_800_63A_ial_3"), jsonObject.get("trust_frameworks_supported"));
-		assertEquals(Arrays.asList("id_document","qes"), jsonObject.get("evidence_supported"));
-		assertEquals(Arrays.asList("idcard","passport"), jsonObject.get("id_documents_supported"));
-		assertEquals(Arrays.asList("eid","pipp"), jsonObject.get("id_documents_verification_methods_supported"));
-		assertEquals(Arrays.asList("email","address"), jsonObject.get("claims_in_verified_claims_supported"));
+		assertEquals(Arrays.asList("nist_800_63A", "eidas"), jsonObject.get("trust_frameworks_supported"));
+		assertEquals(Arrays.asList("document", "id_document", "electronic_signature", "qes"), jsonObject.get("evidence_supported"));
+		assertEquals(Arrays.asList("idcard", "passport"), jsonObject.get("documents_supported"));
+		assertEquals(Arrays.asList("eid", "pipp"), jsonObject.get("documents_methods_supported"));
+		assertEquals(Arrays.asList("vpip", "data"), jsonObject.get("documents_validation_methods_supported"));
+		assertEquals(Arrays.asList("pvr", "pvp"), jsonObject.get("documents_verification_methods_supported"));
+		assertEquals(Arrays.asList("idcard", "passport"), jsonObject.get("id_documents_supported"));
+		assertEquals(Arrays.asList("eid", "pipp"), jsonObject.get("id_documents_verification_methods_supported"));
+		assertEquals(Arrays.asList("email", "address"), jsonObject.get("claims_in_verified_claims_supported"));
+		assertEquals(Arrays.asList("embedded", "external"), jsonObject.get("attachments_supported"));
+		assertEquals(Arrays.asList("sha-256", "sha-384", "sha-512"), jsonObject.get("digest_algorithms_supported"));
 		
 		metadata = OIDCProviderMetadata.parse(jsonObject.toJSONString());
 		
 		assertTrue(metadata.supportsVerifiedClaims());
-		assertEquals(Arrays.asList(IdentityTrustFramework.NIST_800_63A_IAL_2, IdentityTrustFramework.NIST_800_63A_IAL_3), metadata.getIdentityTrustFrameworks());
-		assertEquals(Arrays.asList(IdentityEvidenceType.ID_DOCUMENT, IdentityEvidenceType.QES), metadata.getIdentityEvidenceTypes());
+		assertEquals(Arrays.asList(IdentityTrustFramework.NIST_800_63A, IdentityTrustFramework.EIDAS), metadata.getIdentityTrustFrameworks());
+		assertEquals(Arrays.asList(IdentityEvidenceType.DOCUMENT, IdentityEvidenceType.ID_DOCUMENT, IdentityEvidenceType.ELECTRONIC_SIGNATURE, IdentityEvidenceType.QES), metadata.getIdentityEvidenceTypes());
+		assertEquals(Arrays.asList(DocumentType.IDCARD, DocumentType.PASSPORT), metadata.getDocumentTypes());
+		assertEquals(Arrays.asList(IdentityVerificationMethod.EID, IdentityVerificationMethod.PIPP), metadata.getDocumentMethods());
+		assertEquals(Arrays.asList(ValidationMethodType.VPIP, ValidationMethodType.DATA), metadata.getDocumentValidationMethods());
+		assertEquals(Arrays.asList(VerificationMethodType.PVR, VerificationMethodType.PVP), metadata.getDocumentVerificationMethods());
 		assertEquals(Arrays.asList(IDDocumentType.IDCARD, IDDocumentType.PASSPORT), metadata.getIdentityDocumentTypes());
 		assertEquals(Arrays.asList(IdentityVerificationMethod.EID, IdentityVerificationMethod.PIPP), metadata.getIdentityVerificationMethods());
+		assertEquals(Arrays.asList(ElectronicRecordType.POPULATION_REGISTER, ElectronicRecordType.BANK_ACCOUNT), metadata.getElectronicRecordTypes());
 		assertEquals(Arrays.asList("email", "address"), metadata.getVerifiedClaims());
+		assertEquals(Arrays.asList(AttachmentType.EMBEDDED, AttachmentType.EXTERNAL), metadata.getAttachmentTypes());
+		assertEquals(Arrays.asList(HashAlgorithm.SHA_256, HashAlgorithm.SHA_384, HashAlgorithm.SHA_512), metadata.getAttachmentDigestAlgs());
 	}
 	
 	
-	public void testIdentityAssuranceExample()
+	public void testIdentityAssurance_parseExample()
 		throws ParseException {
 		
-		String json = "{  \n" +
-			"   \"issuer\":\"https://server.example.com\",\n" +
+		String json = "{" +
+			"   \"verified_claims_supported\":true," +
+			"   \"trust_frameworks_supported\":[" +
+			"     \"nist_800_63A\"" +
+			"   ]," +
+			"   \"evidence_supported\": [" +
+			"      \"document\"," +
+			"      \"electronic_record\"," +
+			"      \"vouch\"," +
+			"      \"electronic_signature\"" +
+			"   ]," +
+			"   \"documents_supported\": [" +
+			"       \"idcard\"," +
+			"       \"passport\"," +
+			"       \"driving_permit\"" +
+			"   ]," +
+			"   \"documents_methods_supported\": [" +
+			"       \"pipp\"," +
+			"       \"sripp\"," +
+			"       \"eid\"" +
+			"   ]," +
+			"   \"electronic_records_supported\": [" +
+			"       \"secure_mail\"" +
+			"   ]," +
+			"   \"claims_in_verified_claims_supported\": [" +
+			"      \"given_name\"," +
+			"      \"family_name\"," +
+			"      \"birthdate\"," +
+			"      \"place_of_birth\"," +
+			"      \"nationalities\"," +
+			"      \"address\"" +
+			"   ]," +
+			"  \"attachments_supported\": [" +
+			"    \"external\"," +
+			"    \"embedded\"" +
+			"  ]," +
+			"  \"digest_algorithms_supported\": [" +
+			"    \"sha-256\"" +
+			"  ]" +
+			"}";
+		
+		JSONObject jsonObject = JSONObjectUtils.parse(json);
+		jsonObject.put("issuer", new Issuer("https://op.example.com").getValue());
+		jsonObject.put("subject_types_supported", Arrays.asList(SubjectType.PUBLIC.toString(), SubjectType.PAIRWISE.toString()));
+		jsonObject.put("jwks_uri", URI.create("https://op.example.com/jwks.json").toString());
+		
+		OIDCProviderMetadata metadata = OIDCProviderMetadata.parse(jsonObject);
+		
+		assertTrue(metadata.supportsVerifiedClaims());
+		assertEquals(Collections.singletonList(IdentityTrustFramework.NIST_800_63A), metadata.getIdentityTrustFrameworks());
+		assertEquals(
+			Arrays.asList(
+				IdentityEvidenceType.DOCUMENT,
+				IdentityEvidenceType.ELECTRONIC_RECORD,
+				IdentityEvidenceType.VOUCH,
+				IdentityEvidenceType.ELECTRONIC_SIGNATURE),
+			metadata.getIdentityEvidenceTypes());
+		assertEquals(
+			Arrays.asList(
+				DocumentType.IDCARD,
+				DocumentType.PASSPORT,
+				DocumentType.DRIVING_PERMIT),
+			metadata.getDocumentTypes());
+		assertEquals(
+			Arrays.asList(
+				IdentityVerificationMethod.PIPP,
+				IdentityVerificationMethod.SRIPP,
+				IdentityVerificationMethod.EID),
+			metadata.getDocumentMethods());
+		assertEquals(Collections.singletonList(new ElectronicRecordType("secure_mail")), metadata.getElectronicRecordTypes());
+		assertEquals(Arrays.asList(
+				"given_name",
+				"family_name",
+				"birthdate",
+				"place_of_birth",
+				"nationalities",
+				"address"
+			),
+			metadata.getVerifiedClaims());
+		assertEquals(Arrays.asList(AttachmentType.EXTERNAL, AttachmentType.EMBEDDED), metadata.getAttachmentTypes());
+		assertEquals(Collections.singletonList(HashAlgorithm.SHA_256), metadata.getAttachmentDigestAlgs());
+	}
+	
+	public void testIdentityAssurance_parseExample_deprecated()
+		throws ParseException {
+		
+		String json = "{  " +
+			"   \"issuer\":\"https://server.example.com\"," +
 			"   \"subject_types_supported\":[\"public\", \"pairwise\"]," +
 			"   \"jwks_uri\":\"https://server.example.com/jwks.json\"," +
 			
-			"   \"verified_claims_supported\":true,\n" +
-			"   \"trust_frameworks_supported\":[\n" +
-			"     \"nist_800_63A_ial_2\",\n" +
-			"     \"nist_800_63A_ial_3\"\n" +
-			"   ],\n" +
-			"   \"evidence_supported\":[\n" +
-			"      \"id_document\",\n" +
-			"      \"utility_bill\",\n" +
-			"      \"qes\"\n" +
-			"   ],\n" +
-			"   \"id_documents_supported\":[  \n" +
-			"       \"idcard\",\n" +
-			"       \"passport\",\n" +
-			"       \"driving_permit\"\n" +
-			"   ],\n" +
-			"   \"id_documents_verification_methods_supported\":[  \n" +
-			"       \"pipp\",\n" +
-			"       \"sripp\",\n" +
-			"       \"eid\"\n" +
-			"   ],\n" +
-			"   \"claims_in_verified_claims_supported\":[  \n" +
-			"      \"given_name\",\n" +
-			"      \"family_name\",\n" +
-			"      \"birthdate\",\n" +
-			"      \"place_of_birth\",\n" +
-			"      \"nationality\",\n" +
-			"      \"address\"\n" +
-			"   ]\n" +
+			"   \"verified_claims_supported\":true," +
+			"   \"trust_frameworks_supported\":[" +
+			"     \"nist_800_63A_ial_2\"," +
+			"     \"nist_800_63A_ial_3\"" +
+			"   ]," +
+			"   \"evidence_supported\":[" +
+			"      \"id_document\"," +
+			"      \"utility_bill\"," +
+			"      \"qes\"" +
+			"   ]," +
+			"   \"id_documents_supported\":[  " +
+			"       \"idcard\"," +
+			"       \"passport\"," +
+			"       \"driving_permit\"" +
+			"   ]," +
+			"   \"id_documents_verification_methods_supported\":[  " +
+			"       \"pipp\"," +
+			"       \"sripp\"," +
+			"       \"eid\"" +
+			"   ]," +
+			"   \"claims_in_verified_claims_supported\":[  " +
+			"      \"given_name\"," +
+			"      \"family_name\"," +
+			"      \"birthdate\"," +
+			"      \"place_of_birth\"," +
+			"      \"nationality\"," +
+			"      \"address\"" +
+			"   ]" +
 			"}";
 		
 		OIDCProviderMetadata metadata = OIDCProviderMetadata.parse(json);

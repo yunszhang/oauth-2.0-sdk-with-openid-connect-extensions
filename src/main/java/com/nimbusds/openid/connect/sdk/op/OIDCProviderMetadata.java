@@ -46,9 +46,9 @@ import com.nimbusds.oauth2.sdk.util.MapUtils;
 import com.nimbusds.openid.connect.sdk.Display;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
-import com.nimbusds.openid.connect.sdk.assurance.evidences.IDDocumentType;
-import com.nimbusds.openid.connect.sdk.assurance.evidences.IdentityEvidenceType;
-import com.nimbusds.openid.connect.sdk.assurance.evidences.IdentityVerificationMethod;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.*;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.AttachmentType;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.HashAlgorithm;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimType;
 import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
@@ -64,7 +64,7 @@ import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistratio
  *     <li>OpenID Connect Session Management 1.0, section 2.1 (draft 28).
  *     <li>OpenID Connect Front-Channel Logout 1.0, section 3 (draft 02).
  *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.1 (draft 04).
- *     <li>OpenID Connect for Identity Assurance 1.0 (draft 08).
+ *     <li>OpenID Connect for Identity Assurance 1.0 (draft 12).
  *     <li>OpenID Connect Federation 1.0 (draft 12).
  *     <li>OAuth 2.0 Authorization Server Metadata (RFC 8414)
  *     <li>OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound
@@ -109,9 +109,16 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		p.add("verified_claims_supported");
 		p.add("trust_frameworks_supported");
 		p.add("evidence_supported");
-		p.add("id_documents_supported");
-		p.add("id_documents_verification_methods_supported");
+		p.add("documents_supported");
+		p.add("documents_methods_supported");
+		p.add("documents_validation_methods_supported");
+		p.add("documents_verification_methods_supported");
+		p.add("id_documents_supported"); // deprecated
+		p.add("id_documents_verification_methods_supported"); // deprecated
+		p.add("electronic_records_supported");
 		p.add("claims_in_verified_claims_supported");
+		p.add("attachments_supported");
+		p.add("digest_algorithms_supported");
 		p.add("client_registration_types_supported");
 		p.add("client_registration_authn_methods_supported");
 		p.add("organization_name");
@@ -262,21 +269,66 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	
 	
 	/**
-	 * The supported identity documents.
+	 * The supported identity document types.
 	 */
-	private List<IDDocumentType> idDocuments;
+	private List<DocumentType> documentTypes;
 	
 	
 	/**
-	 * The supported identity verification methods.
+	 * The supported coarse identity verification methods for evidences of
+	 * type document.
 	 */
+	private List<IdentityVerificationMethod> documentMethods;
+	
+	
+	/**
+	 * The supported validation methods for evidences of type document.
+	 */
+	private List<ValidationMethodType> documentValidationMethods;
+	
+	
+	/**
+	 * The supported verification methods for evidences of type document.
+	 */
+	private List<VerificationMethodType> documentVerificationMethods;
+	
+	
+	/**
+	 * The supported identity document types.
+	 */
+	@Deprecated
+	private List<IDDocumentType> idDocumentTypes;
+	
+	
+	/**
+	 * The supported verification methods for identity documents.
+	 */
+	@Deprecated
 	private List<IdentityVerificationMethod> idVerificationMethods;
+	
+	
+	/**
+	 * The supported electronic record types.
+	 */
+	private List<ElectronicRecordType> electronicRecordTypes;
 	
 	
 	/**
 	 * The supported verified claims.
 	 */
 	private List<String> verifiedClaims;
+	
+	
+	/**
+	 * The supported attachment types.
+	 */
+	private List<AttachmentType> attachmentTypes;
+	
+	
+	/**
+	 * The supported digest algorithms for external attachments.
+	 */
+	private List<HashAlgorithm> attachmentDigestAlgs;
 	
 	
 	/**
@@ -907,6 +959,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	 *         specified.
 	 */
 	public List<IdentityTrustFramework> getIdentityTrustFrameworks() {
+		
 		return trustFrameworks;
 	}
 	
@@ -919,6 +972,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	 *                        {@code null} if not specified.
 	 */
 	public void setIdentityTrustFrameworks(final List<IdentityTrustFramework> trustFrameworks) {
+		
 		this.trustFrameworks = trustFrameworks;
 	}
 	
@@ -931,6 +985,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	 *         specified.
 	 */
 	public List<IdentityEvidenceType> getIdentityEvidenceTypes() {
+		
 		return evidenceTypes;
 	}
 	
@@ -943,7 +998,34 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	 *                      {@code null} if not specified.
 	 */
 	public void setIdentityEvidenceTypes(final List<IdentityEvidenceType> evidenceTypes) {
+		
 		this.evidenceTypes = evidenceTypes;
+	}
+	
+	
+	/**
+	 * Gets the supported identity document types. Corresponds to the
+	 * {@code documents_supported} metadata field.
+	 *
+	 * @return The supported identity document types, {@code null} if not
+	 *         specified.
+	 */
+	public List<DocumentType> getDocumentTypes() {
+		
+		return documentTypes;
+	}
+	
+	
+	/**
+	 * Sets the supported identity document types. Corresponds to the
+	 * {@code documents_supported} metadata field.
+	 *
+	 * @param documentTypes The supported identity document types,
+	 *                      {@code null} if not specified.
+	 */
+	public void setDocumentTypes(final List<DocumentType> documentTypes) {
+		
+		this.documentTypes = documentTypes;
 	}
 	
 	
@@ -951,11 +1033,15 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	 * Gets the supported identity document types. Corresponds to the
 	 * {@code id_documents_supported} metadata field.
 	 *
-	 * @return The supported identity documents types, {@code null}
-	 *         if not specified.
+	 * @return The supported identity documents types, {@code null} if not
+	 *         specified.
+	 *
+	 * @deprecated Use {@link #getDocumentTypes} instead.
 	 */
+	@Deprecated
 	public List<IDDocumentType> getIdentityDocumentTypes() {
-		return idDocuments;
+		
+		return idDocumentTypes;
 	}
 	
 	
@@ -965,9 +1051,123 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	 *
 	 * @param idDocuments The supported identity document types,
 	 *                    {@code null} if not specified.
+	 *
+	 * @deprecated Use {@link #setDocumentTypes} instead.
 	 */
-	public void setIdentityDocumentTypes(List<IDDocumentType> idDocuments) {
-		this.idDocuments = idDocuments;
+	@Deprecated
+	public void setIdentityDocumentTypes(final List<IDDocumentType> idDocuments) {
+		
+		this.idDocumentTypes = idDocuments;
+	}
+	
+	
+	/**
+	 * Gets the supported coarse identity verification methods for
+	 * evidences of type document. Corresponds to the
+	 * {@code documents_methods_supported} metadata field.
+	 *
+	 * @return The supported identity verification methods for document
+	 *         evidences, {@code null} if not specified.
+	 */
+	public List<IdentityVerificationMethod> getDocumentMethods() {
+		
+		return documentMethods;
+	}
+	
+	
+	/**
+	 * Sets the supported coarse identity verification methods for
+	 * evidences of type document. Corresponds to the
+	 * {@code documents_methods_supported} metadata field.
+	 *
+	 * @param methods The supported identity verification methods for
+	 *                document evidences, {@code null} if not specified.
+	 */
+	public void setDocumentMethods(final List<IdentityVerificationMethod> methods) {
+	
+		this.documentMethods = methods;
+	}
+	
+	
+	/**
+	 * Gets the supported validation methods for evidences of type
+	 * document. Corresponds to the
+	 * {@code documents_validation_methods_supported} metadata field.
+	 *
+	 * @return The validation methods for document evidences, {@code null}
+	 *         if not specified.
+	 */
+	public List<ValidationMethodType> getDocumentValidationMethods() {
+		
+		return documentValidationMethods;
+	}
+	
+	
+	/**
+	 * Sets the supported validation methods for evidences of type
+	 * document. Corresponds to the
+	 * {@code documents_validation_methods_supported} metadata field.
+	 *
+	 * @param methods The validation methods for document evidences,
+	 *                {@code null} if not specified.
+	 */
+	public void setDocumentValidationMethods(final List<ValidationMethodType> methods) {
+	
+		this.documentValidationMethods = methods;
+	}
+	
+	
+	/**
+	 * Gets the supported verification methods for evidences of type
+	 * document. Corresponds to the
+	 * {@code documents_verification_methods_supported} metadata field.
+	 *
+	 * @return The verification methods for document evidences, {@code null}
+	 *         if not specified.
+	 */
+	public List<VerificationMethodType> getDocumentVerificationMethods() {
+		
+		return documentVerificationMethods;
+	}
+	
+	
+	/**
+	 * Sets the supported verification methods for evidences of type
+	 * document. Corresponds to the
+	 * {@code documents_verification_methods_supported} metadata field.
+	 *
+	 * @param methods The verification methods for document evidences,
+	 *                {@code null} if not specified.
+	 */
+	public void setDocumentVerificationMethods(final List<VerificationMethodType> methods) {
+	
+		this.documentVerificationMethods = methods;
+	}
+	
+	
+	/**
+	 * Gets the supported electronic record types. Corresponds to the
+	 * {@code electronic_records_supported} metadata field.
+	 *
+	 * @return The supported electronic record types, {@code null} if not
+	 *         specified.
+	 */
+	public List<ElectronicRecordType> getElectronicRecordTypes() {
+		
+		return electronicRecordTypes;
+	}
+	
+	
+	/**
+	 * Sets the supported electronic record types. Corresponds to the
+	 * {@code electronic_records_supported} metadata field.
+	 *
+	 * @param electronicRecordTypes The supported electronic record types,
+	 *                              {@code null} if not specified.
+	 */
+	public void setElectronicRecordTypes(final List<ElectronicRecordType> electronicRecordTypes) {
+		
+		this.electronicRecordTypes = electronicRecordTypes;
 	}
 	
 	
@@ -975,10 +1175,12 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	 * Gets the supported identity verification methods. Corresponds to the
 	 * {@code id_documents_verification_methods_supported} metadata field.
 	 *
-	 * @return The supported identity verification methods, {@code null}
-	 *         if not specified.
+	 * @return The supported identity verification methods, {@code null} if
+	 *         not specified.
 	 */
+	@Deprecated
 	public List<IdentityVerificationMethod> getIdentityVerificationMethods() {
+		
 		return idVerificationMethods;
 	}
 	
@@ -990,32 +1192,92 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	 * @param idVerificationMethods The supported identity verification
 	 *                              methods, {@code null} if not specified.
 	 */
+	@Deprecated
 	public void setIdentityVerificationMethods(final List<IdentityVerificationMethod> idVerificationMethods) {
+		
 		this.idVerificationMethods = idVerificationMethods;
 	}
 	
 	
 	/**
-	 * Gets the supported verified claims names. Corresponds to the
+	 * Gets the names of the supported verified claims. Corresponds to the
 	 * {@code claims_in_verified_claims_supported} metadata field.
 	 *
 	 * @return The supported verified claims names, {@code null} if not
 	 *         specified.
 	 */
 	public List<String> getVerifiedClaims() {
+		
 		return verifiedClaims;
 	}
 	
 	
 	/**
-	 * Sets the supported verified claims names. Corresponds to the
+	 * Sets the names of the supported verified claims. Corresponds to the
 	 * {@code claims_in_verified_claims_supported} metadata field.
 	 *
 	 * @param verifiedClaims The supported verified claims names,
 	 *                       {@code null} if not specified.
 	 */
 	public void setVerifiedClaims(final List<String> verifiedClaims) {
+		
 		this.verifiedClaims = verifiedClaims;
+	}
+	
+	
+	/**
+	 * Gets the supported evidence attachment types. Corresponds to the
+	 * {@code attachments_supported} metadata field.
+	 *
+	 * @return The supported evidence attachment types, empty if
+	 *         attachments are not supported, {@code null} if not
+	 *         specified.
+	 */
+	public List<AttachmentType> getAttachmentTypes() {
+		
+		return attachmentTypes;
+	}
+	
+	
+	/**
+	 * Sets the supported evidence attachment types. Corresponds to the
+	 * {@code attachments_supported} metadata field.
+	 *
+	 * @param attachmentTypes The supported evidence attachment types,
+	 *                        empty if attachments are not supported,
+	 *                        {@code null} if not specified.
+	 */
+	public void setAttachmentTypes(final List<AttachmentType> attachmentTypes) {
+		
+		this.attachmentTypes = attachmentTypes;
+	}
+	
+	
+	/**
+	 * Gets the supported digest algorithms for the external evidence
+	 * attachments. Corresponds to the {@code digest_algorithms_supported}
+	 * metadata field.
+	 *
+	 * @return The supported digest algorithms, {@code null} if not
+	 *         specified.
+	 */
+	public List<HashAlgorithm> getAttachmentDigestAlgs() {
+		
+		return attachmentDigestAlgs;
+	}
+	
+	
+	/**
+	 * Sets the supported digest algorithms for the external evidence
+	 * attachments. Corresponds to the {@code digest_algorithms_supported}
+	 * metadata field.
+	 *
+	 * @param digestAlgs The supported digest algorithms, {@code null} if
+	 *                   not specified.
+	 */
+	public void setAttachmentDigestAlgs(final List<HashAlgorithm> digestAlgs) {
+		
+		this.attachmentDigestAlgs = digestAlgs;
 	}
 	
 	
@@ -1297,8 +1559,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 			o.put("backchannel_logout_session_supported", backChannelLogoutSessionSupported);
 		}
 		
-		// identity assurance
-		
+		// OpenID Connect for Identity Assurance 1.0
 		if (verifiedClaimsSupported) {
 			o.put("verified_claims_supported", true);
 			if (trustFrameworks != null) {
@@ -1307,14 +1568,48 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 			if (evidenceTypes != null) {
 				o.put("evidence_supported", Identifier.toStringList(evidenceTypes));
 			}
-			if (idDocuments != null) {
-				o.put("id_documents_supported", Identifier.toStringList(idDocuments));
+			if (
+				(CollectionUtils.contains(evidenceTypes, IdentityEvidenceType.DOCUMENT) || CollectionUtils.contains(evidenceTypes, IdentityEvidenceType.ID_DOCUMENT))
+				&& documentTypes != null) {
+				
+				o.put("documents_supported", Identifier.toStringList(documentTypes));
+				
+				// TODO await resolution of
+				//  https://bitbucket.org/openid/ekyc-ida/issues/1275/clarification-regarding-op-metadata
+				if (documentMethods != null) {
+					o.put("documents_methods_supported", Identifier.toStringList(documentMethods));
+				}
+				if (documentValidationMethods != null) {
+					o.put("documents_validation_methods_supported", Identifier.toStringList(documentValidationMethods));
+				}
+				if (documentVerificationMethods != null) {
+					o.put("documents_verification_methods_supported", Identifier.toStringList(documentVerificationMethods));
+				}
+			}
+			if (idDocumentTypes != null) {
+				// deprecated
+				o.put("id_documents_supported", Identifier.toStringList(idDocumentTypes));
 			}
 			if (idVerificationMethods != null) {
+				// deprecated
 				o.put("id_documents_verification_methods_supported", Identifier.toStringList(idVerificationMethods));
+			}
+			if (electronicRecordTypes != null) {
+				o.put("electronic_records_supported", Identifier.toStringList(electronicRecordTypes));
 			}
 			if (verifiedClaims != null) {
 				o.put("claims_in_verified_claims_supported", verifiedClaims);
+			}
+			if (attachmentTypes != null) {
+				List<String> strings = new LinkedList<>();
+				for (AttachmentType type: attachmentTypes) {
+					strings.add(type.toString());
+				}
+				o.put("attachments_supported", strings);
+				
+				if (attachmentTypes.contains(AttachmentType.EXTERNAL) && attachmentDigestAlgs != null) {
+					o.put("digest_algorithms_supported", Identifier.toStringList(attachmentDigestAlgs));
+				}
 			}
 		}
 		
@@ -1615,20 +1910,75 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 						op.evidenceTypes.add(new IdentityEvidenceType(v));
 					}
 				}
+				
+				if (
+					(CollectionUtils.contains(op.evidenceTypes, IdentityEvidenceType.DOCUMENT) || CollectionUtils.contains(op.evidenceTypes, IdentityEvidenceType.ID_DOCUMENT))
+					&& jsonObject.get("documents_supported") != null) {
+					
+					op.documentTypes = new LinkedList<>();
+					for (String v: JSONObjectUtils.getStringList(jsonObject, "documents_supported")) {
+						op.documentTypes.add(new DocumentType(v));
+					}
+					
+					// TODO await resolution of
+					//  https://bitbucket.org/openid/ekyc-ida/issues/1275/clarification-regarding-op-metadata
+					if (jsonObject.get("documents_methods_supported") != null) {
+						op.documentMethods = new LinkedList<>();
+						for (String v: JSONObjectUtils.getStringList(jsonObject, "documents_methods_supported")) {
+							op.documentMethods.add(new IdentityVerificationMethod(v));
+						}
+					}
+					
+					if (jsonObject.get("documents_validation_methods_supported") != null) {
+						op.documentValidationMethods = new LinkedList<>();
+						for (String v: JSONObjectUtils.getStringList(jsonObject, "documents_validation_methods_supported")) {
+							op.documentValidationMethods.add(new ValidationMethodType(v));
+						}
+					}
+					
+					if (jsonObject.get("documents_verification_methods_supported") != null) {
+						op.documentVerificationMethods = new LinkedList<>();
+						for (String v: JSONObjectUtils.getStringList(jsonObject, "documents_verification_methods_supported")) {
+							op.documentVerificationMethods.add(new VerificationMethodType(v));
+						}
+					}
+				}
+				
 				if (jsonObject.get("id_documents_supported") != null) {
-					op.idDocuments = new LinkedList<>();
+					// deprecated
+					op.idDocumentTypes = new LinkedList<>();
 					for (String v: JSONObjectUtils.getStringList(jsonObject, "id_documents_supported")) {
-						op.idDocuments.add(new IDDocumentType(v));
+						op.idDocumentTypes.add(new IDDocumentType(v));
 					}
 				}
 				if (jsonObject.get("id_documents_verification_methods_supported") != null) {
+					// deprecated
 					op.idVerificationMethods = new LinkedList<>();
 					for (String v: JSONObjectUtils.getStringList(jsonObject, "id_documents_verification_methods_supported")) {
 						op.idVerificationMethods.add(new IdentityVerificationMethod(v));
 					}
 				}
+				if (jsonObject.get("electronic_records_supported") != null) {
+					op.electronicRecordTypes = new LinkedList<>();
+					for (String v: JSONObjectUtils.getStringList(jsonObject, "electronic_records_supported")) {
+						op.electronicRecordTypes.add(new ElectronicRecordType(v));
+					}
+				}
 				if (jsonObject.get("claims_in_verified_claims_supported") != null) {
 					op.verifiedClaims = JSONObjectUtils.getStringList(jsonObject, "claims_in_verified_claims_supported");
+				}
+				if (jsonObject.get("attachments_supported") != null) {
+					op.attachmentTypes = new LinkedList<>();
+					for (String v: JSONObjectUtils.getStringList(jsonObject, "attachments_supported")) {
+						op.attachmentTypes.add(AttachmentType.parse(v));
+					}
+					
+					if (op.attachmentTypes.contains(AttachmentType.EXTERNAL) && jsonObject.get("digest_algorithms_supported") != null) {
+						op.attachmentDigestAlgs = new LinkedList<>();
+						for (String v: JSONObjectUtils.getStringList(jsonObject, "digest_algorithms_supported")) {
+							op.attachmentDigestAlgs.add(new HashAlgorithm(v));
+						}
+					}
 				}
 			}
 		}
