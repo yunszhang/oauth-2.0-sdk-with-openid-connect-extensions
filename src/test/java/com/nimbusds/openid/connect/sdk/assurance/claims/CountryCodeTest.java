@@ -39,6 +39,13 @@ public class CountryCodeTest extends TestCase {
 		} catch (ClassCastException e) {
 			assertTrue(e.getMessage().contains("cannot be cast"));
 		}
+		
+		try {
+			countryCode.toISO3166_3CountryCode();
+			fail();
+		} catch (ClassCastException e) {
+			assertTrue(e.getMessage().contains("cannot be cast"));
+		}
 	}
 	
 	
@@ -55,16 +62,46 @@ public class CountryCodeTest extends TestCase {
 		} catch (ClassCastException e) {
 			assertTrue(e.getMessage().contains("cannot be cast"));
 		}
+		
+		try {
+			countryCode.toISO3166_3CountryCode();
+			fail();
+		} catch (ClassCastException e) {
+			assertTrue(e.getMessage().contains("cannot be cast"));
+		}
+	}
+	
+	
+	public void testParse_4() throws ParseException {
+		
+		CountryCode countryCode = CountryCode.parse("CSHH");
+		assertEquals(4, countryCode.length());
+		ISO3166_3CountryCode iso3166_3CountryCode = countryCode.toISO3166_3CountryCode();
+		assertEquals("CSHH", iso3166_3CountryCode.getValue());
+		
+		try {
+			countryCode.toISO3166_1Alpha3CountryCode();
+			fail();
+		} catch (ClassCastException e) {
+			assertTrue(e.getMessage().contains("cannot be cast"));
+		}
+		
+		try {
+			countryCode.toISO3166_1Alpha2CountryCode();
+			fail();
+		} catch (ClassCastException e) {
+			assertTrue(e.getMessage().contains("cannot be cast"));
+		}
 	}
 	
 	
 	public void testParseException() {
 		
 		try {
-			CountryCode.parse("ABCD");
+			CountryCode.parse("ABCDE");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("The country code must be 3 or 2 letters", e.getMessage());
+			assertEquals("The country code must be 3, 2 or 4 letters", e.getMessage());
 		}
 	}
 }

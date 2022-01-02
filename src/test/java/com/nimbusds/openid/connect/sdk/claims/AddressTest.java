@@ -280,13 +280,13 @@ public class AddressTest extends TestCase {
 	public void testClaimJSON_countryCodeIllegal()
 		throws ParseException {
 		
-		String illegalCountryCode = "AAAA";
+		String illegalCountryCode = "ABCDE";
 		
 		try {
 			CountryCode.parse(illegalCountryCode);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("The country code must be 3 or 2 letters", e.getMessage());
+			assertEquals("The country code must be 3, 2 or 4 letters", e.getMessage());
 		}
 		
 		String json = "{\"country_code\":\"" + illegalCountryCode + "\"}";
