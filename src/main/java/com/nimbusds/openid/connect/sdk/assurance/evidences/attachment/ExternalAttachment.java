@@ -18,19 +18,26 @@
 package com.nimbusds.openid.connect.sdk.assurance.evidences.attachment;
 
 
+import java.io.IOException;
 import java.net.URI;
+import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
 
+import com.nimbusds.jose.util.Base64;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 
 /**
- * External attachment.
+ * External attachment. Provides a {@link #retrieveContent method} to retrieve
+ * the remote content and verify its digest.
  *
  * <p>Related specifications:
  *
@@ -140,6 +147,61 @@ public class ExternalAttachment extends Attachment {
 	 */
 	public Digest getDigest() {
 		return digest;
+	}
+	
+	
+	/**
+	 * Retrieves the external attachment content and verifies its digest.
+	 *
+	 * @param httpConnectTimeout The HTTP connect timeout, in milliseconds.
+	 *                           Zero implies no timeout. Must not be
+	 *                           negative.
+	 * @param httpReadTimeout    The HTTP response read timeout, in
+	 *                           milliseconds. Zero implies no timeout.
+	 *                           Must not be negative.
+	 *
+	 * @return The retrieved content.
+	 *
+	 * @throws IOException              If retrieval of the content failed.
+	 * @throws NoSuchAlgorithmException If the hash algorithm for the
+	 *                                  digest isn't supported.
+	 * @throws DigestMismatchException  If the computed digest for the
+	 *                                  retrieved document doesn't match
+	 *                                  the expected.
+	 */
+	public Content retrieveContent(final int httpConnectTimeout, final int httpReadTimeout)
+		throws IOException, NoSuchAlgorithmException, DigestMismatchException {
+		
+		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, getURL());
+		if (getBearerAccessToken() != null) {
+			httpRequest.setAuthorization(getBearerAccessToken().toAuthorizationHeader());
+		}
+		httpRequest.setConnectTimeout(httpConnectTimeout);
+		httpRequest.setReadTimeout(httpReadTimeout);
+		
+		HTTPResponse httpResponse = httpRequest.send();
+		try {
+			httpResponse.ensureStatusCode(200);
+		} catch (ParseException e) {
+			throw new IOException(e.getMessage(), e);
+		}
+		
+		if (httpResponse.getEntityContentType() == null) {
+			throw new IOException("Missing Content-Type header in HTTP response: " + url);
+		}
+		
+		if (StringUtils.isBlank(httpResponse.getContent())) {
+			throw new IOException("The HTTP response has no content: " + url);
+		}
+		
+		// Trim whitespace to ensure digest gets computed over base64 text only
+		Base64 contentBase64 = new Base64(httpResponse.getContent().trim());
+		
+		if (! getDigest().matches(contentBase64)) {
+			throw new DigestMismatchException("The computed " + digest.getHashAlgorithm() + " digest for the retrieved content doesn't match the expected: " + getURL());
+		}
+		
+		return new Content(httpResponse.getEntityContentType(), contentBase64, getDescriptionString());
 	}
 	
 	

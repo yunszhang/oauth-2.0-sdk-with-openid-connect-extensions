@@ -90,6 +90,26 @@ public final class Digest {
 	
 	
 	/**
+	 * Returns {@code true} if this digest matches the computed for the
+	 * specified content.
+	 *
+	 * @param content The content. Must not be {@code null}.
+	 *
+	 * @return If {@code true} if the digest matches the content, else
+	 *         {@code false}.
+	 *
+	 * @throws NoSuchAlgorithmException If the hash algorithm isn't
+	 *                                  supported.
+	 */
+	public boolean matches(final Base64 content)
+		throws NoSuchAlgorithmException {
+		
+		Digest computed = Digest.compute(getHashAlgorithm(), content);
+		return this.equals(computed);
+	}
+	
+	
+	/**
 	 * Returns a JSON object representation of this cryptographic digest.
 	 *
 	 * @return The JSON object.
@@ -125,7 +145,8 @@ public final class Digest {
 	 *
 	 * @return The digest.
 	 *
-	 * @throws NoSuchAlgorithmException If the algorithm isn't supported.
+	 * @throws NoSuchAlgorithmException If the hash algorithm isn't
+	 *                                  supported.
 	 */
 	public static Digest compute(final HashAlgorithm alg, final Base64 content)
 		throws NoSuchAlgorithmException {
@@ -142,7 +163,8 @@ public final class Digest {
 	 *
 	 * @return The digest.
 	 *
-	 * @throws NoSuchAlgorithmException If the algorithm isn't supported.
+	 * @throws NoSuchAlgorithmException If the hash algorithm isn't
+	 *                                  supported.
 	 */
 	public static Digest compute(final HashAlgorithm alg, final byte[] content)
 		throws NoSuchAlgorithmException {

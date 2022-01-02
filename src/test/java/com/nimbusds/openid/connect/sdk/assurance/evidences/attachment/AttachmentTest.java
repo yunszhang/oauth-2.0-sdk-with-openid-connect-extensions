@@ -50,8 +50,8 @@ public class AttachmentTest extends TestCase {
 		
 		EmbeddedAttachment embeddedAttachment = attachment.toEmbeddedAttachment();
 		
-		assertEquals(ContentType.IMAGE_PNG, embeddedAttachment.getContentType());
-		assertEquals(new Base64("Wkd0bWFtVnlhWFI2Wlc0Mk16VER2RFUyY0RRMWFUbDBNelJ1TlRjd31dzdaM1pTQXJaWGRsTXpNZ2RETmxDZwo="), embeddedAttachment.getContent());
+		assertEquals(ContentType.IMAGE_PNG, embeddedAttachment.getContent().getType());
+		assertEquals(new Base64("Wkd0bWFtVnlhWFI2Wlc0Mk16VER2RFUyY0RRMWFUbDBNelJ1TlRjd31dzdaM1pTQXJaWGRsTXpNZ2RETmxDZwo="), embeddedAttachment.getContent().getBase64());
 	}
 	
 	

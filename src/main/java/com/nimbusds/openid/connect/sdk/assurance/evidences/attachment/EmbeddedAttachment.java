@@ -43,45 +43,20 @@ public class EmbeddedAttachment extends Attachment {
 	
 	
 	/**
-	 * The content type.
-	 */
-	private final ContentType contentType;
-	
-	
-	/**
 	 * The content.
 	 */
-	private final Base64 content;
+	private final Content content;
 	
 	
 	/**
 	 * Creates a new embedded attachment.
 	 *
-	 * @param contentType The content type. Must not be {@code null}.
-	 * @param content     The content. Must not be {@code null}.
-	 * @param description The description, {@code null} if not specified.
+	 * @param content The content. Must not be {@code null}.
 	 */
-	public EmbeddedAttachment(final ContentType contentType,
-				  final Base64 content,
-				  final String description) {
+	public EmbeddedAttachment(final Content content) {
 		
-		super(AttachmentType.EMBEDDED, description);
-		
-		Objects.requireNonNull(contentType, "The content type must not be null");
-		this.contentType = contentType;
-		
-		Objects.requireNonNull(content, "The content must not be null");
+		super(AttachmentType.EMBEDDED, content.getDescription());
 		this.content = content;
-	}
-	
-	
-	/**
-	 * Returns the content type.
-	 *
-	 * @return The content type.
-	 */
-	public ContentType getContentType() {
-		return contentType;
 	}
 	
 	
@@ -90,7 +65,7 @@ public class EmbeddedAttachment extends Attachment {
 	 *
 	 * @return The content.
 	 */
-	public Base64 getContent() {
+	public Content getContent() {
 		return content;
 	}
 	
@@ -98,8 +73,8 @@ public class EmbeddedAttachment extends Attachment {
 	@Override
 	public JSONObject toJSONObject() {
 		JSONObject o = super.toJSONObject();
-		o.put("content_type", getContentType().toString());
-		o.put("content", getContent().toString());
+		o.put("content_type", getContent().getType().toString());
+		o.put("content", getContent().getBase64().toString());
 		return o;
 	}
 	
@@ -110,13 +85,13 @@ public class EmbeddedAttachment extends Attachment {
 		if (!(o instanceof EmbeddedAttachment)) return false;
 		if (!super.equals(o)) return false;
 		EmbeddedAttachment that = (EmbeddedAttachment) o;
-		return Objects.equals(getContentType(), that.getContentType()) && Objects.equals(getContent(), that.getContent());
+		return getContent().equals(that.getContent());
 	}
 	
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(super.hashCode(), getContentType(), getContent());
+		return Objects.hash(super.hashCode(), getContent());
 	}
 	
 	
@@ -132,21 +107,21 @@ public class EmbeddedAttachment extends Attachment {
 	public static EmbeddedAttachment parse(final JSONObject jsonObject)
 		throws ParseException {
 		
-		ContentType contentType;
+		ContentType type;
 		try {
-			contentType = ContentType.parse(JSONObjectUtils.getString(jsonObject, "content_type"));
+			type = ContentType.parse(JSONObjectUtils.getString(jsonObject, "content_type"));
 		} catch (java.text.ParseException e) {
 			throw new ParseException("Invalid content_type: " + e.getMessage(), e);
 		}
 		
-		Base64 content = Base64.from(JSONObjectUtils.getString(jsonObject, "content"));
+		Base64 base64 = Base64.from(JSONObjectUtils.getString(jsonObject, "content"));
 		
-		if (content.toString().trim().isEmpty()) {
+		if (base64.toString().trim().isEmpty()) {
 			throw new ParseException("Empty or blank content");
 		}
 		
 		String description = JSONObjectUtils.getString(jsonObject, "desc", null);
 		
-		return new EmbeddedAttachment(contentType, content, description);
+		return new EmbeddedAttachment(new Content(type, base64, description));
 	}
 }

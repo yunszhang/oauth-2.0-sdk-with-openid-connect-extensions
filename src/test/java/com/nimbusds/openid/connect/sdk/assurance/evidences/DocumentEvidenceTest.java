@@ -131,13 +131,13 @@ public class DocumentEvidenceTest extends TestCase {
 		
 		EmbeddedAttachment frontOfIDDoc = attachments.get(0).toEmbeddedAttachment();
 		assertEquals("Front of id document", frontOfIDDoc.getDescriptionString());
-		assertEquals(ContentType.IMAGE_PNG, frontOfIDDoc.getContentType());
-		assertEquals(new Base64("Wkd0bWFtVnlhWFI2Wlc0Mk16VER2RFUyY0RRMWFUbDBNelJ1TlRjd31dzdaM1pTQXJaWGRsTXpNZ2RETmxDZwo="), frontOfIDDoc.getContent());
+		assertEquals(ContentType.IMAGE_PNG, frontOfIDDoc.getContent().getType());
+		assertEquals(new Base64("Wkd0bWFtVnlhWFI2Wlc0Mk16VER2RFUyY0RRMWFUbDBNelJ1TlRjd31dzdaM1pTQXJaWGRsTXpNZ2RETmxDZwo="), frontOfIDDoc.getContent().getBase64());
 		
 		EmbeddedAttachment backOfIDDoc = attachments.get(1).toEmbeddedAttachment();
 		assertEquals("Back of id document", backOfIDDoc.getDescriptionString());
-		assertEquals(ContentType.IMAGE_PNG, backOfIDDoc.getContentType());
-		assertEquals(new Base64("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAADSFsjdkhjwhAABJRU5ErkJggg=="), backOfIDDoc.getContent());
+		assertEquals(ContentType.IMAGE_PNG, backOfIDDoc.getContent().getType());
+		assertEquals(new Base64("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAADSFsjdkhjwhAABJRU5ErkJggg=="), backOfIDDoc.getContent().getBase64());
 	}
 	
 	

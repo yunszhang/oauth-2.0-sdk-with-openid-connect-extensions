@@ -2079,8 +2079,8 @@ public class UserInfoTest extends TestCase {
 		EmbeddedAttachment embeddedAttachment = attachments.get(0).toEmbeddedAttachment();
 		
 		assertEquals("scan of bill", embeddedAttachment.getDescriptionString());
-		assertEquals(ContentType.APPLICATION_PDF, embeddedAttachment.getContentType());
-		assertEquals(new Base64("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAADSFsjdkhjwhAABJRU5ErkJggg=="), embeddedAttachment.getContent());
+		assertEquals(ContentType.APPLICATION_PDF, embeddedAttachment.getContent().getType());
+		assertEquals(new Base64("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAADSFsjdkhjwhAABJRU5ErkJggg=="), embeddedAttachment.getContent().getBase64());
 		
 		PersonClaims personClaims = verifiedClaimsSet.getClaimsSet();
 		assertEquals("Max", personClaims.getGivenName());
@@ -2630,8 +2630,8 @@ public class UserInfoTest extends TestCase {
 		
 		EmbeddedAttachment scanOfVouch = evidence.getAttachments().get(0).toEmbeddedAttachment();
 		assertEquals("scan of vouch", scanOfVouch.getDescriptionString());
-		assertEquals(ContentType.APPLICATION_PDF, scanOfVouch.getContentType());
-		assertEquals(new Base64("d16d2552e35582810e5a40e523716504525b6016ae96844ddc533163059b3067=="), scanOfVouch.getContent());
+		assertEquals(ContentType.APPLICATION_PDF, scanOfVouch.getContent().getType());
+		assertEquals(new Base64("d16d2552e35582810e5a40e523716504525b6016ae96844ddc533163059b3067=="), scanOfVouch.getContent().getBase64());
 		
 		PersonClaims personClaims = verifiedClaimsSet.getClaimsSet();
 		

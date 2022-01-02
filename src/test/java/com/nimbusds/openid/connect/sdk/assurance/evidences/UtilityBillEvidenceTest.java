@@ -29,9 +29,7 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.date.DateWithTimeZoneOffset;
 import com.nimbusds.oauth2.sdk.util.date.SimpleDate;
-import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.Attachment;
-import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.EmbeddedAttachment;
-import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.EmbeddedAttachmentTest;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.*;
 import com.nimbusds.openid.connect.sdk.claims.Address;
 
 
@@ -133,9 +131,11 @@ public class UtilityBillEvidenceTest extends TestCase {
 		IdentityVerificationMethod method = IdentityVerificationMethod.ONSITE;
 		
 		Attachment attachment = new EmbeddedAttachment(
-			EmbeddedAttachmentTest.IMAGE_JPG,
-			EmbeddedAttachmentTest.SAMPLE_ID_CARD_JPEG,
-			"Some description"
+			new Content(
+				ContentTest.IMAGE_JPG,
+				ContentTest.SAMPLE_ID_CARD_JPEG,
+				"Some description"
+			)
 		);
 		List<Attachment> attachments = Collections.singletonList(attachment);
 		
