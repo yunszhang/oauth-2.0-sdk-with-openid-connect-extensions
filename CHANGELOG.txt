@@ -1876,3 +1876,6 @@ version 9.19 (2021-10-20)
 version 9.20 (2021-11-25)
     * Updates OIDCClientMetadata to allow any URI scheme in a
       frontchannel_logout_uri. Previously only https and http was allowed.
+
+version 9.20.1 (2022-02-03)
+    * Removes selected unused OpenSAML 3.x transient dependencies.
