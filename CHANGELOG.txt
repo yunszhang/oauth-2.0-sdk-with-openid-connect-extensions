@@ -1879,6 +1879,7 @@ version 9.20 (2021-11-25)
 
 version 9.20.1 (2022-02-03)
     * Removes selected unused OpenSAML 3.x transient dependencies.
+    * Bumps selected OpenSAML 3.x transient dependencies.
     * Updates to com.nimbusds:nimbus-jose-jwt:9.15.2
     * Updates to com.nimbusds:content-type:2.2
     * Updates to BouncyCastle 1.69

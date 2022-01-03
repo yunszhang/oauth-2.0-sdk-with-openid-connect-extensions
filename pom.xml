@@ -135,6 +135,20 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<!-- Transient dep of OpenSAML, bump to more secure -->
+			<groupId>org.apache.santuario</groupId>
+			<artifactId>xmlsec</artifactId>
+			<version>2.1.7</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<!-- Transient dep of OpenSAML, bump to more secure -->
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>31.0.1-jre</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.0.1</version>
