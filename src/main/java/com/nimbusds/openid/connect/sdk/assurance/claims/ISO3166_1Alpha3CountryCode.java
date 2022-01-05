@@ -655,7 +655,7 @@ public final class ISO3166_1Alpha3CountryCode extends CountryCode {
 	/** South Sudan */
 	public static final ISO3166_1Alpha3CountryCode SSD = new ISO3166_1Alpha3CountryCode("SSD");
 	
-	/** hide=y}} */
+	/** Sao Tome and Principe */
 	public static final ISO3166_1Alpha3CountryCode STP = new ISO3166_1Alpha3CountryCode("STP");
 	
 	/** Suriname */
