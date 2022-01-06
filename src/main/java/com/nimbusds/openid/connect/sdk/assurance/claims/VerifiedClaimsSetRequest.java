@@ -41,7 +41,7 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
  * <pre>
  * {
  *   "verification": {
- *      "trust_framework": "eidas_ial_high"
+ *      "trust_framework": "eidas_ial"
  *   },
  *   "claims":{
  *      "given_name": null,
@@ -153,7 +153,7 @@ public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 	 * <pre>
 	 * {
 	 *   "verification": {
-	 *      "trust_framework": "eidas_ial_high"
+	 *      "trust_framework": "eidas"
 	 *   },
 	 *   "claims":{
 	 *      "given_name": null,
@@ -193,7 +193,7 @@ public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 	 * <pre>
 	 * {
 	 *   "verification": {
-	 *      "trust_framework": "eidas_ial_high"
+	 *      "trust_framework": "eidas"
 	 *   },
 	 *   "claims":{
 	 *      "given_name": null,
@@ -236,7 +236,7 @@ public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 	 * <pre>
 	 * {
 	 *   "verification": {
-	 *      "trust_framework": "eidas_ial_high"
+	 *      "trust_framework": "eidas"
 	 *   },
 	 *   "claims":{
 	 *      "given_name": null,
