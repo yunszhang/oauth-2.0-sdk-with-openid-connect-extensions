@@ -53,8 +53,10 @@ public class ISO3166_1CountryCodeResourcesTest extends TestCase {
 		for (String code: codes.stringPropertyNames()) {
 			assertEquals(2, code.length());
 			String countryName = codes.getProperty(code);
-			System.out.println(code + ": " + countryName);
 			assertTrue(StringUtils.isNotBlank(countryName));
+			
+			ISO3166_1Alpha2CountryCode isoCode = new ISO3166_1Alpha2CountryCode(code);
+			assertEquals(countryName, isoCode.getCountryName());
 		}
 	}
 
@@ -68,8 +70,10 @@ public class ISO3166_1CountryCodeResourcesTest extends TestCase {
 		for (String code: codes.stringPropertyNames()) {
 			assertEquals(3, code.length());
 			String countryName = codes.getProperty(code);
-			System.out.println(code + ": " + countryName);
 			assertTrue(StringUtils.isNotBlank(countryName));
+			
+			ISO3166_1Alpha3CountryCode isoCode = new ISO3166_1Alpha3CountryCode(code);
+			assertEquals(countryName, isoCode.getCountryName());
 		}
 	}
 	

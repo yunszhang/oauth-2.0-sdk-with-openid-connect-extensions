@@ -18,10 +18,13 @@
 package com.nimbusds.openid.connect.sdk.assurance.claims;
 
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 
 /**
@@ -31,7 +34,7 @@ import com.nimbusds.oauth2.sdk.util.StringUtils;
  * alpha-3 codes.
  */
 @Immutable
-public final class ISO3166_1Alpha3CountryCode extends CountryCode {
+public final class ISO3166_1Alpha3CountryCode extends ISO3166_1AlphaCountryCode {
 	
 	
 	private static final long serialVersionUID = -7659886425656766569L;
@@ -786,16 +789,44 @@ public final class ISO3166_1Alpha3CountryCode extends CountryCode {
 	
 	
 	/**
+	 * The {@code iso3166_1alpha3-codes.properties} resource.
+	 */
+	private static final Properties codesResource = new Properties();
+	
+	
+	/**
 	 * Creates a new ISO 3166-1 alpha-3 country code. Normalises the code
 	 * to upper case.
 	 *
 	 * @param value The country code value, must be three-letter.
 	 */
 	public ISO3166_1Alpha3CountryCode(final String value) {
-		super(value.toUpperCase());
-		if (value.length() != 3 || !StringUtils.isAlpha(value)) {
+		super(value);
+		if (value.length() != 3) {
 			throw new IllegalArgumentException("The ISO 3166-1 alpha-3 country code must be 3 letters");
 		}
+	}
+	
+	
+	/**
+	 * Returns the country name if available in the
+	 * {@code iso3166_1alpha3-codes.properties} resource.
+	 *
+	 * @return The country name, {@code null} if not available.
+	 */
+	@Override
+	public String getCountryName() {
+		
+		if (codesResource.isEmpty()) {
+			InputStream is = getClass().getClassLoader().getResourceAsStream("iso3166_1alpha3-codes.properties");
+			try {
+				codesResource.load(is);
+			} catch (IOException e) {
+				return null;
+			}
+		}
+		
+		return codesResource.getProperty(getValue());
 	}
 	
 	
