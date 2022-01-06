@@ -16,6 +16,6 @@
  */
 
 /**
- * Identity evidence attachment classes.
+ * OpenID Connect for Identity Assurance 1.0 evidence attachment classes.
  */
 package com.nimbusds.openid.connect.sdk.assurance.evidences.attachment;

@@ -15,10 +15,11 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package com.nimbusds.openid.connect.sdk.assurance.claims;
+package com.nimbusds.openid.connect.sdk.assurance.request;
 
 
 import java.util.Collection;
+import java.util.Objects;
 
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
@@ -26,6 +27,7 @@ import net.minidev.json.JSONObject;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSet;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
 
 
@@ -57,20 +59,15 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
  *     <li>OpenID Connect Core 1.0, section 5.5.
  *     <li>OpenID Connect for Identity Assurance 1.0, section 6.
  * </ul>
- *
- * @deprecated Use
- * {@link com.nimbusds.openid.connect.sdk.assurance.request.VerifiedClaimsSetRequest}
- * instead.
  */
-@Deprecated
 @Immutable
 public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 	
 	
 	/**
-	 * The verification element for the requested verified claims.
+	 * The verification element.
 	 */
-	private final JSONObject verificationJSONObject;
+	private final VerificationRequest verification;
 	
 	
 	/**
@@ -78,74 +75,78 @@ public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 	 */
 	public VerifiedClaimsSetRequest() {
 		super();
-		verificationJSONObject = null;
+		verification = new MinimalVerificationRequest();
 	}
 	
 	
 	/**
 	 * Creates a new OpenID Connect verified claims set request.
 	 *
-	 * @param entries                The request entries. Must not be
-	 *                               {@code null}.
-	 * @param verificationJSONObject The verification JSON object,
-	 *                               {@code null} if not specified.
+	 * @param entries      The requested entries. Must not be
+	 *                     {@code null}.
+	 * @param verification The {@code verification} element. Must not be
+	 *                     {@code null}.
 	 */
-	public VerifiedClaimsSetRequest(final Collection<ClaimsSetRequest.Entry> entries,
-					final JSONObject verificationJSONObject) {
+	public VerifiedClaimsSetRequest(final Collection<Entry> entries,
+					final VerificationRequest verification) {
 		super(entries);
-		this.verificationJSONObject = verificationJSONObject;
+		
+		if (verification == null) {
+			throw new IllegalArgumentException("The verification element must not be null");
+		}
+		this.verification = verification;
 	}
 	
 	
 	/**
 	 * Gets the {@code verification} element.
 	 *
-	 * @return The {@code verification} JSON object, {@code null} if not
+	 * @return The {@code verification} element, {@code null} if not
 	 *         specified.
 	 */
-	public JSONObject getVerificationJSONObject() {
-		return verificationJSONObject;
+	public VerificationRequest getVerification() {
+		return verification;
 	}
 	
 	
 	/**
 	 * Sets the {@code verification} element.
 	 *
-	 * @param jsonObject The {@code verification} JSON object, {@code null}
-	 *                   if not specified.
+	 * @param verification The {@code verification} element. Must not be
+	 *                     {@code null}.
 	 *
 	 * @return The updated verified claims set request.
 	 */
-	public VerifiedClaimsSetRequest withVerificationJSONObject(final JSONObject jsonObject) {
-		return new VerifiedClaimsSetRequest(getEntries(), jsonObject);
+	public VerifiedClaimsSetRequest withVerification(final VerificationRequest verification) {
+		return new VerifiedClaimsSetRequest(getEntries(), verification);
 	}
 	
 	
 	@Override
 	public VerifiedClaimsSetRequest add(final String claimName) {
-		ClaimsSetRequest csr = add(new ClaimsSetRequest.Entry(claimName));
-		return new VerifiedClaimsSetRequest(csr.getEntries(), getVerificationJSONObject());
+		ClaimsSetRequest csr = add(new Entry(claimName));
+		return new VerifiedClaimsSetRequest(csr.getEntries(), getVerification());
 	}
 	
 	
 	@Override
-	public VerifiedClaimsSetRequest add(final ClaimsSetRequest.Entry entry) {
+	public VerifiedClaimsSetRequest add(final Entry entry) {
 		ClaimsSetRequest csr = super.add(entry);
-		return new VerifiedClaimsSetRequest(csr.getEntries(), getVerificationJSONObject());
+		return new VerifiedClaimsSetRequest(csr.getEntries(), getVerification());
 	}
 	
 	
 	@Override
 	public VerifiedClaimsSetRequest delete(final String claimName, final LangTag langTag) {
 		ClaimsSetRequest csr = super.delete(claimName, langTag);
-		return new VerifiedClaimsSetRequest(csr.getEntries(), getVerificationJSONObject());
+		return new VerifiedClaimsSetRequest(csr.getEntries(), getVerification());
 	}
 	
 	
 	@Override
 	public VerifiedClaimsSetRequest delete(final String claimName) {
 		ClaimsSetRequest csr = super.delete(claimName);
-		return new VerifiedClaimsSetRequest(csr.getEntries(), getVerificationJSONObject());
+		return new VerifiedClaimsSetRequest(csr.getEntries(), getVerification());
 	}
 	
 	
@@ -175,9 +176,7 @@ public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 		
 		JSONObject o = new JSONObject();
 		
-		if (verificationJSONObject != null && ! verificationJSONObject.isEmpty()) {
-			o.put(VerifiedClaimsSet.VERIFICATION_ELEMENT, verificationJSONObject);
-		}
+		o.put(VerifiedClaimsSet.VERIFICATION_ELEMENT, getVerification().toJSONObject());
 		
 		JSONObject claims = super.toJSONObject();
 		
@@ -218,7 +217,9 @@ public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 	public static VerifiedClaimsSetRequest parse(final JSONObject jsonObject)
 		throws ParseException {
 		
-		JSONObject verificationJSONObject = JSONObjectUtils.getJSONObject(jsonObject, VerifiedClaimsSet.VERIFICATION_ELEMENT, null);
+		MinimalVerificationRequest verification = MinimalVerificationRequest.parse(
+			JSONObjectUtils.getJSONObject(jsonObject, VerifiedClaimsSet.VERIFICATION_ELEMENT, null)
+		);
 		
 		JSONObject claimsJSONObject = JSONObjectUtils.getJSONObject(jsonObject, VerifiedClaimsSet.CLAIMS_ELEMENT, new JSONObject());
 		
@@ -228,7 +229,8 @@ public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 		
 		return new VerifiedClaimsSetRequest(
 			ClaimsSetRequest.parse(claimsJSONObject).getEntries(),
-			verificationJSONObject);
+			verification
+		);
 	}
 	
 	

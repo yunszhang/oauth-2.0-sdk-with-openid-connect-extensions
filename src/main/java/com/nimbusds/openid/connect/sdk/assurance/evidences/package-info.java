@@ -15,6 +15,6 @@
  * specific language governing permissions and limitations under the License.
  */
 /**
- * Identity evidence classes.
+ * OpenID Connect for Identity Assurance 1.0 evidence classes.
  */
 package com.nimbusds.openid.connect.sdk.assurance.evidences;

@@ -1,7 +1,7 @@
 /*
  * oauth2-oidc-sdk
  *
- * Copyright 2012-2016, Connect2id Ltd and contributors.
+ * Copyright 2012-2021, Connect2id Ltd and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -15,6 +15,6 @@
  * specific language governing permissions and limitations under the License.
  */
 /**
- * OpenID Connect for Identity Assurance 1.0 claims.
+ * OpenID Connect for Identity Assurance 1.0 request classes.
  */
-package com.nimbusds.openid.connect.sdk.assurance.claims;
+package com.nimbusds.openid.connect.sdk.assurance.request;
