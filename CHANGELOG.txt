@@ -1873,7 +1873,7 @@ version 9.19 (2021-10-20)
     * Adds new StateHash.compute(AccessToken, JWSAlgorithm, Curve) method,
       deprecates the old method.
 
-version 9.21 (2022-01-05)
+version 9.21 (2022-01-06)
     * Upgrades to OpenID Connect for Identity Assurance 1.0, draft 12.
     * Adds support for the also_known_as OpenID claim.
     * Adds support for the msisdn OpenID claim.
@@ -1883,6 +1883,8 @@ version 9.21 (2022-01-05)
       codes for former countries and territories.
     * Adds CountryCode.length method.
     * Adds country_code claim to Address.
+    * Adds iso3166_1alpha2-codes.properties and
+      iso3166_1alpha3-codes.properties resources.
     * Updates IdentityVerification to support assurance_level and
       assurance_process.
     * Adds IdentityAssuranceLevel class.
