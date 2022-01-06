@@ -791,7 +791,7 @@ public final class ISO3166_1Alpha3CountryCode extends ISO3166_1AlphaCountryCode 
 	/**
 	 * The {@code iso3166_1alpha3-codes.properties} resource.
 	 */
-	private static final Properties codesResource = new Properties();
+	private static final Properties CODES_RESOURCE = new Properties();
 	
 	
 	/**
@@ -809,6 +809,18 @@ public final class ISO3166_1Alpha3CountryCode extends ISO3166_1AlphaCountryCode 
 	
 	
 	/**
+	 * Returns the matching alpha-2 country code. See
+	 * {@link ISO3166_1AlphaCountryCodeMapper}.
+	 *
+	 * @return The matching alpha-2 country code, {@code null} if none.
+	 */
+	public ISO3166_1Alpha2CountryCode toAlpha2CountryCode() {
+		
+		return ISO3166_1AlphaCountryCodeMapper.toAlpha2CountryCode(this);
+	}
+	
+	
+	/**
 	 * Returns the country name if available in the
 	 * {@code iso3166_1alpha3-codes.properties} resource.
 	 *
@@ -817,16 +829,16 @@ public final class ISO3166_1Alpha3CountryCode extends ISO3166_1AlphaCountryCode 
 	@Override
 	public String getCountryName() {
 		
-		if (codesResource.isEmpty()) {
+		if (CODES_RESOURCE.isEmpty()) {
 			InputStream is = getClass().getClassLoader().getResourceAsStream("iso3166_1alpha3-codes.properties");
 			try {
-				codesResource.load(is);
+				CODES_RESOURCE.load(is);
 			} catch (IOException e) {
 				return null;
 			}
 		}
 		
-		return codesResource.getProperty(getValue());
+		return CODES_RESOURCE.getProperty(getValue());
 	}
 	
 	

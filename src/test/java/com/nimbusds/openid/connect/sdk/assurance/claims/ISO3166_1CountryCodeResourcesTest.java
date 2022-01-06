@@ -50,13 +50,17 @@ public class ISO3166_1CountryCodeResourcesTest extends TestCase {
 		
 		assertEquals(249, codes.size());
 		
-		for (String code: codes.stringPropertyNames()) {
-			assertEquals(2, code.length());
-			String countryName = codes.getProperty(code);
+		for (String alpha2Code: codes.stringPropertyNames()) {
+			
+			assertEquals(2, alpha2Code.length());
+			String countryName = codes.getProperty(alpha2Code);
 			assertTrue(StringUtils.isNotBlank(countryName));
 			
-			ISO3166_1Alpha2CountryCode isoCode = new ISO3166_1Alpha2CountryCode(code);
-			assertEquals(countryName, isoCode.getCountryName());
+			ISO3166_1Alpha2CountryCode isoAlpha2Code = new ISO3166_1Alpha2CountryCode(alpha2Code);
+			assertEquals(countryName, isoAlpha2Code.getCountryName());
+			
+			ISO3166_1Alpha3CountryCode isoAlpha3Code = isoAlpha2Code.toAlpha3CountryCode();
+			assertEquals(countryName, isoAlpha3Code.getCountryName());
 		}
 	}
 
@@ -67,13 +71,17 @@ public class ISO3166_1CountryCodeResourcesTest extends TestCase {
 		
 		assertEquals(249, codes.size());
 		
-		for (String code: codes.stringPropertyNames()) {
-			assertEquals(3, code.length());
-			String countryName = codes.getProperty(code);
+		for (String alpha3Code: codes.stringPropertyNames()) {
+			
+			assertEquals(3, alpha3Code.length());
+			String countryName = codes.getProperty(alpha3Code);
 			assertTrue(StringUtils.isNotBlank(countryName));
 			
-			ISO3166_1Alpha3CountryCode isoCode = new ISO3166_1Alpha3CountryCode(code);
-			assertEquals(countryName, isoCode.getCountryName());
+			ISO3166_1Alpha3CountryCode isoAlpha3Code = new ISO3166_1Alpha3CountryCode(alpha3Code);
+			assertEquals(countryName, isoAlpha3Code.getCountryName());
+			
+			ISO3166_1Alpha2CountryCode isoAlpha2Code = isoAlpha3Code.toAlpha2CountryCode();
+			assertEquals(countryName, isoAlpha2Code.getCountryName());
 		}
 	}
 	

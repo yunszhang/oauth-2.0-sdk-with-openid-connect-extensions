@@ -91,4 +91,18 @@ public class ISO3166_1Alpha2CountryCodeTest extends TestCase {
 		
 		assertNotEquals(new ISO3166_1Alpha2CountryCode("BG"), new ISO3166_1Alpha2CountryCode("GB"));
 	}
+	
+	
+	public void testResources() {
+		
+		assertEquals("Bulgaria", ISO3166_1Alpha2CountryCode.BG.getCountryName());
+		assertEquals(ISO3166_1Alpha3CountryCode.BGR, ISO3166_1Alpha2CountryCode.BG.toAlpha3CountryCode());
+	}
+	
+	
+	public void testResources_invalidCode() {
+		
+		assertNull(new ISO3166_1Alpha2CountryCode("XX").getCountryName());
+		assertNull(new ISO3166_1Alpha2CountryCode("XX").toAlpha3CountryCode());
+	}
 }
