@@ -1883,10 +1883,11 @@ version 9.21 (2022-01-06)
       codes for former countries and territories.
     * Adds CountryCode.length method.
     * Adds country_code claim to Address.
-    * Adds ISO3166_1AlphaCountryCodeMapper to map between alpha-2 and alpha3
+    * Adds ISO3166_1AlphaCountryCodeMapper to map between alpha-2 and alpha-3
       codes.
-    * Adds iso3166_1alpha2-codes.properties, iso3166_1alpha3-codes.properties
-      and iso3166_1alpha-2-3-map.properties resources.
+    * Adds iso3166_1alpha2-codes.properties, iso3166_1alpha3-codes.properties,
+      iso3166_3-codes.properties and iso3166_1alpha-2-3-map.properties
+      resources.
     * Updates IdentityVerification to support assurance_level and
       assurance_process.
     * Adds IdentityAssuranceLevel class.

@@ -39,6 +39,8 @@ public class ISO3166_3CountryCodeTest extends TestCase {
 		assertEquals("BU", code.getFirstComponentString());
 		assertEquals("MM", code.getSecondComponentString());
 		
+		assertEquals("Burma", code.getCountryName());
+		
 		code = ISO3166_3CountryCode.parse(code.getValue());
 		assertEquals("BUMM", code.getValue());
 		
@@ -58,6 +60,8 @@ public class ISO3166_3CountryCodeTest extends TestCase {
 		assertEquals("CS", code.getFirstComponentString());
 		assertEquals("HH", code.getSecondComponentString());
 		
+		assertEquals("Czechoslovakia", code.getCountryName());
+		
 		code = ISO3166_3CountryCode.parse(code.getValue());
 		assertEquals("CSHH", code.getValue());
 		
@@ -76,6 +80,8 @@ public class ISO3166_3CountryCodeTest extends TestCase {
 		
 		assertEquals("CS", code.getFirstComponentString());
 		assertEquals("XX", code.getSecondComponentString());
+		
+		assertEquals("Serbia and Montenegro", code.getCountryName());
 		
 		code = ISO3166_3CountryCode.parse(code.getValue());
 		assertEquals("CSXX", code.getValue());

@@ -18,6 +18,10 @@
 package com.nimbusds.openid.connect.sdk.assurance.claims;
 
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -32,6 +36,100 @@ public final class ISO3166_3CountryCode extends CountryCode {
 	
 	
 	private static final long serialVersionUID = 614967184722743546L;
+	
+	
+	/** British Antarctic Territory */
+	public static final ISO3166_3CountryCode BQAQ = new ISO3166_3CountryCode("BQAQ");
+	
+	/** Burma */
+	public static final ISO3166_3CountryCode BUMM = new ISO3166_3CountryCode("BUMM");
+	
+	/** Byelorussian SSR */
+	public static final ISO3166_3CountryCode BYAA = new ISO3166_3CountryCode("BYAA");
+	
+	/** Canton and Enderbury Islands */
+	public static final ISO3166_3CountryCode CTKI = new ISO3166_3CountryCode("CTKI");
+	
+	/** Czechoslovakia */
+	public static final ISO3166_3CountryCode CSHH = new ISO3166_3CountryCode("CSHH");
+	
+	/** Dahomey */
+	public static final ISO3166_3CountryCode DYBJ = new ISO3166_3CountryCode("DYBJ");
+	
+	/** Dronning Maud Land */
+	public static final ISO3166_3CountryCode NQAQ = new ISO3166_3CountryCode("NQAQ");
+	
+	/** East Timor */
+	public static final ISO3166_3CountryCode TPTL = new ISO3166_3CountryCode("TPTL");
+	
+	/** France, Metropolitan */
+	public static final ISO3166_3CountryCode FXFR = new ISO3166_3CountryCode("FXFR");
+	
+	/** French Afars and Issas */
+	public static final ISO3166_3CountryCode AIDJ = new ISO3166_3CountryCode("AIDJ");
+	
+	/** French Southern and Antarctic Territories */
+	public static final ISO3166_3CountryCode FQHH = new ISO3166_3CountryCode("FQHH");
+	
+	/** German Democratic Republic */
+	public static final ISO3166_3CountryCode DDDE = new ISO3166_3CountryCode("DDDE");
+	
+	/** Gilbert Islands */
+	public static final ISO3166_3CountryCode GEHH = new ISO3166_3CountryCode("GEHH");
+	
+	/** Johnston Island */
+	public static final ISO3166_3CountryCode JTUM = new ISO3166_3CountryCode("JTUM");
+	
+	/** Midway Islands */
+	public static final ISO3166_3CountryCode MIUM = new ISO3166_3CountryCode("MIUM");
+	
+	/** Netherlands Antilles */
+	public static final ISO3166_3CountryCode ANHH = new ISO3166_3CountryCode("ANHH");
+	
+	/** Neutral Zone */
+	public static final ISO3166_3CountryCode NTHH = new ISO3166_3CountryCode("NTHH");
+	
+	/** New Hebrides */
+	public static final ISO3166_3CountryCode NHVU = new ISO3166_3CountryCode("NHVU");
+	
+	/** Pacific Islands (Trust Territory) */
+	public static final ISO3166_3CountryCode PCHH = new ISO3166_3CountryCode("PCHH");
+	
+	/** Panama Canal Zone */
+	public static final ISO3166_3CountryCode PZPA = new ISO3166_3CountryCode("PZPA");
+	
+	/** Serbia and Montenegro */
+	public static final ISO3166_3CountryCode CSXX = new ISO3166_3CountryCode("CSXX");
+	
+	/** Sikkim */
+	public static final ISO3166_3CountryCode SKIN = new ISO3166_3CountryCode("SKIN");
+	
+	/** Southern Rhodesia */
+	public static final ISO3166_3CountryCode RHZW = new ISO3166_3CountryCode("RHZW");
+	
+	/** United States Miscellaneous Pacific Islands */
+	public static final ISO3166_3CountryCode PUUM = new ISO3166_3CountryCode("PUUM");
+	
+	/** Upper Volta */
+	public static final ISO3166_3CountryCode HVBF = new ISO3166_3CountryCode("HVBF");
+	
+	/** USSR */
+	public static final ISO3166_3CountryCode SUHH = new ISO3166_3CountryCode("SUHH");
+	
+	/** Viet-Nam, Democratic Republic of */
+	public static final ISO3166_3CountryCode VDVN = new ISO3166_3CountryCode("VDVN");
+	
+	/** Wake Island */
+	public static final ISO3166_3CountryCode WKUM = new ISO3166_3CountryCode("WKUM");
+	
+	/** Yemen, Democratic */
+	public static final ISO3166_3CountryCode YDYE = new ISO3166_3CountryCode("YDYE");
+	
+	/** Yugoslavia */
+	public static final ISO3166_3CountryCode YUCS = new ISO3166_3CountryCode("YUCS");
+	
+	/** Zaire */
+	public static final ISO3166_3CountryCode ZRCD  = new ISO3166_3CountryCode("ZRCD");
 	
 	
 	/**
@@ -99,6 +197,33 @@ public final class ISO3166_3CountryCode extends CountryCode {
 	public String getSecondComponentString() {
 		
 		return getValue().substring(2, 4);
+	}
+	
+	
+	/**
+	 * The {@code iso3166_3-codes.properties} resource.
+	 */
+	private static final Properties CODES_RESOURCE = new Properties();
+	
+	
+	/**
+	 * Returns the country name if available in the
+	 * {@code iso3166_3-codes.properties} resource.
+	 *
+	 * @return The country name, {@code null} if not available.
+	 */
+	public String getCountryName() {
+		
+		if (CODES_RESOURCE.isEmpty()) {
+			InputStream is = getClass().getClassLoader().getResourceAsStream("iso3166_3-codes.properties");
+			try {
+				CODES_RESOURCE.load(is);
+			} catch (IOException e) {
+				return null;
+			}
+		}
+		
+		return CODES_RESOURCE.getProperty(getValue());
 	}
 	
 	
