@@ -26,9 +26,6 @@ import com.nimbusds.oauth2.sdk.token.BearerTokenError;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
 
-/**
- * UserInfo response test.
- */
 public class UserInfoResponseTest extends TestCase {
 
 

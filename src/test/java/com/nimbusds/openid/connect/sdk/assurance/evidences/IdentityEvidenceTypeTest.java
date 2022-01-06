@@ -18,6 +18,8 @@
 package com.nimbusds.openid.connect.sdk.assurance.evidences;
 
 
+import static org.junit.Assert.assertNotEquals;
+
 import junit.framework.TestCase;
 
 
@@ -26,20 +28,35 @@ public class IdentityEvidenceTypeTest extends TestCase {
 	
 	public void testConstants() {
 		
+		assertEquals("document", IdentityEvidenceType.DOCUMENT.getValue());
 		assertEquals("id_document", IdentityEvidenceType.ID_DOCUMENT.getValue());
+		assertEquals("electronic_record", IdentityEvidenceType.ELECTRONIC_RECORD.getValue());
+		assertEquals("vouch", IdentityEvidenceType.VOUCH.getValue());
 		assertEquals("utility_bill", IdentityEvidenceType.UTILITY_BILL.getValue());
+		assertEquals("electronic_signature", IdentityEvidenceType.ELECTRONIC_SIGNATURE.getValue());
 		assertEquals("qes", IdentityEvidenceType.QES.getValue());
+	}
+	
+	
+	public void testConstructor() {
+		
+		String value = "dna";
+		assertEquals(value, new IdentityEvidenceType(value).getValue());
+		
+		assertEquals(new IdentityEvidenceType(value), new IdentityEvidenceType(value));
 	}
 	
 	
 	public void testEquality() {
 		
-		assertTrue(IdentityEvidenceType.UTILITY_BILL.equals(new IdentityEvidenceType("utility_bill")));
+		assertEquals(IdentityEvidenceType.UTILITY_BILL, new IdentityEvidenceType("utility_bill"));
+		assertEquals(IdentityEvidenceType.UTILITY_BILL.hashCode(), new IdentityEvidenceType("utility_bill").hashCode());
 	}
 	
 	
 	public void testInequality() {
 		
-		assertFalse(IdentityEvidenceType.UTILITY_BILL.equals(IdentityEvidenceType.QES));
+		assertNotEquals(IdentityEvidenceType.UTILITY_BILL, IdentityEvidenceType.ELECTRONIC_SIGNATURE);
+		assertNotEquals(IdentityEvidenceType.UTILITY_BILL.hashCode(), IdentityEvidenceType.ELECTRONIC_SIGNATURE.hashCode());
 	}
 }

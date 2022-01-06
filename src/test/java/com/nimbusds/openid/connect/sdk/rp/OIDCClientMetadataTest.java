@@ -43,6 +43,7 @@ import com.nimbusds.oauth2.sdk.client.RegistrationError;
 import com.nimbusds.oauth2.sdk.id.SoftwareID;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.SubjectType;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.HashAlgorithm;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistrationType;
 import com.nimbusds.openid.connect.sdk.id.SectorID;
@@ -121,9 +122,10 @@ public class OIDCClientMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("frontchannel_logout_session_required"));
 		assertTrue(paramNames.contains("backchannel_logout_uri"));
 		assertTrue(paramNames.contains("backchannel_logout_session_required"));
+		assertTrue(paramNames.contains("digest_algorithm"));
 		assertTrue(paramNames.contains("client_registration_types"));
 		assertTrue(paramNames.contains("organization_name"));
-		assertEquals(55, OIDCClientMetadata.getRegisteredParameterNames().size());
+		assertEquals(56, OIDCClientMetadata.getRegisteredParameterNames().size());
 	}
 	
 	
@@ -294,6 +296,10 @@ public class OIDCClientMetadataTest extends TestCase {
 		meta.requiresBackChannelLogoutSession(true);
 		assertTrue(meta.requiresBackChannelLogoutSession());
 		
+		assertNull(meta.getAttachmentDigestAlg());
+		meta.setAttachmentDigestAlg(HashAlgorithm.SHA_256);
+		assertEquals(HashAlgorithm.SHA_256, meta.getAttachmentDigestAlg());
+		
 		assertTrue(meta.getCustomFields().isEmpty());
 		meta.setCustomField("custom-x", "abc");
 		JSONObject expectedCustomFields = new JSONObject();
@@ -341,6 +347,8 @@ public class OIDCClientMetadataTest extends TestCase {
 		
 		assertEquals(URI.create("https://example.com/logout/back-channel"), meta.getBackChannelLogoutURI());
 		assertTrue(meta.requiresBackChannelLogoutSession());
+		
+		assertEquals(HashAlgorithm.SHA_256, meta.getAttachmentDigestAlg());
 		
 		assertEquals(expectedCustomFields, meta.getCustomFields());
 		
@@ -1195,5 +1203,31 @@ public class OIDCClientMetadataTest extends TestCase {
 		} catch (ParseException e) {
 			assertEquals("Invalid sector_identifier_uri parameter: The URI must have a https scheme", e.getMessage());
 		}
+	}
+	
+	
+	public void testIdentityAssurance()
+		throws ParseException {
+		
+		URI redirectURI = URI.create("https://example.com");
+		
+		OIDCClientMetadata metadata = new OIDCClientMetadata();
+		metadata.setApplicationType(ApplicationType.WEB);
+		metadata.setRedirectionURI(redirectURI);
+		metadata.setAttachmentDigestAlg(HashAlgorithm.SHA_512);
+		metadata.applyDefaults();
+		
+		JSONObject jsonObject = metadata.toJSONObject();
+		assertEquals(ApplicationType.WEB.toString(), jsonObject.get("application_type"));
+		assertEquals(Collections.singletonList(GrantType.AUTHORIZATION_CODE.getValue()), jsonObject.get("grant_types"));
+		assertEquals(Collections.singletonList(ResponseType.CODE.toString()), jsonObject.get("response_types"));
+		assertEquals(Collections.singletonList(redirectURI.toString()), jsonObject.get("redirect_uris"));
+		assertEquals(JWSAlgorithm.RS256.getName(), jsonObject.get("id_token_signed_response_alg"));
+		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC.getValue(), jsonObject.get("token_endpoint_auth_method"));
+		assertEquals(HashAlgorithm.SHA_512.getValue(), jsonObject.get("digest_algorithm"));
+		assertEquals(7, jsonObject.size());
+		
+		metadata = OIDCClientMetadata.parse(jsonObject);
+		assertEquals(HashAlgorithm.SHA_512, metadata.getAttachmentDigestAlg());
 	}
 }

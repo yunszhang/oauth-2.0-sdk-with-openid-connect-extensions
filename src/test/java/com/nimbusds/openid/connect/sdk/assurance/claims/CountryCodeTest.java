@@ -26,21 +26,82 @@ import com.nimbusds.oauth2.sdk.ParseException;
 public class CountryCodeTest extends TestCase {
 	
 	
-	public void testParse() throws ParseException {
+	public void testParse_2() throws ParseException {
 		
 		CountryCode countryCode = CountryCode.parse("BG");
+		assertEquals(2, countryCode.length());
 		ISO3166_1Alpha2CountryCode iso3166_1Alpha2CountryCode = countryCode.toISO3166_1Alpha2CountryCode();
 		assertEquals("BG", iso3166_1Alpha2CountryCode.getValue());
+		
+		try {
+			countryCode.toISO3166_1Alpha3CountryCode();
+			fail();
+		} catch (ClassCastException e) {
+			assertTrue(e.getMessage().contains("cannot be cast"));
+		}
+		
+		try {
+			countryCode.toISO3166_3CountryCode();
+			fail();
+		} catch (ClassCastException e) {
+			assertTrue(e.getMessage().contains("cannot be cast"));
+		}
+	}
+	
+	
+	public void testParse_3() throws ParseException {
+		
+		CountryCode countryCode = CountryCode.parse("SWE");
+		assertEquals(3, countryCode.length());
+		ISO3166_1Alpha3CountryCode iso3166_1Alpha3CountryCode = countryCode.toISO3166_1Alpha3CountryCode();
+		assertEquals("SWE", iso3166_1Alpha3CountryCode.getValue());
+		
+		try {
+			countryCode.toISO3166_1Alpha2CountryCode();
+			fail();
+		} catch (ClassCastException e) {
+			assertTrue(e.getMessage().contains("cannot be cast"));
+		}
+		
+		try {
+			countryCode.toISO3166_3CountryCode();
+			fail();
+		} catch (ClassCastException e) {
+			assertTrue(e.getMessage().contains("cannot be cast"));
+		}
+	}
+	
+	
+	public void testParse_4() throws ParseException {
+		
+		CountryCode countryCode = CountryCode.parse("CSHH");
+		assertEquals(4, countryCode.length());
+		ISO3166_3CountryCode iso3166_3CountryCode = countryCode.toISO3166_3CountryCode();
+		assertEquals("CSHH", iso3166_3CountryCode.getValue());
+		
+		try {
+			countryCode.toISO3166_1Alpha3CountryCode();
+			fail();
+		} catch (ClassCastException e) {
+			assertTrue(e.getMessage().contains("cannot be cast"));
+		}
+		
+		try {
+			countryCode.toISO3166_1Alpha2CountryCode();
+			fail();
+		} catch (ClassCastException e) {
+			assertTrue(e.getMessage().contains("cannot be cast"));
+		}
 	}
 	
 	
 	public void testParseException() {
 		
 		try {
-			CountryCode.parse("ABC");
+			CountryCode.parse("ABCDE");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("The ISO 3166-1 alpha-2 country code must be two letters", e.getMessage());
+			assertEquals("The country code must be 3, 2 or 4 letters", e.getMessage());
 		}
 	}
 }

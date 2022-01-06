@@ -18,7 +18,8 @@
 package com.nimbusds.openid.connect.sdk.assurance.evidences;
 
 
-import net.jcip.annotations.Immutable;
+import java.util.Objects;
+
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -32,11 +33,13 @@ import com.nimbusds.oauth2.sdk.util.date.DateWithTimeZoneOffset;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OpenID Connect for Identity Assurance 1.0, section 4.1.1.
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.1.1.
  * </ul>
+ *
+ * @deprecated Use {@link DocumentEvidence} instead.
  */
-@Immutable
-public final class IDDocumentEvidence extends IdentityEvidence {
+@Deprecated
+public class IDDocumentEvidence extends IdentityEvidence {
 	
 	
 	/**
@@ -48,7 +51,7 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 	/**
 	 * The document verification timestamp.
 	 */
-	private final DateWithTimeZoneOffset dtz;
+	private final DateWithTimeZoneOffset time;
 	
 	
 	/**
@@ -70,20 +73,20 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 	 *                   not specified.
 	 * @param verifier   Optional verifier if not the OpenID provider
 	 *                   itself, {@code null} if none.
-	 * @param dtz        The document verification timestamp, {@code null}
+	 * @param time        The document verification timestamp, {@code null}
 	 *                   if not specified.
 	 * @param idDocument The identity document description, {@code null} if
 	 *                   not specified.
 	 */
 	public IDDocumentEvidence(final IdentityVerificationMethod method,
 				  final IdentityVerifier verifier,
-				  final DateWithTimeZoneOffset dtz,
+				  final DateWithTimeZoneOffset time,
 				  final IDDocumentDescription idDocument) {
 		
-		super(IdentityEvidenceType.ID_DOCUMENT);
+		super(IdentityEvidenceType.ID_DOCUMENT, null);
 		
 		this.method = method;
-		this.dtz = dtz;
+		this.time = time;
 		this.verifier = verifier;
 		this.idDocument = idDocument;
 	}
@@ -107,7 +110,7 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 	 *         specified.
 	 */
 	public DateWithTimeZoneOffset getVerificationTime() {
-		return dtz;
+		return time;
 	}
 	
 	
@@ -139,16 +142,34 @@ public final class IDDocumentEvidence extends IdentityEvidence {
 		if (getVerificationMethod() != null) {
 			o.put("method", getVerificationMethod().getValue());
 		}
-		if (dtz != null) {
+		if (getVerificationTime() != null) {
 			o.put("time", getVerificationTime().toISO8601String());
 		}
-		if (verifier != null) {
+		if (getVerifier() != null) {
 			o.put("verifier", getVerifier().toJSONObject());
 		}
 		if (getIdentityDocument() != null) {
 			o.put("document", getIdentityDocument().toJSONObject());
 		}
 		return o;
+	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof IDDocumentEvidence)) return false;
+		IDDocumentEvidence that = (IDDocumentEvidence) o;
+		return Objects.equals(getVerificationMethod(), that.getVerificationMethod()) &&
+			Objects.equals(getVerificationTime(), that.getVerificationTime()) &&
+			Objects.equals(getVerifier(), that.getVerifier()) &&
+			Objects.equals(getIdentityDocument(), that.getIdentityDocument());
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(method, time, getVerifier(), idDocument);
 	}
 	
 	

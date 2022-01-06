@@ -802,6 +802,19 @@ public class ClaimsSetRequest implements JSONAware {
 	 * Gets the specified claim entry from this request.
 	 *
 	 * @param claimName The claim name. Must not be {@code null}.
+	 *
+	 * @return The claim entry, {@code null} if not found.
+	 */
+	public Entry get(final String claimName) {
+		
+		return get(claimName, null);
+	}
+	
+	
+	/**
+	 * Gets the specified claim entry from this request.
+	 *
+	 * @param claimName The claim name. Must not be {@code null}.
 	 * @param langTag   The associated language tag, {@code null} if none.
 	 *
 	 * @return The claim entry, {@code null} if not found.

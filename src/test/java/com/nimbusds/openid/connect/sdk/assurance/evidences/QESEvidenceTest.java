@@ -33,21 +33,24 @@ public class QESEvidenceTest extends TestCase {
 	
 	public void testMinimal() throws ParseException {
 		
-		QESEvidence qesEvidence = new QESEvidence(null, null, null);
+		QESEvidence evidence = new QESEvidence(null, null, null);
 		
-		assertNull(qesEvidence.getQESIssuer());
-		assertNull(qesEvidence.getQESSerialNumberString());
-		assertNull(qesEvidence.getQESCreationTime());
+		assertNull(evidence.getQESIssuer());
+		assertNull(evidence.getQESSerialNumberString());
+		assertNull(evidence.getQESCreationTime());
 		
-		JSONObject jsonObject = qesEvidence.toJSONObject();
+		JSONObject jsonObject = evidence.toJSONObject();
 		assertEquals(IdentityEvidenceType.QES.getValue(), jsonObject.get("type"));
 		assertEquals(1, jsonObject.size());
 		
-		qesEvidence = QESEvidence.parse(jsonObject);
+		evidence = QESEvidence.parse(jsonObject);
 		
-		assertNull(qesEvidence.getQESIssuer());
-		assertNull(qesEvidence.getQESSerialNumberString());
-		assertNull(qesEvidence.getQESCreationTime());
+		assertNull(evidence.getQESIssuer());
+		assertNull(evidence.getQESSerialNumberString());
+		assertNull(evidence.getQESCreationTime());
+		
+		assertEquals("Equality", evidence, QESEvidence.parse(jsonObject));
+		assertEquals("Hash code", evidence.hashCode(), QESEvidence.parse(jsonObject).hashCode());
 	}
 	
 	
@@ -77,5 +80,8 @@ public class QESEvidenceTest extends TestCase {
 		assertEquals(issuer, evidence.getQESIssuer());
 		assertEquals(number, evidence.getQESSerialNumberString());
 		assertEquals(ts.toISO8601String(), evidence.getQESCreationTime().toISO8601String());
+		
+		assertEquals("Equality", evidence, QESEvidence.parse(jsonObject));
+		assertEquals("Hash code", evidence.hashCode(), QESEvidence.parse(jsonObject).hashCode());
 	}
 }

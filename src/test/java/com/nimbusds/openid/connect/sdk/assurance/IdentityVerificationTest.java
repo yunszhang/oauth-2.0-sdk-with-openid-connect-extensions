@@ -45,10 +45,14 @@ public class IdentityVerificationTest extends TestCase {
 			IdentityTrustFramework.DE_AML,
 			null,
 			null,
+			null,
+			null,
 			(List)null);
 		
 		assertEquals(IdentityTrustFramework.DE_AML, verification.getTrustFramework());
 		
+		assertNull(verification.getAssuranceLevel());
+		assertNull(verification.getAssuranceProcess());
 		assertNull(verification.getVerificationTime());
 		assertNull(verification.getVerificationProcess());
 		assertNull(verification.getEvidence());
@@ -59,6 +63,38 @@ public class IdentityVerificationTest extends TestCase {
 		
 		verification = IdentityVerification.parse(jsonObject);
 		
+		assertNull(verification.getAssuranceLevel());
+		assertNull(verification.getAssuranceProcess());
+		assertNull(verification.getVerificationTime());
+		assertNull(verification.getVerificationProcess());
+		assertNull(verification.getEvidence());
+	}
+	
+
+	public void testMinimal_deprecatedConstructor() throws ParseException {
+		
+		IdentityVerification verification = new IdentityVerification(
+			IdentityTrustFramework.DE_AML,
+			null,
+			null,
+			(List)null);
+		
+		assertEquals(IdentityTrustFramework.DE_AML, verification.getTrustFramework());
+		
+		assertNull(verification.getAssuranceLevel());
+		assertNull(verification.getAssuranceProcess());
+		assertNull(verification.getVerificationTime());
+		assertNull(verification.getVerificationProcess());
+		assertNull(verification.getEvidence());
+		
+		JSONObject jsonObject = verification.toJSONObject();
+		assertEquals("de_aml", jsonObject.get("trust_framework"));
+		assertEquals(1, jsonObject.size());
+		
+		verification = IdentityVerification.parse(jsonObject);
+		
+		assertNull(verification.getAssuranceLevel());
+		assertNull(verification.getAssuranceProcess());
 		assertNull(verification.getVerificationTime());
 		assertNull(verification.getVerificationProcess());
 		assertNull(verification.getEvidence());
@@ -66,6 +102,17 @@ public class IdentityVerificationTest extends TestCase {
 	
 	
 	public void testTrustFrameworkRequired(){
+		
+		try {
+			new IdentityVerification(null, null, null, null, null, (List)null);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The trust framework must not be null", e.getMessage());
+		}
+	}
+	
+	
+	public void testTrustFrameworkRequired_deprecated(){
 		
 		try {
 			new IdentityVerification(null, null, null, (List)null);
@@ -78,6 +125,13 @@ public class IdentityVerificationTest extends TestCase {
 	
 	public void testFullySet() throws ParseException {
 		
+		Policy policy = new Policy("policy-x");
+		Procedure procedure = new Procedure("procedure-y");
+		IdentityAssuranceProcess process = new IdentityAssuranceProcess(
+			policy,
+			procedure,
+			null
+		);
 		
 		Date now = DateUtils.fromSecondsSinceEpoch(DateUtils.toSecondsSinceEpoch(new Date())); // second precision
 		
@@ -91,11 +145,15 @@ public class IdentityVerificationTest extends TestCase {
 		
 		IdentityVerification verification = new IdentityVerification(
 			IdentityTrustFramework.DE_AML,
+			IdentityAssuranceLevel.HIGH,
+			process,
 			ts,
 			verificationProcess,
 			Collections.singletonList((IdentityEvidence) evidence));
 		
 		assertEquals(IdentityTrustFramework.DE_AML, verification.getTrustFramework());
+		assertEquals(IdentityAssuranceLevel.HIGH, verification.getAssuranceLevel());
+		assertEquals(process, verification.getAssuranceProcess());
 		assertEquals(ts, verification.getVerificationTime());
 		assertEquals(verificationProcess, verification.getVerificationProcess());
 		assertEquals(evidence, verification.getEvidence().get(0));
@@ -103,6 +161,8 @@ public class IdentityVerificationTest extends TestCase {
 		JSONObject jsonObject = verification.toJSONObject();
 		
 		assertEquals(IdentityTrustFramework.DE_AML.getValue(), jsonObject.get("trust_framework"));
+		assertEquals(IdentityAssuranceLevel.HIGH.getValue(), jsonObject.get("assurance_level"));
+		assertEquals(process, IdentityAssuranceProcess.parse(JSONObjectUtils.getJSONObject(jsonObject, "assurance_process")));
 		assertEquals(ts.toISO8601String(), jsonObject.get("time"));
 		assertEquals(verificationProcess.getValue(), jsonObject.get("verification_process"));
 		JSONArray evidenceArray = JSONObjectUtils.getJSONArray(jsonObject, "evidence");
@@ -111,9 +171,12 @@ public class IdentityVerificationTest extends TestCase {
 		assertEquals(evidence.getQESIssuer(), parsedEvidence.getQESIssuer());
 		assertEquals(evidence.getQESSerialNumberString(), parsedEvidence.getQESSerialNumberString());
 		assertEquals(evidence.getQESCreationTime(), parsedEvidence.getQESCreationTime());
+		assertEquals(6, jsonObject.size());
 		
 		verification = IdentityVerification.parse(jsonObject);
 		assertEquals(IdentityTrustFramework.DE_AML, verification.getTrustFramework());
+		assertEquals(IdentityAssuranceLevel.HIGH, verification.getAssuranceLevel());
+		assertEquals(process, verification.getAssuranceProcess());
 		assertEquals(ts.toISO8601String(), verification.getVerificationTime().toISO8601String());
 		assertEquals(verificationProcess, verification.getVerificationProcess());
 		assertEquals(evidence.getQESIssuer(), verification.getEvidence().get(0).toQESEvidence().getQESIssuer());

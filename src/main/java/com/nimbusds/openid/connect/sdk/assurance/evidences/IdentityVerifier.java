@@ -20,7 +20,6 @@ package com.nimbusds.openid.connect.sdk.assurance.evidences;
 
 import java.util.Objects;
 
-import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONAware;
 import net.minidev.json.JSONObject;
 
@@ -36,17 +35,16 @@ import com.nimbusds.secevent.sdk.claims.TXN;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OpenID Connect for Identity Assurance 1.0, section 4.1.1.1.
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.1.
  * </ul>
  */
-@Immutable
-public final class IdentityVerifier implements JSONAware {
+public class IdentityVerifier implements JSONAware {
 	
 	
 	/**
 	 * The organisation.
 	 */
-	private final String organization;
+	private final Organization organization;
 	
 	
 	/**
@@ -62,8 +60,24 @@ public final class IdentityVerifier implements JSONAware {
 	 * @param txn          Identifier for the identity verification
 	 *                     transaction, {@code null} if not specified.
 	 */
-	public IdentityVerifier(final String organization, final TXN txn) {
+	public IdentityVerifier(final Organization organization, final TXN txn) {
 		this.organization = organization;
+		this.txn = txn;
+	}
+	
+	
+	/**
+	 * Creates a new verifier.
+	 *
+	 * @param organizationString The organisation string, {@code null} if
+	 *                           not specified.
+	 * @param txn                Identifier for the identity verification
+	 *                           transaction, {@code null} if not
+	 *                           specified.
+	 */
+	@Deprecated
+	public IdentityVerifier(final String organizationString, final TXN txn) {
+		this.organization = organizationString != null ? new Organization(organizationString) : null;
 		this.txn = txn;
 	}
 	
@@ -73,8 +87,32 @@ public final class IdentityVerifier implements JSONAware {
 	 *
 	 * @return The organisation, {@code null} if not specified.
 	 */
-	public String getOrganization() {
+	public Organization getOrganizationEntity() {
 		return organization;
+	}
+	
+	
+	/**
+	 * Returns the organisation string.
+	 *
+	 * @return The organisation string, {@code null} if not specified.
+	 */
+	public String getOrganizationString() {
+		return getOrganizationEntity() != null ? getOrganizationEntity().getValue() : null;
+	}
+	
+	
+	/**
+	 * Returns the organisation string.
+	 *
+	 * @return The organisation string, {@code null} if not specified.
+	 *
+	 * @deprecated Use {@link #getOrganizationString()} instead.
+	 */
+	@Deprecated
+	public String getOrganization() {
+		// Deprecated to allow for strongly typed Organization in future
+		return getOrganizationString();
 	}
 	
 	
@@ -97,7 +135,7 @@ public final class IdentityVerifier implements JSONAware {
 	public JSONObject toJSONObject() {
 		JSONObject o = new JSONObject();
 		if (getOrganization() != null) {
-			o.put("organization", getOrganization());
+			o.put("organization", getOrganizationEntity().getValue());
 		}
 		if (getTXN() != null) {
 			o.put("txn", getTXN().getValue());
@@ -117,14 +155,13 @@ public final class IdentityVerifier implements JSONAware {
 		if (this == o) return true;
 		if (!(o instanceof IdentityVerifier)) return false;
 		IdentityVerifier verifier = (IdentityVerifier) o;
-		return getOrganization().equals(verifier.getOrganization()) &&
-			txn.equals(verifier.txn);
+		return Objects.equals(getOrganizationEntity(), verifier.getOrganizationEntity()) && Objects.equals(getTXN(), verifier.getTXN());
 	}
 	
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(getOrganization(), txn);
+		return Objects.hash(getOrganizationEntity(), getTXN());
 	}
 	
 	
@@ -140,11 +177,16 @@ public final class IdentityVerifier implements JSONAware {
 	public static IdentityVerifier parse(final JSONObject jsonObject)
 		throws ParseException {
 		
-		String org = JSONObjectUtils.getString(jsonObject, "organization", null);
+		Organization org = null;
+		if (jsonObject.get("organization") != null) {
+			org = new Organization(JSONObjectUtils.getString(jsonObject, "organization"));
+		}
+		
 		TXN txn = null;
 		if (jsonObject.get("txn") != null) {
 			txn = new TXN(JSONObjectUtils.getString(jsonObject, "txn"));
 		}
+		
 		return new IdentityVerifier(org, txn);
 	}
 }

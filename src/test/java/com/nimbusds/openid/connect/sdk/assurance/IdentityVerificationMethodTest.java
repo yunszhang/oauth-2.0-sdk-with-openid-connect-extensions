@@ -32,6 +32,7 @@ public class IdentityVerificationMethodTest extends TestCase {
 		assertEquals("pipp", IdentityVerificationMethod.PIPP.getValue());
 		assertEquals("sripp", IdentityVerificationMethod.SRIPP.getValue());
 		assertEquals("uripp", IdentityVerificationMethod.URIPP.getValue());
+		assertEquals("onsite", IdentityVerificationMethod.ONSITE.getValue());
 	}
 	
 	
@@ -39,6 +40,7 @@ public class IdentityVerificationMethodTest extends TestCase {
 		
 		String value = "abc";
 		assertEquals(value, new IdentityVerificationMethod(value).getValue());
-		assertTrue(new IdentityVerificationMethod(value).equals(new IdentityVerificationMethod(value)));
+		assertEquals(new IdentityVerificationMethod(value), new IdentityVerificationMethod(value));
+		assertEquals(new IdentityVerificationMethod(value).hashCode(), new IdentityVerificationMethod(value).hashCode());
 	}
 }

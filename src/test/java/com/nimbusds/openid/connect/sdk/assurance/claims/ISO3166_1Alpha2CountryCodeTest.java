@@ -18,6 +18,8 @@
 package com.nimbusds.openid.connect.sdk.assurance.claims;
 
 
+import static org.junit.Assert.assertNotEquals;
+
 import junit.framework.TestCase;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -34,8 +36,8 @@ public class ISO3166_1Alpha2CountryCodeTest extends TestCase {
 		code = ISO3166_1Alpha2CountryCode.parse(code.getValue());
 		assertEquals("BG", code.getValue());
 		
-		assertTrue(code.equals(new ISO3166_1Alpha2CountryCode("BG")));
-		assertTrue(code.equals(new ISO3166_1Alpha2CountryCode("bg")));
+		assertEquals(code, new ISO3166_1Alpha2CountryCode("BG"));
+		assertEquals(code, new ISO3166_1Alpha2CountryCode("bg"));
 	}
 	
 	
@@ -45,25 +47,36 @@ public class ISO3166_1Alpha2CountryCodeTest extends TestCase {
 			new ISO3166_1Alpha2CountryCode("A");
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("The ISO 3166-1 alpha-2 country code must be two letters", e.getMessage());
+			assertEquals("The ISO 3166-1 alpha-2 country code must be 2 letters", e.getMessage());
 		}
 		
 		try {
 			new ISO3166_1Alpha2CountryCode("ABD");
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("The ISO 3166-1 alpha-2 country code must be two letters", e.getMessage());
+			assertEquals("The ISO 3166-1 alpha-2 country code must be 2 letters", e.getMessage());
 		}
 	}
 	
 	
-	public void testParseException() {
+	public void testParseException_incorrectLength() {
 		
 		try {
 			ISO3166_1Alpha2CountryCode.parse("ABC");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("The ISO 3166-1 alpha-2 country code must be two letters", e.getMessage());
+			assertEquals("The ISO 3166-1 alpha-2 country code must be 2 letters", e.getMessage());
+		}
+	}
+	
+	
+	public void testParseException_notLetters() {
+		
+		try {
+			ISO3166_1Alpha2CountryCode.parse("A1");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("The ISO 3166-1 alpha country code must consist of letters", e.getMessage());
 		}
 	}
 	
@@ -76,6 +89,20 @@ public class ISO3166_1Alpha2CountryCodeTest extends TestCase {
 	
 	public void testInequality() {
 		
-		assertFalse(new ISO3166_1Alpha2CountryCode("BG").equals(new ISO3166_1Alpha2CountryCode("GB")));
+		assertNotEquals(new ISO3166_1Alpha2CountryCode("BG"), new ISO3166_1Alpha2CountryCode("GB"));
+	}
+	
+	
+	public void testResources() {
+		
+		assertEquals("Bulgaria", ISO3166_1Alpha2CountryCode.BG.getCountryName());
+		assertEquals(ISO3166_1Alpha3CountryCode.BGR, ISO3166_1Alpha2CountryCode.BG.toAlpha3CountryCode());
+	}
+	
+	
+	public void testResources_invalidCode() {
+		
+		assertNull(new ISO3166_1Alpha2CountryCode("XX").getCountryName());
+		assertNull(new ISO3166_1Alpha2CountryCode("XX").toAlpha3CountryCode());
 	}
 }

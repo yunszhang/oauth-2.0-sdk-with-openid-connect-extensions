@@ -26,6 +26,7 @@ import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.openid.connect.sdk.assurance.claims.CountryCode;
 
 
 /**
@@ -35,6 +36,7 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  *
  * <ul>
  *     <li>OpenID Connect Core 1.0, section 5.1.1.
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 4.3.
  * </ul>
  */
 public class Address extends ClaimsSet {
@@ -74,6 +76,12 @@ public class Address extends ClaimsSet {
 	 * The country claim name.
 	 */
 	public static final String COUNTRY_CLAIM_NAME = "country";
+	
+	
+	/**
+	 * The country code claim name.
+	 */
+	public static final String COUNTRY_CODE_CLAIM_NAME = "country_code";
 
 
 	/**
@@ -89,6 +97,7 @@ public class Address extends ClaimsSet {
 		stdClaimNames.add(REGION_CLAIM_NAME);
 		stdClaimNames.add(POSTAL_CODE_CLAIM_NAME);
 		stdClaimNames.add(COUNTRY_CLAIM_NAME);
+		stdClaimNames.add(COUNTRY_CODE_CLAIM_NAME);
 	}
 	
 	
@@ -279,6 +288,42 @@ public class Address extends ClaimsSet {
 	public String getCountry() {
 	
 		return getStringClaim(COUNTRY_CLAIM_NAME);
+	}
+	
+	
+	/**
+	 * Sets the country code component. Corresponds to the
+	 * {@code country_code} claim.
+	 *
+	 * @param countryCode The country code component. If {@code null} the
+	 *                    claim will be removed.
+	 */
+	public void setCountryCode(final CountryCode countryCode) {
+	
+		String value = countryCode != null ? countryCode.getValue() : null;
+		setClaim(COUNTRY_CODE_CLAIM_NAME, value);
+	}
+	
+	
+	/**
+	 * Gets the country code component. Corresponds to the
+	 * {@code country_code} claim.
+	 *
+	 * @return The country code component, {@code null} if not specified.
+	 */
+	public CountryCode getCountryCode() {
+	
+		String value = getStringClaim(COUNTRY_CODE_CLAIM_NAME);
+		
+		if (value == null) {
+			return null;
+		}
+		
+		try {
+			return CountryCode.parse(value);
+		} catch (ParseException e) {
+			return null;
+		}
 	}
 
 

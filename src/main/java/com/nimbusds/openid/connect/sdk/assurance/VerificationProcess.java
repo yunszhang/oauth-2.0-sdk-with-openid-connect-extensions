@@ -29,7 +29,7 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OpenID Connect for Identity Assurance 1.0, section 4.1.
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.
  * </ul>
  */
 @Immutable
@@ -43,7 +43,7 @@ public final class VerificationProcess extends Identifier {
 	 * Creates a new verification process identifier.
 	 *
 	 * @param value The verification process identifier value. Must not be
-	 *              {@code null}.
+	 *              {@code null} or empty string.
 	 */
 	public VerificationProcess(final String value) {
 		super(value);

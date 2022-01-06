@@ -1,7 +1,7 @@
 /*
  * oauth2-oidc-sdk
  *
- * Copyright 2012-2016, Connect2id Ltd and contributors.
+ * Copyright 2012-2021, Connect2id Ltd and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -20,25 +20,21 @@ package com.nimbusds.openid.connect.sdk.assurance;
 
 import junit.framework.TestCase;
 
-import com.nimbusds.openid.connect.sdk.assurance.evidences.IdentityEvidenceType;
 
-
-public class IdentityIdentityEvidenceTypeTest extends TestCase {
+public class ProcedureTest extends TestCase {
 	
 	
-	public void testConstants() {
+	public void testConstructor() {
 		
-		assertEquals("id_document", IdentityEvidenceType.ID_DOCUMENT.getValue());
-		assertEquals("qes", IdentityEvidenceType.QES.getValue());
-		assertEquals("utility_bill", IdentityEvidenceType.UTILITY_BILL.getValue());
+		String value = "value";
+		Procedure procedure = new Procedure(value);
+		assertEquals(value, procedure.getValue());
 	}
 	
 	
-	public void testValue() {
+	public void testEquality() {
 		
-		String value = "dna";
-		assertEquals(value, new IdentityEvidenceType(value).getValue());
-		
-		assertTrue(new IdentityEvidenceType(value).equals(new IdentityEvidenceType(value)));
+		assertEquals(new Procedure("1"), new Procedure("1"));
+		assertEquals(new Procedure("1").hashCode(), new Procedure("1").hashCode());
 	}
 }

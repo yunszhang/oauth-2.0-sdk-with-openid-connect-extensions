@@ -32,9 +32,6 @@ import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
 
-/**
- * Tests the UserInfo success response.
- */
 public class UserInfoSuccessResponseTest extends TestCase {
 
 
@@ -101,8 +98,8 @@ public class UserInfoSuccessResponseTest extends TestCase {
 		assertNull(response.getUserInfo());
 
 		jwt = (SignedJWT)response.getUserInfoJWT();
-
-		assertTrue(jwt.getState().equals(JWSObject.State.SIGNED));
+		
+		assertEquals(jwt.getState(), JWSObject.State.SIGNED);
 
 		claims = new UserInfo(response.getUserInfoJWT().getJWTClaimsSet());
 

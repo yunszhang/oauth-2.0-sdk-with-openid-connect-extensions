@@ -18,12 +18,16 @@
 package com.nimbusds.openid.connect.sdk.assurance.evidences;
 
 
-import net.jcip.annotations.Immutable;
+import java.util.List;
+import java.util.Objects;
+
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.oauth2.sdk.util.date.DateWithTimeZoneOffset;
 import com.nimbusds.oauth2.sdk.util.date.SimpleDate;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.Attachment;
 import com.nimbusds.openid.connect.sdk.claims.Address;
 
 
@@ -33,11 +37,11 @@ import com.nimbusds.openid.connect.sdk.claims.Address;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OpenID Connect for Identity Assurance 1.0, section 4.1.1.
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.1.4.
  * </ul>
  */
-@Immutable
-public final class UtilityBillEvidence extends IdentityEvidence {
+@Deprecated
+public class UtilityBillEvidence extends IdentityEvidence {
 	
 	
 	/**
@@ -59,6 +63,18 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 	
 	
 	/**
+	 * The utility bill verification timestamp.
+	 */
+	private final DateWithTimeZoneOffset time;
+	
+	
+	/**
+	 * The identity verification method.
+	 */
+	private final IdentityVerificationMethod method;
+	
+	
+	/**
 	 * Creates a new utility bill used as identity evidence.
 	 *
 	 * @param providerName    The utility provider name, {@code null} if
@@ -68,12 +84,42 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 	 * @param date            The utility bill date, {@code null} if not
 	 *                        specified.
 	 */
+	@Deprecated
 	public UtilityBillEvidence(final String providerName, final Address providerAddress, final SimpleDate date) {
 		
-		super(IdentityEvidenceType.UTILITY_BILL);
+		this(providerName, providerAddress, date, null, null, null);
+	}
+	
+	
+	/**
+	 * Creates a new utility bill used as identity evidence.
+	 *
+	 * @param providerName    The utility provider name, {@code null} if
+	 *                        not specified.
+	 * @param providerAddress The utility provider address details,
+	 *                        {@code null} if not specified.
+	 * @param date            The utility bill date, {@code null} if not
+	 *                        specified.
+	 * @param time             The utility bill verification timestamp,
+	 *                        {@code null} if not specified.
+	 * @param method          The identity verification method,
+	 *                        {@code null} if not specified.
+	 * @param attachments     The optional attachments, {@code null} if not
+	 *                        specified.
+	 */
+	public UtilityBillEvidence(final String providerName,
+				   final Address providerAddress,
+				   final SimpleDate date,
+				   final DateWithTimeZoneOffset time,
+				   final IdentityVerificationMethod method,
+				   final List<Attachment> attachments) {
+		
+		super(IdentityEvidenceType.UTILITY_BILL, attachments);
 		this.providerName = providerName;
 		this.providerAddress = providerAddress;
 		this.date = date;
+		this.time = time;
+		this.method = method;
 	}
 	
 	
@@ -108,6 +154,28 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 	}
 	
 	
+	/**
+	 * Returns the utility bill verification timestamp.
+	 *
+	 * @return The utility bill verification timestamp, {@code null} if not
+	 *         specified.
+	 */
+	public DateWithTimeZoneOffset getVerificationTime() {
+		return time;
+	}
+	
+	
+	/**
+	 * Returns the utility bill verification method.
+	 *
+	 * @return The utility bill verification method, {@code null} if not
+	 *         specified.
+	 */
+	public IdentityVerificationMethod getVerificationMethod() {
+		return method;
+	}
+	
+	
 	@Override
 	public JSONObject toJSONObject() {
 		
@@ -128,7 +196,40 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 			o.put("date", getUtilityBillDate().toISO8601String());
 		}
 		
+		if (getVerificationTime() != null) {
+			o.put("time", getVerificationTime().toISO8601String());
+		}
+		
+		if (getVerificationMethod() != null) {
+			o.put("method", getVerificationMethod().getValue());
+		}
+		
 		return o;
+	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof UtilityBillEvidence)) return false;
+		UtilityBillEvidence evidence = (UtilityBillEvidence) o;
+		return Objects.equals(getUtilityProviderName(), evidence.getUtilityProviderName()) &&
+			Objects.equals(getUtilityProviderAddress(), evidence.getUtilityProviderAddress()) &&
+			Objects.equals(getUtilityBillDate(), evidence.getUtilityBillDate()) &&
+			Objects.equals(getVerificationTime(), evidence.getVerificationTime()) &&
+			Objects.equals(getVerificationMethod(), evidence.getVerificationMethod());
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(
+			getUtilityProviderName(),
+			getUtilityProviderAddress(),
+			getUtilityBillDate(),
+			getVerificationTime(),
+			getVerificationMethod()
+		);
 	}
 	
 	
@@ -166,6 +267,21 @@ public final class UtilityBillEvidence extends IdentityEvidence {
 			date = SimpleDate.parseISO8601String(JSONObjectUtils.getString(jsonObject, "date"));
 		}
 		
-		return new UtilityBillEvidence(providerName, providerAddress, date);
+		DateWithTimeZoneOffset dtz = null;
+		if (jsonObject.get("time") != null) {
+			dtz = DateWithTimeZoneOffset.parseISO8601String(JSONObjectUtils.getString(jsonObject, "time"));
+		}
+		
+		IdentityVerificationMethod method = null;
+		if (jsonObject.get("method") != null) {
+			method = new IdentityVerificationMethod(JSONObjectUtils.getString(jsonObject, "method"));
+		}
+		
+		List<Attachment> attachments = null;
+		if (jsonObject.get("attachments") != null) {
+			attachments = Attachment.parseList(JSONObjectUtils.getJSONArray(jsonObject, "attachments"));
+		}
+		
+		return new UtilityBillEvidence(providerName, providerAddress, date, dtz, method, attachments);
 	}
 }

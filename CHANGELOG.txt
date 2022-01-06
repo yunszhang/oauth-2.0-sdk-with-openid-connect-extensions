@@ -1883,3 +1883,40 @@ version 9.20.1 (2022-02-03)
     * Updates to com.nimbusds:nimbus-jose-jwt:9.15.2
     * Updates to com.nimbusds:content-type:2.2
     * Updates to BouncyCastle 1.69
+
+version 9.21 (2022-01-06)
+    * Upgrades to OpenID Connect for Identity Assurance 1.0, draft 12.
+    * Adds support for the also_known_as OpenID claim.
+    * Adds support for the msisdn OpenID claim.
+    * Adds ISO3166_1Alpha2CountryCode class for representing ISO 3166-1
+      3-letter country codes.
+    * Adds ISO3166_3CountryCode class for representing ISO 3166-3 country
+      codes for former countries and territories.
+    * Adds CountryCode.length method.
+    * Adds country_code claim to Address.
+    * Adds ISO3166_1AlphaCountryCodeMapper to map between alpha-2 and alpha-3
+      codes.
+    * Adds iso3166_1alpha2-codes.properties, iso3166_1alpha3-codes.properties,
+      iso3166_3-codes.properties and iso3166_1alpha-2-3-map.properties
+      resources.
+    * Updates IdentityVerification to support assurance_level and
+      assurance_process.
+    * Adds IdentityAssuranceLevel class.
+    * Adds IdentityAssuranceProcess class.
+    * Adds Policy, Procedure and Status classes.
+    * Adds IdentityVerifier.getOrganizationString method, deprecates
+      IdentityVerifier.getOrganization.
+    * Adds Attachment classes for representing embedded and external
+      attachments for evidences, method for external attachment retrieval and
+      digest verification.
+    * Adds a shorthand ClaimsSetRequest.get(String) method.
+    * Updates OIDCProviderMetadata to support the documents_supported,
+      documents_methods_supported, documents_validation_methods_supported,
+      documents_verification_methods_supported, electronic_records_supported,
+      attachments_supported and digest_algorithms_supported metadata fields.
+    * Updates OIDCClientMetadata to support the digest_algorithm field.
+    * Adds static StringUtils.isAlpha and isNumeric methods.
+    * Adds static CollectionUtils.intersect method.
+    * Adds ClaimsSet.equals and hashCode methods.
+    * Updates to com.nimbusds:content-type:2.2
+

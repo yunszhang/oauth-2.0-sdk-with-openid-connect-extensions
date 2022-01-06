@@ -27,7 +27,7 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
  * Identity evidence type.
  *
  * <ul>
- *     <li>OpenID Connect for Identity Assurance 1.0, section 4.1.1.
+ *     <li>OpenID Connect for Identity Assurance 1.0, section 5.1.1.
  * </ul>
  */
 @Immutable
@@ -38,10 +38,34 @@ public final class IdentityEvidenceType extends Identifier {
 	
 	
 	/**
-	 * Verification based on any kind of government issued identity
-	 * document.
+	 * Verification based on a physical or electronic document provided by
+	 * the end-user.
 	 */
+	public static final IdentityEvidenceType DOCUMENT = new IdentityEvidenceType("document");
+	
+	
+	/**
+	 * Verification based on a government issued identity document.
+	 *
+	 * @deprecated Use {@link #DOCUMENT} instead.
+	 */
+	@Deprecated
 	public static final IdentityEvidenceType ID_DOCUMENT = new IdentityEvidenceType("id_document");
+	
+	
+	/**
+	 * Verification based on data or information obtained electronically
+	 * from an approved or recognised source.
+	 */
+	public static final IdentityEvidenceType ELECTRONIC_RECORD = new IdentityEvidenceType("electronic_record");
+	
+	
+	/**
+	 * Verification based on an attestation or reference given by an
+	 * approved or recognised person declaring they believe to the best of
+	 * their knowledge that the claim(s) are genuine and true.
+	 */
+	public static final IdentityEvidenceType VOUCH = new IdentityEvidenceType("vouch");
 	
 	
 	/**
@@ -51,8 +75,17 @@ public final class IdentityEvidenceType extends Identifier {
 	
 	
 	/**
-	 * Verification based on a eIDAS Qualified Electronic Signature.
+	 * Verification based on an electronic signature.
 	 */
+	public static final IdentityEvidenceType ELECTRONIC_SIGNATURE = new IdentityEvidenceType("electronic_signature");
+	
+	
+	/**
+	 * Verification based on a eIDAS Qualified Electronic Signature.
+	 *
+	 * @deprecated Use {@link #ELECTRONIC_SIGNATURE} instead.
+	 */
+	@Deprecated
 	public static final IdentityEvidenceType QES = new IdentityEvidenceType("qes");
 	
 	
