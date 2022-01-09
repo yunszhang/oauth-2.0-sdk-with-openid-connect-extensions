@@ -28,8 +28,8 @@ import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
 
 
 /**
- * Minimal verification request. Allows setting of a preferred trust framework
- * for the identity verification. Can be extended with additional setters.
+ * Minimal verification spec. Allows setting of a preferred trust framework for
+ * the identity verification. Can be extended with additional setters.
  *
  * <p>Related specifications:
  *
@@ -38,7 +38,7 @@ import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
  * </ul>
  */
 @Immutable
-public class MinimalVerificationRequest implements VerificationRequest {
+public class MinimalVerificationSpec implements VerificationSpec {
 	
 	
 	/**
@@ -48,34 +48,34 @@ public class MinimalVerificationRequest implements VerificationRequest {
 	
 	
 	/**
-	 * Creates a new minimal verification request with the specified
-	 * JSON object.
+	 * Creates a new minimal verification spec with the specified JSON
+	 * object.
 	 *
 	 * @param jsonObject The JSON object. Must not be {@code null}.
 	 */
-	protected MinimalVerificationRequest(final JSONObject jsonObject) {
+	protected MinimalVerificationSpec(final JSONObject jsonObject) {
 		Objects.requireNonNull(jsonObject);
 		this.jsonObject = jsonObject;
 	}
 	
 	
 	/**
-	 * Creates a new minimal verification request.
+	 * Creates a new minimal verification spec.
 	 */
-	public MinimalVerificationRequest() {
+	public MinimalVerificationSpec() {
 		this(new JSONObject());
 		jsonObject.put("trust_framework", null);
 	}
 	
 	
 	/**
-	 * Creates a new minimal verification request with a preferred trust
+	 * Creates a new minimal verification spec with a preferred trust
 	 * framework.
 	 *
 	 * @param trustFramework The trust framework, {@code null} if not
 	 *                       specified.
 	 */
-	public MinimalVerificationRequest(final IdentityTrustFramework trustFramework) {
+	public MinimalVerificationSpec(final IdentityTrustFramework trustFramework) {
 		this();
 		if (trustFramework != null) {
 			JSONObject spec = new JSONObject();
@@ -95,18 +95,18 @@ public class MinimalVerificationRequest implements VerificationRequest {
 	
 	
 	/**
-	 * Parses a verification request from the specified JSON object
+	 * Parses a verification spec from the specified JSON object
 	 * representation.
 	 *
 	 * @param jsonObject The JSON object. Must not be {@code null}.
 	 *
-	 * @return The verification request.
+	 * @return The verification spec.
 	 *
 	 * @throws ParseException If parsing failed.
 	 */
-	public static MinimalVerificationRequest parse(final JSONObject jsonObject)
+	public static MinimalVerificationSpec parse(final JSONObject jsonObject)
 		throws ParseException {
 		
-		return new MinimalVerificationRequest(jsonObject);
+		return new MinimalVerificationSpec(jsonObject);
 	}
 }

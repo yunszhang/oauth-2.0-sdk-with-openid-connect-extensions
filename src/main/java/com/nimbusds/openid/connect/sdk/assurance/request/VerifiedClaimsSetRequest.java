@@ -19,7 +19,6 @@ package com.nimbusds.openid.connect.sdk.assurance.request;
 
 
 import java.util.Collection;
-import java.util.Objects;
 
 import net.jcip.annotations.Immutable;
 import net.minidev.json.JSONObject;
@@ -67,7 +66,7 @@ public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 	/**
 	 * The verification element.
 	 */
-	private final VerificationRequest verification;
+	private final VerificationSpec verification;
 	
 	
 	/**
@@ -75,7 +74,7 @@ public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 	 */
 	public VerifiedClaimsSetRequest() {
 		super();
-		verification = new MinimalVerificationRequest();
+		verification = new MinimalVerificationSpec();
 	}
 	
 	
@@ -88,7 +87,7 @@ public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 	 *                     {@code null}.
 	 */
 	public VerifiedClaimsSetRequest(final Collection<Entry> entries,
-					final VerificationRequest verification) {
+					final VerificationSpec verification) {
 		super(entries);
 		
 		if (verification == null) {
@@ -104,7 +103,7 @@ public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 	 * @return The {@code verification} element, {@code null} if not
 	 *         specified.
 	 */
-	public VerificationRequest getVerification() {
+	public VerificationSpec getVerification() {
 		return verification;
 	}
 	
@@ -117,7 +116,7 @@ public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 	 *
 	 * @return The updated verified claims set request.
 	 */
-	public VerifiedClaimsSetRequest withVerification(final VerificationRequest verification) {
+	public VerifiedClaimsSetRequest withVerification(final VerificationSpec verification) {
 		return new VerifiedClaimsSetRequest(getEntries(), verification);
 	}
 	
@@ -217,7 +216,7 @@ public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 	public static VerifiedClaimsSetRequest parse(final JSONObject jsonObject)
 		throws ParseException {
 		
-		MinimalVerificationRequest verification = MinimalVerificationRequest.parse(
+		MinimalVerificationSpec verification = MinimalVerificationSpec.parse(
 			JSONObjectUtils.getJSONObject(jsonObject, VerifiedClaimsSet.VERIFICATION_ELEMENT, null)
 		);
 		

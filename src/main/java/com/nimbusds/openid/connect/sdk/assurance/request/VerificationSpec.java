@@ -22,8 +22,8 @@ import net.minidev.json.JSONObject;
 
 
 /**
- * Verification request, intended to represent the {@code verification}
- * sub-element within a {@code verified_claims} element.
+ * The {@code verification} sub-element within an OpenID Connect
+ * {@link VerifiedClaimsSetRequest request for verified claims}.
  *
  * <p>Example:
  *
@@ -51,7 +51,7 @@ import net.minidev.json.JSONObject;
  *     <li>OpenID Connect for Identity Assurance 1.0, section 6.
  * </ul>
  */
-public interface VerificationRequest {
+public interface VerificationSpec {
 	
 	
 	/**

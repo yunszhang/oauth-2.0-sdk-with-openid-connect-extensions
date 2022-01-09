@@ -26,45 +26,45 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
 
 
-public class MinimalVerificationRequestTest extends TestCase {
+public class MinimalVerificationSpecTest extends TestCase {
 
 
 	public void testMinimal()
 		throws ParseException {
 		
-		VerificationRequest request = new MinimalVerificationRequest();
+		VerificationSpec spec = new MinimalVerificationSpec();
 		
-		assertEquals("{\"trust_framework\":null}", request.toJSONObject().toJSONString());
+		assertEquals("{\"trust_framework\":null}", spec.toJSONObject().toJSONString());
 		
-		request = MinimalVerificationRequest.parse(request.toJSONObject());
+		spec = MinimalVerificationSpec.parse(spec.toJSONObject());
 		
-		assertEquals("{\"trust_framework\":null}", request.toJSONObject().toJSONString());
+		assertEquals("{\"trust_framework\":null}", spec.toJSONObject().toJSONString());
 	}
 
 
 	public void testWithTrustFramework_set()
 		throws ParseException {
 		
-		VerificationRequest request = new MinimalVerificationRequest(IdentityTrustFramework.DE_AML);
+		VerificationSpec spec = new MinimalVerificationSpec(IdentityTrustFramework.DE_AML);
 		
-		assertEquals("{\"trust_framework\":{\"value\":\"de_aml\"}}", request.toJSONObject().toJSONString());
+		assertEquals("{\"trust_framework\":{\"value\":\"de_aml\"}}", spec.toJSONObject().toJSONString());
 		
-		request = MinimalVerificationRequest.parse(request.toJSONObject());
+		spec = MinimalVerificationSpec.parse(spec.toJSONObject());
 		
-		assertEquals("{\"trust_framework\":{\"value\":\"de_aml\"}}", request.toJSONObject().toJSONString());
+		assertEquals("{\"trust_framework\":{\"value\":\"de_aml\"}}", spec.toJSONObject().toJSONString());
 	}
 
 
 	public void testWithTrustFramework_null()
 		throws ParseException {
 		
-		MinimalVerificationRequest request = new MinimalVerificationRequest((IdentityTrustFramework) null);
+		MinimalVerificationSpec spec = new MinimalVerificationSpec((IdentityTrustFramework) null);
 		
-		assertEquals("{\"trust_framework\":null}", request.toJSONObject().toJSONString());
+		assertEquals("{\"trust_framework\":null}", spec.toJSONObject().toJSONString());
 		
-		request = MinimalVerificationRequest.parse(request.toJSONObject());
+		spec = MinimalVerificationSpec.parse(spec.toJSONObject());
 		
-		assertEquals("{\"trust_framework\":null}", request.toJSONObject().toJSONString());
+		assertEquals("{\"trust_framework\":null}", spec.toJSONObject().toJSONString());
 	}
 	
 	
@@ -77,15 +77,15 @@ public class MinimalVerificationRequestTest extends TestCase {
 			"\"trust_framework\":{\"values\":[\"silver\",\"bronze\"]}" +
 			"}";
 		
-		MinimalVerificationRequest request = MinimalVerificationRequest.parse(JSONObjectUtils.parse(json));
+		MinimalVerificationSpec spec = MinimalVerificationSpec.parse(JSONObjectUtils.parse(json));
 		
-		assertEquals(json, request.toJSONObject().toJSONString());
+		assertEquals(json, spec.toJSONObject().toJSONString());
 	}
 	
 	
-	static class ExtendedRequest extends MinimalVerificationRequest {
+	static class ExtendedSpec extends MinimalVerificationSpec {
 		
-		public ExtendedRequest(final IdentityTrustFramework framework) {
+		public ExtendedSpec(final IdentityTrustFramework framework) {
 			super(framework);
 		}
 		
@@ -101,7 +101,7 @@ public class MinimalVerificationRequestTest extends TestCase {
 	
 	public void testExtendWithIncludeAttachmentsSetter() throws ParseException {
 		
-		ExtendedRequest ext = new ExtendedRequest(IdentityTrustFramework.DE_AML);
+		ExtendedSpec ext = new ExtendedSpec(IdentityTrustFramework.DE_AML);
 		
 		assertEquals("{\"trust_framework\":{\"value\":\"de_aml\"}}", ext.toJSONObject().toJSONString());
 		

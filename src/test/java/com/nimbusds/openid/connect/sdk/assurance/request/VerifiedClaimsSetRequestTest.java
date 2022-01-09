@@ -44,7 +44,7 @@ public class VerifiedClaimsSetRequestTest extends TestCase {
 		ClaimsSetRequest.Entry en = request.get("name", null);
 		assertEquals("name", en.getClaimName());
 		
-		VerificationRequest verification = new MinimalVerificationRequest(IdentityTrustFramework.EIDAS);
+		VerificationSpec verification = new MinimalVerificationSpec(IdentityTrustFramework.EIDAS);
 		
 		request = request.withVerification(verification);
 		assertEquals(verification, request.getVerification());
@@ -69,7 +69,7 @@ public class VerifiedClaimsSetRequestTest extends TestCase {
 		
 		boolean exceptionDetected = false;
 		try {
-			new VerifiedClaimsSetRequest(null, new MinimalVerificationRequest());
+			new VerifiedClaimsSetRequest(null, new MinimalVerificationSpec());
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("The entries must not be null", e.getMessage());
@@ -98,7 +98,7 @@ public class VerifiedClaimsSetRequestTest extends TestCase {
 		ClaimsSetRequest.Entry entry = new ClaimsSetRequest.Entry("name");
 		Collection<ClaimsSetRequest.Entry> collection = Collections.singletonList(entry);
 		
-		VerificationRequest verificationRequest = new MinimalVerificationRequest();
+		VerificationSpec verificationRequest = new MinimalVerificationSpec();
 		
 		VerifiedClaimsSetRequest request = new VerifiedClaimsSetRequest(collection, verificationRequest);
 		
