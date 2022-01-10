@@ -188,6 +188,22 @@ public class MinimalVerificationSpecTest extends TestCase {
 	}
 	
 	
+	public void testParse_emptyTrustFrameworkValues() {
+		
+		JSONObject jsonObject = new JSONObject();
+		JSONObject tfSpec = new JSONObject();
+		tfSpec.put("values", new JSONArray());
+		jsonObject.put("trust_framework", tfSpec);
+		
+		try {
+			MinimalVerificationSpec.parse(jsonObject);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid trust_framework spec", e.getMessage());
+		}
+	}
+	
+	
 	public void testParse_trustFrameworkValueAndValues() {
 		
 		JSONObject jsonObject = new JSONObject();

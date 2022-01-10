@@ -172,6 +172,11 @@ public class MinimalVerificationSpec implements VerificationSpec {
 			String value = JSONObjectUtils.getString(tfSpec, "value", null);
 			List<String> values = JSONObjectUtils.getStringList(tfSpec, "values", null);
 			if ((value == null && values == null) || (value != null && values != null)) {
+				// Either value or values must be set
+				throw new ParseException("Invalid trust_framework spec");
+			}
+			if (values != null && values.isEmpty()) {
+				// Values must not be empty
 				throw new ParseException("Invalid trust_framework spec");
 			}
 		}
