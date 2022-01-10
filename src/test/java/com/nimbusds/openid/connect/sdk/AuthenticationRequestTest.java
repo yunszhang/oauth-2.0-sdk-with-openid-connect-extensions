@@ -55,7 +55,8 @@ import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
-import com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest;
+import com.nimbusds.openid.connect.sdk.assurance.request.MinimalVerificationSpec;
+import com.nimbusds.openid.connect.sdk.assurance.request.VerifiedClaimsSetRequest;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
 
@@ -2384,12 +2385,50 @@ public class AuthenticationRequestTest extends TestCase {
 	public void testIdentityAssurance_basicExample()
 		throws Exception {
 		
+		OIDCClaimsRequest claimsRequest = new OIDCClaimsRequest()
+			.withUserInfoVerifiedClaimsRequest(
+				new VerifiedClaimsSetRequest()
+				.add("given_name")
+				.add("family_name")
+				.add("address")
+			);
+		
+		CodeVerifier pkceVerifier = new CodeVerifier();
+		
+		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
+			new ResponseType(ResponseType.Value.CODE),
+			new Scope(OIDCScopeValue.OPENID),
+			new ClientID("123"),
+			URI.create("https://example.com/cb"))
+			.state(new State("7a4b68ab-5315-4e25-a10f-0fbfaa36d6c7"))
+			.codeChallenge(pkceVerifier, CodeChallengeMethod.S256)
+			.claims(claimsRequest)
+			.uiLocales(Collections.singletonList(new LangTag("en")))
+			.purpose("Account holder identification")
+			.endpointURI(URI.create("https://c2id.com/authz"))
+			.build();
+		
+		authRequest = AuthenticationRequest.parse(authRequest.toURI());
+		
+		assertEquals(claimsRequest.toJSONObject(), authRequest.getOIDCClaims().toJSONObject());
+		assertEquals(claimsRequest.toJSONObject(), authRequest.getClaims().toJSONObject());
+		
+		assertEquals(Collections.singletonList(new LangTag("en")), authRequest.getUILocales());
+		assertEquals("Account holder identification", authRequest.getPurpose());
+		assertEquals(claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0).getClaimNames(false), authRequest.getOIDCClaims().getUserInfoVerifiedClaimsRequestList().get(0).getClaimNames(false));
+		assertEquals(claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0).getVerificationJSONObject(), authRequest.getOIDCClaims().getUserInfoVerifiedClaimsRequestList().get(0).getVerificationJSONObject());
+	}
+	
+	
+	public void testIdentityAssurance_basicExample_deprecatedAPI()
+		throws Exception {
+		
 		JSONObject verification = new JSONObject();
 		verification.put("trust_framework", null);
 		
 		OIDCClaimsRequest claimsRequest = new OIDCClaimsRequest()
 			.withUserInfoVerifiedClaimsRequest(
-				new VerifiedClaimsSetRequest()
+				new com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest()
 				.add("given_name")
 				.add("family_name")
 				.add("address")
@@ -2426,17 +2465,14 @@ public class AuthenticationRequestTest extends TestCase {
 	public void testIdentityAssurance_verificationElement()
 		throws Exception {
 		
-		JSONObject verification = new JSONObject();
-		verification.put("trust_framework", IdentityTrustFramework.DE_AML.getValue());
-		
 		OIDCClaimsRequest claimsRequest = new OIDCClaimsRequest()
 			.withUserInfoClaimsRequest(new ClaimsSetRequest()
 				.add("family_name")
 			)
 			.withUserInfoVerifiedClaimsRequest(
 				new VerifiedClaimsSetRequest()
+					.withVerification(new MinimalVerificationSpec(IdentityTrustFramework.DE_AML))
 					.add("given_name")
-				.withVerificationJSONObject(verification)
 			);
 		
 		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
