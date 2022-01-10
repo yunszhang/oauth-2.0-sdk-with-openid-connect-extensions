@@ -18,7 +18,10 @@
 package com.nimbusds.openid.connect.sdk.assurance.request;
 
 
+import java.util.Arrays;
+
 import junit.framework.TestCase;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -29,6 +32,7 @@ import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
 public class MinimalVerificationSpecTest extends TestCase {
 
 
+	// default constructor
 	public void testMinimal()
 		throws ParseException {
 		
@@ -40,8 +44,9 @@ public class MinimalVerificationSpecTest extends TestCase {
 		
 		assertEquals("{\"trust_framework\":null}", spec.toJSONObject().toJSONString());
 	}
-
-
+	
+	
+	// IdentityTrustFramework constructor
 	public void testWithTrustFramework_set()
 		throws ParseException {
 		
@@ -53,9 +58,38 @@ public class MinimalVerificationSpecTest extends TestCase {
 		
 		assertEquals("{\"trust_framework\":{\"value\":\"de_aml\"}}", spec.toJSONObject().toJSONString());
 	}
-
-
+	
+	
+	// IdentityTrustFramework constructor
 	public void testWithTrustFramework_null()
+		throws ParseException {
+		
+		MinimalVerificationSpec spec = new MinimalVerificationSpec((IdentityTrustFramework) null);
+		
+		assertEquals("{\"trust_framework\":null}", spec.toJSONObject().toJSONString());
+		
+		spec = MinimalVerificationSpec.parse(spec.toJSONObject());
+		
+		assertEquals("{\"trust_framework\":null}", spec.toJSONObject().toJSONString());
+	}
+	
+	
+	// List<IdentityTrustFramework> constructor
+	public void testWithMultipleTrustFrameworks_set()
+		throws ParseException {
+		
+		VerificationSpec spec = new MinimalVerificationSpec(Arrays.asList(IdentityTrustFramework.DE_AML, IdentityTrustFramework.EIDAS));
+		
+		assertEquals("{\"trust_framework\":{\"values\":[\"de_aml\",\"eidas\"]}}", spec.toJSONObject().toJSONString());
+		
+		spec = MinimalVerificationSpec.parse(spec.toJSONObject());
+		
+		assertEquals("{\"trust_framework\":{\"values\":[\"de_aml\",\"eidas\"]}}", spec.toJSONObject().toJSONString());
+	}
+	
+	
+	// List<IdentityTrustFramework> constructor
+	public void testWithMultipleTrustFrameworks_null()
 		throws ParseException {
 		
 		MinimalVerificationSpec spec = new MinimalVerificationSpec((IdentityTrustFramework) null);
@@ -80,6 +114,128 @@ public class MinimalVerificationSpecTest extends TestCase {
 		MinimalVerificationSpec spec = MinimalVerificationSpec.parse(JSONObjectUtils.parse(json));
 		
 		assertEquals(json, spec.toJSONObject().toJSONString());
+	}
+	
+	
+	public void testParse_emptyJSONObject() {
+		
+		try {
+			MinimalVerificationSpec.parse(new JSONObject());
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing required trust_framework key", e.getMessage());
+		}
+	}
+	
+	
+	public void testParse_missingTrustFrameworkKey() {
+		
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("time", null);
+		
+		try {
+			MinimalVerificationSpec.parse(jsonObject);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing required trust_framework key", e.getMessage());
+		}
+	}
+	
+	
+	public void testParse_emptyTrustFrameworkSpec() {
+		
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("trust_framework", new JSONObject());
+		
+		try {
+			MinimalVerificationSpec.parse(jsonObject);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid trust_framework spec", e.getMessage());
+		}
+	}
+	
+	
+	public void testParse_nullTrustFrameworkValue() {
+		
+		JSONObject jsonObject = new JSONObject();
+		JSONObject tfSpec = new JSONObject();
+		tfSpec.put("value", null);
+		jsonObject.put("trust_framework", tfSpec);
+		
+		try {
+			MinimalVerificationSpec.parse(jsonObject);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid trust_framework spec", e.getMessage());
+		}
+	}
+	
+	
+	public void testParse_nullTrustFrameworkValues() {
+		
+		JSONObject jsonObject = new JSONObject();
+		JSONObject tfSpec = new JSONObject();
+		tfSpec.put("values", null);
+		jsonObject.put("trust_framework", tfSpec);
+		
+		try {
+			MinimalVerificationSpec.parse(jsonObject);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid trust_framework spec", e.getMessage());
+		}
+	}
+	
+	
+	public void testParse_trustFrameworkValueAndValues() {
+		
+		JSONObject jsonObject = new JSONObject();
+		JSONObject tfSpec = new JSONObject();
+		tfSpec.put("value", IdentityTrustFramework.EIDAS.getValue());
+		JSONArray tfValues = new JSONArray();
+		tfValues.add(IdentityTrustFramework.EIDAS.getValue());
+		tfValues.add(IdentityTrustFramework.DE_AML.getValue());
+		tfSpec.put("values", tfValues);
+		jsonObject.put("trust_framework", tfSpec);
+		
+		try {
+			MinimalVerificationSpec.parse(jsonObject);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid trust_framework spec", e.getMessage());
+		}
+	}
+	
+	
+	public void testParse_trustFramework_value()
+		throws ParseException {
+		
+		JSONObject jsonObject = new JSONObject();
+		JSONObject tfSpec = new JSONObject();
+		tfSpec.put("value", IdentityTrustFramework.DE_AML.getValue());
+		jsonObject.put("trust_framework", tfSpec);
+		
+		MinimalVerificationSpec spec = MinimalVerificationSpec.parse(jsonObject);
+		
+		assertEquals("{\"trust_framework\":{\"value\":\"de_aml\"}}", spec.toJSONObject().toJSONString());
+	}
+	
+	
+	public void testParse_trustFramework_twoValues()
+		throws ParseException {
+		
+		JSONObject jsonObject = new JSONObject();
+		JSONObject tfSpec = new JSONObject();
+		JSONArray tfValues = new JSONArray();
+		tfValues.add(IdentityTrustFramework.DE_AML.getValue());
+		tfValues.add(IdentityTrustFramework.EIDAS.getValue());
+		tfSpec.put("values", tfValues);
+		jsonObject.put("trust_framework", tfSpec);
+		
+		MinimalVerificationSpec spec = MinimalVerificationSpec.parse(jsonObject);
+		
+		assertEquals("{\"trust_framework\":{\"values\":[\"de_aml\",\"eidas\"]}}", spec.toJSONObject().toJSONString());
 	}
 	
 	

@@ -18,18 +18,50 @@
 package com.nimbusds.openid.connect.sdk.assurance.request;
 
 
+import java.util.List;
 import java.util.Objects;
 
 import net.jcip.annotations.Immutable;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
 
 
 /**
  * Minimal verification spec. Allows setting of a preferred trust framework for
  * the identity verification. Can be extended with additional setters.
+ *
+ * <p>Default verification example:
+ *
+ * <pre>
+ * {
+ *   "trust_framework": null
+ * }
+ * </pre>
+ *
+ * <p>Verification example with preferred trust framework:
+ *
+ * <pre>
+ * {
+ *   "trust_framework": {
+ *      "value" : "eidas"
+ *   }
+ * }
+ * </pre>
+ *
+ * <p>Verification example with list of two preferred trust frameworks:
+ *
+ * <pre>
+ * {
+ *   "trust_framework": {
+ *      "values" : [ "eidas", "de_aml" ]
+ *   }
+ * }
+ * </pre>
  *
  * <p>Related specifications:
  *
@@ -78,9 +110,32 @@ public class MinimalVerificationSpec implements VerificationSpec {
 	public MinimalVerificationSpec(final IdentityTrustFramework trustFramework) {
 		this();
 		if (trustFramework != null) {
-			JSONObject spec = new JSONObject();
-			spec.put("value", trustFramework.getValue());
-			jsonObject.put("trust_framework", spec);
+			JSONObject tfSpec = new JSONObject();
+			tfSpec.put("value", trustFramework.getValue());
+			jsonObject.put("trust_framework", tfSpec);
+		}
+	}
+	
+	
+	/**
+	 * Creates a new minimal verification spec with a list of preferred
+	 * trust frameworks.
+	 *
+	 * @param trustFrameworks The trust frameworks, {@code null} if not
+	 *                        specified.
+	 */
+	public MinimalVerificationSpec(final List<IdentityTrustFramework> trustFrameworks) {
+		this();
+		if (CollectionUtils.isNotEmpty(trustFrameworks)) {
+			JSONObject tfSpec = new JSONObject();
+			JSONArray tfValues = new JSONArray();
+			for (IdentityTrustFramework tf: trustFrameworks) {
+				if (tf != null) {
+					tfValues.add(tf.getValue());
+				}
+			}
+			tfSpec.put("values", tfValues);
+			jsonObject.put("trust_framework", tfSpec);
 		}
 	}
 	
@@ -106,6 +161,20 @@ public class MinimalVerificationSpec implements VerificationSpec {
 	 */
 	public static MinimalVerificationSpec parse(final JSONObject jsonObject)
 		throws ParseException {
+		
+		// Verify the trust_framework element
+		if (! jsonObject.containsKey("trust_framework")) {
+			throw new ParseException("Missing required trust_framework key");
+		}
+		
+		if (jsonObject.get("trust_framework") != null) {
+			JSONObject tfSpec = JSONObjectUtils.getJSONObject(jsonObject, "trust_framework");
+			String value = JSONObjectUtils.getString(tfSpec, "value", null);
+			List<String> values = JSONObjectUtils.getStringList(tfSpec, "values", null);
+			if ((value == null && values == null) || (value != null && values != null)) {
+				throw new ParseException("Invalid trust_framework spec");
+			}
+		}
 		
 		return new MinimalVerificationSpec(jsonObject);
 	}
