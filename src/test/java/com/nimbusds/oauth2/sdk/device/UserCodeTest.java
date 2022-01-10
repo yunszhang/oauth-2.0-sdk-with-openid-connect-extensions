@@ -17,11 +17,10 @@
 
 package com.nimbusds.oauth2.sdk.device;
 
+import static org.junit.Assert.assertNotEquals;
+
 import junit.framework.TestCase;
 
-/**
- * Tests generation and comparison of user codes
- */
 public class UserCodeTest extends TestCase {
 
 	public void testValueConstructor() {
@@ -69,8 +68,8 @@ public class UserCodeTest extends TestCase {
 		UserCode c1 = new UserCode("abc", UserCode.LETTER_CHAR_SET);
 
 		UserCode c2 = new UserCode("abc", UserCode.LETTER_CHAR_SET);
-
-		assertTrue(c1.equals(c2));
+		
+		assertEquals(c1, c2);
 	}
 
 
@@ -79,8 +78,8 @@ public class UserCodeTest extends TestCase {
 		UserCode c1 = new UserCode("abc-def", UserCode.LETTER_CHAR_SET);
 
 		UserCode c2 = new UserCode("1ABCDEF8", UserCode.LETTER_CHAR_SET);
-
-		assertTrue(c1.equals(c2));
+		
+		assertEquals(c1, c2);
 	}
 
 
@@ -89,16 +88,16 @@ public class UserCodeTest extends TestCase {
 		UserCode c1 = new UserCode("abc", UserCode.LETTER_CHAR_SET);
 
 		UserCode c2 = new UserCode("def", UserCode.LETTER_CHAR_SET);
-
-		assertFalse(c1.equals(c2));
+		
+		assertNotEquals(c1, c2);
 	}
 
 
 	public void testInequalityNull() {
 
 		UserCode c1 = new UserCode("abc", UserCode.LETTER_CHAR_SET);
-
-		assertFalse(c1.equals(null));
+		
+		assertNotEquals(null, c1);
 	}
 
 
@@ -116,7 +115,7 @@ public class UserCodeTest extends TestCase {
 
 		UserCode code = new UserCode();
 
-		System.out.println("Random user code (default length): " + code);
+//		System.out.println("Random user code (default length): " + code);
 
 		assertEquals(8 + 1, code.toString().length());
 		assertEquals(8, code.getStrippedValue().length());
@@ -127,7 +126,7 @@ public class UserCodeTest extends TestCase {
 
 		UserCode code = new UserCode(UserCode.DIGIT_CHAR_SET, 16);
 
-		System.out.println("Random user code (16 char length): " + code);
+//		System.out.println("Random user code (16 char length): " + code);
 
 		assertEquals(16 + 3, code.toString().length());
 		assertEquals(16, code.getStrippedValue().length());
@@ -140,7 +139,7 @@ public class UserCodeTest extends TestCase {
 
 		String json = code.toJSONString();
 
-		System.out.println("\"user_code\":" + json);
+//		System.out.println("\"user_code\":" + json);
 
 		assertEquals("\"abc\"", json);
 	}

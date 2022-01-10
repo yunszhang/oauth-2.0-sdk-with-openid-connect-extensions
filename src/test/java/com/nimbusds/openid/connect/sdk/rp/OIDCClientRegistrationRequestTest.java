@@ -46,9 +46,6 @@ import com.nimbusds.openid.connect.sdk.SubjectType;
 
 
 
-/**
- * Tests the OIDC client registration class.
- */
 public class OIDCClientRegistrationRequestTest extends TestCase {
 	
 	
@@ -87,7 +84,7 @@ public class OIDCClientRegistrationRequestTest extends TestCase {
 		assertEquals(HTTPRequest.Method.POST, httpRequest.getMethod());
 		assertEquals(ContentType.APPLICATION_JSON.toString(), httpRequest.getEntityContentType().toString());
 		
-		System.out.println(httpRequest.getQuery());
+		assertNotNull(httpRequest.getQuery());
 		
 		request = OIDCClientRegistrationRequest.parse(httpRequest);
 		

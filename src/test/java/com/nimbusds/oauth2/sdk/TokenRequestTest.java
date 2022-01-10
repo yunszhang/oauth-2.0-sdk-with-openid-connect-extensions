@@ -1459,7 +1459,7 @@ public class TokenRequestTest extends TestCase {
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
 
-		System.out.println(httpRequest.getQuery());
+//		System.out.println(httpRequest.getQuery());
 		assertEquals(Collections.singletonList("client_credentials"), httpRequest.getQueryParameters().get("grant_type"));
 		assertEquals(Collections.singletonList("read write"), httpRequest.getQueryParameters().get("scope"));
 		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), httpRequest.getQueryParameters().get("data"));
@@ -1485,7 +1485,7 @@ public class TokenRequestTest extends TestCase {
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
 
-		System.out.println(httpRequest.getQuery());
+//		System.out.println(httpRequest.getQuery());
 		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), httpRequest.getQueryParameters().get("data"));
 
 		request = TokenRequest.parse(httpRequest);
@@ -1508,12 +1508,12 @@ public class TokenRequestTest extends TestCase {
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
 
-		System.out.println(httpRequest.getQuery());
+//		System.out.println(httpRequest.getQuery());
 		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), httpRequest.getQueryParameters().get("data"));
 
 		request = TokenRequest.parse(httpRequest);
 		assertEquals(Collections.singletonList("http://xxxxxx/PartyOData"), request.getCustomParameter("data"));
-		System.out.println(request.getCustomParameters());
+//		System.out.println(request.getCustomParameters());
 		assertEquals(1, request.getCustomParameters().size());
 	}
 	

@@ -82,9 +82,9 @@ public class CIBAExampleTest {
 		
 		// Successful registration
 		OIDCClientInformation clientInfo = (OIDCClientInformation) regResponse.toSuccessResponse().getClientInformation();
-		System.out.println("Client ID: " + clientInfo.getID());
-		System.out.println("Client registration token: " + clientInfo.getRegistrationAccessToken());
-		System.out.println("Client metadata: " + clientInfo.getOIDCMetadata());
+//		System.out.println("Client ID: " + clientInfo.getID());
+//		System.out.println("Client registration token: " + clientInfo.getRegistrationAccessToken());
+//		System.out.println("Client metadata: " + clientInfo.getOIDCMetadata());
 		
 		
 		// CIBA request

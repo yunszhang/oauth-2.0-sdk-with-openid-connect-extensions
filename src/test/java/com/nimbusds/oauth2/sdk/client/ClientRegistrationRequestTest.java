@@ -44,9 +44,6 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 
 
-/**
- * Tests the client registration request class.
- */
 public class ClientRegistrationRequestTest extends TestCase {
 
 
@@ -72,7 +69,7 @@ public class ClientRegistrationRequestTest extends TestCase {
 
 		JSONObject jsonObject = httpRequest.getQueryAsJSONObject();
 
-		System.out.println(jsonObject);
+//		System.out.println(jsonObject);
 
 		List<String> stringList = (List<String>)jsonObject.get("redirect_uris");
 		assertEquals(metadata.getRedirectionURIs().iterator().next().toString(), stringList.get(0));

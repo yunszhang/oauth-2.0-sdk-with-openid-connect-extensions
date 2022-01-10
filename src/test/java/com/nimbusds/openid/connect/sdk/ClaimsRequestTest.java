@@ -104,7 +104,7 @@ public class ClaimsRequestTest extends TestCase {
 
 		ClaimsRequest cr = ClaimsRequest.resolve(ResponseType.parse("code"), scope);
 
-		System.out.println("Claims request for scope openid: " + cr.toJSONObject());
+//		System.out.println("Claims request for scope openid: " + cr.toJSONObject());
 
 		assertTrue(cr.getIDTokenClaims().isEmpty());
 		assertTrue(cr.getUserInfoClaims().isEmpty());
@@ -118,7 +118,7 @@ public class ClaimsRequestTest extends TestCase {
 
 		ClaimsRequest cr = ClaimsRequest.resolve(ResponseType.parse("code"), scope);
 
-		System.out.println("Claims request for scope openid email profile phone address: " + cr.toJSONObject());
+//		System.out.println("Claims request for scope openid email profile phone address: " + cr.toJSONObject());
 
 		assertTrue(cr.getIDTokenClaims().isEmpty());
 
@@ -185,7 +185,7 @@ public class ClaimsRequestTest extends TestCase {
 
 		ClaimsRequest cr = ClaimsRequest.resolve(ResponseType.parse("id_token"), scope);
 
-		System.out.println("Claims request for scope openid email profile phone address: " + cr.toJSONObject());
+//		System.out.println("Claims request for scope openid email profile phone address: " + cr.toJSONObject());
 		assertTrue(cr.getUserInfoClaims().isEmpty());
 
 		Collection<ClaimsRequest.Entry> idTokenClaims = cr.getIDTokenClaims();
@@ -274,7 +274,7 @@ public class ClaimsRequestTest extends TestCase {
 
 		ClaimsRequest cr = ClaimsRequest.resolve(ResponseType.parse("code"), scope);
 
-		System.out.println("Claims request for scope openid profile: " + cr.toJSONObject());
+//		System.out.println("Claims request for scope openid profile: " + cr.toJSONObject());
 
 		assertTrue(cr.getIDTokenClaims().isEmpty());
 
@@ -302,7 +302,7 @@ public class ClaimsRequestTest extends TestCase {
 		addon.addUserInfoClaim("email", ClaimRequirement.ESSENTIAL);
 		addon.addUserInfoClaim("email_verified", ClaimRequirement.ESSENTIAL);
 
-		System.out.println("Essential claims request: " + addon.toJSONObject());
+//		System.out.println("Essential claims request: " + addon.toJSONObject());
 
 		cr.add(addon);
 

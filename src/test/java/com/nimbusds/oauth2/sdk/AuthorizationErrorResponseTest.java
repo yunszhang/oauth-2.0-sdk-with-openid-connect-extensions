@@ -97,7 +97,7 @@ public class AuthorizationErrorResponseTest extends TestCase {
 
 		URI location = r.toURI();
 			
-		System.out.println(location.toString());
+//		System.out.println(location.toString());
 		assertNull(location.getFragment());
 		assertNotNull(location.getQuery());
 			

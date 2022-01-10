@@ -174,7 +174,7 @@ public class SIVAESBasedPairwiseSubjectCodecTest extends TestCase {
 			Subject localSubject = new Subject(subByteLen);
 			
 			Subject pairWiseSubject = codec.encode(new SectorID("example.com"), localSubject);
-			System.out.println(pairWiseSubject);
+//			System.out.println(pairWiseSubject);
 			assertEquals(localSubject, codec.decode(pairWiseSubject).getValue());
 		}
 	}

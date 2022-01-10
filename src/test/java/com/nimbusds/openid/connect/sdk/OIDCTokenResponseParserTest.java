@@ -105,7 +105,7 @@ public class OIDCTokenResponseParserTest extends TestCase {
 		
 		HTTPResponse httpResponse = response.toHTTPResponse();
 		
-		System.out.println(httpResponse.getContent());
+//		System.out.println(httpResponse.getContent());
 		
 		TokenResponse tokenResponse = OIDCTokenResponseParser.parse(httpResponse);
 		

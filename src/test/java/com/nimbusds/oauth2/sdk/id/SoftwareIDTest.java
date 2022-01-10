@@ -18,6 +18,8 @@
 package com.nimbusds.oauth2.sdk.id;
 
 
+import java.util.UUID;
+
 import junit.framework.TestCase;
 
 
@@ -30,9 +32,11 @@ public class SoftwareIDTest extends TestCase {
 	public void testGenerateAndCompare() {
 
 		SoftwareID id = new SoftwareID();
-
-		System.out.println("Generated software ID: " + id);
-
-		assertTrue(new SoftwareID(id.getValue()).equals(id));
+		
+		UUID uuid = UUID.fromString(id.getValue());
+		
+//		System.out.println("Generated software ID as UUID: " + uuid);
+		
+		assertEquals(new SoftwareID(id.getValue()), id);
 	}
 }

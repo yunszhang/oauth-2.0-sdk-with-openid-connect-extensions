@@ -18,14 +18,13 @@
 package com.nimbusds.oauth2.sdk.id;
 
 
+import static org.junit.Assert.assertNotEquals;
+
 import junit.framework.TestCase;
 
 import com.nimbusds.jose.util.Base64;
 
 
-/**
- * Tests random state value generation.
- */
 public class StateTest extends TestCase {
 	
 
@@ -59,8 +58,8 @@ public class StateTest extends TestCase {
 		State s1 = new State("abc");
 
 		State s2 = new State("abc");
-
-		assertTrue(s1.equals(s2));
+		
+		assertEquals(s1, s2);
 	}
 
 
@@ -69,16 +68,16 @@ public class StateTest extends TestCase {
 		State s1 = new State("abc");
 
 		State s2 = new State("def");
-
-		assertFalse(s1.equals(s2));
+		
+		assertNotEquals(s1, s2);
 	}
 
 
 	public void testInequalityNull() {
 
 		State s1 = new State("abc");
-
-		assertFalse(s1.equals(null));
+		
+		assertNotEquals(null, s1);
 	}
 
 
@@ -96,7 +95,7 @@ public class StateTest extends TestCase {
 		
 		State state = new State();
 		
-		System.out.println("Random state (default byte length): " + state);
+//		System.out.println("Random state (default byte length): " + state);
 		
 		assertEquals(Identifier.DEFAULT_BYTE_LENGTH, new Base64(state.toString()).decode().length);
 	}
@@ -106,7 +105,7 @@ public class StateTest extends TestCase {
 	
 		State state = new State(16);
 		
-		System.out.println("Random state (16 byte length): " + state);
+//		System.out.println("Random state (16 byte length): " + state);
 		
 		assertEquals(16, new Base64(state.toString()).decode().length);
 	}
@@ -118,7 +117,7 @@ public class StateTest extends TestCase {
 
 		String json = state.toJSONString();
 
-		System.out.println("\"state\":" + json);
+//		System.out.println("\"state\":" + json);
 
 		assertEquals("\"abc\"", json);
 	}

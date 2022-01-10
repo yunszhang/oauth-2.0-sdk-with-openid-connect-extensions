@@ -49,7 +49,7 @@ public class HashBasedPairwiseSubjectCodecTest extends TestCase {
 		Subject localSubject = new Subject("alice");
 
 		Subject pairwiseSubject = codec.encode(sectorID, localSubject);
-		System.out.println("Pairwise subject: " + pairwiseSubject);
+//		System.out.println("Pairwise subject: " + pairwiseSubject);
 		assertEquals(256, new Base64URL(pairwiseSubject.getValue()).decode().length * 8);
 	}
 
@@ -69,7 +69,7 @@ public class HashBasedPairwiseSubjectCodecTest extends TestCase {
 		Subject localSubject = new Subject("alice");
 
 		Subject pairwiseSubject = codec.encode(sectorID, localSubject);
-		System.out.println("Pairwise subject: " + pairwiseSubject);
+//		System.out.println("Pairwise subject: " + pairwiseSubject);
 		assertEquals(256, new Base64URL(pairwiseSubject.getValue()).decode().length * 8);
 	}
 
@@ -113,7 +113,7 @@ public class HashBasedPairwiseSubjectCodecTest extends TestCase {
 		Subject localSubject = new Subject("alice");
 
 		Subject pairwiseSubject = codec.encode(sectorID, localSubject);
-		System.out.println("Pairwise subject: " + pairwiseSubject);
+//		System.out.println("Pairwise subject: " + pairwiseSubject);
 		assertEquals(256, new Base64URL(pairwiseSubject.getValue()).decode().length * 8);
 	}
 

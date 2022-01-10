@@ -102,7 +102,7 @@ public class JSONArrayUtilsTest extends TestCase {
 		jsonArray.add("a b c");
 
 		try {
-			System.out.println(JSONArrayUtils.toURIList(jsonArray));
+			JSONArrayUtils.toURIList(jsonArray);
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Illegal URI: Illegal character in path at index 1: a b c", e.getMessage());

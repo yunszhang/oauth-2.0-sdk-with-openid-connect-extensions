@@ -106,7 +106,7 @@ public class AuthorizationRequestTest extends TestCase {
 
 		String query = req.toQueryString();
 
-		System.out.println("Authorization query: " + query);
+//		System.out.println("Authorization query: " + query);
 
 		Map<String,List<String>> params = URLUtils.parseParameters(query);
 		assertEquals(Collections.singletonList("code"), params.get("response_type"));
@@ -250,7 +250,7 @@ public class AuthorizationRequestTest extends TestCase {
 
 		String query = req.toQueryString();
 
-		System.out.println("Authorization query: " + query);
+//		System.out.println("Authorization query: " + query);
 
 		Map<String,List<String>> params = URLUtils.parseParameters(query);
 

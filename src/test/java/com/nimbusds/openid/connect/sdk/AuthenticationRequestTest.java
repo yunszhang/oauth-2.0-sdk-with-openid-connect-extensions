@@ -423,7 +423,7 @@ public class AuthenticationRequestTest extends TestCase {
 		// Check the resulting query string
 		String queryString = request.toQueryString();
 
-		System.out.println("OIDC login query string: " + queryString);
+//		System.out.println("OIDC login query string: " + queryString);
 
 		request = AuthenticationRequest.parse(uri, queryString);
 
@@ -679,7 +679,7 @@ public class AuthenticationRequestTest extends TestCase {
 
 		claimsOut = request.getClaims();
 
-		System.out.println("OIDC login request claims: " + claimsOut.toJSONObject().toString());
+//		System.out.println("OIDC login request claims: " + claimsOut.toJSONObject().toString());
 
 		assertEquals(2, claimsOut.getUserInfoClaims().size());
 
@@ -797,7 +797,7 @@ public class AuthenticationRequestTest extends TestCase {
 
 		ClaimsRequest claimsOut = request.getClaims();
 
-		System.out.println("OIDC login request claims: " + claimsOut.toJSONObject().toString());
+//		System.out.println("OIDC login request claims: " + claimsOut.toJSONObject().toString());
 
 		assertEquals(2, claimsOut.getUserInfoClaims().size());
 
@@ -807,7 +807,7 @@ public class AuthenticationRequestTest extends TestCase {
 		// Check the resulting query string
 		String queryString = request.toQueryString();
 
-		System.out.println("OIDC login query string: " + queryString);
+//		System.out.println("OIDC login query string: " + queryString);
 
 
 		request = AuthenticationRequest.parse(uri, queryString);
@@ -865,7 +865,7 @@ public class AuthenticationRequestTest extends TestCase {
 
 		claimsOut = request.getClaims();
 
-		System.out.println("OIDC login request claims: " + claimsOut.toJSONObject().toString());
+//		System.out.println("OIDC login request claims: " + claimsOut.toJSONObject().toString());
 
 		assertEquals(2, claimsOut.getUserInfoClaims().size());
 
@@ -1601,7 +1601,7 @@ public class AuthenticationRequestTest extends TestCase {
 			.build()
 			.toURI();
 		
-		System.out.println(authRequest);
+//		System.out.println(authRequest);
 		
 		Base64URL fragment = Base64URL.encode(MessageDigest.getInstance("SHA-256").digest(jwtString.getBytes(Charset.forName("UTF-8"))));
 		
@@ -1619,7 +1619,7 @@ public class AuthenticationRequestTest extends TestCase {
 			.build()
 			.toURI();
 		
-		System.out.println(authRequest);
+//		System.out.println(authRequest);
 	}
 	
 	
@@ -2481,7 +2481,7 @@ public class AuthenticationRequestTest extends TestCase {
 			.endpointURI(URI.create("https://c2id.com/authz"))
 			.build();
 		
-		System.out.println(authRequest.toURI());
+//		System.out.println(authRequest.toURI());
 		
 		authRequest = AuthenticationRequest.parse(authRequest.toURI());
 		

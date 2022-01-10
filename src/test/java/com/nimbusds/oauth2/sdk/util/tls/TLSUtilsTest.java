@@ -27,6 +27,7 @@ import java.util.List;
 import javax.net.ssl.SSLSocketFactory;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
@@ -54,7 +55,7 @@ public class TLSUtilsTest {
 		certChain.remove(0); // remove site cert for c2id.net
 		
 		for (X509Certificate c: certChain) {
-			System.out.println(c.getSubjectDN());
+			assertNotNull(c.getSubjectDN());
 		}
 		
 		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -84,7 +85,7 @@ public class TLSUtilsTest {
 		certChain.remove(1); // remove root cert
 		
 		for (X509Certificate c: certChain) {
-			System.out.println(c.getSubjectDN());
+			assertNotNull(c.getSubjectDN());
 		}
 		
 		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());

@@ -93,7 +93,7 @@ public class ISO3166_1CountryCodeResourcesTest extends TestCase {
 		
 		for (String code2: codes2.stringPropertyNames()) {
 			String countryName = codes2.getProperty(code2);
-			System.out.println(code2 + ": " + countryName);
+			assertNotNull(countryName);
 			assertTrue(codes3.containsValue(countryName));
 		}
 	}

@@ -21,12 +21,11 @@ package com.nimbusds.oauth2.sdk;
 import java.util.Collection;
 import java.util.List;
 
+import static org.junit.Assert.assertNotEquals;
+
 import junit.framework.TestCase;
 
 
-/**
- * Tests the scope class.
- */
 public class ScopeTest extends TestCase {
 
 
@@ -84,7 +83,7 @@ public class ScopeTest extends TestCase {
 
 		String out = scope.toString();
 
-		System.out.println("Scope: " + out);
+//		System.out.println("Scope: " + out);
 		
 		assertEquals("read write", out);
 
@@ -93,8 +92,8 @@ public class ScopeTest extends TestCase {
 		assertTrue(scope.contains(new Scope.Value("read")));
 		assertTrue(scope.contains(new Scope.Value("write")));
 		assertEquals(2, scopeParsed.size());
-
-		assertTrue(scope.equals(scopeParsed));
+		
+		assertEquals(scope, scopeParsed);
 	}
 	
 	
@@ -116,8 +115,8 @@ public class ScopeTest extends TestCase {
 
 		Scope s1 = Scope.parse("read");
 		Scope s2 = Scope.parse("write");
-
-		assertFalse(s1.equals(s2));
+		
+		assertNotEquals(s1, s2);
 	}
 
 

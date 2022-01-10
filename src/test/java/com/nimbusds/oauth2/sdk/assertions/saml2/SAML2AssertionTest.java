@@ -268,10 +268,10 @@ public class SAML2AssertionTest extends TestCase {
 
 		assertFalse(xml.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
 
-		System.out.println(SerializeSupport.prettyPrintXML(SAML2AssertionFactory.createAsElement(
-			details,
-			SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256,
-			credential)));
+//		System.out.println(SerializeSupport.prettyPrintXML(SAML2AssertionFactory.createAsElement(
+//			details,
+//			SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256,
+//			credential)));
 
 		// Parse back
 		SAML2AssertionDetailsVerifier detailsVerifier = new SAML2AssertionDetailsVerifier(new HashSet<>(Collections.singletonList(new Audience("https://c2id.com/token"))));
