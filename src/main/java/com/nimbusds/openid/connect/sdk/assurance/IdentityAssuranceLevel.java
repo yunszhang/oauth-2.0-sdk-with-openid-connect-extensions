@@ -46,7 +46,8 @@ public final class IdentityAssuranceLevel extends Identifier {
 	
 	
 	/**
-	 * Low confidence/assurance in the identity. Used in eIDAS & UK TFIDA.
+	 * Low confidence/assurance in the identity. Used in eIDAS &amp; UK
+	 * TFIDA.
 	 */
 	public static final IdentityAssuranceLevel LOW = new IdentityAssuranceLevel("low");
 	
@@ -64,7 +65,8 @@ public final class IdentityAssuranceLevel extends Identifier {
 	
 	
 	/**
-	 * High confidence/assurance in the identity. Used in eIDAS & UK TFIDA.
+	 * High confidence/assurance in the identity. Used in eIDAS &amp; UK
+	 * TFIDA.
 	 */
 	public static final IdentityAssuranceLevel HIGH = new IdentityAssuranceLevel("high");
 	
