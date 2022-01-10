@@ -26,6 +26,7 @@ import net.minidev.json.JSONObject;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.oauth2.sdk.util.MapUtils;
 import com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSet;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
 
@@ -70,7 +71,9 @@ public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 	
 	
 	/**
-	 * Creates a new empty OpenID Connect verified claims set request.
+	 * Creates a new OpenID Connect verified claims set request specifying
+	 * the default {@link MinimalVerificationSpec minimal verification}
+	 * and no claims.
 	 */
 	public VerifiedClaimsSetRequest() {
 		super();
@@ -168,7 +171,7 @@ public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 	 * }
 	 * </pre>
 	 *
-	 * @return The JSON object, empty if no claims are specified.
+	 * @return The JSON object.
 	 */
 	@Override
 	public JSONObject toJSONObject() {
@@ -178,10 +181,10 @@ public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 		o.put(VerifiedClaimsSet.VERIFICATION_ELEMENT, getVerification().toJSONObject());
 		
 		JSONObject claims = super.toJSONObject();
-		
-		if (claims != null && ! claims.isEmpty()) {
-			o.put(VerifiedClaimsSet.CLAIMS_ELEMENT, claims);
+		if (MapUtils.isEmpty(claims)) {
+			throw new IllegalStateException("Empty verified claims object");
 		}
+		o.put(VerifiedClaimsSet.CLAIMS_ELEMENT, claims);
 		
 		return o;
 	}
@@ -217,11 +220,10 @@ public class VerifiedClaimsSetRequest extends ClaimsSetRequest {
 		throws ParseException {
 		
 		MinimalVerificationSpec verification = MinimalVerificationSpec.parse(
-			JSONObjectUtils.getJSONObject(jsonObject, VerifiedClaimsSet.VERIFICATION_ELEMENT, null)
+			JSONObjectUtils.getJSONObject(jsonObject, VerifiedClaimsSet.VERIFICATION_ELEMENT)
 		);
 		
 		JSONObject claimsJSONObject = JSONObjectUtils.getJSONObject(jsonObject, VerifiedClaimsSet.CLAIMS_ELEMENT, new JSONObject());
-		
 		if (claimsJSONObject.isEmpty()) {
 			throw new ParseException("Empty verified claims object");
 		}

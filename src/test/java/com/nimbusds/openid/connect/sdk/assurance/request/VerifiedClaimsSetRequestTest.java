@@ -34,7 +34,8 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
 public class VerifiedClaimsSetRequestTest extends TestCase {
 
 
-	public void testDefaultConstructor() throws ParseException {
+	public void testDefaultConstructor() 
+		throws ParseException {
 		
 		VerifiedClaimsSetRequest request = new VerifiedClaimsSetRequest();
 		assertTrue(request.getEntries().isEmpty());
@@ -62,6 +63,17 @@ public class VerifiedClaimsSetRequestTest extends TestCase {
 		
 		VerifiedClaimsSetRequest parsed = VerifiedClaimsSetRequest.parse(jsonObject.toJSONString());
 		assertEquals(jsonObject, parsed.toJSONObject());
+	}
+
+
+	public void testToJSONObject_illegalStateExceptionOnMissingClaims() {
+		
+		try {
+			new VerifiedClaimsSetRequest().toJSONObject();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Empty verified claims object", e.getMessage());
+		}
 	}
 	
 	
@@ -93,7 +105,8 @@ public class VerifiedClaimsSetRequestTest extends TestCase {
 	}
 	
 	
-	public void testParamConstructor() throws ParseException {
+	public void testParamConstructor() 
+		throws ParseException {
 		
 		ClaimsSetRequest.Entry entry = new ClaimsSetRequest.Entry("name");
 		Collection<ClaimsSetRequest.Entry> collection = Collections.singletonList(entry);
@@ -161,9 +174,30 @@ public class VerifiedClaimsSetRequestTest extends TestCase {
 	}
 	
 	
+	public void testParse_rejectInvalidVerificationObject() {
+		
+		String json =
+			"{" +
+			"   \"verification\": {" +
+			"      \"trust_framework\": {}" +
+			"   }," +
+			"   \"claims\": {\"email\": null}" +
+			"}";
+		
+		try {
+			VerifiedClaimsSetRequest.parse(json);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid trust_framework spec", e.getMessage());
+			assertNull(e.getErrorObject());
+		}
+	}
+	
+	
 	public void testParse_rejectEmptyClaimsObject() {
 		
-		String json = "{" +
+		String json =
+			"{" +
 			"   \"verification\": {" +
 			"      \"trust_framework\": null" +
 			"   }," +
@@ -182,15 +216,16 @@ public class VerifiedClaimsSetRequestTest extends TestCase {
 	
 	public void testParseExample() throws ParseException {
 		
-		String json = "{\n" +
-			"   \"verification\": {\n" +
-			"      \"trust_framework\": null\n" +
-			"   },\n" +
-			"   \"claims\":{\n" +
-			"      \"given_name\":null,\n" +
-			"      \"family_name\":null,\n" +
-			"      \"birthdate\":null\n" +
-			"   }\n" +
+		String json =
+			"{" +
+			"   \"verification\": {" +
+			"      \"trust_framework\": null" +
+			"   }," +
+			"   \"claims\":{" +
+			"      \"given_name\":null," +
+			"      \"family_name\":null," +
+			"      \"birthdate\":null" +
+			"   }" +
 			"}";
 		
 		VerifiedClaimsSetRequest request = VerifiedClaimsSetRequest.parse(json);
