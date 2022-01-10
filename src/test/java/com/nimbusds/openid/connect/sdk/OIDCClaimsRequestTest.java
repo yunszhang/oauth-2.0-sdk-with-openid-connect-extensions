@@ -34,9 +34,10 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
-import com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest;
+import com.nimbusds.openid.connect.sdk.assurance.request.MinimalVerificationSpec;
+import com.nimbusds.openid.connect.sdk.assurance.request.VerificationSpec;
+import com.nimbusds.openid.connect.sdk.assurance.request.VerifiedClaimsSetRequest;
 import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
-import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
 
 
@@ -522,8 +523,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		assertEquals("auth_time", entry.getClaimName());
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
-		assertNull(entry.getValue());
-		assertNull(entry.getValues());
+		assertNull(entry.getRawValue());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
 
@@ -531,7 +531,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		assertEquals("acr", entry.getClaimName());
 		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
-		assertNull(entry.getValue());
+		assertNull(entry.getValueAsString());
 		assertEquals(Collections.singletonList("urn:mace:incommon:iap:silver"), entry.getValuesAsListOfStrings());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
@@ -551,8 +551,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		assertEquals("given_name", entry.getClaimName());
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
-		assertNull(entry.getValue());
-		assertNull(entry.getValues());
+		assertNull(entry.getRawValue());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
 
@@ -560,8 +559,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		assertEquals("nickname", entry.getClaimName());
 		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
-		assertNull(entry.getValue());
-		assertNull(entry.getValues());
+		assertNull(entry.getRawValue());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
 
@@ -569,8 +567,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		assertEquals("email", entry.getClaimName());
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
-		assertNull(entry.getValue());
-		assertNull(entry.getValues());
+		assertNull(entry.getRawValue());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
 
@@ -578,8 +575,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		assertEquals("email_verified", entry.getClaimName());
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
-		assertNull(entry.getValue());
-		assertNull(entry.getValues());
+		assertNull(entry.getRawValue());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
 
@@ -587,8 +583,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		assertEquals("picture", entry.getClaimName());
 		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
-		assertNull(entry.getValue());
-		assertNull(entry.getValues());
+		assertNull(entry.getRawValue());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
 
@@ -596,8 +591,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		assertEquals("http://example.info/claims/groups", entry.getClaimName());
 		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
 		assertNull(entry.getLangTag());
-		assertNull(entry.getValue());
-		assertNull(entry.getValues());
+		assertNull(entry.getRawValue());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
 	}
@@ -635,15 +629,14 @@ public class OIDCClaimsRequestTest extends TestCase {
 		ClaimsSetRequest.Entry entry = claimsRequest.getIDTokenClaimsRequest().get("auth_time");
 		assertEquals("auth_time", entry.getClaimName());
 		assertNull(entry.getLangTag());
-		assertNull(entry.getValue());
-		assertNull(entry.getValues());
+		assertNull(entry.getRawValue());
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 
 		entry = claimsRequest.getIDTokenClaimsRequest().get("acr");
 		assertEquals("acr", entry.getClaimName());
 		assertNull(entry.getLangTag());
-		assertNull(entry.getValue());
-		assertTrue(entry.getValues().contains("urn:mace:incommon:iap:silver"));
+		assertNull(entry.getValueAsString());
+		assertEquals(Collections.singletonList("urn:mace:incommon:iap:silver"), entry.getValuesAsListOfStrings());
 		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
 
 		assertEquals(2, claimsRequest.getIDTokenClaimsRequest().getEntries().size());
@@ -662,50 +655,43 @@ public class OIDCClaimsRequestTest extends TestCase {
 		entry = claimsRequest.getUserInfoClaimsRequest().get("given_name");
 		assertEquals("given_name", entry.getClaimName());
 		assertNull(entry.getLangTag());
-		assertNull(entry.getValue());
-		assertNull(entry.getValues());
+		assertNull(entry.getRawValue());
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 
 		entry = claimsRequest.getUserInfoClaimsRequest().get("nickname");
 		assertEquals("nickname", entry.getClaimName());
 		assertNull(entry.getLangTag());
-		assertNull(entry.getValue());
-		assertNull(entry.getValues());
+		assertNull(entry.getRawValue());
 		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
 
 		entry = claimsRequest.getUserInfoClaimsRequest().get("email");
 		assertEquals("email", entry.getClaimName());
 		assertNull(entry.getLangTag());
-		assertNull(entry.getValue());
-		assertNull(entry.getValues());
+		assertNull(entry.getRawValue());
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 
 		entry = claimsRequest.getUserInfoClaimsRequest().get("email_verified");
 		assertEquals("email_verified", entry.getClaimName());
 		assertNull(entry.getLangTag());
-		assertNull(entry.getValue());
-		assertNull(entry.getValues());
+		assertNull(entry.getRawValue());
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 
 		entry = claimsRequest.getUserInfoClaimsRequest().get("picture");
 		assertEquals("picture", entry.getClaimName());
 		assertNull(entry.getLangTag());
-		assertNull(entry.getValue());
-		assertNull(entry.getValues());
+		assertNull(entry.getRawValue());
 		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
 
 		entry = claimsRequest.getUserInfoClaimsRequest().get("http://example.info/claims/groups");
 		assertEquals("http://example.info/claims/groups", entry.getClaimName());
 		assertNull(entry.getLangTag());
-		assertNull(entry.getValue());
-		assertNull(entry.getValues());
+		assertNull(entry.getRawValue());
 		assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
 
 		entry = claimsRequest.getUserInfoClaimsRequest().get("http://example.info/claims/additionalInfo", LangTag.parse("de"));
 		assertEquals("http://example.info/claims/additionalInfo", entry.getClaimName());
 		assertEquals(LangTag.parse("de"),entry.getLangTag());
-		assertNull(entry.getValue());
-		assertNull(entry.getValues());
+		assertNull(entry.getRawValue());
 		Map<String, Object> additionalInformation = entry.getAdditionalInformation();
 		assertNotNull(additionalInformation);
 		assertTrue( additionalInformation.containsKey("info"));
@@ -972,9 +958,8 @@ public class OIDCClaimsRequestTest extends TestCase {
 
 				assertEquals(ClaimRequirement.VOLUNTARY, entry.getClaimRequirement());
 				assertNull(entry.getLangTag());
-				assertNull(entry.getValue());
-				assertTrue(entry.getValues().contains("urn:mace:incommon:iap:silver"));
-				assertEquals(1, entry.getValues().size());
+				assertNull(entry.getValueAsString());
+				assertEquals(Collections.singletonList("urn:mace:incommon:iap:silver"), entry.getValuesAsListOfStrings());
 
 			} else {
 				fail("Unexpected id_token claim name: " + entry.getClaimName());
@@ -1154,6 +1139,22 @@ public class OIDCClaimsRequestTest extends TestCase {
 		
 		assertNull(claimsRequest.getUserInfoClaimsRequest());
 		
+		// New API
+		assertEquals(1, claimsRequest.getUserInfoVerifiedClaimsRequests().size());
+		assertEquals(3, claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getEntries().size());
+		
+		for (ClaimsSetRequest.Entry en: claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getEntries()) {
+			
+			assertTrue(Arrays.asList("given_name", "family_name", "birthdate").contains(en.getClaimName()));
+			
+			assertEquals(ClaimRequirement.VOLUNTARY, en.getClaimRequirement());
+			assertNull(en.getLangTag());
+			assertNull(en.getRawValue());
+			assertNull(en.getPurpose());
+			assertNull(en.getAdditionalInformation());
+		}
+		
+		// Deprecated API
 		assertEquals(1, claimsRequest.getUserInfoVerifiedClaimsRequestList().size());
 		assertEquals(3, claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0).getEntries().size());
 		
@@ -1163,8 +1164,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 			
 			assertEquals(ClaimRequirement.VOLUNTARY, en.getClaimRequirement());
 			assertNull(en.getLangTag());
-			assertNull(en.getValue());
-			assertNull(en.getValues());
+			assertNull(en.getRawValue());
 			assertNull(en.getPurpose());
 			assertNull(en.getAdditionalInformation());
 		}
@@ -1176,29 +1176,51 @@ public class OIDCClaimsRequestTest extends TestCase {
 	public void testAssurance_essentialExample()
 		throws ParseException {
 		
-		String json = "{\n" +
-			"   \"userinfo\":{\n" +
-			"      \"verified_claims\":{\n" +
-			"         \"verification\": {\n" +
-			"            \"trust_framework\": null\n" +
-			"         },\n" +
-			"         \"claims\":{\n" +
-			"            \"given_name\":{\"essential\": true},\n" +
-			"            \"family_name\":{\"essential\": true},\n" +
-			"            \"birthdate\":null\n" +
-			"         }\n" +
-			"      }\n" +
-			"   }\n" +
-			"}\n";
+		String json = 
+			"{" +
+			"   \"userinfo\":{" +
+			"      \"verified_claims\":{" +
+			"         \"verification\": {" +
+			"            \"trust_framework\": null" +
+			"         }," +
+			"         \"claims\":{" +
+			"            \"given_name\":{\"essential\": true}," +
+			"            \"family_name\":{\"essential\": true}," +
+			"            \"birthdate\":null" +
+			"         }" +
+			"      }" +
+			"   }" +
+			"}";
 		
 		OIDCClaimsRequest claimsRequest = OIDCClaimsRequest.parse(json);
 		
 		assertNull(claimsRequest.getUserInfoClaimsRequest());
 		
+		// New API
+		assertEquals(1, claimsRequest.getUserInfoVerifiedClaimsRequests().size());
+		assertEquals(3, claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getEntries().size());
+		
+		Map<String,ClaimRequirement> claimReq = new HashMap<>();
+		claimReq.put("given_name", ClaimRequirement.ESSENTIAL);
+		claimReq.put("family_name", ClaimRequirement.ESSENTIAL);
+		claimReq.put("birthdate", ClaimRequirement.VOLUNTARY);
+		
+		for (ClaimsSetRequest.Entry en: claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getEntries()) {
+			
+			assertTrue(Arrays.asList("given_name", "family_name", "birthdate").contains(en.getClaimName()));
+			
+			assertEquals(claimReq.get(en.getClaimName()), en.getClaimRequirement());
+			assertNull(en.getLangTag());
+			assertNull(en.getRawValue());
+			assertNull(en.getPurpose());
+			assertNull(en.getAdditionalInformation());
+		}
+		
+		// Deprecated API
 		assertEquals(1, claimsRequest.getUserInfoVerifiedClaimsRequestList().size());
 		assertEquals(3, claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0).getEntries().size());
 		
-		Map<String,ClaimRequirement> claimReq = new HashMap<>();
+		claimReq = new HashMap<>();
 		claimReq.put("given_name", ClaimRequirement.ESSENTIAL);
 		claimReq.put("family_name", ClaimRequirement.ESSENTIAL);
 		claimReq.put("birthdate", ClaimRequirement.VOLUNTARY);
@@ -1209,8 +1231,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 			
 			assertEquals(claimReq.get(en.getClaimName()), en.getClaimRequirement());
 			assertNull(en.getLangTag());
-			assertNull(en.getValue());
-			assertNull(en.getValues());
+			assertNull(en.getRawValue());
 			assertNull(en.getPurpose());
 			assertNull(en.getAdditionalInformation());
 		}
@@ -1223,7 +1244,8 @@ public class OIDCClaimsRequestTest extends TestCase {
 	public void testAssurance_exampleWithUserInfo()
 		throws ParseException {
 		
-		String json = "{" +
+		String json =
+			"{" +
 			"  \"userinfo\": {" +
 			"    \"verified_claims\": {" +
 			"      \"verification\": {" +
@@ -1241,16 +1263,16 @@ public class OIDCClaimsRequestTest extends TestCase {
 		OIDCClaimsRequest claimsRequest = OIDCClaimsRequest.parse(json);
 		
 		assertNull(claimsRequest.getIDTokenClaimsRequest());
-		assertTrue(claimsRequest.getIDTokenVerifiedClaimsRequestList().isEmpty());
+		assertTrue(claimsRequest.getIDTokenVerifiedClaimsRequests().isEmpty());
 		
 		assertNull(claimsRequest.getUserInfoClaimsRequest());
-		assertEquals(1, claimsRequest.getUserInfoVerifiedClaimsRequestList().size());
+		assertEquals(1, claimsRequest.getUserInfoVerifiedClaimsRequests().size());
 		
-		VerifiedClaimsSetRequest verifiedClaimsSetRequest = claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0);
+		VerifiedClaimsSetRequest verifiedClaimsSetRequest = claimsRequest.getUserInfoVerifiedClaimsRequests().get(0);
 		
 		JSONObject expectedVerificationJSONObject = new JSONObject();
 		expectedVerificationJSONObject.put("trust_framework", null);
-		assertEquals(expectedVerificationJSONObject, verifiedClaimsSetRequest.getVerificationJSONObject());
+		assertEquals(expectedVerificationJSONObject, verifiedClaimsSetRequest.getVerification().toJSONObject());
 		
 		ClaimsSetRequest.Entry givenName = verifiedClaimsSetRequest.get("given_name");
 		assertEquals("given_name", givenName.getClaimName());
@@ -1273,7 +1295,8 @@ public class OIDCClaimsRequestTest extends TestCase {
 	public void testAssurance_exampleWithPurpose()
 		throws ParseException {
 		
-		String json = "{" +
+		String json =
+			"{" +
 			"   \"userinfo\":{" +
 			"      \"verified_claims\":{" +
 			"         \"verification\": {" +
@@ -1299,8 +1322,8 @@ public class OIDCClaimsRequestTest extends TestCase {
 		
 		assertNull(claimsRequest.getUserInfoClaimsRequest());
 		
-		assertEquals(1, claimsRequest.getUserInfoVerifiedClaimsRequestList().size());
-		assertEquals(3, claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0).getEntries().size());
+		assertEquals(1, claimsRequest.getUserInfoVerifiedClaimsRequests().size());
+		assertEquals(3, claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getEntries().size());
 		
 		Map<String,ClaimRequirement> claimReq = new HashMap<>();
 		claimReq.put("given_name", ClaimRequirement.ESSENTIAL);
@@ -1312,7 +1335,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		purposes.put("family_name", null);
 		purposes.put("birthdate", "To send you best wishes on your birthday");
 		
-		for (ClaimsSetRequest.Entry en: claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0).getEntries()) {
+		for (ClaimsSetRequest.Entry en: claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getEntries()) {
 			
 			assertTrue(Arrays.asList("given_name", "family_name", "birthdate").contains(en.getClaimName()));
 			
@@ -1329,7 +1352,8 @@ public class OIDCClaimsRequestTest extends TestCase {
 	
 	public void testAssurance_rejectEmptyClaimsElement() {
 	
-		String json = "{" +
+		String json =
+			"{" +
 			"   \"userinfo\":{" +
 			"      \"verified_claims\":{" +
 			"         \"verification\": {" +
@@ -1349,7 +1373,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 	}
 	
 	
-	public void testEntry() throws LangTagException, ParseException {
+	public void testEntry() throws LangTagException {
 		
 		ClaimsSetRequest.Entry entry = new ClaimsSetRequest.Entry("name");
 		
@@ -1379,8 +1403,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		entry = entry.withValue(value);
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 		assertEquals(langTag, entry.getLangTag());
-		assertEquals(value, entry.getValue());
-		assertNull(entry.getValues());
+		assertEquals(value, entry.getValueAsString());
 		assertNull(entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
 		
@@ -1388,8 +1411,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		entry = entry.withPurpose(purpose);
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 		assertEquals(langTag, entry.getLangTag());
-		assertEquals(value, entry.getValue());
-		assertNull(entry.getValues());
+		assertEquals(value, entry.getValueAsString());
 		assertEquals(purpose, entry.getPurpose());
 		assertNull(entry.getAdditionalInformation());
 		
@@ -1398,8 +1420,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		entry = entry.withAdditionalInformation(otherInfo);
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 		assertEquals(langTag, entry.getLangTag());
-		assertEquals(value, entry.getValue());
-		assertNull(entry.getValues());
+		assertEquals(value, entry.getValueAsString());
 		assertEquals(purpose, entry.getPurpose());
 		assertEquals(otherInfo, entry.getAdditionalInformation());
 		
@@ -1407,8 +1428,8 @@ public class OIDCClaimsRequestTest extends TestCase {
 		entry = entry.withValues(values);
 		assertEquals(ClaimRequirement.ESSENTIAL, entry.getClaimRequirement());
 		assertEquals(langTag, entry.getLangTag());
-		assertNull(entry.getValue());
-		assertEquals(values, entry.getValues());
+		assertNull(entry.getValueAsString());
+		assertEquals(values, entry.getValuesAsListOfStrings());
 		assertEquals(purpose, entry.getPurpose());
 		assertEquals(otherInfo, entry.getAdditionalInformation());
 	}
@@ -1424,6 +1445,44 @@ public class OIDCClaimsRequestTest extends TestCase {
 				.add("address")
 			);
 		
+		Collection<ClaimsSetRequest.Entry> entries = claimsRequest.getIDTokenVerifiedClaimsRequests().get(0).getEntries();
+		ClaimsSetRequest.Entry en = entries.iterator().next();
+		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
+		en = entries.iterator().next();
+		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
+		assertEquals(2, entries.size());
+		
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getIDTokenVerifiedClaimsRequests().get(0).getClaimNames(false));
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getIDTokenVerifiedClaimsRequests().get(0).getClaimNames(true));
+		
+		String expectedJSON = "{\"id_token\":{\"verified_claims\":{\"claims\":{\"address\":null,\"name\":null},\"verification\":{\"trust_framework\":null}}}}";
+		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
+		
+		claimsRequest = OIDCClaimsRequest.parse(claimsRequest.toJSONString());
+		
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getIDTokenVerifiedClaimsRequests().get(0).getClaimNames(false));
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getIDTokenVerifiedClaimsRequests().get(0).getClaimNames(true));
+		
+		assertNull(claimsRequest.getIDTokenClaimsRequest());
+		
+		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
+	}
+	
+	
+	public void testVerifiedIDTokenClaims_deprecatedAPI()
+		throws Exception {
+		
+		JSONObject verification = new JSONObject();
+		verification.put("trust_framework", null);
+		
+		OIDCClaimsRequest claimsRequest = new OIDCClaimsRequest()
+			.withIDTokenVerifiedClaimsRequest(
+				new com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest()
+				.add("name")
+				.add("address")
+				.withVerificationJSONObject(verification)
+			);
+		
 		Collection<ClaimsSetRequest.Entry> entries = claimsRequest.getIDTokenVerifiedClaimsRequestList().get(0).getEntries();
 		ClaimsSetRequest.Entry en = entries.iterator().next();
 		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
@@ -1434,7 +1493,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getIDTokenVerifiedClaimsRequestList().get(0).getClaimNames(false));
 		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getIDTokenVerifiedClaimsRequestList().get(0).getClaimNames(true));
 		
-		String expectedJSON = "{\"id_token\":{\"verified_claims\":{\"claims\":{\"name\":null,\"address\":null}}}}";
+		String expectedJSON = "{\"id_token\":{\"verified_claims\":{\"claims\":{\"address\":null,\"name\":null},\"verification\":{\"trust_framework\":null}}}}";
 		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
 		
 		claimsRequest = OIDCClaimsRequest.parse(claimsRequest.toJSONString());
@@ -1462,6 +1521,48 @@ public class OIDCClaimsRequestTest extends TestCase {
 				.add("address")
 			);
 		
+		Collection<ClaimsSetRequest.Entry> entries = claimsRequest.getIDTokenVerifiedClaimsRequests().get(0).getEntries();
+		ClaimsSetRequest.Entry en = entries.iterator().next();
+		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
+		en = entries.iterator().next();
+		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
+		assertEquals(2, entries.size());
+		
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getIDTokenVerifiedClaimsRequests().get(0).getClaimNames(false));
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getIDTokenVerifiedClaimsRequests().get(0).getClaimNames(true));
+		
+		String expectedJSON = "{\"id_token\":{\"email\":null,\"verified_claims\":{\"claims\":{\"address\":null,\"name\":null},\"verification\":{\"trust_framework\":null}}}}";
+		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
+		
+		claimsRequest = OIDCClaimsRequest.parse(claimsRequest.toJSONString());
+		
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getIDTokenVerifiedClaimsRequests().get(0).getClaimNames(false));
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getIDTokenVerifiedClaimsRequests().get(0).getClaimNames(true));
+		
+		assertEquals("email", claimsRequest.getIDTokenClaimsRequest().getEntries().iterator().next().getClaimName());
+		
+		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
+	}
+	
+	
+	public void testPlainAndVerifiedIDTokenClaims_deprecatedAPI()
+		throws Exception {
+		
+		JSONObject verification = new JSONObject();
+		verification.put("trust_framework", null);
+		
+		OIDCClaimsRequest claimsRequest = new OIDCClaimsRequest()
+			.withIDTokenClaimsRequest(
+				new ClaimsSetRequest()
+				.add("email")
+			)
+			.withIDTokenVerifiedClaimsRequest(
+				new com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest()
+				.add("name")
+				.add("address")
+				.withVerificationJSONObject(verification)
+			);
+		
 		Collection<ClaimsSetRequest.Entry> entries = claimsRequest.getIDTokenVerifiedClaimsRequestList().get(0).getEntries();
 		ClaimsSetRequest.Entry en = entries.iterator().next();
 		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
@@ -1472,7 +1573,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getIDTokenVerifiedClaimsRequestList().get(0).getClaimNames(false));
 		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getIDTokenVerifiedClaimsRequestList().get(0).getClaimNames(true));
 		
-		String expectedJSON = "{\"id_token\":{\"verified_claims\":{\"claims\":{\"address\":null,\"name\":null}},\"email\":null}}";
+		String expectedJSON = "{\"id_token\":{\"email\":null,\"verified_claims\":{\"claims\":{\"address\":null,\"name\":null},\"verification\":{\"trust_framework\":null}}}}";
 		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
 		
 		claimsRequest = OIDCClaimsRequest.parse(claimsRequest.toJSONString());
@@ -1496,6 +1597,44 @@ public class OIDCClaimsRequestTest extends TestCase {
 				.add("address")
 			);
 		
+		Collection<ClaimsSetRequest.Entry> entries = claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getEntries();
+		ClaimsSetRequest.Entry en = entries.iterator().next();
+		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
+		en = entries.iterator().next();
+		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
+		assertEquals(2, entries.size());
+		
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getClaimNames(false));
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getClaimNames(true));
+		
+		String expectedJSON = "{\"userinfo\":{\"verified_claims\":{\"claims\":{\"address\":null,\"name\":null},\"verification\":{\"trust_framework\":null}}}}";
+		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
+		
+		claimsRequest = OIDCClaimsRequest.parse(claimsRequest.toJSONString());
+		
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getClaimNames(false));
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getClaimNames(true));
+		
+		assertNull(claimsRequest.getUserInfoClaimsRequest());
+		
+		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
+	}
+	
+	
+	public void testVerifiedUserInfoClaims_deprecatedAPI()
+		throws Exception {
+		
+		JSONObject verification = new JSONObject();
+		verification.put("trust_framework", null);
+		
+		OIDCClaimsRequest claimsRequest = new OIDCClaimsRequest()
+			.withUserInfoVerifiedClaimsRequest(
+				new com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest()
+				.add("name")
+				.add("address")
+				.withVerificationJSONObject(verification)
+			);
+		
 		Collection<ClaimsSetRequest.Entry> entries = claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0).getEntries();
 		ClaimsSetRequest.Entry en = entries.iterator().next();
 		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
@@ -1506,7 +1645,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0).getClaimNames(false));
 		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0).getClaimNames(true));
 		
-		String expectedJSON = "{\"userinfo\":{\"verified_claims\":{\"claims\":{\"name\":null,\"address\":null}}}}";
+		String expectedJSON = "{\"userinfo\":{\"verified_claims\":{\"claims\":{\"address\":null,\"name\":null},\"verification\":{\"trust_framework\":null}}}}";
 		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
 		
 		claimsRequest = OIDCClaimsRequest.parse(claimsRequest.toJSONString());
@@ -1534,6 +1673,48 @@ public class OIDCClaimsRequestTest extends TestCase {
 				.add("address")
 			);
 		
+		Collection<ClaimsSetRequest.Entry> entries = claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getEntries();
+		ClaimsSetRequest.Entry en = entries.iterator().next();
+		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
+		en = entries.iterator().next();
+		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
+		assertEquals(2, entries.size());
+		
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getClaimNames(false));
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getClaimNames(true));
+		
+		String expectedJSON = "{\"userinfo\":{\"email\":null,\"verified_claims\":{\"claims\":{\"address\":null,\"name\":null},\"verification\":{\"trust_framework\":null}}}}";
+		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
+		
+		claimsRequest = OIDCClaimsRequest.parse(claimsRequest.toJSONString());
+		
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getClaimNames(false));
+		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getClaimNames(true));
+		
+		assertEquals("email", claimsRequest.getUserInfoClaimsRequest().getEntries().iterator().next().getClaimName());
+		
+		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
+	}
+	
+	
+	public void testPlainAndVerifiedUserInfoClaims_deprecatedAPI()
+		throws Exception {
+		
+		JSONObject verification = new JSONObject();
+		verification.put("trust_framework", null);
+		
+		OIDCClaimsRequest claimsRequest = new OIDCClaimsRequest()
+			.withUserInfoClaimsRequest(
+				new ClaimsSetRequest()
+				.add("email")
+			)
+			.withUserInfoVerifiedClaimsRequest(
+				new com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest()
+				.add("name")
+				.add("address")
+				.withVerificationJSONObject(verification)
+			);
+		
 		Collection<ClaimsSetRequest.Entry> entries = claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0).getEntries();
 		ClaimsSetRequest.Entry en = entries.iterator().next();
 		assertTrue(en.getClaimName().equals("name") || en.getClaimName().equals("address"));
@@ -1544,7 +1725,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0).getClaimNames(false));
 		assertEquals(new HashSet<>(Arrays.asList("name", "address")), claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0).getClaimNames(true));
 		
-		String expectedJSON = "{\"userinfo\":{\"verified_claims\":{\"claims\":{\"address\":null,\"name\":null}},\"email\":null}}";
+		String expectedJSON = "{\"userinfo\":{\"email\":null,\"verified_claims\":{\"claims\":{\"address\":null,\"name\":null},\"verification\":{\"trust_framework\":null}}}}";
 		assertEquals(JSONObjectUtils.parse(expectedJSON), claimsRequest.toJSONObject());
 		
 		claimsRequest = OIDCClaimsRequest.parse(claimsRequest.toJSONString());
@@ -1564,24 +1745,100 @@ public class OIDCClaimsRequestTest extends TestCase {
 		OIDCClaimsRequest claimsRequest = new OIDCClaimsRequest();
 		
 		// Getters and setters with null
-		assertTrue(claimsRequest.getIDTokenVerifiedClaimsRequestList().isEmpty());
-		assertTrue(claimsRequest.getUserInfoVerifiedClaimsRequestList().isEmpty());
+		assertTrue(claimsRequest.getIDTokenVerifiedClaimsRequests().isEmpty());
+		assertTrue(claimsRequest.getUserInfoVerifiedClaimsRequests().isEmpty());
 		
 		// Add claims with verification to id_token and userinfo top-level members
-		JSONObject idTokenVerification = new JSONObject();
+		final JSONObject idTokenVerification = new JSONObject();
+		idTokenVerification.put("trust_framework", null);
 		idTokenVerification.put("time", null);
 		
-		JSONObject userInfoVerification = new JSONObject();
-		userInfoVerification.put("trust_framework", IdentityTrustFramework.EIDAS_IAL_HIGH.getValue());
+		VerificationSpec idTokenVerificationSpec = new VerificationSpec() {
+			@Override
+			public JSONObject toJSONObject() {
+				return idTokenVerification;
+			}
+		};
+		
+		final JSONObject userInfoVerification = new JSONObject();
+		JSONObject tfSpec = new JSONObject();
+		tfSpec.put("value", IdentityTrustFramework.EIDAS.getValue());
+		userInfoVerification.put("trust_framework", tfSpec);
+		
+		VerificationSpec userInfoVerificationSpec = new VerificationSpec() {
+			@Override
+			public JSONObject toJSONObject() {
+				return userInfoVerification;
+			}
+		};
 		
 		
 		claimsRequest = claimsRequest
 			.withIDTokenVerifiedClaimsRequest(
 				new VerifiedClaimsSetRequest()
-					.withVerificationJSONObject(idTokenVerification)
+					.withVerification(idTokenVerificationSpec)
 					.add("email"))
 			.withUserInfoVerifiedClaimsRequest(
 				new VerifiedClaimsSetRequest()
+					.withVerification(userInfoVerificationSpec)
+					.add("name")
+					.add("address")
+		);
+		
+		// Getters
+		assertEquals(idTokenVerification, claimsRequest.getIDTokenVerifiedClaimsRequests().get(0).getVerification().toJSONObject());
+		assertEquals(userInfoVerification, claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getVerification().toJSONObject());
+		
+		// JSON output
+		JSONObject jsonObject = claimsRequest.toJSONObject();
+		
+		String expectedJSON = "{\"id_token\":{\"verified_claims\":{\"claims\":{\"email\":null},\"verification\":{\"trust_framework\":null,\"time\":null}}},\"userinfo\":{\"verified_claims\":{\"claims\":{\"address\":null,\"name\":null},\"verification\":{\"trust_framework\":{\"value\":\"eidas\"}}}}}";
+		
+		assertEquals(JSONObjectUtils.parse(expectedJSON), jsonObject);
+		
+		// Parse
+		claimsRequest = OIDCClaimsRequest.parse(jsonObject.toJSONString());
+		
+		// Getters
+		assertEquals(idTokenVerification, claimsRequest.getIDTokenVerifiedClaimsRequests().get(0).getVerification().toJSONObject());
+		assertEquals(userInfoVerification, claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getVerification().toJSONObject());
+		
+		// Copy
+		OIDCClaimsRequest copy = new OIDCClaimsRequest()
+			.add(claimsRequest);
+		
+		assertEquals(idTokenVerification, copy.getIDTokenVerifiedClaimsRequests().get(0).getVerification().toJSONObject());
+		assertEquals(userInfoVerification, copy.getUserInfoVerifiedClaimsRequests().get(0).getVerification().toJSONObject());
+	}
+	
+	
+	public void testVerificationElements_deprecatedAPI()
+		throws Exception {
+		
+		OIDCClaimsRequest claimsRequest = new OIDCClaimsRequest();
+		
+		// Getters and setters with null
+		assertTrue(claimsRequest.getIDTokenVerifiedClaimsRequestList().isEmpty());
+		assertTrue(claimsRequest.getUserInfoVerifiedClaimsRequestList().isEmpty());
+		
+		// Add claims with verification to id_token and userinfo top-level members
+		JSONObject idTokenVerification = new JSONObject();
+		idTokenVerification.put("trust_framework", null);
+		idTokenVerification.put("time", null);
+		
+		JSONObject userInfoVerification = new JSONObject();
+		JSONObject tfSpec = new JSONObject();
+		tfSpec.put("value", IdentityTrustFramework.EIDAS_IAL_HIGH.getValue());
+		userInfoVerification.put("trust_framework", tfSpec);
+		
+		
+		claimsRequest = claimsRequest
+			.withIDTokenVerifiedClaimsRequest(
+				new com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest()
+					.withVerificationJSONObject(idTokenVerification)
+					.add("email"))
+			.withUserInfoVerifiedClaimsRequest(
+				 new com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest()
 					.withVerificationJSONObject(userInfoVerification)
 					.add("name")
 					.add("address")
@@ -1594,7 +1851,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		// JSON output
 		JSONObject jsonObject = claimsRequest.toJSONObject();
 		
-		String expectedJSON = "{\"id_token\":{\"verified_claims\":{\"claims\":{\"email\":null},\"verification\":{\"time\":null}}},\"userinfo\":{\"verified_claims\":{\"claims\":{\"address\":null,\"name\":null},\"verification\":{\"trust_framework\":\"eidas_ial_high\"}}}}";
+		String expectedJSON = "{\"id_token\":{\"verified_claims\":{\"claims\":{\"email\":null},\"verification\":{\"trust_framework\":null,\"time\":null}}},\"userinfo\":{\"verified_claims\":{\"claims\":{\"address\":null,\"name\":null},\"verification\":{\"trust_framework\":{\"value\":\"eidas_ial_high\"}}}}}";
 		
 		assertEquals(JSONObjectUtils.parse(expectedJSON), jsonObject);
 		
@@ -1622,7 +1879,9 @@ public class OIDCClaimsRequestTest extends TestCase {
 			"    \"email\" : null," +
 			"    \"verified_claims\" : {" +
 			"      \"verification\" : {" +
-			"        \"trust_framework\" : \"eidas_ial_high\"" +
+			"        \"trust_framework\" : {" +
+			"          \"value\": \"eidas\"" +
+			"         }" +
 			"      }," +
 			"      \"claims\" : {" +
 			"        \"name\" : {" +
@@ -1640,11 +1899,12 @@ public class OIDCClaimsRequestTest extends TestCase {
 		
 		OIDCClaimsRequest claimsRequest = OIDCClaimsRequest.parse(json);
 		
-		// Get UserInfo verification element if any
-		System.out.println(claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0).getVerificationJSONObject());
+		// Get UserInfo verification element
+		MinimalVerificationSpec expectedVerification = new MinimalVerificationSpec(IdentityTrustFramework.EIDAS);
+		assertEquals(expectedVerification.toJSONObject(), claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getVerification().toJSONObject());
 		
 		// Get requested verified claims at UserInfo endpoint if any
-		for (ClaimsSetRequest.Entry en: claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0).getEntries()) {
+		for (ClaimsSetRequest.Entry en: claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getEntries()) {
 			System.out.println("verified claim name: " + en.getClaimName());
 			System.out.println("requirement: " + en.getClaimRequirement());
 			System.out.println("optional language tag: " + en.getLangTag());
@@ -1659,7 +1919,7 @@ public class OIDCClaimsRequestTest extends TestCase {
 		}
 		
 		// Repeat for claims delivered with ID token if any
-		assertTrue(claimsRequest.getIDTokenVerifiedClaimsRequestList().isEmpty());
+		assertTrue(claimsRequest.getIDTokenVerifiedClaimsRequests().isEmpty());
 		assertNull(claimsRequest.getIDTokenClaimsRequest());
 	}
 	
@@ -1688,6 +1948,110 @@ public class OIDCClaimsRequestTest extends TestCase {
 	
 	// https://openid.net/specs/openid-connect-4-identity-assurance-1_0.html#section-6.3.3
 	public void testVerified_multipleVerifiedClaimsElements()
+		throws Exception {
+		
+		String json = "{" +
+			"  \"id_token\": {" +
+			"    \"verified_claims\": [" +
+			"      {" +
+			"        \"verification\": {" +
+			"          \"trust_framework\": {" +
+			"            \"value\": \"eidas_ial_substantial\"" +
+			"          }" +
+			"        }," +
+			"        \"claims\": {" +
+			"          \"email\": null," +
+			"          \"email_verified\": null" +
+			"        }" +
+			"      }," +
+			"      {" +
+			"        \"verification\": {" +
+			"          \"trust_framework\": {" +
+			"            \"values\": [\"eidas_ial_high\", \"eidas_ial_substantial\"]" +
+			"          }" +
+			"        }," +
+			"        \"claims\": {" +
+			"          \"birthdate\": null" +
+			"        }" +
+			"      }" +
+			"    ]" +
+			"  }," +
+			"  \"userinfo\": {" +
+			"    \"verified_claims\": [" +
+			"      {" +
+			"        \"verification\": {" +
+			"          \"trust_framework\": {" +
+			"            \"value\": \"eidas_ial_high\"" +
+			"          }" +
+			"        }," +
+			"        \"claims\": {" +
+			"          \"given_name\": null," +
+			"          \"family_name\": null" +
+			"        }" +
+			"      }," +
+			"      {" +
+			"        \"verification\": {" +
+			"          \"trust_framework\": {" +
+			"            \"values\": [\"eidas_ial_high\", \"eidas_ial_substantial\"]" +
+			"          }" +
+			"        }," +
+			"        \"claims\": {" +
+			"          \"birthdate\": null" +
+			"        }" +
+			"      }" +
+			"    ]" +
+			"  }" +
+			"}";
+		
+		
+		OIDCClaimsRequest claimsRequest = OIDCClaimsRequest.parse(json);
+		
+		// ID token
+		assertEquals(2, claimsRequest.getIDTokenVerifiedClaimsRequests().size());
+		
+		// ID token 0
+		JSONObject idTokenClaimsVerification = claimsRequest.getIDTokenVerifiedClaimsRequests().get(0).getVerification().toJSONObject();
+		assertEquals(1, idTokenClaimsVerification.size());
+		JSONObject trustFramework = JSONObjectUtils.getJSONObject(idTokenClaimsVerification, "trust_framework");
+		assertEquals("eidas_ial_substantial", trustFramework.get("value"));
+		assertEquals(1, trustFramework.size());
+		
+		assertEquals(new HashSet<>(Arrays.asList("email", "email_verified")), claimsRequest.getIDTokenVerifiedClaimsRequests().get(0).getClaimNames(false));
+		
+		// ID token 1
+		idTokenClaimsVerification = claimsRequest.getIDTokenVerifiedClaimsRequests().get(1).getVerification().toJSONObject();
+		assertEquals(1, idTokenClaimsVerification.size());
+		trustFramework = JSONObjectUtils.getJSONObject(idTokenClaimsVerification, "trust_framework");
+		assertEquals(Arrays.asList("eidas_ial_high", "eidas_ial_substantial"), JSONObjectUtils.getStringList(trustFramework, "values"));
+		assertEquals(1, trustFramework.size());
+		
+		assertEquals(Collections.singleton("birthdate"), claimsRequest.getIDTokenVerifiedClaimsRequests().get(1).getClaimNames(false));
+		
+		// UserInfo
+		assertEquals(2, claimsRequest.getIDTokenVerifiedClaimsRequests().size());
+		
+		// UserInfo 0
+		JSONObject userInfoClaimsVerification = claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getVerification().toJSONObject();
+		assertEquals(1, userInfoClaimsVerification.size());
+		trustFramework = JSONObjectUtils.getJSONObject(userInfoClaimsVerification, "trust_framework");
+		assertEquals("eidas_ial_high", trustFramework.get("value"));
+		assertEquals(1, trustFramework.size());
+		
+		assertEquals(new HashSet<>(Arrays.asList("given_name", "family_name")), claimsRequest.getUserInfoVerifiedClaimsRequests().get(0).getClaimNames(false));
+		
+		// UserInfo 1
+		userInfoClaimsVerification = claimsRequest.getUserInfoVerifiedClaimsRequests().get(1).getVerification().toJSONObject();
+		assertEquals(1, userInfoClaimsVerification.size());
+		trustFramework = JSONObjectUtils.getJSONObject(userInfoClaimsVerification, "trust_framework");
+		assertEquals(Arrays.asList("eidas_ial_high", "eidas_ial_substantial"), JSONObjectUtils.getStringList(trustFramework, "values"));
+		assertEquals(1, trustFramework.size());
+		
+		assertEquals(Collections.singleton("birthdate"), claimsRequest.getUserInfoVerifiedClaimsRequests().get(1).getClaimNames(false));
+	}
+	
+	
+	// https://openid.net/specs/openid-connect-4-identity-assurance-1_0.html#section-6.3.3
+	public void testVerified_multipleVerifiedClaimsElements_deprecatedAPI()
 		throws Exception {
 		
 		String json = "{" +

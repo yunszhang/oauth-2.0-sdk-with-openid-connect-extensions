@@ -1885,7 +1885,7 @@ version 9.20.1 (2022-02-03)
     * Updates to BouncyCastle 1.69
 
 version 9.21 (2022-01-10)
-    * Upgrades to OpenID Connect for Identity Assurance 1.0, draft 12.
+    * Upgrades OpenID Connect for Identity Assurance 1.0 support to draft 12.
     * Adds support for the also_known_as OpenID claim.
     * Adds support for the msisdn OpenID claim.
     * Adds ISO3166_1Alpha2CountryCode class for representing ISO 3166-1
@@ -1899,6 +1899,11 @@ version 9.21 (2022-01-10)
     * Adds iso3166_1alpha2-codes.properties, iso3166_1alpha3-codes.properties,
       iso3166_3-codes.properties and iso3166_1alpha-2-3-map.properties
       resources.
+    * Adds com.nimbusds.openid.connect.sdk.assurance.request.
+      VerifiedClaimsSetRequest class deprecating com.nimbusds.openid.connect.
+      sdk.assurance.claims.VerifiedClaimsSetRequest.
+    * Updates OIDCClaimsRequest to support the new VerifiedClaimsSetRequest
+      class.
     * Updates IdentityVerification to support assurance_level and
       assurance_process.
     * Adds IdentityAssuranceLevel class.

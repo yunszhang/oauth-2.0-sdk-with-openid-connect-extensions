@@ -2384,12 +2384,16 @@ public class AuthenticationRequestTest extends TestCase {
 	public void testIdentityAssurance_basicExample()
 		throws Exception {
 		
+		JSONObject verification = new JSONObject();
+		verification.put("trust_framework", null);
+		
 		OIDCClaimsRequest claimsRequest = new OIDCClaimsRequest()
 			.withUserInfoVerifiedClaimsRequest(
 				new VerifiedClaimsSetRequest()
 				.add("given_name")
 				.add("family_name")
 				.add("address")
+				.withVerificationJSONObject(verification)
 			);
 		
 		CodeVerifier pkceVerifier = new CodeVerifier();
@@ -2415,6 +2419,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(Collections.singletonList(new LangTag("en")), authRequest.getUILocales());
 		assertEquals("Account holder identification", authRequest.getPurpose());
 		assertEquals(claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0).getClaimNames(false), authRequest.getOIDCClaims().getUserInfoVerifiedClaimsRequestList().get(0).getClaimNames(false));
+		assertEquals(claimsRequest.getUserInfoVerifiedClaimsRequestList().get(0).getVerificationJSONObject(), authRequest.getOIDCClaims().getUserInfoVerifiedClaimsRequestList().get(0).getVerificationJSONObject());
 	}
 	
 	
@@ -2452,7 +2457,11 @@ public class AuthenticationRequestTest extends TestCase {
 	public void testIdentityAssurance_basicExample_deprecated()
 		throws Exception {
 		
+		JSONObject verification = new JSONObject();
+		verification.put("trust_framework", null);
+		
 		ClaimsRequest claimsRequest = new ClaimsRequest();
+		claimsRequest.setUserInfoClaimsVerificationJSONObject(verification);
 		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("given_name"));
 		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("family_name"));
 		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("address"));
@@ -2481,6 +2490,7 @@ public class AuthenticationRequestTest extends TestCase {
 		assertEquals(Collections.singletonList(new LangTag("en")), authRequest.getUILocales());
 		assertEquals("Account holder identification", authRequest.getPurpose());
 		assertEquals(claimsRequest.getVerifiedUserInfoClaimNames(false), authRequest.getClaims().getVerifiedUserInfoClaimNames(false));
+		assertEquals(claimsRequest.getUserInfoClaimsVerificationJSONObject(), authRequest.getClaims().getUserInfoClaimsVerificationJSONObject());
 	}
 	
 	
@@ -2491,7 +2501,9 @@ public class AuthenticationRequestTest extends TestCase {
 		claimsRequest.addUserInfoClaim("family_name");
 		claimsRequest.addVerifiedUserInfoClaim(new ClaimsRequest.Entry("given_name"));
 		JSONObject verification = new JSONObject();
-		verification.put("trust_framework", IdentityTrustFramework.DE_AML.getValue());
+		JSONObject tfSpec = new JSONObject();
+		tfSpec.put("value", IdentityTrustFramework.DE_AML.getValue());
+		verification.put("trust_framework", tfSpec);
 		claimsRequest.setUserInfoClaimsVerificationJSONObject(verification);
 		
 		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(

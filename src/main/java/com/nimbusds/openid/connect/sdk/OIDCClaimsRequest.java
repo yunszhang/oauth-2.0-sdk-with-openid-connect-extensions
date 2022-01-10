@@ -28,9 +28,10 @@ import net.minidev.json.JSONObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONArrayUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest;
+import com.nimbusds.openid.connect.sdk.assurance.request.VerifiedClaimsSetRequest;
 import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
 
@@ -85,15 +86,14 @@ public class OIDCClaimsRequest implements JSONAware {
 	
 	
 	/**
-	 * Verified claims requested in the ID token, empty list if not
-	 * specified.
+	 * Verified claims requested in the ID token, empty list if none.
 	 */
 	private final List<VerifiedClaimsSetRequest> idTokenVerified;
 	
 	
 	/**
 	 * Verified claims requested at the UserInfo endpoint, empty list if
-	 * not specified.
+	 * none.
 	 */
 	private final List<VerifiedClaimsSetRequest> userInfoVerified;
 	
@@ -161,11 +161,11 @@ public class OIDCClaimsRequest implements JSONAware {
 		
 		// Verified id_token
 		List<VerifiedClaimsSetRequest> idTokenVerifiedList = new LinkedList<>(idTokenVerified);
-		idTokenVerifiedList.addAll(other.getIDTokenVerifiedClaimsRequestList());
+		idTokenVerifiedList.addAll(other.getIDTokenVerifiedClaimsRequests());
 		
 		// Verified userinfo
 		List<VerifiedClaimsSetRequest> userInfoVerifiedList = new LinkedList<>(userInfoVerified);
-		userInfoVerifiedList.addAll(other.getUserInfoVerifiedClaimsRequestList());
+		userInfoVerifiedList.addAll(other.getUserInfoVerifiedClaimsRequests());
 		
 		return new OIDCClaimsRequest(
 			idTokenEntries.isEmpty() ? null : new ClaimsSetRequest(idTokenEntries),
@@ -198,8 +198,8 @@ public class OIDCClaimsRequest implements JSONAware {
 		return new OIDCClaimsRequest(
 			idToken,
 			getUserInfoClaimsRequest(),
-			getIDTokenVerifiedClaimsRequestList(),
-			getUserInfoVerifiedClaimsRequestList());
+			getIDTokenVerifiedClaimsRequests(),
+			getUserInfoVerifiedClaimsRequests());
 	}
 	
 	
@@ -225,8 +225,50 @@ public class OIDCClaimsRequest implements JSONAware {
 		return new OIDCClaimsRequest(
 			getIDTokenClaimsRequest(),
 			userInfo,
-			getIDTokenVerifiedClaimsRequestList(),
-			getUserInfoVerifiedClaimsRequestList());
+			getIDTokenVerifiedClaimsRequests(),
+			getUserInfoVerifiedClaimsRequests());
+	}
+	
+	
+	private static List<VerifiedClaimsSetRequest> toCurrent(final List<com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest> list) {
+		
+		if (CollectionUtils.isEmpty(list)) {
+			return Collections.emptyList();
+		}
+		
+		List<VerifiedClaimsSetRequest> out = new LinkedList<>();
+		for (com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest r: list) {
+			if (r == null) {
+				continue;
+			}
+			try {
+				out.add(VerifiedClaimsSetRequest.parse(r.toJSONObject()));
+			} catch (ParseException e) {
+				// should never happen
+			}	
+		}
+		return out;
+	}
+	
+	
+	private static List<com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest> toDeprecated(final List<VerifiedClaimsSetRequest> list) {
+		
+		if (CollectionUtils.isEmpty(list)) {
+			return Collections.emptyList();
+		}
+		
+		List<com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest> out = new LinkedList<>();
+		for (VerifiedClaimsSetRequest r: list) {
+			if (r == null) {
+				continue;
+			}
+			try {
+				out.add(com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest.parse(r.toJSONObject()));
+			} catch (ParseException e) {
+				// should never happen
+			}
+		}
+		return out;
 	}
 	
 	
@@ -236,8 +278,20 @@ public class OIDCClaimsRequest implements JSONAware {
 	 * @return The ID token verified claims request list, empty list if not
 	 *         specified.
 	 */
-	public List<VerifiedClaimsSetRequest> getIDTokenVerifiedClaimsRequestList() {
+	public List<VerifiedClaimsSetRequest> getIDTokenVerifiedClaimsRequests() {
 		return idTokenVerified;
+	}
+	
+	
+	/**
+	 * Returns the list of verified claims sets requested in the ID token.
+	 *
+	 * @return The ID token verified claims request list, empty list if not
+	 *         specified.
+	 */
+	@Deprecated
+	public List<com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest> getIDTokenVerifiedClaimsRequestList() {
+		return toDeprecated(idTokenVerified);
 	}
 	
 	
@@ -249,12 +303,30 @@ public class OIDCClaimsRequest implements JSONAware {
 	 *
 	 * @return The updated OpenID claims request.
 	 */
-	public OIDCClaimsRequest withIDTokenVerifiedClaimsRequestList(final List<VerifiedClaimsSetRequest> idTokenVerifiedList) {
+	public OIDCClaimsRequest withIDTokenVerifiedClaimsRequests(final List<VerifiedClaimsSetRequest> idTokenVerifiedList) {
 		return new OIDCClaimsRequest(
 			getIDTokenClaimsRequest(),
 			getUserInfoClaimsRequest(),
 			idTokenVerifiedList != null ? idTokenVerifiedList : Collections.<VerifiedClaimsSetRequest>emptyList(),
-			getUserInfoVerifiedClaimsRequestList());
+			getUserInfoVerifiedClaimsRequests());
+	}
+	
+	
+	/**
+	 * Sets the list of verified claims sets requested in the ID token.
+	 *
+	 * @param idTokenVerifiedList One or more ID token verified claims
+	 *                            requests, empty list if not specified.
+	 *
+	 * @return The updated OpenID claims request.
+	 */
+	@Deprecated
+	public OIDCClaimsRequest withIDTokenVerifiedClaimsRequestList(final List<com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest> idTokenVerifiedList) {
+		return new OIDCClaimsRequest(
+			getIDTokenClaimsRequest(),
+			getUserInfoClaimsRequest(),
+			idTokenVerifiedList != null ? toCurrent(idTokenVerifiedList) : Collections.<VerifiedClaimsSetRequest>emptyList(),
+			getUserInfoVerifiedClaimsRequests());
 	}
 	
 	
@@ -271,7 +343,25 @@ public class OIDCClaimsRequest implements JSONAware {
 			getIDTokenClaimsRequest(),
 			getUserInfoClaimsRequest(),
 			idTokenVerified != null ? Collections.singletonList(idTokenVerified) : Collections.<VerifiedClaimsSetRequest>emptyList(),
-			getUserInfoVerifiedClaimsRequestList());
+			getUserInfoVerifiedClaimsRequests());
+	}
+	
+	
+	/**
+	 * Sets a single verified claims set requested in the ID token.
+	 *
+	 * @param idTokenVerified The ID token verified claims request,
+	 *                        {@code null} if not specified.
+	 *
+	 * @return The updated OpenID claims request.
+	 */
+	@Deprecated
+	public OIDCClaimsRequest withIDTokenVerifiedClaimsRequest(final com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest idTokenVerified) {
+		return new OIDCClaimsRequest(
+			getIDTokenClaimsRequest(),
+			getUserInfoClaimsRequest(),
+			idTokenVerified != null ? toCurrent(Collections.singletonList(idTokenVerified)) : Collections.<VerifiedClaimsSetRequest>emptyList(),
+			getUserInfoVerifiedClaimsRequests());
 	}
 	
 	
@@ -282,8 +372,21 @@ public class OIDCClaimsRequest implements JSONAware {
 	 * @return The UserInfo verified claims request list, empty list if not
 	 *         specified.
 	 */
-	public List<VerifiedClaimsSetRequest> getUserInfoVerifiedClaimsRequestList() {
+	public List<VerifiedClaimsSetRequest> getUserInfoVerifiedClaimsRequests() {
 		return userInfoVerified;
+	}
+	
+	
+	/**
+	 * Returns the list of verified claims sets requested at the UserInfo
+	 * endpoint.
+	 *
+	 * @return The UserInfo verified claims request list, empty list if not
+	 *         specified.
+	 */
+	@Deprecated
+	public List<com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest> getUserInfoVerifiedClaimsRequestList() {
+		return toDeprecated(userInfoVerified);
 	}
 	
 	
@@ -296,12 +399,31 @@ public class OIDCClaimsRequest implements JSONAware {
 	 *
 	 * @return The updated OpenID claims request.
 	 */
-	public OIDCClaimsRequest withUserInfoVerifiedClaimsRequestList(final List<VerifiedClaimsSetRequest> userInfoVerifiedList) {
+	public OIDCClaimsRequest withUserInfoVerifiedClaimsRequests(final List<VerifiedClaimsSetRequest> userInfoVerifiedList) {
 		return new OIDCClaimsRequest(
 			getIDTokenClaimsRequest(),
 			getUserInfoClaimsRequest(),
-			getIDTokenVerifiedClaimsRequestList(),
+			getIDTokenVerifiedClaimsRequests(),
 			userInfoVerifiedList != null ? userInfoVerifiedList : Collections.<VerifiedClaimsSetRequest>emptyList());
+	}
+	
+	
+	/**
+	 * Sets the list of verified claims sets requested at the UserInfo
+	 * endpoint.
+	 *
+	 * @param userInfoVerifiedList One or more UserInfo verified claims
+	 *                             requests, empty list if not specified.
+	 *
+	 * @return The updated OpenID claims request.
+	 */
+	@Deprecated
+	public OIDCClaimsRequest withUserInfoVerifiedClaimsRequestList(final List<com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest> userInfoVerifiedList) {
+		return new OIDCClaimsRequest(
+			getIDTokenClaimsRequest(),
+			getUserInfoClaimsRequest(),
+			getIDTokenVerifiedClaimsRequests(),
+			userInfoVerifiedList != null ? toCurrent(userInfoVerifiedList) : Collections.<VerifiedClaimsSetRequest>emptyList());
 	}
 	
 	
@@ -318,8 +440,27 @@ public class OIDCClaimsRequest implements JSONAware {
 		return new OIDCClaimsRequest(
 			getIDTokenClaimsRequest(),
 			getUserInfoClaimsRequest(),
-			getIDTokenVerifiedClaimsRequestList(),
+			getIDTokenVerifiedClaimsRequests(),
 			userInfoVerified != null ? Collections.singletonList(userInfoVerified) : Collections.<VerifiedClaimsSetRequest>emptyList());
+	}
+	
+	
+	/**
+	 * Sets a single verified claims set requested at the UserInfo
+	 * endpoint.
+	 *
+	 * @param userInfoVerified The UserInfo verified claims request,
+	 *                         {@code null} if not specified.
+	 *
+	 * @return The updated OpenID claims request.
+	 */
+	@Deprecated
+	public OIDCClaimsRequest withUserInfoVerifiedClaimsRequest(final com.nimbusds.openid.connect.sdk.assurance.claims.VerifiedClaimsSetRequest userInfoVerified) {
+		return new OIDCClaimsRequest(
+			getIDTokenClaimsRequest(),
+			getUserInfoClaimsRequest(),
+			getIDTokenVerifiedClaimsRequests(),
+			userInfoVerified != null ? toCurrent(Collections.singletonList(userInfoVerified)) : Collections.<VerifiedClaimsSetRequest>emptyList());
 	}
 	
 	
@@ -680,7 +821,7 @@ public class OIDCClaimsRequest implements JSONAware {
 			if (! csr.getEntries().isEmpty()) {
 				claimsRequest = claimsRequest.withIDTokenClaimsRequest(csr);
 			}
-			claimsRequest = claimsRequest.withIDTokenVerifiedClaimsRequestList(parseVerified(idTokenObject));
+			claimsRequest = claimsRequest.withIDTokenVerifiedClaimsRequests(parseVerified(idTokenObject));
 		}
 		
 		JSONObject userInfoObject = JSONObjectUtils.getJSONObject(jsonObject, "userinfo", null);
@@ -690,7 +831,7 @@ public class OIDCClaimsRequest implements JSONAware {
 			if (! csr.getEntries().isEmpty()) {
 				claimsRequest = claimsRequest.withUserInfoClaimsRequest(ClaimsSetRequest.parse(userInfoObject));
 			}
-			claimsRequest = claimsRequest.withUserInfoVerifiedClaimsRequestList(parseVerified(userInfoObject));
+			claimsRequest = claimsRequest.withUserInfoVerifiedClaimsRequests(parseVerified(userInfoObject));
 		}
 		
 		return claimsRequest;
