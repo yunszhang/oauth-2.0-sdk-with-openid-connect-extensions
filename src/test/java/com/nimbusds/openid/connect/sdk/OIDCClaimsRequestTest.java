@@ -2152,4 +2152,77 @@ public class OIDCClaimsRequestTest extends TestCase {
 		
 		assertEquals(Collections.singleton("birthdate"), claimsRequest.getUserInfoVerifiedClaimsRequestList().get(1).getClaimNames(false));
 	}
+	
+	
+	// https://connect2id.com/products/nimbus-oauth-openid-connect-sdk/examples/openid-connect/identity-assurance#claims-process
+	public void _testVerified_genericParseAlgorithm()
+		throws ParseException {
+		
+		String json =
+			"{" +
+			"  \"id_token\" : {" +
+			"    \"email\" : null," +
+			"    \"verified_claims\" : {" +
+			"      \"verification\" : {" +
+			"        \"trust_framework\" : {" +
+			"          \"value\" : \"eidas\"" +
+			"        }" +
+			"      }," +
+			"      \"claims\" : {" +
+			"        \"name\" : {" +
+			"          \"essential\" : true," +
+			"          \"purpose\"   : \"Name required for contract\"" +
+			"        }," +
+			"        \"address\" : {" +
+			"          \"essential\" : true," +
+			"          \"purpose\"   : \"Address required for contract\"" +
+			"        }" +
+			"      }" +
+			"    }" +
+			"  }" +
+			"}";
+		
+		OIDCClaimsRequest claimsRequest = OIDCClaimsRequest.parse(json);
+		
+		print(claimsRequest);
+	}
+	
+	
+	private static void print(OIDCClaimsRequest claimsRequest) {
+		
+		int num = 1;
+		for (VerifiedClaimsSetRequest claimsSetRequest: claimsRequest.getUserInfoVerifiedClaimsRequests()) {
+			System.out.println("UserInfo set #" + num++ + ":");
+			print(claimsSetRequest);
+		}
+		
+		num = 1;
+		for (VerifiedClaimsSetRequest claimsSetRequest: claimsRequest.getIDTokenVerifiedClaimsRequests()) {
+			System.out.println("UserInfo set #" + num++ + ":");
+			print(claimsSetRequest);
+		}
+	}
+	
+	
+	private static void print(VerifiedClaimsSetRequest verifiedClaimsSetRequest) {
+		
+		VerificationSpec verification = verifiedClaimsSetRequest.getVerification();
+		System.out.println("\tVerification: " + verification.toJSONObject());
+		
+		System.out.println("\tRequested claims: ");
+		for (ClaimsSetRequest.Entry en: verifiedClaimsSetRequest.getEntries()) {
+			System.out.println("\t\tname: " + en.getClaimName());
+			System.out.println("\t\t\trequirement: " + en.getClaimRequirement());
+			if (en.getRawValue() != null) {
+				// Use claim specific typed value getter
+				System.out.println("\t\t\tvalue: " + en.getValueAsString());
+			}
+			if (en.getLangTag() != null) {
+				System.out.println("\t\t\tlanguage tag: " + en.getLangTag());
+			}
+			if (en.getPurpose() != null) {
+				System.out.println("\t\t\tpurpose message: " + en.getPurpose());
+			}
+		}
+	}
 }
