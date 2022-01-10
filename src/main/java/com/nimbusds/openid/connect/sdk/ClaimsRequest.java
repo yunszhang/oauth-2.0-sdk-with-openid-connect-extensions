@@ -320,7 +320,7 @@ public class ClaimsRequest implements JSONAware {
 		public String getClaimName(final boolean withLangTag) {
 			
 			if (withLangTag && langTag != null)
-				return claimName + "#" + langTag.toString();
+				return claimName + "#" + langTag;
 			else
 				return claimName;
 		}

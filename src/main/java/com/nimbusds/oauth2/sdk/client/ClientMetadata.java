@@ -197,7 +197,7 @@ public class ClientMetadata {
 	/**
 	 * The client policy for use of end-user data.
 	 */
-	private Map<LangTag,URI> policyURIEntries;
+	private final Map<LangTag,URI> policyURIEntries;
 
 
 	/**
