@@ -1925,3 +1925,6 @@ version 9.21 (2022-01-10)
     * Adds ClaimsSet.equals and hashCode methods.
     * Updates to com.nimbusds:content-type:2.2
 
+version 9.21.1 (2022-01-12)
+    * Fixes device_authorization_endpoint parsing in OIDCProviderMetadata.parse
+      (iss #380).

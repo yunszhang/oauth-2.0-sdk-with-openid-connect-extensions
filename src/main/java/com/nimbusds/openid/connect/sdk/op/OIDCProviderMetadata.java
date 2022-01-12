@@ -1674,6 +1674,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		op.setRevocationEndpointURI(as.getRevocationEndpointURI());
 		op.setRequestObjectEndpoint(as.getRequestObjectEndpoint());
 		op.setPushedAuthorizationRequestEndpointURI(as.getPushedAuthorizationRequestEndpointURI());
+		op.setDeviceAuthorizationEndpointURI(as.getDeviceAuthorizationEndpointURI());
 		op.userInfoEndpoint = JSONObjectUtils.getURI(jsonObject, "userinfo_endpoint", null);
 		op.checkSessionIframe = JSONObjectUtils.getURI(jsonObject, "check_session_iframe", null);
 		op.endSessionEndpoint = JSONObjectUtils.getURI(jsonObject, "end_session_endpoint", null);

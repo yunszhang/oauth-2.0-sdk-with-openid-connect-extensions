@@ -413,6 +413,9 @@ public class OIDCProviderMetadataTest extends TestCase {
 		
 		meta.setFederationRegistrationEndpointURI(new URI("https://c2id.com/fed"));
 		assertEquals("https://c2id.com/fed", meta.getFederationRegistrationEndpointURI().toString());
+		
+		meta.setDeviceAuthorizationEndpointURI(new URI("https://c2id.com/device"));
+		assertEquals("https://c2id.com/device", meta.getDeviceAuthorizationEndpointURI().toString());
 
 		meta.setScopes(Scope.parse("openid email profile"));
 		assertTrue(Scope.parse("openid email profile").containsAll(meta.getScopes()));
@@ -691,6 +694,7 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertEquals("https://c2id.com/logout", meta.getEndSessionEndpointURI().toString());
 		assertEquals("https://c2id.com/requests", meta.getRequestObjectEndpoint().toString());
 		assertEquals("https://c2id.com/par", meta.getPushedAuthorizationRequestEndpointURI().toString());
+		assertEquals("https://c2id.com/device", meta.getDeviceAuthorizationEndpointURI().toString());
 		
 		assertTrue(Scope.parse("openid email profile").containsAll(meta.getScopes()));
 
