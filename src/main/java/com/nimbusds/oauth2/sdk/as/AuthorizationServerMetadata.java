@@ -68,7 +68,7 @@ import com.nimbusds.oauth2.sdk.util.URIUtils;
  *         (draft-ietf-oauth-incremental-authz-04)
  * </ul>
  */
-public class AuthorizationServerMetadata extends AuthorizationServerEndpointMetadata {
+public class AuthorizationServerMetadata extends AuthorizationServerEndpointMetadata implements ReadOnlyAuthorizationServerMetadata {
 
 	/**
 	 * The registered parameter names.
@@ -387,24 +387,14 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the issuer identifier. Corresponds to the {@code issuer}
-	 * metadata field.
-	 *
-	 * @return The issuer identifier.
-	 */
+	@Override
 	public Issuer getIssuer() {
 		
 		return issuer;
 	}
 	
 	
-	/**
-	 * Gets the JSON Web Key (JWK) set URI. Corresponds to the
-	 * {@code jwks_uri} metadata field.
-	 *
-	 * @return The JWK set URI, {@code null} if not specified.
-	 */
+	@Override
 	public URI getJWKSetURI() {
 		
 		return jwkSetURI;
@@ -423,12 +413,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported scope values. Corresponds to the
-	 * {@code scopes_supported} metadata field.
-	 *
-	 * @return The supported scope values, {@code null} if not specified.
-	 */
+	@Override
 	public Scope getScopes() {
 		
 		return scope;
@@ -448,13 +433,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported response type values. Corresponds to the
-	 * {@code response_types_supported} metadata field.
-	 *
-	 * @return The supported response type values, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public List<ResponseType> getResponseTypes() {
 		
 		return rts;
@@ -474,13 +453,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported response mode values. Corresponds to the
-	 * {@code response_modes_supported}.
-	 *
-	 * @return The supported response mode values, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public List<ResponseMode> getResponseModes() {
 		
 		return rms;
@@ -500,12 +473,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported OAuth 2.0 grant types. Corresponds to the
-	 * {@code grant_types_supported} metadata field.
-	 *
-	 * @return The supported grant types, {@code null} if not specified.
-	 */
+	@Override
 	public List<GrantType> getGrantTypes() {
 		
 		return gts;
@@ -524,14 +492,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported authorisation code challenge methods for PKCE.
-	 * Corresponds to the {@code code_challenge_methods_supported} metadata
-	 * field.
-	 *
-	 * @return The supported code challenge methods, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public List<CodeChallengeMethod> getCodeChallengeMethods() {
 		
 		return codeChallengeMethods;
@@ -552,14 +513,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported token endpoint authentication methods.
-	 * Corresponds to the {@code token_endpoint_auth_methods_supported}
-	 * metadata field.
-	 *
-	 * @return The supported token endpoint authentication methods,
-	 *         {@code null} if not specified.
-	 */
+	@Override
 	public List<ClientAuthenticationMethod> getTokenEndpointAuthMethods() {
 		
 		return tokenEndpointAuthMethods;
@@ -580,15 +534,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported JWS algorithms for the {@code private_key_jwt}
-	 * and {@code client_secret_jwt} token endpoint authentication methods.
-	 * Corresponds to the
-	 * {@code token_endpoint_auth_signing_alg_values_supported} metadata
-	 * field.
-	 *
-	 * @return The supported JWS algorithms, {@code null} if not specified.
-	 */
+	@Override
 	public List<JWSAlgorithm> getTokenEndpointJWSAlgs() {
 		
 		return tokenEndpointJWSAlgs;
@@ -615,15 +561,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported introspection endpoint authentication methods.
-	 * Corresponds to the
-	 * {@code introspection_endpoint_auth_methods_supported} metadata
-	 * field.
-	 *
-	 * @return The supported introspection endpoint authentication methods,
-	 *         {@code null} if not specified.
-	 */
+	@Override
 	public List<ClientAuthenticationMethod> getIntrospectionEndpointAuthMethods() {
 		return introspectionEndpointAuthMethods;
 	}
@@ -645,15 +583,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported JWS algorithms for the {@code private_key_jwt}
-	 * and {@code client_secret_jwt} introspection endpoint authentication
-	 * methods. Corresponds to the
-	 * {@code introspection_endpoint_auth_signing_alg_values_supported}
-	 * metadata field.
-	 *
-	 * @return The supported JWS algorithms, {@code null} if not specified.
-	 */
+	@Override
 	public List<JWSAlgorithm> getIntrospectionEndpointJWSAlgs() {
 		
 		return introspectionEndpointJWSAlgs;
@@ -680,14 +610,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported revocation endpoint authentication methods.
-	 * Corresponds to the
-	 * {@code revocation_endpoint_auth_methods_supported} metadata field.
-	 *
-	 * @return The supported revocation endpoint authentication methods,
-	 *         {@code null} if not specified.
-	 */
+	@Override
 	public List<ClientAuthenticationMethod> getRevocationEndpointAuthMethods() {
 		
 		return revocationEndpointAuthMethods;
@@ -708,15 +631,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported JWS algorithms for the {@code private_key_jwt}
-	 * and {@code client_secret_jwt} revocation endpoint authentication
-	 * methods. Corresponds to the
-	 * {@code revocation_endpoint_auth_signing_alg_values_supported}
-	 * metadata field.
-	 *
-	 * @return The supported JWS algorithms, {@code null} if not specified.
-	 */
+	@Override
 	public List<JWSAlgorithm> getRevocationEndpointJWSAlgs() {
 		
 		return revocationEndpointJWSAlgs;
@@ -743,13 +658,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported JWS algorithms for request objects. Corresponds
-	 * to the {@code request_object_signing_alg_values_supported} metadata
-	 * field.
-	 *
-	 * @return The supported JWS algorithms, {@code null} if not specified.
-	 */
+	@Override
 	public List<JWSAlgorithm> getRequestObjectJWSAlgs() {
 		
 		return requestObjectJWSAlgs;
@@ -770,13 +679,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported JWE algorithms for request objects. Corresponds
-	 * to the {@code request_object_encryption_alg_values_supported}
-	 * metadata field.
-	 *
-	 * @return The supported JWE algorithms, {@code null} if not specified.
-	 */
+	@Override
 	public List<JWEAlgorithm> getRequestObjectJWEAlgs() {
 		
 		return requestObjectJWEAlgs;
@@ -797,15 +700,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported encryption methods for request objects.
-	 * Corresponds to the
-	 * {@code request_object_encryption_enc_values_supported} metadata
-	 * field.
-	 *
-	 * @return The supported encryption methods, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public List<EncryptionMethod> getRequestObjectJWEEncs() {
 		
 		return requestObjectJWEEncs;
@@ -827,14 +722,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the support for the {@code request} authorisation request
-	 * parameter. Corresponds to the {@code request_parameter_supported}
-	 * metadata field.
-	 *
-	 * @return {@code true} if the {@code reqeust} parameter is supported,
-	 *         else {@code false}.
-	 */
+	@Override
 	public boolean supportsRequestParam() {
 		
 		return requestParamSupported;
@@ -856,14 +744,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the support for the {@code request_uri} authorisation request
-	 * parameter. Corresponds to the
-	 * {@code request_uri_parameter_supported} metadata field.
-	 *
-	 * @return {@code true} if the {@code request_uri} parameter is
-	 *         supported, else {@code false}.
-	 */
+	@Override
 	public boolean supportsRequestURIParam() {
 		
 		return requestURIParamSupported;
@@ -885,14 +766,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the requirement for the {@code request_uri} parameter
-	 * pre-registration. Corresponds to the
-	 * {@code require_request_uri_registration} metadata field.
-	 *
-	 * @return {@code true} if the {@code request_uri} parameter values
-	 *         must be pre-registered, else {@code false}.
-	 */
+	@Override
 	public boolean requiresRequestURIRegistration() {
 		
 		return requireRequestURIReg;
@@ -914,15 +788,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the support for the {@code iss} authorisation response
-	 * parameter. Corresponds to the
-	 * {@code authorization_response_iss_parameter_supported} metadata
-	 * field.
-	 *
-	 * @return {@code true} if the {@code iss} authorisation response
-	 *         parameter is provided, else {@code false}.
-	 */
+	@Override
 	public boolean supportsAuthorizationResponseIssuerParam() {
 		
 		return authzResponseIssParameterSupported;
@@ -947,12 +813,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported UI locales. Corresponds to the
-	 * {@code ui_locales_supported} metadata field.
-	 *
-	 * @return The supported UI locales, {@code null} if not specified.
-	 */
+	@Override
 	public List<LangTag> getUILocales() {
 		
 		return uiLocales;
@@ -972,13 +833,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the service documentation URI. Corresponds to the
-	 * {@code service_documentation} metadata field.
-	 *
-	 * @return The service documentation URI, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public URI getServiceDocsURI() {
 		
 		return serviceDocsURI;
@@ -1000,12 +855,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the provider's policy regarding relying party use of data.
-	 * Corresponds to the {@code op_policy_uri} metadata field.
-	 *
-	 * @return The policy URI, {@code null} if not specified.
-	 */
+	@Override
 	public URI getPolicyURI() {
 		
 		return policyURI;
@@ -1026,12 +876,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the provider's terms of service. Corresponds to the
-	 * {@code op_tos_uri} metadata field.
-	 *
-	 * @return The terms of service URI, {@code null} if not specified.
-	 */
+	@Override
 	public URI getTermsOfServiceURI() {
 		
 		return tosURI;
@@ -1052,13 +897,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the aliases for communication with mutual TLS. Corresponds to the
-	 * {@code mtls_endpoint_aliases} metadata field.
-	 * 
-	 * @return The aliases for communication with mutual TLS, or {@code null}
-	 *         when no aliases are defined.
-	 */
+	@Override
 	public AuthorizationServerEndpointMetadata getMtlsEndpointAliases() {
 
 		return mtlsEndpointAliases;
@@ -1079,14 +918,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the support for TLS client certificate bound access tokens.
-	 * Corresponds to the
-	 * {@code tls_client_certificate_bound_access_tokens} metadata field.
-	 *
-	 * @return {@code true} if TLS client certificate bound access tokens
-	 *         are supported, else {@code false}.
-	 */
+	@Override
 	public boolean supportsTLSClientCertificateBoundAccessTokens() {
 		
 		return tlsClientCertificateBoundAccessTokens;
@@ -1108,14 +940,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the support for TLS client certificate bound access tokens.
-	 * Corresponds to the
-	 * {@code tls_client_certificate_bound_access_tokens} metadata field.
-	 *
-	 * @return {@code true} if TLS client certificate bound access tokens
-	 *         are supported, else {@code false}.
-	 */
+	@Override
 	@Deprecated
 	public boolean supportsMutualTLSSenderConstrainedAccessTokens() {
 		
@@ -1141,13 +966,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported JWS algorithms for Demonstrating
-	 * Proof-of-Possession at the Application Layer (DPoP). Corresponds to
-	 * the "dpop_signing_alg_values_supported" metadata field.
-	 *
-	 * @return The supported JWS algorithms for DPoP, {@code null} if none.
-	 */
+	@Override
 	public List<JWSAlgorithm> getDPoPJWSAlgs() {
 		
 		return dPoPJWSAlgs;
@@ -1168,13 +987,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported JWS algorithms for JWT-encoded authorisation
-	 * responses. Corresponds to the
-	 * {@code authorization_signing_alg_values_supported} metadata field.
-	 *
-	 * @return The supported JWS algorithms, {@code null} if not specified.
-	 */
+	@Override
 	public List<JWSAlgorithm> getAuthorizationJWSAlgs() {
 		
 		return authzJWSAlgs;
@@ -1195,14 +1008,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported JWE algorithms for JWT-encoded authorisation
-	 * responses. Corresponds to the
-	 * {@code authorization_encryption_alg_values_supported} metadata
-	 * field.
-	 *
-	 * @return The supported JWE algorithms, {@code null} if not specified.
-	 */
+	@Override
 	public List<JWEAlgorithm> getAuthorizationJWEAlgs() {
 		
 		return authzJWEAlgs;
@@ -1224,15 +1030,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported encryption methods for JWT-encoded authorisation
-	 * responses. Corresponds to the
-	 * {@code authorization_encryption_enc_values_supported} metadata
-	 * field.
-	 *
-	 * @return The supported encryption methods, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public List<EncryptionMethod> getAuthorizationJWEEncs() {
 		
 		return authzJWEEncs;
@@ -1254,13 +1052,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the requirement for pushed authorisation requests (PAR).
-	 * Corresponds to the {@code pushed_authorization_request_endpoint}
-	 * metadata field.
-	 *
-	 * @return {@code true} if PAR is required, else {@code false}.
-	 */
+	@Override
 	public boolean requiresPushedAuthorizationRequests() {
 		
 		return requirePAR;
@@ -1281,14 +1073,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported OAuth 2.0 client types for incremental
-	 * authorisation. Corresponds to the
-	 * {@code incremental_authz_types_supported} metadata field.
-	 *
-	 * @return The supported client types for incremental authorisation,
-	 *         {@code null} if not specified.
-	 */
+	@Override
 	public List<ClientType> getIncrementalAuthorizationTypes() {
 		
 		return incrementalAuthzTypes;
@@ -1310,13 +1095,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the supported CIBA token delivery modes. Corresponds to the
-	 * {@code backchannel_token_delivery_modes_supported} metadata field.
-	 *
-	 * @return The CIBA token delivery modes, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public List<BackChannelTokenDeliveryMode> getBackChannelTokenDeliveryModes() {
 		
 		return backChannelTokenDeliveryModes;
@@ -1335,13 +1114,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 		this.backChannelTokenDeliveryModes = backChannelTokenDeliveryModes;
 	}
 	
-	/**
-	 * Gets the supported JWS algorithms for CIBA requests. Corresponds to
-	 * the {@code backchannel_authentication_request_signing_alg_values_supported}
-	 * metadata field.
-	 *
-	 * @return The supported JWS algorithms, {@code null} if not specified.
-	 */
+	@Override
 	public List<JWSAlgorithm> getBackChannelAuthenticationRequestJWSAlgs() {
 		
 		return backChannelAuthRequestJWSAlgs;
@@ -1361,14 +1134,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the support for the {@code user_code} CIBA request parameter.
-	 * Corresponds to the {@code backchannel_user_code_parameter_supported}
-	 * metadata field.
-	 *
-	 * @return {@code true} if the {@code user_code} parameter is
-	 *         supported, else {@code false}.
-	 */
+	@Override
 	public boolean supportsBackChannelUserCodeParam() {
 		
 		return backChannelUserCodeSupported;
@@ -1390,26 +1156,14 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the specified custom (not registered) parameter.
-	 *
-	 * @param name The parameter name. Must not be {@code null}.
-	 *
-	 * @return The parameter value, {@code null} if not specified.
-	 */
+	@Override
 	public Object getCustomParameter(final String name) {
 		
 		return customParameters.get(name);
 	}
 	
 	
-	/**
-	 * Gets the specified custom (not registered) URI parameter.
-	 *
-	 * @param name The parameter name. Must not be {@code null}.
-	 *
-	 * @return The parameter URI value, {@code null} if not specified.
-	 */
+	@Override
 	public URI getCustomURIParameter(final String name) {
 		
 		try {
@@ -1436,11 +1190,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Gets the custom (not registered) parameters.
-	 *
-	 * @return The custom parameters, empty JSON object if none.
-	 */
+	@Override
 	public JSONObject getCustomParameters() {
 		
 		return customParameters;
@@ -1480,12 +1230,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	}
 	
 	
-	/**
-	 * Returns the JSON object representation of this OpenID Connect
-	 * provider metadata.
-	 *
-	 * @return The JSON object representation.
-	 */
+	@Override
 	public JSONObject toJSONObject() {
 		JSONObject o = super.toJSONObject();
 		

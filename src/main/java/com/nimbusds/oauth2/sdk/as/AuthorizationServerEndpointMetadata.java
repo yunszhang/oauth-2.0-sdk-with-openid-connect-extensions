@@ -45,7 +45,7 @@ import com.nimbusds.oauth2.sdk.util.OrderedJSONObject;
  * 	   Core 1.0 (draft 03)
  * </ul>
  */
-public class AuthorizationServerEndpointMetadata {
+public class AuthorizationServerEndpointMetadata implements ReadOnlyAuthorizationServerEndpointMetadata {
 	
 	/**
 	 * The registered parameter names.
@@ -142,13 +142,7 @@ public class AuthorizationServerEndpointMetadata {
 	}
 	
 	
-	/**
-	 * Gets the authorisation endpoint URI. Corresponds the
-	 * {@code authorization_endpoint} metadata field.
-	 *
-	 * @return The authorisation endpoint URI, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public URI getAuthorizationEndpointURI() {
 		
 		return authzEndpoint;
@@ -168,12 +162,7 @@ public class AuthorizationServerEndpointMetadata {
 	}
 	
 	
-	/**
-	 * Gets the token endpoint URI. Corresponds the {@code token_endpoint}
-	 * metadata field.
-	 *
-	 * @return The token endpoint URI, {@code null} if not specified.
-	 */
+	@Override
 	public URI getTokenEndpointURI() {
 		
 		return tokenEndpoint;
@@ -193,13 +182,7 @@ public class AuthorizationServerEndpointMetadata {
 	}
 	
 	
-	/**
-	 * Gets the client registration endpoint URI. Corresponds to the
-	 * {@code registration_endpoint} metadata field.
-	 *
-	 * @return The client registration endpoint URI, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public URI getRegistrationEndpointURI() {
 		
 		return regEndpoint;
@@ -219,13 +202,7 @@ public class AuthorizationServerEndpointMetadata {
 	}
 	
 	
-	/**
-	 * Gets the token introspection endpoint URI. Corresponds to the
-	 * {@code introspection_endpoint} metadata field.
-	 *
-	 * @return The token introspection endpoint URI, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public URI getIntrospectionEndpointURI() {
 		
 		return introspectionEndpoint;
@@ -245,13 +222,7 @@ public class AuthorizationServerEndpointMetadata {
 	}
 	
 	
-	/**
-	 * Gets the token revocation endpoint URI. Corresponds to the
-	 * {@code revocation_endpoint} metadata field.
-	 *
-	 * @return The token revocation endpoint URI, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public URI getRevocationEndpointURI() {
 		
 		return revocationEndpoint;
@@ -271,13 +242,8 @@ public class AuthorizationServerEndpointMetadata {
 	}
 	
 	
-	/**
-	 * Gets the request object endpoint. Corresponds to the
-	 * {@code request_object_endpoint} metadata field.
-	 *
-	 * @return The request object endpoint, {@code null} if not specified.
-	 */
 	@Deprecated
+	@Override
 	public URI getRequestObjectEndpoint() {
 		
 		return requestObjectEndpoint;
@@ -298,13 +264,7 @@ public class AuthorizationServerEndpointMetadata {
 	}
 	
 	
-	/**
-	 * Gets the pushed authorisation request endpoint. Corresponds to the
-	 * {@code pushed_authorization_request_endpoint} metadata field.
-	 *
-	 * @return The pushed authorisation request endpoint, {@code null} if
-	 *         not specified.
-	 */
+	@Override
 	public URI getPushedAuthorizationRequestEndpointURI() {
 		
 		return parEndpoint;
@@ -324,13 +284,7 @@ public class AuthorizationServerEndpointMetadata {
 	}
 	
 	
-	/**
-	 * Gets the device authorization endpoint URI. Corresponds the
-	 * {@code device_authorization_endpoint} metadata field.
-	 *
-	 * @return The device authorization endpoint URI, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public URI getDeviceAuthorizationEndpointURI() {
 		
 		return deviceAuthzEndpoint;
@@ -350,13 +304,7 @@ public class AuthorizationServerEndpointMetadata {
 	}
 	
 	
-	/**
-	 * Gets the back-channel authentication endpoint URI. Corresponds the
-	 * {@code backchannel_authentication_endpoint} metadata field.
-	 *
-	 * @return The back-channel authentication endpoint URI, {@code null}
-	 *         if not specified.
-	 */
+	@Override
 	public URI getBackChannelAuthenticationEndpoint() {
 		
 		return backChannelAuthEndpoint;
