@@ -75,7 +75,7 @@ import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistratio
  *         Response (draft-ietf-oauth-iss-auth-resp-00)
  * </ul>
  */
-public class OIDCProviderMetadata extends AuthorizationServerMetadata {
+public class OIDCProviderMetadata extends AuthorizationServerMetadata implements ReadOnlyOIDCProviderMetadata {
 
 
 	/**
@@ -87,8 +87,6 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	static {
 		Set<String> p = new HashSet<>(AuthorizationServerMetadata.getRegisteredParameterNames());
 		p.addAll(OIDCProviderEndpointMetadata.getRegisteredParameterNames());
-		p.add("check_session_iframe");
-		p.add("end_session_endpoint");
 		p.add("acr_values_supported");
 		p.add("subject_types_supported");
 		p.add("id_token_signing_alg_values_supported");
@@ -398,6 +396,14 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		}
 	}
 	
+	
+	@Override
+	public OIDCProviderEndpointMetadata getReadOnlyMtlsEndpointAliases() {
+	
+		return getMtlsEndpointAliases();
+	}
+	
+	
 	@Override
 	public OIDCProviderEndpointMetadata getMtlsEndpointAliases() {
 	
@@ -418,12 +424,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 
 
-	/**
-	 * Gets the UserInfo endpoint URI. Corresponds the
-	 * {@code userinfo_endpoint} metadata field.
-	 *
-	 * @return The UserInfo endpoint URI, {@code null} if not specified.
-	 */
+	@Override
 	public URI getUserInfoEndpointURI() {
 
 		return userInfoEndpoint;
@@ -443,12 +444,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the cross-origin check session iframe URI. Corresponds to the
-	 * {@code check_session_iframe} metadata field.
-	 * 
-	 * @return The check session iframe URI, {@code null} if not specified.
-	 */
+	@Override
 	public URI getCheckSessionIframeURI() {
 		
 		return checkSessionIframe;
@@ -468,12 +464,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the logout endpoint URI. Corresponds to the
-	 * {@code end_session_endpoint} metadata field.
-	 * 
-	 * @return The logoout endpoint URI, {@code null} if not specified.
-	 */
+	@Override
 	public URI getEndSessionEndpointURI() {
 		
 		return endSessionEndpoint;
@@ -492,12 +483,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 		this.endSessionEndpoint = endSessionEndpoint;
 	}
 
-	/**
-	 * Gets the supported Authentication Context Class References (ACRs).
-	 * Corresponds to the {@code acr_values_supported} metadata field.
-	 *
-	 * @return The supported ACRs, {@code null} if not specified.
-	 */
+	@Override
 	public List<ACR> getACRs() {
 
 		return acrValues;
@@ -516,24 +502,14 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 
 
-	/**
-	 * Gets the supported subject types. Corresponds to the
-	 * {@code subject_types_supported} metadata field.
-	 *
-	 * @return The supported subject types.
-	 */
+	@Override
 	public List<SubjectType> getSubjectTypes() {
 
 		return subjectTypes;
 	}
 
 
-	/**
-	 * Gets the supported JWS algorithms for ID tokens. Corresponds to the 
-	 * {@code id_token_signing_alg_values_supported} metadata field.
-	 *
-	 * @return The supported JWS algorithms, {@code null} if not specified.
-	 */
+	@Override
 	public List<JWSAlgorithm> getIDTokenJWSAlgs() {
 
 		return idTokenJWSAlgs;
@@ -553,12 +529,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 
 
-	/**
-	 * Gets the supported JWE algorithms for ID tokens. Corresponds to the 
-	 * {@code id_token_encryption_alg_values_supported} metadata field.
-	 *
-	 * @return The supported JWE algorithms, {@code null} if not specified.
-	 */
+	@Override
 	public List<JWEAlgorithm> getIDTokenJWEAlgs() {
 
 		return idTokenJWEAlgs;
@@ -578,13 +549,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 
 
-	/**
-	 * Gets the supported encryption methods for ID tokens. Corresponds to 
-	 * the {@code id_token_encryption_enc_values_supported} metadata field.
-	 *
-	 * @return The supported encryption methods, {@code null} if not 
-	 *         specified.
-	 */
+	@Override
 	public List<EncryptionMethod> getIDTokenJWEEncs() {
 
 		return idTokenJWEEncs;
@@ -604,12 +569,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 
 
-	/**
-	 * Gets the supported JWS algorithms for UserInfo JWTs. Corresponds to 
-	 * the {@code userinfo_signing_alg_values_supported} metadata field.
-	 *
-	 * @return The supported JWS algorithms, {@code null} if not specified.
-	 */
+	@Override
 	public List<JWSAlgorithm> getUserInfoJWSAlgs() {
 
 		return userInfoJWSAlgs;
@@ -629,12 +589,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 
 
-	/**
-	 * Gets the supported JWE algorithms for UserInfo JWTs. Corresponds to 
-	 * the {@code userinfo_encryption_alg_values_supported} metadata field.
-	 *
-	 * @return The supported JWE algorithms, {@code null} if not specified.
-	 */
+	@Override
 	public List<JWEAlgorithm> getUserInfoJWEAlgs() {
 
 		return userInfoJWEAlgs;
@@ -654,14 +609,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 
 
-	/**
-	 * Gets the supported encryption methods for UserInfo JWTs. Corresponds 
-	 * to the {@code userinfo_encryption_enc_values_supported} metadata 
-	 * field.
-	 *
-	 * @return The supported encryption methods, {@code null} if not 
-	 *         specified.
-	 */
+	@Override
 	public List<EncryptionMethod> getUserInfoJWEEncs() {
 
 		return userInfoJWEEncs;
@@ -682,12 +630,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 
 
-	/**
-	 * Gets the supported displays. Corresponds to the 
-	 * {@code display_values_supported} metadata field.
-	 *
-	 * @return The supported displays, {@code null} if not specified.
-	 */
+	@Override
 	public List<Display> getDisplays() {
 
 		return displays;
@@ -707,12 +650,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the supported claim types. Corresponds to the 
-	 * {@code claim_types_supported} metadata field.
-	 * 
-	 * @return The supported claim types, {@code null} if not specified.
-	 */
+	@Override
 	public List<ClaimType> getClaimTypes() {
 		
 		return claimTypes;
@@ -732,12 +670,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 
 
-	/**
-	 * Gets the supported claims names. Corresponds to the 
-	 * {@code claims_supported} metadata field.
-	 *
-	 * @return The supported claims names, {@code null} if not specified.
-	 */
+	@Override
 	public List<String> getClaims() {
 
 		return claims;
@@ -757,12 +690,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the supported claims locales. Corresponds to the
-	 * {@code claims_locales_supported} metadata field.
-	 * 
-	 * @return The supported claims locales, {@code null} if not specified.
-	 */
+	@Override
 	public List<LangTag> getClaimsLocales() {
 		
 		return claimsLocales;
@@ -782,14 +710,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the support for the {@code claims} authorisation request
-	 * parameter. Corresponds to the {@code claims_parameter_supported} 
-	 * metadata field.
-	 * 
-	 * @return {@code true} if the {@code claim} parameter is supported,
-	 *         else {@code false}.
-	 */
+	@Override
 	public boolean supportsClaimsParam() {
 		
 		return claimsParamSupported;
@@ -811,13 +732,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the support for front-channel logout. Corresponds to the
-	 * {@code frontchannel_logout_supported} metadata field.
-	 *
-	 * @return {@code true} if front-channel logout is supported, else
-	 *         {@code false}.
-	 */
+	@Override
 	public boolean supportsFrontChannelLogout() {
 		
 		return frontChannelLogoutSupported;
@@ -838,14 +753,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the support for front-channel logout with a session ID.
-	 * Corresponds to the {@code frontchannel_logout_session_supported}
-	 * metadata field.
-	 *
-	 * @return {@code true} if front-channel logout with a session ID is
-	 *         supported, else {@code false}.
-	 */
+	@Override
 	public boolean supportsFrontChannelLogoutSession() {
 		
 		return frontChannelLogoutSessionSupported;
@@ -868,13 +776,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the support for back-channel logout. Corresponds to the
-	 * {@code backchannel_logout_supported} metadata field.
-	 *
-	 * @return {@code true} if back-channel logout is supported, else
-	 *         {@code false}.
-	 */
+	@Override
 	public boolean supportsBackChannelLogout() {
 		
 		return backChannelLogoutSupported;
@@ -895,14 +797,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the support for back-channel logout with a session ID.
-	 * Corresponds to the {@code backchannel_logout_session_supported}
-	 * metadata field.
-	 *
-	 * @return {@code true} if back-channel logout with a session ID is
-	 *         supported, else {@code false}.
-	 */
+	@Override
 	public boolean supportsBackChannelLogoutSession() {
 		
 		return backChannelLogoutSessionSupported;
@@ -925,13 +820,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets support for verified claims. Corresponds to the
-	 * {@code verified_claims_supported} metadata field.
-	 *
-	 * @return {@code true} if verified claims are supported, else
-	 *         {@code false}.
-	 */
+	@Override
 	public boolean supportsVerifiedClaims() {
 		
 		return verifiedClaimsSupported;
@@ -951,13 +840,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the supported identity trust frameworks. Corresponds to the
-	 * {@code trust_frameworks_supported} metadata field.
-	 *
-	 * @return The supported identity trust frameworks, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public List<IdentityTrustFramework> getIdentityTrustFrameworks() {
 		
 		return trustFrameworks;
@@ -977,13 +860,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the supported identity evidence types. Corresponds to the
-	 * {@code evidence_supported} metadata field.
-	 *
-	 * @return The supported identity evidence types, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public List<IdentityEvidenceType> getIdentityEvidenceTypes() {
 		
 		return evidenceTypes;
@@ -1003,13 +880,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the supported identity document types. Corresponds to the
-	 * {@code documents_supported} metadata field.
-	 *
-	 * @return The supported identity document types, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public List<DocumentType> getDocumentTypes() {
 		
 		return documentTypes;
@@ -1029,15 +900,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the supported identity document types. Corresponds to the
-	 * {@code id_documents_supported} metadata field.
-	 *
-	 * @return The supported identity documents types, {@code null} if not
-	 *         specified.
-	 *
-	 * @deprecated Use {@link #getDocumentTypes} instead.
-	 */
+	@Override
 	@Deprecated
 	public List<IDDocumentType> getIdentityDocumentTypes() {
 		
@@ -1061,14 +924,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the supported coarse identity verification methods for
-	 * evidences of type document. Corresponds to the
-	 * {@code documents_methods_supported} metadata field.
-	 *
-	 * @return The supported identity verification methods for document
-	 *         evidences, {@code null} if not specified.
-	 */
+	@Override
 	public List<IdentityVerificationMethod> getDocumentMethods() {
 		
 		return documentMethods;
@@ -1089,14 +945,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the supported validation methods for evidences of type
-	 * document. Corresponds to the
-	 * {@code documents_validation_methods_supported} metadata field.
-	 *
-	 * @return The validation methods for document evidences, {@code null}
-	 *         if not specified.
-	 */
+	@Override
 	public List<ValidationMethodType> getDocumentValidationMethods() {
 		
 		return documentValidationMethods;
@@ -1117,14 +966,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the supported verification methods for evidences of type
-	 * document. Corresponds to the
-	 * {@code documents_verification_methods_supported} metadata field.
-	 *
-	 * @return The verification methods for document evidences, {@code null}
-	 *         if not specified.
-	 */
+	@Override
 	public List<VerificationMethodType> getDocumentVerificationMethods() {
 		
 		return documentVerificationMethods;
@@ -1145,13 +987,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the supported electronic record types. Corresponds to the
-	 * {@code electronic_records_supported} metadata field.
-	 *
-	 * @return The supported electronic record types, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public List<ElectronicRecordType> getElectronicRecordTypes() {
 		
 		return electronicRecordTypes;
@@ -1171,13 +1007,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the supported identity verification methods. Corresponds to the
-	 * {@code id_documents_verification_methods_supported} metadata field.
-	 *
-	 * @return The supported identity verification methods, {@code null} if
-	 *         not specified.
-	 */
+	@Override
 	@Deprecated
 	public List<IdentityVerificationMethod> getIdentityVerificationMethods() {
 		
@@ -1199,13 +1029,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the names of the supported verified claims. Corresponds to the
-	 * {@code claims_in_verified_claims_supported} metadata field.
-	 *
-	 * @return The supported verified claims names, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public List<String> getVerifiedClaims() {
 		
 		return verifiedClaims;
@@ -1225,14 +1049,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the supported evidence attachment types. Corresponds to the
-	 * {@code attachments_supported} metadata field.
-	 *
-	 * @return The supported evidence attachment types, empty if
-	 *         attachments are not supported, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public List<AttachmentType> getAttachmentTypes() {
 		
 		return attachmentTypes;
@@ -1253,14 +1070,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the supported digest algorithms for the external evidence
-	 * attachments. Corresponds to the {@code digest_algorithms_supported}
-	 * metadata field.
-	 *
-	 * @return The supported digest algorithms, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public List<HashAlgorithm> getAttachmentDigestAlgs() {
 		
 		return attachmentDigestAlgs;
@@ -1281,13 +1091,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the supported federation client registration types. Corresponds
-	 * to the {@code client_registration_types_supported} metadata field.
-	 *
-	 * @return The supported client registration types, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public List<ClientRegistrationType> getClientRegistrationTypes() {
 		return clientRegistrationTypes;
 	}
@@ -1305,15 +1109,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the supported client authentication methods for automatic
-	 * federation client registration. Corresponds to the
-	 * {@code client_registration_authn_methods_supported} field.
-	 *
-	 * @return The supported authentication methods for automatic
-	 *         federation client registration, {@code null} if not
-	 *         specified.
-	 */
+	@Override
 	public Map<EndpointName,List<ClientAuthenticationMethod>> getClientRegistrationAuthnMethods() {
 		return clientRegistrationAuthMethods;
 	}
@@ -1333,12 +1129,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the organisation name (in federation). Corresponds to the
-	 * {@code organization_name} metadata field.
-	 *
-	 * @return The organisation name, {@code null} if not specified.
-	 */
+	@Override
 	public String getOrganizationName() {
 		return organizationName;
 	}
@@ -1356,13 +1147,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 	
 	
-	/**
-	 * Gets the federation registration endpoint URI. Corresponds to the
-	 * {@code federation_registration_endpoint} metadata field.
-	 *
-	 * @return The federation registration endpoint URI, {@code null} if
-	 *         not specified.
-	 */
+	@Override
 	public URI getFederationRegistrationEndpointURI() {
 		
 		return federationRegistrationEndpoint;
@@ -1407,12 +1192,7 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata {
 	}
 
 
-	/**
-	 * Returns the JSON object representation of this OpenID Connect
-	 * provider metadata.
-	 *
-	 * @return The JSON object representation.
-	 */
+	@Override
 	public JSONObject toJSONObject() {
 
 		JSONObject o = super.toJSONObject();

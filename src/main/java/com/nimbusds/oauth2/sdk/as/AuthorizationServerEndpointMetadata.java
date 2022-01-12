@@ -31,7 +31,7 @@ import com.nimbusds.oauth2.sdk.util.OrderedJSONObject;
 
 
 /**
- * OAuth 2.0 Authorisation Server (AS) metadata for the endpoints.
+ * OAuth 2.0 Authorisation Server (AS) endpoint metadata.
  *
  * <p>Related specifications:
  *
@@ -242,8 +242,8 @@ public class AuthorizationServerEndpointMetadata implements ReadOnlyAuthorizatio
 	}
 	
 	
-	@Deprecated
 	@Override
+	@Deprecated
 	public URI getRequestObjectEndpoint() {
 		
 		return requestObjectEndpoint;
@@ -325,12 +325,7 @@ public class AuthorizationServerEndpointMetadata implements ReadOnlyAuthorizatio
 	}
 	
 	
-	/**
-	 * Returns the JSON object representation of this OpenID Connect
-	 * provider metadata.
-	 *
-	 * @return The JSON object representation.
-	 */
+	@Override
 	public JSONObject toJSONObject() {
 		
 		JSONObject o = new OrderedJSONObject();
@@ -387,10 +382,7 @@ public class AuthorizationServerEndpointMetadata implements ReadOnlyAuthorizatio
 	public static AuthorizationServerEndpointMetadata parse(final JSONObject jsonObject)
 		throws ParseException {
 		
-		// Parse issuer and subject_types_supported first
-		
 		AuthorizationServerEndpointMetadata as = new AuthorizationServerEndpointMetadata();
-		
 		as.authzEndpoint = JSONObjectUtils.getURI(jsonObject, "authorization_endpoint", null);
 		as.tokenEndpoint = JSONObjectUtils.getURI(jsonObject, "token_endpoint", null);
 		as.regEndpoint = JSONObjectUtils.getURI(jsonObject, "registration_endpoint", null);

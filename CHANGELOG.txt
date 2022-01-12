@@ -1928,5 +1928,7 @@ version 9.21 (2022-01-10)
 version 9.22 (2022-01-12)
     * Extracts ReadOnlyAuthorizationServerEndpointMetadata interface.
     * Extracts ReadOnlyAuthorizationServerMetadata interface.
+    * Extracts ReadOnlyOIDCProviderEndpointMetadata interface.
+    * Extracts ReadOnlyOIDCProviderMetadata interface.
     * Fixes device_authorization_endpoint parsing in OIDCProviderMetadata.parse
       (iss #380).

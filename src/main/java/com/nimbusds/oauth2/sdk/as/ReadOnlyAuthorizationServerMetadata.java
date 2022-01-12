@@ -317,13 +317,13 @@ public interface ReadOnlyAuthorizationServerMetadata extends ReadOnlyAuthorizati
 	
 	
 	/**
-	 * Gets the aliases for communication with mutual TLS. Corresponds to the
-	 * {@code mtls_endpoint_aliases} metadata field.
+	 * Gets the aliases for communication with mutual TLS. Corresponds to
+	 * the {@code mtls_endpoint_aliases} metadata field.
 	 *
-	 * @return The aliases for communication with mutual TLS, or {@code null}
-	 * when no aliases are defined.
+	 * @return The aliases for communication with mutual TLS, {@code null}
+	 *         when no aliases are defined.
 	 */
-	AuthorizationServerEndpointMetadata getMtlsEndpointAliases();
+	ReadOnlyAuthorizationServerEndpointMetadata getReadOnlyMtlsEndpointAliases();
 	
 	
 	/**
@@ -471,8 +471,7 @@ public interface ReadOnlyAuthorizationServerMetadata extends ReadOnlyAuthorizati
 	
 	
 	/**
-	 * Returns the JSON object representation of this OpenID Connect
-	 * provider metadata.
+	 * Returns the JSON object representation of the metadata.
 	 *
 	 * @return The JSON object representation.
 	 */

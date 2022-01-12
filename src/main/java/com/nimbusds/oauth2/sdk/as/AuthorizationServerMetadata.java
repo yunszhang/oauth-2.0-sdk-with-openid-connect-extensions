@@ -898,6 +898,19 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	
 	
 	@Override
+	public ReadOnlyAuthorizationServerEndpointMetadata getReadOnlyMtlsEndpointAliases() {
+
+		return getMtlsEndpointAliases();
+	}
+	
+	
+	/**
+	 * Gets the aliases for communication with mutual TLS. Corresponds to
+	 * the {@code mtls_endpoint_aliases} metadata field.
+	 *
+	 * @return The aliases for communication with mutual TLS, {@code null}
+	 *         when no aliases are defined.
+	 */
 	public AuthorizationServerEndpointMetadata getMtlsEndpointAliases() {
 
 		return mtlsEndpointAliases;

@@ -48,7 +48,7 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  *     <li>OpenID Connect Federation 1.0 (draft 10).
  * </ul>
  */
-public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMetadata {
+public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMetadata implements ReadOnlyOIDCProviderEndpointMetadata {
 	
 	/**
 	 * The registered parameter names.
@@ -59,6 +59,8 @@ public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMet
 	static {
 		Set<String> p = new HashSet<>(AuthorizationServerEndpointMetadata.getRegisteredParameterNames());
 		p.add("userinfo_endpoint");
+		p.add("check_session_iframe");
+		p.add("end_session_endpoint");
 		p.add("federation_registration_endpoint");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -89,6 +91,18 @@ public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMet
 	
 	
 	/**
+	 * The cross-origin check session iframe.
+	 */
+	private URI checkSessionIframe;
+	
+	
+	/**
+	 * The logout endpoint.
+	 */
+	private URI endSessionEndpoint;
+	
+	
+	/**
 	 * Creates a new OpenID Connect provider endpoint metadata instance.
 	 */
 	public OIDCProviderEndpointMetadata() {
@@ -99,25 +113,21 @@ public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMet
 	 * Converts an authorization server endpoint metadata to an OpenID
 	 * Connect provider endpoint metadata instance.
 	 */
-	public OIDCProviderEndpointMetadata(final AuthorizationServerEndpointMetadata mtlsEndpointAliases) {
+	public OIDCProviderEndpointMetadata(final AuthorizationServerEndpointMetadata endpointMetadata) {
 
-		setAuthorizationEndpointURI(mtlsEndpointAliases.getAuthorizationEndpointURI());
-		setTokenEndpointURI(mtlsEndpointAliases.getTokenEndpointURI());
-		setRegistrationEndpointURI(mtlsEndpointAliases.getRegistrationEndpointURI());
-		setIntrospectionEndpointURI(mtlsEndpointAliases.getIntrospectionEndpointURI());
-		setRevocationEndpointURI(mtlsEndpointAliases.getRevocationEndpointURI());
-		setDeviceAuthorizationEndpointURI(mtlsEndpointAliases.getDeviceAuthorizationEndpointURI());
-		setPushedAuthorizationRequestEndpointURI(mtlsEndpointAliases.getPushedAuthorizationRequestEndpointURI());
-		setRequestObjectEndpoint(mtlsEndpointAliases.getRequestObjectEndpoint());
+		setAuthorizationEndpointURI(endpointMetadata.getAuthorizationEndpointURI());
+		setTokenEndpointURI(endpointMetadata.getTokenEndpointURI());
+		setRegistrationEndpointURI(endpointMetadata.getRegistrationEndpointURI());
+		setIntrospectionEndpointURI(endpointMetadata.getIntrospectionEndpointURI());
+		setRevocationEndpointURI(endpointMetadata.getRevocationEndpointURI());
+		setDeviceAuthorizationEndpointURI(endpointMetadata.getDeviceAuthorizationEndpointURI());
+		setBackChannelAuthenticationEndpoint(endpointMetadata.getBackChannelAuthenticationEndpoint());
+		setPushedAuthorizationRequestEndpointURI(endpointMetadata.getPushedAuthorizationRequestEndpointURI());
+		setRequestObjectEndpoint(endpointMetadata.getRequestObjectEndpoint());
 	}
 
 
-	/**
-	 * Gets the UserInfo endpoint URI. Corresponds the
-	 * {@code userinfo_endpoint} metadata field.
-	 *
-	 * @return The UserInfo endpoint URI, {@code null} if not specified.
-	 */
+	@Override
 	public URI getUserInfoEndpointURI() {
 
 		return userInfoEndpoint;
@@ -137,13 +147,47 @@ public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMet
 	}
 	
 	
+	@Override
+	public URI getCheckSessionIframeURI() {
+		
+		return checkSessionIframe;
+	}
+	
+	
 	/**
-	 * Gets the federation registration endpoint URI. Corresponds to the
-	 * {@code federation_registration_endpoint} metadata field.
+	 * Sets the cross-origin check session iframe URI. Corresponds to the
+	 * {@code check_session_iframe} metadata field.
 	 *
-	 * @return The federation registration endpoint URI, {@code null} if
-	 *         not specified.
+	 * @param checkSessionIframe The check session iframe URI, {@code null}
+	 *                           if not specified.
 	 */
+	public void setCheckSessionIframeURI(final URI checkSessionIframe) {
+		
+		this.checkSessionIframe = checkSessionIframe;
+	}
+	
+	
+	@Override
+	public URI getEndSessionEndpointURI() {
+		
+		return endSessionEndpoint;
+	}
+	
+	
+	/**
+	 * Sets the logout endpoint URI. Corresponds to the
+	 * {@code end_session_endpoint} metadata field.
+	 *
+	 * @param endSessionEndpoint The logoout endpoint URI, {@code null} if
+	 *                           not specified.
+	 */
+	public void setEndSessionEndpointURI(final URI endSessionEndpoint) {
+		
+		this.endSessionEndpoint = endSessionEndpoint;
+	}
+	
+	
+	@Override
 	public URI getFederationRegistrationEndpointURI() {
 		
 		return federationRegistrationEndpoint;
@@ -164,21 +208,22 @@ public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMet
 	}
 	
 	
-	/**
-	 * Returns the JSON object representation of this OpenID Connect
-	 * provider metadata.
-	 *
-	 * @return The JSON object representation.
-	 */
+	@Override
 	public JSONObject toJSONObject() {
 		
 		JSONObject o = super.toJSONObject();
 		
-		if (userInfoEndpoint != null)
-			o.put("userinfo_endpoint", userInfoEndpoint.toString());
+		if (getUserInfoEndpointURI() != null)
+			o.put("userinfo_endpoint", getUserInfoEndpointURI().toString());
 		
-		if (federationRegistrationEndpoint != null)
-			o.put("federation_registration_endpoint", federationRegistrationEndpoint.toString());
+		if (getCheckSessionIframeURI() != null)
+			o.put("check_session_iframe", getCheckSessionIframeURI().toString());
+		
+		if (getEndSessionEndpointURI() != null)
+			o.put("end_session_endpoint", getEndSessionEndpointURI().toString());
+		
+		if (getFederationRegistrationEndpointURI() != null)
+			o.put("federation_registration_endpoint", getFederationRegistrationEndpointURI().toString());
 		
 		return o;
 	}
@@ -209,9 +254,12 @@ public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMet
 		op.setIntrospectionEndpointURI(as.getIntrospectionEndpointURI());
 		op.setRevocationEndpointURI(as.getRevocationEndpointURI());
 		op.setDeviceAuthorizationEndpointURI(as.getDeviceAuthorizationEndpointURI());
+		op.setBackChannelAuthenticationEndpoint(as.getBackChannelAuthenticationEndpoint());
 		op.setPushedAuthorizationRequestEndpointURI(as.getPushedAuthorizationRequestEndpointURI());
 		op.setRequestObjectEndpoint(as.getRequestObjectEndpoint());
 		op.userInfoEndpoint = JSONObjectUtils.getURI(jsonObject, "userinfo_endpoint", null);
+		op.checkSessionIframe = JSONObjectUtils.getURI(jsonObject, "check_session_iframe", null);
+		op.endSessionEndpoint = JSONObjectUtils.getURI(jsonObject, "end_session_endpoint", null);
 		op.federationRegistrationEndpoint = JSONObjectUtils.getURI(jsonObject, "federation_registration_endpoint", null);
 		
 		return op;

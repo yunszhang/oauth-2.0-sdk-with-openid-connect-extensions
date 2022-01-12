@@ -20,9 +20,11 @@ package com.nimbusds.oauth2.sdk.as;
 
 import java.net.URI;
 
+import net.minidev.json.JSONObject;
+
 
 /**
- * Read-only OAuth 2.0 Authorisation Server (AS) metadata for the endpoints.
+ * Read-only OAuth 2.0 Authorisation Server (AS) endpoint metadata.
  *
  * <p>Related specifications:
  *
@@ -126,4 +128,12 @@ public interface ReadOnlyAuthorizationServerEndpointMetadata {
 	 *         if not specified.
 	 */
 	URI getBackChannelAuthenticationEndpoint();
+	
+	
+	/**
+	 * Returns the JSON object representation of the metadata.
+	 *
+	 * @return The JSON object.
+	 */
+	JSONObject toJSONObject();
 }
