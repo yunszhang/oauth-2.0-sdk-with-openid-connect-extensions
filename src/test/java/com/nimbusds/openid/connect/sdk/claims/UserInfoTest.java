@@ -23,7 +23,6 @@ import java.util.*;
 
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
-import org.opensaml.soap.wssecurity.impl.SaltImpl;
 
 import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jose.JOSEObjectType;
@@ -3222,23 +3221,28 @@ public class UserInfoTest extends TestCase {
 	
 	public void testAssurance_onlineExampleWithVerifiedClaims() throws ParseException {
 		
+		// The verification details for some eIDAS process
 		Date now = new Date();
 		DateWithTimeZoneOffset timestamp = new DateWithTimeZoneOffset(
 			now,
 			TimeZone.getDefault());
-		VerificationProcess verificationProcess = new VerificationProcess("4ebc8150-1b26-460a-adc1-3e9096ab88f9");
 		
 		IdentityVerification verification = new IdentityVerification(
-			IdentityTrustFramework.EIDAS_IAL_SUBSTANTIAL,
+			IdentityTrustFramework.EIDAS,
+			IdentityAssuranceLevel.SUBSTANTIAL,
+			null,
 			timestamp,
-			verificationProcess,
-			new QESEvidence(
+			new VerificationProcess(UUID.randomUUID().toString()),
+			new ElectronicSignatureEvidence(
+				new SignatureType("qes_eidas"),
 				new Issuer("https://qes-provider.org"),
-				"cc58176d-6cd4-4d9d-bad9-50981ad3ee1f",
-				DateWithTimeZoneOffset.parseISO8601String("2019-12-01T08:00:00Z")));
+				new SerialNumber("cc58176d-6cd4-4d9d-bad9-50981ad3ee1f"),
+				timestamp,
+				null));
 		
 		PersonClaims claims = new PersonClaims();
-		claims.setName("Alice Adams");
+		claims.setGivenName("Alice");
+		claims.setFamilyName("Adams");
 		claims.setEmailAddress("alice@wonderland.com");
 		
 		VerifiedClaimsSet verifiedClaims = new VerifiedClaimsSet(
@@ -3248,41 +3252,37 @@ public class UserInfoTest extends TestCase {
 		UserInfo userInfo = new UserInfo(new Subject("alice"));
 		userInfo.setVerifiedClaims(verifiedClaims);
 		
-		// {
-		//   "sub":"alice",
-		//   "verified_claims":{
-		//       "claims":{
-		//           "name":"Alice Adams",
-		//           "email":"alice@wonderland.com"
-		//           },
-		//       "verification":{
-		//           "trust_framework":"eidas_ial_substantial",
-		//           "time":"2019-12-04T22:57:16+02:00",
-		//           "verification_process":"4ebc8150-1b26-460a-adc1-3e9096ab88f9",
-		//           "evidence":[{
-		//               "type":"qes",
-		//               "issuer":"https:\/\/qes-provider.org",
-		//               "serial_number":"cc58176d-6cd4-4d9d-bad9-50981ad3ee1f",
-		//               "created_at":"2019-12-01T08:00:00+00:00"
-		//           }]
-		//       }
-		//   }
-		// }
+//		System.out.println(userInfo.toJSONObject());
 		
 		UserInfoSuccessResponse userInfoResponse = new UserInfoSuccessResponse(userInfo);
 		userInfo = userInfoResponse.getUserInfo();
 		
 //		System.out.println("Subject: " + userInfo.getSubject());
 		
-		verifiedClaims = userInfo.getVerifiedClaims().get(0);
+		if (userInfo.getVerifiedClaims() == null) {
+			System.out.println("No verified claims found");
+			return;
+		}
 		
-//		System.out.println("Trust framework: " + verifiedClaims.getVerification().getTrustFramework());
-//		System.out.println("Evidence type: " + verifiedClaims.getVerification().getEvidence().get(0).getEvidenceType());
-//		System.out.println("Verified claims: " + verifiedClaims.getClaimsSet().toJSONObject());
-		
-		// Subject: alice
-		// Trust framework: eidas_ial_substantial
-		// Evidence type: qes
-		// Verified claims: {"name":"Alice Adams","email":"alice@wonderland.com"}
+		for (VerifiedClaimsSet verifiedClaimsSet: userInfo.getVerifiedClaims()) {
+			
+			IdentityVerification verification1 = verifiedClaimsSet.getVerification();
+//			System.out.println("Trust framework: " + verification1.getTrustFramework());
+//			System.out.println("Assurance level: " + verification1.getAssuranceLevel());
+//			System.out.println("Time: " + verification1.getVerificationTime());
+//			System.out.println("Verification process: " + verification1.getVerificationProcess());
+			
+			if (verification1.getEvidence() != null) {
+				for (IdentityEvidence ev : verification1.getEvidence()) {
+//					System.out.println("Evidence type: " + ev.getEvidenceType());
+				}
+			}
+			
+//			System.out.println("Verified claims: ");
+			claims = verifiedClaimsSet.getClaimsSet();
+//			System.out.println("Given name: " + claims.getGivenName());
+//			System.out.println("Family name: " + claims.getFamilyName());
+//			System.out.println("Email: " + claims.getEmailAddress());
+		}
 	}
 }
