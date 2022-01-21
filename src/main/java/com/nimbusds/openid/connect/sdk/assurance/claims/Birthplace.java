@@ -85,8 +85,8 @@ public final class Birthplace extends ClaimsSet {
 	/**
 	 * Creates a new birthplace claims set.
 	 *
-	 * @param countryCode The country code, as ISO3166-1 Alpha-2 or
-	 *                    ISO3166-3 code, {@code null} if not specified.
+	 * @param countryCode The country code, as ISO3166-1 or ISO3166-3 code,
+	 *                    {@code null} if not specified.
 	 * @param region      State, province, prefecture, or region component,
 	 *                    {@code null} if not specified.
 	 * @param locality    City or other locality, {@code null} if not
@@ -118,7 +118,7 @@ public final class Birthplace extends ClaimsSet {
 	 * Gets the country code.
 	 *
 	 * @return The country code, {@code null} if not specified or illegal
-	 *         ISO 3166-1 alpha-2 (two-letter) country code.
+	 *         ISO3166-1 or ISO3166-3 country code.
 	 */
 	public CountryCode getCountry() {
 	
@@ -128,7 +128,7 @@ public final class Birthplace extends ClaimsSet {
 		}
 		
 		try {
-			return ISO3166_1Alpha2CountryCode.parse(code);
+			return CountryCode.parse(code);
 		} catch (ParseException e) {
 			return null;
 		}

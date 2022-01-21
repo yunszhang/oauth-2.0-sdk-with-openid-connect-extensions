@@ -18,6 +18,8 @@
 package com.nimbusds.openid.connect.sdk.assurance.claims;
 
 
+import java.util.Arrays;
+
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 
@@ -47,43 +49,55 @@ public class BirthplaceTest extends TestCase {
 	
 	public void testParamConstructor_allSet() {
 		
-		Birthplace birthplace = new Birthplace(new ISO3166_1Alpha2CountryCode("DE"), "Muster Region", "Musterstadt");
-		assertEquals("DE", birthplace.getCountry().getValue());
-		assertEquals("Muster Region", birthplace.getRegion());
-		assertEquals("Musterstadt", birthplace.getLocality());
-		
-		JSONObject jsonObject = birthplace.toJSONObject();
-		assertEquals(3, jsonObject.size());
-		
-		birthplace = new Birthplace(jsonObject);
-		assertEquals("DE", birthplace.getCountry().getValue());
-		assertEquals("Muster Region", birthplace.getRegion());
-		assertEquals("Musterstadt", birthplace.getLocality());
+		for (CountryCode countryCode: Arrays.asList(
+			ISO3166_1Alpha2CountryCode.DE,
+			ISO3166_1Alpha3CountryCode.DEU,
+			ISO3166_3CountryCode.DDDE)) {
+			
+			Birthplace birthplace = new Birthplace(countryCode, "Muster Region", "Musterstadt");
+			assertEquals(countryCode.getValue(), birthplace.getCountry().getValue());
+			assertEquals("Muster Region", birthplace.getRegion());
+			assertEquals("Musterstadt", birthplace.getLocality());
+			
+			JSONObject jsonObject = birthplace.toJSONObject();
+			assertEquals(3, jsonObject.size());
+			
+			birthplace = new Birthplace(jsonObject);
+			assertEquals(countryCode.getValue(), birthplace.getCountry().getValue());
+			assertEquals("Muster Region", birthplace.getRegion());
+			assertEquals("Musterstadt", birthplace.getLocality());
+		}
 	}
 	
 	
 	public void testGettersAndSetters() {
 		
-		Birthplace birthplace = new Birthplace(new JSONObject());
-		
-		birthplace.setCountry(new ISO3166_1Alpha2CountryCode("DE"));
-		assertEquals("DE", birthplace.getCountry().getValue());
-		
-		birthplace.setCountry(null);
-		assertNull(birthplace.getCountry());
-		
-		birthplace.setRegion("Muster Region");
-		assertEquals("Muster Region", birthplace.getRegion());
-		
-		birthplace.setRegion(null);
-		assertNull(birthplace.getRegion());
-		
-		birthplace.setLocality("Musterstadt");
-		assertEquals("Musterstadt", birthplace.getLocality());
-		
-		birthplace.setLocality(null);
-		assertNull(birthplace.getLocality());
-		
-		assertTrue(birthplace.toJSONObject().isEmpty());
+		for (CountryCode countryCode: Arrays.asList(
+			ISO3166_1Alpha2CountryCode.DE,
+			ISO3166_1Alpha3CountryCode.DEU,
+			ISO3166_3CountryCode.DDDE)) {
+			
+			Birthplace birthplace = new Birthplace(new JSONObject());
+			
+			birthplace.setCountry(countryCode);
+			assertEquals(countryCode, birthplace.getCountry());
+			
+			birthplace.setCountry(null);
+			assertNull(birthplace.getCountry());
+			
+			birthplace.setRegion("Muster Region");
+			assertEquals("Muster Region", birthplace.getRegion());
+			
+			birthplace.setRegion(null);
+			assertNull(birthplace.getRegion());
+			
+			birthplace.setLocality("Musterstadt");
+			assertEquals("Musterstadt", birthplace.getLocality());
+			
+			birthplace.setLocality(null);
+			assertNull(birthplace.getLocality());
+			
+			assertTrue(birthplace.toJSONObject().isEmpty());
+		}
 	}
 }

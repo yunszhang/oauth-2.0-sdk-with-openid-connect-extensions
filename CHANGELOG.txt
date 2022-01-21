@@ -1932,3 +1932,7 @@ version 9.22 (2022-01-12)
     * Extracts ReadOnlyOIDCProviderMetadata interface.
     * Fixes device_authorization_endpoint parsing in OIDCProviderMetadata.parse
       (iss #380).
+
+version 9.22.1 (2022-01-21)
+    * Updates Birthplace to allow ISO 3166-1 Alpha-3 country codes.
+
