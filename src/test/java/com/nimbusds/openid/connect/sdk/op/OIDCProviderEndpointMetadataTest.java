@@ -69,6 +69,7 @@ public class OIDCProviderEndpointMetadataTest extends TestCase {
 		assertNull(endpointMetadata.getIntrospectionEndpointURI());
 		assertNull(endpointMetadata.getRevocationEndpointURI());
 		assertNull(endpointMetadata.getDeviceAuthorizationEndpointURI());
+		assertNull(endpointMetadata.getBackChannelAuthenticationEndpointURI());
 		assertNull(endpointMetadata.getBackChannelAuthenticationEndpoint());
 		
 		// OIDC
@@ -90,6 +91,7 @@ public class OIDCProviderEndpointMetadataTest extends TestCase {
 		assertNull(parsedEndpointMetadata.getIntrospectionEndpointURI());
 		assertNull(parsedEndpointMetadata.getRevocationEndpointURI());
 		assertNull(parsedEndpointMetadata.getDeviceAuthorizationEndpointURI());
+		assertNull(parsedEndpointMetadata.getBackChannelAuthenticationEndpointURI());
 		assertNull(parsedEndpointMetadata.getBackChannelAuthenticationEndpoint());
 		
 		// OIDC
@@ -100,7 +102,7 @@ public class OIDCProviderEndpointMetadataTest extends TestCase {
 	}
 	
 	
-	public void testGetterAndSetters() throws ParseException, URISyntaxException {
+	public void testGettersAndSetters() throws ParseException, URISyntaxException {
 		
 		OIDCProviderEndpointMetadata endpointMetadata = new OIDCProviderEndpointMetadata();
 		
@@ -128,8 +130,8 @@ public class OIDCProviderEndpointMetadataTest extends TestCase {
 		endpointMetadata.setDeviceAuthorizationEndpointURI(new URI("https://c2id.com/device"));
 		assertEquals(new URI("https://c2id.com/device"), endpointMetadata.getDeviceAuthorizationEndpointURI());
 		
-		endpointMetadata.setBackChannelAuthenticationEndpoint(new URI("https://c2id.com/ciba"));
-		assertEquals(new URI("https://c2id.com/ciba"), endpointMetadata.getBackChannelAuthenticationEndpoint());
+		endpointMetadata.setBackChannelAuthenticationEndpointURI(new URI("https://c2id.com/ciba"));
+		assertEquals(new URI("https://c2id.com/ciba"), endpointMetadata.getBackChannelAuthenticationEndpointURI());
 		
 		endpointMetadata.setUserInfoEndpointURI(new URI("https://c2id.com/userinfo"));
 		assertEquals(new URI("https://c2id.com/userinfo"), endpointMetadata.getUserInfoEndpointURI());
@@ -159,11 +161,29 @@ public class OIDCProviderEndpointMetadataTest extends TestCase {
 		assertEquals(new URI("https://c2id.com/par"), endpointMetadata.getPushedAuthorizationRequestEndpointURI());
 		assertEquals(new URI("https://c2id.com/jar"), endpointMetadata.getRequestObjectEndpoint());
 		assertEquals(new URI("https://c2id.com/device"), endpointMetadata.getDeviceAuthorizationEndpointURI());
+		assertEquals(new URI("https://c2id.com/ciba"), endpointMetadata.getBackChannelAuthenticationEndpointURI());
 		assertEquals(new URI("https://c2id.com/ciba"), endpointMetadata.getBackChannelAuthenticationEndpoint());
 		assertEquals(new URI("https://c2id.com/userinfo"), endpointMetadata.getUserInfoEndpointURI());
 		assertEquals(new URI("https://c2id.com/session"), endpointMetadata.getCheckSessionIframeURI());
 		assertEquals(new URI("https://c2id.com/logout"), endpointMetadata.getEndSessionEndpointURI());
 		assertEquals(new URI("https://c2id.com/fed"), endpointMetadata.getFederationRegistrationEndpointURI());
+	}
+	
+	
+	public void testDeprecatedCIBAEndpointGetterAndSetter() throws ParseException, URISyntaxException {
+		
+		OIDCProviderEndpointMetadata endpointMetadata = new OIDCProviderEndpointMetadata();
+		
+		endpointMetadata.setBackChannelAuthenticationEndpoint(new URI("https://c2id.com/ciba"));
+		assertEquals(new URI("https://c2id.com/ciba"), endpointMetadata.getBackChannelAuthenticationEndpoint());
+		
+		JSONObject jsonObject = endpointMetadata.toJSONObject();
+		assertEquals("https://c2id.com/ciba", jsonObject.get("backchannel_authentication_endpoint"));
+		assertEquals(1, jsonObject.size());
+		
+		endpointMetadata = OIDCProviderEndpointMetadata.parse(jsonObject);
+		
+		assertEquals(new URI("https://c2id.com/ciba"), endpointMetadata.getBackChannelAuthenticationEndpoint());
 	}
 	
 	
@@ -179,7 +199,7 @@ public class OIDCProviderEndpointMetadataTest extends TestCase {
 		asEndpointMetadata.setPushedAuthorizationRequestEndpointURI(new URI("https://c2id.com/par"));
 		asEndpointMetadata.setRequestObjectEndpoint(new URI("https://c2id.com/jar"));
 		asEndpointMetadata.setDeviceAuthorizationEndpointURI(new URI("https://c2id.com/device"));
-		asEndpointMetadata.setBackChannelAuthenticationEndpoint(new URI("https://c2id.com/ciba"));
+		asEndpointMetadata.setBackChannelAuthenticationEndpointURI(new URI("https://c2id.com/ciba"));
 		
 		ReadOnlyOIDCProviderEndpointMetadata opEndpointMetadata = new OIDCProviderEndpointMetadata(asEndpointMetadata);
 		assertEquals(new URI("https://c2id.com/authz"), opEndpointMetadata.getAuthorizationEndpointURI());
@@ -190,7 +210,7 @@ public class OIDCProviderEndpointMetadataTest extends TestCase {
 		assertEquals(new URI("https://c2id.com/par"), opEndpointMetadata.getPushedAuthorizationRequestEndpointURI());
 		assertEquals(new URI("https://c2id.com/jar"), opEndpointMetadata.getRequestObjectEndpoint());
 		assertEquals(new URI("https://c2id.com/device"), opEndpointMetadata.getDeviceAuthorizationEndpointURI());
-		assertEquals(new URI("https://c2id.com/ciba"), opEndpointMetadata.getBackChannelAuthenticationEndpoint());
+		assertEquals(new URI("https://c2id.com/ciba"), opEndpointMetadata.getBackChannelAuthenticationEndpointURI());
 		assertNull(opEndpointMetadata.getUserInfoEndpointURI());
 		assertNull(opEndpointMetadata.getCheckSessionIframeURI());
 		assertNull(opEndpointMetadata.getEndSessionEndpointURI());

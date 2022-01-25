@@ -127,6 +127,20 @@ public interface ReadOnlyAuthorizationServerEndpointMetadata {
 	 * @return The back-channel authentication endpoint URI, {@code null}
 	 *         if not specified.
 	 */
+	URI getBackChannelAuthenticationEndpointURI();
+	
+	
+	/**
+	 * Gets the back-channel authentication endpoint URI. Corresponds the
+	 * {@code backchannel_authentication_endpoint} metadata field.
+	 *
+	 * @deprecated Use {@link #getBackChannelAuthenticationEndpointURI}
+	 * instead.
+	 *
+	 * @return The back-channel authentication endpoint URI, {@code null}
+	 *         if not specified.
+	 */
+	@Deprecated
 	URI getBackChannelAuthenticationEndpoint();
 	
 	

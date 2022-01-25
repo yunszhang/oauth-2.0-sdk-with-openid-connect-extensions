@@ -74,6 +74,7 @@ public class AuthorizationServerEndpointMetadataTest extends TestCase {
 		assertNull(parsedEndpointMetadata.getIntrospectionEndpointURI());
 		assertNull(parsedEndpointMetadata.getRevocationEndpointURI());
 		assertNull(parsedEndpointMetadata.getDeviceAuthorizationEndpointURI());
+		assertNull(parsedEndpointMetadata.getBackChannelAuthenticationEndpointURI());
 		assertNull(parsedEndpointMetadata.getBackChannelAuthenticationEndpoint());
 	}
 	
@@ -106,8 +107,8 @@ public class AuthorizationServerEndpointMetadataTest extends TestCase {
 		endpointMetadata.setDeviceAuthorizationEndpointURI(new URI("https://c2id.com/device"));
 		assertEquals(new URI("https://c2id.com/device"), endpointMetadata.getDeviceAuthorizationEndpointURI());
 		
-		endpointMetadata.setBackChannelAuthenticationEndpoint(new URI("https://c2id.com/ciba"));
-		assertEquals(new URI("https://c2id.com/ciba"), endpointMetadata.getBackChannelAuthenticationEndpoint());
+		endpointMetadata.setBackChannelAuthenticationEndpointURI(new URI("https://c2id.com/ciba"));
+		assertEquals(new URI("https://c2id.com/ciba"), endpointMetadata.getBackChannelAuthenticationEndpointURI());
 		
 		JSONObject jsonObject = endpointMetadata.toJSONObject();
 		
@@ -125,6 +126,7 @@ public class AuthorizationServerEndpointMetadataTest extends TestCase {
 		assertEquals(new URI("https://c2id.com/par"), endpointMetadata.getPushedAuthorizationRequestEndpointURI());
 		assertEquals(new URI("https://c2id.com/jar"), endpointMetadata.getRequestObjectEndpoint());
 		assertEquals(new URI("https://c2id.com/device"), endpointMetadata.getDeviceAuthorizationEndpointURI());
+		assertEquals(new URI("https://c2id.com/ciba"), endpointMetadata.getBackChannelAuthenticationEndpointURI());
 		assertEquals(new URI("https://c2id.com/ciba"), endpointMetadata.getBackChannelAuthenticationEndpoint());
 	}
 }

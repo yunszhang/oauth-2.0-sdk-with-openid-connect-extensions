@@ -1937,4 +1937,7 @@ version 9.22.1 (2022-01-21)
     * Updates Birthplace to allow ISO 3166-1 Alpha-3 country codes.
 
 version 9.22.2 (2022-01-25)
+    * Adds AuthorizationServerEndpointMetadata.
+      {get|set}BackChannelAuthenticationEndpointURI deprecating
+      {get|set}BackChannelAuthenticationEndpoint.
     * Updates to Nimbus JOSE+JWT 9.16.1

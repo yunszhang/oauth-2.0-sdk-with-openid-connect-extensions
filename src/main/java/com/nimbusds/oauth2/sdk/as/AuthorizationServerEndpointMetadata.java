@@ -305,9 +305,17 @@ public class AuthorizationServerEndpointMetadata implements ReadOnlyAuthorizatio
 	
 	
 	@Override
-	public URI getBackChannelAuthenticationEndpoint() {
+	public URI getBackChannelAuthenticationEndpointURI() {
 		
 		return backChannelAuthEndpoint;
+	}
+	
+	
+	@Deprecated
+	@Override
+	public URI getBackChannelAuthenticationEndpoint() {
+		
+		return getBackChannelAuthenticationEndpointURI();
 	}
 	
 	
@@ -319,9 +327,27 @@ public class AuthorizationServerEndpointMetadata implements ReadOnlyAuthorizatio
 	 *                                endpoint URI, {@code null} if not
 	 *                                specified.
 	 */
-	public void setBackChannelAuthenticationEndpoint(final URI backChannelAuthEndpoint) {
+	public void setBackChannelAuthenticationEndpointURI(final URI backChannelAuthEndpoint) {
 		
 		this.backChannelAuthEndpoint = backChannelAuthEndpoint;
+	}
+	
+	
+	/**
+	 * Sets the back-channel authentication endpoint URI. Corresponds the
+	 * {@code backchannel_authentication_endpoint} metadata field.
+	 *
+	 * @deprecated Use {@link #setBackChannelAuthenticationEndpointURI}
+	 * instead.
+	 *
+	 * @param backChannelAuthEndpoint The back-channel authentication e
+	 *                                endpoint URI, {@code null} if not
+	 *                                specified.
+	 */
+	@Deprecated
+	public void setBackChannelAuthenticationEndpoint(final URI backChannelAuthEndpoint) {
+		
+		setBackChannelAuthenticationEndpointURI(backChannelAuthEndpoint);
 	}
 	
 	
@@ -330,32 +356,32 @@ public class AuthorizationServerEndpointMetadata implements ReadOnlyAuthorizatio
 		
 		JSONObject o = new OrderedJSONObject();
 		
-		if (authzEndpoint != null)
-			o.put("authorization_endpoint", authzEndpoint.toString());
+		if (getAuthorizationEndpointURI() != null)
+			o.put("authorization_endpoint", getAuthorizationEndpointURI().toString());
 		
-		if (tokenEndpoint != null)
-			o.put("token_endpoint", tokenEndpoint.toString());
+		if (getTokenEndpointURI() != null)
+			o.put("token_endpoint", getTokenEndpointURI().toString());
 		
-		if (regEndpoint != null)
-			o.put("registration_endpoint", regEndpoint.toString());
+		if (getRegistrationEndpointURI() != null)
+			o.put("registration_endpoint", getRegistrationEndpointURI().toString());
 		
-		if (introspectionEndpoint != null)
-			o.put("introspection_endpoint", introspectionEndpoint.toString());
+		if (getIntrospectionEndpointURI() != null)
+			o.put("introspection_endpoint", getIntrospectionEndpointURI().toString());
 		
-		if (revocationEndpoint != null)
-			o.put("revocation_endpoint", revocationEndpoint.toString());
+		if (getRevocationEndpointURI() != null)
+			o.put("revocation_endpoint", getRevocationEndpointURI().toString());
 		
-		if (requestObjectEndpoint != null)
-			o.put("request_object_endpoint", requestObjectEndpoint.toString());
+		if (getRequestObjectEndpoint() != null)
+			o.put("request_object_endpoint", getRequestObjectEndpoint().toString());
 		
-		if (parEndpoint != null)
-			o.put("pushed_authorization_request_endpoint", parEndpoint.toString());
+		if (getPushedAuthorizationRequestEndpointURI() != null)
+			o.put("pushed_authorization_request_endpoint", getPushedAuthorizationRequestEndpointURI().toString());
 		
-		if (deviceAuthzEndpoint != null)
-			o.put("device_authorization_endpoint", deviceAuthzEndpoint.toString());
+		if (getDeviceAuthorizationEndpointURI() != null)
+			o.put("device_authorization_endpoint", getDeviceAuthorizationEndpointURI().toString());
 		
-		if (backChannelAuthEndpoint != null)
-			o.put("backchannel_authentication_endpoint", backChannelAuthEndpoint.toString());
+		if (getBackChannelAuthenticationEndpointURI() != null)
+			o.put("backchannel_authentication_endpoint", getBackChannelAuthenticationEndpointURI().toString());
 		
 		return o;
 	}

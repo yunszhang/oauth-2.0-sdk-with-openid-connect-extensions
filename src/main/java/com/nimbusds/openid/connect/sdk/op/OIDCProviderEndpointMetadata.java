@@ -121,7 +121,7 @@ public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMet
 		setIntrospectionEndpointURI(endpointMetadata.getIntrospectionEndpointURI());
 		setRevocationEndpointURI(endpointMetadata.getRevocationEndpointURI());
 		setDeviceAuthorizationEndpointURI(endpointMetadata.getDeviceAuthorizationEndpointURI());
-		setBackChannelAuthenticationEndpoint(endpointMetadata.getBackChannelAuthenticationEndpoint());
+		setBackChannelAuthenticationEndpointURI(endpointMetadata.getBackChannelAuthenticationEndpointURI());
 		setPushedAuthorizationRequestEndpointURI(endpointMetadata.getPushedAuthorizationRequestEndpointURI());
 		setRequestObjectEndpoint(endpointMetadata.getRequestObjectEndpoint());
 	}
@@ -254,7 +254,7 @@ public class OIDCProviderEndpointMetadata extends AuthorizationServerEndpointMet
 		op.setIntrospectionEndpointURI(as.getIntrospectionEndpointURI());
 		op.setRevocationEndpointURI(as.getRevocationEndpointURI());
 		op.setDeviceAuthorizationEndpointURI(as.getDeviceAuthorizationEndpointURI());
-		op.setBackChannelAuthenticationEndpoint(as.getBackChannelAuthenticationEndpoint());
+		op.setBackChannelAuthenticationEndpointURI(as.getBackChannelAuthenticationEndpointURI());
 		op.setPushedAuthorizationRequestEndpointURI(as.getPushedAuthorizationRequestEndpointURI());
 		op.setRequestObjectEndpoint(as.getRequestObjectEndpoint());
 		op.userInfoEndpoint = JSONObjectUtils.getURI(jsonObject, "userinfo_endpoint", null);

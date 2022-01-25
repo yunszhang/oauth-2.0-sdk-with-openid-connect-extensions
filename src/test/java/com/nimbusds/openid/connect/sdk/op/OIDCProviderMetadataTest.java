@@ -570,18 +570,14 @@ public class OIDCProviderMetadataTest extends TestCase {
 
 		meta.setSupportsRequestURIParam(true);
 		assertTrue(meta.supportsRequestURIParam());
-
-		meta.setBackChannelAuthenticationEndpoint(new URI("https://c2id.com/ciba"));
-		assertEquals("https://c2id.com/ciba", meta.getBackChannelAuthenticationEndpoint().toString());
-
+		
+		meta.setBackChannelAuthenticationEndpointURI(new URI("https://c2id.com/ciba"));
+		assertEquals("https://c2id.com/ciba", meta.getBackChannelAuthenticationEndpointURI().toString());
+		
 		userInfoJWSAlgs = new LinkedList<>();
 		userInfoJWSAlgs.add(JWSAlgorithm.RS256);
 		meta.setBackChannelAuthenticationRequestJWSAlgs(userInfoJWSAlgs);
 		assertEquals(JWSAlgorithm.RS256, meta.getBackChannelAuthenticationRequestJWSAlgs().get(0));
-
-		meta.setBackChannelAuthenticationEndpoint(new URI("https://c2id.com/ciba_notification"));
-		assertEquals("https://c2id.com/ciba_notification", meta.getBackChannelAuthenticationEndpoint().toString());
-		
 
 		List<BackChannelTokenDeliveryMode> deliveryModes = new LinkedList<>();
 		deliveryModes.add(BackChannelTokenDeliveryMode.PING);
@@ -695,6 +691,8 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertEquals("https://c2id.com/requests", meta.getRequestObjectEndpoint().toString());
 		assertEquals("https://c2id.com/par", meta.getPushedAuthorizationRequestEndpointURI().toString());
 		assertEquals("https://c2id.com/device", meta.getDeviceAuthorizationEndpointURI().toString());
+		assertEquals("https://c2id.com/ciba", meta.getBackChannelAuthenticationEndpointURI().toString());
+		assertEquals("https://c2id.com/ciba", meta.getBackChannelAuthenticationEndpoint().toString());
 		
 		assertTrue(Scope.parse("openid email profile").containsAll(meta.getScopes()));
 
@@ -776,6 +774,11 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(meta.supportsFrontChannelLogoutSession());
 		assertTrue(meta.supportsBackChannelLogout());
 		assertTrue(meta.supportsBackChannelLogoutSession());
+		
+		assertEquals("https://c2id.com/ciba", meta.getBackChannelAuthenticationEndpointURI().toString());
+		assertEquals(JWSAlgorithm.RS256, meta.getBackChannelAuthenticationRequestJWSAlgs().get(0));
+		assertEquals(BackChannelTokenDeliveryMode.PING, meta.getBackChannelTokenDeliveryModes().get(0));
+		assertTrue(meta.supportsBackChannelUserCodeParam());
 		
 		assertTrue(meta.supportsTLSClientCertificateBoundAccessTokens());
 		
