@@ -77,7 +77,7 @@ import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistratio
  *         OAuth 2.0 (JARM).
  *     <li>OAuth 2.0 Pushed Authorization Requests (RFC 9126)
  *     <li>OpenID Connect Client Initiated Backchannel Authentication Flow -
- * 	   Core 1.0 (draft 03)
+ * 	   Core 1.0
  *     <li>OpenID Connect Federation 1.0 (draft 13)
  * </ul>
  */

@@ -137,8 +137,8 @@ This SDK version implements the following standards and drafts:
 * Financial-grade API: JWT Secured Authorization Response Mode for OAuth
   2.0 (JARM) (2018-10-17)
 
-* OpenID Connect Client Initiated Backchannel Authentication (CIBA) Flow -
-  Core 1.0 (draft 03)
+* OpenID Connect Client Initiated Backchannel Authentication (CIBA) Flow - 
+  Core 1.0
 
 
 ## Questions or comments? 

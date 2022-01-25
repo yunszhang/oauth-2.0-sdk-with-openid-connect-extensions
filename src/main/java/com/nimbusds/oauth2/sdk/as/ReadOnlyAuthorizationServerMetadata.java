@@ -57,7 +57,7 @@ import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
  *     <li>OAuth 2.0 Pushed Authorization Requests (RFC 9126)
  *     <li>OAuth 2.0 Device Authorization Grant (RFC 8628)
  *     <li>OpenID Connect Client Initiated Backchannel Authentication Flow -
- * 	   Core 1.0 (draft 03)
+ * 	   Core 1.0
  *     <li>OAuth 2.0 Incremental Authorization
  *         (draft-ietf-oauth-incremental-authz-04)
  * </ul>
