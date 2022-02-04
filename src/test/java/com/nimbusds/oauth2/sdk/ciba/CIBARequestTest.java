@@ -27,6 +27,7 @@ import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
+import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.Audience;
@@ -34,7 +35,6 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.JWTID;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 
 public class CIBARequestTest extends TestCase {
@@ -784,5 +784,46 @@ public class CIBARequestTest extends TestCase {
 		} catch (ParseException e) {
 			assertEquals("Missing required client authentication", e.getMessage());
 		}
+	}
+	
+	
+	public void testRoundTrip_privateKeyJWTClientAuthentication() throws JOSEException, ParseException {
+		
+		RSAKey clientKey = new RSAKeyGenerator(2048)
+			.keyIDFromThumbprint(true)
+			.keyUse(KeyUse.SIGNATURE)
+			.algorithm(JWSAlgorithm.RS256)
+			.generate();
+		
+		ClientAuthentication clientAuth = new PrivateKeyJWT(
+			new ClientID("123"),
+			ENDPOINT_URI,
+			(JWSAlgorithm) clientKey.getAlgorithm(),
+			clientKey.toRSAPrivateKey(),
+			clientKey.getKeyID(),
+			null);
+			
+		
+		CIBARequest request = new CIBARequest.Builder(clientAuth, new Scope("openid"))
+			.endpointURI(ENDPOINT_URI)
+			.loginHint("alice")
+			.build();
+		assertTrue(request.getCustomParameters().isEmpty());
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		
+		Map<String,List<String>> formParams = httpRequest.getQueryParameters();
+		assertNotNull(formParams.get("client_assertion_type"));
+		assertNotNull(formParams.get("client_assertion"));
+		assertNotNull(formParams.get("scope"));
+		assertNotNull(formParams.get("login_hint"));
+		assertEquals(4, formParams.size());
+		
+		request = CIBARequest.parse(httpRequest);
+		
+		assertEquals(new Scope("openid"), request.getScope());
+		assertEquals("alice", request.getLoginHint());
+		System.out.println(request.getCustomParameters());
+		assertTrue(request.getCustomParameters().isEmpty());
 	}
 }

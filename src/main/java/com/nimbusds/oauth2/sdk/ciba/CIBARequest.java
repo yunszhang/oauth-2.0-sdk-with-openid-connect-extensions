@@ -41,6 +41,7 @@ import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.util.*;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 
+
 /**
  * <p>CIBA request to an OpenID provider / OAuth 2.0 authorisation server
  * backend authentication endpoint. Supports plan as well as signed (JWT)
@@ -153,14 +154,14 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	
 	
 	/**
-	 * Human readable binding message for the display at the consumption
+	 * Human-readable binding message for the display at the consumption
 	 * and authentication devices (optional).
 	 */
 	private final String bindingMessage;
 	
 	
 	/**
-	 * User secret code (password, PIN, etc) to authorise the CIBA request
+	 * User secret code (password, PIN, etc.) to authorise the CIBA request
 	 * with the authentication device (optional).
 	 */
 	private final Secret userCode;
@@ -169,7 +170,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	/**
 	 * Requested expiration for the {@code auth_req_id} (optional).
 	 */
-	private final Integer requestedЕxpiry;
+	private final Integer requestedExpiry;
 	
 	
 	/**
@@ -637,7 +638,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		if (requestedExpiry != null && requestedExpiry < 1) {
 			throw new IllegalArgumentException("The requested expiry must be a positive integer");
 		}
-		this.requestedЕxpiry = requestedExpiry;
+		this.requestedExpiry = requestedExpiry;
 		
 		this.customParams = customParams != null ? customParams : Collections.<String, List<String>>emptyMap();
 		
@@ -677,7 +678,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		loginHint = null;
 		bindingMessage = null;
 		userCode = null;
-		requestedЕxpiry = null;
+		requestedExpiry = null;
 		customParams = Collections.emptyMap();
 	}
 
@@ -807,7 +808,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	 */
 	public Integer getRequestedExpiry() {
 		
-		return requestedЕxpiry;
+		return requestedExpiry;
 	}
 	
 	
@@ -1057,7 +1058,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		
 		for (Map.Entry<String,List<String>> p: params.entrySet()) {
 			
-			if (! REGISTERED_PARAMETER_NAMES.contains(p.getKey())) {
+			if (! REGISTERED_PARAMETER_NAMES.contains(p.getKey()) && ! clientAuth.getFormParameterNames().contains(p.getKey())) {
 				// We have a custom parameter
 				if (customParams == null) {
 					customParams = new HashMap<>();
