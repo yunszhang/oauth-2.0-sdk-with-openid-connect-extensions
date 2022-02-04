@@ -18,10 +18,7 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import net.jcip.annotations.Immutable;
 
@@ -58,6 +55,13 @@ public final class ClientSecretPost extends PlainClientSecret {
 	public ClientSecretPost(final ClientID clientID, final Secret secret) {
 	
 		super(ClientAuthenticationMethod.CLIENT_SECRET_POST, clientID, secret);
+	}
+	
+	
+	@Override
+	public Set<String> getFormParameterNames() {
+		
+		return Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("client_id", "client_secret")));
 	}
 	
 	

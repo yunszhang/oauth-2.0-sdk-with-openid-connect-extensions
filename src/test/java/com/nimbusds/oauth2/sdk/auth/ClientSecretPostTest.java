@@ -18,10 +18,7 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import junit.framework.TestCase;
 
@@ -29,9 +26,6 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 
 
-/**
- * Tests client secret basic authentication.
- */
 public class ClientSecretPostTest extends TestCase {
 
 
@@ -51,6 +45,8 @@ public class ClientSecretPostTest extends TestCase {
 		assertTrue(csp instanceof PlainClientSecret);
 
 		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_POST, csp.getMethod());
+		
+		assertEquals(new HashSet<>(Arrays.asList("client_id", "client_secret")), csp.getFormParameterNames());
 
 		assertEquals(id, csp.getClientID().getValue());
 		assertEquals(pw, csp.getClientSecret().getValue());

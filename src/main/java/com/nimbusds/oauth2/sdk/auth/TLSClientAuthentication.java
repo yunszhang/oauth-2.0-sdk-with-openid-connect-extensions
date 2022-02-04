@@ -22,6 +22,7 @@ import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.net.ssl.SSLSocketFactory;
 
 import com.nimbusds.common.contenttype.ContentType;
@@ -117,6 +118,13 @@ public abstract class TLSClientAuthentication extends ClientAuthentication {
 	public X509Certificate getClientX509Certificate() {
 		
 		return certificate;
+	}
+	
+	
+	@Override
+	public Set<String> getFormParameterNames() {
+		
+		return Collections.singleton("client_id");
 	}
 	
 	

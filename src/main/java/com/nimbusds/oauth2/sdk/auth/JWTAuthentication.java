@@ -18,10 +18,7 @@
 package com.nimbusds.oauth2.sdk.auth;
 
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -170,6 +167,13 @@ public abstract class JWTAuthentication extends ClientAuthentication {
 	}
 	
 	
+	@Override
+	public Set<String> getFormParameterNames() {
+		
+		return Collections.unmodifiableSet(new HashSet<>(Arrays.asList("client_assertion", "client_assertion_type", "client_id")));
+	}
+	
+	
 	/**
 	 * Returns the parameter representation of this JSON Web Token (JWT) 
 	 * based client authentication. Note that the parameters are not 
@@ -182,8 +186,8 @@ public abstract class JWTAuthentication extends ClientAuthentication {
 	 * "client_assertion_type" = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
 	 * </pre>
 	 *
-	 * @return The parameters map, with keys "client_assertion",
-	 *         "client_assertion_type" and "client_id".
+	 * @return The parameters map, with keys "client_assertion" and
+	 *         "client_assertion_type".
 	 */
 	public Map<String,List<String>> toParameters() {
 	

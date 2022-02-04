@@ -19,6 +19,7 @@ package com.nimbusds.oauth2.sdk.auth;
 
 
 import java.net.URL;
+import java.util.Collections;
 import javax.net.ssl.SSLSocketFactory;
 
 import com.nimbusds.common.contenttype.ContentType;
@@ -40,6 +41,7 @@ public class PKITLSClientAuthenticationTest extends TestCase {
 			(SSLSocketFactory) null);
 		
 		assertEquals(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientAuth.getMethod());
+		assertEquals(Collections.singleton("client_id"), clientAuth.getFormParameterNames());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertNull(clientAuth.getClientX509CertificateSubjectDN()); // n/a
@@ -67,6 +69,7 @@ public class PKITLSClientAuthenticationTest extends TestCase {
 			sslSocketFactory);
 		
 		assertEquals(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientAuth.getMethod());
+		assertEquals(Collections.singleton("client_id"), clientAuth.getFormParameterNames());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertEquals(sslSocketFactory, clientAuth.getSSLSocketFactory());
 		assertNull(clientAuth.getClientX509CertificateSubjectDN()); // n/a
@@ -92,6 +95,7 @@ public class PKITLSClientAuthenticationTest extends TestCase {
 			"cn=client-123");
 		
 		assertEquals(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientAuth.getMethod());
+		assertEquals(Collections.singleton("client_id"), clientAuth.getFormParameterNames());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals("cn=client-123", clientAuth.getClientX509CertificateSubjectDN()); // assume validated
@@ -119,6 +123,7 @@ public class PKITLSClientAuthenticationTest extends TestCase {
 			"cn=client-123");
 		
 		assertEquals(ClientAuthenticationMethod.TLS_CLIENT_AUTH, clientAuth.getMethod());
+		assertEquals(Collections.singleton("client_id"), clientAuth.getFormParameterNames());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals("cn=client-123", clientAuth.getClientX509CertificateSubjectDN());

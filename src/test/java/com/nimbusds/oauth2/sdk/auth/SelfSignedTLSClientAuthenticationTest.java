@@ -20,14 +20,16 @@ package com.nimbusds.oauth2.sdk.auth;
 
 import java.net.URL;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import javax.net.ssl.SSLSocketFactory;
+
+import junit.framework.TestCase;
 
 import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.X509CertificateGenerator;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import junit.framework.TestCase;
 
 
 public class SelfSignedTLSClientAuthenticationTest extends TestCase {
@@ -41,6 +43,7 @@ public class SelfSignedTLSClientAuthenticationTest extends TestCase {
 			(SSLSocketFactory)null);
 		
 		assertEquals(ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH, clientAuth.getMethod());
+		assertEquals(Collections.singleton("client_id"), clientAuth.getFormParameterNames());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertNull(clientAuth.getClientX509Certificate());
@@ -69,6 +72,7 @@ public class SelfSignedTLSClientAuthenticationTest extends TestCase {
 		);
 		
 		assertEquals(ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH, clientAuth.getMethod());
+		assertEquals(Collections.singleton("client_id"), clientAuth.getFormParameterNames());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertEquals(sslSocketFactory, clientAuth.getSSLSocketFactory());
 		assertNull(clientAuth.getClientX509Certificate());
@@ -96,6 +100,7 @@ public class SelfSignedTLSClientAuthenticationTest extends TestCase {
 			clientCert);
 		
 		assertEquals(ClientAuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH, clientAuth.getMethod());
+		assertEquals(Collections.singleton("client_id"), clientAuth.getFormParameterNames());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals(clientCert, clientAuth.getClientX509Certificate());
@@ -188,6 +193,7 @@ public class SelfSignedTLSClientAuthenticationTest extends TestCase {
 		httpRequest.setClientX509Certificate(clientCert);
 		
 		SelfSignedTLSClientAuthentication clientAuth = SelfSignedTLSClientAuthentication.parse(httpRequest);
+		assertEquals(Collections.singleton("client_id"), clientAuth.getFormParameterNames());
 		assertEquals(new ClientID("123"), clientAuth.getClientID());
 		assertNull(clientAuth.getSSLSocketFactory());
 		assertEquals(clientCert, clientAuth.getClientX509Certificate());

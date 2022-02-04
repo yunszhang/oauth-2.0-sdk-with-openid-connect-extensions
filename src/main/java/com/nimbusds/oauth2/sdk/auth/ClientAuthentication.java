@@ -20,6 +20,7 @@ package com.nimbusds.oauth2.sdk.auth;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.security.auth.x500.X500Principal;
 
 import com.nimbusds.common.contenttype.ContentType;
@@ -81,7 +82,7 @@ public abstract class ClientAuthentication {
 	
 	
 	/**
-	 * Gets the client authentication method.
+	 * Returns the client authentication method.
 	 *
 	 * @return The client authentication method.
 	 */
@@ -92,7 +93,7 @@ public abstract class ClientAuthentication {
 
 
 	/**
-	 * Gets the client identifier.
+	 * Returns the client identifier.
 	 *
 	 * @return The client identifier.
 	 */
@@ -100,6 +101,15 @@ public abstract class ClientAuthentication {
 
 		return clientID;
 	}
+	
+	
+	/**
+	 * Returns the name of the form parameters, if such are used by the
+	 * authentication method.
+	 *
+	 * @return The form parameter names, empty set if none.
+	 */
+	public abstract Set<String> getFormParameterNames();
 	
 	
 	/**

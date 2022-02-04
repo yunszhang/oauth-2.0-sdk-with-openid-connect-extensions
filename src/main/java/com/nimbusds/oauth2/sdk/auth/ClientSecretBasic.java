@@ -23,14 +23,15 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Set;
 
 import net.jcip.annotations.Immutable;
 
 import com.nimbusds.jose.util.Base64;
-
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.id.ClientID;
 
 
 /**
@@ -72,6 +73,13 @@ public final class ClientSecretBasic extends PlainClientSecret {
 	public ClientSecretBasic(final ClientID clientID, final Secret secret) {
 	
 		super(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, clientID, secret);
+	}
+	
+	
+	@Override
+	public Set<String> getFormParameterNames() {
+		
+		return Collections.emptySet();
 	}
 	
 	

@@ -1944,3 +1944,6 @@ version 9.22.2 (2022-01-25)
 
 version 9.23 (2022-02-04)
     * Adds JWTClaimsSetUtils.toMultiValuedParameters utility method.
+
+version 9.24 (2022-02-04)
+    * Adds ClientAuthentication.getFormParameterNames method.

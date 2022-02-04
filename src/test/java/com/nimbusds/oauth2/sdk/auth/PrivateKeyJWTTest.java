@@ -37,9 +37,6 @@ import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 
 
-/**
- * Tests the private key JWT authentication class.
- */
 public class PrivateKeyJWTTest extends TestCase {
 
 
@@ -73,6 +70,8 @@ public class PrivateKeyJWTTest extends TestCase {
 		RSAPublicKey pub = (RSAPublicKey)pair.getPublic();
 
 		PrivateKeyJWT privateKeyJWT = new PrivateKeyJWT(clientID, tokenEndpoint, JWSAlgorithm.RS256, priv, null, null);
+		
+		assertEquals(new HashSet<>(Arrays.asList("client_id", "client_assertion", "client_assertion_type")), privateKeyJWT.getFormParameterNames());
 
 		privateKeyJWT = PrivateKeyJWT.parse(privateKeyJWT.toParameters());
 
@@ -85,8 +84,8 @@ public class PrivateKeyJWTTest extends TestCase {
 
 		// 4 min < exp < 6 min
 		final long now = new Date().getTime();
-		final Date fourMinutesFromNow = new Date(now + 4*60*1000l);
-		final Date sixMinutesFromNow = new Date(now + 6*60*1000l);
+		final Date fourMinutesFromNow = new Date(now + 4*60*1000L);
+		final Date sixMinutesFromNow = new Date(now + 6*60*1000L);
 		assertTrue(privateKeyJWT.getJWTAuthenticationClaimsSet().getExpirationTime().after(fourMinutesFromNow));
 		assertTrue(privateKeyJWT.getJWTAuthenticationClaimsSet().getExpirationTime().before(sixMinutesFromNow));
 		assertNotNull(privateKeyJWT.getJWTAuthenticationClaimsSet().getJWTID());
@@ -122,8 +121,8 @@ public class PrivateKeyJWTTest extends TestCase {
 
 		// 4 min < exp < 6 min
 		final long now = new Date().getTime();
-		final Date fourMinutesFromNow = new Date(now + 4*60*1000l);
-		final Date sixMinutesFromNow = new Date(now + 6*60*1000l);
+		final Date fourMinutesFromNow = new Date(now + 4*60*1000L);
+		final Date sixMinutesFromNow = new Date(now + 6*60*1000L);
 		assertTrue(privateKeyJWT.getJWTAuthenticationClaimsSet().getExpirationTime().after(fourMinutesFromNow));
 		assertTrue(privateKeyJWT.getJWTAuthenticationClaimsSet().getExpirationTime().before(sixMinutesFromNow));
 		assertNotNull(privateKeyJWT.getJWTAuthenticationClaimsSet().getJWTID());
@@ -156,8 +155,8 @@ public class PrivateKeyJWTTest extends TestCase {
 
 		// 4 min < exp < 6 min
 		final long now = new Date().getTime();
-		final Date fourMinutesFromNow = new Date(now + 4*60*1000l);
-		final Date sixMinutesFromNow = new Date(now + 6*60*1000l);
+		final Date fourMinutesFromNow = new Date(now + 4*60*1000L);
+		final Date sixMinutesFromNow = new Date(now + 6*60*1000L);
 		assertTrue(privateKeyJWT.getJWTAuthenticationClaimsSet().getExpirationTime().after(fourMinutesFromNow));
 		assertTrue(privateKeyJWT.getJWTAuthenticationClaimsSet().getExpirationTime().before(sixMinutesFromNow));
 		assertNotNull(privateKeyJWT.getJWTAuthenticationClaimsSet().getJWTID());
@@ -193,8 +192,8 @@ public class PrivateKeyJWTTest extends TestCase {
 
 		// 4 min < exp < 6 min
 		final long now = new Date().getTime();
-		final Date fourMinutesFromNow = new Date(now + 4*60*1000l);
-		final Date sixMinutesFromNow = new Date(now + 6*60*1000l);
+		final Date fourMinutesFromNow = new Date(now + 4*60*1000L);
+		final Date sixMinutesFromNow = new Date(now + 6*60*1000L);
 		assertTrue(privateKeyJWT.getJWTAuthenticationClaimsSet().getExpirationTime().after(fourMinutesFromNow));
 		assertTrue(privateKeyJWT.getJWTAuthenticationClaimsSet().getExpirationTime().before(sixMinutesFromNow));
 		assertNotNull(privateKeyJWT.getJWTAuthenticationClaimsSet().getJWTID());
@@ -228,6 +227,5 @@ public class PrivateKeyJWTTest extends TestCase {
 		} catch (ParseException e) {
 			assertEquals("Invalid private key JWT authentication: The client identifier doesn't match the client assertion subject / issuer", e.getMessage());
 		}
-		
 	}
 }

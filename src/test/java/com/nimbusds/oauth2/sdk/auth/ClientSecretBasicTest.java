@@ -29,9 +29,6 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 
 
-/**
- * Tests client secret basic authentication.
- */
 public class ClientSecretBasicTest extends TestCase {
 
 
@@ -51,6 +48,8 @@ public class ClientSecretBasicTest extends TestCase {
 		assertTrue(csb instanceof PlainClientSecret);
 		
 		assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, csb.getMethod());
+		
+		assertTrue(csb.getFormParameterNames().isEmpty());
 		
 		assertEquals(id, csb.getClientID().toString());
 		assertEquals(pw, csb.getClientSecret().getValue());
