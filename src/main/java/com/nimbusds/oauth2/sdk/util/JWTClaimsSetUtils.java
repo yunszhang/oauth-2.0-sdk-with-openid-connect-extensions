@@ -18,6 +18,8 @@
 package com.nimbusds.oauth2.sdk.util;
 
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,6 +60,35 @@ public final class JWTClaimsSetUtils {
 		}
 		
 		return builder.build();
+	}
+	
+	
+	/**
+	 * Creates a multi-valued string parameters map from the specified JWT
+	 * claims set. {@link JWTClaimsSet#getRegisteredNames() registered JWT
+	 * claims} and {@code null} valued claims are not included in the
+	 * returned parameters.
+	 *
+	 * @param claimsSet The JWT claims set. Must not be {@code null}.
+	 *
+	 * @return The string parameters map.
+	 */
+	public static Map<String,List<String>> toMultiValuedParameters(final JWTClaimsSet claimsSet) {
+		
+		Map<String,List<String>> params = new HashMap<>();
+		
+		for (Map.Entry<String,Object> entry: claimsSet.toJSONObject().entrySet()) {
+			
+			if (JWTClaimsSet.getRegisteredNames().contains(entry.getKey()))
+				continue; // skip sub, aud, iat, etc...
+			
+			if (entry.getValue() == null)
+				continue; // skip null value
+			
+			params.put(entry.getKey(), Collections.singletonList(entry.getValue().toString()));
+		}
+		
+		return params;
 	}
 	
 	

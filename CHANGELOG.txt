@@ -1941,3 +1941,6 @@ version 9.22.2 (2022-01-25)
       {get|set}BackChannelAuthenticationEndpointURI deprecating
       {get|set}BackChannelAuthenticationEndpoint.
     * Updates to Nimbus JOSE+JWT 9.16.1
+
+version 9.23 (2022-02-04)
+    * Adds JWTClaimsSetUtils.toMultiValuedParameters utility method.
