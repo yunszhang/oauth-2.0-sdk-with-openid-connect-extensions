@@ -1950,3 +1950,6 @@ version 9.24 (2022-02-04)
     * CIBARequest.parse must not include form parameters from the client
       authentication (e.g. private_key_jwt) into the custom parameters map.
     * Updates to Nimbus JOSE+JWT 9.18
+
+version 9.25 (2022-02-09)
+    * Adds OpenID "claims" parameter support to CIBARequest.

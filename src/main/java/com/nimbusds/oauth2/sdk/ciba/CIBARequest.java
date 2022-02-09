@@ -39,6 +39,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.Identifier;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.util.*;
+import com.nimbusds.openid.connect.sdk.OIDCClaimsRequest;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 
 
@@ -105,6 +106,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		p.add("binding_message");
 		p.add("user_code");
 		p.add("requested_expiry");
+		p.add("claims");
 		
 		// Signed JWT
 		p.add("request");
@@ -171,6 +173,12 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	 * Requested expiration for the {@code auth_req_id} (optional).
 	 */
 	private final Integer requestedExpiry;
+	
+	
+	/**
+	 * Individual claims to be returned (optional).
+	 */
+	private final OIDCClaimsRequest claims;
 	
 	
 	/**
@@ -267,6 +275,12 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		
 		
 		/**
+		 * Individual claims to be returned (optional).
+		 */
+		private OIDCClaimsRequest claims;
+		
+		
+		/**
 		 * Custom parameters.
 		 */
 		private Map<String,List<String>> customParams = new HashMap<>();
@@ -347,6 +361,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			bindingMessage = request.getBindingMessage();
 			userCode = request.getUserCode();
 			requestedExpiry = request.getRequestedExpiry();
+			claims = request.getOIDCClaims();
 			customParams = request.getCustomParameters();
 			signedRequest = request.getRequestJWT();
 		}
@@ -481,6 +496,22 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		
 		
 		/**
+		 * Sets the individual OpenID claims to be returned.
+		 * Corresponds to the optional {@code claims} parameter.
+		 *
+		 * @param claims The individual OpenID claims to be returned,
+		 *               {@code null} if not specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder claims(final OIDCClaimsRequest claims) {
+			
+			this.claims = claims;
+			return this;
+		}
+		
+		
+		/**
 		 * Sets a custom parameter.
 		 *
 		 * @param name   The parameter name. Must not be {@code null}.
@@ -545,6 +576,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 					bindingMessage,
 					userCode,
 					requestedExpiry,
+					claims,
 					customParams
 				);
 			} catch (IllegalArgumentException e) {
@@ -583,6 +615,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	 * @param customParams            Custom parameters, empty or
 	 *                                {@code null} if not specified.
 	 */
+	@Deprecated
 	public CIBARequest(final URI uri,
 			   final ClientAuthentication clientAuth,
 			   final Scope scope,
@@ -594,6 +627,61 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			   final String bindingMessage,
 			   final Secret userCode,
 			   final Integer requestedExpiry,
+			   final Map<String, List<String>> customParams) {
+		
+		this(uri, clientAuth,
+			scope, clientNotificationToken, acrValues,
+			loginHintTokenString, idTokenHint, loginHint,
+			bindingMessage, userCode, requestedExpiry,
+			null, customParams);
+	}
+	
+	
+	/**
+	 * Creates a new CIBA request.
+	 *
+	 * @param uri                     The endpoint URI, {@code null} if not
+	 *                                specified.
+	 * @param clientAuth              The client authentication. Must not
+	 *                                be {@code null}.
+	 * @param scope                   The requested scope. Must not be
+	 *                                empty or {@code null}.
+	 * @param clientNotificationToken The client notification token,
+	 *                                {@code null} if not specified.
+	 * @param acrValues               The requested ACR values,
+	 *                                {@code null} if not specified.
+	 * @param loginHintTokenString    The login hint token string,
+	 *                                {@code null} if not specified.
+	 * @param idTokenHint             The ID Token hint, {@code null} if
+	 *                                not specified.
+	 * @param loginHint               The login hint, {@code null} if not
+	 *                                specified.
+	 * @param bindingMessage          The binding message, {@code null} if
+	 *                                not specified.
+	 * @param userCode                The user code, {@code null} if not
+	 *                                specified.
+	 * @param requestedExpiry         The required expiry (as positive
+	 *                                integer), {@code null} if not
+	 *                                specified.
+	 * @param claims                  The individual OpenID claims to be
+	 *                                returned. Corresponds to the optional
+	 *                                {@code claims} parameter.
+	 *                                {@code null} if not specified.
+	 * @param customParams            Custom parameters, empty or
+	 *                                {@code null} if not specified.
+	 */
+	public CIBARequest(final URI uri,
+			   final ClientAuthentication clientAuth,
+			   final Scope scope,
+			   final BearerAccessToken clientNotificationToken,
+			   final List<ACR> acrValues,
+			   final String loginHintTokenString,
+			   final JWT idTokenHint,
+			   final String loginHint,
+			   final String bindingMessage,
+			   final Secret userCode,
+			   final Integer requestedExpiry,
+			   final OIDCClaimsRequest claims,
 			   final Map<String, List<String>> customParams) {
 		
 		super(uri, clientAuth);
@@ -640,6 +728,8 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		}
 		this.requestedExpiry = requestedExpiry;
 		
+		this.claims = claims;
+		
 		this.customParams = customParams != null ? customParams : Collections.<String, List<String>>emptyMap();
 		
 		signedRequest = null;
@@ -679,6 +769,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		bindingMessage = null;
 		userCode = null;
 		requestedExpiry = null;
+		claims = null;
 		customParams = Collections.emptyMap();
 	}
 
@@ -696,7 +787,8 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 
 	
 	/**
-	 * Gets the scope. Corresponds to the optional {@code scope} parameter.
+	 * Returns the scope. Corresponds to the optional {@code scope}
+	 * parameter.
 	 *
 	 * @return The scope, {@code null} for a {@link #isSigned signed
 	 *         request}.
@@ -708,8 +800,8 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	
 	
 	/**
-	 * Gets the client notification token, required for the CIBA ping and
-	 * push token delivery modes. Corresponds to the
+	 * Returns the client notification token, required for the CIBA ping
+	 * and push token delivery modes. Corresponds to the
 	 * {@code client_notification_token} parameter.
 	 *
 	 * @return The client notification token, {@code null} if not
@@ -722,7 +814,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	
 	
 	/**
-	 * Gets the requested Authentication Context Class Reference values.
+	 * Returns the requested Authentication Context Class Reference values.
 	 * Corresponds to the optional {@code acr_values} parameter.
 	 *
 	 * @return The requested ACR values, {@code null} if not specified.
@@ -734,7 +826,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	
 	
 	/**
-	 * Gets the login hint token string, containing information
+	 * Returns the login hint token string, containing information
 	 * identifying the end-user for whom authentication is being requested.
 	 * Corresponds to the {@code login_hint_token} parameter.
 	 *
@@ -748,7 +840,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	
 	
 	/**
-	 * Gets the ID Token hint, passed as a hint to identify the end-user
+	 * Returns the ID Token hint, passed as a hint to identify the end-user
 	 * for whom authentication is being requested. Corresponds to the
 	 * {@code id_token_hint} parameter.
 	 *
@@ -761,7 +853,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	
 	
 	/**
-	 * Gets the login hint (email address, phone number, etc), about the
+	 * Returns the login hint (email address, phone number, etc), about the
 	 * end-user for whom authentication is being requested. Corresponds to
 	 * the {@code login_hint} parameter.
 	 *
@@ -774,7 +866,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	
 	
 	/**
-	 * Gets the human readable binding message for the display at the
+	 * Returns the human-readable binding message for the display at the
 	 * consumption and authentication devices. Corresponds to the
 	 * {@code binding_message} parameter.
 	 *
@@ -787,8 +879,8 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	
 	
 	/**
-	 * Gets the user secret code (password, PIN, etc) to authorise the CIBA
-	 * request with the authentication device. Corresponds to the
+	 * Returns the user secret code (password, PIN, etc) to authorise the
+	 * CIBA request with the authentication device. Corresponds to the
 	 * {@code user_code} parameter.
 	 *
 	 * @return The user code, {@code null} if not specified.
@@ -800,7 +892,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	
 	
 	/**
-	 * Gets the requested expiration for the {@code auth_req_id}.
+	 * Returns the requested expiration for the {@code auth_req_id}.
 	 * Corresponds to the {@code requested_expiry} parameter.
 	 *
 	 * @return The required expiry (as positive integer), {@code null} if
@@ -809,6 +901,19 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	public Integer getRequestedExpiry() {
 		
 		return requestedExpiry;
+	}
+	
+	
+	/**
+	 * Returns the individual OpenID claims to be returned. Corresponds to
+	 * the optional {@code claims} parameter.
+	 *
+	 * @return The individual claims to be returned, {@code null} if not
+	 *         specified.
+	 */
+	public OIDCClaimsRequest getOIDCClaims() {
+		
+		return claims;
 	}
 	
 	
@@ -901,6 +1006,9 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		}
 		if (getRequestedExpiry() != null) {
 			params.put("requested_expiry", Collections.singletonList(getRequestedExpiry().toString()));
+		}
+		if (getOIDCClaims() != null) {
+			params.put("claims", Collections.singletonList(getOIDCClaims().toJSONString()));
 		}
 		
 		return params;
@@ -1044,12 +1152,21 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		v = MultivaluedMapUtils.getFirstValue(params, "requested_expiry");
 		
 		Integer requestedExpiry = null;
-
 		if (StringUtils.isNotBlank(v)) {
 			try {
 				requestedExpiry = Integer.valueOf(v);
 			} catch (NumberFormatException e) {
 				throw new ParseException("The requested_expiry parameter must be an integer");
+			}
+		}
+		
+		v = MultivaluedMapUtils.getFirstValue(params, "claims");
+		OIDCClaimsRequest claims = null;
+		if (StringUtils.isNotBlank(v)) {
+			try {
+				claims = OIDCClaimsRequest.parse(v);
+			} catch (ParseException e) {
+				throw new ParseException("Invalid claims parameter: " + e.getMessage(), e);
 			}
 		}
 		
@@ -1070,7 +1187,10 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		try {
 			return new CIBARequest(
 				uri, clientAuth,
-				scope, clientNotificationToken, acrValues, loginHintTokenString, idTokenHint, loginHint, bindingMessage, userCode, requestedExpiry,
+				scope, clientNotificationToken, acrValues,
+				loginHintTokenString, idTokenHint, loginHint,
+				bindingMessage, userCode, requestedExpiry,
+				claims,
 				customParams);
 		} catch (IllegalArgumentException e) {
 			throw new ParseException(e.getMessage());

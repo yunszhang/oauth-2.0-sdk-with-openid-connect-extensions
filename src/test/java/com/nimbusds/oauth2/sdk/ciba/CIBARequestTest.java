@@ -35,7 +35,10 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.JWTID;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+import com.nimbusds.openid.connect.sdk.OIDCClaimsRequest;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
+import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
+
 
 public class CIBARequestTest extends TestCase {
 	
@@ -64,6 +67,9 @@ public class CIBARequestTest extends TestCase {
 	private static final Secret USER_CODE = new Secret("8364");
 	
 	private static final Integer REQUESTED_EXPIRY = 60;
+	
+	private static final OIDCClaimsRequest CLAIMS = new OIDCClaimsRequest()
+		.withIDTokenClaimsRequest(new ClaimsSetRequest().add("email"));
 	
 	private static final Map<String,List<String>> CUSTOM_PARAMS;
 	
@@ -148,6 +154,7 @@ public class CIBARequestTest extends TestCase {
 		assertEquals(LOGIN_HINT, request.getLoginHint());
 		assertNull(request.getUserCode());
 		assertNull(request.getRequestedExpiry());
+		assertNull(request.getOIDCClaims());
 		assertTrue(request.getCustomParameters().isEmpty());
 		assertNull(request.getCustomParameter("no-such-param"));
 		assertFalse(request.isSigned());
@@ -182,6 +189,7 @@ public class CIBARequestTest extends TestCase {
 				BINDING_MESSAGE,
 				USER_CODE,
 				REQUESTED_EXPIRY,
+				CLAIMS,
 				CUSTOM_PARAMS
 			);
 			
@@ -208,6 +216,7 @@ public class CIBARequestTest extends TestCase {
 			assertEquals(BINDING_MESSAGE, request.getBindingMessage());
 			assertEquals(USER_CODE, request.getUserCode());
 			assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
+			assertEquals(CLAIMS, request.getOIDCClaims());
 			assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
 			assertFalse(request.isSigned());
 			assertNull(request.getRequestJWT());
@@ -246,6 +255,7 @@ public class CIBARequestTest extends TestCase {
 			assertEquals(BINDING_MESSAGE, request.getBindingMessage());
 			assertEquals(USER_CODE, request.getUserCode());
 			assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
+			assertEquals(CLAIMS.toJSONObject(), request.getOIDCClaims().toJSONObject());
 			assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
 			assertFalse(request.isSigned());
 			assertNull(request.getRequestJWT());
@@ -274,6 +284,7 @@ public class CIBARequestTest extends TestCase {
 				.bindingMessage(BINDING_MESSAGE)
 				.userCode(USER_CODE)
 				.requestedExpiry(REQUESTED_EXPIRY)
+				.claims(CLAIMS)
 				.customParameter("custom-xyz", "abc")
 				.build();
 			
@@ -300,6 +311,7 @@ public class CIBARequestTest extends TestCase {
 			assertEquals(BINDING_MESSAGE, request.getBindingMessage());
 			assertEquals(USER_CODE, request.getUserCode());
 			assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
+			assertEquals(CLAIMS, request.getOIDCClaims());
 			assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
 			
 			// Copy
@@ -329,6 +341,7 @@ public class CIBARequestTest extends TestCase {
 			assertEquals(BINDING_MESSAGE, request.getBindingMessage());
 			assertEquals(USER_CODE, request.getUserCode());
 			assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
+			assertEquals(CLAIMS, request.getOIDCClaims());
 			assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
 		}
 	}
@@ -409,6 +422,7 @@ public class CIBARequestTest extends TestCase {
 				null,
 				null,
 				null,
+				null,
 				null
 			);
 			fail();
@@ -427,6 +441,7 @@ public class CIBARequestTest extends TestCase {
 				null,
 				CLIENT_AUTH,
 				new Scope(), // empty scope
+				null,
 				null,
 				null,
 				null,
@@ -461,6 +476,7 @@ public class CIBARequestTest extends TestCase {
 				null,
 				null,
 				null,
+				null,
 				null
 			);
 			fail();
@@ -487,6 +503,7 @@ public class CIBARequestTest extends TestCase {
 				null,
 				null,
 				0,
+				null,
 				null
 			);
 			fail();
@@ -513,6 +530,7 @@ public class CIBARequestTest extends TestCase {
 				null,
 				null,
 				0,
+				null,
 				null
 			);
 			fail();
@@ -535,6 +553,7 @@ public class CIBARequestTest extends TestCase {
 				null,
 				null,
 				0,
+				null,
 				null
 			);
 			fail();
@@ -557,6 +576,7 @@ public class CIBARequestTest extends TestCase {
 				null,
 				null,
 				0,
+				null,
 				null
 			);
 			fail();
@@ -579,6 +599,7 @@ public class CIBARequestTest extends TestCase {
 				null,
 				null,
 				0,
+				null,
 				null
 			);
 			fail();
@@ -605,6 +626,7 @@ public class CIBARequestTest extends TestCase {
 				null,
 				null,
 				0,
+				null,
 				null
 			);
 			fail();
@@ -631,6 +653,7 @@ public class CIBARequestTest extends TestCase {
 				null,
 				null,
 				0,
+				null,
 				null
 			);
 			fail();
@@ -823,7 +846,38 @@ public class CIBARequestTest extends TestCase {
 		
 		assertEquals(new Scope("openid"), request.getScope());
 		assertEquals("alice", request.getLoginHint());
-		System.out.println(request.getCustomParameters());
 		assertTrue(request.getCustomParameters().isEmpty());
+	}
+	
+	
+	public void testWithClaimsParameter() throws ParseException {
+		
+		assertEquals("{\"id_token\":{\"email\":null}}", CLAIMS.toJSONString());
+		
+		CIBARequest request = new CIBARequest.Builder(
+			CLIENT_AUTH,
+			SCOPE)
+			.endpointURI(ENDPOINT_URI)
+			.loginHint(LOGIN_HINT)
+			.claims(CLAIMS)
+			.build();
+		
+		Map<String,List<String>> params = request.toParameters();
+		assertEquals(Collections.singletonList(SCOPE.toString()), params.get("scope"));
+		assertEquals(Collections.singletonList(LOGIN_HINT), params.get("login_hint"));
+		assertEquals(Collections.singletonList(CLAIMS.toJSONString()), params.get("claims"));
+		assertEquals(3, params.size());
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		
+		request = CIBARequest.parse(httpRequest);
+		
+		assertEquals(CLAIMS.toJSONObject(), request.getOIDCClaims().toJSONObject());
+		
+		params = request.toParameters();
+		assertEquals(Collections.singletonList(SCOPE.toString()), params.get("scope"));
+		assertEquals(Collections.singletonList(LOGIN_HINT), params.get("login_hint"));
+		assertEquals(Collections.singletonList(CLAIMS.toJSONString()), params.get("claims"));
+		assertEquals(3, params.size());
 	}
 }
