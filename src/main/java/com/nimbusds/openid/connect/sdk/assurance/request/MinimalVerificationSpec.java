@@ -168,19 +168,47 @@ public class MinimalVerificationSpec implements VerificationSpec {
 		}
 		
 		if (jsonObject.get("trust_framework") != null) {
+			
 			JSONObject tfSpec = JSONObjectUtils.getJSONObject(jsonObject, "trust_framework");
-			String value = JSONObjectUtils.getString(tfSpec, "value", null);
-			List<String> values = JSONObjectUtils.getStringList(tfSpec, "values", null);
-			if ((value == null && values == null) || (value != null && values != null)) {
-				// Either value or values must be set
-				throw new ParseException("Invalid trust_framework spec");
-			}
-			if (values != null && values.isEmpty()) {
-				// Values must not be empty
-				throw new ParseException("Invalid trust_framework spec");
+			
+			try {
+				validateTrustFrameworkSpec(tfSpec);
+			} catch (ParseException e) {
+				throw new ParseException("Invalid trust_framework spec: " + e.getMessage(), e);
 			}
 		}
 		
 		return new MinimalVerificationSpec(jsonObject);
+	}
+	
+	
+	/**
+	 * Validates the {@code trust_framework} JSON object.
+	 *
+	 * @param tfSpec The JSON object. Must be {@code null}.
+	 *
+	 * @throws ParseException If the JSON object is illegal.
+	 */
+	private static void validateTrustFrameworkSpec(final JSONObject tfSpec)
+		throws ParseException {
+		
+		String value = null;
+		if (tfSpec.containsKey("value")) {
+			value = JSONObjectUtils.getString(tfSpec, "value");
+		}
+		
+		List<String> values = null;
+		if (tfSpec.containsKey("values")) {
+			values = JSONObjectUtils.getStringList(tfSpec, "values");
+			if (values.isEmpty()) {
+				// If set values must not be empty
+				throw new ParseException("The values JSON array must not be empty");
+			}
+		}
+		
+		if (value != null && values != null) {
+			// Value or values must not be set together
+			throw new ParseException("Value and values must not be set together");
+		}
 	}
 }

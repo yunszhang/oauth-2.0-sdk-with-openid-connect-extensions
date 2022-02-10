@@ -2225,4 +2225,64 @@ public class OIDCClaimsRequestTest extends TestCase {
 			}
 		}
 	}
+	
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/385/
+	public void testAcceptEmptyIdASpecs() throws ParseException {
+		
+		String json = 
+			"{" +
+			"    \"id_token\": {" +
+			"        \"email\": {" +
+			"            \"essential\": false" +
+			"        }," +
+			"        \"email_verified\": {" +
+			"            \"essential\": false" +
+			"        }," +
+			"        \"verified_claims\": {" +
+			"            \"verification\": {" +
+			"                \"trust_framework\": {}" +
+			"            }," +
+			"            \"claims\": {" +
+			"                \"given_name\": {}" +
+			"            }" +
+			"        }" +
+			"    }," +
+			"    \"userinfo\": {" +
+			"        \"email\": {" +
+			"            \"essential\": false" +
+			"        }," +
+			"        \"email_verified\": {" +
+			"            \"essential\": false" +
+			"        }," +
+			"        \"verified_claims\": {" +
+			"            \"verification\": {" +
+			"                \"trust_framework\": {}" +
+			"            }," +
+			"            \"claims\": {" +
+			"                \"given_name\": {}" +
+			"            }" +
+			"        }" +
+			"    }" +
+			"}";
+		
+		OIDCClaimsRequest claimsRequest = OIDCClaimsRequest.parse(json);
+		
+		VerifiedClaimsSetRequest idTokenVerifiedSpec = claimsRequest.getIDTokenVerifiedClaimsRequests().get(0);
+		
+		assertEquals("{\"trust_framework\":{}}", idTokenVerifiedSpec.getVerification().toJSONObject().toJSONString());
+		
+		assertEquals(Collections.singleton("given_name"), idTokenVerifiedSpec.getClaimNames(false));
+		assertEquals(ClaimRequirement.VOLUNTARY, idTokenVerifiedSpec.get("given_name").getClaimRequirement());
+		assertNull(idTokenVerifiedSpec.get("given_name").getRawValue());
+		
+		VerifiedClaimsSetRequest userInfoVerifiedSpec = claimsRequest.getUserInfoVerifiedClaimsRequests().get(0);
+		
+		assertEquals("{\"trust_framework\":{}}", userInfoVerifiedSpec.getVerification().toJSONObject().toJSONString());
+		
+		assertEquals(Collections.singleton("given_name"), userInfoVerifiedSpec.getClaimNames(false));
+		assertEquals("given_name", userInfoVerifiedSpec.get("given_name").getClaimName());
+		assertEquals(ClaimRequirement.VOLUNTARY, userInfoVerifiedSpec.get("given_name").getClaimRequirement());
+		assertNull(userInfoVerifiedSpec.get("given_name").getRawValue());
+	}
 }

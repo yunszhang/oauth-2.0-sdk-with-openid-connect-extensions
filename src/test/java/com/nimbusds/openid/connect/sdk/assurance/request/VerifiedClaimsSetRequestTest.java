@@ -174,26 +174,6 @@ public class VerifiedClaimsSetRequestTest extends TestCase {
 	}
 	
 	
-	public void testParse_rejectInvalidVerificationObject() {
-		
-		String json =
-			"{" +
-			"   \"verification\": {" +
-			"      \"trust_framework\": {}" +
-			"   }," +
-			"   \"claims\": {\"email\": null}" +
-			"}";
-		
-		try {
-			VerifiedClaimsSetRequest.parse(json);
-			fail();
-		} catch (ParseException e) {
-			assertEquals("Invalid trust_framework spec", e.getMessage());
-			assertNull(e.getErrorObject());
-		}
-	}
-	
-	
 	public void testParse_rejectEmptyClaimsObject() {
 		
 		String json =

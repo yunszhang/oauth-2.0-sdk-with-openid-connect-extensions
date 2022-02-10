@@ -746,7 +746,8 @@ public class OIDCClaimsRequest implements JSONAware {
 		} catch (ParseException e) {
 			throw new ParseException("Invalid verified claims request" +
 				(position > -1 ? " at position " + position : "") +
-				": " + e.getMessage());
+				": " + e.getMessage(),
+				e);
 		}
 	}
 	

@@ -142,17 +142,14 @@ public class MinimalVerificationSpecTest extends TestCase {
 	}
 	
 	
-	public void testParse_emptyTrustFrameworkSpec() {
+	public void testParse_emptyTrustFrameworkSpec() throws ParseException {
 		
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("trust_framework", new JSONObject());
 		
-		try {
-			MinimalVerificationSpec.parse(jsonObject);
-			fail();
-		} catch (ParseException e) {
-			assertEquals("Invalid trust_framework spec", e.getMessage());
-		}
+		MinimalVerificationSpec spec = MinimalVerificationSpec.parse(jsonObject);
+		
+		assertEquals("{\"trust_framework\":{}}", spec.toJSONObject().toJSONString());
 	}
 	
 	
@@ -167,7 +164,7 @@ public class MinimalVerificationSpecTest extends TestCase {
 			MinimalVerificationSpec.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid trust_framework spec", e.getMessage());
+			assertEquals("Invalid trust_framework spec: JSON object member with key value has null value", e.getMessage());
 		}
 	}
 	
@@ -183,7 +180,7 @@ public class MinimalVerificationSpecTest extends TestCase {
 			MinimalVerificationSpec.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid trust_framework spec", e.getMessage());
+			assertEquals("Invalid trust_framework spec: JSON object member with key values has null value", e.getMessage());
 		}
 	}
 	
@@ -199,7 +196,7 @@ public class MinimalVerificationSpecTest extends TestCase {
 			MinimalVerificationSpec.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid trust_framework spec", e.getMessage());
+			assertEquals("Invalid trust_framework spec: The values JSON array must not be empty", e.getMessage());
 		}
 	}
 	
@@ -219,7 +216,7 @@ public class MinimalVerificationSpecTest extends TestCase {
 			MinimalVerificationSpec.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid trust_framework spec", e.getMessage());
+			assertEquals("Invalid trust_framework spec: Value and values must not be set together", e.getMessage());
 		}
 	}
 	
