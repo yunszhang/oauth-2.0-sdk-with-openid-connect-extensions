@@ -1955,3 +1955,4 @@ version 9.25 (2022-02-10)
     * Adds OpenID "claims" parameter support to CIBARequest.
     * MinimalVerificationSpec.parse must allow trust_framework set to an empty
       JSON object (iss #385).
+    * Updates to Nimbus JOSE+JWT 9.19
