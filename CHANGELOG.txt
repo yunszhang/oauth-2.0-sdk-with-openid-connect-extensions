@@ -1959,3 +1959,6 @@ version 9.25 (2022-02-10)
 
 version 9.26 (2022-02-17)
     * Updates OIDCClientMetadata.resolveSectorID to support CIBA.
+
+version 9.27 (2022-02-17)
+    * Updates SectorIDURIValidator.validate to support CIBA-related URIs.

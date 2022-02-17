@@ -111,7 +111,7 @@ public class SectorIDURIValidatorTest extends TestCase {
 			v.validate(URI.create("https://example.com/apps.json"), redirectURIs);
 			fail();
 		} catch (GeneralException e) {
-			assertEquals("Couldn't validate sector ID URI: Missing Content-Type", e.getMessage());
+			assertEquals("Couldn't validate sector ID: Missing HTTP Content-Type", e.getMessage());
 		}
 	}
 
@@ -140,7 +140,7 @@ public class SectorIDURIValidatorTest extends TestCase {
 			v.validate(URI.create("https://example.com/apps.json"), redirectURIs);
 			fail();
 		} catch (GeneralException e) {
-			assertEquals("Couldn't validate sector ID URI: Content-Type must be application/json, found text/plain", e.getMessage());
+			assertEquals("Couldn't validate sector ID: HTTP Content-Type must be application/json, found text/plain", e.getMessage());
 		}
 	}
 
@@ -194,7 +194,7 @@ public class SectorIDURIValidatorTest extends TestCase {
 			v.validate(URI.create("https://example.com/apps.json"), redirectURIs);
 			fail();
 		} catch (GeneralException e) {
-			assertEquals("Sector ID URI validation failed: Redirect URI https://yourapp.com/callback is missing from published JSON array at sector ID URI https://example.com/apps.json", e.getMessage());
+			assertEquals("Sector ID validation failed: URI https://yourapp.com/callback not present at sector ID URI https://example.com/apps.json", e.getMessage());
 		}
 	}
 
@@ -219,7 +219,7 @@ public class SectorIDURIValidatorTest extends TestCase {
 			v.validate(URI.create("https://example.com/apps.json"), redirectURIs);
 			fail();
 		} catch (GeneralException e) {
-			assertEquals("Sector ID URI validation failed: Redirect URI https://myapp.com/callback is missing from published JSON array at sector ID URI https://example.com/apps.json", e.getMessage());
+			assertEquals("Sector ID validation failed: URI https://myapp.com/callback not present at sector ID URI https://example.com/apps.json", e.getMessage());
 		}
 	}
 }

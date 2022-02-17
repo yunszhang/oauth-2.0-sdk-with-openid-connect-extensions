@@ -37,6 +37,7 @@ import com.nimbusds.oauth2.sdk.util.JSONArrayUtils;
  * <ul>
  *     <li>OpenID Connect Core 1.0, section 8.1.
  *     <li>OpenID Connect Dynamic Client Registration 1.0, section 5.
+ *     <li>OpenID Connect CIBA Flow - Core 1.0, section 4.
  * </ul>
  */
 public class SectorIDURIValidator {
@@ -49,7 +50,7 @@ public class SectorIDURIValidator {
 
 
 	/**
-	 * Creates a new sector identifier URI validator.
+	 * Creates a new sector ID URI validator.
 	 *
 	 * @param resourceRetriever The URL resource retriever to use. Must not
 	 *                          be {@code null}.
@@ -73,22 +74,20 @@ public class SectorIDURIValidator {
 
 
 	/**
-	 * Validates the specified sector identifier URI by ensuring it lists
-	 * all specified redirection URIs.
+	 * Validates the specified URIs for being present in a sector ID
+	 * document.
 	 *
-	 *
-	 * @param sectorURI    The sector identifier URI. Must not be
-	 *                     {@code null}.
-	 * @param redirectURIs The redirection URIs of the client. Must not be
-	 *                     {@code null}.
+	 * @param sectorURI      The sector ID URI. Must not be {@code null}.
+	 * @param urisToValidate The client URIs to check for being present in
+	 *                       the sector ID JSON document. Must not be
+	 *                       {@code null}.
 	 *
 	 * @throws GeneralException If validation failed.
 	 */
-	public void validate(final URI sectorURI, final Set<URI> redirectURIs)
+	public void validate(final URI sectorURI, final Set<URI> urisToValidate)
 		throws GeneralException {
 
 		Resource resource;
-
 		try {
 			resource = resourceRetriever.retrieveResource(sectorURI.toURL());
 		} catch (IOException e) {
@@ -96,19 +95,19 @@ public class SectorIDURIValidator {
 		}
 
 		if (resource.getContentType() == null) {
-			throw new GeneralException("Couldn't validate sector ID URI: Missing Content-Type");
+			throw new GeneralException("Couldn't validate sector ID: Missing HTTP Content-Type");
 		}
 
 		if (! resource.getContentType().toLowerCase().startsWith("application/json")) {
-			throw new GeneralException("Couldn't validate sector ID URI: Content-Type must be application/json, found " + resource.getContentType());
+			throw new GeneralException("Couldn't validate sector ID: HTTP Content-Type must be application/json, found " + resource.getContentType());
 		}
 
 		List<URI> uriList = JSONArrayUtils.toURIList(JSONArrayUtils.parse(resource.getContent()));
 
-		for (URI uri: redirectURIs) {
+		for (URI uri: urisToValidate) {
 
 			if (! uriList.contains(uri)) {
-				throw new GeneralException("Sector ID URI validation failed: Redirect URI " + uri + " is missing from published JSON array at sector ID URI " + sectorURI);
+				throw new GeneralException("Sector ID validation failed: URI " + uri + " not present at sector ID URI " + sectorURI);
 			}
 		}
 	}
