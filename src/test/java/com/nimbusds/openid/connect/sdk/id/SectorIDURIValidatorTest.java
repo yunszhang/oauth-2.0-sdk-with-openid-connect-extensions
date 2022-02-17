@@ -27,11 +27,17 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import junit.framework.TestCase;
+import net.minidev.json.JSONArray;
+
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.util.Resource;
 import com.nimbusds.jose.util.ResourceRetriever;
 import com.nimbusds.oauth2.sdk.GeneralException;
-import junit.framework.TestCase;
-import net.minidev.json.JSONArray;
+import com.nimbusds.oauth2.sdk.GrantType;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.ciba.BackChannelTokenDeliveryMode;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 
 public class SectorIDURIValidatorTest extends TestCase {
@@ -61,8 +67,7 @@ public class SectorIDURIValidatorTest extends TestCase {
 	}
 
 
-	public void testRetrievalFailed()
-		throws Exception {
+	public void testRetrievalFailed() {
 
 		ResourceRetriever resourceRetriever = new ResourceRetriever() {
 			@Override
@@ -87,8 +92,7 @@ public class SectorIDURIValidatorTest extends TestCase {
 	}
 
 
-	public void testMissingContentType()
-		throws Exception {
+	public void testMissingContentType() {
 
 		ResourceRetriever resourceRetriever = new ResourceRetriever() {
 			@Override
@@ -116,8 +120,7 @@ public class SectorIDURIValidatorTest extends TestCase {
 	}
 
 
-	public void testBadContentType()
-		throws Exception {
+	public void testBadContentType() {
 
 		ResourceRetriever resourceRetriever = new ResourceRetriever() {
 			@Override
@@ -145,8 +148,7 @@ public class SectorIDURIValidatorTest extends TestCase {
 	}
 
 
-	public void testBadJSON()
-		throws Exception {
+	public void testBadJSON() {
 
 		ResourceRetriever resourceRetriever = new ResourceRetriever() {
 			@Override
@@ -171,8 +173,7 @@ public class SectorIDURIValidatorTest extends TestCase {
 	}
 
 
-	public void testRedirectURINotFoundInSectorIDURI()
-		throws Exception {
+	public void testRedirectURINotFoundInSectorIDURI() {
 
 		ResourceRetriever resourceRetriever = new ResourceRetriever() {
 			@Override
@@ -199,8 +200,7 @@ public class SectorIDURIValidatorTest extends TestCase {
 	}
 
 
-	public void testNoneRedirectURIsInInSectorIDURI()
-		throws Exception {
+	public void testNoneRedirectURIsInInSectorIDURI() {
 
 		ResourceRetriever resourceRetriever = new ResourceRetriever() {
 			@Override
@@ -221,5 +221,90 @@ public class SectorIDURIValidatorTest extends TestCase {
 		} catch (GeneralException e) {
 			assertEquals("Sector ID validation failed: URI https://myapp.com/callback not present at sector ID URI https://example.com/apps.json", e.getMessage());
 		}
+	}
+	
+	
+	
+	public void testCollectURIs_none() {
+	
+		assertTrue(SectorIDURIValidator.collectURIsForValidation(new OIDCClientMetadata()).isEmpty());
+	}
+	
+	
+	public void testCollectURIs_redirectURI() {
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setRedirectionURI(URI.create("https://rp.example.com"));
+		clientMetadata.applyDefaults();
+		
+		assertEquals(Collections.singleton(URI.create("https://rp.example.com")), SectorIDURIValidator.collectURIsForValidation(clientMetadata));
+	}
+	
+	
+	public void testCollectURIs_multipleRedirectURIs() {
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		Set<URI> redirectURIs = new HashSet<>(Arrays.asList(URI.create("https://rp.example.com/cb-1"), URI.create("https://rp.example.com/cb-2")));
+		clientMetadata.setRedirectionURIs(redirectURIs);
+		clientMetadata.applyDefaults();
+		
+		assertEquals(redirectURIs, SectorIDURIValidator.collectURIsForValidation(clientMetadata));
+	}
+	
+	
+	public void testCollectURIs_CIBA_poll() {
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.POLL);
+		
+		assertTrue(SectorIDURIValidator.collectURIsForValidation(clientMetadata).isEmpty());
+		
+		clientMetadata.setJWKSetURI(URI.create("https://rp.example.com/jwks.json"));
+		
+		assertEquals(Collections.singleton(URI.create("https://rp.example.com/jwks.json")), SectorIDURIValidator.collectURIsForValidation(clientMetadata));
+	}
+	
+	
+	public void testCollectURIs_CIBA_ping() {
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.PING);
+		
+		assertTrue(SectorIDURIValidator.collectURIsForValidation(clientMetadata).isEmpty());
+		
+		clientMetadata.setJWKSetURI(URI.create("https://rp.example.com/jwks.json"));
+		
+		assertEquals(Collections.singleton(URI.create("https://rp.example.com/jwks.json")), SectorIDURIValidator.collectURIsForValidation(clientMetadata));
+	}
+	
+	
+	public void testCollectURIs_CIBA_push() {
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.PUSH);
+		
+		assertTrue(SectorIDURIValidator.collectURIsForValidation(clientMetadata).isEmpty());
+		
+		clientMetadata.setBackChannelClientNotificationEndpoint(URI.create("https://rp.example.com/ciba"));
+		
+		assertEquals(Collections.singleton(URI.create("https://rp.example.com/ciba")), SectorIDURIValidator.collectURIsForValidation(clientMetadata));
+	}
+	
+	
+	public void testCollectURIs_codeGrant_and_CIBA() {
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setGrantTypes(new HashSet<>(Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.CIBA)));
+		clientMetadata.setRedirectionURI(URI.create("https://rp.example.com/cb"));
+		clientMetadata.setJWKSetURI(URI.create("https://rp.example.com/jwks.json"));
+		clientMetadata.setTokenEndpointAuthMethod(ClientAuthenticationMethod.PRIVATE_KEY_JWT);
+		clientMetadata.setTokenEndpointAuthJWSAlg(JWSAlgorithm.RS256);
+		clientMetadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.POLL);
+		clientMetadata.setBackChannelAuthRequestJWSAlg(JWSAlgorithm.RS256);
+		
+		Set<URI> urisToValidate = SectorIDURIValidator.collectURIsForValidation(clientMetadata);
+		assertTrue(urisToValidate.contains(URI.create("https://rp.example.com/cb")));
+		assertTrue(urisToValidate.contains(URI.create("https://rp.example.com/jwks.json")));
+		assertEquals(2, urisToValidate.size());
 	}
 }

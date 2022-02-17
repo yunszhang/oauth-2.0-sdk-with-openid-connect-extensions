@@ -20,13 +20,17 @@ package com.nimbusds.openid.connect.sdk.id;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.nimbusds.jose.util.Resource;
 import com.nimbusds.jose.util.ResourceRetriever;
 import com.nimbusds.oauth2.sdk.GeneralException;
+import com.nimbusds.oauth2.sdk.ciba.BackChannelTokenDeliveryMode;
 import com.nimbusds.oauth2.sdk.util.JSONArrayUtils;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 
 /**
@@ -110,5 +114,47 @@ public class SectorIDURIValidator {
 				throw new GeneralException("Sector ID validation failed: URI " + uri + " not present at sector ID URI " + sectorURI);
 			}
 		}
+	}
+	
+	
+	/**
+	 * Collects the client URIs for sector ID validation.
+	 *
+	 * <p>For the OAuth 2.0 authorisation code and implicit grants:
+	 * {@code redirect_uris}.
+	 *
+	 * <p>For the OAuth 2.0 CIBA grant: {@code jwks_uri} for the poll and
+	 * ping token delivery modes,
+	 * {@code backchannel_client_notification_endpoint} for the push mode.
+	 *
+	 * @param clientMetadata The client metadata. Must not be {@code null}.
+	 *
+	 * @return The URIs for sector ID validation, empty set if none.
+	 */
+	public static Set<URI> collectURIsForValidation(final OIDCClientMetadata clientMetadata) {
+		
+		Set<URI> uris = new HashSet<>();
+		
+		// Grant types code, implicit
+		if (clientMetadata.getRedirectionURIs() != null) {
+			uris.addAll(clientMetadata.getRedirectionURIs());
+		}
+		
+		// Grant type CIBA
+		if (BackChannelTokenDeliveryMode.POLL.equals(clientMetadata.getBackChannelTokenDeliveryMode()) ||
+		    BackChannelTokenDeliveryMode.PING.equals(clientMetadata.getBackChannelTokenDeliveryMode())) {
+		
+			if (clientMetadata.getJWKSetURI() != null) {
+				uris.add(clientMetadata.getJWKSetURI());
+			}
+		}
+		if (BackChannelTokenDeliveryMode.PUSH.equals(clientMetadata.getBackChannelTokenDeliveryMode())) {
+			
+			if (clientMetadata.getBackChannelClientNotificationEndpoint() != null) {
+				uris.add(clientMetadata.getBackChannelClientNotificationEndpoint());
+			}
+		}
+		
+		return Collections.unmodifiableSet(uris);
 	}
 }
