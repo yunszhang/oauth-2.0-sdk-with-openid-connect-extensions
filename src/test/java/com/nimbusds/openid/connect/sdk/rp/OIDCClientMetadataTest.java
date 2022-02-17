@@ -38,6 +38,7 @@ import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.ciba.BackChannelTokenDeliveryMode;
 import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.oauth2.sdk.client.RegistrationError;
 import com.nimbusds.oauth2.sdk.id.SoftwareID;
@@ -687,7 +688,7 @@ public class OIDCClientMetadataTest extends TestCase {
 		try {
 			clientMetadata.resolveSectorID();
 		} catch (IllegalStateException e) {
-			assertEquals("Couldn't resolve sector ID: More than one redirect_uri, sector_identifier_uri not specified", e.getMessage());
+			assertEquals("Couldn't resolve sector ID: More than one URI in redirect_uris, sector_identifier_uri not specified", e.getMessage());
 		}
 	}
 
@@ -699,7 +700,7 @@ public class OIDCClientMetadataTest extends TestCase {
 		try {
 			clientMetadata.resolveSectorID();
 		} catch (IllegalStateException e) {
-			assertEquals("Couldn't resolve sector ID: Missing redirect_uris", e.getMessage());
+			assertEquals("Couldn't resolve sector ID", e.getMessage());
 		}
 	}
 
@@ -717,6 +718,145 @@ public class OIDCClientMetadataTest extends TestCase {
 		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
 		clientMetadata.setSubjectType(null);
 		assertNull(clientMetadata.resolveSectorID());
+	}
+	
+	
+	public void testResolveSectorIdentifier_CIBA_poll() {
+	
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setSubjectType(SubjectType.PAIRWISE);
+		clientMetadata.setGrantTypes(Collections.singleton(GrantType.CIBA));
+		clientMetadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.POLL);
+		clientMetadata.setJWKSetURI(URI.create("https://rp.example.com/jwks.json"));
+		
+		assertEquals("rp.example.com", clientMetadata.resolveSectorID().getValue());
+	}
+	
+	
+	public void testResolveSectorIdentifier_CIBA_poll_sectorIDPrecedence() {
+	
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setSubjectType(SubjectType.PAIRWISE);
+		clientMetadata.setGrantTypes(Collections.singleton(GrantType.CIBA));
+		clientMetadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.POLL);
+		clientMetadata.setJWKSetURI(URI.create("https://rp.example.com/jwks.json"));
+		clientMetadata.setSectorIDURI(URI.create("https://federation.example.com"));
+		
+		assertEquals("federation.example.com", clientMetadata.resolveSectorID().getValue());
+	}
+	
+	
+	public void testResolveSectorIdentifier_CIBA_poll_missingJWKSetURI() {
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setSubjectType(SubjectType.PAIRWISE);
+		clientMetadata.setGrantTypes(Collections.singleton(GrantType.CIBA));
+		clientMetadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.POLL);
+		
+		try {
+			clientMetadata.resolveSectorID();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Couldn't resolve sector ID: A jwks_uri is required for CIBA poll or ping backchannel_token_delivery_mode", e.getMessage());
+		}
+	}
+	
+	
+	public void testResolveSectorIdentifier_CIBA_ping() {
+	
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setSubjectType(SubjectType.PAIRWISE);
+		clientMetadata.setGrantTypes(Collections.singleton(GrantType.CIBA));
+		clientMetadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.PING);
+		clientMetadata.setJWKSetURI(URI.create("https://rp.example.com/jwks.json"));
+		
+		assertEquals("rp.example.com", clientMetadata.resolveSectorID().getValue());
+	}
+	
+	
+	public void testResolveSectorIdentifier_CIBA_ping_sectorIDPrecedence() {
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setSubjectType(SubjectType.PAIRWISE);
+		clientMetadata.setGrantTypes(Collections.singleton(GrantType.CIBA));
+		clientMetadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.PING);
+		clientMetadata.setJWKSetURI(URI.create("https://rp.example.com/jwks.json"));
+		clientMetadata.setSectorIDURI(URI.create("https://federation.example.com"));
+		
+		assertEquals("federation.example.com", clientMetadata.resolveSectorID().getValue());
+	}
+	
+	
+	public void testResolveSectorIdentifier_CIBA_ping_missingJWKSetURI() {
+	
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setSubjectType(SubjectType.PAIRWISE);
+		clientMetadata.setGrantTypes(Collections.singleton(GrantType.CIBA));
+		clientMetadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.PING);
+		
+		try {
+			clientMetadata.resolveSectorID();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Couldn't resolve sector ID: A jwks_uri is required for CIBA poll or ping backchannel_token_delivery_mode", e.getMessage());
+		}
+	}
+	
+	
+	public void testResolveSectorIdentifier_CIBA_push() {
+	
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setSubjectType(SubjectType.PAIRWISE);
+		clientMetadata.setGrantTypes(Collections.singleton(GrantType.CIBA));
+		clientMetadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.PUSH);
+		clientMetadata.setBackChannelClientNotificationEndpoint(URI.create("https://rp.example.com/ciba"));
+		
+		assertEquals("rp.example.com", clientMetadata.resolveSectorID().getValue());
+	}
+	
+	
+	public void testResolveSectorIdentifier_CIBA_push_sectorIDPrecedence() {
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setSubjectType(SubjectType.PAIRWISE);
+		clientMetadata.setGrantTypes(Collections.singleton(GrantType.CIBA));
+		clientMetadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.PUSH);
+		clientMetadata.setBackChannelClientNotificationEndpoint(URI.create("https://rp.example.com/ciba"));
+		clientMetadata.setSectorIDURI(URI.create("https://federation.example.com"));
+		
+		assertEquals("federation.example.com", clientMetadata.resolveSectorID().getValue());
+	}
+	
+	
+	public void testResolveSectorIdentifier_CIBA_push_missingNotificationEndpoint() {
+	
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setSubjectType(SubjectType.PAIRWISE);
+		clientMetadata.setGrantTypes(Collections.singleton(GrantType.CIBA));
+		clientMetadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.PUSH);
+		
+		try {
+			clientMetadata.resolveSectorID();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Couldn't resolve sector ID: A backchannel_client_notification_endpoint is required for CIBA push backchannel_token_delivery_mode", e.getMessage());
+		}
+	}
+	
+	
+	public void testResolveSectorIdentifier_codeGrant_and_cibaGrant() {
+		
+		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
+		clientMetadata.setSubjectType(SubjectType.PAIRWISE);
+		clientMetadata.setRedirectionURI(URI.create("https://rp.example.com/cb"));
+		clientMetadata.setBackChannelTokenDeliveryMode(BackChannelTokenDeliveryMode.POLL);
+		
+		try {
+			clientMetadata.resolveSectorID();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Couldn't resolve sector ID: A sector_identifier_uri is required when both redirect_uris and CIBA backchannel_token_delivery_mode are present", e.getMessage());
+		}
 	}
 	
 	

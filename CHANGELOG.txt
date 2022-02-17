@@ -1956,3 +1956,6 @@ version 9.25 (2022-02-10)
     * MinimalVerificationSpec.parse must allow trust_framework set to an empty
       JSON object (iss #385).
     * Updates to Nimbus JOSE+JWT 9.19
+
+version 9.26 (2022-02-17)
+    * Updates OIDCClientMetadata.resolveSectorID to support CIBA.

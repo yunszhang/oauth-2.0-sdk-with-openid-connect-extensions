@@ -132,4 +132,24 @@ public class SectorIDTest extends TestCase {
 		SectorID sectorID = new SectorID(identifier);
 		assertEquals(identifier.getValue(), sectorID.getValue());
 	}
+	
+	
+	public void testEqualityAndHashCode() {
+		
+		SectorID a = new SectorID("https://rp.example.com/a/b/c");
+		SectorID b = new SectorID("https://rp.example.com/a/b/c");
+		
+		assertEquals(a, b);
+		assertEquals(a.hashCode(), b.hashCode());
+	}
+	
+	
+	public void testInequality() {
+		
+		SectorID a = new SectorID("https://rp.example.com/b");
+		SectorID b = new SectorID("https://rp.example.com/a");
+		
+		assertNotSame(a, b);
+		assertNotSame(a.hashCode(), b.hashCode());
+	}
 }

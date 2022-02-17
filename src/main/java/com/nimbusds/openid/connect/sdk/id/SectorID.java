@@ -104,7 +104,7 @@ public final class SectorID extends Identifier {
 	
 	
 	/**
-	 * Creates a new sector identifier based on a audience.
+	 * Creates a new sector identifier based on an audience.
 	 *
 	 * @param audience The audience. Must not be empty or {@code null}.
 	 */

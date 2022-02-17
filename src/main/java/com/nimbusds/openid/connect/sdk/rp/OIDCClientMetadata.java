@@ -29,6 +29,7 @@ import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.ciba.BackChannelTokenDeliveryMode;
 import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.oauth2.sdk.client.RegistrationError;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
@@ -396,21 +397,53 @@ public class OIDCClientMetadata extends ClientMetadata {
 			return null;
 		}
 
-		// Check sector identifier URI first
+		// The sector identifier URI has priority
 		if (getSectorIDURI() != null) {
 			return new SectorID(getSectorIDURI());
 		}
 
-		// Check redirect URIs second
-		if (CollectionUtils.isEmpty(getRedirectionURIs())) {
-			throw new IllegalStateException("Couldn't resolve sector ID: Missing redirect_uris");
+		if (CollectionUtils.isNotEmpty(getRedirectionURIs()) && getBackChannelTokenDeliveryMode() != null) {
+			throw new IllegalStateException(
+				"Couldn't resolve sector ID: " +
+				"A sector_identifier_uri is required when both redirect_uris and CIBA backchannel_token_delivery_mode are present"
+			);
 		}
-
-		if (getRedirectionURIs().size() > 1) {
-			throw new IllegalStateException("Couldn't resolve sector ID: More than one redirect_uri, sector_identifier_uri not specified");
+		
+		// Code and/or implicit OAuth 2.0 grant
+		if (CollectionUtils.isNotEmpty(getRedirectionURIs())) {
+			if (getRedirectionURIs().size() > 1) {
+				throw new IllegalStateException(
+					"Couldn't resolve sector ID: " +
+					"More than one URI in redirect_uris, sector_identifier_uri not specified"
+				);
+			}
+			return new SectorID(getRedirectionURIs().iterator().next());
 		}
-
-		return new SectorID(getRedirectionURIs().iterator().next());
+		
+		// CIBA OAuth 2.0 grant
+		if (BackChannelTokenDeliveryMode.POLL.equals(getBackChannelTokenDeliveryMode()) ||
+		    BackChannelTokenDeliveryMode.PING.equals(getBackChannelTokenDeliveryMode())) {
+			
+			if (getJWKSetURI() == null) {
+				throw new IllegalStateException(
+					"Couldn't resolve sector ID: " +
+					"A jwks_uri is required for CIBA poll or ping backchannel_token_delivery_mode"
+				);
+			}
+			return new SectorID(getJWKSetURI());
+		}
+		if (BackChannelTokenDeliveryMode.PUSH.equals(getBackChannelTokenDeliveryMode())) {
+			
+			if (getBackChannelClientNotificationEndpoint() == null) {
+				throw new IllegalStateException(
+					"Couldn't resolve sector ID: " +
+					"A backchannel_client_notification_endpoint is required for CIBA push backchannel_token_delivery_mode"
+				);
+			}
+			return new SectorID(getBackChannelClientNotificationEndpoint());
+		}
+		
+		throw new IllegalStateException("Couldn't resolve sector ID");
 	}
 
 
