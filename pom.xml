@@ -103,7 +103,7 @@
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>siv-mode</artifactId>
-			<version>1.4.3</version>
+			<version>1.4.4</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
