@@ -53,7 +53,7 @@ public class DPoPKeySelectorTest extends TestCase {
 			
 			JWSHeader header = new JWSHeader.Builder(alg)
 				.type(DPoPProofFactory.TYPE)
-				.jwk(jwk)
+				.jwk(jwk.toPublicJWK())
 				.build();
 			
 			List<Key> candidates = new DPoPKeySelector(Collections.singleton(alg))
@@ -78,7 +78,7 @@ public class DPoPKeySelectorTest extends TestCase {
 			
 			JWSHeader header = new JWSHeader.Builder(alg)
 				.type(DPoPProofFactory.TYPE)
-				.jwk(jwk)
+				.jwk(jwk.toPublicJWK())
 				.build();
 			
 			List<Key> candidates = new DPoPKeySelector(Collections.singleton(alg))
@@ -145,7 +145,7 @@ public class DPoPKeySelectorTest extends TestCase {
 			new DPoPKeySelector(Collections.singleton(JWSAlgorithm.ES256))
 				.selectJWSKeys(
 					new JWSHeader.Builder(JWSAlgorithm.ES256)
-						.jwk(jwk)
+						.jwk(jwk.toPublicJWK())
 						.build(),
 					new DPoPProofContext(ISSUER)
 				);
