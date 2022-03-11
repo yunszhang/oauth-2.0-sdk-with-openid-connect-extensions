@@ -582,6 +582,15 @@ public class HTTPRequestTest {
 		httpRequest.setHeader("DPoP", "illegal-jwt");
 		
 		assertNull(httpRequest.getDPoP());
+		
+		try {
+			httpRequest.getPoPWithException();
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid serialized unsecured/JWS/JWE object: Missing part delimiters", e.getMessage());
+			java.text.ParseException cause = (java.text.ParseException) e.getCause();
+			assertEquals("Invalid serialized unsecured/JWS/JWE object: Missing part delimiters", cause.getMessage());
+		}
 	}
 	
 	

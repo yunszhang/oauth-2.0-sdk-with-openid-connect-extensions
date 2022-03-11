@@ -326,6 +326,25 @@ public class HTTPRequest extends HTTPMessage {
 	 */
 	public SignedJWT getDPoP() {
 	
+		try {
+			return getPoPWithException();
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Gets the {@code DPoP} header value.
+	 *
+	 * @return The {@code DPoP} header value, {@code null} if not
+	 *         specified.
+	 *
+	 * @throws ParseException If JWT parsing failed.
+	 */
+	public SignedJWT getPoPWithException()
+		throws ParseException {
+		
 		String dPoP = getHeaderValue("DPoP");
 		if (dPoP == null) {
 			return null;
@@ -334,7 +353,7 @@ public class HTTPRequest extends HTTPMessage {
 		try {
 			return SignedJWT.parse(dPoP);
 		} catch (java.text.ParseException e) {
-			return null;
+			throw new ParseException(e.getMessage(), e);
 		}
 	}
 	
