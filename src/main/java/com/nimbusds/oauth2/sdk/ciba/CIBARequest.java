@@ -29,6 +29,9 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.langtag.LangTag;
+import com.nimbusds.langtag.LangTagException;
+import com.nimbusds.langtag.LangTagUtils;
 import com.nimbusds.oauth2.sdk.AbstractAuthenticatedRequest;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
@@ -107,6 +110,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		p.add("user_code");
 		p.add("requested_expiry");
 		p.add("claims");
+		p.add("claims_locales");
 		
 		// Signed JWT
 		p.add("request");
@@ -179,6 +183,13 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	 * Individual claims to be returned (optional).
 	 */
 	private final OIDCClaimsRequest claims;
+	
+	
+	/**
+	 * The end-user's preferred languages and scripts for claims being
+	 * returned (optional).
+	 */
+	private final List<LangTag> claimsLocales;
 	
 	
 	/**
@@ -281,6 +292,13 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		
 		
 		/**
+		 * The end-user's preferred languages and scripts for claims
+		 * being returned (optional).
+		 */
+		private List<LangTag> claimsLocales;
+		
+		
+		/**
 		 * Custom parameters.
 		 */
 		private Map<String,List<String>> customParams = new HashMap<>();
@@ -362,6 +380,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			userCode = request.getUserCode();
 			requestedExpiry = request.getRequestedExpiry();
 			claims = request.getOIDCClaims();
+			claimsLocales = request.getClaimsLocales();
 			customParams = request.getCustomParameters();
 			signedRequest = request.getRequestJWT();
 		}
@@ -512,6 +531,23 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		
 		
 		/**
+		 * Sets the end-user's preferred languages and scripts for the
+		 * claims being returned, ordered by preference. Corresponds to
+		 * the optional {@code claims_locales} parameter.
+		 *
+		 * @param claimsLocales The preferred claims locales,
+		 *                      {@code null} if not specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder claimsLocales(final List<LangTag> claimsLocales) {
+			
+			this.claimsLocales = claimsLocales;
+			return this;
+		}
+		
+		
+		/**
 		 * Sets a custom parameter.
 		 *
 		 * @param name   The parameter name. Must not be {@code null}.
@@ -577,6 +613,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 					userCode,
 					requestedExpiry,
 					claims,
+					claimsLocales,
 					customParams
 				);
 			} catch (IllegalArgumentException e) {
@@ -663,9 +700,66 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	 * @param requestedExpiry         The required expiry (as positive
 	 *                                integer), {@code null} if not
 	 *                                specified.
-	 * @param claims                  The individual OpenID claims to be
-	 *                                returned. Corresponds to the optional
-	 *                                {@code claims} parameter.
+	 * @param claims                  The individual claims to be returned,
+	 *                                {@code null} if not specified.
+	 * @param customParams            Custom parameters, empty or
+	 *                                {@code null} if not specified.
+	 */
+	@Deprecated
+	public CIBARequest(final URI uri,
+			   final ClientAuthentication clientAuth,
+			   final Scope scope,
+			   final BearerAccessToken clientNotificationToken,
+			   final List<ACR> acrValues,
+			   final String loginHintTokenString,
+			   final JWT idTokenHint,
+			   final String loginHint,
+			   final String bindingMessage,
+			   final Secret userCode,
+			   final Integer requestedExpiry,
+			   final OIDCClaimsRequest claims,
+			   final Map<String, List<String>> customParams) {
+		
+		this(uri, clientAuth,
+			scope, clientNotificationToken, acrValues,
+			loginHintTokenString, idTokenHint, loginHint,
+			bindingMessage, userCode, requestedExpiry,
+			claims, null,
+			customParams);
+	}
+	
+	
+	/**
+	 * Creates a new CIBA request.
+	 *
+	 * @param uri                     The endpoint URI, {@code null} if not
+	 *                                specified.
+	 * @param clientAuth              The client authentication. Must not
+	 *                                be {@code null}.
+	 * @param scope                   The requested scope. Must not be
+	 *                                empty or {@code null}.
+	 * @param clientNotificationToken The client notification token,
+	 *                                {@code null} if not specified.
+	 * @param acrValues               The requested ACR values,
+	 *                                {@code null} if not specified.
+	 * @param loginHintTokenString    The login hint token string,
+	 *                                {@code null} if not specified.
+	 * @param idTokenHint             The ID Token hint, {@code null} if
+	 *                                not specified.
+	 * @param loginHint               The login hint, {@code null} if not
+	 *                                specified.
+	 * @param bindingMessage          The binding message, {@code null} if
+	 *                                not specified.
+	 * @param userCode                The user code, {@code null} if not
+	 *                                specified.
+	 * @param requestedExpiry         The required expiry (as positive
+	 *                                integer), {@code null} if not
+	 *                                specified.
+	 * @param claims                  The individual claims to be
+	 *                                returned, {@code null} if not
+	 *                                specified.
+	 * @param claimsLocales           The preferred languages and scripts
+	 *                                for claims being returned,
 	 *                                {@code null} if not specified.
 	 * @param customParams            Custom parameters, empty or
 	 *                                {@code null} if not specified.
@@ -682,6 +776,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			   final Secret userCode,
 			   final Integer requestedExpiry,
 			   final OIDCClaimsRequest claims,
+			   final List<LangTag> claimsLocales,
 			   final Map<String, List<String>> customParams) {
 		
 		super(uri, clientAuth);
@@ -730,6 +825,12 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		
 		this.claims = claims;
 		
+		if (claimsLocales != null) {
+			this.claimsLocales = Collections.unmodifiableList(claimsLocales);
+		} else {
+			this.claimsLocales = null;
+		}
+		
 		this.customParams = customParams != null ? customParams : Collections.<String, List<String>>emptyMap();
 		
 		signedRequest = null;
@@ -770,6 +871,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		userCode = null;
 		requestedExpiry = null;
 		claims = null;
+		claimsLocales = null;
 		customParams = Collections.emptyMap();
 	}
 
@@ -905,8 +1007,8 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	
 	
 	/**
-	 * Returns the individual OpenID claims to be returned. Corresponds to
-	 * the optional {@code claims} parameter.
+	 * Returns the individual claims to be returned. Corresponds to the
+	 * optional {@code claims} parameter.
 	 *
 	 * @return The individual claims to be returned, {@code null} if not
 	 *         specified.
@@ -914,6 +1016,19 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	public OIDCClaimsRequest getOIDCClaims() {
 		
 		return claims;
+	}
+	
+	
+	/**
+	 * Returns the end-user's preferred languages and scripts for the
+	 * claims being returned, ordered by preference. Corresponds to the
+	 * optional {@code claims_locales} parameter.
+	 *
+	 * @return The preferred claims locales, {@code null} if not specified.
+	 */
+	public List<LangTag> getClaimsLocales() {
+		
+		return claimsLocales;
 	}
 	
 	
@@ -1009,6 +1124,9 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		}
 		if (getOIDCClaims() != null) {
 			params.put("claims", Collections.singletonList(getOIDCClaims().toJSONString()));
+		}
+		if (CollectionUtils.isNotEmpty(getClaimsLocales())) {
+			params.put("claims_locales", Collections.singletonList(LangTagUtils.concat(getClaimsLocales())));
 		}
 		
 		return params;
@@ -1170,6 +1288,20 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			}
 		}
 		
+		v = MultivaluedMapUtils.getFirstValue(params, "claims_locales");
+		List<LangTag> claimsLocales = null;
+		if (StringUtils.isNotBlank(v)) {
+			claimsLocales = new LinkedList<>();
+			StringTokenizer st = new StringTokenizer(v, " ");
+			while (st.hasMoreTokens()) {
+				try {
+					claimsLocales.add(LangTag.parse(st.nextToken()));
+				} catch (LangTagException e) {
+					throw new ParseException("Invalid claims_locales parameter: " + e.getMessage(), e);
+				}
+			}
+		}
+		
 		// Parse additional custom parameters
 		Map<String,List<String>> customParams = null;
 		
@@ -1190,7 +1322,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 				scope, clientNotificationToken, acrValues,
 				loginHintTokenString, idTokenHint, loginHint,
 				bindingMessage, userCode, requestedExpiry,
-				claims,
+				claims, claimsLocales,
 				customParams);
 		} catch (IllegalArgumentException e) {
 			throw new ParseException(e.getMessage());

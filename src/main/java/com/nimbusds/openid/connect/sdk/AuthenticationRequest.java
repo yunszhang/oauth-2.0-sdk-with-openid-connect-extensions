@@ -28,6 +28,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
+import com.nimbusds.langtag.LangTagUtils;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -35,10 +36,7 @@ import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
-import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
-import com.nimbusds.oauth2.sdk.util.StringUtils;
-import com.nimbusds.oauth2.sdk.util.URIUtils;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
+import com.nimbusds.oauth2.sdk.util.*;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 
 
@@ -1539,19 +1537,9 @@ public class AuthenticationRequest extends AuthorizationRequest {
 			params.put("ui_locales", Collections.singletonList(sb.toString()));
 		}
 
-		if (claimsLocales != null) {
+		if (CollectionUtils.isNotEmpty(claimsLocales)) {
 
-			StringBuilder sb = new StringBuilder();
-
-			for (LangTag locale: claimsLocales) {
-
-				if (sb.length() > 0)
-					sb.append(' ');
-
-				sb.append(locale.toString());
-			}
-
-			params.put("claims_locales", Collections.singletonList(sb.toString()));
+			params.put("claims_locales", Collections.singletonList(LangTagUtils.concat(claimsLocales)));
 		}
 
 		if (idTokenHint != null) {

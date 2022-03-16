@@ -22,6 +22,9 @@ import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
+import com.nimbusds.langtag.LangTag;
+import com.nimbusds.langtag.LangTagException;
+import com.nimbusds.langtag.LangTagUtils;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.SerializeException;
@@ -70,6 +73,16 @@ public class CIBARequestTest extends TestCase {
 	
 	private static final OIDCClaimsRequest CLAIMS = new OIDCClaimsRequest()
 		.withIDTokenClaimsRequest(new ClaimsSetRequest().add("email"));
+	
+	private static final List<LangTag> CLAIMS_LOCALES;
+	
+	static {
+		try {
+			CLAIMS_LOCALES = Arrays.asList(new LangTag("en"), new LangTag("bg"));
+		} catch (LangTagException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	
 	private static final Map<String,List<String>> CUSTOM_PARAMS;
 	
@@ -190,6 +203,7 @@ public class CIBARequestTest extends TestCase {
 				USER_CODE,
 				REQUESTED_EXPIRY,
 				CLAIMS,
+				CLAIMS_LOCALES,
 				CUSTOM_PARAMS
 			);
 			
@@ -217,6 +231,7 @@ public class CIBARequestTest extends TestCase {
 			assertEquals(USER_CODE, request.getUserCode());
 			assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
 			assertEquals(CLAIMS, request.getOIDCClaims());
+			assertEquals(CLAIMS_LOCALES, request.getClaimsLocales());
 			assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
 			assertFalse(request.isSigned());
 			assertNull(request.getRequestJWT());
@@ -256,6 +271,7 @@ public class CIBARequestTest extends TestCase {
 			assertEquals(USER_CODE, request.getUserCode());
 			assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
 			assertEquals(CLAIMS.toJSONObject(), request.getOIDCClaims().toJSONObject());
+			assertEquals(CLAIMS_LOCALES, request.getClaimsLocales());
 			assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
 			assertFalse(request.isSigned());
 			assertNull(request.getRequestJWT());
@@ -285,6 +301,7 @@ public class CIBARequestTest extends TestCase {
 				.userCode(USER_CODE)
 				.requestedExpiry(REQUESTED_EXPIRY)
 				.claims(CLAIMS)
+				.claimsLocales(CLAIMS_LOCALES)
 				.customParameter("custom-xyz", "abc")
 				.build();
 			
@@ -312,6 +329,7 @@ public class CIBARequestTest extends TestCase {
 			assertEquals(USER_CODE, request.getUserCode());
 			assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
 			assertEquals(CLAIMS, request.getOIDCClaims());
+			assertEquals(CLAIMS_LOCALES, request.getClaimsLocales());
 			assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
 			
 			// Copy
@@ -342,6 +360,7 @@ public class CIBARequestTest extends TestCase {
 			assertEquals(USER_CODE, request.getUserCode());
 			assertEquals(REQUESTED_EXPIRY, request.getRequestedExpiry());
 			assertEquals(CLAIMS, request.getOIDCClaims());
+			assertEquals(CLAIMS_LOCALES, request.getClaimsLocales());
 			assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
 		}
 	}
@@ -879,5 +898,40 @@ public class CIBARequestTest extends TestCase {
 		assertEquals(Collections.singletonList(LOGIN_HINT), params.get("login_hint"));
 		assertEquals(Collections.singletonList(CLAIMS.toJSONString()), params.get("claims"));
 		assertEquals(3, params.size());
+	}
+	
+	
+	public void testWithClaimsAndLocalesParameters() throws ParseException {
+		
+		assertEquals("{\"id_token\":{\"email\":null}}", CLAIMS.toJSONString());
+		
+		CIBARequest request = new CIBARequest.Builder(
+			CLIENT_AUTH,
+			SCOPE)
+			.endpointURI(ENDPOINT_URI)
+			.loginHint(LOGIN_HINT)
+			.claims(CLAIMS)
+			.claimsLocales(CLAIMS_LOCALES)
+			.build();
+		
+		Map<String,List<String>> params = request.toParameters();
+		assertEquals(Collections.singletonList(SCOPE.toString()), params.get("scope"));
+		assertEquals(Collections.singletonList(LOGIN_HINT), params.get("login_hint"));
+		assertEquals(Collections.singletonList(CLAIMS.toJSONString()), params.get("claims"));
+		assertEquals(Collections.singletonList(LangTagUtils.concat(CLAIMS_LOCALES)), params.get("claims_locales"));
+		assertEquals(4, params.size());
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		
+		request = CIBARequest.parse(httpRequest);
+		
+		assertEquals(CLAIMS.toJSONObject(), request.getOIDCClaims().toJSONObject());
+		
+		params = request.toParameters();
+		assertEquals(Collections.singletonList(SCOPE.toString()), params.get("scope"));
+		assertEquals(Collections.singletonList(LOGIN_HINT), params.get("login_hint"));
+		assertEquals(Collections.singletonList(CLAIMS.toJSONString()), params.get("claims"));
+		assertEquals(Collections.singletonList(LangTagUtils.concat(CLAIMS_LOCALES)), params.get("claims_locales"));
+		assertEquals(4, params.size());
 	}
 }

@@ -1971,3 +1971,7 @@ version 9.27.1 (2022-03-08)
 
 version 9.28 (2022-03-11)
     * Adds HTTPRequest.getPoPWithException method.
+
+version 9.29 (2022-03-16)
+    * Adds CIBARequest claims_locales parameter support.
+    * Upgrades to Nimbus LangTag 1.6.
