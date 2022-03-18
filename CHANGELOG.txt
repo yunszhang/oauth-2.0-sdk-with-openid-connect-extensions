@@ -1975,3 +1975,6 @@ version 9.28 (2022-03-11)
 version 9.29 (2022-03-16)
     * Adds CIBARequest claims_locales parameter support.
     * Upgrades to Nimbus LangTag 1.6.
+
+version 9.30 (2022-03-18)
+    * Adds CIBARequest purpose (ekYC-IdA) parameter support.

@@ -111,6 +111,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		p.add("requested_expiry");
 		p.add("claims");
 		p.add("claims_locales");
+		p.add("purpose");
 		
 		// Signed JWT
 		p.add("request");
@@ -190,6 +191,13 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	 * returned (optional).
 	 */
 	private final List<LangTag> claimsLocales;
+	
+	
+	/**
+	 * The transaction specific purpose, for use in OpenID Connect Identity
+	 * Assurance.
+	 */
+	private final String purpose;
 	
 	
 	/**
@@ -299,6 +307,12 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		
 		
 		/**
+		 * The transaction specific purpose (optional).
+		 */
+		private String purpose;
+		
+		
+		/**
 		 * Custom parameters.
 		 */
 		private Map<String,List<String>> customParams = new HashMap<>();
@@ -381,6 +395,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			requestedExpiry = request.getRequestedExpiry();
 			claims = request.getOIDCClaims();
 			claimsLocales = request.getClaimsLocales();
+			purpose = request.getPurpose();
 			customParams = request.getCustomParameters();
 			signedRequest = request.getRequestJWT();
 		}
@@ -548,6 +563,21 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		
 		
 		/**
+		 * Sets the transaction specific purpose. Corresponds to the
+		 * optional {@code purpose} parameter.
+		 *
+		 * @param purpose The purpose, {@code null} if not specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder purpose(final String purpose) {
+			
+			this.purpose = purpose;
+			return this;
+		}
+		
+		
+		/**
 		 * Sets a custom parameter.
 		 *
 		 * @param name   The parameter name. Must not be {@code null}.
@@ -614,6 +644,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 					requestedExpiry,
 					claims,
 					claimsLocales,
+					purpose,
 					customParams
 				);
 			} catch (IllegalArgumentException e) {
@@ -724,7 +755,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			scope, clientNotificationToken, acrValues,
 			loginHintTokenString, idTokenHint, loginHint,
 			bindingMessage, userCode, requestedExpiry,
-			claims, null,
+			claims, null, null,
 			customParams);
 	}
 	
@@ -761,6 +792,8 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	 * @param claimsLocales           The preferred languages and scripts
 	 *                                for claims being returned,
 	 *                                {@code null} if not specified.
+	 * @param purpose                 The transaction specific purpose,
+	 *                                {@code null} if not specified.
 	 * @param customParams            Custom parameters, empty or
 	 *                                {@code null} if not specified.
 	 */
@@ -777,6 +810,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			   final Integer requestedExpiry,
 			   final OIDCClaimsRequest claims,
 			   final List<LangTag> claimsLocales,
+			   final String purpose,
 			   final Map<String, List<String>> customParams) {
 		
 		super(uri, clientAuth);
@@ -831,6 +865,8 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			this.claimsLocales = null;
 		}
 		
+		this.purpose = purpose;
+		
 		this.customParams = customParams != null ? customParams : Collections.<String, List<String>>emptyMap();
 		
 		signedRequest = null;
@@ -872,6 +908,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		requestedExpiry = null;
 		claims = null;
 		claimsLocales = null;
+		purpose = null;
 		customParams = Collections.emptyMap();
 	}
 
@@ -1033,6 +1070,18 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	
 	
 	/**
+	 * Returns the transaction specific purpose. Corresponds to the
+	 * optional {@code purpose} parameter.
+	 *
+	 * @return The purpose, {@code null} if not specified.
+	 */
+	public String getPurpose() {
+		
+		return purpose;
+	}
+	
+	
+	/**
 	 * Returns the additional custom parameters.
 	 *
 	 * @return The additional custom parameters as a unmodifiable map,
@@ -1127,6 +1176,10 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		}
 		if (CollectionUtils.isNotEmpty(getClaimsLocales())) {
 			params.put("claims_locales", Collections.singletonList(LangTagUtils.concat(getClaimsLocales())));
+		}
+		
+		if (getPurpose() != null) {
+			params.put("purpose", Collections.singletonList(purpose));
 		}
 		
 		return params;
@@ -1302,6 +1355,8 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			}
 		}
 		
+		String purpose = MultivaluedMapUtils.getFirstValue(params, "purpose");
+		
 		// Parse additional custom parameters
 		Map<String,List<String>> customParams = null;
 		
@@ -1322,7 +1377,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 				scope, clientNotificationToken, acrValues,
 				loginHintTokenString, idTokenHint, loginHint,
 				bindingMessage, userCode, requestedExpiry,
-				claims, claimsLocales,
+				claims, claimsLocales, purpose,
 				customParams);
 		} catch (IllegalArgumentException e) {
 			throw new ParseException(e.getMessage());
