@@ -38,6 +38,8 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.JWTID;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+import com.nimbusds.oauth2.sdk.util.URIUtils;
+import com.nimbusds.oauth2.sdk.util.URLUtils;
 import com.nimbusds.openid.connect.sdk.OIDCClaimsRequest;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
@@ -77,6 +79,8 @@ public class CIBARequestTest extends TestCase {
 	private static final List<LangTag> CLAIMS_LOCALES;
 	
 	private static final String PURPOSE = "Account holder verification";
+	
+	private static final List<URI> RESOURCES = Arrays.asList(URI.create("https://rs1.example.com"), URI.create("https://rs2.example.com"));
 	
 	static {
 		try {
@@ -139,7 +143,6 @@ public class CIBARequestTest extends TestCase {
 		
 		assertEquals(1024, CIBARequest.CLIENT_NOTIFICATION_TOKEN_MAX_LENGTH);
 	}
-
 	
 
 	public void testConstructor_requiredOnly() throws java.text.ParseException {
@@ -207,6 +210,7 @@ public class CIBARequestTest extends TestCase {
 				CLAIMS,
 				CLAIMS_LOCALES,
 				PURPOSE,
+				RESOURCES,
 				CUSTOM_PARAMS
 			);
 			
@@ -284,7 +288,11 @@ public class CIBARequestTest extends TestCase {
 			JWTClaimsSet jwtClaimsSet = request.toJWTClaimsSet();
 			Map<String, List<String>> params = request.toParameters();
 			for (Map.Entry<String, Object> en : jwtClaimsSet.getClaims().entrySet()) {
-				assertEquals(Collections.singletonList((String) en.getValue()), params.get(en.getKey()));
+				if (en.getKey().equals("resource")) {
+					assertEquals(en.getValue(), params.get(en.getKey()));
+				} else {
+					assertEquals(Collections.singletonList((String) en.getValue()), params.get(en.getKey()));
+				}
 			}
 			assertEquals(params.size(), jwtClaimsSet.getClaims().size());
 		}
@@ -308,6 +316,7 @@ public class CIBARequestTest extends TestCase {
 				.claims(CLAIMS)
 				.claimsLocales(CLAIMS_LOCALES)
 				.purpose(PURPOSE)
+				.resource(RESOURCES.get(0))
 				.customParameter("custom-xyz", "abc")
 				.build();
 			
@@ -337,6 +346,7 @@ public class CIBARequestTest extends TestCase {
 			assertEquals(CLAIMS, request.getOIDCClaims());
 			assertEquals(CLAIMS_LOCALES, request.getClaimsLocales());
 			assertEquals(PURPOSE, request.getPurpose());
+			assertEquals(Collections.singletonList(RESOURCES.get(0)), request.getResources());
 			assertEquals(CUSTOM_PARAMS, request.getCustomParameters());
 			
 			// Copy
@@ -969,5 +979,87 @@ public class CIBARequestTest extends TestCase {
 		assertEquals(Collections.singletonList(LOGIN_HINT), params.get("login_hint"));
 		assertEquals(Collections.singletonList(PURPOSE), params.get("purpose"));
 		assertEquals(3, params.size());
+	}
+	
+	
+	public void testWithResourceParameter() throws ParseException {
+		
+		CIBARequest request = new CIBARequest.Builder(
+			CLIENT_AUTH,
+			SCOPE)
+			.endpointURI(ENDPOINT_URI)
+			.loginHint(LOGIN_HINT)
+			.resource(RESOURCES.get(0))
+			.build();
+		
+		Map<String,List<String>> params = request.toParameters();
+		assertEquals(Collections.singletonList(SCOPE.toString()), params.get("scope"));
+		assertEquals(Collections.singletonList(LOGIN_HINT), params.get("login_hint"));
+		assertEquals(Collections.singletonList(RESOURCES.get(0).toString()), params.get("resource"));
+		assertEquals(3, params.size());
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		
+		request = CIBARequest.parse(httpRequest);
+		
+		params = request.toParameters();
+		assertEquals(Collections.singletonList(SCOPE.toString()), params.get("scope"));
+		assertEquals(Collections.singletonList(LOGIN_HINT), params.get("login_hint"));
+		assertEquals(Collections.singletonList(RESOURCES.get(0).toString()), params.get("resource"));
+		assertEquals(3, params.size());
+	}
+	
+	
+	public void testWithTwoResourceParameters() throws ParseException {
+		
+		CIBARequest request = new CIBARequest.Builder(
+			CLIENT_AUTH,
+			SCOPE)
+			.endpointURI(ENDPOINT_URI)
+			.loginHint(LOGIN_HINT)
+			.resources(RESOURCES.get(0), RESOURCES.get(1))
+			.build();
+		
+		Map<String,List<String>> params = request.toParameters();
+		assertEquals(Collections.singletonList(SCOPE.toString()), params.get("scope"));
+		assertEquals(Collections.singletonList(LOGIN_HINT), params.get("login_hint"));
+		assertEquals(Arrays.asList(RESOURCES.get(0).toString(), RESOURCES.get(1).toString()), params.get("resource"));
+		assertEquals(3, params.size());
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		
+		request = CIBARequest.parse(httpRequest);
+		
+		params = request.toParameters();
+		assertEquals(Collections.singletonList(SCOPE.toString()), params.get("scope"));
+		assertEquals(Collections.singletonList(LOGIN_HINT), params.get("login_hint"));
+		assertEquals(Arrays.asList(RESOURCES.get(0).toString(), RESOURCES.get(1).toString()), params.get("resource"));
+		assertEquals(3, params.size());
+	}
+	
+	
+	public void testParseWithIllegalResourceParameter() throws ParseException {
+		
+		CIBARequest request = new CIBARequest.Builder(
+			CLIENT_AUTH,
+			SCOPE)
+			.endpointURI(ENDPOINT_URI)
+			.loginHint(LOGIN_HINT)
+			.build();
+		
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		
+		// Illegal resource
+		Map<String,List<String>> params = request.toParameters();
+		params.put("resource", Collections.singletonList("/api/v1"));
+		httpRequest.setQuery(URLUtils.serializeParameters(params));
+		
+		try {
+			CIBARequest.parse(httpRequest);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Illegal resource parameter: Must be an absolute URI and with no query or fragment", e.getMessage());
+		}
 	}
 }

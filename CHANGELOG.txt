@@ -1978,3 +1978,5 @@ version 9.29 (2022-03-16)
 
 version 9.30 (2022-03-18)
     * Adds CIBARequest purpose (ekYC-IdA) parameter support.
+    * Adds CIBARequest resource (RFC 8707) parameter support.
+    * Adds new static ResourceUtils methods.

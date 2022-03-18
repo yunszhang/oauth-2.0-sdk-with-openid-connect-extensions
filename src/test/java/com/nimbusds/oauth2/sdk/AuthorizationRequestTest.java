@@ -834,7 +834,7 @@ public class AuthorizationRequestTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_RESOURCE, e.getErrorObject());
-			assertEquals("Illegal resource parameter: Must be an absolute URI and with no query or fragment: /api/v1", e.getErrorObject().getDescription());
+			assertEquals("Illegal resource parameter: Must be an absolute URI and with no query or fragment", e.getErrorObject().getDescription());
 		}
 	}
 	
@@ -851,7 +851,7 @@ public class AuthorizationRequestTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals(OAuth2Error.INVALID_RESOURCE, e.getErrorObject());
-			assertEquals("Illegal resource parameter: Must be an absolute URI and with no query or fragment: https://rs.example.com/#fragment", e.getErrorObject().getDescription());
+			assertEquals("Illegal resource parameter: Must be an absolute URI and with no query or fragment", e.getErrorObject().getDescription());
 		}
 	}
 	

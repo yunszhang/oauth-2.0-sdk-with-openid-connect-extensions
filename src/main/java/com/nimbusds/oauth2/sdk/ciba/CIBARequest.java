@@ -112,6 +112,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		p.add("claims");
 		p.add("claims_locales");
 		p.add("purpose");
+		p.add("resource");
 		
 		// Signed JWT
 		p.add("request");
@@ -198,6 +199,12 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	 * Assurance.
 	 */
 	private final String purpose;
+	
+	
+	/**
+	 * The resource URI(s) (optional).
+	 */
+	private final List<URI> resources;
 	
 	
 	/**
@@ -313,6 +320,12 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		
 		
 		/**
+		 * The resource URI(s) (optional).
+		 */
+		private List<URI> resources;
+		
+		
+		/**
 		 * Custom parameters.
 		 */
 		private Map<String,List<String>> customParams = new HashMap<>();
@@ -396,6 +409,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			claims = request.getOIDCClaims();
 			claimsLocales = request.getClaimsLocales();
 			purpose = request.getPurpose();
+			resources = request.getResources();
 			customParams = request.getCustomParameters();
 			signedRequest = request.getRequestJWT();
 		}
@@ -578,6 +592,42 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		
 		
 		/**
+		 * Sets the resource server URI.
+		 *
+		 * @param resource The resource URI, {@code null} if not
+		 *                 specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder resource(final URI resource) {
+			if (resource != null) {
+				this.resources = Collections.singletonList(resource);
+			} else {
+				this.resources = null;
+			}
+			return this;
+		}
+		
+		
+		/**
+		 * Sets the resource server URI(s).
+		 *
+		 * @param resources The resource URI(s), {@code null} if not
+		 *                  specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder resources(final URI ... resources) {
+			if (resources != null) {
+				this.resources = Arrays.asList(resources);
+			} else {
+				this.resources = null;
+			}
+			return this;
+		}
+		
+		
+		/**
 		 * Sets a custom parameter.
 		 *
 		 * @param name   The parameter name. Must not be {@code null}.
@@ -645,6 +695,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 					claims,
 					claimsLocales,
 					purpose,
+					resources,
 					customParams
 				);
 			} catch (IllegalArgumentException e) {
@@ -756,6 +807,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			loginHintTokenString, idTokenHint, loginHint,
 			bindingMessage, userCode, requestedExpiry,
 			claims, null, null,
+			null,
 			customParams);
 	}
 	
@@ -794,6 +846,8 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	 *                                {@code null} if not specified.
 	 * @param purpose                 The transaction specific purpose,
 	 *                                {@code null} if not specified.
+	 * @param resources               The resource URI(s), {@code null} if
+	 *                                not specified.
 	 * @param customParams            Custom parameters, empty or
 	 *                                {@code null} if not specified.
 	 */
@@ -811,6 +865,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			   final OIDCClaimsRequest claims,
 			   final List<LangTag> claimsLocales,
 			   final String purpose,
+			   final List<URI> resources,
 			   final Map<String, List<String>> customParams) {
 		
 		super(uri, clientAuth);
@@ -867,6 +922,8 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		
 		this.purpose = purpose;
 		
+		this.resources = ResourceUtils.ensureLegalResourceURIs(resources);
+		
 		this.customParams = customParams != null ? customParams : Collections.<String, List<String>>emptyMap();
 		
 		signedRequest = null;
@@ -909,6 +966,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		claims = null;
 		claimsLocales = null;
 		purpose = null;
+		resources = null;
 		customParams = Collections.emptyMap();
 	}
 
@@ -1082,6 +1140,17 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	
 	
 	/**
+	 * Returns the resource server URI.
+	 *
+	 * @return The resource URI(s), {@code null} if not specified.
+	 */
+	public List<URI> getResources() {
+		
+		return resources;
+	}
+	
+	
+	/**
 	 * Returns the additional custom parameters.
 	 *
 	 * @return The additional custom parameters as a unmodifiable map,
@@ -1177,9 +1246,11 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		if (CollectionUtils.isNotEmpty(getClaimsLocales())) {
 			params.put("claims_locales", Collections.singletonList(LangTagUtils.concat(getClaimsLocales())));
 		}
-		
 		if (getPurpose() != null) {
 			params.put("purpose", Collections.singletonList(purpose));
+		}
+		if (CollectionUtils.isNotEmpty(getResources())) {
+			params.put("resource", URIUtils.toStringList(getResources(), true));
 		}
 		
 		return params;
@@ -1357,6 +1428,8 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		
 		String purpose = MultivaluedMapUtils.getFirstValue(params, "purpose");
 		
+		List<URI> resources = ResourceUtils.parseResourceURIs(params.get("resource"));
+		
 		// Parse additional custom parameters
 		Map<String,List<String>> customParams = null;
 		
@@ -1378,6 +1451,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 				loginHintTokenString, idTokenHint, loginHint,
 				bindingMessage, userCode, requestedExpiry,
 				claims, claimsLocales, purpose,
+				resources,
 				customParams);
 		} catch (IllegalArgumentException e) {
 			throw new ParseException(e.getMessage());

@@ -836,14 +836,7 @@ public class AuthorizationRequest extends AbstractRequest {
 		this.codeChallenge = codeChallenge;
 		this.codeChallengeMethod = codeChallengeMethod;
 		
-		if (resources != null) {
-			for (URI resourceURI: resources) {
-				if (! ResourceUtils.isValidResourceURI(resourceURI))
-					throw new IllegalArgumentException("Resource URI must be absolute and without a fragment: " + resourceURI);
-			}
-		}
-		
-		this.resources = resources;
+		this.resources = ResourceUtils.ensureLegalResourceURIs(resources);
 		
 		this.includeGrantedScopes = includeGrantedScopes;
 		
@@ -1478,36 +1471,13 @@ public class AuthorizationRequest extends AbstractRequest {
 				codeChallengeMethod = CodeChallengeMethod.parse(v);
 		}
 		
-		List<URI> resources = null;
 		
-		List<String> vList = params.get("resource");
-		
-		if (vList != null) {
-			
-			resources = new LinkedList<>();
-			
-			for (String uriValue: vList) {
-				
-				if (uriValue == null)
-					continue;
-				
-				String errMsg = "Illegal resource parameter: Must be an absolute URI and with no query or fragment: " + uriValue;
-				
-				URI resourceURI;
-				try {
-					resourceURI = new URI(uriValue);
-				} catch (URISyntaxException e) {
-					throw new ParseException(errMsg, OAuth2Error.INVALID_RESOURCE.setDescription(errMsg),
-						clientID, redirectURI, ResponseMode.resolve(rm, rt), state, e);
-				}
-				
-				if (! ResourceUtils.isValidResourceURI(resourceURI)) {
-					throw new ParseException(errMsg, OAuth2Error.INVALID_RESOURCE.setDescription(errMsg),
-						clientID, redirectURI, ResponseMode.resolve(rm, rt), state, null);
-				}
-				
-				resources.add(resourceURI);
-			}
+		List<URI> resources;
+		try {
+			resources = ResourceUtils.parseResourceURIs(params.get("resource"));
+		} catch (ParseException e) {
+			throw new ParseException(e.getMessage(), OAuth2Error.INVALID_RESOURCE.setDescription(e.getMessage()),
+				clientID, redirectURI, ResponseMode.resolve(rm, rt), state, e);
 		}
 		
 		boolean includeGrantedScopes = false;
