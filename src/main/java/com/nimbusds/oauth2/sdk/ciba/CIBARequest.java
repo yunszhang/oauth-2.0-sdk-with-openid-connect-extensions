@@ -342,8 +342,8 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		 *
 		 * @param clientAuth The client authentication. Must not be
 		 *                   {@code null}.
-		 * @param scope      The requested scope. Must not be empty or
-		 *                   {@code null}.
+		 * @param scope      The requested scope, {@code null} if not
+		 *                   specified.
 		 */
 		public Builder(final ClientAuthentication clientAuth,
 			       final Scope scope) {
@@ -353,9 +353,6 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			}
 			this.clientAuth = clientAuth;
 			
-			if (CollectionUtils.isEmpty(scope)) {
-				throw new IllegalArgumentException("The scope must not be null or empty");
-			}
 			this.scope = scope;
 			
 			signedRequest = null;
@@ -870,9 +867,6 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 		
 		super(uri, clientAuth);
 		
-		if (CollectionUtils.isEmpty(scope)) {
-			throw new IllegalArgumentException("The scope must not be null or empty");
-		}
 		this.scope = scope;
 		
 		if (clientNotificationToken != null && clientNotificationToken.getValue().length() > CLIENT_NOTIFICATION_TOKEN_MAX_LENGTH) {
@@ -987,8 +981,7 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	 * Returns the scope. Corresponds to the optional {@code scope}
 	 * parameter.
 	 *
-	 * @return The scope, {@code null} for a {@link #isSigned signed
-	 *         request}.
+	 * @return The scope, {@code null} if not specified.
 	 */
 	public Scope getScope() {
 
@@ -1213,8 +1206,10 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 			params.put("request", Collections.singletonList(signedRequest.serialize()));
 			return params;
 		}
-		
-		params.put("scope", Collections.singletonList(getScope().toString()));
+
+		if (CollectionUtils.isNotEmpty(getScope())) {
+			params.put("scope", Collections.singletonList(getScope().toString()));
+		}
 		
 		if (getClientNotificationToken() != null) {
 			params.put("client_notification_token", Collections.singletonList(getClientNotificationToken().getValue()));

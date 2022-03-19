@@ -38,7 +38,6 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.JWTID;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
-import com.nimbusds.oauth2.sdk.util.URIUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import com.nimbusds.openid.connect.sdk.OIDCClaimsRequest;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
@@ -150,7 +149,7 @@ public class CIBARequestTest extends TestCase {
 		CIBARequest request = new CIBARequest(
 			null,
 			CLIENT_AUTH,
-			SCOPE,
+			null,
 			null,
 			null,
 			null,
@@ -164,7 +163,7 @@ public class CIBARequestTest extends TestCase {
 		
 		assertNull(request.getEndpointURI());
 		assertEquals(CLIENT_AUTH, request.getClientAuthentication());
-		assertEquals(SCOPE, request.getScope());
+		assertNull(request.getScope());
 		assertNull(request.getClientNotificationToken());
 		assertNull(request.getACRValues());
 		assertNull(request.getLoginHintTokenString());
@@ -186,9 +185,8 @@ public class CIBARequestTest extends TestCase {
 		}
 		
 		JWTClaimsSet jwtClaimsSet = request.toJWTClaimsSet();
-		assertEquals("openid", jwtClaimsSet.getStringClaim("scope"));
 		assertEquals(LOGIN_HINT, jwtClaimsSet.getStringClaim("login_hint"));
-		assertEquals(2, jwtClaimsSet.getClaims().size());
+		assertEquals(1, jwtClaimsSet.getClaims().size());
 	}
 	
 
@@ -443,60 +441,6 @@ public class CIBARequestTest extends TestCase {
 	}
 	
 	
-	public void testConstructor_rejectNullScope() {
-		
-		IllegalArgumentException exception = null;
-		try {
-			new CIBARequest(
-				null,
-				CLIENT_AUTH,
-				null, // scope
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null
-			);
-			fail();
-		} catch (IllegalArgumentException e) {
-			exception = e;
-		}
-		assertEquals("The scope must not be null or empty", exception.getMessage());
-	}
-	
-	
-	public void testConstructor_rejectEmptyScope() {
-		
-		IllegalArgumentException exception = null;
-		try {
-			new CIBARequest(
-				null,
-				CLIENT_AUTH,
-				new Scope(), // empty scope
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null
-			);
-			fail();
-		} catch (IllegalArgumentException e) {
-			exception = e;
-		}
-		assertEquals("The scope must not be null or empty", exception.getMessage());
-	}
-	
-	
 	public void testConstructor_rejectExcessiveClientNotificationToken() {
 		
 		IllegalArgumentException exception = null;
@@ -734,22 +678,6 @@ public class CIBARequestTest extends TestCase {
 	}
 	
 	
-	public void testParse_expectScopeParameter() {
-		
-		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, ENDPOINT_URL);
-		CLIENT_AUTH.applyTo(httpRequest);
-		httpRequest.setEntityContentType(ContentType.APPLICATION_URLENCODED);
-		httpRequest.setQuery("client_notification_token=Yuo1chie");
-		
-		try {
-			CIBARequest.parse(httpRequest);
-			fail();
-		} catch (ParseException e) {
-			assertEquals("The scope must not be null or empty", e.getMessage());
-		}
-	}
-	
-	
 	public void testParse_idTokenHintNotJWT() {
 		
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.POST, ENDPOINT_URL);
@@ -884,6 +812,66 @@ public class CIBARequestTest extends TestCase {
 		assertEquals(new Scope("openid"), request.getScope());
 		assertEquals("alice", request.getLoginHint());
 		assertTrue(request.getCustomParameters().isEmpty());
+	}
+	
+	
+	public void testWithNullScopeParameter() throws ParseException {
+		
+		CIBARequest request = new CIBARequest.Builder(
+			CLIENT_AUTH,
+			(Scope) null)
+			.endpointURI(ENDPOINT_URI)
+			.loginHint(LOGIN_HINT)
+			.claims(CLAIMS)
+			.build();
+		
+		assertNull(request.getScope());
+		
+		Map<String,List<String>> params = request.toParameters();
+		assertEquals(Collections.singletonList(LOGIN_HINT), params.get("login_hint"));
+		assertEquals(Collections.singletonList(CLAIMS.toJSONString()), params.get("claims"));
+		assertEquals(2, params.size());
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		
+		request = CIBARequest.parse(httpRequest);
+		
+		assertNull(request.getScope());
+		
+		params = request.toParameters();
+		assertEquals(Collections.singletonList(LOGIN_HINT), params.get("login_hint"));
+		assertEquals(Collections.singletonList(CLAIMS.toJSONString()), params.get("claims"));
+		assertEquals(2, params.size());
+	}
+	
+	
+	public void testWithEmptyScopeParameter() throws ParseException {
+		
+		CIBARequest request = new CIBARequest.Builder(
+			CLIENT_AUTH,
+			new Scope())
+			.endpointURI(ENDPOINT_URI)
+			.loginHint(LOGIN_HINT)
+			.claims(CLAIMS)
+			.build();
+		
+		assertEquals(new Scope(), request.getScope());
+		
+		Map<String,List<String>> params = request.toParameters();
+		assertEquals(Collections.singletonList(LOGIN_HINT), params.get("login_hint"));
+		assertEquals(Collections.singletonList(CLAIMS.toJSONString()), params.get("claims"));
+		assertEquals(2, params.size());
+		
+		HTTPRequest httpRequest = request.toHTTPRequest();
+		
+		request = CIBARequest.parse(httpRequest);
+		
+		assertNull(request.getScope());
+		
+		params = request.toParameters();
+		assertEquals(Collections.singletonList(LOGIN_HINT), params.get("login_hint"));
+		assertEquals(Collections.singletonList(CLAIMS.toJSONString()), params.get("claims"));
+		assertEquals(2, params.size());
 	}
 	
 	
@@ -1038,7 +1026,7 @@ public class CIBARequestTest extends TestCase {
 	}
 	
 	
-	public void testParseWithIllegalResourceParameter() throws ParseException {
+	public void testParseWithIllegalResourceParameter() {
 		
 		CIBARequest request = new CIBARequest.Builder(
 			CLIENT_AUTH,
