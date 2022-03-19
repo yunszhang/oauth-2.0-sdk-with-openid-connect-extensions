@@ -21,25 +21,26 @@ package com.nimbusds.openid.connect.sdk.op;
 import java.net.URI;
 import java.util.*;
 
+import junit.framework.TestCase;
+
 import com.nimbusds.oauth2.sdk.*;
+import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.ciba.CIBARequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
+import com.nimbusds.openid.connect.sdk.OIDCClaimsRequest;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
+import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
-import junit.framework.TestCase;
 
 
-/**
- * Tests the ACR request class.
- */
 public class ACRRequestTest extends TestCase {
 	
 	
@@ -58,6 +59,8 @@ public class ACRRequestTest extends TestCase {
 		
 		assertEquals(1, req.getEssentialACRs().size());
 		assertEquals(1, req.getVoluntaryACRs().size());
+		
+		assertFalse(req.isEmpty());
 	}
 	
 	
@@ -67,10 +70,12 @@ public class ACRRequestTest extends TestCase {
 		
 		assertNull(req.getEssentialACRs());
 		assertNull(req.getVoluntaryACRs());
+		
+		assertTrue(req.isEmpty());
 	}
 	
 	
-	public void testResolvePlainOAuthRequest()
+	public void testResolveOAuthRequest()
 		throws Exception {
 		
 		AuthorizationRequest authzRequest = new AuthorizationRequest(
@@ -87,13 +92,65 @@ public class ACRRequestTest extends TestCase {
 	}
 	
 	
-	public void testResolveNone()
+	public void testResolveCIBARequest_OAuth() {
+		
+		CIBARequest cibaRequest = new CIBARequest.Builder(
+			new ClientSecretBasic(new ClientID(), new Secret()),
+			new Scope("read", "write"))
+			.loginHint("alice@example.com")
+			.build();
+		
+		ACRRequest acrRequest = ACRRequest.resolve(cibaRequest);
+		
+		assertNull(acrRequest.getEssentialACRs());
+		assertNull(acrRequest.getVoluntaryACRs());
+		
+		assertTrue(acrRequest.isEmpty());
+	}
+	
+	
+	public void testResolveCIBARequest_OpenID() {
+		
+		CIBARequest cibaRequest = new CIBARequest.Builder(
+			new ClientSecretBasic(new ClientID(), new Secret()),
+			new Scope("openid"))
+			.loginHint("alice@example.com")
+			.build();
+		
+		ACRRequest acrRequest = ACRRequest.resolve(cibaRequest);
+		
+		assertNull(acrRequest.getEssentialACRs());
+		assertNull(acrRequest.getVoluntaryACRs());
+		
+		assertTrue(acrRequest.isEmpty());
+	}
+	
+	
+	public void testResolveCIBARequest_OpenID_withACRValues() {
+		
+		CIBARequest cibaRequest = new CIBARequest.Builder(
+			new ClientSecretBasic(new ClientID(), new Secret()),
+			new Scope("openid"))
+			.loginHint("alice@example.com")
+			.acrValues(Collections.singletonList(new ACR("1")))
+			.build();
+		
+		ACRRequest acrRequest = ACRRequest.resolve(cibaRequest);
+		
+		assertNull(acrRequest.getEssentialACRs());
+		assertEquals(Collections.singletonList(new ACR("1")), acrRequest.getVoluntaryACRs());
+		
+		assertFalse(acrRequest.isEmpty());
+	}
+	
+	
+	public void testResolveOpenIDRequest()
 		throws Exception {
 		
 		AuthenticationRequest authRequest = new AuthenticationRequest(
 			new URI("https://c2id.com/login"),
 			new ResponseType("code"),
-			Scope.parse("openid profile"),
+			new Scope("openid", "profile"),
 			new ClientID("abc"),
 			new URI("https://example.com/in"),
 			new State(),
@@ -141,12 +198,16 @@ public class ACRRequestTest extends TestCase {
 	public void testResolveClaimsLevelEssentialACRRequest()
 		throws Exception {
 		
-		ClaimsRequest claims = new ClaimsRequest();
-		
 		List<String> essentialACRs = new ArrayList<>();
 		essentialACRs.add("A");
 		essentialACRs.add("B");
-		claims.addIDTokenClaim("acr", ClaimRequirement.ESSENTIAL, null, essentialACRs);
+		
+		OIDCClaimsRequest claims = new OIDCClaimsRequest()
+			.withIDTokenClaimsRequest(
+				new ClaimsSetRequest()
+					.add(new ClaimsSetRequest.Entry("acr")
+						.withClaimRequirement(ClaimRequirement.ESSENTIAL)
+						.withValues(essentialACRs)));
 		
 		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
 			new ResponseType("code"),
@@ -171,20 +232,24 @@ public class ACRRequestTest extends TestCase {
 	public void testResolveClaimsLevelVoluntaryACRRequest()
 		throws Exception {
 		
-		ClaimsRequest claims = new ClaimsRequest();
-		
 		List<String> essentialACRs = new ArrayList<>();
 		essentialACRs.add("A");
 		essentialACRs.add("B");
-		claims.addIDTokenClaim("acr", ClaimRequirement.VOLUNTARY, null, essentialACRs);
+		
+		OIDCClaimsRequest claims = new OIDCClaimsRequest()
+			.withIDTokenClaimsRequest(
+				new ClaimsSetRequest()
+					.add(new ClaimsSetRequest.Entry("acr")
+						.withClaimRequirement(ClaimRequirement.VOLUNTARY)
+						.withValues(essentialACRs)));
 
 		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
 			new ResponseType("code"),
 			new Scope("openid", "profile"),
 			new ClientID("123"),
-			new URI("https://example.com/in")).
-			claims(claims).
-			build();
+			new URI("https://example.com/in"))
+			.claims(claims)
+			.build();
 		
 		ACRRequest acrRequest = ACRRequest.resolve(authRequest);
 		
@@ -205,21 +270,25 @@ public class ACRRequestTest extends TestCase {
 		acrValues.add(new ACR("1"));
 		acrValues.add(new ACR("2"));
 		
-		ClaimsRequest claims = new ClaimsRequest();
-		
 		List<String> essentialACRs = new ArrayList<>();
 		essentialACRs.add("A");
 		essentialACRs.add("B");
-		claims.addIDTokenClaim("acr", ClaimRequirement.ESSENTIAL, null, essentialACRs);
+		
+		OIDCClaimsRequest claims = new OIDCClaimsRequest()
+			.withIDTokenClaimsRequest(
+				new ClaimsSetRequest()
+					.add(new ClaimsSetRequest.Entry("acr")
+						.withClaimRequirement(ClaimRequirement.ESSENTIAL)
+						.withValues(essentialACRs)));
 
 		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
 			new ResponseType("code"),
 			new Scope("openid", "profile"),
 			new ClientID("123"),
-			new URI("https://example.com/in")).
-			acrValues(acrValues).
-			claims(claims).
-			build();
+			new URI("https://example.com/in"))
+			.acrValues(acrValues)
+			.claims(claims)
+			.build();
 		
 		ACRRequest acrRequest = ACRRequest.resolve(authRequest);
 		
@@ -357,15 +426,19 @@ public class ACRRequestTest extends TestCase {
 		opMetadata.applyDefaults();
 		
 		acrRequest.ensureACRSupport(authRequest, opMetadata);
-		
-		acrRequest.ensureACRSupport((AuthorizationRequest) authRequest, opMetadata.getACRs());
+		acrRequest.ensureACRSupport(authRequest, opMetadata.getACRs());
 	}
 	
 	
 	public void testEnsureACRSupport_noEssentialACRsSupported() {
 		
-		ClaimsRequest claimsRequest = new ClaimsRequest();
-		claimsRequest.addIDTokenClaim("acr", ClaimRequirement.ESSENTIAL, null, "1");
+		OIDCClaimsRequest claimsRequest = new OIDCClaimsRequest()
+			.withIDTokenClaimsRequest(
+				new ClaimsSetRequest()
+					.add(new ClaimsSetRequest.Entry("acr")
+						.withClaimRequirement(ClaimRequirement.ESSENTIAL)
+						.withValue("1"))
+		);
 		
 		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
 			new ResponseType("code"),
@@ -392,7 +465,7 @@ public class ACRRequestTest extends TestCase {
 		}
 		
 		try {
-			acrRequest.ensureACRSupport((AuthorizationRequest) authRequest, opMetadata.getACRs());
+			acrRequest.ensureACRSupport(authRequest, opMetadata.getACRs());
 		} catch (GeneralException e) {
 			assertEquals(OAuth2Error.ACCESS_DENIED, e.getErrorObject());
 			assertEquals("Access denied by resource owner or authorization server: Requested essential ACR(s) not supported", e.getErrorObject().getDescription());
@@ -403,8 +476,13 @@ public class ACRRequestTest extends TestCase {
 	
 	public void testEnsureACRSupport_essentialACRsSupported() {
 		
-		ClaimsRequest claimsRequest = new ClaimsRequest();
-		claimsRequest.addIDTokenClaim("acr", ClaimRequirement.ESSENTIAL, null, "1");
+		OIDCClaimsRequest claimsRequest = new OIDCClaimsRequest()
+			.withIDTokenClaimsRequest(
+				new ClaimsSetRequest()
+					.add(new ClaimsSetRequest.Entry("acr")
+						.withClaimRequirement(ClaimRequirement.ESSENTIAL)
+						.withValue("1"))
+			);
 		
 		AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
 			new ResponseType("code"),
@@ -432,7 +510,7 @@ public class ACRRequestTest extends TestCase {
 		}
 		
 		try {
-			acrRequest.ensureACRSupport((AuthorizationRequest) authRequest, opMetadata.getACRs());
+			acrRequest.ensureACRSupport(authRequest, opMetadata.getACRs());
 		} catch (GeneralException e) {
 			assertEquals(OAuth2Error.ACCESS_DENIED, e.getErrorObject());
 			assertEquals("Access denied by resource owner or authorization server: Requested essential ACR(s) not supported", e.getErrorObject().getDescription());

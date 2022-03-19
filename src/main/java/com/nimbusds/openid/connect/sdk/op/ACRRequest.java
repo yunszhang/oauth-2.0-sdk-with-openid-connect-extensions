@@ -22,15 +22,19 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.jcip.annotations.Immutable;
+
 import com.nimbusds.oauth2.sdk.AuthorizationRequest;
 import com.nimbusds.oauth2.sdk.GeneralException;
 import com.nimbusds.oauth2.sdk.OAuth2Error;
+import com.nimbusds.oauth2.sdk.ciba.CIBARequest;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-import com.nimbusds.openid.connect.sdk.ClaimsRequest;
+import com.nimbusds.openid.connect.sdk.OIDCClaimsRequest;
+import com.nimbusds.openid.connect.sdk.OIDCScopeValue;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
+import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
-import net.jcip.annotations.Immutable;
 
 
 /**
@@ -205,63 +209,117 @@ public final class ACRRequest {
 	 */
 	public static ACRRequest resolve(final AuthorizationRequest authzRequest) {
 		
-		List<ACR> essentialACRs = null;
-		List<ACR> voluntaryACRs = null;
-		
 		if (! (authzRequest instanceof AuthenticationRequest)) {
 			// Plain OAuth 2.0
-			return new ACRRequest(essentialACRs, voluntaryACRs);
+			return new ACRRequest(null, null);
 		}
 		
 		// OpenID
 		AuthenticationRequest authRequest = (AuthenticationRequest) authzRequest;
 		
-		ClaimsRequest claimsRequest = authRequest.getClaims();
+		// OpenID
+		return resolve(authRequest.getACRValues(), authRequest.getOIDCClaims());
+	}
+	
+	
+	/**
+	 * Resolves the requested essential and voluntary ACR values from the
+	 * specified CIBA request.
+	 *
+	 * @param cibaRequest The CIBA request. Must be resolved and not
+	 *                    {@code null}.
+	 *
+	 * @return The resolved ACR request.
+	 */
+	public static ACRRequest resolve(final CIBARequest cibaRequest) {
 		
-		if (claimsRequest != null) {
-			
-			for (ClaimsRequest.Entry claimEntry: claimsRequest.getIDTokenClaims()) {
+		if (cibaRequest.isSigned()) {
+			throw new IllegalArgumentException("The CIBA request must be resolved (not signed)");
+		}
+		
+		if (cibaRequest.getScope() != null && ! cibaRequest.getScope().contains(OIDCScopeValue.OPENID)) {
+			// Plain OAuth 2.0
+			return new ACRRequest(null, null);
+		}
+		
+		// OpenID
+		return resolve(cibaRequest.getACRValues(), cibaRequest.getOIDCClaims());
+	}
+	
+	
+	
+	private static ClaimsSetRequest.Entry getACRClaimRequest(final OIDCClaimsRequest claimsRequest) {
+		
+		if (claimsRequest == null) {
+			return null;
+		}
+		
+		ClaimsSetRequest idTokenClaimsRequest = claimsRequest.getIDTokenClaimsRequest();
+		
+		if (idTokenClaimsRequest == null) {
+			return null;
+		}
+		
+		for (ClaimsSetRequest.Entry en: idTokenClaimsRequest.getEntries()) {
+			if ("acr".equals(en.getClaimName())) {
+				return en;
+			}
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * Resolves the requested essential and voluntary ACR values from the
+	 * specified top-level {@code acr_values} request parameter and
+	 * {@code claims} request parameter.
+	 *
+	 * @param acrValues     The top-level {@code acr_values} request
+	 *                      parameter, {@code null} if not specified.
+	 * @param claimsRequest The OpenID {@code claims} request parameter,
+	 *                      {@code null} if not specified.
+	 *
+	 * @return The resolved ACR request.
+	 */
+	public static ACRRequest resolve(final List<ACR> acrValues, final OIDCClaimsRequest claimsRequest) {
+		
+		List<ACR> essentialACRs = null;
+		List<ACR> voluntaryACRs = null;
+		
+		ClaimsSetRequest.Entry en = getACRClaimRequest(claimsRequest);
+		
+		if (en != null) {
+			if (en.getClaimRequirement().equals(ClaimRequirement.ESSENTIAL)) {
 				
-				if (! claimEntry.getClaimName().equals("acr"))
-					continue;
+				essentialACRs = new ArrayList<>();
 				
-				if (claimEntry.getClaimRequirement().equals(ClaimRequirement.ESSENTIAL)) {
+				if (en.getValueAsString() != null)
+					essentialACRs.add(new ACR(en.getValueAsString()));
+				
+				if (en.getValuesAsListOfStrings() != null) {
+					for (String v: en.getValuesAsListOfStrings())
+						essentialACRs.add(new ACR(v));
+				}
+			} else {
+				voluntaryACRs = new ArrayList<>();
+				
+				if (en.getValueAsString() != null)
+					voluntaryACRs.add(new ACR(en.getValueAsString()));
+				
+				if (en.getValuesAsListOfStrings() != null) {
 					
-					essentialACRs = new ArrayList<>();
-					
-					if (claimEntry.getValue() != null)
-						essentialACRs.add(new ACR(claimEntry.getValue()));
-					
-					if (claimEntry.getValues() != null) {
-						
-						for (String v: claimEntry.getValues())
-							essentialACRs.add(new ACR(v));
-					}
-					
-				} else {
-					voluntaryACRs = new ArrayList<>();
-					
-					if (claimEntry.getValue() != null)
-						voluntaryACRs.add(new ACR(claimEntry.getValue()));
-					
-					if (claimEntry.getValues() != null) {
-						
-						for (String v: claimEntry.getValues())
-							voluntaryACRs.add(new ACR(v));
-					}
+					for (String v: en.getValuesAsListOfStrings())
+						voluntaryACRs.add(new ACR(v));
 				}
 			}
 		}
 		
-		
-		List<ACR> topLevelACRs = authRequest.getACRValues();
-		
-		if (topLevelACRs != null) {
+		if (acrValues != null) {
 			
 			if (voluntaryACRs == null)
 				voluntaryACRs = new ArrayList<>();
 			
-			voluntaryACRs.addAll(topLevelACRs);
+			voluntaryACRs.addAll(acrValues);
 		}
 		
 		return new ACRRequest(essentialACRs, voluntaryACRs);

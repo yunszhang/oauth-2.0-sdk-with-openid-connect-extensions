@@ -1983,3 +1983,4 @@ version 9.30 (2022-03-18)
 
 version 9.31 (2022-03-19)
     * Updates CIBARequest to make the scope parameter optional.
+    * Updates ACRRequest to support CIBARequest.
