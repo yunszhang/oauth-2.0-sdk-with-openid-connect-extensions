@@ -76,8 +76,7 @@ import com.nimbusds.oauth2.sdk.util.URIUtils;
  *     <li>OAuth 2.0 Form Post Response Mode 1.0.
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM).
- *     <li>OAuth 2.0 Authorization Server Issuer Identifier in Authorization
- *         Response (draft-ietf-oauth-iss-auth-resp-00).
+ *     <li>OAuth 2.0 Authorization Server Issuer Identification (RFC 9207)
  * </ul>
  */
 @Immutable
@@ -279,7 +278,7 @@ public class AuthorizationErrorResponse
 		// State
 		State state = State.parse(MultivaluedMapUtils.getFirstValue(params, "state"));
 		
-		// Parse optional issuer, draft-ietf-oauth-iss-auth-resp-00
+		// Parse optional issuer, OAuth 2.0 Authorization Server Issuer Identification (RFC 9207)
 		Issuer issuer = Issuer.parse(MultivaluedMapUtils.getFirstValue(params, "iss"));
 		
 		return new AuthorizationErrorResponse(redirectURI, error, state, issuer, null);

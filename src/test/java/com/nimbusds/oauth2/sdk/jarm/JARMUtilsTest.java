@@ -193,7 +193,7 @@ public class JARMUtilsTest extends TestCase {
 	}
 	
 	
-	// draft-ietf-oauth-iss-auth-resp-00
+	// OAuth 2.0 Authorization Server Issuer Identification (RFC 9207)
 	public void testToJWTClaimsSet_issuerInResponse() throws ParseException {
 		
 		Issuer issuer = new Issuer("https://c2id.com");
@@ -226,7 +226,7 @@ public class JARMUtilsTest extends TestCase {
 	}
 	
 	
-	// draft-ietf-oauth-iss-auth-resp-00
+	// OAuth 2.0 Authorization Server Issuer Identification (RFC 9207)
 	public void testToJWTClaimsSet_issuerInResponseMustMatch() {
 		
 		Issuer issuer = new Issuer("https://c2id.com");

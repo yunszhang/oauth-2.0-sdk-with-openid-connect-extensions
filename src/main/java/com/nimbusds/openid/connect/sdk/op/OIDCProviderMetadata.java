@@ -71,8 +71,7 @@ import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistratio
  *         Access Tokens (RFC 8705)
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
- *     <li>OAuth 2.0 Authorization Server Issuer Identifier in Authorization
- *         Response (draft-ietf-oauth-iss-auth-resp-00)
+ *     <li>OAuth 2.0 Authorization Server Issuer Identification (RFC 9207)
  * </ul>
  */
 public class OIDCProviderMetadata extends AuthorizationServerMetadata implements ReadOnlyOIDCProviderMetadata {

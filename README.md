@@ -100,8 +100,7 @@ This SDK version implements the following standards and drafts:
 
 * OAuth 2.0 Pushed Authorization Requests (RFC 9126)
 
-* OAuth 2.0 Authorization Server Issuer Identifier in Authorization Response 
-  (draft-ietf-oauth-iss-auth-resp-00)
+* OAuth 2.0 Authorization Server Issuer Identification (RFC 9207)
 
 * OpenID Connect Core 1.0 (2014-02-25)
 

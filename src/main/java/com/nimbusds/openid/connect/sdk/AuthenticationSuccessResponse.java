@@ -65,15 +65,14 @@ import net.jcip.annotations.Immutable;
  *
  * <ul>
  *     <li>OpenID Connect Core 1.0, section 3.1.2.5, 3.1.2.6, 3.2.2.5, 3.2.2.6,
- *         3.3.2.5 and 3.3.2.6.
- *     <li>OpenID Connect Session Management 1.0 - draft 23, section 3.
- *     <li>OAuth 2.0 (RFC 6749), section 3.1.
- *     <li>OAuth 2.0 Multiple Response Type Encoding Practices 1.0.
- *     <li>OAuth 2.0 Form Post Response Mode 1.0.
+ *         3.3.2.5 and 3.3.2.6
+ *     <li>OpenID Connect Session Management 1.0 - draft 23, section 3
+ *     <li>OAuth 2.0 (RFC 6749), section 3.1
+ *     <li>OAuth 2.0 Multiple Response Type Encoding Practices 1.0
+ *     <li>OAuth 2.0 Form Post Response Mode 1.0
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
- *         OAuth 2.0 (JARM).
- *     <li>OAuth 2.0 Authorization Server Issuer Identifier in Authorization
- *         Response (draft-ietf-oauth-iss-auth-resp-00).
+ *         OAuth 2.0 (JARM)
+ *     <li>OAuth 2.0 Authorization Server Issuer Identification (RFC 9207)
  * </ul>
  */
 @Immutable

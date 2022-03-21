@@ -51,8 +51,7 @@ import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
  *         (DPoP) (draft-ietf-oauth-dpop-02)
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
- *     <li>OAuth 2.0 Authorization Server Issuer Identifier in Authorization
- *         Response (draft-ietf-oauth-iss-auth-resp-00)
+ *     <li>OAuth 2.0 Authorization Server Issuer Identification (RFC 9207)
  *     <li>Financial-grade API - Part 2: Read and Write API Security Profile
  *     <li>OAuth 2.0 Pushed Authorization Requests (RFC 9126)
  *     <li>OAuth 2.0 Device Authorization Grant (RFC 8628)
