@@ -167,6 +167,50 @@ public class IDTokenValidatorTest extends TestCase {
 	}
 
 
+	public void testVerifySignedWithExplicitTyping()
+		throws Exception {
+		
+		JOSEObjectType jwtType = new JOSEObjectType("id_token+jwt");
+		
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.keyID("1")
+			.keyUse(KeyUse.SIGNATURE)
+			.generate();
+		JWKSet jwkSet = new JWKSet(rsaJWK);
+
+		Issuer iss = new Issuer("https://c2id.com");
+		ClientID clientID = new ClientID("123");
+		Date now = new Date();
+
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+				.issuer(iss.getValue())
+				.subject("alice")
+				.audience(clientID.getValue())
+				.expirationTime(new Date(now.getTime() + 10*60*1000L))
+				.issueTime(now)
+				.build();
+
+		SignedJWT idToken = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).type(jwtType).build(), claimsSet);
+		idToken.sign(new RSASSASigner(rsaJWK));
+
+		JWSKeySelector<?> jwsKeySelector = new JWSVerificationKeySelector<>(JWSAlgorithm.RS256, new ImmutableJWKSet<>(jwkSet));
+		
+		IDTokenValidator idTokenValidator = new IDTokenValidator(jwtType, iss, clientID, jwsKeySelector,null);
+		assertEquals(jwtType, idTokenValidator.getExpectedJWTType());
+		assertEquals(iss, idTokenValidator.getExpectedIssuer());
+		assertEquals(clientID, idTokenValidator.getClientID());
+		assertEquals(jwsKeySelector, idTokenValidator.getJWSKeySelector());
+		assertNull(idTokenValidator.getJWEKeySelector());
+
+		IDTokenClaimsSet idTokenClaimsSet = idTokenValidator.validate(idToken, null);
+		assertEquals(iss, idTokenClaimsSet.getIssuer());
+		assertEquals(new Subject("alice"), idTokenClaimsSet.getSubject());
+		assertTrue(idTokenClaimsSet.getAudience().contains(new Audience("123")));
+		assertNotNull(idTokenClaimsSet.getExpirationTime());
+		assertNotNull(idTokenClaimsSet.getIssueTime());
+	}
+
+
 	public void testVerifyBadSigned()
 		throws Exception {
 		

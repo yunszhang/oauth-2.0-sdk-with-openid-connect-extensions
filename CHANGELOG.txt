@@ -1988,3 +1988,7 @@ version 9.31 (2022-03-19)
 version 9.31.1 (2022-03-29)
     * Fixes parsing of require_pushed_authorization_requests in
       OIDCProviderMetadata.parse (iss #388).
+
+version 9.32 (2022-03-29)
+    * Updates IDTokenValidator and AbstractJWTValidator to support explicit JWT
+      typing via the "typ" (type) header.

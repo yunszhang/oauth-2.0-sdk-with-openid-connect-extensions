@@ -18,6 +18,7 @@
 package com.nimbusds.openid.connect.sdk.validators;
 
 
+import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.proc.JWEKeySelector;
 import com.nimbusds.jose.proc.JWSKeySelector;
 import com.nimbusds.jwt.proc.ClockSkewAware;
@@ -36,6 +37,12 @@ public abstract class AbstractJWTValidator implements ClockSkewAware {
 	 * timestamps, in seconds.
 	 */
 	public static final int DEFAULT_MAX_CLOCK_SKEW = 60;
+	
+	
+	/**
+	 * The expected JWT "typ" (type) header, {@code null} if none.
+	 */
+	private final JOSEObjectType jwtType;
 	
 	
 	/**
@@ -81,10 +88,38 @@ public abstract class AbstractJWTValidator implements ClockSkewAware {
 	 *                       {@code null} if encrypted tokens are not
 	 *                       expected.
 	 */
+	@Deprecated
 	public AbstractJWTValidator(final Issuer expectedIssuer,
 				    final ClientID clientID,
 				    final JWSKeySelector jwsKeySelector,
 				    final JWEKeySelector jweKeySelector) {
+		
+		this(null, expectedIssuer, clientID, jwsKeySelector, jweKeySelector);
+	}
+	
+	
+	/**
+	 * Creates a new abstract JWT validator.
+	 *
+	 * @param jwtType        The expected JWT "typ" (type) header,
+	 *                       {@code null} if none.
+	 * @param expectedIssuer The expected token issuer (OpenID Provider).
+	 *                       Must not be {@code null}.
+	 * @param clientID       The client ID. Must not be {@code null}.
+	 * @param jwsKeySelector The key selector for JWS verification,
+	 *                       {@code null} if unsecured (plain) tokens are
+	 *                       expected.
+	 * @param jweKeySelector The key selector for JWE decryption,
+	 *                       {@code null} if encrypted tokens are not
+	 *                       expected.
+	 */
+	public AbstractJWTValidator(final JOSEObjectType jwtType,
+				    final Issuer expectedIssuer,
+				    final ClientID clientID,
+				    final JWSKeySelector jwsKeySelector,
+				    final JWEKeySelector jweKeySelector) {
+		
+		this.jwtType = jwtType;
 		
 		if (expectedIssuer == null) {
 			throw new IllegalArgumentException("The expected token issuer must not be null");
@@ -99,6 +134,16 @@ public abstract class AbstractJWTValidator implements ClockSkewAware {
 		// Optional
 		this.jwsKeySelector = jwsKeySelector;
 		this.jweKeySelector = jweKeySelector;
+	}
+	
+	
+	/**
+	 * Returns the expected JWT "typ" (type) header.
+	 *
+	 * @return The expected JWT "typ" (type) header, {@code null} if none.
+	 */
+	public JOSEObjectType getExpectedJWTType() {
+		return jwtType;
 	}
 	
 	
@@ -153,7 +198,6 @@ public abstract class AbstractJWTValidator implements ClockSkewAware {
 	 */
 	@Override
 	public int getMaxClockSkew() {
-		
 		return maxClockSkew;
 	}
 	
@@ -167,7 +211,6 @@ public abstract class AbstractJWTValidator implements ClockSkewAware {
 	 */
 	@Override
 	public void setMaxClockSkew(final int maxClockSkew) {
-		
 		this.maxClockSkew = maxClockSkew;
 	}
 }

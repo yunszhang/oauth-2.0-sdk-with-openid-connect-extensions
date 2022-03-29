@@ -21,6 +21,9 @@ package com.nimbusds.openid.connect.sdk.validators;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
+
+import net.jcip.annotations.ThreadSafe;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -41,7 +44,6 @@ import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
-import net.jcip.annotations.ThreadSafe;
 
 
 /**
@@ -65,6 +67,9 @@ import net.jcip.annotations.ThreadSafe;
  *     <li>{@link #create(OIDCProviderMetadata, OIDCClientInformation)}
  *     <li>{@link #create(Issuer, OIDCClientInformation)}
  * </ul>
+ *
+ * <p>An expected JWT "typ" (type) header can also be specified, but note such
+ * ID tokens are not compliant with OpenID Connect.
  *
  * <p>Related specifications:
  *
@@ -199,7 +204,32 @@ public class IDTokenValidator extends AbstractJWTValidator implements ClockSkewA
 				final JWSKeySelector jwsKeySelector,
 				final JWEKeySelector jweKeySelector) {
 		
-		super(expectedIssuer, clientID, jwsKeySelector, jweKeySelector);
+		this(null, expectedIssuer, clientID, jwsKeySelector, jweKeySelector);
+	}
+
+
+	/**
+	 * Creates a new ID token validator.
+	 *
+	 * @param jwtType        The expected JWT "typ" (type) header,
+	 *                       {@code null} if none.
+	 * @param expectedIssuer The expected ID token issuer (OpenID
+	 *                       Provider). Must not be {@code null}.
+	 * @param clientID       The client ID. Must not be {@code null}.
+	 * @param jwsKeySelector The key selector for JWS verification,
+	 *                       {@code null} if unsecured (plain) ID tokens
+	 *                       are expected.
+	 * @param jweKeySelector The key selector for JWE decryption,
+	 *                       {@code null} if encrypted ID tokens are not
+	 *                       expected.
+	 */
+	public IDTokenValidator(final JOSEObjectType jwtType,
+				final Issuer expectedIssuer,
+				final ClientID clientID,
+				final JWSKeySelector jwsKeySelector,
+				final JWEKeySelector jweKeySelector) {
+		
+		super(jwtType, expectedIssuer, clientID, jwsKeySelector, jweKeySelector);
 	}
 
 
@@ -283,6 +313,9 @@ public class IDTokenValidator extends AbstractJWTValidator implements ClockSkewA
 		}
 
 		ConfigurableJWTProcessor<?> jwtProcessor = new DefaultJWTProcessor();
+		if (getExpectedJWTType() != null) {
+			jwtProcessor.setJWSTypeVerifier(new DefaultJOSEObjectTypeVerifier(Collections.singleton(getExpectedJWTType())));
+		}
 		jwtProcessor.setJWSKeySelector(getJWSKeySelector());
 		jwtProcessor.setJWTClaimsSetVerifier(new IDTokenClaimsVerifier(getExpectedIssuer(), getClientID(), expectedNonce, getMaxClockSkew()));
 		JWTClaimsSet jwtClaimsSet = jwtProcessor.process(idToken, null);
