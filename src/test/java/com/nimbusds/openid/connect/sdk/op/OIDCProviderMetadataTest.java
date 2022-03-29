@@ -30,6 +30,7 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.as.AuthorizationServerEndpointMetadata;
+import com.nimbusds.oauth2.sdk.as.AuthorizationServerMetadata;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.ciba.BackChannelTokenDeliveryMode;
 import com.nimbusds.oauth2.sdk.client.ClientType;
@@ -1200,6 +1201,57 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue((Boolean)jsonObject.get("tls_client_certificate_bound_access_tokens"));
 		
 		assertTrue(OIDCProviderMetadata.parse(jsonObject).supportsTLSClientCertificateBoundAccessTokens());
+	}
+	
+	
+	public void testPAR()
+		throws ParseException {
+		
+		OIDCProviderMetadata metadata = new OIDCProviderMetadata(new Issuer("https://c2id.com"), Collections.singletonList(SubjectType.PUBLIC), URI.create("https://c2id.com/jwks.json"));
+		
+		assertNull(metadata.getPushedAuthorizationRequestEndpointURI());
+		assertFalse(metadata.requiresPushedAuthorizationRequests());
+		
+		metadata.applyDefaults();
+		assertNull(metadata.getPushedAuthorizationRequestEndpointURI());
+		assertFalse(metadata.requiresPushedAuthorizationRequests());
+		
+		URI parEndpoint = URI.create("https://c2id.com/par");
+		metadata.setPushedAuthorizationRequestEndpointURI(parEndpoint);
+		assertEquals(parEndpoint, metadata.getPushedAuthorizationRequestEndpointURI());
+		
+		JSONObject jsonObject = metadata.toJSONObject();
+		assertEquals(parEndpoint.toString(), jsonObject.get("pushed_authorization_request_endpoint"));
+		assertFalse(jsonObject.containsKey("require_pushed_authorization_requests"));
+		
+		metadata = OIDCProviderMetadata.parse(jsonObject.toJSONString());
+		assertEquals(parEndpoint, metadata.getPushedAuthorizationRequestEndpointURI());
+		assertFalse(metadata.requiresPushedAuthorizationRequests());
+	}
+	
+	
+	public void testPAR_requiredByOP()
+		throws ParseException {
+		
+		OIDCProviderMetadata metadata = new OIDCProviderMetadata(new Issuer("https://c2id.com"), Collections.singletonList(SubjectType.PUBLIC), URI.create("https://c2id.com/jwks.json"));
+		metadata.applyDefaults();
+		assertNull(metadata.getPushedAuthorizationRequestEndpointURI());
+		assertFalse(metadata.requiresPushedAuthorizationRequests());
+		
+		URI parEndpoint = URI.create("https://c2id.com/par");
+		metadata.setPushedAuthorizationRequestEndpointURI(parEndpoint);
+		assertEquals(parEndpoint, metadata.getPushedAuthorizationRequestEndpointURI());
+		
+		metadata.requiresPushedAuthorizationRequests(true);
+		assertTrue(metadata.requiresPushedAuthorizationRequests());
+		
+		JSONObject jsonObject = metadata.toJSONObject();
+		assertEquals(parEndpoint.toString(), jsonObject.get("pushed_authorization_request_endpoint"));
+		assertTrue((Boolean) jsonObject.get("require_pushed_authorization_requests"));
+		
+		metadata = OIDCProviderMetadata.parse(jsonObject.toJSONString());
+		assertEquals(parEndpoint, metadata.getPushedAuthorizationRequestEndpointURI());
+		assertTrue(metadata.requiresPushedAuthorizationRequests());
 	}
 	
 	

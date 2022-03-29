@@ -1984,3 +1984,7 @@ version 9.30 (2022-03-18)
 version 9.31 (2022-03-19)
     * Updates CIBARequest to make the scope parameter optional.
     * Updates ACRRequest to support CIBARequest.
+
+version 9.31.1 (2022-03-29)
+    * Fixes parsing of require_pushed_authorization_requests in
+      OIDCProviderMetadata.parse (iss #388).

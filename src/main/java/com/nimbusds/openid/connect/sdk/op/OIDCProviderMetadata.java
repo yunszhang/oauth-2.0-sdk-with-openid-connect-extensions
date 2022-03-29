@@ -1481,6 +1481,8 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata implements
 		op.setSupportsRequestURIParam(as.supportsRequestURIParam());
 		op.setRequiresRequestURIRegistration(as.requiresRequestURIRegistration());
 		
+		op.requiresPushedAuthorizationRequests(as.requiresPushedAuthorizationRequests());
+		
 		op.setSupportsAuthorizationResponseIssuerParam(as.supportsAuthorizationResponseIssuerParam());
 		
 		op.setCodeChallengeMethods(as.getCodeChallengeMethods());
