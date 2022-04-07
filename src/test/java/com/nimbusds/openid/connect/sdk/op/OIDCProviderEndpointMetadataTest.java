@@ -27,6 +27,7 @@ import net.minidev.json.JSONObject;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.as.AuthorizationServerEndpointMetadata;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
 
 public class OIDCProviderEndpointMetadataTest extends TestCase {
@@ -215,5 +216,34 @@ public class OIDCProviderEndpointMetadataTest extends TestCase {
 		assertNull(opEndpointMetadata.getCheckSessionIframeURI());
 		assertNull(opEndpointMetadata.getEndSessionEndpointURI());
 		assertNull(opEndpointMetadata.getFederationRegistrationEndpointURI());
+	}
+	
+	
+	// https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions/issues/373/exception-thrown-when-calling#comment-62053807
+	public void testParseSampleWithUndefinedAuthorizationEndpoint() throws ParseException {
+		
+		String json ="{"+
+			"\"token_endpoint\":\"https://keycloakdomain/auth/realms/tcw/protocol/openid-connect/token\","+
+			"\"revocation_endpoint\":\"https://keycloakdomain/auth/realms/tcw/protocol/openid-connect/revoke\","+
+			"\"introspection_endpoint\":\"https://keycloakdomain/auth/realms/tcw/protocol/openid-connect/token/introspect\","+
+			"\"device_authorization_endpoint\":\"https://keycloakdomain/auth/realms/tcw/protocol/openid-connect/auth/device\","+
+			"\"registration_endpoint\":\"https://keycloakdomain/auth/realms/tcw/clients-registrations/openid-connect\","+
+			"\"userinfo_endpoint\":\"https://keycloakdomain/auth/realms/tcw/protocol/openid-connect/userinfo\","+
+			"\"pushed_authorization_request_endpoint\":\"https://keycloakdomain/auth/realms/tcw/protocol/openid-connect/ext/par/request\","+
+			"\"backchannel_authentication_endpoint\":\"https://keycloakdomain/auth/realms/tcw/protocol/openid-connect/ext/ciba/auth\""+
+			"}";
+		
+		OIDCProviderEndpointMetadata endpointMetadata = OIDCProviderEndpointMetadata.parse(JSONObjectUtils.parse(json));
+		
+		assertEquals(URI.create("https://keycloakdomain/auth/realms/tcw/protocol/openid-connect/token"), endpointMetadata.getTokenEndpointURI());
+		assertEquals(URI.create("https://keycloakdomain/auth/realms/tcw/protocol/openid-connect/revoke"), endpointMetadata.getRevocationEndpointURI());
+		assertEquals(URI.create("https://keycloakdomain/auth/realms/tcw/protocol/openid-connect/token/introspect"), endpointMetadata.getIntrospectionEndpointURI());
+		assertEquals(URI.create("https://keycloakdomain/auth/realms/tcw/protocol/openid-connect/auth/device"), endpointMetadata.getDeviceAuthorizationEndpointURI());
+		assertEquals(URI.create("https://keycloakdomain/auth/realms/tcw/clients-registrations/openid-connect"), endpointMetadata.getRegistrationEndpointURI());
+		assertEquals(URI.create("https://keycloakdomain/auth/realms/tcw/protocol/openid-connect/userinfo"), endpointMetadata.getUserInfoEndpointURI());
+		assertEquals(URI.create("https://keycloakdomain/auth/realms/tcw/protocol/openid-connect/ext/par/request"), endpointMetadata.getPushedAuthorizationRequestEndpointURI());
+		assertEquals(URI.create("https://keycloakdomain/auth/realms/tcw/protocol/openid-connect/ext/ciba/auth"), endpointMetadata.getBackChannelAuthenticationEndpointURI());
+		
+		assertNull(endpointMetadata.getAuthorizationEndpointURI());
 	}
 }
