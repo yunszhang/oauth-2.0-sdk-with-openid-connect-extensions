@@ -36,6 +36,7 @@ import com.nimbusds.oauth2.sdk.ciba.BackChannelTokenDeliveryMode;
 import com.nimbusds.oauth2.sdk.client.ClientType;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
+import com.nimbusds.openid.connect.sdk.Prompt;
 
 
 /**
@@ -59,6 +60,7 @@ import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
  * 	   Core 1.0
  *     <li>OAuth 2.0 Incremental Authorization
  *         (draft-ietf-oauth-incremental-authz-04)
+ *     <li>Initiating User Registration via OpenID Connect (draft 04)
  * </ul>
  */
 public interface ReadOnlyAuthorizationServerMetadata extends ReadOnlyAuthorizationServerEndpointMetadata {
@@ -441,6 +443,15 @@ public interface ReadOnlyAuthorizationServerMetadata extends ReadOnlyAuthorizati
 	 * supported, else {@code false}.
 	 */
 	boolean supportsBackChannelUserCodeParam();
+	
+	
+	/**
+	 * Gets the supported {@link Prompt.Type prompt types}. Corresponds to
+	 * the {@code prompt_values_supported} metadata field.
+	 *
+	 * @return The supported prompt types, {@code null} if not specified.
+	 */
+	List<Prompt.Type> getPromptTypes();
 	
 	
 	/**

@@ -20,13 +20,11 @@ package com.nimbusds.oauth2.sdk.as;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
+import org.checkerframework.checker.units.qual.A;
 
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
@@ -38,6 +36,7 @@ import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.client.ClientType;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.openid.connect.sdk.Prompt;
 
 
 public class AuthorizationServerMetadataTest extends TestCase {
@@ -92,7 +91,8 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("backchannel_authentication_endpoint"));
 		assertTrue(paramNames.contains("backchannel_authentication_request_signing_alg_values_supported"));
 		assertTrue(paramNames.contains("backchannel_user_code_parameter_supported"));
-		assertEquals(44, paramNames.size());
+		assertTrue(paramNames.contains("prompt_values_supported"));
+		assertEquals(45, paramNames.size());
 	}
 	
 	
@@ -739,5 +739,45 @@ public class AuthorizationServerMetadataTest extends TestCase {
 		assertEquals(3, metadata.getMtlsEndpointAliases().toJSONObject().size());
 		
 		assertEquals(12, metadata.toJSONObject().size());
+	}
+	
+	
+	public void testPromptValuesSupported() throws ParseException {
+		
+		AuthorizationServerMetadata metadata = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
+		metadata.applyDefaults();
+		
+		assertNull(metadata.getPromptTypes());
+		
+		List<Prompt.Type> promptTypes = Arrays.asList(Prompt.Type.LOGIN, Prompt.Type.CREATE);
+		
+		metadata.setPromptTypes(promptTypes);
+		
+		assertEquals(promptTypes, metadata.getPromptTypes());
+		
+		JSONObject jsonObject = metadata.toJSONObject();
+		
+		assertEquals(Arrays.asList("login", "create"), jsonObject.get("prompt_values_supported"));
+		
+		metadata = AuthorizationServerMetadata.parse(jsonObject.toJSONString());
+		
+		assertEquals(promptTypes, metadata.getPromptTypes());
+	}
+	
+	
+	public void testPromptValuesSupport_parseIllegal() {
+		
+		AuthorizationServerMetadata metadata = new AuthorizationServerMetadata(new Issuer("https://c2id.com"));
+		metadata.applyDefaults();
+		JSONObject jsonObject = metadata.toJSONObject();
+		
+		jsonObject.put("prompt_values_supported", Arrays.asList("login", "create", "xxx"));
+		
+		try {
+			AuthorizationServerMetadata.parse(jsonObject);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Unknown prompt type: xxx", e.getMessage());
+		}
 	}
 }

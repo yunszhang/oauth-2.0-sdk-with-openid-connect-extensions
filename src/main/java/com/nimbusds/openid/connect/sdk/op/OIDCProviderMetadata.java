@@ -72,6 +72,7 @@ import com.nimbusds.openid.connect.sdk.federation.registration.ClientRegistratio
  *     <li>Financial-grade API: JWT Secured Authorization Response Mode for
  *         OAuth 2.0 (JARM)
  *     <li>OAuth 2.0 Authorization Server Issuer Identification (RFC 9207)
+ *     <li>Initiating User Registration via OpenID Connect (draft 04)
  * </ul>
  */
 public class OIDCProviderMetadata extends AuthorizationServerMetadata implements ReadOnlyOIDCProviderMetadata {
@@ -1492,6 +1493,8 @@ public class OIDCProviderMetadata extends AuthorizationServerMetadata implements
 		op.setBackChannelAuthenticationRequestJWSAlgs(as.getBackChannelAuthenticationRequestJWSAlgs());
 		op.setSupportsBackChannelUserCodeParam(as.supportsBackChannelUserCodeParam());
 		op.setBackChannelTokenDeliveryModes(as.getBackChannelTokenDeliveryModes());
+		
+		op.setPromptTypes(as.getPromptTypes());
 
 		if (jsonObject.get("acr_values_supported") != null) {
 

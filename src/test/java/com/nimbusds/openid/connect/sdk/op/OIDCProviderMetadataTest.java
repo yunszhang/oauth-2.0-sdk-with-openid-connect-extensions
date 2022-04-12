@@ -37,10 +37,7 @@ import com.nimbusds.oauth2.sdk.client.ClientType;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import com.nimbusds.openid.connect.sdk.Display;
-import com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue;
-import com.nimbusds.openid.connect.sdk.OIDCScopeValue;
-import com.nimbusds.openid.connect.sdk.SubjectType;
+import com.nimbusds.openid.connect.sdk.*;
 import com.nimbusds.openid.connect.sdk.assurance.IdentityTrustFramework;
 import com.nimbusds.openid.connect.sdk.assurance.evidences.*;
 import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.AttachmentType;
@@ -135,7 +132,8 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(paramNames.contains("client_registration_authn_methods_supported"));
 		assertTrue(paramNames.contains("organization_name"));
 		assertTrue(paramNames.contains("federation_registration_endpoint"));
-		assertEquals(81, paramNames.size());
+		assertTrue(paramNames.contains("prompt_values_supported"));
+		assertEquals(82, paramNames.size());
 	}
 
 
@@ -610,6 +608,10 @@ public class OIDCProviderMetadataTest extends TestCase {
 		meta.setSupportsBackChannelLogoutSession(true);
 		assertTrue(meta.supportsBackChannelLogoutSession());
 		
+		assertNull(meta.getPromptTypes());
+		meta.setPromptTypes(Arrays.asList(Prompt.Type.LOGIN, Prompt.Type.CREATE));
+		assertEquals(Arrays.asList(Prompt.Type.LOGIN, Prompt.Type.CREATE), meta.getPromptTypes());
+		
 		AuthorizationServerEndpointMetadata asEndpoints = new AuthorizationServerEndpointMetadata();
 		asEndpoints.setAuthorizationEndpointURI(meta.getAuthorizationEndpointURI());
 		asEndpoints.setTokenEndpointURI(meta.getTokenEndpointURI());
@@ -775,6 +777,8 @@ public class OIDCProviderMetadataTest extends TestCase {
 		assertTrue(meta.supportsFrontChannelLogoutSession());
 		assertTrue(meta.supportsBackChannelLogout());
 		assertTrue(meta.supportsBackChannelLogoutSession());
+		
+		assertEquals(Arrays.asList(Prompt.Type.LOGIN, Prompt.Type.CREATE), meta.getPromptTypes());
 		
 		assertEquals("https://c2id.com/ciba", meta.getBackChannelAuthenticationEndpointURI().toString());
 		assertEquals(JWSAlgorithm.RS256, meta.getBackChannelAuthenticationRequestJWSAlgs().get(0));
@@ -1772,5 +1776,45 @@ public class OIDCProviderMetadataTest extends TestCase {
 		
 		op = OIDCProviderMetadata.parse(jsonObject);
 		assertEquals(Arrays.asList(JWSAlgorithm.ES256, JWSAlgorithm.ES384, JWSAlgorithm.ES512), op.getDPoPJWSAlgs());
+	}
+	
+	
+	public void testPromptValuesSupported() throws ParseException {
+		
+		OIDCProviderMetadata metadata = new OIDCProviderMetadata(new Issuer("https://c2id.com"), Collections.singletonList(SubjectType.PUBLIC), URI.create("https://c2id.com/jwks.json"));
+		metadata.applyDefaults();
+		
+		assertNull(metadata.getPromptTypes());
+		
+		List<Prompt.Type> promptTypes = Arrays.asList(Prompt.Type.LOGIN, Prompt.Type.CREATE);
+		
+		metadata.setPromptTypes(promptTypes);
+		
+		assertEquals(promptTypes, metadata.getPromptTypes());
+		
+		JSONObject jsonObject = metadata.toJSONObject();
+		
+		assertEquals(Arrays.asList("login", "create"), jsonObject.get("prompt_values_supported"));
+		
+		metadata = OIDCProviderMetadata.parse(jsonObject.toJSONString());
+		
+		assertEquals(promptTypes, metadata.getPromptTypes());
+	}
+	
+	
+	public void testPromptValuesSupport_parseIllegal() {
+		
+		OIDCProviderMetadata metadata = new OIDCProviderMetadata(new Issuer("https://c2id.com"), Collections.singletonList(SubjectType.PUBLIC), URI.create("https://c2id.com/jwks.json"));
+		metadata.applyDefaults();
+		JSONObject jsonObject = metadata.toJSONObject();
+		
+		jsonObject.put("prompt_values_supported", Arrays.asList("login", "create", "xxx"));
+		
+		try {
+			AuthorizationServerMetadata.parse(jsonObject);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Unknown prompt type: xxx", e.getMessage());
+		}
 	}
 }

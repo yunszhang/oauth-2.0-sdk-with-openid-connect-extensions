@@ -17,6 +17,7 @@
 
 package com.nimbusds.oauth2.sdk.as;
 
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -34,8 +35,8 @@ import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
-import com.nimbusds.oauth2.sdk.client.ClientType;
 import com.nimbusds.oauth2.sdk.ciba.BackChannelTokenDeliveryMode;
+import com.nimbusds.oauth2.sdk.client.ClientType;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.Issuer;
@@ -43,6 +44,8 @@ import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.URIUtils;
+import com.nimbusds.openid.connect.sdk.Prompt;
+
 
 /**
  * OAuth 2.0 Authorisation Server (AS) metadata.
@@ -65,6 +68,7 @@ import com.nimbusds.oauth2.sdk.util.URIUtils;
  * 	   Core 1.0
  *     <li>OAuth 2.0 Incremental Authorization
  *         (draft-ietf-oauth-incremental-authz-04)
+ *     <li>Initiating User Registration via OpenID Connect (draft 04)
  * </ul>
  */
 public class AuthorizationServerMetadata extends AuthorizationServerEndpointMetadata implements ReadOnlyAuthorizationServerMetadata {
@@ -111,6 +115,7 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 		p.add("backchannel_token_delivery_modes_supported");
 		p.add("backchannel_authentication_request_signing_alg_values_supported");
 		p.add("backchannel_user_code_parameter_supported");
+		p.add("prompt_values_supported");
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
 	
@@ -352,6 +357,12 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	 * else not.
 	 */
 	private boolean backChannelUserCodeSupported = false;
+	
+	
+	/**
+	 * The supported prompt types.
+	 */
+	private List<Prompt.Type> promptTypes;
 	
 	
 	/**
@@ -1169,6 +1180,24 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 	
 	
 	@Override
+	public List<Prompt.Type> getPromptTypes() {
+		return promptTypes;
+	}
+	
+	
+	/**
+	 * Sets the supported {@link Prompt.Type prompt types}. Corresponds to
+	 * the {@code prompt_values_supported} metadata field.
+	 *
+	 * @param promptTypes The supported prompt types, {@code null} if not
+	 *                    specified.
+	 */
+	public void setPromptTypes(final List<Prompt.Type> promptTypes) {
+		this.promptTypes = promptTypes;
+	}
+	
+	
+	@Override
 	public Object getCustomParameter(final String name) {
 		
 		return customParameters.get(name);
@@ -1519,6 +1548,16 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 		
 		if (backChannelUserCodeSupported) {
 			o.put("backchannel_user_code_parameter_supported", true);
+		}
+		
+		
+		// Prompt=create
+		if (promptTypes != null) {
+			stringList = new ArrayList<>(promptTypes.size());
+			for (Prompt.Type type: promptTypes) {
+				stringList.add(type.toString());
+			}
+			o.put("prompt_values_supported", stringList);
 		}
 
 		// Append any custom (not registered) parameters
@@ -1898,6 +1937,17 @@ public class AuthorizationServerMetadata extends AuthorizationServerEndpointMeta
 		
 		if (jsonObject.get("backchannel_user_code_parameter_supported") != null) {
 			as.backChannelUserCodeSupported = JSONObjectUtils.getBoolean(jsonObject, "backchannel_user_code_parameter_supported");
+		}
+		
+		// prompt=create
+		if (jsonObject.get("prompt_values_supported") != null) {
+			
+			as.promptTypes = new ArrayList<>();
+			for (String v: JSONObjectUtils.getStringList(jsonObject, "prompt_values_supported")) {
+				
+				if (v != null)
+					as.promptTypes.add(Prompt.Type.parse(v));
+			}
 		}
 
 		// Parse custom (not registered) parameters

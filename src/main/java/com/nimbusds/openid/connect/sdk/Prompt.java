@@ -33,7 +33,7 @@ import com.nimbusds.oauth2.sdk.util.StringUtils;
  *
  * <ul>
  *     <li>OpenID Connect Core 1.0, section 3.1.2.1.
- *     <li>Initiating User Registration via OpenID Connect (draft 03)
+ *     <li>Initiating User Registration via OpenID Connect (draft 04)
  * </ul>
  */
 @NotThreadSafe
