@@ -1995,3 +1995,6 @@ version 9.32 (2022-03-29)
 
 version 9.33 (2022-04-13)
     * AuthorizationServerMetadata adds "prompt_values_supported" support.
+
+version 9.34 (2022-04-17)
+    * Adds CIBAHintType enum.

@@ -1016,6 +1016,23 @@ public class CIBARequest extends AbstractAuthenticatedRequest {
 	
 	
 	/**
+	 * Returns the hint type.
+	 *
+	 * @return The hint type.
+	 */
+	public CIBAHintType getHintType() {
+		
+		if (getLoginHintTokenString() != null) {
+			return CIBAHintType.LOGIN_HINT_TOKEN;
+		} else if (getIDTokenHint() != null) {
+			return CIBAHintType.ID_TOKEN_HINT;
+		} else {
+			return CIBAHintType.LOGIN_HINT;
+		}
+	}
+	
+	
+	/**
 	 * Returns the login hint token string, containing information
 	 * identifying the end-user for whom authentication is being requested.
 	 * Corresponds to the {@code login_hint_token} parameter.

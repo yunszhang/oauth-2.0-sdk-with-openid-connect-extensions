@@ -46,8 +46,6 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
 
 public class CIBARequestTest extends TestCase {
 	
-	enum HintBy { LOGIN_HINT_TOKEN, ID_TOKEN, LOGIN_HINT }
-	
 	private static final URI ENDPOINT_URI = URI.create("https://c2id.com/ciba/");
 	
 	private static final URL ENDPOINT_URL;
@@ -166,6 +164,7 @@ public class CIBARequestTest extends TestCase {
 		assertNull(request.getScope());
 		assertNull(request.getClientNotificationToken());
 		assertNull(request.getACRValues());
+		assertEquals(CIBAHintType.LOGIN_HINT, request.getHintType());
 		assertNull(request.getLoginHintTokenString());
 		assertNull(request.getIDTokenHint());
 		assertEquals(LOGIN_HINT, request.getLoginHint());
@@ -192,16 +191,16 @@ public class CIBARequestTest extends TestCase {
 
 	public void testConstructor_allSet() throws MalformedURLException, ParseException {
 		
-		for (HintBy hintBy: HintBy.values()) {
+		for (CIBAHintType hintBy: CIBAHintType.values()) {
 			CIBARequest request = new CIBARequest(
 				ENDPOINT_URI,
 				CLIENT_AUTH,
 				SCOPE,
 				CLIENT_NOTIFICATION_TOKEN,
 				ACR_VALUES,
-				HintBy.LOGIN_HINT_TOKEN.equals(hintBy) ? LOGIN_HINT_TOKEN_STRING : null,
-				HintBy.ID_TOKEN.equals(hintBy) ? ID_TOKEN : null,
-				HintBy.LOGIN_HINT.equals(hintBy) ? LOGIN_HINT : null,
+				CIBAHintType.LOGIN_HINT_TOKEN.equals(hintBy) ? LOGIN_HINT_TOKEN_STRING : null,
+				CIBAHintType.ID_TOKEN_HINT.equals(hintBy) ? ID_TOKEN : null,
+				CIBAHintType.LOGIN_HINT.equals(hintBy) ? LOGIN_HINT : null,
 				BINDING_MESSAGE,
 				USER_CODE,
 				REQUESTED_EXPIRY,
@@ -217,17 +216,18 @@ public class CIBARequestTest extends TestCase {
 			assertEquals(SCOPE, request.getScope());
 			assertEquals(CLIENT_NOTIFICATION_TOKEN, request.getClientNotificationToken());
 			assertEquals(ACR_VALUES, request.getACRValues());
-			if (HintBy.LOGIN_HINT_TOKEN.equals(hintBy)) {
+			assertEquals(hintBy, request.getHintType());
+			if (CIBAHintType.LOGIN_HINT_TOKEN.equals(hintBy)) {
 				assertEquals(LOGIN_HINT_TOKEN_STRING, request.getLoginHintTokenString());
 			} else {
 				assertNull(request.getLoginHintTokenString());
 			}
-			if (HintBy.ID_TOKEN.equals(hintBy)) {
+			if (CIBAHintType.ID_TOKEN_HINT.equals(hintBy)) {
 				assertEquals(ID_TOKEN, request.getIDTokenHint());
 			} else {
 				assertNull(request.getIDTokenHint());
 			}
-			if (HintBy.LOGIN_HINT.equals(hintBy)) {
+			if (CIBAHintType.LOGIN_HINT.equals(hintBy)) {
 				assertEquals(LOGIN_HINT, request.getLoginHint());
 			} else {
 				assertNull(request.getLoginHint());
@@ -260,15 +260,15 @@ public class CIBARequestTest extends TestCase {
 			assertEquals(SCOPE, request.getScope());
 			assertEquals(CLIENT_NOTIFICATION_TOKEN, request.getClientNotificationToken());
 			assertEquals(ACR_VALUES, request.getACRValues());
-			if (HintBy.LOGIN_HINT_TOKEN.equals(hintBy)) {
+			if (CIBAHintType.LOGIN_HINT_TOKEN.equals(hintBy)) {
 				assertEquals(LOGIN_HINT_TOKEN_STRING, request.getLoginHintTokenString());
 			} else {
 				assertNull(request.getLoginHintTokenString());
 			}
-			if (HintBy.ID_TOKEN.equals(hintBy)) {
+			if (CIBAHintType.ID_TOKEN_HINT.equals(hintBy)) {
 				assertEquals(ID_TOKEN.serialize(), request.getIDTokenHint().getParsedString());
 			}
-			if (HintBy.LOGIN_HINT.equals(hintBy)) {
+			if (CIBAHintType.LOGIN_HINT.equals(hintBy)) {
 				assertEquals(LOGIN_HINT, request.getLoginHint());
 			} else {
 				assertNull(request.getLoginHint());
@@ -300,14 +300,14 @@ public class CIBARequestTest extends TestCase {
 	public void testBuilders() {
 		
 		// Regular
-		for (HintBy hintBy: HintBy.values()) {
+		for (CIBAHintType hintBy: CIBAHintType.values()) {
 			CIBARequest request = new CIBARequest.Builder(CLIENT_AUTH, SCOPE)
 				.endpointURI(ENDPOINT_URI)
 				.clientNotificationToken(CLIENT_NOTIFICATION_TOKEN)
 				.acrValues(ACR_VALUES)
-				.loginHintTokenString(HintBy.LOGIN_HINT_TOKEN.equals(hintBy) ? LOGIN_HINT_TOKEN_STRING : null)
-				.idTokenHint(HintBy.ID_TOKEN.equals(hintBy) ? ID_TOKEN : null)
-				.loginHint(HintBy.LOGIN_HINT.equals(hintBy) ? LOGIN_HINT : null)
+				.loginHintTokenString(CIBAHintType.LOGIN_HINT_TOKEN.equals(hintBy) ? LOGIN_HINT_TOKEN_STRING : null)
+				.idTokenHint(CIBAHintType.ID_TOKEN_HINT.equals(hintBy) ? ID_TOKEN : null)
+				.loginHint(CIBAHintType.LOGIN_HINT.equals(hintBy) ? LOGIN_HINT : null)
 				.bindingMessage(BINDING_MESSAGE)
 				.userCode(USER_CODE)
 				.requestedExpiry(REQUESTED_EXPIRY)
@@ -323,17 +323,18 @@ public class CIBARequestTest extends TestCase {
 			assertEquals(SCOPE, request.getScope());
 			assertEquals(CLIENT_NOTIFICATION_TOKEN, request.getClientNotificationToken());
 			assertEquals(ACR_VALUES, request.getACRValues());
-			if (HintBy.LOGIN_HINT_TOKEN.equals(hintBy)) {
+			assertEquals(hintBy, request.getHintType());
+			if (CIBAHintType.LOGIN_HINT_TOKEN.equals(hintBy)) {
 				assertEquals(LOGIN_HINT_TOKEN_STRING, request.getLoginHintTokenString());
 			} else {
 				assertNull(request.getLoginHintTokenString());
 			}
-			if (HintBy.ID_TOKEN.equals(hintBy)) {
+			if (CIBAHintType.ID_TOKEN_HINT.equals(hintBy)) {
 				assertEquals(ID_TOKEN, request.getIDTokenHint());
 			} else {
 				assertNull(request.getIDTokenHint());
 			}
-			if (HintBy.LOGIN_HINT.equals(hintBy)) {
+			if (CIBAHintType.LOGIN_HINT.equals(hintBy)) {
 				assertEquals(LOGIN_HINT, request.getLoginHint());
 			} else {
 				assertNull(request.getLoginHint());
@@ -356,17 +357,17 @@ public class CIBARequestTest extends TestCase {
 			assertEquals(SCOPE, request.getScope());
 			assertEquals(CLIENT_NOTIFICATION_TOKEN, request.getClientNotificationToken());
 			assertEquals(ACR_VALUES, request.getACRValues());
-			if (HintBy.LOGIN_HINT_TOKEN.equals(hintBy)) {
+			if (CIBAHintType.LOGIN_HINT_TOKEN.equals(hintBy)) {
 				assertEquals(LOGIN_HINT_TOKEN_STRING, request.getLoginHintTokenString());
 			} else {
 				assertNull(request.getLoginHintTokenString());
 			}
-			if (HintBy.ID_TOKEN.equals(hintBy)) {
+			if (CIBAHintType.ID_TOKEN_HINT.equals(hintBy)) {
 				assertEquals(ID_TOKEN, request.getIDTokenHint());
 			} else {
 				assertNull(request.getIDTokenHint());
 			}
-			if (HintBy.LOGIN_HINT.equals(hintBy)) {
+			if (CIBAHintType.LOGIN_HINT.equals(hintBy)) {
 				assertEquals(LOGIN_HINT, request.getLoginHint());
 			} else {
 				assertNull(request.getLoginHint());
