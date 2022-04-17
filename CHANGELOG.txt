@@ -1993,5 +1993,5 @@ version 9.32 (2022-03-29)
     * Updates IDTokenValidator and AbstractJWTValidator to support explicit JWT
       typing via the "typ" (type) header.
 
-version 9.33 (2022-04-23)
+version 9.33 (2022-04-13)
     * AuthorizationServerMetadata adds "prompt_values_supported" support.
