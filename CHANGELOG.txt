@@ -1998,3 +1998,7 @@ version 9.33 (2022-04-13)
 
 version 9.34 (2022-04-17)
     * Adds CIBAHintType enum.
+
+version 9.35 (2022-04-26)
+    * Updates Nimbus JOSE+JWT to 9.22.
+    * Updates optional BouncyCastle dependency to 1.70.
