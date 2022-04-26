@@ -20,36 +20,31 @@ package com.nimbusds.openid.connect.sdk.validators;
 
 import java.net.URI;
 import java.security.Key;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import junit.framework.TestCase;
 import net.minidev.json.JSONObject;
 import org.junit.Assert;
+import org.opensaml.xmlsec.signature.J;
+import org.opensaml.xmlsec.signature.P;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jose.proc.BadJWSException;
+import com.nimbusds.jose.proc.JWEDecryptionKeySelector;
+import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.jose.util.ByteUtils;
-import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.PlainJWT;
-import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.*;
 import com.nimbusds.jwt.proc.BadJWTException;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.*;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
@@ -63,38 +58,43 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 public class LogoutTokenValidatorTest extends TestCase {
 	
 	
-	private static Issuer ISSUER = new Issuer(URI.create("https://c2id.com"));
+	private static final Issuer ISSUER = new Issuer(URI.create("https://c2id.com"));
 	
 	
-	private static JWTID JWTID = new JWTID();
+	private static final JWTID JWTID = new JWTID();
 	
 	
-	private static Subject SUBJECT = new Subject("alice");
+	private static final Subject SUBJECT = new Subject("alice");
 	
 	
-	private static SessionID SESSION_ID = new SessionID(UUID.randomUUID().toString());
+	private static final SessionID SESSION_ID = new SessionID(UUID.randomUUID().toString());
 	
 	
-	private static ClientID CLIENT_ID = new ClientID("123");
+	private static final ClientID CLIENT_ID = new ClientID("123");
 	
 	
-	private static Secret CLIENT_SECRET = new Secret(32);
+	private static final Secret CLIENT_SECRET = new Secret(32);
 	
 	
-	private static final RSAKey RSA_JWK;
+	private static final RSAKey RSA_SIGN_JWK;
+	
+	
+	private static final RSAKey RSA_ENCRYPT_JWK;
 	
 	
 	static {
 		try {
-			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-			gen.initialize(2048);
-			KeyPair kp = gen.generateKeyPair();
-			RSA_JWK = new RSAKey.Builder((RSAPublicKey)kp.getPublic())
-				.privateKey((RSAPrivateKey)kp.getPrivate())
-				.keyIDFromThumbprint()
-				.build();
+			RSA_SIGN_JWK = new RSAKeyGenerator(2048)
+				.keyUse(KeyUse.SIGNATURE)
+				.keyIDFromThumbprint(true)
+				.generate();
 			
-		} catch (NoSuchAlgorithmException | JOSEException e) {
+			RSA_ENCRYPT_JWK = new RSAKeyGenerator(2048)
+				.keyUse(KeyUse.ENCRYPTION)
+				.keyIDFromThumbprint(true)
+				.generate();
+			
+		} catch (JOSEException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -141,14 +141,14 @@ public class LogoutTokenValidatorTest extends TestCase {
 		
 		SignedJWT jwt = new SignedJWT(
 			new JWSHeader.Builder(JWSAlgorithm.RS256)
-				.keyID(RSA_JWK.getKeyID())
+				.keyID(RSA_SIGN_JWK.getKeyID())
 				.build(),
 			claimsSet);
 		
-		jwt.sign(new RSASSASigner(RSA_JWK));
+		jwt.sign(new RSASSASigner(RSA_SIGN_JWK));
 		
 		LogoutTokenValidator validator = new LogoutTokenValidator(
-			ISSUER, CLIENT_ID, JWSAlgorithm.RS256, new JWKSet(RSA_JWK)
+			ISSUER, CLIENT_ID, JWSAlgorithm.RS256, new JWKSet(RSA_SIGN_JWK.toPublicJWK())
 		);
 		
 		LogoutTokenClaimsSet validatedClaims = validator.validate(jwt);
@@ -176,14 +176,14 @@ public class LogoutTokenValidatorTest extends TestCase {
 		
 		SignedJWT jwt = new SignedJWT(
 			new JWSHeader.Builder(JWSAlgorithm.RS256)
-				.keyID(RSA_JWK.getKeyID())
+				.keyID(RSA_SIGN_JWK.getKeyID())
 				.build(),
 			claimsSet);
 		
-		jwt.sign(new RSASSASigner(RSA_JWK));
+		jwt.sign(new RSASSASigner(RSA_SIGN_JWK));
 		
 		LogoutTokenValidator validator = new LogoutTokenValidator(
-			ISSUER, CLIENT_ID, JWSAlgorithm.RS256, new JWKSet(RSA_JWK)
+			ISSUER, CLIENT_ID, JWSAlgorithm.RS256, new JWKSet(RSA_SIGN_JWK.toPublicJWK())
 		);
 		
 		LogoutTokenClaimsSet validatedClaims = validator.validate(jwt);
@@ -211,14 +211,14 @@ public class LogoutTokenValidatorTest extends TestCase {
 		
 		SignedJWT jwt = new SignedJWT(
 			new JWSHeader.Builder(JWSAlgorithm.RS256)
-				.keyID(RSA_JWK.getKeyID())
+				.keyID(RSA_SIGN_JWK.getKeyID())
 				.build(),
 			claimsSet);
 		
-		jwt.sign(new RSASSASigner(RSA_JWK));
+		jwt.sign(new RSASSASigner(RSA_SIGN_JWK));
 		
 		LogoutTokenValidator validator = new LogoutTokenValidator(
-			ISSUER, CLIENT_ID, JWSAlgorithm.RS256, new JWKSet(RSA_JWK)
+			ISSUER, CLIENT_ID, JWSAlgorithm.RS256, new JWKSet(RSA_SIGN_JWK.toPublicJWK())
 		);
 		
 		LogoutTokenClaimsSet validatedClaims = validator.validate(jwt);
@@ -229,6 +229,127 @@ public class LogoutTokenValidatorTest extends TestCase {
 		assertNotNull(validatedClaims.getIssueTime());
 		assertEquals(JWTID, validatedClaims.getJWTID());
 		assertEquals(SESSION_ID, validatedClaims.getSessionID());
+	}
+	
+	
+	public void testGoodRSASigned_optionalType()
+		throws Exception {
+		
+		JWTClaimsSet claimsSet = new LogoutTokenClaimsSet(
+			ISSUER,
+			SUBJECT,
+			new Audience(CLIENT_ID).toSingleAudienceList(),
+			new Date(),
+			JWTID,
+			SESSION_ID)
+			.toJWTClaimsSet();
+		
+		SignedJWT jwt = new SignedJWT(
+			new JWSHeader.Builder(JWSAlgorithm.RS256)
+				.type(LogoutTokenValidator.TYPE)
+				.keyID(RSA_SIGN_JWK.getKeyID())
+				.build(),
+			claimsSet);
+		
+		jwt.sign(new RSASSASigner(RSA_SIGN_JWK));
+		
+		LogoutTokenValidator validator = new LogoutTokenValidator(
+			ISSUER, CLIENT_ID, JWSAlgorithm.RS256, new JWKSet(RSA_SIGN_JWK.toPublicJWK())
+		);
+		
+		LogoutTokenClaimsSet validatedClaims = validator.validate(jwt);
+		
+		assertEquals(ISSUER, validatedClaims.getIssuer());
+		assertEquals(SUBJECT, validatedClaims.getSubject());
+		assertEquals(new Audience(CLIENT_ID).toSingleAudienceList(), validatedClaims.getAudience());
+		assertNotNull(validatedClaims.getIssueTime());
+		assertEquals(JWTID, validatedClaims.getJWTID());
+		assertEquals(SESSION_ID, validatedClaims.getSessionID());
+	}
+	
+	
+	public void testGoodRSASigned_requireType()
+		throws Exception {
+		
+		JWTClaimsSet claimsSet = new LogoutTokenClaimsSet(
+			ISSUER,
+			SUBJECT,
+			new Audience(CLIENT_ID).toSingleAudienceList(),
+			new Date(),
+			JWTID,
+			SESSION_ID)
+			.toJWTClaimsSet();
+		
+		SignedJWT jwt = new SignedJWT(
+			new JWSHeader.Builder(JWSAlgorithm.RS256)
+				.type(LogoutTokenValidator.TYPE)
+				.keyID(RSA_SIGN_JWK.getKeyID())
+				.build(),
+			claimsSet);
+		
+		jwt.sign(new RSASSASigner(RSA_SIGN_JWK));
+		
+		LogoutTokenValidator validator = new LogoutTokenValidator(
+			ISSUER, CLIENT_ID, true, new JWSVerificationKeySelector<>(JWSAlgorithm.RS256, new ImmutableJWKSet<>(new JWKSet(RSA_SIGN_JWK.toPublicJWK()))), null
+		);
+		
+		LogoutTokenClaimsSet validatedClaims = validator.validate(jwt);
+		
+		assertEquals(ISSUER, validatedClaims.getIssuer());
+		assertEquals(SUBJECT, validatedClaims.getSubject());
+		assertEquals(new Audience(CLIENT_ID).toSingleAudienceList(), validatedClaims.getAudience());
+		assertNotNull(validatedClaims.getIssueTime());
+		assertEquals(JWTID, validatedClaims.getJWTID());
+		assertEquals(SESSION_ID, validatedClaims.getSessionID());
+	}
+	
+	
+	
+	public void testGoodSignedThenEncrypted()
+		throws Exception {
+		
+		JWTClaimsSet claimsSet = new LogoutTokenClaimsSet(
+			ISSUER,
+			SUBJECT,
+			new Audience(CLIENT_ID).toSingleAudienceList(),
+			new Date(),
+			JWTID,
+			null)
+			.toJWTClaimsSet();
+		
+		for (boolean typed: Arrays.asList(true, false)) {
+			
+			SignedJWT jwt = new SignedJWT(
+				new JWSHeader.Builder(JWSAlgorithm.RS256)
+					.keyID(RSA_SIGN_JWK.getKeyID())
+					.build(),
+				claimsSet);
+			jwt.sign(new RSASSASigner(RSA_SIGN_JWK));
+			
+			JWEObject jweObject = new JWEObject(
+				new JWEHeader.Builder(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A128GCM)
+					.type(typed ? LogoutTokenValidator.TYPE : null)
+					.build(),
+				new Payload(jwt)
+			);
+			jweObject.encrypt(new RSAEncrypter(RSA_ENCRYPT_JWK));
+			
+			
+			LogoutTokenValidator validator = new LogoutTokenValidator(
+				ISSUER, CLIENT_ID, false,
+				new JWSVerificationKeySelector(JWSAlgorithm.RS256, new ImmutableJWKSet(new JWKSet(RSA_SIGN_JWK.toPublicJWK()))),
+				new JWEDecryptionKeySelector(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A128GCM, new ImmutableJWKSet(new JWKSet(RSA_ENCRYPT_JWK)))
+			);
+			
+			LogoutTokenClaimsSet validatedClaims = validator.validate(jwt);
+			
+			assertEquals(ISSUER, validatedClaims.getIssuer());
+			assertEquals(SUBJECT, validatedClaims.getSubject());
+			assertEquals(new Audience(CLIENT_ID).toSingleAudienceList(), validatedClaims.getAudience());
+			assertNotNull(validatedClaims.getIssueTime());
+			assertEquals(JWTID, validatedClaims.getJWTID());
+			assertNull(validatedClaims.getSessionID());
+		}
 	}
 	
 	
@@ -330,6 +451,117 @@ public class LogoutTokenValidatorTest extends TestCase {
 			fail();
 		} catch (BadJWTException e) {
 			assertEquals("Found illegal nonce (nonce) claim", e.getMessage());
+		}
+	}
+	
+	
+	public void testMissingRequiredType() throws ParseException, JOSEException {
+		
+		JWTClaimsSet claimsSet = new LogoutTokenClaimsSet(
+			ISSUER,
+			SUBJECT,
+			new Audience(CLIENT_ID).toSingleAudienceList(),
+			new Date(),
+			JWTID,
+			SESSION_ID)
+			.toJWTClaimsSet();
+		
+		SignedJWT jwt = new SignedJWT(
+			new JWSHeader.Builder(JWSAlgorithm.RS256)
+				.keyID(RSA_SIGN_JWK.getKeyID())
+				.build(),
+			claimsSet);
+		
+		jwt.sign(new RSASSASigner(RSA_SIGN_JWK));
+		
+		LogoutTokenValidator validator = new LogoutTokenValidator(
+			ISSUER, CLIENT_ID, true, new JWSVerificationKeySelector<>(JWSAlgorithm.RS256, new ImmutableJWKSet<>(new JWKSet(RSA_SIGN_JWK.toPublicJWK()))), null
+		);
+		
+		try {
+			validator.validate(jwt);
+			fail();
+		} catch (BadJOSEException e) {
+			assertEquals("Invalid / missing logout token typ (type) header, must be logout+jwt", e.getMessage());
+		}
+	}
+	
+	
+	public void testMissingRequiredType_signedThenEncrypted() throws ParseException, JOSEException {
+		
+		JWTClaimsSet claimsSet = new LogoutTokenClaimsSet(
+			ISSUER,
+			SUBJECT,
+			new Audience(CLIENT_ID).toSingleAudienceList(),
+			new Date(),
+			JWTID,
+			SESSION_ID)
+			.toJWTClaimsSet();
+		
+		SignedJWT jwt = new SignedJWT(
+			new JWSHeader.Builder(JWSAlgorithm.RS256)
+				.keyID(RSA_SIGN_JWK.getKeyID())
+				.build(),
+			claimsSet);
+		jwt.sign(new RSASSASigner(RSA_SIGN_JWK));
+		
+		JWEObject jweObject = new JWEObject(
+			new JWEHeader(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A128GCM),
+			new Payload(jwt)
+		);
+		jweObject.encrypt(new RSAEncrypter(RSA_ENCRYPT_JWK));
+		
+		LogoutTokenValidator validator = new LogoutTokenValidator(
+			ISSUER, CLIENT_ID, true,
+			new JWSVerificationKeySelector<>(JWSAlgorithm.RS256, new ImmutableJWKSet<>(new JWKSet(RSA_SIGN_JWK.toPublicJWK()))),
+			new JWEDecryptionKeySelector<>(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A128GCM, new ImmutableJWKSet<>(new JWKSet(RSA_ENCRYPT_JWK)))
+		);
+		
+		try {
+			validator.validate(jwt);
+			fail();
+		} catch (BadJOSEException e) {
+			assertEquals("Invalid / missing logout token typ (type) header, must be logout+jwt", e.getMessage());
+		}
+	}
+	
+	
+	public void testInvalidType() throws ParseException, JOSEException {
+		
+		JWTClaimsSet claimsSet = new LogoutTokenClaimsSet(
+			ISSUER,
+			SUBJECT,
+			new Audience(CLIENT_ID).toSingleAudienceList(),
+			new Date(),
+			JWTID,
+			SESSION_ID)
+			.toJWTClaimsSet();
+		
+		SignedJWT jwt = new SignedJWT(
+			new JWSHeader.Builder(JWSAlgorithm.RS256)
+				.type(new JOSEObjectType("id_token+jwt")) // some unaccepted type
+				.keyID(RSA_SIGN_JWK.getKeyID())
+				.build(),
+			claimsSet);
+		
+		jwt.sign(new RSASSASigner(RSA_SIGN_JWK));
+		
+		for (boolean requireTypedToken: Arrays.asList(true, false)) {
+			
+			LogoutTokenValidator validator = new LogoutTokenValidator(
+				ISSUER, CLIENT_ID, requireTypedToken, new JWSVerificationKeySelector<>(JWSAlgorithm.RS256, new ImmutableJWKSet<>(new JWKSet(RSA_SIGN_JWK.toPublicJWK()))), null
+			);
+			
+			try {
+				validator.validate(jwt);
+				fail();
+			} catch (BadJOSEException e) {
+				if (requireTypedToken) {
+					assertEquals("Invalid / missing logout token typ (type) header, must be logout+jwt", e.getMessage());
+				} else {
+					assertEquals("If set the logout token typ (type) header must be logout+jwt", e.getMessage());
+				}
+			}
 		}
 	}
 	
@@ -700,14 +932,9 @@ public class LogoutTokenValidatorTest extends TestCase {
 		assertEquals(claimsSet.getIssueTime(), validated.getIssueTime());
 		
 		// Sign logout token with invalid RSA key
-		KeyPairGenerator pairGen = KeyPairGenerator.getInstance("RSA");
-		pairGen.initialize(2048);
-		KeyPair keyPair = pairGen.generateKeyPair();
-		
-		final RSAKey badKey = new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
-			.privateKey((RSAPrivateKey) keyPair.getPrivate())
+		final RSAKey badKey = new RSAKeyGenerator(2048)
 			.keyID("1")
-			.build();
+			.generate();
 		
 		idToken = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(badKey.getKeyID()).build(), claimsSet.toJWTClaimsSet());
 		idToken.sign(new RSASSASigner(badKey));

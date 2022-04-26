@@ -50,7 +50,7 @@ import com.nimbusds.openid.connect.sdk.id.SectorID;
  *     <li>OpenID Connect Dynamic Client Registration 1.0, section 2.
  *     <li>OpenID Connect Session Management 1.0, section 5.1.1 (draft 28).
  *     <li>OpenID Connect Front-Channel Logout 1.0, section 2 (draft 02).
- *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.2 (draft 04).
+ *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.2 (draft 07).
  *     <li>OpenID Connect for Identity Assurance 1.0 (draft 12).
  *     <li>OpenID Connect Federation 1.0 (draft 14).
  *     <li>OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591), section

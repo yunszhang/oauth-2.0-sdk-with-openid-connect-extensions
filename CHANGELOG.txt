@@ -2000,5 +2000,7 @@ version 9.34 (2022-04-17)
     * Adds CIBAHintType enum.
 
 version 9.35 (2022-04-26)
+    * Updates LogoutTokenValidator to support explicitly typed logout tokens,
+      see OpenID Connect Back-Channel Logout 1.0 - draft 07, section 4.1.
     * Updates Nimbus JOSE+JWT to 9.22.
     * Updates optional BouncyCastle dependency to 1.70.

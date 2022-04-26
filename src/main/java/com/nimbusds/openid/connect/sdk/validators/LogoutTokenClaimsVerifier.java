@@ -38,7 +38,7 @@ import com.nimbusds.openid.connect.sdk.claims.LogoutTokenClaimsSet;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.6 (draft 04).
+ *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.6 (draft 07).
  * </ul>
  */
 @ThreadSafe

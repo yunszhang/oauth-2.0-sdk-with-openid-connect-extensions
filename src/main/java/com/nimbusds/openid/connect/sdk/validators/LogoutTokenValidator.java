@@ -20,17 +20,17 @@ package com.nimbusds.openid.connect.sdk.validators;
 
 import java.net.URL;
 
+import net.jcip.annotations.ThreadSafe;
+
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.jwk.source.RemoteJWKSet;
-import com.nimbusds.jose.proc.BadJOSEException;
-import com.nimbusds.jose.proc.JWEKeySelector;
-import com.nimbusds.jose.proc.JWSKeySelector;
-import com.nimbusds.jose.proc.JWSVerificationKeySelector;
+import com.nimbusds.jose.proc.*;
 import com.nimbusds.jose.util.ResourceRetriever;
 import com.nimbusds.jwt.*;
 import com.nimbusds.jwt.proc.BadJWTException;
@@ -44,7 +44,6 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.openid.connect.sdk.claims.LogoutTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
-import net.jcip.annotations.ThreadSafe;
 
 
 /**
@@ -59,19 +58,36 @@ import net.jcip.annotations.ThreadSafe;
  *         secret to verify them.
  * </ul>
  *
+ * <p>The logout types may be {@linkplain #TYPE explicitly typed} with
+ * {@code logout+jwt}.
+ *
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.4 (draft 04).
+ *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.4 (draft 07).
  * </ul>
  */
 @ThreadSafe
 public class LogoutTokenValidator extends AbstractJWTValidator {
+	
+	
+	/**
+	 * The recommended logout token JWT (typ) type.
+	 */
+	public static final JOSEObjectType TYPE = new JOSEObjectType("logout+jwt");
+	
+	
+	/**
+	 * {@code true} to require logout tokens to be explicitly
+	 * {@link #TYPE typed}, {@code false} to accept untyped tokens.
+	 */
+	private final boolean requireTypedTokens;
 
 
 	/**
 	 * Creates a new validator for RSA or EC signed logout tokens where the
-	 * OpenID Provider's JWK set is specified by value.
+	 * OpenID Provider's JWK set is specified by value. Explicit typing of
+	 * the logout tokens is not required but wil be checked if present.
 	 *
 	 * @param expectedIssuer The expected logout token issuer (OpenID
 	 *                       Provider). Must not be {@code null}.
@@ -86,13 +102,14 @@ public class LogoutTokenValidator extends AbstractJWTValidator {
 				    final JWSAlgorithm expectedJWSAlg,
 				    final JWKSet jwkSet) {
 
-		this(expectedIssuer, clientID, new JWSVerificationKeySelector(expectedJWSAlg, new ImmutableJWKSet(jwkSet)),  null);
+		this(expectedIssuer, clientID, new JWSVerificationKeySelector<>(expectedJWSAlg, new ImmutableJWKSet<>(jwkSet)),  null);
 	}
 
 
 	/**
 	 * Creates a new validator for RSA or EC signed logout tokens where the
-	 * OpenID Provider's JWK set is specified by URL.
+	 * OpenID Provider's JWK set is specified by URL. Explicit typing of
+	 * the logout tokens is not required but wil be checked if present.
 	 *
 	 * @param expectedIssuer The expected logout token issuer (OpenID
 	 *                       Provider). Must not be {@code null}.
@@ -114,7 +131,9 @@ public class LogoutTokenValidator extends AbstractJWTValidator {
 	/**
 	 * Creates a new validator for RSA or EC signed logout tokens where the
 	 * OpenID Provider's JWK set is specified by URL. Permits setting of a
-	 * specific resource retriever (HTTP client) for the JWK set.
+	 * specific resource retriever (HTTP client) for the JWK set. Explicit
+	 * typing of the logout tokens is not required but wil be checked if
+	 * present.
 	 *
 	 * @param expectedIssuer    The expected logout token issuer (OpenID
 	 *                          Provider). Must not be {@code null}.
@@ -137,12 +156,14 @@ public class LogoutTokenValidator extends AbstractJWTValidator {
 				    final URL jwkSetURI,
 				    final ResourceRetriever resourceRetriever) {
 
-		this(expectedIssuer, clientID, new JWSVerificationKeySelector(expectedJWSAlg, new RemoteJWKSet(jwkSetURI, resourceRetriever)),  null);
+		this(expectedIssuer, clientID, new JWSVerificationKeySelector<>(expectedJWSAlg, new RemoteJWKSet<>(jwkSetURI, resourceRetriever)),  null);
 	}
 
 
 	/**
-	 * Creates a new validator for HMAC protected logout tokens.
+	 * Creates a new validator for HMAC protected logout tokens. Explicit
+	 * typing of the logout tokens is not required but wil be checked if
+	 * present.
 	 *
 	 * @param expectedIssuer The expected logout token issuer (OpenID
 	 *                       Provider). Must not be {@code null}.
@@ -156,7 +177,7 @@ public class LogoutTokenValidator extends AbstractJWTValidator {
 				    final JWSAlgorithm expectedJWSAlg,
 				    final Secret clientSecret) {
 
-		this(expectedIssuer, clientID, new JWSVerificationKeySelector(expectedJWSAlg, new ImmutableSecret(clientSecret.getValueBytes())), null);
+		this(expectedIssuer, clientID, new JWSVerificationKeySelector<>(expectedJWSAlg, new ImmutableSecret<>(clientSecret.getValueBytes())), null);
 	}
 
 
@@ -173,12 +194,40 @@ public class LogoutTokenValidator extends AbstractJWTValidator {
 	 *                       {@code null} if encrypted logout tokens are
 	 *                       not expected.
 	 */
+	@Deprecated
 	public LogoutTokenValidator(final Issuer expectedIssuer,
 				    final ClientID clientID,
-				    final JWSKeySelector jwsKeySelector,
-				    final JWEKeySelector jweKeySelector) {
+				    final JWSKeySelector<?> jwsKeySelector,
+				    final JWEKeySelector<?> jweKeySelector) {
 		
-		super(expectedIssuer, clientID, jwsKeySelector, jweKeySelector);
+		this(expectedIssuer, clientID, false, jwsKeySelector, jweKeySelector);
+	}
+
+
+	/**
+	 * Creates a new logout token validator.
+	 *
+	 * @param expectedIssuer    The expected logout token issuer (OpenID
+	 *                          Provider). Must not be {@code null}.
+	 * @param clientID          The client ID. Must not be {@code null}.
+	 * @param requireTypedToken {@code true} to require logout tokens to be
+	 *                          explicitly {@link #TYPE typed},
+	 *                          {@code false} to accept untyped tokens.
+	 * @param jwsKeySelector    The key selector for JWS verification,
+	 *                          {@code null} if unsecured (plain) logout
+	 *                          tokens are expected.
+	 * @param jweKeySelector    The key selector for JWE decryption,
+	 *                          {@code null} if encrypted logout tokens are
+	 *                          not expected.
+	 */
+	public LogoutTokenValidator(final Issuer expectedIssuer,
+				    final ClientID clientID,
+				    final boolean requireTypedToken,
+				    final JWSKeySelector<?> jwsKeySelector,
+				    final JWEKeySelector<?> jweKeySelector) {
+		
+		super(TYPE, expectedIssuer, clientID, jwsKeySelector, jweKeySelector);
+		this.requireTypedTokens = requireTypedToken;
 	}
 
 
@@ -226,7 +275,8 @@ public class LogoutTokenValidator extends AbstractJWTValidator {
 			throw new BadJWTException("Verification of signed JWTs not configured");
 		}
 
-		ConfigurableJWTProcessor<?> jwtProcessor = new DefaultJWTProcessor();
+		ConfigurableJWTProcessor<?> jwtProcessor = new DefaultJWTProcessor<>();
+		jwtProcessor.setJWSTypeVerifier(new TypeVerifier(requireTypedTokens));
 		jwtProcessor.setJWSKeySelector(getJWSKeySelector());
 		jwtProcessor.setJWTClaimsSetVerifier(new LogoutTokenClaimsVerifier(getExpectedIssuer(), getClientID()));
 		JWTClaimsSet jwtClaimsSet = jwtProcessor.process(logoutToken, null);
@@ -255,14 +305,42 @@ public class LogoutTokenValidator extends AbstractJWTValidator {
 			throw new BadJWTException("Verification of signed JWTs not configured");
 		}
 
-		ConfigurableJWTProcessor<?> jwtProcessor = new DefaultJWTProcessor();
+		ConfigurableJWTProcessor<?> jwtProcessor = new DefaultJWTProcessor<>();
+		jwtProcessor.setJWETypeVerifier(new TypeVerifier(requireTypedTokens));
 		jwtProcessor.setJWSKeySelector(getJWSKeySelector());
 		jwtProcessor.setJWEKeySelector(getJWEKeySelector());
 		jwtProcessor.setJWTClaimsSetVerifier(new LogoutTokenClaimsVerifier(getExpectedIssuer(), getClientID()));
-
 		JWTClaimsSet jwtClaimsSet = jwtProcessor.process(logoutToken, null);
 
 		return toLogoutTokenClaimsSet(jwtClaimsSet);
+	}
+	
+	
+	private static class TypeVerifier implements JOSEObjectTypeVerifier {
+		
+		
+		private final boolean requireTypedTokens;
+		
+		
+		public TypeVerifier(final boolean requireTypedTokens) {
+			this.requireTypedTokens = requireTypedTokens;
+		}
+		
+		
+		@Override
+		public void verify(final JOSEObjectType type, final SecurityContext context)
+			throws BadJOSEException {
+		
+			if (requireTypedTokens) {
+				if (! TYPE.equals(type)) {
+					throw new BadJOSEException("Invalid / missing logout token typ (type) header, must be " + TYPE);
+				}
+			} else {
+				if (type != null && ! TYPE.equals(type)) {
+					throw new BadJOSEException("If set the logout token typ (type) header must be " + TYPE);
+				}
+			}
+		}
 	}
 
 
@@ -289,7 +367,9 @@ public class LogoutTokenValidator extends AbstractJWTValidator {
 
 	/**
 	 * Creates a new logout token validator for the specified OpenID
-	 * Provider metadata and OpenID Relying Party registration.
+	 * Provider metadata and OpenID Relying Party registration. Explicit
+	 * typing of the logout tokens is not required but wil be checked if
+	 * present.
 	 *
 	 * @param opMetadata      The OpenID Provider metadata. Must not be
 	 *                        {@code null}.
@@ -306,7 +386,7 @@ public class LogoutTokenValidator extends AbstractJWTValidator {
 	 */
 	public static LogoutTokenValidator create(final OIDCProviderMetadata opMetadata,
 						  final OIDCClientInformation clientInfo,
-						  final JWKSource clientJWKSource)
+						  final JWKSource<?> clientJWKSource)
 		throws GeneralException {
 		
 		// Logout tokens verified according to registered ID token algorithms!

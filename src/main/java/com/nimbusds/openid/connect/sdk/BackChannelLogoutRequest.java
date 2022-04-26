@@ -55,7 +55,7 @@ import com.nimbusds.oauth2.sdk.util.URLUtils;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.5 (draft 04).
+ *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.5 (draft 07).
  * </ul>
  */
 @Immutable

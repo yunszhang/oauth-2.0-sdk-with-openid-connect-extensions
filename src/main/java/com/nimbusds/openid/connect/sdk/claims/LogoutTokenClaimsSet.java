@@ -52,7 +52,7 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
  * <p>Related specifications:
  *
  * <ul>
- *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.4 (draft 04).
+ *     <li>OpenID Connect Back-Channel Logout 1.0, section 2.4 (draft 07).
  *     <li>Security Event Token (SET) (RFC 8417).
  * </ul>
  */
