@@ -28,9 +28,11 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
  * client X.509 certificate submitted during successful PKI mutual TLS
  * authentication (in
  * {@link com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod#TLS_CLIENT_AUTH
- * tls_client_auth}) matches one of the the registered values for the client.
- * These can be: {@code tls_client_auth_subject_dn}, {@code tls_client_auth_san_dns},
- * {@code tls_client_auth_san_uri}, {@code tls_client_auth_san_ip} or
+ * tls_client_auth}) matches one of the registered values for the client.
+ * These can be: {@code tls_client_auth_subject_dn},
+ * {@code tls_client_auth_san_dns},
+ * {@code tls_client_auth_san_uri},
+ * {@code tls_client_auth_san_ip} or
  * {@code tls_client_auth_san_email}.
  *
  * <p>Implementations must be tread-safe.
