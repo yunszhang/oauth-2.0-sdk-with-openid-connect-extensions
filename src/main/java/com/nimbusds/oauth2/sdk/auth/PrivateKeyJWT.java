@@ -52,6 +52,7 @@ import com.nimbusds.oauth2.sdk.util.URLUtils;
  *     <li>PS384
  *     <li>PS512
  *     <li>ES256
+ *     <li>ES256K
  *     <li>ES384
  *     <li>ES512
  * </ul>
