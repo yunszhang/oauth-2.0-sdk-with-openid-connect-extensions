@@ -2004,3 +2004,7 @@ version 9.35 (2022-04-26)
       see OpenID Connect Back-Channel Logout 1.0 - draft 07, section 4.1.
     * Updates Nimbus JOSE+JWT to 9.22.
     * Updates optional BouncyCastle dependency to 1.70.
+
+version 9.36 (2022-05-25)
+    * Adds JWTAssertionFactory.create method for signed JWTs with optional x5c,
+      x5t#S256 JWS header support, and PrivateKey interface.
