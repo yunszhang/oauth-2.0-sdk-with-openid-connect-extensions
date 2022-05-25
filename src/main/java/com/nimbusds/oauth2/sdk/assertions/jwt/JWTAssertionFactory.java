@@ -108,7 +108,7 @@ public class JWTAssertionFactory {
 	 *                     be supported and not {@code null}.
 	 * @param privateKey   The signing private RSA or EC key. Must not be
 	 *                     {@code null}.
-	 * @param keyID        Optional identifier for the RSA key, to aid key
+	 * @param keyID        Optional identifier for the key, to aid key
 	 *                     selection on the recipient side. Recommended.
 	 *                     {@code null} if not specified.
 	 * @param x5c          Optional X.509 certificate chain for the public

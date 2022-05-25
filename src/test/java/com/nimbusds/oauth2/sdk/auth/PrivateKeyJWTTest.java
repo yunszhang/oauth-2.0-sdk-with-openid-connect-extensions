@@ -21,12 +21,20 @@ package com.nimbusds.oauth2.sdk.auth;
 import java.net.URI;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
+import com.nimbusds.jose.util.Base64;
+import com.nimbusds.jose.util.Base64URL;
+import com.nimbusds.jose.util.X509CertUtils;
 import com.nimbusds.oauth2.sdk.ParseException;
 import junit.framework.TestCase;
 
@@ -35,6 +43,9 @@ import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.id.Subject;
+import com.nimbusds.oauth2.sdk.util.X509CertificateUtils;
 
 
 public class PrivateKeyJWTTest extends TestCase {
@@ -58,59 +69,91 @@ public class PrivateKeyJWTTest extends TestCase {
 	}
 
 
-	public void testWithRS256()
+	public void testWithRSA()
 		throws Exception {
 
 		ClientID clientID = new ClientID("123");
 		URI tokenEndpoint = new URI("https://c2id.com/token");
-
-		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-		KeyPair pair = keyGen.generateKeyPair();
-		RSAPrivateKey priv = (RSAPrivateKey)pair.getPrivate();
-		RSAPublicKey pub = (RSAPublicKey)pair.getPublic();
-
-		PrivateKeyJWT privateKeyJWT = new PrivateKeyJWT(clientID, tokenEndpoint, JWSAlgorithm.RS256, priv, null, null);
 		
-		assertEquals(new HashSet<>(Arrays.asList("client_id", "client_assertion", "client_assertion_type")), privateKeyJWT.getFormParameterNames());
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.generate();
+		
+		PrivateKey priv = rsaJWK.toRSAPrivateKey();
+		RSAPublicKey pub = rsaJWK.toRSAPublicKey();
 
-		privateKeyJWT = PrivateKeyJWT.parse(privateKeyJWT.toParameters());
-
-		assertTrue(privateKeyJWT.getClientAssertion().verify(new RSASSAVerifier(pub)));
-
-		assertEquals(clientID, privateKeyJWT.getJWTAuthenticationClaimsSet().getClientID());
-		assertEquals(clientID.getValue(), privateKeyJWT.getJWTAuthenticationClaimsSet().getIssuer().getValue());
-		assertEquals(clientID.getValue(), privateKeyJWT.getJWTAuthenticationClaimsSet().getSubject().getValue());
-		assertEquals(tokenEndpoint.toString(), privateKeyJWT.getJWTAuthenticationClaimsSet().getAudience().get(0).getValue());
-
-		// 4 min < exp < 6 min
-		final long now = new Date().getTime();
-		final Date fourMinutesFromNow = new Date(now + 4*60*1000L);
-		final Date sixMinutesFromNow = new Date(now + 6*60*1000L);
-		assertTrue(privateKeyJWT.getJWTAuthenticationClaimsSet().getExpirationTime().after(fourMinutesFromNow));
-		assertTrue(privateKeyJWT.getJWTAuthenticationClaimsSet().getExpirationTime().before(sixMinutesFromNow));
-		assertNotNull(privateKeyJWT.getJWTAuthenticationClaimsSet().getJWTID());
-		assertNull(privateKeyJWT.getJWTAuthenticationClaimsSet().getIssueTime());
-		assertNull(privateKeyJWT.getJWTAuthenticationClaimsSet().getNotBeforeTime());
+		for (JWSAlgorithm alg: JWSAlgorithm.Family.RSA) {
+			
+			PrivateKeyJWT privateKeyJWT = new PrivateKeyJWT(clientID, tokenEndpoint, alg, priv, null, null);
+			
+			assertEquals(new HashSet<>(Arrays.asList("client_id", "client_assertion", "client_assertion_type")), privateKeyJWT.getFormParameterNames());
+			
+			privateKeyJWT = PrivateKeyJWT.parse(privateKeyJWT.toParameters());
+			
+			assertEquals(alg, privateKeyJWT.getClientAssertion().getHeader().getAlgorithm());
+			
+			assertTrue(privateKeyJWT.getClientAssertion().verify(new RSASSAVerifier(pub)));
+			
+			assertEquals(clientID, privateKeyJWT.getJWTAuthenticationClaimsSet().getClientID());
+			assertEquals(clientID.getValue(), privateKeyJWT.getJWTAuthenticationClaimsSet().getIssuer().getValue());
+			assertEquals(clientID.getValue(), privateKeyJWT.getJWTAuthenticationClaimsSet().getSubject().getValue());
+			assertEquals(tokenEndpoint.toString(), privateKeyJWT.getJWTAuthenticationClaimsSet().getAudience().get(0).getValue());
+			
+			// 4 min < exp < 6 min
+			final long now = new Date().getTime();
+			final Date fourMinutesFromNow = new Date(now + 4 * 60 * 1000L);
+			final Date sixMinutesFromNow = new Date(now + 6 * 60 * 1000L);
+			assertTrue(privateKeyJWT.getJWTAuthenticationClaimsSet().getExpirationTime().after(fourMinutesFromNow));
+			assertTrue(privateKeyJWT.getJWTAuthenticationClaimsSet().getExpirationTime().before(sixMinutesFromNow));
+			assertNotNull(privateKeyJWT.getJWTAuthenticationClaimsSet().getJWTID());
+			assertNull(privateKeyJWT.getJWTAuthenticationClaimsSet().getIssueTime());
+			assertNull(privateKeyJWT.getJWTAuthenticationClaimsSet().getNotBeforeTime());
+		}
 	}
 
 
-	public void testWithRS256AndKeyID()
+	public void testWithRSA_multipleKeyParams()
 		throws Exception {
 
 		ClientID clientID = new ClientID("123");
 		URI tokenEndpoint = new URI("https://c2id.com/token");
+		
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.keyID("1")
+			.generate();
+		
+		PrivateKey priv = rsaJWK.toRSAPrivateKey();
+		RSAPublicKey pub = rsaJWK.toRSAPublicKey();
+		
+		Date now = new Date();
+		Date oneDayAgo = new Date(now.getTime() - 1000*60*60*24);
+		Date oneDayAhead = new Date(now.getTime() + 1000*60*60*24);
+		
+		X509Certificate cert = X509CertificateUtils.generate(
+			new Issuer("https://ca.example.com"),
+			new Subject(clientID.getValue()),
+			oneDayAgo,
+			oneDayAhead,
+			rsaJWK.toRSAPublicKey(),
+			rsaJWK.toPrivateKey());
+		
+		List<com.nimbusds.jose.util.Base64> x5c = Collections.singletonList(Base64.encode(cert.getEncoded()));
+		
+		Base64URL x5t256 = X509CertUtils.computeSHA256Thumbprint(cert);
 
-		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-		KeyPair pair = keyGen.generateKeyPair();
-		RSAPrivateKey priv = (RSAPrivateKey)pair.getPrivate();
-		RSAPublicKey pub = (RSAPublicKey)pair.getPublic();
-
-		PrivateKeyJWT privateKeyJWT = new PrivateKeyJWT(clientID, tokenEndpoint, JWSAlgorithm.RS256, priv, "1", null);
-		assertEquals("1", privateKeyJWT.getClientAssertion().getHeader().getKeyID());
+		PrivateKeyJWT privateKeyJWT = new PrivateKeyJWT(clientID, tokenEndpoint, JWSAlgorithm.RS256, priv, rsaJWK.getKeyID(), x5c, x5t256, null);
+		assertEquals(JWSAlgorithm.RS256, privateKeyJWT.getClientAssertion().getHeader().getAlgorithm());
+		assertEquals(rsaJWK.getKeyID(), privateKeyJWT.getClientAssertion().getHeader().getKeyID());
+		assertEquals(x5c, privateKeyJWT.getClientAssertion().getHeader().getX509CertChain());
+		assertEquals(x5t256, privateKeyJWT.getClientAssertion().getHeader().getX509CertSHA256Thumbprint());
+		assertEquals(4, privateKeyJWT.getClientAssertion().getHeader().getIncludedParams().size());
 
 		privateKeyJWT = PrivateKeyJWT.parse(privateKeyJWT.toParameters());
-
-		assertEquals("1", privateKeyJWT.getClientAssertion().getHeader().getKeyID());
+		
+		assertEquals(JWSAlgorithm.RS256, privateKeyJWT.getClientAssertion().getHeader().getAlgorithm());
+		assertEquals(rsaJWK.getKeyID(), privateKeyJWT.getClientAssertion().getHeader().getKeyID());
+		assertEquals(x5c, privateKeyJWT.getClientAssertion().getHeader().getX509CertChain());
+		assertEquals(x5t256, privateKeyJWT.getClientAssertion().getHeader().getX509CertSHA256Thumbprint());
+		assertEquals(4, privateKeyJWT.getClientAssertion().getHeader().getIncludedParams().size());
 
 		assertTrue(privateKeyJWT.getClientAssertion().verify(new RSASSAVerifier(pub)));
 
@@ -120,9 +163,8 @@ public class PrivateKeyJWTTest extends TestCase {
 		assertEquals(tokenEndpoint.toString(), privateKeyJWT.getJWTAuthenticationClaimsSet().getAudience().get(0).getValue());
 
 		// 4 min < exp < 6 min
-		final long now = new Date().getTime();
-		final Date fourMinutesFromNow = new Date(now + 4*60*1000L);
-		final Date sixMinutesFromNow = new Date(now + 6*60*1000L);
+		final Date fourMinutesFromNow = new Date(now.getTime() + 4*60*1000L);
+		final Date sixMinutesFromNow = new Date(now.getTime() + 6*60*1000L);
 		assertTrue(privateKeyJWT.getJWTAuthenticationClaimsSet().getExpirationTime().after(fourMinutesFromNow));
 		assertTrue(privateKeyJWT.getJWTAuthenticationClaimsSet().getExpirationTime().before(sixMinutesFromNow));
 		assertNotNull(privateKeyJWT.getJWTAuthenticationClaimsSet().getJWTID());
@@ -131,7 +173,45 @@ public class PrivateKeyJWTTest extends TestCase {
 	}
 
 
-	public void testWithES256()
+	public void testUnsupportedAlg()
+		throws Exception {
+
+		ClientID clientID = new ClientID("123");
+		URI tokenEndpoint = new URI("https://c2id.com/token");
+		
+		RSAKey rsaJWK = new RSAKeyGenerator(2048)
+			.keyID("1")
+			.generate();
+		
+		PrivateKey priv = rsaJWK.toRSAPrivateKey();
+		RSAPublicKey pub = rsaJWK.toRSAPublicKey();
+		
+		Date now = new Date();
+		Date oneDayAgo = new Date(now.getTime() - 1000*60*60*24);
+		Date oneDayAhead = new Date(now.getTime() + 1000*60*60*24);
+		
+		X509Certificate cert = X509CertificateUtils.generate(
+			new Issuer("https://ca.example.com"),
+			new Subject(clientID.getValue()),
+			oneDayAgo,
+			oneDayAhead,
+			rsaJWK.toRSAPublicKey(),
+			rsaJWK.toPrivateKey());
+		
+		List<com.nimbusds.jose.util.Base64> x5c = Collections.singletonList(Base64.encode(cert.getEncoded()));
+		
+		Base64URL x5t256 = X509CertUtils.computeSHA256Thumbprint(cert);
+
+		try {
+			new PrivateKeyJWT(clientID, tokenEndpoint, new JWSAlgorithm("xxx"), priv, rsaJWK.getKeyID(), x5c, x5t256, null);
+			fail();
+		} catch (JOSEException e) {
+			assertEquals("Unsupported JWS algorithm: xxx", e.getMessage());
+		}
+	}
+
+
+	public void testWithES256_deprecated()
 		throws Exception {
 
 		ClientID clientID = new ClientID("123");
@@ -165,7 +245,7 @@ public class PrivateKeyJWTTest extends TestCase {
 	}
 
 
-	public void testWithES256AndKeyID()
+	public void testWithES256AndKeyID_deprecated()
 		throws Exception {
 
 		ClientID clientID = new ClientID("123");
@@ -210,8 +290,7 @@ public class PrivateKeyJWTTest extends TestCase {
 		
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
 		KeyPair pair = keyGen.generateKeyPair();
-		RSAPrivateKey priv = (RSAPrivateKey)pair.getPrivate();
-		RSAPublicKey pub = (RSAPublicKey)pair.getPublic();
+		PrivateKey priv = pair.getPrivate();
 		
 		PrivateKeyJWT privateKeyJWT = new PrivateKeyJWT(clientID, tokenEndpoint, JWSAlgorithm.RS256, priv, null, null);
 		

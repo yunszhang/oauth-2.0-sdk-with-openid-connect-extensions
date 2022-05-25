@@ -2006,5 +2006,7 @@ version 9.35 (2022-04-26)
     * Updates optional BouncyCastle dependency to 1.70.
 
 version 9.36 (2022-05-25)
+    * Adds PrivateKeyJWT constructors with optional x5c, x5t#S256 JWS header
+      support, and PrivateKey interface.
     * Adds JWTAssertionFactory.create method for signed JWTs with optional x5c,
       x5t#S256 JWS header support, and PrivateKey interface.

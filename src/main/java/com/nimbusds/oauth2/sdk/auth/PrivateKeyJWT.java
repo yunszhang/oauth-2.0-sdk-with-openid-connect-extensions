@@ -19,6 +19,7 @@ package com.nimbusds.oauth2.sdk.auth;
 
 
 import java.net.URI;
+import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
@@ -29,6 +30,8 @@ import net.jcip.annotations.Immutable;
 import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.util.Base64;
+import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.assertions.jwt.JWTAssertionFactory;
@@ -100,6 +103,164 @@ public final class PrivateKeyJWT extends JWTAuthentication {
 
 
 	/**
+	 * Creates a new private key JWT authentication. The expiration
+	 * time (exp) is set to five minutes from the current system time.
+	 * Generates a default identifier (jti) for the JWT. The issued-at
+	 * (iat) and not-before (nbf) claims are not set.
+	 *
+	 * @param clientID     The client identifier. Must not be {@code null}.
+	 * @param endpoint     The endpoint URI where the client will submit
+	 *                     the JWT authentication, for example the token
+	 *                     endpoint. Must not be {@code null}.
+	 * @param jwsAlgorithm The expected RSA (RS256, RS384, RS512, PS256,
+	 *                     PS384 or PS512) or EC (ES256, ES384, ES512)
+	 *                     signature algorithm for the JWT assertion. Must
+	 *                     be supported and not {@code null}.
+	 * @param privateKey   The signing private RSA or EC key. Must not be
+	 *                     {@code null}.
+	 * @param keyID        Optional identifier for the key, to aid key
+	 *                     selection on the recipient side. Recommended.
+	 *                     {@code null} if not specified.
+	 * @param jcaProvider  Optional specific JCA provider, {@code null} to
+	 *                     use the default one.
+	 *
+	 * @throws JOSEException If RSA signing failed.
+	 */
+	public PrivateKeyJWT(final ClientID clientID,
+			     final URI endpoint,
+			     final JWSAlgorithm jwsAlgorithm,
+			     final PrivateKey privateKey,
+			     final String keyID,
+			     final Provider jcaProvider)
+		throws JOSEException {
+
+		this(new JWTAuthenticationClaimsSet(clientID, new Audience(endpoint.toString())),
+			jwsAlgorithm,
+			privateKey,
+			keyID,
+			null,
+			null,
+			jcaProvider);
+	}
+
+
+	/**
+	 * Creates a new private key JWT authentication. The expiration
+	 * time (exp) is set to five minutes from the current system time.
+	 * Generates a default identifier (jti) for the JWT. The issued-at
+	 * (iat) and not-before (nbf) claims are not set.
+	 *
+	 * @param clientID     The client identifier. Must not be {@code null}.
+	 * @param endpoint     The endpoint URI where the client will submit
+	 *                     the JWT authentication, for example the token
+	 *                     endpoint. Must not be {@code null}.
+	 * @param jwsAlgorithm The expected RSA (RS256, RS384, RS512, PS256,
+	 *                     PS384 or PS512) or EC (ES256, ES384, ES512)
+	 *                     signature algorithm for the JWT assertion. Must
+	 *                     be supported and not {@code null}.
+	 * @param privateKey   The signing private RSA or EC key. Must not be
+	 *                     {@code null}.
+	 * @param keyID        Optional identifier for the key, to aid key
+	 *                     selection on the recipient side. Recommended.
+	 *                     {@code null} if not specified.
+	 * @param x5c          Optional X.509 certificate chain for the public
+	 *                     key, {@code null} if not specified.
+	 * @param x5t256       Optional X.509 certificate SHA-256 thumbprint,
+	 *                     {@code null} if not specified.
+	 * @param jcaProvider  Optional specific JCA provider, {@code null} to
+	 *                     use the default one.
+	 *
+	 * @throws JOSEException If RSA signing failed.
+	 */
+	public PrivateKeyJWT(final ClientID clientID,
+			     final URI endpoint,
+			     final JWSAlgorithm jwsAlgorithm,
+			     final PrivateKey privateKey,
+			     final String keyID,
+			     final List<Base64> x5c,
+			     final Base64URL x5t256,
+			     final Provider jcaProvider)
+		throws JOSEException {
+
+		this(new JWTAuthenticationClaimsSet(clientID, new Audience(endpoint.toString())),
+			jwsAlgorithm,
+			privateKey,
+			keyID,
+			x5c,
+			x5t256,
+			jcaProvider);
+	}
+	
+	
+	/**
+	 * Creates a new private key JWT authentication.
+	 *
+	 * @param jwtAuthClaimsSet The JWT authentication claims set. Must not
+	 *                         be {@code null}.
+	 * @param jwsAlgorithm     The expected RSA (RS256, RS384, RS512,
+	 *                         PS256, PS384 or PS512) or EC (ES256, ES384,
+	 *                         ES512) signature algorithm for the JWT
+	 *                         assertion. Must be supported and not
+	 *                         {@code null}.
+	 * @param privateKey       The signing private RSA or EC key. Must not
+	 *                         be {@code null}.
+	 * @param keyID            Optional identifier for the key, to aid key
+	 *                         selection on the recipient side.
+	 *                         Recommended. {@code null} if not specified.
+	 * @param jcaProvider      Optional specific JCA provider, {@code null}
+	 *                         to use the default one.
+	 *
+	 * @throws JOSEException If RSA signing failed.
+	 */
+	public PrivateKeyJWT(final JWTAuthenticationClaimsSet jwtAuthClaimsSet,
+			     final JWSAlgorithm jwsAlgorithm,
+			     final PrivateKey privateKey,
+			     final String keyID,
+			     final Provider jcaProvider)
+		throws JOSEException {
+		
+		this(jwtAuthClaimsSet, jwsAlgorithm, privateKey, keyID, null, null, jcaProvider);
+	}
+	
+	
+	/**
+	 * Creates a new private key JWT authentication.
+	 *
+	 * @param jwtAuthClaimsSet The JWT authentication claims set. Must not
+	 *                         be {@code null}.
+	 * @param jwsAlgorithm     The expected RSA (RS256, RS384, RS512,
+	 *                         PS256, PS384 or PS512) or EC (ES256, ES384,
+	 *                         ES512) signature algorithm for the JWT
+	 *                         assertion. Must be supported and not
+	 *                         {@code null}.
+	 * @param privateKey       The signing private RSA or EC key. Must not
+	 *                         be {@code null}.
+	 * @param keyID            Optional identifier for the key, to aid key
+	 *                         selection on the recipient side.
+	 *                         Recommended. {@code null} if not specified.
+	 * @param x5c              Optional X.509 certificate chain for the
+	 *                         public key, {@code null} if not specified.
+	 * @param x5t256           Optional X.509 certificate SHA-256
+	 *                         thumbprint, {@code null} if not specified.
+	 * @param jcaProvider      Optional specific JCA provider, {@code null}
+	 *                         to use the default one.
+	 *
+	 * @throws JOSEException If RSA signing failed.
+	 */
+	public PrivateKeyJWT(final JWTAuthenticationClaimsSet jwtAuthClaimsSet,
+			     final JWSAlgorithm jwsAlgorithm,
+			     final PrivateKey privateKey,
+			     final String keyID,
+			     final List<Base64> x5c,
+			     final Base64URL x5t256,
+			     final Provider jcaProvider)
+		throws JOSEException {
+		
+		this(JWTAssertionFactory.create(jwtAuthClaimsSet, jwsAlgorithm, privateKey, keyID, x5c, x5t256, jcaProvider));
+	}
+
+
+	/**
 	 * Creates a new RSA private key JWT authentication. The expiration
 	 * time (exp) is set to five minutes from the current system time.
 	 * Generates a default identifier (jti) for the JWT. The issued-at
@@ -123,6 +284,7 @@ public final class PrivateKeyJWT extends JWTAuthentication {
 	 *
 	 * @throws JOSEException If RSA signing failed.
 	 */
+	@Deprecated
 	public PrivateKeyJWT(final ClientID clientID,
 			     final URI endpoint,
 			     final JWSAlgorithm jwsAlgorithm,
@@ -158,6 +320,7 @@ public final class PrivateKeyJWT extends JWTAuthentication {
 	 *
 	 * @throws JOSEException If RSA signing failed.
 	 */
+	@Deprecated
 	public PrivateKeyJWT(final JWTAuthenticationClaimsSet jwtAuthClaimsSet,
 			     final JWSAlgorithm jwsAlgorithm,
 			     final RSAPrivateKey rsaPrivateKey,
@@ -165,7 +328,7 @@ public final class PrivateKeyJWT extends JWTAuthentication {
 			     final Provider jcaProvider)
 		throws JOSEException {
 
-		this(JWTAssertionFactory.create(jwtAuthClaimsSet, jwsAlgorithm, rsaPrivateKey, keyID, jcaProvider));
+		this(JWTAssertionFactory.create(jwtAuthClaimsSet, jwsAlgorithm, rsaPrivateKey, keyID, null, null, jcaProvider));
 	}
 
 
@@ -193,6 +356,7 @@ public final class PrivateKeyJWT extends JWTAuthentication {
 	 *
 	 * @throws JOSEException If RSA signing failed.
 	 */
+	@Deprecated
 	public PrivateKeyJWT(final ClientID clientID,
 			     final URI endpoint,
 			     final JWSAlgorithm jwsAlgorithm,
@@ -228,6 +392,7 @@ public final class PrivateKeyJWT extends JWTAuthentication {
 	 *
 	 * @throws JOSEException If RSA signing failed.
 	 */
+	@Deprecated
 	public PrivateKeyJWT(final JWTAuthenticationClaimsSet jwtAuthClaimsSet,
 			     final JWSAlgorithm jwsAlgorithm,
 			     final ECPrivateKey ecPrivateKey,
@@ -235,7 +400,7 @@ public final class PrivateKeyJWT extends JWTAuthentication {
 			     final Provider jcaProvider)
 		throws JOSEException {
 
-		this(JWTAssertionFactory.create(jwtAuthClaimsSet, jwsAlgorithm, ecPrivateKey, keyID, jcaProvider));
+		this(JWTAssertionFactory.create(jwtAuthClaimsSet, jwsAlgorithm, ecPrivateKey, keyID, null, null, jcaProvider));
 	}
 
 
