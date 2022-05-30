@@ -2010,3 +2010,6 @@ version 9.36 (2022-05-25)
       support, and PrivateKey interface.
     * Adds JWTAssertionFactory.create method for signed JWTs with optional x5c,
       x5t#S256 JWS header support, and PrivateKey interface.
+
+version 9.37 (2022-05-30)
+    * ErrorObject receives support for including custom parameters.

@@ -46,12 +46,16 @@ public class ErrorObjectTest extends TestCase {
 		assertNull(eo.getDescription());
 		assertNull(eo.getURI());
 		assertEquals(0, eo.getHTTPStatusCode());
+		assertTrue(eo.getCustomParams().isEmpty());
 
-		assertEquals("access_denied", (String)eo.toJSONObject().get("error"));
+		assertEquals("access_denied", eo.toJSONObject().get("error"));
 		assertEquals(1, eo.toJSONObject().size());
 		
-		assertEquals("access_denied", MultivaluedMapUtils.getFirstValue(eo.toParameters(), "error"));
+		assertEquals(Collections.singletonList("access_denied"), eo.toParameters().get("error"));
 		assertEquals(1, eo.toParameters().size());
+		
+		assertEquals(eo.toJSONObject(), ErrorObject.parse(eo.toJSONObject()).toJSONObject());
+		assertEquals(eo.toParameters(), ErrorObject.parse(eo.toParameters()).toParameters());
 	}
 
 
@@ -63,14 +67,18 @@ public class ErrorObjectTest extends TestCase {
 		assertEquals("Access denied", eo.getDescription());
 		assertNull(eo.getURI());
 		assertEquals(0, eo.getHTTPStatusCode());
+		assertTrue(eo.getCustomParams().isEmpty());
 
-		assertEquals("access_denied", (String)eo.toJSONObject().get("error"));
-		assertEquals("Access denied", (String)eo.toJSONObject().get("error_description"));
+		assertEquals("access_denied", eo.toJSONObject().get("error"));
+		assertEquals("Access denied", eo.toJSONObject().get("error_description"));
 		assertEquals(2, eo.toJSONObject().size());
 		
-		assertEquals("access_denied", MultivaluedMapUtils.getFirstValue(eo.toParameters(), "error"));
-		assertEquals("Access denied", MultivaluedMapUtils.getFirstValue(eo.toParameters(), "error_description"));
+		assertEquals(Collections.singletonList("access_denied"), eo.toParameters().get("error"));
+		assertEquals(Collections.singletonList("Access denied"), eo.toParameters().get("error_description"));
 		assertEquals(2, eo.toParameters().size());
+		
+		assertEquals(eo.toJSONObject(), ErrorObject.parse(eo.toJSONObject()).toJSONObject());
+		assertEquals(eo.toParameters(), ErrorObject.parse(eo.toParameters()).toParameters());
 	}
 
 
@@ -82,10 +90,18 @@ public class ErrorObjectTest extends TestCase {
 		assertEquals("Access denied", eo.getDescription());
 		assertNull(eo.getURI());
 		assertEquals(403, eo.getHTTPStatusCode());
+		assertTrue(eo.getCustomParams().isEmpty());
 
-		assertEquals("access_denied", (String)eo.toJSONObject().get("error"));
-		assertEquals("Access denied", (String)eo.toJSONObject().get("error_description"));
+		assertEquals("access_denied", eo.toJSONObject().get("error"));
+		assertEquals("Access denied", eo.toJSONObject().get("error_description"));
 		assertEquals(2, eo.toJSONObject().size());
+		
+		assertEquals(Collections.singletonList("access_denied"), eo.toParameters().get("error"));
+		assertEquals(Collections.singletonList("Access denied"), eo.toParameters().get("error_description"));
+		assertEquals(2, eo.toParameters().size());
+		
+		assertEquals(eo.toJSONObject(), ErrorObject.parse(eo.toJSONObject()).toJSONObject());
+		assertEquals(eo.toParameters(), ErrorObject.parse(eo.toParameters()).toParameters());
 	}
 
 
@@ -98,16 +114,64 @@ public class ErrorObjectTest extends TestCase {
 		assertEquals("Access denied", eo.getDescription());
 		assertEquals(new URI("https://c2id.com/errors/access_denied"), eo.getURI());
 		assertEquals(403, eo.getHTTPStatusCode());
+		assertTrue(eo.getCustomParams().isEmpty());
 
-		assertEquals("access_denied", (String)eo.toJSONObject().get("error"));
-		assertEquals("Access denied", (String)eo.toJSONObject().get("error_description"));
-		assertEquals("https://c2id.com/errors/access_denied", (String)eo.toJSONObject().get("error_uri"));
+		assertEquals("access_denied", eo.toJSONObject().get("error"));
+		assertEquals("Access denied", eo.toJSONObject().get("error_description"));
+		assertEquals("https://c2id.com/errors/access_denied", eo.toJSONObject().get("error_uri"));
 		assertEquals(3, eo.toJSONObject().size());
 		
-		assertEquals("access_denied", MultivaluedMapUtils.getFirstValue(eo.toParameters(), "error"));
-		assertEquals("Access denied", MultivaluedMapUtils.getFirstValue(eo.toParameters(), "error_description"));
-		assertEquals("https://c2id.com/errors/access_denied", MultivaluedMapUtils.getFirstValue(eo.toParameters(), "error_uri"));
+		assertEquals(Collections.singletonList("access_denied"), eo.toParameters().get("error"));
+		assertEquals(Collections.singletonList("Access denied"), eo.toParameters().get("error_description"));
+		assertEquals(Collections.singletonList("https://c2id.com/errors/access_denied"), eo.toParameters().get("error_uri"));
 		assertEquals(3, eo.toParameters().size());
+		
+		assertEquals(eo.toJSONObject(), ErrorObject.parse(eo.toJSONObject()).toJSONObject());
+		assertEquals(eo.toParameters(), ErrorObject.parse(eo.toParameters()).toParameters());
+	}
+
+
+	public void testConstructor5()
+		throws Exception {
+
+		Map<String,String> customParams = new HashMap<>();
+		customParams.put("p1", "abc");
+		customParams.put("p2", "def");
+		customParams.put("p3", null);
+		
+		ErrorObject eo = new ErrorObject(
+			"access_denied",
+			"Access denied",
+			403,
+			new URI("https://c2id.com/errors/access_denied"),
+			customParams
+		);
+
+		assertEquals("access_denied", eo.getCode());
+		assertEquals("Access denied", eo.getDescription());
+		assertEquals(new URI("https://c2id.com/errors/access_denied"), eo.getURI());
+		assertEquals(403, eo.getHTTPStatusCode());
+		assertEquals(customParams, eo.getCustomParams());
+
+		assertEquals("access_denied", eo.toJSONObject().get("error"));
+		assertEquals("Access denied", eo.toJSONObject().get("error_description"));
+		assertEquals("https://c2id.com/errors/access_denied", eo.toJSONObject().get("error_uri"));
+		assertEquals("abc", eo.toJSONObject().get("p1"));
+		assertEquals("def", eo.toJSONObject().get("p2"));
+		assertTrue(eo.toJSONObject().containsKey("p3"));
+		assertNull(eo.toJSONObject().get("p3"));
+		assertEquals(6, eo.toJSONObject().size());
+		
+		assertEquals(Collections.singletonList("access_denied"), eo.toParameters().get("error"));
+		assertEquals(Collections.singletonList("Access denied"), eo.toParameters().get("error_description"));
+		assertEquals(Collections.singletonList("https://c2id.com/errors/access_denied"), eo.toParameters().get("error_uri"));
+		assertEquals(Collections.singletonList("abc"), eo.toParameters().get("p1"));
+		assertEquals(Collections.singletonList("def"), eo.toParameters().get("p2"));
+		assertEquals(Collections.singletonList(null), eo.toParameters().get("p3"));
+		assertEquals(6, eo.toParameters().size());
+		
+		assertEquals(eo.toJSONObject(), ErrorObject.parse(eo.toJSONObject()).toJSONObject());
+		assertEquals(eo.toParameters(), ErrorObject.parse(eo.toParameters()).toParameters());
 	}
 
 
@@ -119,6 +183,7 @@ public class ErrorObjectTest extends TestCase {
 		jsonObject.put("error", "access_denied");
 		jsonObject.put("error_description", "Access denied");
 		jsonObject.put("error_uri", "https://c2id.com/errors/access_denied");
+		jsonObject.put("custom-param-1", "value-1");
 
 		httpResponse.setContent(jsonObject.toJSONString());
 
@@ -128,6 +193,8 @@ public class ErrorObjectTest extends TestCase {
 		assertEquals("access_denied", errorObject.getCode());
 		assertEquals("Access denied", errorObject.getDescription());
 		assertEquals("https://c2id.com/errors/access_denied", errorObject.getURI().toString());
+		assertEquals("value-1", errorObject.getCustomParams().get("custom-param-1"));
+		assertEquals(1, errorObject.getCustomParams().size());
 	}
 
 
@@ -268,6 +335,19 @@ public class ErrorObjectTest extends TestCase {
 	public void testSetHTTPStatusCode() {
 
 		assertEquals(440, new ErrorObject("code", "description", 400).setHTTPStatusCode(440).getHTTPStatusCode());
+	}
+	
+	
+	public void testSetCustomParams() {
+		
+		Map<String,String> customParams = new HashMap<>();
+		customParams.put("p1", "abc");
+		customParams.put("p2", "def");
+		customParams.put("p3", null);
+		
+		assertEquals(customParams, new ErrorObject("code").setCustomParams(customParams).getCustomParams());
+		
+		assertTrue(new ErrorObject("code", "description", 400, null, customParams).setCustomParams(null).getCustomParams().isEmpty());
 	}
 	
 	

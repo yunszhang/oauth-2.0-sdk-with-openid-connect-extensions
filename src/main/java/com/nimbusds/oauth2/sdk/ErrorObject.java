@@ -32,11 +32,13 @@ import net.minidev.json.JSONObject;
 import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.oauth2.sdk.util.MapUtils;
 import com.nimbusds.oauth2.sdk.util.MultivaluedMapUtils;
 
 
 /**
- * Error object, used to encapsulate OAuth 2.0 and other errors.
+ * Error object, used to encapsulate OAuth 2.0 and other errors. Supports
+ * custom parameters.
  *
  * <p>Example error object as HTTP response:
  *
@@ -81,6 +83,12 @@ public class ErrorObject implements Serializable {
 	 * about the error.
 	 */
 	private final URI uri;
+	
+	
+	/**
+	 * Optional custom parameters, empty or {@code null} if none.
+	 */
+	private final Map<String,String> customParams;
 
 
 	/**
@@ -143,6 +151,29 @@ public class ErrorObject implements Serializable {
 		           final int httpStatusCode,
 			   final URI uri) {
 	
+		this(code, description, httpStatusCode, uri, null);
+	}
+
+
+	/**
+	 * Creates a new error with the specified code, description, HTTP
+	 * status code and page URI. The code and the description must be
+	 * within the {@link #isLegal(String) legal} character range.
+	 *
+	 * @param code           The error code, {@code null} if not specified.
+	 * @param description    The error description, {@code null} if not
+	 *                       specified.
+	 * @param httpStatusCode The HTTP status code, zero if not specified.
+	 * @param uri            The error page URI, {@code null} if not
+	 *                       specified.
+	 * @param customParams   Custom parameters, {@code null} if none.
+	 */
+	public ErrorObject(final String code,
+			   final String description,
+		           final int httpStatusCode,
+			   final URI uri,
+			   final Map<String,String> customParams) {
+	
 		if (! isLegal(code)) {
 			throw new IllegalArgumentException("Illegal char(s) in code, see RFC 6749, section 5.2");
 		}
@@ -155,6 +186,8 @@ public class ErrorObject implements Serializable {
 		
 		this.httpStatusCode = httpStatusCode;
 		this.uri = uri;
+		
+		this.customParams = customParams;
 	}
 
 
@@ -262,6 +295,33 @@ public class ErrorObject implements Serializable {
 
 		return new ErrorObject(getCode(), getDescription(), getHTTPStatusCode(), uri);
 	}
+	
+	
+	/**
+	 * Returns the custom parameters.
+	 *
+	 * @return The custom parameters, empty map if none.
+	 */
+	public Map<String,String> getCustomParams() {
+		if (MapUtils.isNotEmpty(customParams)) {
+			return Collections.unmodifiableMap(customParams);
+		} else {
+			return Collections.emptyMap();
+		}
+	}
+	
+	
+	/**
+	 * Sets the custom parameters.
+	 *
+	 * @param customParams The custom parameters, {@code null} if none.
+	 *
+	 * @return A copy of this error with the specified custom parameters.
+	 */
+	public ErrorObject setCustomParams(final Map<String,String> customParams) {
+		
+		return new ErrorObject(getCode(), getDescription(), getHTTPStatusCode(), getURI(), customParams);
+	}
 
 
 	/**
@@ -282,16 +342,20 @@ public class ErrorObject implements Serializable {
 
 		JSONObject o = new JSONObject();
 
-		if (code != null) {
-			o.put("error", code);
+		if (getCode() != null) {
+			o.put("error", getCode());
 		}
 
-		if (description != null) {
-			o.put("error_description", description);
+		if (getDescription() != null) {
+			o.put("error_description", getDescription());
 		}
 
-		if (uri != null) {
-			o.put("error_uri", uri.toString());
+		if (getURI() != null) {
+			o.put("error_uri", getURI().toString());
+		}
+		
+		if (! getCustomParams().isEmpty()) {
+			o.putAll(getCustomParams());
 		}
 
 		return o;
@@ -318,6 +382,12 @@ public class ErrorObject implements Serializable {
 		
 		if (getURI() != null) {
 			params.put("error_uri", Collections.singletonList(getURI().toString()));
+		}
+		
+		if (! getCustomParams().isEmpty()) {
+			for (Map.Entry<String, String> en: getCustomParams().entrySet()) {
+				params.put(en.getKey(), Collections.singletonList(en.getValue()));
+			}
 		}
 		
 		return params;
@@ -412,8 +482,20 @@ public class ErrorObject implements Serializable {
 		} catch (ParseException e) {
 			// ignore and continue
 		}
+		
+		Map<String, String> customParams = null;
+		for (Map.Entry<String, Object> en: jsonObject.entrySet()) {
+			if (!"error".equals(en.getKey()) && !"error_description".equals(en.getKey()) && !"error_uri".equals(en.getKey())) {
+				if (en.getValue() == null || en.getValue() instanceof String) {
+					if (customParams == null) {
+						customParams = new HashMap<>();
+					}
+					customParams.put(en.getKey(), (String)en.getValue());
+				}
+			}
+		}
 
-		return new ErrorObject(code, description, 0, uri);
+		return new ErrorObject(code, description, 0, uri, customParams);
 	}
 	
 	
@@ -431,6 +513,14 @@ public class ErrorObject implements Serializable {
 		String description = MultivaluedMapUtils.getFirstValue(params, "error_description");
 		String uriString = MultivaluedMapUtils.getFirstValue(params, "error_uri");
 		
+		if (! isLegal(code)) {
+			code = null;
+		}
+		
+		if (! isLegal(description)) {
+			description = null;
+		}
+		
 		URI uri = null;
 		if (uriString != null) {
 			try {
@@ -440,15 +530,23 @@ public class ErrorObject implements Serializable {
 			}
 		}
 		
-		if (! isLegal(code)) {
-			code = null;
+		Map<String, String> customParams = null;
+		for (Map.Entry<String, List<String>> en: params.entrySet()) {
+			if (!"error".equals(en.getKey()) && !"error_description".equals(en.getKey()) && !"error_uri".equals(en.getKey())) {
+			
+				if (customParams == null) {
+					customParams = new HashMap<>();
+				}
+				
+				if (en.getValue() == null) {
+					customParams.put(en.getKey(), null);
+				} else if (! en.getValue().isEmpty()) {
+					customParams.put(en.getKey(), en.getValue().get(0));
+				}
+			}
 		}
 		
-		if (! isLegal(description)) {
-			description = null;
-		}
-		
-		return new ErrorObject(code, description, 0, uri);
+		return new ErrorObject(code, description, 0, uri, customParams);
 	}
 
 
@@ -475,7 +573,8 @@ public class ErrorObject implements Serializable {
 			intermediary.getCode(),
 			intermediary.description,
 			httpResponse.getStatusCode(),
-			intermediary.getURI());
+			intermediary.getURI(),
+			intermediary.getCustomParams());
 	}
 	
 	
