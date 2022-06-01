@@ -18,7 +18,6 @@
 package com.nimbusds.oauth2.sdk;
 
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,7 +27,6 @@ import net.minidev.json.JSONObject;
 
 import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 
 
 /**
@@ -156,14 +154,8 @@ public class TokenErrorResponse extends TokenResponse implements ErrorResponse {
 		// No error?
 		if (error == null)
 			return o;
-
-		o.put("error", error.getCode());
-
-		if (error.getDescription() != null)
-			o.put("error_description", error.getDescription());
 		
-		if (error.getURI() != null)
-			o.put("error_uri", error.getURI().toString());
+		o.putAll(error.toJSONObject());
 		
 		return o;
 	}
@@ -209,19 +201,7 @@ public class TokenErrorResponse extends TokenResponse implements ErrorResponse {
 		if (! jsonObject.containsKey("error"))
 			return new TokenErrorResponse();
 		
-		ErrorObject error;
-		
-		try {
-			// Parse code
-			String code = JSONObjectUtils.getString(jsonObject, "error");
-			String description = JSONObjectUtils.getString(jsonObject, "error_description", null);
-			URI uri = JSONObjectUtils.getURI(jsonObject, "error_uri", null);
-
-			error = new ErrorObject(code, description, HTTPResponse.SC_BAD_REQUEST, uri);
-			
-		} catch (ParseException e) {
-			throw new ParseException("Missing or invalid token error response parameter: " + e.getMessage(), e);
-		}
+		ErrorObject error = ErrorObject.parse(jsonObject).setHTTPStatusCode(HTTPResponse.SC_BAD_REQUEST);
 		
 		return new TokenErrorResponse(error);
 	}

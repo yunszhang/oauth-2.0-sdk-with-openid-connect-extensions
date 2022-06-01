@@ -19,7 +19,10 @@ package com.nimbusds.oauth2.sdk;
 
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
@@ -43,7 +46,7 @@ public class TokenErrorResponseTest extends TestCase {
 		
 		super.setUp();
 		
-		ERROR_PAGE_URI = new URI("http://server.example.com/error/123");
+		ERROR_PAGE_URI = new URI("https://server.example.com/error/123");
 	}
 
 
@@ -93,6 +96,53 @@ public class TokenErrorResponseTest extends TestCase {
 
 		assertFalse(r.indicatesSuccess());
 		assertEquals(OAuth2Error.INVALID_REQUEST, r.getErrorObject());
+	}
+	
+	
+	public void testSerializeAndParse_errorObjectWithCustomParams()
+		throws Exception {
+	
+		Map<String,String> customParams = new HashMap<>();
+		customParams.put("client_auth_id", UUID.randomUUID().toString());
+		
+		ErrorObject err = OAuth2Error.INVALID_CLIENT.setCustomParams(customParams);
+
+		TokenErrorResponse r = new TokenErrorResponse(err);
+
+		assertFalse(r.indicatesSuccess());
+		
+		assertEquals(HTTPResponse.SC_UNAUTHORIZED, r.getErrorObject().getHTTPStatusCode());
+		assertEquals(OAuth2Error.INVALID_CLIENT, r.getErrorObject());
+		assertEquals(OAuth2Error.INVALID_CLIENT.getDescription(), r.getErrorObject().getDescription());
+		assertEquals(customParams.get("client_auth_id"), r.getErrorObject().getCustomParams().get("client_auth_id"));
+		assertEquals(1, r.getErrorObject().getCustomParams().size());
+		
+
+		HTTPResponse httpResponse = r.toHTTPResponse();
+		
+		assertEquals(HTTPResponse.SC_UNAUTHORIZED, httpResponse.getStatusCode());
+		assertEquals(ContentType.APPLICATION_JSON.toString(), httpResponse.getEntityContentType().toString());
+		assertEquals("no-store", httpResponse.getCacheControl());
+		assertEquals("no-cache", httpResponse.getPragma());
+		
+		
+		JSONObject jsonObject = JSONObjectUtils.parse(httpResponse.getContent());
+
+		assertEquals(OAuth2Error.INVALID_CLIENT.getCode(), (String)jsonObject.get("error"));
+		assertEquals(OAuth2Error.INVALID_CLIENT.getDescription(), (String)jsonObject.get("error_description"));
+		assertEquals(customParams.get("client_auth_id"), jsonObject.get("client_auth_id"));
+		assertEquals(3, jsonObject.size());
+		
+		
+		r = TokenErrorResponse.parse(httpResponse);
+
+		assertFalse(r.indicatesSuccess());
+		
+		assertEquals(HTTPResponse.SC_UNAUTHORIZED, r.getErrorObject().getHTTPStatusCode());
+		assertEquals(OAuth2Error.INVALID_CLIENT, r.getErrorObject());
+		assertEquals(OAuth2Error.INVALID_CLIENT.getDescription(), r.getErrorObject().getDescription());
+		assertEquals(customParams.get("client_auth_id"), r.getErrorObject().getCustomParams().get("client_auth_id"));
+		assertEquals(1, r.getErrorObject().getCustomParams().size());
 	}
 
 
@@ -145,6 +195,6 @@ public class TokenErrorResponseTest extends TestCase {
 		assertNull(errorResponse.getErrorObject().getCode());
 		assertNull(errorResponse.getErrorObject().getDescription());
 		assertNull(errorResponse.getErrorObject().getURI());
-		assertEquals("{\"error\":null}", errorResponse.toJSONObject().toJSONString()); // TODO
+		assertTrue(errorResponse.toJSONObject().isEmpty());
 	}
 }

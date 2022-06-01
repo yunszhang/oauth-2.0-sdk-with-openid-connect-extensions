@@ -2014,3 +2014,6 @@ version 9.36 (2022-05-25)
 version 9.37 (2022-05-30)
     * ErrorObject receives support for including custom parameters.
     * Updates to Nimbus JOSE+JWT 9.23
+
+version 9.37.1 (2022-06-01)
+    * Updates TokenErrorResponse to support ErrorObject custom parameters.
