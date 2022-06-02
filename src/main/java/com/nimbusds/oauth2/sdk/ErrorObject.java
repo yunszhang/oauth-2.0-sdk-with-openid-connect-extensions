@@ -223,7 +223,7 @@ public class ErrorObject implements Serializable {
 	 */
 	public ErrorObject setDescription(final String description) {
 
-		return new ErrorObject(getCode(), description, getHTTPStatusCode(), getURI());
+		return new ErrorObject(getCode(), description, getHTTPStatusCode(), getURI(), getCustomParams());
 	}
 
 
@@ -245,7 +245,7 @@ public class ErrorObject implements Serializable {
 		else
 			newDescription = text;
 
-		return new ErrorObject(getCode(), newDescription, getHTTPStatusCode(), getURI());
+		return new ErrorObject(getCode(), newDescription, getHTTPStatusCode(), getURI(), getCustomParams());
 	}
 
 
@@ -269,7 +269,7 @@ public class ErrorObject implements Serializable {
 	 */
 	public ErrorObject setHTTPStatusCode(final int httpStatusCode) {
 
-		return new ErrorObject(getCode(), getDescription(), httpStatusCode, getURI());
+		return new ErrorObject(getCode(), getDescription(), httpStatusCode, getURI(), getCustomParams());
 	}
 
 
@@ -293,7 +293,7 @@ public class ErrorObject implements Serializable {
 	 */
 	public ErrorObject setURI(final URI uri) {
 
-		return new ErrorObject(getCode(), getDescription(), getHTTPStatusCode(), uri);
+		return new ErrorObject(getCode(), getDescription(), getHTTPStatusCode(), uri, getCustomParams());
 	}
 	
 	

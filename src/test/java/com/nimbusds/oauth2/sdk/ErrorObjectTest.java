@@ -321,33 +321,109 @@ public class ErrorObjectTest extends TestCase {
 
 
 	public void testSetDescription() {
-
-		assertEquals("new description", new ErrorObject("bad_request", "old description").setDescription("new description").getDescription());
-	}
-
-
-	public void testAppendDescription() {
-
-		assertEquals("a b", new ErrorObject("bad_request", "a").appendDescription(" b").getDescription());
-	}
-
-
-	public void testSetHTTPStatusCode() {
-
-		assertEquals(440, new ErrorObject("code", "description", 400).setHTTPStatusCode(440).getHTTPStatusCode());
-	}
-	
-	
-	public void testSetCustomParams() {
+		
+		URI uri = URI.create("https://c2id.com/errors/access_denied");
 		
 		Map<String,String> customParams = new HashMap<>();
 		customParams.put("p1", "abc");
 		customParams.put("p2", "def");
 		customParams.put("p3", null);
 		
-		assertEquals(customParams, new ErrorObject("code").setCustomParams(customParams).getCustomParams());
+		ErrorObject error_1 = new ErrorObject("code", "description", 400, uri, customParams);
 		
-		assertTrue(new ErrorObject("code", "description", 400, null, customParams).setCustomParams(null).getCustomParams().isEmpty());
+		ErrorObject error_2 = error_1.setDescription("new description");
+		
+		assertEquals("code", error_2.getCode());
+		assertEquals("new description", error_2.getDescription());
+		assertEquals(400, error_2.getHTTPStatusCode());
+		assertEquals(uri, error_2.getURI());
+		assertEquals(customParams, error_2.getCustomParams());
+	}
+
+
+	public void testAppendDescription() {
+		
+		URI uri = URI.create("https://c2id.com/errors/access_denied");
+		
+		Map<String,String> customParams = new HashMap<>();
+		customParams.put("p1", "abc");
+		customParams.put("p2", "def");
+		customParams.put("p3", null);
+		
+		ErrorObject error_1 = new ErrorObject("code", "a", 400, uri, customParams);
+		
+		ErrorObject error_2 = error_1.appendDescription("b");
+		
+		assertEquals("code", error_2.getCode());
+		assertEquals("ab", error_2.getDescription());
+		assertEquals(400, error_2.getHTTPStatusCode());
+		assertEquals(uri, error_2.getURI());
+		assertEquals(customParams, error_2.getCustomParams());
+	}
+
+
+	public void testSetURI() {
+		
+		URI uri = URI.create("https://c2id.com/errors/access_denied");
+		
+		Map<String,String> customParams = new HashMap<>();
+		customParams.put("p1", "abc");
+		customParams.put("p2", "def");
+		customParams.put("p3", null);
+		
+		ErrorObject error_1 = new ErrorObject("code", "description", 400, uri, customParams);
+		
+		URI otherURI = URI.create("https://errors.c2id.com/access_denied.html");
+		
+		ErrorObject error_2 = error_1.setURI(otherURI);
+		
+		assertEquals("code", error_2.getCode());
+		assertEquals("description", error_2.getDescription());
+		assertEquals(400, error_2.getHTTPStatusCode());
+		assertEquals(otherURI, error_2.getURI());
+		assertEquals(customParams, error_2.getCustomParams());
+	}
+
+
+	public void testSetHTTPStatusCode() {
+		
+		URI uri = URI.create("https://c2id.com/errors/access_denied");
+		
+		Map<String,String> customParams = new HashMap<>();
+		customParams.put("p1", "abc");
+		customParams.put("p2", "def");
+		customParams.put("p3", null);
+		
+		ErrorObject error_1 = new ErrorObject("code", "description", 400, uri, customParams);
+		
+		ErrorObject error_2 = error_1.setHTTPStatusCode(440);
+		
+		assertEquals("code", error_2.getCode());
+		assertEquals("description", error_2.getDescription());
+		assertEquals(440, error_2.getHTTPStatusCode());
+		assertEquals(uri, error_2.getURI());
+		assertEquals(customParams, error_2.getCustomParams());
+	}
+	
+	
+	public void testSetCustomParams() {
+		
+		URI uri = URI.create("https://c2id.com/errors/access_denied");
+		
+		ErrorObject error_1 = new ErrorObject("code", "description", 400, uri);
+		
+		Map<String,String> customParams = new HashMap<>();
+		customParams.put("p1", "abc");
+		customParams.put("p2", "def");
+		customParams.put("p3", null);
+		
+		ErrorObject error_2 = error_1.setCustomParams(customParams);
+		
+		assertEquals("code", error_2.getCode());
+		assertEquals("description", error_2.getDescription());
+		assertEquals(400, error_2.getHTTPStatusCode());
+		assertEquals(uri, error_2.getURI());
+		assertEquals(customParams, error_2.getCustomParams());
 	}
 	
 	

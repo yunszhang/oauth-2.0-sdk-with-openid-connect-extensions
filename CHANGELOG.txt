@@ -2017,3 +2017,7 @@ version 9.37 (2022-05-30)
 
 version 9.37.1 (2022-06-01)
     * Updates TokenErrorResponse to support ErrorObject custom parameters.
+
+version 9.37.2 (2022-06-02)
+    * ErrorObject description set / append, uri set, HTTP status code set
+      methods must copy the customParams field (iss #392).

@@ -18,7 +18,9 @@
 package com.nimbusds.oauth2.sdk;
 
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import junit.framework.TestCase;
 
@@ -57,6 +59,48 @@ public class PushedAuthorizationErrorResponseTest extends TestCase {
 		assertEquals(OAuth2Error.INVALID_REQUEST.getCode(), params.get("error"));
 		assertEquals(OAuth2Error.INVALID_REQUEST.getDescription(), params.get("error_description"));
 		assertEquals(2, params.size());
+	}
+	
+	
+	public void testLifeCycle_withCustomParams() throws ParseException {
+		
+		Map<String,String> customParams = new HashMap<>();
+		customParams.put("client_auth_id", UUID.randomUUID().toString());
+		
+		ErrorObject errorObject = OAuth2Error.INVALID_CLIENT.setCustomParams(customParams);
+		
+		PushedAuthorizationErrorResponse response = new PushedAuthorizationErrorResponse(errorObject);
+		assertEquals(errorObject, response.getErrorObject());
+		assertFalse(response.indicatesSuccess());
+		
+		Map<String, Object> params = response.getErrorObject().toJSONObject();
+		assertEquals(errorObject.getCode(), params.get("error"));
+		assertEquals(errorObject.getDescription(), params.get("error_description"));
+		assertEquals(customParams.get("client_auth_id"), params.get("client_auth_id"));
+		assertEquals(3, params.size());
+		
+		HTTPResponse httpResponse = response.toHTTPResponse();
+		assertEquals(401, httpResponse.getStatusCode());
+		assertEquals(ContentType.APPLICATION_JSON.toString(), httpResponse.getEntityContentType().toString());
+		params = httpResponse.getContentAsJSONObject();
+		assertEquals(errorObject.getCode(), params.get("error"));
+		assertEquals(errorObject.getDescription(), params.get("error_description"));
+		assertEquals(customParams.get("client_auth_id"), params.get("client_auth_id"));
+		assertEquals(3, params.size());
+		
+		response = PushedAuthorizationErrorResponse.parse(httpResponse);
+		assertEquals(401, response.getErrorObject().getHTTPStatusCode());
+		assertEquals(errorObject.getCode(), params.get("error"));
+		assertEquals(errorObject.getDescription(), params.get("error_description"));
+		assertEquals(customParams.get("client_auth_id"), params.get("client_auth_id"));
+		assertEquals(3, params.size());
+		assertFalse(response.indicatesSuccess());
+		
+		params = response.getErrorObject().toJSONObject();
+		assertEquals(errorObject.getCode(), params.get("error"));
+		assertEquals(errorObject.getDescription(), params.get("error_description"));
+		assertEquals(customParams.get("client_auth_id"), params.get("client_auth_id"));
+		assertEquals(3, params.size());
 	}
 	
 	
